@@ -14,7 +14,8 @@ import { downloadTsv } from '../utils/download';
 // `schemas` and the wording here, so the command line can say the same things
 // in English without either language reaching the other's caller.
 const PROBLEM_TEXT: Record<TeamTsvProblemCode, string> = {
-  'header-mismatch': 'A fejléc nem a megszokott. Ez általában nem baj: az importálás oszlopsorrend szerint olvas.',
+  'header-mismatch': 'A fejléc nem a megszokott. Az első sort fejlécként olvassuk — nem importáljuk —, az oszlopokat sorrend szerint vesszük.',
+  'missing-header': 'Az első sor egy csapat, nem fejléc — a fájlból hiányzik a fejlécsor. Szúrd be, különben ez a csapat nem kerül be.',
   'no-rows': 'A fájl egyetlen csapatsort sem tartalmaz.',
   'wrong-column-count': 'Több oszlop van a sorban, mint a formátumban — valószínűleg tabulátor került valamelyik mezőbe.',
   'empty-teamname': 'Hiányzik a csapatnév.',

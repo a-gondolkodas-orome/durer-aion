@@ -692,7 +692,7 @@ components:
             What is wrong, as a code rather than a sentence, so each caller
             words it in its own language.
           enum:
-            ["header-mismatch", "no-rows", "wrong-column-count", "empty-teamname",
+            ["header-mismatch", "missing-header", "no-rows", "wrong-column-count", "empty-teamname",
              "teamname-too-long", "invalid-category", "email-too-long", "other-missing",
              "other-too-long", "invalid-team-id", "invalid-join-code", "invalid-credentials",
              "duplicate-teamname", "duplicate-team-id", "duplicate-join-code",

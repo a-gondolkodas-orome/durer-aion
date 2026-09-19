@@ -170,7 +170,8 @@ function describe(problem: TeamTsvProblem): string {
   const column = problem.column === undefined ? '' : `, column "${problem.column}"`;
   const found = problem.found === undefined ? '' : `: ${problem.found}`;
   const said: Record<TeamTsvProblem['code'], string> = {
-    'header-mismatch': 'header is not the one we define, which is usually harmless',
+    'header-mismatch': 'header is not the one we define; the first line is read as one all the same, and not imported',
+    'missing-header': 'the first line is a team, not a header, so the file has none — add the header row',
     'no-rows': 'no team rows',
     'wrong-column-count': 'more columns than the format has, so the row is not what it looks like',
     'empty-teamname': 'no team name',

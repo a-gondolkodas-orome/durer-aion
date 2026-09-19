@@ -251,6 +251,10 @@ are nginx's, and Vite's proxy shows you neither.
 
 - a file through *Fájl kiválasztása*, and rows pasted into the box. Picking a
   file also checks it — the count and any problems appear without importing.
+- rows pasted **without the header line above them**, which is what copying
+  them out of a spreadsheet gives you: refused, saying the file has no header.
+  The first line is read as one, so accepting it would drop that team in
+  silence.
 - `scripts/unit_test.tsv`: every problem listed against the line it is on, the
   import button disabled, and the team list unchanged.
 - *Ellenőrzés* on a file naming a team that already exists: reported as a

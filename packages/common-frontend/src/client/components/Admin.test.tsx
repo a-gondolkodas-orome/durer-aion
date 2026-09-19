@@ -294,6 +294,26 @@ test('the import tab refuses a bad row without asking the server', async () => {
   expect(importTeams).not.toHaveBeenCalled();
 });
 
+// Rows copied out of a spreadsheet without the line above them. The first line
+// is the header, so the page used to import every team but one and report a
+// clean file — the only warning it showed said the header was usually no
+// problem.
+test('the import tab refuses a paste with no header line', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams');
+  renderAdmin();
+  await openImportTab();
+
+  paste([importRow('Alpha'), importRow('Bravo'), importRow('Charlie')].join('\n'));
+
+  expect(await screen.findByText(/hiányzik a fejlécsor/)).toBeInTheDocument();
+  // All three counted, and no row blamed for what is wrong with the file.
+  expect(screen.getByText('3 sor. Magával a fájllal van baj, az importálás így nem futna le.'))
+    .toBeInTheDocument();
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(importTeams).not.toHaveBeenCalled();
+});
+
 // One row can break several rules at once. Counting problems made the summary
 // say "1 sor, ebből 2 hibás", which is more broken rows than there are rows.
 test('the import tab counts the rows at fault, not the rules they break', async () => {

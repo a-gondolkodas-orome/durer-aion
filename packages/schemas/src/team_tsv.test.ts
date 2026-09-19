@@ -58,6 +58,46 @@ describe('parseTeamsTsv', () => {
     expect(result.ok).toBe(true);
   });
 
+  describe('a file with no header line at all', () => {
+    // Rows copied out of a spreadsheet without the line above them. Line 1 is
+    // the header, so reading it as one drops that team — and a header we do not
+    // recognise is only a warning, so nothing would have said so.
+    it('refuses it rather than swallowing the first team', () => {
+      const content = [row({ teamname: 'Alpha' }), row({ teamname: 'Bravo' })].join('\n');
+      const result = parseTeamsTsv(content);
+
+      expect(result.ok).toBe(false);
+      const [problem] = result.problems;
+      expect(problem.code).toBe('missing-header');
+      // Against the file: line 1 is a team, and blaming it would count it
+      // among the rows at fault when the fault is the line above it.
+      expect(problem.row).toBe(0);
+      // Both teams are still counted, and on the lines the file has: the count
+      // an organiser sees has to be the number of rows they pasted.
+      expect(result.rows.map(team => team.teamname)).toEqual(['Alpha', 'Bravo']);
+      expect(result.rows.map(team => team.row)).toEqual([1, 2]);
+    });
+
+    it('knows a team by its id or its login code, not only its category', () => {
+      // The category is the usual tell; an export carries identifiers too, and
+      // a file whose first row has a bad category would otherwise slip through.
+      const exported = row({ teamname: 'Alpha', category: 'X', joinCode: '692-2481-797' });
+
+      expect(codes(exported)).toContain('missing-header');
+    });
+
+    it('leaves a header that is merely different a warning', () => {
+      // None of its cells is a category, a UUID or a join code, so it is a
+      // header — a strange one, which the importer reads by position anyway.
+      const content = ['Name\tCat\tMail\tNotes\tID\tCode\tCreds', row()].join('\n');
+      const result = parseTeamsTsv(content);
+
+      expect(codes(content)).toEqual(['header-mismatch']);
+      expect(result.ok).toBe(true);
+      expect(result.rows).toHaveLength(1);
+    });
+  });
+
   it('numbers problems by the line of the file, header included', () => {
     const content = file(row(), row({ teamname: 'Bravo', category: 'X' }));
     const [problem] = parseTeamsTsv(content).problems;

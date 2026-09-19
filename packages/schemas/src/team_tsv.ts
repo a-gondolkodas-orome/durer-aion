@@ -55,6 +55,7 @@ export const CREDENTIALS_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
 export type TeamTsvProblemCode =
   // The file as a whole.
   | 'header-mismatch'
+  | 'missing-header'
   | 'no-rows'
   | 'wrong-column-count'
   // One cell.
@@ -128,6 +129,23 @@ function sameHeader(found: readonly string[]): boolean {
     && TEAM_IMPORT_HEADER.every((column, index) => found[index] === column);
 }
 
+/** Whether a line is plainly a team rather than a header.
+ *
+ * The first line is the header, so a file that has none loses its first team —
+ * silently, since a header we do not recognise is only a warning. The signals
+ * are the cells a header cannot hold: the words there are `Category`, `ID` and
+ * `Login Code`, and none of them is a category, a UUID or a join code.
+ *
+ * It does not catch every file that has none — a first row with a misspelt
+ * category and no identifiers still reads as a header — but it catches the one
+ * that happens: rows copied out of a spreadsheet without the line above them.
+ */
+function looksLikeTeamRow(cells: readonly string[]): boolean {
+  return (TEAM_CATEGORIES as readonly string[]).includes(cells[1] ?? '')
+    || TEAM_ID_PATTERN.test(cells[4] ?? '')
+    || JOIN_CODE_PATTERN.test(cells[5] ?? '');
+}
+
 export function parseTeamsTsv(content: string): TeamTsvParseResult {
   const problems: TeamTsvProblem[] = [];
   const rows: ParsedTeamRow[] = [];
@@ -136,7 +154,18 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
 
   const lines = content.split('\n');
   const header = (lines[0] ?? '').split('\t').map(cell => cell.trim());
-  if (!sameHeader(header)) {
+  // A file with no header at all: read line 1 as one and its team is dropped
+  // without a word, which is what rows pasted out of a spreadsheet look like.
+  // Refused rather than guessed at, and the line is still read as a team below,
+  // so the count and every line number are the ones the file has.
+  const mismatched = !sameHeader(header);
+  const noHeader = mismatched && looksLikeTeamRow(header);
+  if (noHeader) {
+    // Against the file rather than line 1: the line is fine, it is the line
+    // above it that is missing — and line 1 is a team here, which should not
+    // be counted among the rows at fault.
+    error({ row: 0, code: 'missing-header', found: header.join(', ') });
+  } else if (mismatched) {
     // One problem, whatever is wrong with it: the header is a single fact about
     // the file, and the importer reads by position regardless, so a mismatch is
     // worth saying once and is not always a mistake.
@@ -148,7 +177,7 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
   const firstTeamId = new Map<string, number>();
   const firstJoinCode = new Map<string, number>();
 
-  for (let index = 1; index < lines.length; index++) {
+  for (let index = noHeader ? 0 : 1; index < lines.length; index++) {
     const row = index + 1;
     const line = lines[index];
     // A blank line is what a text editor leaves at the end of a file and what
