@@ -25,12 +25,13 @@ readability.
 
 ## Architecture
 
-Most games live under `src/components/games/`, one folder per game, registered
-in `gameList.ts`. The newest ones live in `packages/strategy-games/src/` instead —
-`remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` — where a
-game is a `StrategyGameConfig` object rather than a component, turned into a
-page by `strategyGameFactory` at its one export site in
-`src/components/games/index.ts`. That is the shape a **new** game takes; the
+Every game lives under `src/components/games/`, one folder per game, registered
+in `gameList.ts`. Two of them — `remove-divisor-multiple` and
+`stones-remove-one-not-twice-from-left` — export a `StrategyGameConfig` object
+rather than a component, turned into a page by `strategyGameFactory` at its one
+export site in `src/components/games/index.ts`. Which shape everything should
+settle on is open
+([#517](https://github.com/a-gondolkodas-orome/durer-aion/issues/517)); the
 folder layout below is the same either way.
 
 Shared infrastructure lives in `src/components/strategy-game-factory/`, a

@@ -12,6 +12,21 @@ Follow the steps in [README.md § Adding a new
 game](../../README.md#adding-a-new-game). Use `strategyGameFactory` (see
 `strategy-game-factory.tsx`) — copy a similar existing game as a starting point.
 
+## Two game shapes
+
+A game reaches the router in one of two shapes, and both are live. Most export the
+component `strategyGameFactory(...)` returns, which the barrel re-exports.
+`remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` instead export
+a `StrategyGameConfig` object and leave the factory call to the barrel. Nothing
+downstream can tell the difference — the barrel is where the two meet.
+
+They came out of the shelved boardgame.io replacement, whose competition server was
+to consume the config without the React wrapping. That consumer is gone, so which
+shape everything should settle on is open:
+[#517](https://github.com/a-gondolkodas-orome/durer-aion/issues/517). Until it is
+decided, follow whichever shape the game you are editing already uses, and a new
+game the steps in README.md § Adding a new game.
+
 ## strategyGameFactory API
 
 Required params: `presentation`, `BoardClient`, `gameplay`, `variants`.
