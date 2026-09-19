@@ -115,6 +115,19 @@ describe('importTeamsFromTsv', () => {
     expect(codes(result.problems)).toEqual(['invalid-category', 'other-missing', 'other-missing']);
   });
 
+  it('orders the errors by line, wherever they were found', async () => {
+    // The clashes with live teams are found only after the file is parsed, so
+    // without a sort this answer would read line 3 before line 2 — and the
+    // grid the admin page draws lists them in the order they arrive.
+    const teams = stubTeams({ teamNames: ['Alpha'] });
+    const bad = ['Bravo', 'X', 'a@b.com', 'x'].join('\t');
+
+    const result = await importTeamsFromTsv(teams, file(row('Alpha'), bad));
+
+    expect(codes(result.problems)).toEqual(['teamname-taken', 'invalid-category']);
+    expect(result.problems.map(problem => problem.row)).toEqual([2, 3]);
+  });
+
   describe('against the teams already in the database', () => {
     it('refuses a team name a live team holds, naming the row', async () => {
       const teams = stubTeams({ teamNames: ['Alpha'] });

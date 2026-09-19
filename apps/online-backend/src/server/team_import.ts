@@ -96,10 +96,15 @@ function finish(
 ): ImportResult {
   // Errors first: they are why the file was refused, and a file with no `Other`
   // column would otherwise bury them under a warning per row.
-  const ordered = [
-    ...problems.filter(problem => problem.severity === 'error'),
-    ...problems.filter(problem => problem.severity === 'warning'),
-  ];
+  //
+  // By line within each, because the clashes with live teams are found only
+  // after the whole file is parsed: without the sort, a taken team name on
+  // line 2 would be listed below a bad category on line 500. The sort is
+  // stable, so two problems on one line keep the order the rules ran in, and
+  // `row: 0` — the file as a whole — comes first.
+  const byLine = (severity: TeamTsvProblem['severity']) =>
+    problems.filter(problem => problem.severity === severity).sort((a, b) => a.row - b.row);
+  const ordered = [...byLine('error'), ...byLine('warning')];
   return {
     imported,
     rows,
