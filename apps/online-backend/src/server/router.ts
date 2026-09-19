@@ -75,24 +75,39 @@ export function configureTeamsRouter(
   const pathMinutes = (raw: string): number | undefined =>
     /^-?\d+$/.test(raw) ? Number(raw) : undefined;
 
-  /** A refusal as the status the admin page already knows how to read. */
-  const refuse = (
-    ctx: { throw: (status: number, message: string) => never },
-    reason: ExtendRefusal,
-    matchID: string,
-  ): never => {
+  /** The status a refusal answers with, and the line that says why. */
+  const refusalStatus = (reason: ExtendRefusal, matchID: string): [number, string] => {
     switch (reason.kind) {
       case "match-not-found":
-        return ctx.throw(404, `Match ${matchID} not found`);
+        return [404, `Match ${matchID} not found`];
       case "team-not-found":
-        return ctx.throw(500, `Match found, but assigned team ${reason.teamId} was not found.`);
+        return [500, `Match found, but assigned team ${reason.teamId} was not found.`];
       case "other-match-running":
-        return ctx.throw(501, `IN PROGRESS match found (${reason.running}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
+        return [501, `IN PROGRESS match found (${reason.running}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`];
       case "no-match-running":
-        return ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+        return [501, 'Restarting an already finished match is not supported right now.'];
       case "game-not-found":
-        return ctx.throw(404, `Match found, but game ${reason.gameName} was not found.`);
+        return [404, `Match found, but game ${reason.gameName} was not found.`];
     }
+  };
+
+  /** A refusal as the status the admin page already knows how to read, with the
+   *  kind beside it.
+   *
+   * The status alone does not say which refusal it was — a match that has
+   * finished and an id the team has moved on from are both 501, and they need
+   * different things said to the organiser. So the kind travels in the body —
+   * the same vocabulary the bulk walk reports in its `problems`, so the page
+   * picks its line from a kind rather than by matching English prose.
+   * `message` is the line the route answered before, for whoever reads the API
+   * rather than the page.
+   *
+   * Set rather than thrown: a refusal is a routine answer to a stale id, and
+   * koa logs a stack trace for every error it writes. */
+  const refuse = (ctx: Server.AppCtx, reason: ExtendRefusal, matchID: string): void => {
+    const [status, message] = refusalStatus(reason, matchID);
+    ctx.status = status;
+    ctx.body = { ...reason, message };
   };
 
   /**

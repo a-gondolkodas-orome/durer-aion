@@ -132,20 +132,35 @@ describe("adding minutes to one match", () => {
   });
 
   // The route refuses two different things with a 501 — a match that has
-  // finished, and an id the team has moved on from — and the message is what
-  // tells them apart. The branch tested `err.code`, which carries axios's own
-  // string rather than the status, so it never fired and both read as an
-  // unexpected error (#507).
+  // finished, and an id the team has moved on from — so the status alone does
+  // not say which, and the kind it sends beside it is what picks the line. The
+  // branch tested `err.code`, which carries axios's own string rather than the
+  // status, so it never fired and both read as an unexpected error (#507).
+  //
+  // The messages are translation keys, not Hungarian strings: the admin page
+  // carries the language switcher, and `npm run i18n:check` is what pins that
+  // hu and en both have them. i18next answers with the key itself here.
   test.each([
     ["an id the team has moved on from",
-      "IN PROGRESS match found (0EKBiMgbJ5A), but it does not match with matchID (an-older-match). "
-      + "(Probably you are using an old matchID.)"],
-    ["a match that has finished", "Restarting an already finished match is not supported right now."],
-  ])("carries the route's own reason for refusing %s", async (_case, reason) => {
-    fakeAxios(() => status(501, reason));
+      { kind: "other-match-running", running: "0EKBiMgbJ5A" },
+      "admin.addMinutes.otherMatchRunning"],
+    ["a match that has finished",
+      { kind: "no-match-running" },
+      "admin.addMinutes.noMatchRunning"],
+  ])("says which refusal a 501 was for %s", async (_case, refusal, key) => {
+    fakeAxios(() => status(501, refusal));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow(reason);
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow(key);
+  });
+
+  // A kind this build does not know — the server learning a new refusal ahead
+  // of the page — is better as the generic line than as a missing key.
+  test("falls back to the generic message for a refusal it does not know", async () => {
+    fakeAxios(() => status(501, { kind: "moon-phase" }));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow("Váratlan hiba történt");
   });
 
   test("any other failure is reported like the other admin actions", async () => {

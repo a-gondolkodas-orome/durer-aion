@@ -27,6 +27,26 @@ function apiAxiosInstance(timeout = 10000): AxiosInstance {
   });
 }
 
+/** What a refused extension says to the organiser, or nothing for a refusal
+ *  this does not know.
+ *
+ * The route answers a refusal with the kind beside the status
+ * (`server/router.ts`), because the status does not tell the two apart: a match
+ * that has finished and an id the team has moved on from are both 501, and
+ * they need different things said. The keys are written out rather than built
+ * from the kind so `npm run i18n:check` can see them.
+ */
+function refusalMessage(kind: string | undefined, running: string | undefined): string | undefined {
+  switch (kind) {
+    case 'other-match-running':
+      return i18n.t('admin.addMinutes.otherMatchRunning', { running });
+    case 'no-match-running':
+      return i18n.t('admin.addMinutes.noMatchRunning');
+    default:
+      return undefined;
+  }
+}
+
 function makeAxiosError(any_error: unknown): AxiosError {
   if (!axios.isAxiosError(any_error)) {
     throw  any_error;
@@ -202,10 +222,11 @@ export class RealClientRepository implements ClientRepository {
       // this never fired and both of the route's 501s reached the organiser as
       // "Váratlan hiba történt" (#507).
       if (err.response?.status === 501) {
-        // The route's own message: which match is running, and that the id may
-        // be a stale one. English, as the admin routes' messages are, and more
-        // than one fixed line could say about two different refusals.
-        throw new Error(String(err.response.data), { cause: e });
+        const refusal = err.response.data as { kind?: string, running?: string } | undefined;
+        const said = refusalMessage(refusal?.kind, refusal?.running);
+        if (said !== undefined) {
+          throw new Error(said, { cause: e });
+        }
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }

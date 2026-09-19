@@ -1,4 +1,10 @@
 {
+  "admin": {
+    "addMinutes": {
+      "otherMatchRunning": "The team has a different match running ({{running}}) — the match id is probably a stale one.",
+      "noMatchRunning": "A match that has finished can no longer be extended."
+    }
+  },
   "chooser": {
     "achievedPoint": "Points achieved",
     "filledAt": "Filled at",

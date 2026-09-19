@@ -12,6 +12,22 @@ import { configureTeamsRouter } from "./router";
 const PASSWORD = "organiser-password";
 const CREDENTIALS = `Basic ${Buffer.from(`${ADMIN_USER}:${PASSWORD}`).toString("base64")}`;
 
+const MATCH = "0EKBiMgbJ5A";
+const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
+const START = "2026-03-21T18:00:00.000Z";
+const END = "2026-03-21T19:00:00.000Z";
+
+const team = (fields: Partial<TeamModel> = {}) =>
+  ({
+    teamId: TEAM_ID,
+    teamName: "Alpha",
+    other: "",
+    relayMatch: { state: "IN PROGRESS", matchID: MATCH, startAt: new Date(START), endAt: new Date(END) },
+    strategyMatch: { state: "NOT STARTED" },
+    update: vi.fn().mockResolvedValue(undefined),
+    ...fields,
+  }) as unknown as TeamModel;
+
 // The route over HTTP, the way admin_session.test.ts serves it. The walk itself
 // is add_minutes.test.ts'; what this is about is the body the route accepts.
 describe("POST /game/admin/addminutes", () => {
@@ -99,13 +115,19 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
     vi.restoreAllMocks();
   });
 
-  async function serve() {
-    const teams = { getTeam: vi.fn().mockResolvedValue(null) } as unknown as TeamsRepository;
+  async function serve(row: TeamModel | null = null) {
+    const teams = { getTeam: vi.fn().mockResolvedValue(row) } as unknown as TeamsRepository;
     const app = new Koa<Koa.DefaultState, Server.AppCtx>();
     app.silent = true;
-    // No match under any id: a request that gets past the path is a 404, which
-    // is enough to tell "refused the minutes" from "went on to look".
-    app.context.db = { fetch: vi.fn().mockResolvedValue({}), setState: vi.fn() } as unknown as StorageAPI.Async;
+    // With no team, storage holding no match: a request that gets past the path
+    // is a 404, which tells "refused the minutes" from "went on to look".
+    app.context.db = {
+      fetch: vi.fn().mockResolvedValue(row === null ? {} : {
+        state: { _stateID: 7, G: { start: START, end: END }, ctx: {} },
+        metadata: { gameName: "relay_c", players: [{ name: TEAM_ID }] },
+      }),
+      setState: vi.fn(),
+    } as unknown as StorageAPI.Async;
     app.context.durer_transport = { getMatchQueue: () => ({ add: (task: () => unknown) => task() }), pubSub: {} };
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
     configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
@@ -115,10 +137,11 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
     servers.push(server);
     await new Promise(resolve => server.once("listening", resolve));
     const { port } = server.address() as AddressInfo;
-    return (minutes: string) => fetch(`http://127.0.0.1:${port}/game/admin/a-match/addminutes/${minutes}`, {
-      method: "POST",
-      headers: { authorization: CREDENTIALS },
-    });
+    return (minutes: string, matchID = "a-match") =>
+      fetch(`http://127.0.0.1:${port}/game/admin/${matchID}/addminutes/${minutes}`, {
+        method: "POST",
+        headers: { authorization: CREDENTIALS },
+      });
   }
 
   it.each(["soon", "1.5", "1e3", "0x10"])("refuses %s minutes", async (minutes) => {
@@ -131,5 +154,37 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
     const request = await serve();
 
     expect((await request(minutes)).status).toBe(404);
+  });
+
+  // Both of these are 501, and they mean different things to an organiser, so
+  // the status alone cannot pick what the page says. The kind travels with it,
+  // the same kinds the bulk walk reports (#507).
+  it("says which refusal a 501 was, not just that it refused", async () => {
+    const request = await serve(team());
+
+    const response = await request("10", "an-older-match");
+
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ kind: "other-match-running", running: MATCH });
+  });
+
+  it("says so when the team has no match running at all", async () => {
+    const request = await serve(team({ relayMatch: { state: "NOT STARTED" } }));
+
+    const response = await request("10");
+
+    expect(response.status).toBe(501);
+    expect(await response.json()).toMatchObject({ kind: "no-match-running" });
+  });
+
+  // The other refusals keep the statuses they answered before. The router is
+  // configured with no games here, so the lookup refuses whatever it is told.
+  it("still 404s a game no registry has", async () => {
+    const request = await serve(team());
+
+    const response = await request("10", MATCH);
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ kind: "game-not-found" });
   });
 });

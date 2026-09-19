@@ -118,11 +118,23 @@ paths:
         "400":
           description: Minutes in the path was not a whole number
         "404":
-          description: Match not found
+          description: Match or its game not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesRefusal"
         "500":
           description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesRefusal"
         "501":
-          description: Restarting finished match not supported
+          description: No match running, or the id names one the team has moved on from
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesRefusal"
 
   /game/admin/{matchId}/metadata:
     get:
@@ -821,6 +833,30 @@ components:
               reason:
                 type: string
                 enum: [match-not-found, team-not-found, other-match-running, no-match-running, game-not-found, error]
+
+    AddMinutesRefusal:
+      type: object
+      description: >
+        Why one match was not given more time. The status does not say on its
+        own — a match that has finished and an id the team has moved on from are
+        both 501 — so the kind travels with it, the same kinds the bulk walk
+        reports in its problems.
+      properties:
+        kind:
+          type: string
+          enum: [match-not-found, team-not-found, other-match-running, no-match-running, game-not-found]
+        message:
+          type: string
+        running:
+          type: string
+          description: With other-match-running, the match the team does have running.
+        teamId:
+          type: string
+        gameName:
+          type: string
+      required:
+        - kind
+        - message
 
     AddMinutesResponse:
       type: object
