@@ -12,21 +12,28 @@
  * Still no substitute for the round against `npm run stack:up`: nginx and the
  * built frontend are not in front of this, and postgres is not behind it.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { AddressInfo } from "node:net";
 import { io as connect, Socket } from "socket.io-client";
+import { Client } from "boardgame.io/client";
 import { createMatch } from "boardgame.io/internal";
 import { Server } from "boardgame.io/server";
+import type { Bot } from "boardgame.io/ai";
 import { MyGameWrappers, gameWrapper, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
 import botWrapper from "./botwrapper";
-import { BOT_ID, SocketIOButBotMoves } from "./socketio_botmoves";
+import { BOT_ID, SocketIOButBotMoves, fetch as fetchMatch } from "./socketio_botmoves";
+import { getBotCredentials } from "./server/common";
 
 const GAME_NAME = strategyNames.E;
 const game = { ...gameWrapper(MyGameWrappers.E()), name: GAME_NAME };
 const HUMAN_ID = "0";
 // Each test gets its own server and its own store, so one id is enough.
 const MATCH_ID = "match-under-test";
+/** Stands in for what `server/team_manage.ts` injects into a real match. Only
+ *  the tests that need boardgame.io to ask for credentials use it — it is
+ *  having them at all that turns the check on. */
+const TEAM_CREDENTIALS = "the-team's-credentials";
 
 /** How long a step may take before the test calls it a hang. The bot pauses
  *  400ms for UX (botwrapper.ts) and then the move travels back, so this is
@@ -79,11 +86,47 @@ interface BgioState {
 const makeMove = (type: string, args: unknown[], playerID: string) =>
   ({ type: "MAKE_MOVE", payload: { type, args, playerID } });
 
+/** The real judge, and the two the tests need to hold still. Both keep the
+ *  strategy and change only when it answers, so what they play is what the
+ *  round would play. */
+const RealBot = botWrapper(StrategyWrappers.E());
+
 describe("the socket transport a browser talks to", () => {
   let server: BgioServer;
   let running: RunningServers;
   let url: string;
   const sockets: Socket[] = [];
+
+  /** The one the tests share, unless a test replaces it: the real judge, the
+   *  in-memory store, and the wait on a judge's turn left at its default. */
+  async function startServer(bot: Bot = new RealBot({ enumerate: game.ai?.enumerate }), syncBotTurnWaitMs?: number) {
+    server = Server({
+      games: [game],
+      // No `db`, so boardgame.io hands us its in-memory store — the transport
+      // is what this file is about, not what persists behind it.
+      transport: new SocketIOButBotMoves(
+        { https: undefined },
+        { [GAME_NAME]: bot },
+        undefined,
+        syncBotTurnWaitMs,
+      ),
+      // Set, rather than left out, so the server does not warn about CORS.
+      origins: [],
+    });
+    // Port 0: the OS picks a free one, so a developer's own stack on :8000 is
+    // not something this suite can collide with.
+    running = await server.run(0);
+    url = `http://localhost:${(running.appServer.address() as AddressInfo).port}`;
+  }
+
+  /** Throws the shared server away and starts one built for this test. Two of
+   *  them need a judge they can hold still, or a wait they can outlast; the
+   *  rest want the defaults, so the cost of building it twice falls only on
+   *  the two. */
+  async function restartServerWith(bot: Bot, syncBotTurnWaitMs?: number) {
+    server.kill(running);
+    await startServer(bot, syncBotTurnWaitMs);
+  }
 
   beforeEach(async () => {
     // boardgame.io announces the port it bound on, and the bot transport logs
@@ -95,21 +138,7 @@ describe("the socket transport a browser talks to", () => {
     // environment (server/common.ts) and refuses to start without it.
     vi.stubEnv("BOT_CREDENTIALS", "bot-credentials-for-this-test");
 
-    server = Server({
-      games: [game],
-      // No `db`, so boardgame.io hands us its in-memory store — the transport
-      // is what this file is about, not what persists behind it.
-      transport: new SocketIOButBotMoves(
-        { https: undefined },
-        { [GAME_NAME]: new (botWrapper(StrategyWrappers.E()))({ enumerate: game.ai?.enumerate }) },
-      ),
-      // Set, rather than left out, so the server does not warn about CORS.
-      origins: [],
-    });
-    // Port 0: the OS picks a free one, so a developer's own stack on :8000 is
-    // not something this suite can collide with.
-    running = await server.run(0);
-    url = `http://localhost:${(running.appServer.address() as AddressInfo).port}`;
+    await startServer();
   });
 
   afterEach(() => {
@@ -126,10 +155,22 @@ describe("the socket transport a browser talks to", () => {
     return socket;
   }
 
-  /** A match as the router makes one, straight into the server's store. */
-  async function createStoredMatch(): Promise<void> {
+  /** A match as the router makes one, straight into the server's store.
+   *
+   *  With `teamCredentials`, both players are given theirs the way
+   *  `server/team_manage.ts` does — the team's and the bot's. It has to be both
+   *  or neither: boardgame.io asks for credentials on a match where *any*
+   *  player has them, so injecting only the team's would have the bot's own
+   *  move refused, and a test could then pass because the bot was never
+   *  allowed to play rather than because it was never asked. Left out, the
+   *  match asks for none, which is what every other test here wants. */
+  async function createStoredMatch(teamCredentials?: string): Promise<void> {
     const match = createMatch({ game, numPlayers: 2, setupData: undefined, unlisted: true });
     if ("setupDataError" in match) throw new Error(match.setupDataError);
+    if (teamCredentials !== undefined) {
+      match.metadata.players[HUMAN_ID].credentials = teamCredentials;
+      match.metadata.players[BOT_ID].credentials = getBotCredentials();
+    }
     await server.db.createMatch(MATCH_ID, match);
   }
 
@@ -186,6 +227,156 @@ describe("the socket transport a browser talks to", () => {
     const afterReload = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
     expect(afterReload._stateID).toBe(beforeReload._stateID);
     expect(afterReload.G).toStrictEqual(beforeReload.G);
+  });
+
+  /** A match state on the judge's turn, played out by a local client rather
+   *  than assembled by hand — the same move `startLiveGame` sends, with nobody
+   *  to answer it. That is what the store holds when the bot's move never
+   *  happened: the backend restarted mid-turn, or the bot's own update lost a
+   *  stateID race. */
+  function stateOnTheJudgesTurn() {
+    const scratch = Client({ game, numPlayers: 2, playerID: HUMAN_ID });
+    scratch.start();
+    scratch.moves.chooseNewGameType("live");
+    const state = scratch.store.getState();
+    scratch.stop();
+    return state;
+  }
+
+  /** The regression: a player's move used to be the only thing that asked the
+   *  bot to play, so a match left on the judge's turn stayed there however
+   *  often the team came back to it (#133).
+   *
+   *  Asserted on the sync's own answer rather than on a later `update`: the
+   *  turn is taken in front of boardgame.io's sync handler, so the state it
+   *  reads back out of storage already carries the bot's move. There is no
+   *  push to wait for here, which is the point — the socket is not yet on the
+   *  match's channel to receive one. */
+  it("plays the judge's turn a team comes back to", async () => {
+    await createStoredMatch();
+    const stuck = stateOnTheJudgesTurn();
+    expect(stuck.ctx.currentPlayer).toBe(BOT_ID);
+    await server.db.setState(MATCH_ID, stuck);
+
+    const state = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
+
+    expect(state.G.stonesRight).toBeGreaterThan(0);
+    expect(state.ctx.currentPlayer).not.toBe(BOT_ID);
+  });
+
+  /** The credential check belongs to boardgame.io's `Master.onSync`, which
+   *  answers a sync it refuses with nothing at all. The bot's turn is taken in
+   *  front of that, so it makes the same check itself — otherwise anyone who
+   *  learned a matchID could drive a competition match along. */
+  it("leaves the judge's turn alone for a sync it cannot authenticate", async () => {
+    await createStoredMatch(TEAM_CREDENTIALS);
+    await server.db.setState(MATCH_ID, stateOnTheJudgesTurn());
+
+    const socket = await connectClient();
+    socket.emit("sync", MATCH_ID, HUMAN_ID, "not-the-team's-credentials", 2);
+    // Asserting a non-event, so it is waited out rather than awaited: the bot
+    // pauses 400ms for UX (botwrapper.ts) and the store is in memory, so a
+    // turn that was going to be taken has been by now.
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    const { state } = await fetchMatch(server.db, MATCH_ID, { state: true } as const);
+    expect(state.ctx.currentPlayer).toBe(BOT_ID);
+  });
+
+  /** The judge held mid-turn, so a reload can land inside one. It plays the
+   *  real strategy once let go — what the test is about is when it answers,
+   *  not what it answers — and the pause the real one keeps for UX is dropped,
+   *  since the holding is the pause here. */
+  function heldJudge() {
+    const asked: number[] = [];
+    let arrive = (): void => undefined;
+    const beenAsked = new Promise<void>(resolve => { arrive = resolve; });
+    let letGo = (): void => undefined;
+    const released = new Promise<void>(resolve => { letGo = resolve; });
+
+    class HeldBot extends RealBot {
+      async wait(): Promise<void> {
+        // The 400ms the real one keeps for UX; here the test decides.
+      }
+      async play(...args: Parameters<InstanceType<typeof RealBot>["play"]>): ReturnType<Bot["play"]> {
+        asked.push(args[0]._stateID);
+        arrive();
+        await released;
+        return super.play(...args);
+      }
+    }
+
+    return {
+      bot: new HeldBot({ enumerate: game.ai?.enumerate }),
+      asked,
+      beenAsked,
+      release: () => { letGo(); },
+    };
+  }
+
+  /** The invariant `takeBotTurn` rests on: a player's move and a reconnect
+   *  both ask for the judge's turn, and whichever runs second finds it already
+   *  taken. It is the match's queue that makes that true — and boardgame.io
+   *  drops that queue the moment a match's last client disconnects, which is
+   *  what a reload is. Asked twice at the same stateID, the judge decides
+   *  twice, and `Master.onUpdate` broadcasts before it persists, so the two
+   *  answers can interleave and leave the team on a position storage did not
+   *  keep. */
+  it("asks the judge once when a reload lands inside its turn", async () => {
+    const judge = heldJudge();
+    await restartServerWith(judge.bot);
+    await createStoredMatch();
+
+    const first = await connectClient();
+    const before = await syncAs(first, MATCH_ID, HUMAN_ID);
+    first.emit("update", makeMove("chooseNewGameType", ["live"], HUMAN_ID), before._stateID, MATCH_ID, HUMAN_ID);
+    await judge.beenAsked;
+
+    // The reload, with the judge still thinking: the last client leaving is
+    // what has boardgame.io drop the queue.
+    first.disconnect();
+    // Waited out rather than awaited: the server learns of a disconnect on its
+    // own schedule, and it is what that disconnect does to the queue that this
+    // test is about. Long enough for a loopback socket to have closed.
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const second = await connectClient();
+    const synced = syncAs(second, MATCH_ID, HUMAN_ID);
+    // On a queue of its own the reconnect asks the judge again straight away,
+    // so this is long enough for a second question to have been put.
+    await new Promise(resolve => setTimeout(resolve, 300));
+    judge.release();
+
+    expect(judge.asked).toHaveLength(1);
+    const answered = await synced;
+    // The answer carries the turn, and it is the one storage kept.
+    expect(answered.ctx.currentPlayer).not.toBe(BOT_ID);
+    const { state } = await fetchMatch(server.db, MATCH_ID, { state: true } as const);
+    expect(answered._stateID).toBe(state._stateID);
+    expect(answered.G).toStrictEqual(state.G);
+  });
+
+  /** The wait `resumeBotTurn` puts on the judge has to be bounded. This is the
+   *  packet boardgame.io answers *and* registers the socket on, so a turn that
+   *  never came back would not only lose this answer — it would leave the
+   *  socket off the match's channel, where no later push could reach it
+   *  either. Late is recoverable; never is not. */
+  it("answers a sync whose judge's turn never comes back", async () => {
+    const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    onTestFinished(() => { warned.mockRestore(); });
+    class SilentBot extends RealBot {
+      play(): ReturnType<Bot["play"]> {
+        return new Promise<never>(() => undefined);
+      }
+    }
+    await restartServerWith(new SilentBot({ enumerate: game.ai?.enumerate }), 200);
+    await createStoredMatch();
+    await server.db.setState(MATCH_ID, stateOnTheJudgesTurn());
+
+    const state = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
+
+    // Late, not wrong: the stored state, with the judge still to move.
+    expect(state.ctx.currentPlayer).toBe(BOT_ID);
+    expect(warned).toHaveBeenCalledWith(expect.stringContaining(MATCH_ID));
   });
 
   it("refuses a sync for a match nobody created", async () => {

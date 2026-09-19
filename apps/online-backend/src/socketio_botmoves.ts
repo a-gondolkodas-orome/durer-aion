@@ -99,6 +99,11 @@ export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player.
 export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
 
+/** How long a sync waits for the bot's turn before it is answered without it.
+ *  Generous against what the wait is really made of: the bot's own 400ms pause
+ *  (botwrapper.ts), plus a player's move it may be queued behind. */
+export const SYNC_BOT_TURN_WAIT_MS = 5000;
+
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
  *
@@ -110,14 +115,19 @@ export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, Bot>;
   onFinishedMatch: (matchID: string) => Promise<void>;
   unFinishedMatches = new Set<string>();
+  /** A parameter only so a test can shrink it; the server passes three
+   *  arguments and takes the constant. */
+  readonly syncBotTurnWaitMs: number;
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, Bot>,
-    onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined
+    onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined,
+    syncBotTurnWaitMs: number = SYNC_BOT_TURN_WAIT_MS
   ) {
     super({ ...socketOpts });
     this.bots = bots;
     this.onFinishedMatch = onFinishedMatch;
+    this.syncBotTurnWaitMs = syncBotTurnWaitMs;
   }
   init(
     app: Server.App & { _io: IOTypes.Server; },
@@ -138,7 +148,9 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Refuses a `sync` naming a match that storage does not have.
+        /** Refuses a `sync` naming a match that storage does not have, and for
+         * one it does, hands the packet to `resumeBotTurn` before letting it
+         * through.
          *
          * boardgame.io's `Master.onSync` skips its credential check when
          * `playerID` is null — the spectator case it is written for — and
@@ -157,7 +169,7 @@ export class SocketIOButBotMoves extends SocketIO {
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
-        socket.use(([event, matchID]: IOTypes.Event, next) => {
+        socket.use(([event, matchID, playerID, credentials]: IOTypes.Event, next) => {
           if (event !== "sync") {
             next();
             return;
@@ -167,8 +179,13 @@ export class SocketIOButBotMoves extends SocketIO {
             return;
           }
           void fetch(app.context.db, matchID, { metadata: true } as const).then(
-            ({ metadata }) => {
-              next(metadata === undefined ? new Error(`sync for unknown match ${matchID}`) : undefined);
+            async ({ metadata }) => {
+              if (metadata === undefined) {
+                next(new Error(`sync for unknown match ${matchID}`));
+                return;
+              }
+              await this.resumeBotTurn(app, game, bot, matchID, metadata, playerID, credentials);
+              next();
             },
             (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
           );
@@ -201,81 +218,212 @@ export class SocketIOButBotMoves extends SocketIO {
             // Do not react to bot's turn
             return;
           }
-          const matchQueue = this.getMatchQueue(matchID);
-          await matchQueue.add(async () => {
-            // These happen after the player stepped.
-            // The state is written to storage, and the server now returned
-            // the authoritative state to the player.
-            // TODO: do not load the result from storage, reuse from the redux?
-            // TODO: try do not send an authoritative state to the player...?
-            console.log("Bot moves");
-
-            const {  state  } = await fetch(app.context.db, matchID, {
-               state: true,
-             } as const);
-            if (currentPlayer(state.ctx) !== BOT_ID) {
-              // Not a real action, possibly a failed move.
-              return;
-            }
-            if (state.ctx.gameover) {
-              // Game is over, no need to react
-              return;
-            }
-            const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
-            if (botPlayer === null) {
-              // Only reachable with ctx.gameover set to something falsy, which
-              // the check above lets through and which no game here produces.
-              return;
-            }
-            let botAction;
-            if (
-              state.ctx.phase === "play" ||
-              state.ctx.phase === "startNewGame"
-            )  {
-              botAction = await bot.play(state, botPlayer);
-            } else {
-              return;
-            }
-
-            const master = new Master(
-              game,
-              app.context.db,
-              TransportAPI(
-                matchID,
-                socket,
-                getFilterPlayerView(game),
-                this.pubSub
-              ),
-              app.context.auth
-            );
-
-            const nextStateID = state._stateID;
-            await master.onUpdate(
-              {
-                type: "MAKE_MOVE",
-                payload: {
-                  ...botAction.action.payload,
-                  credentials: getBotCredentials(),
-                },
-              },
-              nextStateID,
-              matchID,
-              BOT_ID
-            );
-          });
-          await matchQueue.add(async () => {
-            const {  state  } = await fetch(app.context.db, matchID, {
-               state: true,
-             } as const);
-            if (state.ctx.gameover) {
-              if (this.unFinishedMatches.has(matchID)) {
-                this.unFinishedMatches.delete(matchID);
-                await this.onFinishedMatch(matchID);
-              }
-            }
-          });
+          await this.takeBotTurn(app, game, socket, bot, matchID);
         });
       });
     }
+  }
+
+  /** The other half of the job `update` does. A player's move is the only
+   *  other thing that asks the bot to play, so a match whose bot move never
+   *  happened — the backend restarted mid-turn, or the bot's own update lost a
+   *  stateID race — is one nobody will ever move again: the team cannot play
+   *  out of turn, and the board sits on "waiting for the server" for good
+   *  (issue #133). A reconnect is the moment someone is there to be stuck, so
+   *  it is where the server looks again.
+   *
+   *  Run from the sync middleware rather than from a second `sync` listener,
+   *  because a listener beside boardgame.io's own can do neither of the two
+   *  things this needs. It cannot see the credential check: `Master.onSync`
+   *  makes it and answers nothing when it fails, so a sibling would take the
+   *  turn for a caller boardgame.io had just refused. And it cannot order
+   *  itself against the answer: boardgame.io puts the socket on the match's
+   *  pubsub channel only after `onSync` returns, so a bot move published
+   *  before that reaches nobody, while the answer already on its way carries
+   *  the state from before it — #133 again, on the very reload meant to cure
+   *  it. From the middleware the turn is taken *first*, and `onSync` reads it
+   *  back out of storage, so the answer carries the bot's move instead of
+   *  racing it. What that costs is the bot's thinking time added to the one
+   *  sync that lands on its turn, which is the right way round: the team waits
+   *  once and sees the board it should, rather than seeing a stale one at once
+   *  and depending on a push that may never arrive.
+   *
+   *  Answers nothing and throws nothing, and does not wait forever: a bot
+   *  that could not play is no reason to drop the team's sync. A turn that
+   *  never settles would be worse than the stale answer this replaced — the
+   *  packet would never reach boardgame.io's listener, and `addClient` is
+   *  there too, so the socket would be left off the match's channel and no
+   *  later push could reach it either. */
+  private async resumeBotTurn(
+    app: Server.App,
+    game: Game,
+    bot: Bot,
+    matchID: string,
+    metadata: Server.MatchData,
+    playerID: unknown,
+    credentials: unknown
+  ): Promise<void> {
+    // `Master.onSync` skips this when playerID is null — the spectator case —
+    // and a spectator is not who the bot owes a move to, so this skips the
+    // turn instead of the check.
+    if (typeof playerID !== "string") {
+      return;
+    }
+    try {
+      const authentic = await app.context.auth.authenticateCredentials({
+        playerID,
+        credentials: typeof credentials === "string" ? credentials : undefined,
+        metadata,
+      });
+      if (!authentic) {
+        return;
+      }
+      // No socket: `Master.onUpdate` only ever publishes to the match's
+      // channel, and this caller is not on it yet — the router's add-minutes
+      // handler passes null for the same reason.
+      //
+      // The failure handler goes on the turn rather than on the race below:
+      // past the wait nothing is listening to `turn` any more, so a bot that
+      // throws then would be an unhandled rejection.
+      const turn = this.takeBotTurn(app, game, null, bot, matchID).catch((error: unknown) => {
+        console.error(`could not take the bot's turn on a sync for match ${matchID}`, error);
+      });
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const expired = new Promise<"expired">(resolve => {
+        timer = setTimeout(() => { resolve("expired"); }, this.syncBotTurnWaitMs);
+      });
+      try {
+        if (await Promise.race([turn, expired]) === "expired") {
+          // Not an abandoned turn: it stays on the match queue and its move is
+          // persisted, so the next sync reads it back. Only this packet stops
+          // waiting for it.
+          console.warn(`the judge's turn outlasted the sync for match ${matchID}; answering with the stored state`);
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch (error) {
+      // Only the credential check reaches here; the turn carries its own
+      // handler above.
+      console.error(`could not check who the sync for match ${matchID} is from`, error);
+    }
+  }
+
+  /** boardgame.io drops a match's queue as soon as its last client
+   *  disconnects (`removeClient`) — and a reload is exactly that. The bot's
+   *  turn outlives it: it is taken from a player's move and again from the
+   *  reconnect, and the queue is the only thing keeping the two from asking
+   *  the bot twice at the same stateID (see takeBotTurn). `Master.onUpdate`
+   *  broadcasts before it persists, so two answers can interleave and leave
+   *  the team's browser on a position storage did not keep.
+   *
+   *  So the queue goes when it falls idle rather than when the room empties.
+   *  Deferred, not kept: the chain below re-checks and re-arms until the
+   *  queue is really empty, so no match leaves a row behind. */
+  deleteMatchQueue(matchID: string): void {
+    const queue = this.perMatchQueue.get(matchID);
+    if (queue === undefined) {
+      return;
+    }
+    if (queue.size === 0 && queue.pending === 0) {
+      super.deleteMatchQueue(matchID);
+      return;
+    }
+    void queue.onIdle().then(() => {
+      // A new client may have picked this same queue up in the meantime, and
+      // may have put work on it; the recursion re-checks both.
+      if (this.perMatchQueue.get(matchID) === queue) {
+        this.deleteMatchQueue(matchID);
+      }
+    });
+  }
+
+  /** Plays the bot's turn if the match is waiting on one, and closes the match
+   *  if that turn ended it. Both halves go through the match's own queue, which
+   *  is what lets a player's move and a reconnect both call this: whichever
+   *  runs second finds the turn already taken and does nothing.
+   *
+   *  The second half runs whether or not the first played: the move that ends
+   *  a match is often the team's own, `turn.onMove` calling `events.endGame()`
+   *  on a move made after the clock ran out (a game's `game.ts`). Reading the
+   *  state back for a reconnect that moved nothing is the price of that. */
+  private async takeBotTurn(
+    app: Server.App,
+    game: Game,
+    socket: IOTypes.Socket | null,
+    bot: Bot,
+    matchID: string
+  ): Promise<void> {
+    const matchQueue = this.getMatchQueue(matchID);
+    await matchQueue.add(async () => {
+      // These happen after the player stepped.
+      // The state is written to storage, and the server now returned
+      // the authoritative state to the player.
+      // TODO: do not load the result from storage, reuse from the redux?
+      // TODO: try do not send an authoritative state to the player...?
+      const {  state  } = await fetch(app.context.db, matchID, {
+         state: true,
+       } as const);
+      if (currentPlayer(state.ctx) !== BOT_ID) {
+        // Not a real action, possibly a failed move.
+        return;
+      }
+      if (state.ctx.gameover) {
+        // Game is over, no need to react
+        return;
+      }
+      const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
+      if (botPlayer === null) {
+        // Only reachable with ctx.gameover set to something falsy, which
+        // the check above lets through and which no game here produces.
+        return;
+      }
+      if (state.ctx.phase !== "play" && state.ctx.phase !== "startNewGame") {
+        return;
+      }
+      // Said here rather than on the way in: a reconnect asks this of every
+      // match a team opens, and only the ones the bot really owes a move are
+      // a turn being taken.
+      console.log("Bot moves");
+      this.unFinishedMatches.add(matchID);
+      const botAction = await bot.play(state, botPlayer);
+
+      const master = new Master(
+        game,
+        app.context.db,
+        TransportAPI(
+          matchID,
+          socket,
+          getFilterPlayerView(game),
+          this.pubSub
+        ),
+        app.context.auth
+      );
+
+      const nextStateID = state._stateID;
+      await master.onUpdate(
+        {
+          type: "MAKE_MOVE",
+          payload: {
+            ...botAction.action.payload,
+            credentials: getBotCredentials(),
+          },
+        },
+        nextStateID,
+        matchID,
+        BOT_ID
+      );
+    });
+    await matchQueue.add(async () => {
+      const {  state  } = await fetch(app.context.db, matchID, {
+         state: true,
+       } as const);
+      if (state.ctx.gameover) {
+        if (this.unFinishedMatches.has(matchID)) {
+          this.unFinishedMatches.delete(matchID);
+          await this.onFinishedMatch(matchID);
+        }
+      }
+    });
   }
 }
