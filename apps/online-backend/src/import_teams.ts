@@ -17,7 +17,10 @@ if (filename === undefined) {
 
 const { teams } = getDb();
 
-import_teams_from_tsv_locally(teams, filename).then(() => exit(0)).catch((e: unknown) => {
+// A refused file is a failure, not a quiet zero: the summary it printed scrolls
+// past, and `scripts/import_teams.sh` and every shell around it have only the
+// status to go on.
+import_teams_from_tsv_locally(teams, filename).then(imported => exit(imported ? 0 : 1)).catch((e: unknown) => {
   console.error('team import failed', e);
   exit(1);
 });

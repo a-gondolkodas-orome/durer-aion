@@ -1,6 +1,6 @@
 // cspell:ignore asjdgaskjd
 
-import { DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import { DeletedTeamDto, ImportResultDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';
 import type { BoardProps } from 'boardgame.io/react';
 
@@ -39,6 +39,10 @@ export interface ClientRepository {
   getDeleted(): Promise<DeletedTeamDto[]>;
   restoreTeam(deletionId: number): Promise<void>;
   restoreBatch(deletedAt: string): Promise<RestoreResultDto>;
+  /** Loads a TSV of teams: every row or none. With `dryRun` it is checked and
+   * nothing is written, which is the only way to learn what a live team would
+   * refuse. */
+  importTeams(tsv: string, options?: { dryRun?: boolean }): Promise<ImportResultDto>;
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
   // Unlike startRelay, which moves the team to the relay page, this dispatches
   // the opening move of the match once the board is up.
@@ -289,6 +293,9 @@ export class MockClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
   restoreBatch(_deletedAt: string): Promise<RestoreResultDto> {
+    throw Error("NOT call this");
+  }
+  importTeams(_tsv: string, _options?: { dryRun?: boolean }): Promise<ImportResultDto> {
     throw Error("NOT call this");
   }
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {

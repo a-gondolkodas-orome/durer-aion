@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { RealClientRepository } from "./client-repository";
@@ -153,5 +155,28 @@ describe("the archive of deleted teams", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(new RealClientRepository().restoreTeam(7)).rejects.toThrow("A csapat már nincs az archívumban");
+  });
+});
+
+describe("the team import", () => {
+  // The response carries the join codes the import just generated, and nothing
+  // else keeps them: no screen shows a join code, so a client that gives up
+  // first drops the only copy — of a transaction that committed regardless.
+  // The two timeouts are set in different files, so the ordering between them
+  // is pinned here rather than left to whoever edits one of them next.
+  test("waits longer than the nginx in front of it, never less", async () => {
+    const created = vi.spyOn(axios, "create")
+      .mockReturnValue({ put: () => Promise.resolve({ data: {} }) } as unknown as AxiosInstance);
+
+    await new RealClientRepository().importTeams("teamName\n");
+
+    const conf = readFileSync(fileURLToPath(new URL("../nginx/nginx.conf", import.meta.url)), "utf-8");
+    const teamLocation = conf.slice(conf.indexOf("location /team {"));
+    const proxyTimeout = /proxy_read_timeout\s+(\d+)s/.exec(teamLocation.slice(0, teamLocation.indexOf("\n    }")));
+    if (proxyTimeout === null) {
+      throw new Error("nginx.conf no longer sets proxy_read_timeout under location /team");
+    }
+
+    expect(created.mock.calls.at(-1)?.[0]?.timeout).toBeGreaterThan(Number(proxyTimeout[1]) * 1000);
   });
 });

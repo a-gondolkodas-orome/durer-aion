@@ -1,27 +1,46 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
-import { ValidationError } from 'sequelize';
-import { TeamsRepository } from './db';
-import { OTHER_IMPORT_MAX_LENGTH } from './model';
+import {
+  OTHER_IMPORT_MAX_LENGTH,
+  ParsedTeamRow,
+  TeamTsvProblem,
+  parseTeamsTsv,
+  teamsToImportTsv,
+} from 'schemas';
+import { NewTeam, TakenIdentifiers, TeamsRepository } from './db';
 
-function arraysEqual(a: string[], b: string[]) {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (a.length !== b.length) return false;
-
-  // If you don't care about the order of the elements inside
-  // the array, you should sort both arrays here.
-  // Please note that calling sort on an array will modify that array.
-  // you might want to clone your array first.
-
-  for (let i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+/** What a caller gets back, whether the file loaded or was refused.
+ *
+ * There is no per-row log. The rows that worked are the export table, and
+ * `imported` counts them; saying so again once per row was ~2 000 strings on a
+ * 500-team file, which is the largest part of a response nobody reads.
+ */
+export interface ImportResult {
+  /** Teams written. Zero whenever the file was refused — the import is
+   * all-or-nothing, so there is no third case. */
+  imported: number;
+  /** Data rows the file held, blank lines excluded. */
+  rows: number;
+  /** Errors first, then warnings, each in the order of the file. */
+  problems: TeamTsvProblem[];
+  /** Problems past the cap, which are not in `problems`. */
+  problemsTruncated: number;
+  /** Data rows holding at least one error — the rows that refused the file.
+   * Counted before the cap, so it stays the file's own number when `problems`
+   * is truncated and a caller cannot recover it from the list. */
+  badRows: number;
+  /** One row per imported team, in `TEAM_IMPORT_HEADER` order, with the
+   * generated cells filled in. This is the only copy of the join codes the
+   * import created. */
+  exportTable: string[][];
 }
 
+// A file wrong in every row would otherwise answer with thousands of problems.
+// Nobody reads past the first few before fixing the file and trying again.
+const MAX_PROBLEMS = 200;
+
 function randomDigits(numDigits: number) {
-  let result = "";
+  let result = '';
   for (let i = 0; i < numDigits; i++) { result += `${randomInt(0, 10)}`; }
   return result;
 }
@@ -29,130 +48,244 @@ function randomDigits(numDigits: number) {
 function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
-export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
-  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
-  const { successful, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
-  //wrap out logs
-  for (let i = 0; i < logs.value.length; i++) {
-    console[logs.sev[i]](logs.value[i]);
+
+// Enough tries that exhausting them is a broken generator rather than bad luck:
+// a join code is 1 in 10^10, so even a thousand teams make a single collision
+// unlikely, let alone this many in a row. Bounded because the alternative is a
+// loop that hangs the request instead of saying what is wrong.
+const MAX_DRAWS = 100;
+
+/** Thrown when the draws run out, so the caller can say which server fault it
+ * was rather than answer an unexplained 500. It is not one of the problems an
+ * `ImportResult` carries: those are what is wrong with the *file*, and an
+ * organiser can act on every one of them. This is a broken generator, which
+ * they can do nothing about and which no file of theirs caused. */
+export class CouldNotGenerate extends Error {
+  constructor(readonly what: string) {
+    super(`Could not generate an unused ${what} in ${MAX_DRAWS} tries.`);
   }
-  console.info("Summary:");
-  console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
-  export_table.unshift(expected_header);
-  writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
 
-export async function import_teams_from_tsv(teams: TeamsRepository, filename: string) {
-  const logs: {
-    sev: ('info' | 'warn' | 'error')[];
-    value: string[];
-  } = {
-    sev: [],
-    value: [],
+/** Draws until the value is one nobody holds. */
+function draw(generate: () => string, taken: Set<string>, what: string): string {
+  for (let attempt = 0; attempt < MAX_DRAWS; attempt++) {
+    const value = generate();
+    if (!taken.has(value)) return value;
+  }
+  throw new CouldNotGenerate(what);
+}
+
+/**
+ * Fills the cells the file left blank.
+ *
+ * A generated value is checked against the ones in use rather than trusted: a
+ * collision is rare, and rare is the bad case here, because it would abort the
+ * whole import once, on a competition morning. `taken` is updated as it goes,
+ * so two rows of the same file cannot be given the same code either.
+ */
+function fill(row: ParsedTeamRow, taken: TakenIdentifiers): NewTeam {
+  const teamId = row.teamId === '' ? draw(randomUUID, taken.teamIds, 'team id') : row.teamId;
+  taken.teamIds.add(teamId);
+
+  const joinCode = row.joinCode === '' ? draw(generateLoginCode, taken.joinCodes, 'join code') : row.joinCode;
+  taken.joinCodes.add(joinCode);
+
+  return {
+    teamname: row.teamname,
+    category: row.category,
+    email: row.email,
+    other: row.other,
+    teamId,
+    joinCode,
+    // Not checked against anything: `credentials` carries no unique constraint,
+    // only a format (`model.ts`).
+    credentials: row.credentials === '' ? randomUUID() : row.credentials,
   };
+}
 
-  function oninfo(msg: string) { logs.value.push(msg); logs.sev.push('info') }
-  function onwarn(msg: string) { logs.value.push(msg); logs.sev.push('warn') }
-  function onerror(msg: string) { logs.value.push(msg); logs.sev.push('error') }
+function exportRow(team: NewTeam): string[] {
+  return [team.teamname, team.category, team.email, team.other, team.teamId, team.joinCode, team.credentials];
+}
 
+function finish(
+  imported: number, rows: number, problems: TeamTsvProblem[], exportTable: string[][],
+): ImportResult {
+  // Errors first: they are why the file was refused, and a file with no `Other`
+  // column would otherwise bury them under a warning per row.
+  //
+  // By line within each, because the clashes with live teams are found only
+  // after the whole file is parsed: without the sort, a taken team name on
+  // line 2 would be listed below a bad category on line 500. The sort is
+  // stable, so two problems on one line keep the order the rules ran in, and
+  // `row: 0` — the file as a whole — comes first.
+  const byLine = (severity: TeamTsvProblem['severity']) =>
+    problems.filter(problem => problem.severity === severity).sort((a, b) => a.row - b.row);
+  const ordered = [...byLine('error'), ...byLine('warning')];
+  // Rows, not problems: one row can break several rules at once, and `row: 0`
+  // — the file as a whole — is no row at all. Counted from every problem
+  // rather than from the slice below, so the cap decides what is listed and
+  // not what is reported.
+  const badRows = new Set(
+    problems.filter(problem => problem.severity === 'error' && problem.row !== 0).map(problem => problem.row),
+  ).size;
+  return {
+    imported,
+    rows,
+    problems: ordered.slice(0, MAX_PROBLEMS),
+    problemsTruncated: Math.max(0, ordered.length - MAX_PROBLEMS),
+    badRows,
+    exportTable,
+  };
+}
 
-  oninfo("Importing teams.");
-  oninfo("  Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
-  const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
-  const rows = untrimmed_rows;
-  if (rows[rows.length - 1].trim() === "") {
-    rows.pop();
+/**
+ * Loads a TSV of teams: parse, then every row or none.
+ *
+ * Takes the file's *content* rather than its name, so the HTTP route can hand
+ * over a request body and no copy of it — join codes included — reaches disk.
+ *
+ * With `dryRun` it stops after the checks and writes nothing, which is how the
+ * admin page can report the clashes with live teams that a check in the browser
+ * cannot see.
+ */
+export async function importTeamsFromTsv(
+  teams: TeamsRepository, content: string, options: { dryRun?: boolean } = {},
+): Promise<ImportResult> {
+  const parsed = parseTeamsTsv(content);
+  const problems = [...parsed.problems];
+
+  // A file can be well-formed and still name a team that exists. The unique
+  // constraints would catch it, but only as a constraint name and only after
+  // the rows before it were written.
+  const taken = await teams.takenIdentifiers();
+  for (const row of parsed.rows) {
+    if (row.teamname !== '' && taken.teamNames.has(row.teamname)) {
+      problems.push({ row: row.row, column: 'Teamname', severity: 'error', code: 'teamname-taken', found: row.teamname });
+    }
+    if (row.teamId !== '' && taken.teamIds.has(row.teamId)) {
+      problems.push({ row: row.row, column: 'ID', severity: 'error', code: 'team-id-taken', found: row.teamId });
+    }
+    if (row.joinCode !== '' && taken.joinCodes.has(row.joinCode)) {
+      problems.push({ row: row.row, column: 'Login Code', severity: 'error', code: 'join-code-taken', found: row.joinCode });
+    }
   }
-  const table = rows.map(row => row.split('\t'));
-  const header = table.shift() ?? [];
-  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
-  if (!arraysEqual(header, expected_header)) {
-    onwarn("WARNING: Header not exactly how we defined it. This is not always a problem.");
-    onwarn(`Found: ${header.join(', ')}`);
-    onwarn(`Expected: ${expected_header.join(', ')}`);
-  }
-  const export_table: string[][] = [];
 
-  let successful = 0;
-  let failed = 0; // not counting empty rows...
+  const hasError = problems.some(problem => problem.severity === 'error');
+  if (hasError || options.dryRun) {
+    return finish(0, parsed.dataLines, problems, []);
+  }
+
+  const filled = parsed.rows.map(row => ({ row: row.row, team: fill(row, taken) }));
+  const refused = await teams.insertTeams(filled);
+  if (refused) {
+    // The checks above missed it — a team added between the read and the write,
+    // or a rule only the database has. Nothing was written.
+    problems.push({
+      row: refused.failedRow,
+      severity: 'error',
+      code: 'database-refused',
+      // `errors` is what sequelize's own validators fill in. A constraint the
+      // database itself refused can arrive with it empty — `UniqueConstraintError`
+      // defaults it to `[]` — and a refusal quoting nothing leaves the admin with
+      // a row number and no reason.
+      found: refused.error.errors.map(item => item.message).join(' ') || refused.error.message,
+    });
+    return finish(0, parsed.dataLines, problems, []);
+  }
+
+  return finish(filled.length, parsed.dataLines, problems, filled.map(({ team }) => exportRow(team)));
+}
+
+/** The problems in English, for the command line. The admin page words the same
+ * codes in Hungarian; neither wording belongs in the shared parser. */
+function describe(problem: TeamTsvProblem): string {
+  const where = problem.row === 0 ? 'file' : `line ${problem.row}`;
+  const column = problem.column === undefined ? '' : `, column "${problem.column}"`;
+  const found = problem.found === undefined ? '' : `: ${problem.found}`;
+  const said: Record<TeamTsvProblem['code'], string> = {
+    'header-mismatch': 'header is not the one we define; the first line is read as one all the same, and not imported',
+    'missing-header': 'the first line is a team, not a header, so the file has none — add the header row',
+    'no-rows': 'no team rows',
+    'wrong-column-count': 'more columns than the format has, so the row is not what it looks like',
+    'empty-teamname': 'no team name',
+    'teamname-too-long': 'team name is too long',
+    'invalid-category': 'category is not C, D or E',
+    'email-too-long': 'email is too long',
+    'other-missing': '"Other" is empty; it is what identifies a team later — names, school, addresses',
+    'other-truncated':
+      `"Other" is longer than the import keeps and was cut to ${OTHER_IMPORT_MAX_LENGTH} characters`,
+    'other-too-long': '"Other" is longer than the column holds',
+    'invalid-team-id': 'ID is not a UUIDv4',
+    'invalid-join-code': 'login code is not in the 111-2222-333 shape',
+    'invalid-credentials': 'credentials are not a UUID',
+    'duplicate-teamname': 'team name is used twice in this file',
+    'duplicate-team-id': 'ID is used twice in this file',
+    'duplicate-join-code': 'login code is used twice in this file',
+    'teamname-taken': 'a team of this name already exists',
+    'team-id-taken': 'a team with this ID already exists',
+    'join-code-taken': 'a team with this login code already exists',
+    'database-refused': 'the database refused this row',
+  };
+  const first = problem.otherRow === undefined ? '' : ` (first used on line ${problem.otherRow})`;
+  return `${where}${column}: ${said[problem.code]}${found}${first}`;
+}
+
+/**
+ * The import as the command line runs it: read the file, load it, then write
+ * `<file>.export` beside it — the copy of the generated join codes an organiser
+ * mails out.
+ *
+ * `connect()` — a `sequelize.sync()` — is here rather than in the import
+ * itself because this is the one caller that may be talking to a database no
+ * server has opened yet (#190). On the HTTP path the server has already synced,
+ * and doing it per request would put a schema change on an admin's click.
+ *
+ * Answers whether it imported, which `import_teams.js` turns into its exit
+ * code: a refused file finishes this function normally, and a shell that reads
+ * only the status would take it for a load that worked.
+ */
+export async function import_teams_from_tsv_locally(
+  teams: TeamsRepository, filename: string,
+): Promise<boolean> {
   await teams.connect();
-  for (const row of table) {
-    // Trim: Remove possible '\r' characters in windows CRLF
-    const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
-    let ok = true;
-    let teamId = extra_columns[0];
-    let login_code = extra_columns[1];
-    let credentials = extra_columns[2];
+  const result = await importTeamsFromTsv(teams, readFileSync(filename, 'utf-8'));
 
-    if (category === undefined) {
-      onwarn('Skipping empty row...');
-      // Do not print more error messages lol
-      continue;
-    }
-
-    if (teamname === undefined || teamname === "") {
-      onerror(`Empty teamname`);
-      ok = false;
-    }
-
-    // TODO: remove hard-coded values
-    if (!['C', 'D', 'E'].includes(category)) {
-      onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
-      ok = false;
-    }
-
-    if (other === undefined || other === "") {
-      onwarn(`"Other" field not set for team ${teamname}`);
-      onwarn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
-    }
-    // Stricter than the column, on purpose: the admin routes append an audit
-    // trail to this field, and `model.ts` says what the gap is for.
-    if (other !== undefined && other.length > OTHER_IMPORT_MAX_LENGTH) {
-      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < ${OTHER_IMPORT_MAX_LENGTH})`);
-      ok = false;
-    }
-
-    if (teamId === undefined || teamId === "") {
-      oninfo('Generating teamId')
-      teamId = randomUUID();
-    }
-
-    if (login_code === undefined || login_code === "") {
-      oninfo('Generating login code')
-      login_code = generateLoginCode();
-    }
-
-    if (credentials === undefined || credentials === "") {
-      oninfo('Generating credentials')
-      credentials = randomUUID();
-    }
-
-    if (ok) {
-      oninfo(`Adding ${teamname} to DB.`);
-      try {
-        await teams.insertTeam({ teamname, category, email, other, teamId, joinCode: login_code, credentials });
-      } catch (err) {
-        if (err instanceof ValidationError) {
-          onerror(`Failed to validate team when adding to DB: ${err.errors.map(e => e.message).join(', ')}`);
-          ok = false;
-        } else {
-          console.log('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
-          throw err;
-        }
-      }
-    }
-
-    if (ok) {
-      oninfo(`Successfully imported team ${teamname}.`);
-      const row_to_export = [teamname, category, email, other, teamId, login_code, credentials];
-      export_table.push(row_to_export);
-      successful++;
-    } else {
-      onerror(`Failed to import team ${teamname}. See reasons above.`);
-      onerror('-----------------------------------------------------'); // separate errors
-      failed++;
-    }
+  for (const problem of result.problems) {
+    console[problem.severity === 'error' ? 'error' : 'warn'](describe(problem));
+  }
+  if (result.problemsTruncated > 0) {
+    console.error(`... and ${result.problemsTruncated} more.`);
   }
 
-  return { successful, failed, export_table, logs };
+  const exportFile = `${filename}.export`;
+  console.info('Summary:');
+  if (result.imported === 0) {
+    console.error(`Imported nothing. The file has ${result.rows} rows; fix the errors above and run it again.`);
+    // Nothing was written, so an export from an earlier run is still lying
+    // there with that run's join codes — the file DEPLOYMENT.md has organisers
+    // fetch back off the host and mail out. Said rather than deleted: it is
+    // the only copy of those codes, and the earlier import that made them is
+    // still good.
+    if (existsSync(exportFile)) {
+      console.error(`${exportFile} is from an earlier run and was not rewritten; do not mail it out as this file's.`);
+    }
+    return false;
+  }
+  console.info(`Successfully imported ${result.imported} teams.`);
+  const exportTsv = teamsToImportTsv(result.exportTable);
+  try {
+    writeFileSync(exportFile, exportTsv, { encoding: 'utf-8' });
+    console.info(`Their login codes are in ${exportFile}`);
+  } catch (e: unknown) {
+    // The teams are committed, and `teamName` is unique, so the file cannot be
+    // run again to make the codes a second time. Throwing out of here would
+    // exit 1 — which now says "imported nothing", sending the operator to do
+    // exactly that — so the failure is reported and the codes printed instead,
+    // as the only copy left of them.
+    console.error(`Could not write ${exportFile}: ${e instanceof Error ? e.message : String(e)}`);
+    console.error('The teams ARE imported; running this file again will not work. '
+      + 'Their login codes follow — save them before this output scrolls away.');
+    console.info(exportTsv);
+  }
+  return true;
 }

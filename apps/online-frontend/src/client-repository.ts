@@ -3,17 +3,28 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, ImportResultDto, RestoreResultDto, BoardMoves } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
 // (vite.config.ts) the way nginx does in the docker stack.
-function apiAxiosInstance(): AxiosInstance {
+function apiAxiosInstance(timeoutMs = 10000): AxiosInstance {
   return axios.create({
     baseURL: '/',
-    timeout: 10000,
+    timeout: timeoutMs,
   });
 }
+
+// A team import is one request that loads the whole file in one transaction,
+// so it is one wait rather than many — but a wait long enough that the default
+// would cut it. Set above nginx's `proxy_read_timeout`
+// (apps/online-frontend/nginx/nginx.conf) rather than under it, so the browser
+// is never the first to give up: timing out here does not stop the server, and
+// the response it drops carries the join codes the import just generated, which
+// nothing else keeps — no screen shows a join code, so they would have to be
+// dug out of the database by hand. Past the proxy's own ceiling they are lost
+// either way; this only makes sure the whole of that ceiling is usable.
+const IMPORT_TIMEOUT_MS = 180000;
 
 function makeAxiosError(any_error: unknown): AxiosError {
   if (!axios.isAxiosError(any_error)) {
@@ -278,6 +289,37 @@ export class RealClientRepository implements ClientRepository {
       // The server says which column a live team holds, in the body.
       if (err.response?.status === 409) {
         throw new Error(`Ütközik egy élő csapattal: ${String(err.response.data)}`, { cause: e });
+      }
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+  }
+
+  /** The TSV is the body: it is what the route takes, and it is the only shape
+   * a paste into the admin page can have. */
+  async importTeams(tsv: string, options?: { dryRun?: boolean }): Promise<ImportResultDto> {
+    const url = urlcat('/team/admin/import', options?.dryRun === true ? { dryRun: 1 } : {});
+    try {
+      const result = await apiAxiosInstance(IMPORT_TIMEOUT_MS).put(url, tsv, {
+        headers: { 'Content-Type': 'text/tab-separated-values' },
+      });
+      return result.data as ImportResultDto;
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      if (err.response?.status === 413) {
+        throw new Error('A fájl túl nagy.', { cause: e });
+      }
+      if (err.code === 'ECONNABORTED') {
+        // The request may still be running: the server was not told to stop.
+        throw new Error('Az importálás túl sokáig tartott. Frissíts, és nézd meg, bekerültek-e a csapatok.', { cause: e });
+      }
+      // The one server fault the route names: it could not generate a free id
+      // or join code. Worded here rather than shown from the body, the way the
+      // 413 above is — the wire is English, for the logs and the CLI, and the
+      // organiser reading this page is owed Hungarian.
+      if (err.response?.status === 503) {
+        throw new Error('A szerver nem tudott szabad azonosítót vagy belépőkódot generálni, ezért semmit sem importált. '
+          + 'Ez a szerver hibája, nem a fájlé.', { cause: e });
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
