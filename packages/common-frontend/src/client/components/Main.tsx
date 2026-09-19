@@ -51,26 +51,33 @@ export function Main(props: { language: string, gitCommitHash: string }) {
         }}
         data-testid="mainRoot"
       >
-        {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-        {!teamState && <Login />}
-        {teamState && teamState.pageState === "DISCLAIMER" && (
-          <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
-        )}
-        {teamState && teamState.pageState === "HOME" && frontendState === null && (
-          <Chooser state={teamState} setState={setFrontEndState}/>
-        )}
-        {teamState && (
-          teamState.pageState === "RELAY" ||
-          (teamState.pageState === "HOME" && frontendState === "R")
-        ) && (
-          <Relay state={teamState} />
-        )}
-        {teamState && (
-          teamState.pageState === "STRATEGY" ||
-          (teamState.pageState === "HOME" && frontendState === "S")
-        ) && (
-          <Strategy state={teamState} />
-        )}
+        {/* The admin page is the page, not a panel above the team's own. These
+            used to be independent conditions, so `/admin` also rendered
+            whatever the browser's own session was entitled to: the join-code
+            login form for an organiser with no team cookie, and a live,
+            playable board for one still holding a team's session from
+            testing. */}
+        {admin ? <Admin teamId={window.location.pathname.split('/').at(2)}/> : <>
+          {!teamState && <Login />}
+          {teamState && teamState.pageState === "DISCLAIMER" && (
+            <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
+          )}
+          {teamState && teamState.pageState === "HOME" && frontendState === null && (
+            <Chooser state={teamState} setState={setFrontEndState}/>
+          )}
+          {teamState && (
+            teamState.pageState === "RELAY" ||
+            (teamState.pageState === "HOME" && frontendState === "R")
+          ) && (
+            <Relay state={teamState} />
+          )}
+          {teamState && (
+            teamState.pageState === "STRATEGY" ||
+            (teamState.pageState === "HOME" && frontendState === "S")
+          ) && (
+            <Strategy state={teamState} />
+          )}
+        </>}
       </Container>
       <footer style={{
         textAlign: "center",
