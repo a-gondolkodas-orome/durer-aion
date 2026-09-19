@@ -405,6 +405,30 @@ test('the import tab reports a refused file as a failure, not a success', async 
   expect(screen.getByText('Az adatbázis visszautasította ezt a sort.')).toBeInTheDocument();
 });
 
+// The answer is about the text that was sent. An edit while it is out would have
+// it land on text it never saw: the old answer's problems replace the new text's
+// own, and *Importálás indítása* goes live for a file the browser had just
+// refused. Read-only rather than disabled, so the organiser keeps their
+// selection and scroll position across a sub-second round trip.
+test('the import tab takes no edit while a check is out', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  let answer: (result: ImportResultDto) => void = () => undefined;
+  vi.spyOn(repo, 'importTeams')
+    .mockReturnValue(new Promise<ImportResultDto>(resolve => { answer = resolve; }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Ellenőrzés'));
+
+  await waitFor(() => { expect(screen.getByTestId('importTeamsTsv')).toHaveAttribute('readonly'); });
+
+  answer(importResult({ rows: 1 }));
+
+  // And hands it back the moment the answer is in.
+  await waitFor(() => { expect(screen.getByTestId('importTeamsTsv')).not.toHaveAttribute('readonly'); });
+});
+
 // The server lists at most 200 problems. Counting the rows in that list would
 // tell the organiser 200 of their 500 rows are bad, directly above the line
 // saying the list is not all of them.

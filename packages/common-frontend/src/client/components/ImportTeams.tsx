@@ -233,10 +233,17 @@ export function ImportTeams(props: { onImported: () => void }) {
         )}
       </Stack>
 
+      {/* Held while a request is out, because `check` applies whatever comes
+          back: an edit now would have an answer about the old text land on the
+          new, re-enabling the import for a file the browser had just refused.
+          The file button is the other way in, and is already disabled.
+          Read-only rather than disabled, so a sub-second round trip does not
+          cost the organiser their selection and scroll position. */}
       <textarea
         aria-label="A beillesztett TSV"
         data-testid="importTeamsTsv"
         value={tsv}
+        readOnly={busy !== null}
         onChange={(event) => { edited(event.target.value); }}
         placeholder={'Ide is be lehet illeszteni a sorokat.'}
         rows={10}
