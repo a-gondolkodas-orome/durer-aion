@@ -34,15 +34,29 @@ export const TEAM_CATEGORIES = ['C', 'D', 'E'] as const;
 export const TEAMNAME_MAX_LENGTH = 255;
 export const EMAIL_MAX_LENGTH = 255;
 
-/** What the import accepts in `Other`, which is deliberately less than the
- * column holds (`OTHER_MAX_LENGTH` in the backend's `model.ts`, 1024).
+/** What the import *keeps* in `Other`, which is deliberately less than the
+ * column holds (`OTHER_MAX_LENGTH` below).
  *
  * The difference is not headroom, it is the room the audit trail grows into:
  * the admin routes append `prevstratid:` and `te[…]:` notes to this same field,
  * and sequelize validates a changed attribute on every save. #497 is the bug
  * that made the point — with both limits at 700, a team imported with notes
- * that long had its first reset refused, for good. */
+ * that long had its first reset refused, for good.
+ *
+ * Kept rather than demanded: a longer value is cut to this length and warned
+ * about, not refused. `parseTeamsTsv` does the cutting, so the CLI, the API and
+ * the page all write the same thing. See `other-truncated`. */
 export const OTHER_IMPORT_MAX_LENGTH = 700;
+
+/** How wide the `other` column is. The backend's `model.ts` re-exports it and
+ * builds the column and its validator from it, so the two cannot disagree.
+ *
+ * The import's own ceiling: up to here a value is something this app wrote —
+ * an archive export carries the audit trail back — and trimming it to
+ * `OTHER_IMPORT_MAX_LENGTH` costs the trail, which is a convenience. Past here
+ * it is a value no screen here could have produced, so it is refused rather
+ * than quietly cut down to two thirds of what was typed. */
+export const OTHER_MAX_LENGTH = 1024;
 
 export const JOIN_CODE_PATTERN = /^[0-9]{3}-[0-9]{4}-[0-9]{3}$/;
 
@@ -64,6 +78,7 @@ export type TeamTsvProblemCode =
   | 'invalid-category'
   | 'email-too-long'
   | 'other-missing'
+  | 'other-truncated'
   | 'other-too-long'
   | 'invalid-team-id'
   | 'invalid-join-code'
@@ -92,7 +107,10 @@ export interface TeamTsvProblem {
   otherRow?: number;
 }
 
-/** One data row, blanks still blank — filling them in is the server's job. */
+/** One data row, blanks still blank — filling them in is the server's job.
+ *
+ * Every cell is the file's own but `other`, which is cut to
+ * `OTHER_IMPORT_MAX_LENGTH` when it is longer (`other-truncated`). */
 export interface ParsedTeamRow {
   row: number;
   teamname: string;
@@ -221,6 +239,9 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
     const at = (column: number) => cells[column] ?? '';
     const [teamname, category, email, other, teamId, joinCode, credentials] =
       [at(0), at(1), at(2), at(3), at(4), at(5), at(6)];
+    // The one cell this parser may hand back changed rather than as it came:
+    // see `other-truncated` below.
+    let keptOther = other;
 
     if (teamname === '') {
       error({ row, column: 'Teamname', code: 'empty-teamname' });
@@ -247,8 +268,18 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
       // Not fatal, but the field is how an organiser finds a team again from a
       // phone call: contestant names, school, email addresses.
       warn({ row, column: 'Other', code: 'other-missing' });
-    } else if (other.length > OTHER_IMPORT_MAX_LENGTH) {
+    } else if (other.length > OTHER_MAX_LENGTH) {
       error({ row, column: 'Other', code: 'other-too-long', found: `${other.length}` });
+    } else if (other.length > OTHER_IMPORT_MAX_LENGTH) {
+      // Cut rather than refused, because the file that has one of these is an
+      // archive export: `other` carries the audit trail the admin routes append,
+      // so a team reset often enough comes back longer than the import keeps.
+      // Refusing it would take the whole file with it — the import is all or
+      // nothing — and the round trip is the only way to restore a batch onto
+      // another instance. The tail goes first, which is the trail; the notes an
+      // organiser typed are at the front.
+      warn({ row, column: 'Other', code: 'other-truncated', found: `${other.length}` });
+      keptOther = other.slice(0, OTHER_IMPORT_MAX_LENGTH);
     }
 
     // A supplied identifier is checked for shape here rather than left to the
@@ -285,7 +316,7 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
       error({ row, column: 'Credentials', code: 'invalid-credentials', found: credentials });
     }
 
-    rows.push({ row, teamname, category, email, other, teamId, joinCode, credentials });
+    rows.push({ row, teamname, category, email, other: keptOther, teamId, joinCode, credentials });
   }
 
   // The lines the file has, not the ones that parsed: a file whose every row was

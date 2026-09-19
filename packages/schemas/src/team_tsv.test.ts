@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   OTHER_IMPORT_MAX_LENGTH,
+  OTHER_MAX_LENGTH,
   TEAMNAME_MAX_LENGTH,
   TEAM_IMPORT_HEADER,
   parseTeamsTsv,
@@ -225,9 +226,34 @@ describe('parseTeamsTsv', () => {
       expect(codes(file(row({ category: '' })))).toEqual(['invalid-category']);
     });
 
-    it('takes an "Other" field of 700 characters and refuses 701', () => {
+    it('takes an "Other" field of 700 characters as it is', () => {
       expect(codes(file(row({ other: 'a'.repeat(OTHER_IMPORT_MAX_LENGTH) })))).toEqual([]);
-      expect(codes(file(row({ other: 'a'.repeat(OTHER_IMPORT_MAX_LENGTH + 1) })))).toEqual(['other-too-long']);
+    });
+
+    // An archive export carries the audit trail the admin routes append, so a
+    // team reset often enough comes back longer than the import keeps. Refusing
+    // it would take the whole file with it, and the round trip is the only way
+    // to restore a batch onto another instance.
+    it('cuts an "Other" field the column still holds, and says so', () => {
+      const other = `${'a'.repeat(OTHER_IMPORT_MAX_LENGTH)}b prevstratid:0EKBiMgbJ5A`;
+      const result = parseTeamsTsv(file(row({ other })));
+
+      expect(result.problems.map(problem => problem.code)).toEqual(['other-truncated']);
+      // A warning, so the file still loads.
+      expect(result.ok).toBe(true);
+      // The tail goes, which is the trail; what the organiser typed is at the
+      // front and survives.
+      expect(result.rows[0].other).toBe('a'.repeat(OTHER_IMPORT_MAX_LENGTH));
+      // The length the file had, so the warning can say what was cut.
+      expect(result.problems[0].found).toBe(`${other.length}`);
+    });
+
+    it('cuts at the column width and refuses past it', () => {
+      expect(codes(file(row({ other: 'a'.repeat(OTHER_MAX_LENGTH) })))).toEqual(['other-truncated']);
+      // Longer than anything this app writes, so it is a value nobody here
+      // produced: cutting it to two thirds would be guessing at what was meant.
+      expect(codes(file(row({ other: 'a'.repeat(OTHER_MAX_LENGTH + 1) })))).toEqual(['other-too-long']);
+      expect(parseTeamsTsv(file(row({ other: 'a'.repeat(OTHER_MAX_LENGTH + 1) }))).ok).toBe(false);
     });
 
     it('warns, without failing, when "Other" is empty', () => {

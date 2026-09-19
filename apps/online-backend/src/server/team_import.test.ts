@@ -2,7 +2,7 @@ import { randomInt } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { ValidationError } from 'sequelize';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { TEAM_IMPORT_HEADER } from 'schemas';
+import { OTHER_IMPORT_MAX_LENGTH, TEAM_IMPORT_HEADER } from 'schemas';
 import { NewTeam, TeamsRepository } from './db';
 import { import_teams_from_tsv_locally, importTeamsFromTsv } from './team_import';
 
@@ -117,6 +117,30 @@ describe('importTeamsFromTsv', () => {
 
     expect(result.imported).toBe(1);
     expect(codes(result.problems)).toEqual(['header-mismatch']);
+  });
+
+  // The archive round trip README.md § *Checking it works* asks for: a batch
+  // downloaded as import-TSV and fed back. `other` carries the audit trail the
+  // admin routes append, so a team reset often enough comes back longer than
+  // the import keeps — and all-or-nothing means refusing that one row would
+  // refuse the batch.
+  it('imports a batch whose notes outgrew what the import keeps', async () => {
+    const teams = stubTeams();
+    const grown = `${'a'.repeat(OTHER_IMPORT_MAX_LENGTH - 10)} prevstratid:0EKBiMgbJ5A`;
+    const content = file(
+      ['Alpha', 'C', 'a@b.com', grown, '', '', ''].join('\t'),
+      row('Bravo'),
+    );
+
+    const result = await importTeamsFromTsv(teams, content);
+
+    expect(result.imported).toBe(2);
+    expect(codes(result.problems)).toEqual(['other-truncated']);
+    expect(inserted(teams)[0].team.other).toBe(grown.slice(0, OTHER_IMPORT_MAX_LENGTH));
+    // The row it is about, not the file: the organiser has to find it again.
+    expect(result.problems[0].row).toBe(2);
+    // A warning, so it is not one of the rows that would refuse the file.
+    expect(result.badRows).toBe(0);
   });
 
   it('reports errors before warnings', async () => {

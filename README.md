@@ -270,18 +270,21 @@ are nginx's, and Vite's proxy shows you neither.
 - that same downloaded file fed straight back: every row refused as a
   duplicate, and no team doubled.
 - the archive round trip: delete all, download the batch as import-TSV, import
-  it back.
+  it back. A team whose `Other` outgrew what the import keeps — the audit trail
+  the admin routes append to that field — comes back cut to length with a
+  warning naming its row, rather than refusing the batch.
 
 Two fixtures feed it by hand, which is why no code names either.
 `scripts/test.tsv` is the happy path — the file `teams:import` loads.
 `scripts/unit_test.tsv` is the one shaped for the rejections, its team names
 saying what each row is for: the cells to blank so the importer generates them,
 the empty row to leave in, a category, an ID and a login code of the wrong
-shape, a team name, an ID and a login code each used by two rows, and a row with
-no `Other`, which is the one warning that does not refuse the file. Load it and
-every one of them should be reported at once, against the line it is on, with
-**no team written** — the import is all or nothing, so a file with one bad row
-leaves the database as it was and can be fixed and loaded again.
+shape, a team name, an ID and a login code each used by two rows, and the two
+warnings that do not refuse a file — a row with no `Other`, and one whose
+`Other` is longer than the import keeps, which is cut rather than refused. Load
+it and every one of them should be reported at once, against the line it is on,
+with **no team written** — the import is all or nothing, so a file with one bad
+row leaves the database as it was and can be fixed and loaded again.
 
 `scripts/admin.py` is the post-competition scoring pull, holding no credential
 of its own:

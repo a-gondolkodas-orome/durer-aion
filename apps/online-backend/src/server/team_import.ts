@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import {
+  OTHER_IMPORT_MAX_LENGTH,
   ParsedTeamRow,
   TeamTsvProblem,
   parseTeamsTsv,
@@ -211,7 +212,9 @@ function describe(problem: TeamTsvProblem): string {
     'invalid-category': 'category is not C, D or E',
     'email-too-long': 'email is too long',
     'other-missing': '"Other" is empty; it is what identifies a team later — names, school, addresses',
-    'other-too-long': '"Other" is too long',
+    'other-truncated':
+      `"Other" is longer than the import keeps and was cut to ${OTHER_IMPORT_MAX_LENGTH} characters`,
+    'other-too-long': '"Other" is longer than the column holds',
     'invalid-team-id': 'ID is not a UUIDv4',
     'invalid-join-code': 'login code is not in the 111-2222-333 shape',
     'invalid-credentials': 'credentials are not a UUID',

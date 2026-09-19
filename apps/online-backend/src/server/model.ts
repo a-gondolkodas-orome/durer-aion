@@ -5,7 +5,7 @@ import {
   Model,
   ModelAttributes,
 } from "sequelize";
-import { EMAIL_MAX_LENGTH, MatchStatus, TEAMNAME_MAX_LENGTH } from "schemas";
+import { EMAIL_MAX_LENGTH, MatchStatus, OTHER_MAX_LENGTH, TEAMNAME_MAX_LENGTH } from "schemas";
 
 // Sequelize adds the timestamp columns itself, and only for names the attribute
 // list leaves free. Omitting them from the attribute types therefore keeps them
@@ -39,27 +39,16 @@ export class TeamModel extends Model<
   declare readonly updatedAt: Date;
 }
 
-/** How much the `other` column holds, and all its validator asks of it.
+/** The `other` column's two limits: how much it holds, and the lower length the
+ * import keeps so the audit trail this file appends below has room to grow.
  *
- * The two were 1024 and 700, and the gap was not headroom but a wall: `other`
- * carries the organisers' notes *and* an audit trail the admin routes append to
- * (`server/router.ts`), and sequelize validates a changed attribute on every
- * save. A team imported with notes near 700 characters therefore had its first
- * reset refused — and, since the route's other assignments were in memory only,
- * refused for good, with a message naming a field the organiser had not touched.
- *
- * The import keeps the lower limit of its own below, which is what leaves room
- * for the trail; the column's width is what the column is allowed to hold.
+ * Both are defined with the rest of the import format's rules in `schemas`,
+ * which says what each is for — the admin page enforces them before it uploads,
+ * and a limit the page and the column disagreed on would refuse a file only
+ * after it reached the server. Re-exported here so they still read side by side
+ * with the validator that applies them.
  */
-export const OTHER_MAX_LENGTH = 1024;
-
-/** What the team import accepts, which is deliberately less than the column
- * holds: the difference is the room the audit trail grows into.
- *
- * Defined with the rest of the import format's rules in `schemas`, since the
- * admin page enforces the same limit before it uploads, and re-exported here
- * so the column's two limits still read side by side. */
-export { OTHER_IMPORT_MAX_LENGTH } from "schemas";
+export { OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH } from "schemas";
 
 /** A team's notes with one audit note appended, or unchanged when it will not
  * fit.
