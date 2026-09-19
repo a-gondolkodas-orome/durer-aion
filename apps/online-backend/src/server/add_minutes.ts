@@ -29,7 +29,17 @@ export interface MatchClock {
   db: StorageAPI.Async | StorageAPI.Sync;
   teams: TeamsRepository;
   games: AnyBgioGame[];
-  /** `ctx.durer_transport.getMatchQueue` — the queue the bot's moves run on. */
+  /** `ctx.durer_transport.getMatchQueue` — the queue the bot's moves run on.
+   *
+   * boardgame.io hands out a queue per match and drops it when the match's last
+   * client disconnects, so the queue is an object with a lifetime rather than a
+   * name: a disconnect and a reconnect inside one extension's window leave the
+   * extension on the old queue and the returning player's move on a new one,
+   * with nothing between them. Nothing here can close that without owning the
+   * map, and a disconnected player is not moving; what it costs is the window,
+   * not the mechanism. Asking for a queue also creates one when the match has
+   * no client at all — an empty PQueue that only a later disconnect removes,
+   * which is a few hundred bytes per running match. */
   queueFor: (matchID: string) => MatchQueue;
   /** `ctx.durer_transport.pubSub` — where the team's open board is told. */
   pubSub: Parameters<typeof TransportAPI>[3];
@@ -59,7 +69,9 @@ const noteFor = (matchID: string, minutes: number, grant: string | undefined) =>
  *
  * `grant` makes a repeat safe. The note it leaves in `other` is the record, so
  * the same grant asked for twice — a request the server finished and the browser
- * gave up on — reports `already-granted` and writes nothing.
+ * gave up on — reports `already-granted` and writes nothing. The note is written
+ * after the clock has actually moved, so the record is of an extension that
+ * happened rather than one that was attempted.
  */
 export async function addMinutesToMatch(
   clock: MatchClock,
@@ -120,6 +132,22 @@ async function extend(
     G: { ...state.G, end: endAt.toISOString(), millisecondsRemaining: endAt.getTime() - Date.now() },
   };
 
+  // The clock first, then the row describing it. Nothing spans the two stores,
+  // so a failure between them leaves them apart, and the order decides what
+  // that costs. `G.end` is what the team's own clock counts down to
+  // (`gamewrapper.ts`); the row is what the organisers read, and the note is
+  // the grant's record. Writing the state first leaves a failure showing as a
+  // row behind the clock, and leaves no grant recorded for minutes nobody got
+  // — the other order wrote the grant for a state write that then failed, and
+  // `already-granted` refused the very repeat that would have healed it.
+  //
+  // What is left is a row write failing after the clock moved: the walk reports
+  // that team and a repeat moves it again. That window is the narrower of the
+  // two — this is an update on a row already in hand, where `setState` fetches
+  // and writes a whole match — and a second extension the organiser was told
+  // about beats a first one silently refused.
+  await db.setState(matchID, newState);
+
   // One write rather than two: the match's new end and the note that records it
   // are the same fact, and `other`'s validator runs on every save either way.
   // The note is dropped rather than the extension when the field is full —
@@ -129,7 +157,6 @@ async function extend(
     [side]: { state: "IN PROGRESS", matchID, startAt: new Date(newState.G.start), endAt },
     other: appendOtherNote(team.other, noteFor(matchID, minutes, grant)),
   });
-  await db.setState(matchID, newState);
 
   // The team's board is told the way the socket transport tells it, which is
   // what makes the new clock show without a reload. `socketio_botmoves.ts` has

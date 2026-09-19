@@ -114,6 +114,38 @@ describe("addMinutesToMatch", () => {
     expect(queueFor).toHaveBeenCalledWith(MATCH);
   });
 
+  // The clock is what the team counts down to; the row and the note describe
+  // it. Writing them the other way round recorded a grant for a state write
+  // that then failed, and `already-granted` refused the repeat that would have
+  // put it right.
+  it("moves the clock before the row that describes it", async () => {
+    const alpha = team();
+    const db = storage();
+    const order: string[] = [];
+    vi.mocked(db.setState).mockImplementation(() => { order.push("state"); return Promise.resolve(); });
+    vi.mocked(alpha.update).mockImplementation(() => { order.push("row"); return Promise.resolve(alpha); });
+
+    await addMinutesToMatch(clockOf([alpha], db), { matchID: MATCH, minutes: 10 });
+
+    expect(order).toStrictEqual(["state", "row"]);
+  });
+
+  it("leaves the row and the grant alone when the clock could not be moved", async () => {
+    const alpha = team();
+    const db = storage();
+    vi.mocked(db.setState).mockRejectedValue(new Error("the database went away"));
+
+    await expect(addMinutesToMatch(clockOf([alpha], db), { matchID: MATCH, minutes: 10, grant: "a1b2c3d4" }))
+      .rejects.toThrow("the database went away");
+
+    expect(alpha.update).not.toHaveBeenCalled();
+    // Nothing was recorded, so the same grant asked for again applies rather
+    // than reporting an extension the team never got.
+    vi.mocked(db.setState).mockResolvedValue(undefined);
+    const again = await addMinutesToMatch(clockOf([alpha], db), { matchID: MATCH, minutes: 10, grant: "a1b2c3d4" });
+    expect(again).toMatchObject({ status: "extended" });
+  });
+
   it("extends a running strategy match the same way", async () => {
     const alpha = team({
       relayMatch: { state: "NOT STARTED" },
