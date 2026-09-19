@@ -103,3 +103,47 @@ describe("the socket transport", () => {
     }
   );
 });
+
+/** The queue is what keeps a player's move and a reconnect from asking the bot
+ *  twice at the same stateID. boardgame.io drops it the moment a match's last
+ *  client disconnects, which is what a reload is, so the transport holds it
+ *  until it falls idle instead. */
+describe("the match queue", () => {
+  const transport = () => new SocketIOButBotMoves({}, {});
+
+  it("survives the last client leaving while it still has work", async () => {
+    const socketio = transport();
+    const queue = socketio.getMatchQueue(KNOWN_MATCH);
+    let release = (): void => undefined;
+    const working = queue.add(() => new Promise<void>(resolve => { release = resolve; }));
+
+    socketio.deleteMatchQueue(KNOWN_MATCH);
+
+    expect(socketio.getMatchQueue(KNOWN_MATCH)).toBe(queue);
+    release();
+    await working;
+  });
+
+  it("is dropped once the work it was kept for is done", async () => {
+    const socketio = transport();
+    const queue = socketio.getMatchQueue(KNOWN_MATCH);
+    let release = (): void => undefined;
+    const working = queue.add(() => new Promise<void>(resolve => { release = resolve; }));
+
+    socketio.deleteMatchQueue(KNOWN_MATCH);
+    release();
+    await working;
+    await queue.onIdle();
+
+    expect(socketio.getMatchQueue(KNOWN_MATCH)).not.toBe(queue);
+  });
+
+  it("is dropped at once when it is already idle", () => {
+    const socketio = transport();
+    const queue = socketio.getMatchQueue(KNOWN_MATCH);
+
+    socketio.deleteMatchQueue(KNOWN_MATCH);
+
+    expect(socketio.getMatchQueue(KNOWN_MATCH)).not.toBe(queue);
+  });
+});

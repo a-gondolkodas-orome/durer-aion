@@ -273,6 +273,35 @@ export class SocketIOButBotMoves extends SocketIO {
     }
   }
 
+  /** boardgame.io drops a match's queue as soon as its last client
+   *  disconnects (`removeClient`) — and a reload is exactly that. The bot's
+   *  turn outlives it: it is taken from a player's move and again from the
+   *  reconnect, and the queue is the only thing keeping the two from asking
+   *  the bot twice at the same stateID (see takeBotTurn). `Master.onUpdate`
+   *  broadcasts before it persists, so two answers can interleave and leave
+   *  the team's browser on a position storage did not keep.
+   *
+   *  So the queue goes when it falls idle rather than when the room empties.
+   *  Deferred, not kept: the chain below re-checks and re-arms until the
+   *  queue is really empty, so no match leaves a row behind. */
+  deleteMatchQueue(matchID: string): void {
+    const queue = this.perMatchQueue.get(matchID);
+    if (queue === undefined) {
+      return;
+    }
+    if (queue.size === 0 && queue.pending === 0) {
+      super.deleteMatchQueue(matchID);
+      return;
+    }
+    void queue.onIdle().then(() => {
+      // A new client may have picked this same queue up in the meantime, and
+      // may have put work on it; the recursion re-checks both.
+      if (this.perMatchQueue.get(matchID) === queue) {
+        this.deleteMatchQueue(matchID);
+      }
+    });
+  }
+
   /** Plays the bot's turn if the match is waiting on one, and closes the match
    *  if that turn ended it. Both halves go through the match's own queue, which
    *  is what lets a player's move and a reconnect both call this: whichever
