@@ -83,6 +83,13 @@ export const TransportAPI = (
   return { send, sendAll };
 };
 
+/** Narrows a value that arrived over the socket, where the declared argument
+ *  types describe what a well-behaved client sends rather than what anyone
+ *  can send. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 /** Copied from boardgame.io/dist/src/master/master.ts */
 export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
   db: StorageAPI.Async | StorageAPI.Sync,
@@ -98,6 +105,17 @@ export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
 
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player.
 export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
+
+/** The packets boardgame.io's transport answers with a match id the client
+ *  chose, and where in each one's arguments that id sits: `sync` and `chat`
+ *  lead with it, `update` sends the action and the stale stateID first. See
+ *  its `nsp.on("connection")` listener; `disconnect` is the only other packet
+ *  it registers, and that one carries no id. */
+const MATCH_ID_ARGUMENT: ReadonlyMap<string, number> = new Map([
+  ["sync", 0],
+  ["update", 2],
+  ["chat", 0],
+]);
 
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
@@ -138,7 +156,7 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Refuses a `sync` naming a match that storage does not have.
+        /** Refuses a packet naming a match that storage does not have.
          *
          * boardgame.io's `Master.onSync` skips its credential check when
          * `playerID` is null — the spectator case it is written for — and
@@ -147,53 +165,105 @@ export class SocketIOButBotMoves extends SocketIO {
          * Postgres for as long as it cares to, none of which any team can
          * reach and nothing of which asks who is asking.
          *
+         * `update` and `chat` do not create anything, but they are read with
+         * the same client-chosen id before anyone has been authenticated, and
+         * each of them keys an in-memory map off it that nothing evicts from —
+         * boardgame.io's `perMatchQueue` and this class's `unFinishedMatches`.
+         * An unknown id also leaves `update` reading state that is not there
+         * (#437).
+         *
          * A match here is only ever created by the server, for a team that
          * asked for one (`server/team_manage.ts`), and the id reaches a
-         * browser only in that answer. So a sync for a match storage does not
-         * have belongs to no client of this competition, and the packet never
-         * reaches boardgame.io's listener.
+         * browser only in that answer. So a packet naming a match storage does
+         * not have belongs to no client of this competition, and it never
+         * reaches boardgame.io's listener. What the check establishes is that
+         * the id names a real match, and nothing more: who may act on that
+         * match is still the Master's credential check to decide.
          *
          * A packet middleware rather than a wrapped listener: it is the hook
          * socket.io documents for this, and it does not depend on what the
-         * base transport registered before us.
+         * base transport registered before us. A refused packet is dropped
+         * with no answer to the client, and socket.io's own `Socket` carries
+         * the noop `error` listener that keeps that from throwing.
          */
-        socket.use(([event, matchID]: IOTypes.Event, next) => {
-          if (event !== "sync") {
-            next();
-            return;
-          }
+        const refusalFor = async ([event, ...args]: IOTypes.Event): Promise<string | undefined> => {
+          const at = MATCH_ID_ARGUMENT.get(String(event));
+          if (at === undefined) return undefined;
+          const matchID: unknown = args[at];
           if (typeof matchID !== "string" || matchID === "") {
-            next(new Error("sync without a match id"));
-            return;
+            return `${String(event)} without a match id`;
           }
-          void fetch(app.context.db, matchID, { metadata: true } as const).then(
-            ({ metadata }) => {
-              next(metadata === undefined ? new Error(`sync for unknown match ${matchID}`) : undefined);
+          try {
+            const { metadata } = await fetch(app.context.db, matchID, { metadata: true } as const);
+            return metadata === undefined ? `${String(event)} for unknown match ${matchID}` : undefined;
+          } catch (error: unknown) {
+            // Said differently from a match nobody created, because the two
+            // call for opposite reactions: this one is the server's to fix.
+            return `storage could not be read for match ${matchID}: ${String(error)}`;
+          }
+        };
+
+        /* One line per socket rather than one per refusal: how many packets
+         * arrive is the client's choice, so a socket that keeps at it must not
+         * be able to fill the log. The first refusal is the one worth having —
+         * it is the only trace that a real team, and not a stray client, ran
+         * into the check. */
+        let reported = false;
+        const refuse = (reason: string, next: (error: Error) => void) => {
+          if (!reported) {
+            reported = true;
+            console.warn(`Refused a packet on socket ${socket.id}: ${reason}`);
+          }
+          next(new Error(reason));
+        };
+
+        /* socket.io hands each packet to the middleware as it arrives and does
+         * not wait for the one before it, so the storage read above would let
+         * packets overtake each other. boardgame.io rejects a move whose
+         * stateID is stale, so a swapped pair of updates costs a team a move:
+         * each check runs after the one before it, which leaves the socket's
+         * packets in the order the client sent them. The cost is that a read
+         * storage is slow to answer holds up that socket's later packets —
+         * one team's board, where a reordered move is a lost one. */
+        let checked: Promise<unknown> = Promise.resolve();
+        socket.use((packet: IOTypes.Event, next) => {
+          const released = checked.then(() => refusalFor(packet));
+          // The next packet waits for this check to have finished, not for it
+          // to have passed: one refusal must not refuse everything behind it.
+          checked = released.then(() => undefined, () => undefined);
+          void released.then(
+            reason => {
+              if (reason === undefined) next();
+              else refuse(reason, next);
             },
-            (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
+            // The check answers rather than throws, so anything here is a bug
+            // in it — and a packet must not be let past on the strength of one.
+            (error: unknown) => { refuse(`the check itself failed: ${String(error)}`, next); }
           );
         });
 
-        /* Where a refused packet lands. With no listener here socket.io
-         * writes "Missing error handler on `socket`" and a stack trace for
-         * every one of them — a log an unauthenticated client could fill at
-         * will. Refusing a sync is routine, so it is answered with nothing. */
-        socket.on("error", () => undefined);
-
-        socket.on("update", async (...args: Parameters<Master['onUpdate']>) => {
+        const onPlayerUpdate = async (...args: Parameters<Master['onUpdate']>) => {
           // The arguments are stale: we react to a player's step
           // But we are on the same API that reacts to it
           // Basically we assume that a socket.on('update', ...)
           // already updated the game state, making StateID and PlayerID stale
           const [actionData, , matchID, stalePlayerID] = args;
-          //this in theory means, that the match already exist
+          // That the match exists is what the guard above established, which
+          // is also what bounds this set: the id is the client's, and nothing
+          // evicts from here except a match reaching its end.
           //also we assume, this event can't happen, after the game is finished
           this.unFinishedMatches.add(matchID);
-          if (actionData.type !== "MAKE_MOVE") {
+          // The action is the client's too, and the guard said nothing about
+          // it — read no further into it than each check has reached.
+          if (!isRecord(actionData) || actionData.type !== "MAKE_MOVE") {
             // skip if alma type is not 'MAKE_MOVE'
             return;
           }
-          if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
+          const payloadType: unknown = isRecord(actionData.payload) ? actionData.payload.type : undefined;
+          if (typeof payloadType !== "string") {
+            return;
+          }
+          if (isMakeMovePayloadReadOnly(payloadType)) {
             // also skip if payload type is getTime
             return;
           }
@@ -213,6 +283,11 @@ export class SocketIOButBotMoves extends SocketIO {
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,
              } as const);
+            // Only reachable if the match went away between the guard above
+            // and this read. Nothing in this codebase deletes one, but
+            // `state.ctx` off an absent match is what an unknown id used to
+            // reach, and that took the whole server down with it (#437).
+            if (state === undefined) return;
             if (currentPlayer(state.ctx) !== BOT_ID) {
               // Not a real action, possibly a failed move.
               return;
@@ -267,12 +342,23 @@ export class SocketIOButBotMoves extends SocketIO {
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,
              } as const);
+            if (state === undefined) return;
             if (state.ctx.gameover) {
               if (this.unFinishedMatches.has(matchID)) {
                 this.unFinishedMatches.delete(matchID);
                 await this.onFinishedMatch(matchID);
               }
             }
+          });
+        };
+
+        socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
+          /* socket.io does not wait for a listener's promise, so a rejection
+           * in there reaches nothing but node's unhandled-rejection handling,
+           * which ends the process and every match being played on it. The
+           * bot's turn is worth losing on its own; the round is not. */
+          void onPlayerUpdate(...args).catch((error: unknown) => {
+            console.error(`Reacting to an update for match ${String(args[2])} failed:`, error);
           });
         });
       });
