@@ -1,6 +1,6 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { Stack } from '@mui/system';
-import { Button } from '@mui/material';
+import { Button, alpha } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import {
@@ -275,7 +275,15 @@ export function ImportTeams(props: { onImported: () => void }) {
           getRowClassName={(params) => `import-problem-${String(params.row.severity)}`}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[10, 25, 50]}
-          sx={{ height: 'auto' }}
+          // What the row classes above are for: an error is why the file will
+          // not load, a warning is something to look at once it has. A tint
+          // rather than recoloured text, which the grid's own hover and
+          // selection colours would fight.
+          sx={(theme) => ({
+            height: 'auto',
+            '& .import-problem-error': { backgroundColor: alpha(theme.palette.error.main, 0.12) },
+            '& .import-problem-warning': { backgroundColor: alpha(theme.palette.warning.main, 0.12) },
+          })}
         />
       )}
       {truncated > 0 && <Stack>És további {truncated} probléma, amit a szerver már nem sorolt fel.</Stack>}
