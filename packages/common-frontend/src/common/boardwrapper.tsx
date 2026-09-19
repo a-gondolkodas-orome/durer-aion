@@ -19,7 +19,7 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
 export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
   return (props: StrategyBoardProps<G>) => {
-    const { G, ctx, moves } = props;
+    const { G, ctx, moves, isActive } = props;
     const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining); // asked from the server
     // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
     // only ever asks whether it is `true`.
@@ -47,6 +47,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
       setMsRemaining(G.millisecondsRemaining);
     }, [G.millisecondsRemaining]);
     const finished = msRemaining < - 5000 || gameover === true
+    // `isActive` is bgio's: the team's turn and no gameover. Every control
+    // below refuses clicks outside it, which the server would reject anyway
+    // (issue #4). The board is faded only while no game is on it — the bot
+    // answers within a state update or two, so fading on each of its turns
+    // would flash the board every move; out of turn it just ignores clicks.
+    const myTurn = isActive && !finished;
+    const gameRunning = ctx.phase === 'play' && !finished;
+    const boardLive = myTurn && gameRunning;
     return (
       <>
         <Dialog
@@ -218,7 +226,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                         fontSize: { xs: '14px', sm: '16px' },
                         textTransform: 'none',
                         borderRadius: '10px',
-                      }} variant='contained' color='primary' onClick={() => moves.chooseNewGameType("test")}>
+                      }} variant='contained' color='primary' disabled={!myTurn} onClick={() => moves.chooseNewGameType("test")}>
                       {t('strategy.testGameButton')}
                       </Button>
                       <Stack sx={{ width: '4%' }} />
@@ -228,7 +236,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                         fontSize: { xs: '14px', sm: '16px' },
                         textTransform: 'none',
                         borderRadius: '10px',
-                      }} variant='contained' color='primary' onClick={() => moves.chooseNewGameType("live")}>
+                      }} variant='contained' color='primary' disabled={!myTurn} onClick={() => moves.chooseNewGameType("live")}>
                       {t('strategy.realGameButton')}
                       </Button>
                     </Stack>
@@ -242,7 +250,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                         fontSize: '16px',
                         textTransform: 'none',
                         borderRadius: '10px',
-                      }} variant='contained' color='primary' onClick={() => moves.chooseRole(GUESSER_PLAYER)}>
+                      }} variant='contained' color='primary' disabled={!myTurn} onClick={() => moves.chooseRole(GUESSER_PLAYER)}>
                       {t('strategy.firstPlayer')}
                       </Button>
                       <Stack sx={{ width: '4%' }} />
@@ -252,7 +260,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                         fontSize: '16px',
                         textTransform: 'none',
                         borderRadius: '10px',
-                      }} variant='contained' color='primary' onClick={() => moves.chooseRole(JUDGE_PLAYER)}>
+                      }} variant='contained' color='primary' disabled={!myTurn} onClick={() => moves.chooseRole(JUDGE_PLAYER)}>
                       {t('strategy.secondPlayer')}
                       </Button>
                     </Stack>
@@ -298,14 +306,20 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                 </Stack>
                 </Stack>
               </Stack>
-            <Stack sx={{
-              width: {
-                xs: '100%',
-                md: '60%',
-              },
-              flexDirection: 'row',
-              padding: '15px',
-            }}>
+            <Stack
+              data-testid="strategyBoard"
+              aria-disabled={!boardLive}
+              sx={{
+                width: {
+                  xs: '100%',
+                  md: '60%',
+                },
+                flexDirection: 'row',
+                padding: '15px',
+                opacity: gameRunning ? 1 : 0.4,
+                pointerEvents: boardLive ? 'auto' : 'none',
+                transition: 'opacity 0.3s',
+              }}>
               {board(props)}
             </Stack>
           </Stack>

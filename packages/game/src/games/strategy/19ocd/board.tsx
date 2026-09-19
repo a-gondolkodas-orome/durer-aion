@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { MyGameState } from './game';
+import { MyGameState, possibleMoves } from './game';
 import { BoardProps } from 'boardgame.io/react';
 import { range } from "lodash";
 
@@ -8,10 +8,19 @@ type MyGameProps = BoardProps<MyGameState>;
 
 
 export function MyBoard({ G, moves }: MyGameProps) {
+  // The rule the server applies, so a cell reacts only when the move would be
+  // accepted: still on the table, and a divisor or a multiple of the last one.
+  const legal = new Set(possibleMoves(G).map(move => move.args?.[0]));
 
   const onClick = (index: number) => {
-    moves.removeNumber(index)
+    if (legal.has(index)) {
+      moves.removeNumber(index)
+    }
   };
+  const cellStyle = (index: number) => ({
+    cursor: legal.has(index) ? 'pointer' : 'default',
+    pointerEvents: G.numbersOnTable[index - 1] ? undefined : 'none' as const,
+  });
 
   return (
     <svg width="100%" height="100%" viewBox='0 0 200 200'>
@@ -24,6 +33,7 @@ export function MyBoard({ G, moves }: MyGameProps) {
                               //: G.previousMove === n+1 ? "red" : "#ff9999"}
               opacity={ G.numbersOnTable[n] ? 1 : 0.1}
               strokeWidth="1%"
+              style={cellStyle(n + 1)}
               onClick={() => onClick(n + 1)}
             />
           <text
@@ -34,6 +44,7 @@ export function MyBoard({ G, moves }: MyGameProps) {
               dominantBaseline="middle"
               opacity={ G.numbersOnTable[n] ? 1 : 0.1}
               fill="black"
+              style={cellStyle(n + 1)}
               onClick={() => onClick(n + 1)}>{n + 1}</text></Fragment>
         ))}
       <text x="5" y="30" fontSize="10" textAnchor="start"  fill="black">Az előző lépés: {G.previousMove === -1 ? "" : G.previousMove}</text>
@@ -41,4 +52,3 @@ export function MyBoard({ G, moves }: MyGameProps) {
     </svg>
   )
 }
-
