@@ -289,6 +289,39 @@ describe('importTeamsFromTsv', () => {
       expect(result.problemsTruncated).toBe(300);
     });
 
+    // The cap decides how much is listed. A caller counting the rows in that
+    // list would tell the organiser 200 of their 500 rows are bad, directly
+    // above the line saying the list is not all of them.
+    it('counts every bad row, not the ones that fit under the cap', async () => {
+      const teams = stubTeams();
+      // Every row has a bad category, which is an error per row.
+      const rows = Array.from({ length: 500 }, (_, index) => `Team ${index}\tX\ta@b.com\tSuli`);
+
+      const result = await importTeamsFromTsv(teams, file(...rows));
+
+      expect(result.problems).toHaveLength(200);
+      expect(result.badRows).toBe(500);
+    });
+
+    it('counts a row breaking several rules once', async () => {
+      const teams = stubTeams();
+
+      const result = await importTeamsFromTsv(teams, file(`\tX\ta@b.com\tSuli`));
+
+      expect(codes(result.problems)).toEqual(['empty-teamname', 'invalid-category']);
+      expect(result.badRows).toBe(1);
+    });
+
+    // A missing header, or no rows at all, is a problem with the file and sits
+    // on no line of it.
+    it('does not count a problem about the file as a bad row', async () => {
+      const teams = stubTeams();
+
+      const result = await importTeamsFromTsv(teams, HEADER);
+
+      expect(codes(result.problems)).toEqual(['no-rows']);
+      expect(result.badRows).toBe(0);
+    });
   });
 });
 

@@ -116,8 +116,12 @@ export function ImportTeams(props: { onImported: () => void }) {
   // Rows, not problems: one row can break several rules at once, and a problem
   // about the file — a missing header, no rows at all — belongs to no row. The
   // summary counts what it says it counts; the grid below lists every problem.
+  //
+  // The server's own count when it has answered, because it caps the problems
+  // it sends: counting the rows in that list would report 200 bad rows for a
+  // file with 500, right above the note saying the list is short.
   const errorLines = new Set(errors.map(problem => problem.row));
-  const badRows = local.rows.filter(row => errorLines.has(row.row)).length;
+  const badRows = result?.badRows ?? local.rows.filter(row => errorLines.has(row.row)).length;
   const imported = result !== null && result.imported > 0;
 
   const edited = (text: string) => {

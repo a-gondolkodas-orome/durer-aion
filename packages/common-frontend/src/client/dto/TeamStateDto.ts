@@ -60,6 +60,9 @@ export interface ImportResultDto {
   problems: TeamTsvProblem[];
   /// Problems past the server's cap, which are not in `problems`.
   problemsTruncated: number;
+  /// Data rows holding at least one error. Counted before the cap, so it is
+  /// the file's own number even when `problems` does not list them all.
+  badRows: number;
   /// One row per imported team, in `TEAM_IMPORT_HEADER` order. The only copy
   /// of the join codes the import generated, which is why the page hands it
   /// to the browser to save rather than only offering to.

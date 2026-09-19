@@ -726,6 +726,11 @@ components:
         problemsTruncated:
           type: integer
           description: Problems past the cap, which are not in `problems`
+        badRows:
+          type: integer
+          description: >
+            Data rows holding at least one error, counted before the cap, so
+            it is the file's own number even when `problems` is truncated
         exportTable:
           type: array
           items:

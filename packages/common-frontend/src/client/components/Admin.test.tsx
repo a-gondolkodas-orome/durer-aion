@@ -274,7 +274,7 @@ const paste = (tsv: string) =>
   fireEvent.change(screen.getByTestId('importTeamsTsv'), { target: { value: tsv } });
 
 const importResult = (overrides: Partial<ImportResultDto> = {}): ImportResultDto => ({
-  imported: 0, rows: 0, problems: [], problemsTruncated: 0, exportTable: [], ...overrides,
+  imported: 0, rows: 0, problems: [], problemsTruncated: 0, badRows: 0, exportTable: [], ...overrides,
 });
 
 // The browser knows the file's own rules, so a mistake in it is named before a
@@ -403,6 +403,31 @@ test('the import tab reports a refused file as a failure, not a success', async 
 
   expect(await screen.findByText('Az importálás nem futott le, egy csapat sem került be.')).toBeInTheDocument();
   expect(screen.getByText('Az adatbázis visszautasította ezt a sort.')).toBeInTheDocument();
+});
+
+// The server lists at most 200 problems. Counting the rows in that list would
+// tell the organiser 200 of their 500 rows are bad, directly above the line
+// saying the list is not all of them.
+test('the import tab reports the bad rows the server counted, not the ones it listed', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    rows: 500,
+    badRows: 500,
+    problemsTruncated: 300,
+    problems: [{ row: 2, column: 'Category', severity: 'error', code: 'invalid-category', found: 'X' }],
+  }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, ...Array.from({ length: 500 }, (_, index) => importRow(`Team ${index}`, 'X'))].join('\n'));
+  fireEvent.click(screen.getByText('Ellenőrzés'));
+
+  // Waited for first: until the answer lands the summary is the browser's own,
+  // which counts all 500 anyway — so asserting on it straight away would pass
+  // whatever the answer then did to it.
+  await screen.findByText('És további 300 probléma, amit a szerver már nem sorolt fel.');
+
+  expect(screen.getByText('500 sor, ebből 500 hibás. Az importálás így nem futna le.')).toBeInTheDocument();
 });
 
 test('the import tab shows the request failing rather than looking like it worked', async () => {

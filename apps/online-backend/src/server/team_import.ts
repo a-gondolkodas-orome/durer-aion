@@ -24,6 +24,10 @@ export interface ImportResult {
   problems: TeamTsvProblem[];
   /** Problems past the cap, which are not in `problems`. */
   problemsTruncated: number;
+  /** Data rows holding at least one error — the rows that refused the file.
+   * Counted before the cap, so it stays the file's own number when `problems`
+   * is truncated and a caller cannot recover it from the list. */
+  badRows: number;
   /** One row per imported team, in `TEAM_IMPORT_HEADER` order, with the
    * generated cells filled in. This is the only copy of the join codes the
    * import created. */
@@ -116,11 +120,19 @@ function finish(
   const byLine = (severity: TeamTsvProblem['severity']) =>
     problems.filter(problem => problem.severity === severity).sort((a, b) => a.row - b.row);
   const ordered = [...byLine('error'), ...byLine('warning')];
+  // Rows, not problems: one row can break several rules at once, and `row: 0`
+  // — the file as a whole — is no row at all. Counted from every problem
+  // rather than from the slice below, so the cap decides what is listed and
+  // not what is reported.
+  const badRows = new Set(
+    problems.filter(problem => problem.severity === 'error' && problem.row !== 0).map(problem => problem.row),
+  ).size;
   return {
     imported,
     rows,
     problems: ordered.slice(0, MAX_PROBLEMS),
     problemsTruncated: Math.max(0, ordered.length - MAX_PROBLEMS),
+    badRows,
     exportTable,
   };
 }
