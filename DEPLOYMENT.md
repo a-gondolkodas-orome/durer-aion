@@ -279,6 +279,9 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 ```
 
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
+A refused file writes nothing and exits non-zero, so an `.export` already sitting there is an
+earlier run's and holds that run's codes — the command says so rather than leaving you to
+notice the timestamp.
 
 The admin page's **Importálás** tab does the same job through the browser, and hands
 the join codes back as a download rather than leaving them on the host — the path for

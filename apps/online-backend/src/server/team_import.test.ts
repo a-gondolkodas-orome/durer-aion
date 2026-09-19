@@ -1,9 +1,10 @@
 import { randomInt } from 'crypto';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { ValidationError } from 'sequelize';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { TEAM_IMPORT_HEADER } from 'schemas';
 import { NewTeam, TeamsRepository } from './db';
-import { importTeamsFromTsv } from './team_import';
+import { import_teams_from_tsv_locally, importTeamsFromTsv } from './team_import';
 
 // Only `randomInt` is replaceable, and `beforeEach` puts the real one back —
 // `mockReset` restores the implementation `vi.fn` was given. The join code
@@ -13,6 +14,19 @@ import { importTeamsFromTsv } from './team_import';
 vi.mock('crypto', async (importOriginal) => {
   const actual = await importOriginal<typeof import('crypto')>();
   return { ...actual, randomInt: vi.fn(actual.randomInt) };
+});
+
+// The command-line entry point reads and writes beside the file it was given.
+// Only those three are replaced, so anything else reaching for `fs` during a
+// run — vitest included — still gets the real one.
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs')>();
+  return {
+    ...actual,
+    readFileSync: vi.fn(),
+    writeFileSync: vi.fn(),
+    existsSync: vi.fn().mockReturnValue(false),
+  };
 });
 
 const HEADER = TEAM_IMPORT_HEADER.join('\t');
@@ -274,5 +288,74 @@ describe('importTeamsFromTsv', () => {
       expect(result.problems).toHaveLength(200);
       expect(result.problemsTruncated).toBe(300);
     });
+
+  });
+});
+
+/** The command line around the same import: what it answers its shell, and what
+ * it leaves on disk. `import_teams.js` turns the answer into an exit code. */
+describe('import_teams_from_tsv_locally', () => {
+  let logged: string[];
+
+  beforeEach(() => {
+    logged = [];
+    // The function reports to the console by design, and the run is meant to
+    // have the report to itself — so the messages are collected and asserted
+    // on rather than written.
+    for (const method of ['info', 'warn', 'error'] as const) {
+      vi.spyOn(console, method).mockImplementation((...args: unknown[]) => {
+        logged.push(args.join(' '));
+      });
+    }
+    vi.mocked(existsSync).mockReturnValue(false);
+  });
+
+  // Put back, so a test added after this block still has the setup file's
+  // recorder underneath it and fails on anything it writes.
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  it('says it imported, and writes the join codes beside the file', async () => {
+    const teams = stubTeams();
+    vi.mocked(readFileSync).mockReturnValue(file(row('Alpha')));
+
+    expect(await import_teams_from_tsv_locally(teams, 'teams.tsv')).toBe(true);
+
+    expect(vi.mocked(writeFileSync).mock.calls[0][0]).toBe('teams.tsv.export');
+    expect(logged).toContain('Successfully imported 1 teams.');
+  });
+
+  // Returning normally made `import_teams.js` exit 0, so a shell — and
+  // `scripts/import_teams.sh` is one — saw a load that refused every row as a
+  // load that worked.
+  it('says it did not import when the file was refused', async () => {
+    const teams = stubTeams();
+    vi.mocked(readFileSync).mockReturnValue(file(row('Alpha', ['', '', '']), `\tC\ta@b.com\tSuli`));
+
+    expect(await import_teams_from_tsv_locally(teams, 'teams.tsv')).toBe(false);
+
+    expect(teams.insertTeams).not.toHaveBeenCalled();
+    expect(writeFileSync).not.toHaveBeenCalled();
+  });
+
+  // Nothing was written, so the export next to the file is the earlier run's,
+  // holding that run's join codes — and DEPLOYMENT.md has an organiser fetch
+  // that file off the host and mail it out.
+  it('warns that an export from an earlier run was left as it was', async () => {
+    const teams = stubTeams();
+    vi.mocked(readFileSync).mockReturnValue(file(`\tC\ta@b.com\tSuli`));
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    expect(await import_teams_from_tsv_locally(teams, 'teams.tsv')).toBe(false);
+
+    expect(logged.join('\n')).toContain('teams.tsv.export is from an earlier run');
+  });
+
+  it('does not mention an export that is not there', async () => {
+    const teams = stubTeams();
+    vi.mocked(readFileSync).mockReturnValue(file(`\tC\ta@b.com\tSuli`));
+
+    await import_teams_from_tsv_locally(teams, 'teams.tsv');
+
+    expect(logged.join('\n')).not.toContain('earlier run');
   });
 });

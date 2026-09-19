@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import {
   ParsedTeamRow,
@@ -224,8 +224,14 @@ function describe(problem: TeamTsvProblem): string {
  * itself because this is the one caller that may be talking to a database no
  * server has opened yet (#190). On the HTTP path the server has already synced,
  * and doing it per request would put a schema change on an admin's click.
+ *
+ * Answers whether it imported, which `import_teams.js` turns into its exit
+ * code: a refused file finishes this function normally, and a shell that reads
+ * only the status would take it for a load that worked.
  */
-export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
+export async function import_teams_from_tsv_locally(
+  teams: TeamsRepository, filename: string,
+): Promise<boolean> {
   await teams.connect();
   const result = await importTeamsFromTsv(teams, readFileSync(filename, 'utf-8'));
 
@@ -236,12 +242,22 @@ export async function import_teams_from_tsv_locally(teams: TeamsRepository, file
     console.error(`... and ${result.problemsTruncated} more.`);
   }
 
+  const exportFile = `${filename}.export`;
   console.info('Summary:');
   if (result.imported === 0) {
-    console.info(`Imported nothing. The file has ${result.rows} rows; fix the errors above and run it again.`);
-    return;
+    console.error(`Imported nothing. The file has ${result.rows} rows; fix the errors above and run it again.`);
+    // Nothing was written, so an export from an earlier run is still lying
+    // there with that run's join codes — the file DEPLOYMENT.md has organisers
+    // fetch back off the host and mail out. Said rather than deleted: it is
+    // the only copy of those codes, and the earlier import that made them is
+    // still good.
+    if (existsSync(exportFile)) {
+      console.error(`${exportFile} is from an earlier run and was not rewritten; do not mail it out as this file's.`);
+    }
+    return false;
   }
   console.info(`Successfully imported ${result.imported} teams.`);
-  writeFileSync(`${filename}.export`, teamsToImportTsv(result.exportTable), { encoding: 'utf-8' });
-  console.info(`Their login codes are in ${filename}.export`);
+  writeFileSync(exportFile, teamsToImportTsv(result.exportTable), { encoding: 'utf-8' });
+  console.info(`Their login codes are in ${exportFile}`);
+  return true;
 }

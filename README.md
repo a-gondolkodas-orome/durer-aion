@@ -256,7 +256,9 @@ are nginx's, and Vite's proxy shows you neither.
   The first line is read as one, so accepting it would drop that team in
   silence.
 - `scripts/unit_test.tsv`: every problem listed against the line it is on, the
-  import button disabled, and the team list unchanged.
+  import button disabled, and the team list unchanged. Through the command line
+  the same file exits non-zero (`echo $?`), and leaves an `.export` from an
+  earlier run alone, saying so.
 - *Ellenőrzés* on a file naming a team that already exists: reported as a
   clash, still nothing written. This is the check only the server can make.
 - `scripts/test.tsv`, all 999 rows — the size check. The generated join codes
