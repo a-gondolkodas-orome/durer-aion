@@ -270,6 +270,14 @@ for a lookup-table key.
 }
 ```
 
+Your `turn` is the play phase's, whole: boardgame.io *replaces* a phase's turn
+config with the game's rather than merging the two, and the wrapper spreads
+yours into that phase. So a move limit here is the one in force, and it counts
+every move of the phase — except the clock poll the client sends once a second
+as time runs out, which `gamewrapper.ts` registers as `noLimit` for exactly that
+reason. Both live games leave the limit unset and end their own turn with
+`events.endTurn()` instead.
+
 A move takes as many arguments as you give it — `moves.changeCoins(K, L)` for
 a "pick two values, then commit" turn, driven by form inputs rather than by a
 click on the board. The two live games are both single-click, single-argument;
