@@ -59,6 +59,22 @@ export function configureTeamsRouter(
     };
   };
 
+  /** The minutes an add-minutes route was asked for, or nothing.
+   *
+   * A non-integer used to reach `setMinutes`, where it becomes an Invalid Date
+   * and throws on the way out of `toISOString` — a 500 for a typo. A negative
+   * one is not a typo: taking time back is the same operation.
+   *
+   * `Number` is not the test. It reads `null` and `[]` as nought and `true` as
+   * one, so a body nobody meant would have moved every running match. */
+  const bodyMinutes = (sent: unknown): number | undefined =>
+    typeof sent === "number" && Number.isInteger(sent) ? sent : undefined;
+
+  /** {@link bodyMinutes} for a path segment, which is always a string. Digits
+   *  rather than `Number`, which also reads `1e3` and `0x10`. */
+  const pathMinutes = (raw: string): number | undefined =>
+    /^-?\d+$/.test(raw) ? Number(raw) : undefined;
+
   /** A refusal as the status the admin page already knows how to read. */
   const refuse = (
     ctx: { throw: (status: number, message: string) => never },
@@ -122,7 +138,9 @@ export function configureTeamsRouter(
  */
   router.post("/game/admin/:matchId/addminutes/:minutes", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
-    const result = await addMinutesToMatch(matchClock(ctx), { matchID, minutes: Number(ctx.params.minutes) });
+    const minutes = pathMinutes(ctx.params.minutes)
+      ?? ctx.throw(400, "The minutes in the path must be a whole number.");
+    const result = await addMinutesToMatch(matchClock(ctx), { matchID, minutes });
     if (result.status === "refused") refuse(ctx, result.reason, matchID);
     else ctx.body = { updatedEndTime: result.endAt, matchID: result.matchID, team: result.team };
   });
@@ -142,12 +160,8 @@ export function configureTeamsRouter(
    */
   router.post("/game/admin/addminutes", adminAuth, koaBody(), async (ctx) => {
     const body = ctx.request.body as { minutes?: unknown; grant?: unknown } | undefined;
-    const minutes = Number(body?.minutes);
-    // Rejected here rather than reaching `setMinutes`, where a non-number
-    // becomes an Invalid Date and throws on the way out of `toISOString`.
-    if (!Number.isInteger(minutes)) {
-      ctx.throw(400, "Expected { minutes: integer, grant: string }.");
-    }
+    const minutes = bodyMinutes(body?.minutes)
+      ?? ctx.throw(400, "Expected { minutes: integer, grant: string }.");
     const sent: unknown = body?.grant;
     const grant = typeof sent === "string" && sent !== ""
       ? sent

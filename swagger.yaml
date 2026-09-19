@@ -115,6 +115,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AddMinutesResponse"
+        "400":
+          description: Minutes in the path was not a whole number
         "404":
           description: Match not found
         "500":
