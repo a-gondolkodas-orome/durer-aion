@@ -2,7 +2,6 @@ import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import {
   ParsedTeamRow,
-  TeamImportColumn,
   TeamTsvProblem,
   parseTeamsTsv,
   teamsToImportTsv,
@@ -51,24 +50,24 @@ function generateLoginCode() {
 // loop that hangs the request instead of saying what is wrong.
 const MAX_DRAWS = 100;
 
-/** Carries an exhausted generator out to the answer. Thrown rather than
- * returned so `fill` stays the shape it reads as — every cell filled, or
- * nothing — and caught in `importTeamsFromTsv`, which turns it into a problem
- * like any other. Left to propagate it would reach the route as a 500, which
- * tells the admin only that something went wrong. */
-class CouldNotGenerate extends Error {
-  constructor(readonly column: TeamImportColumn) {
-    super(`Could not generate an unused ${column} in ${MAX_DRAWS} tries.`);
+/** Thrown when the draws run out, so the caller can say which server fault it
+ * was rather than answer an unexplained 500. It is not one of the problems an
+ * `ImportResult` carries: those are what is wrong with the *file*, and an
+ * organiser can act on every one of them. This is a broken generator, which
+ * they can do nothing about and which no file of theirs caused. */
+export class CouldNotGenerate extends Error {
+  constructor(readonly what: string) {
+    super(`Could not generate an unused ${what} in ${MAX_DRAWS} tries.`);
   }
 }
 
 /** Draws until the value is one nobody holds. */
-function draw(generate: () => string, taken: Set<string>, column: TeamImportColumn): string {
+function draw(generate: () => string, taken: Set<string>, what: string): string {
   for (let attempt = 0; attempt < MAX_DRAWS; attempt++) {
     const value = generate();
     if (!taken.has(value)) return value;
   }
-  throw new CouldNotGenerate(column);
+  throw new CouldNotGenerate(what);
 }
 
 /**
@@ -80,10 +79,10 @@ function draw(generate: () => string, taken: Set<string>, column: TeamImportColu
  * so two rows of the same file cannot be given the same code either.
  */
 function fill(row: ParsedTeamRow, taken: TakenIdentifiers): NewTeam {
-  const teamId = row.teamId === '' ? draw(randomUUID, taken.teamIds, 'ID') : row.teamId;
+  const teamId = row.teamId === '' ? draw(randomUUID, taken.teamIds, 'team id') : row.teamId;
   taken.teamIds.add(teamId);
 
-  const joinCode = row.joinCode === '' ? draw(generateLoginCode, taken.joinCodes, 'Login Code') : row.joinCode;
+  const joinCode = row.joinCode === '' ? draw(generateLoginCode, taken.joinCodes, 'join code') : row.joinCode;
   taken.joinCodes.add(joinCode);
 
   return {
@@ -163,16 +162,7 @@ export async function importTeamsFromTsv(
     return finish(0, parsed.rows.length, problems, []);
   }
 
-  let filled;
-  try {
-    filled = parsed.rows.map(row => ({ row: row.row, team: fill(row, taken) }));
-  } catch (error) {
-    if (!(error instanceof CouldNotGenerate)) throw error;
-    // Against the file rather than a row: a hundred collisions in a row is the
-    // generator, not the team that happened to be next in the file.
-    problems.push({ row: 0, column: error.column, severity: 'error', code: 'could-not-generate' });
-    return finish(0, parsed.rows.length, problems, []);
-  }
+  const filled = parsed.rows.map(row => ({ row: row.row, team: fill(row, taken) }));
   const refused = await teams.insertTeams(filled);
   if (refused) {
     // The checks above missed it — a team added between the read and the write,
@@ -220,7 +210,6 @@ function describe(problem: TeamTsvProblem): string {
     'team-id-taken': 'a team with this ID already exists',
     'join-code-taken': 'a team with this login code already exists',
     'database-refused': 'the database refused this row',
-    'could-not-generate': `every one of ${MAX_DRAWS} generated values was already in use, which is a broken generator rather than bad luck`,
   };
   const first = problem.otherRow === undefined ? '' : ` (first used on line ${problem.otherRow})`;
   return `${where}${column}: ${said[problem.code]}${found}${first}`;

@@ -309,6 +309,14 @@ export class RealClientRepository implements ClientRepository {
         // The request may still be running: the server was not told to stop.
         throw new Error('Az importálás túl sokáig tartott. Frissíts, és nézd meg, bekerültek-e a csapatok.', { cause: e });
       }
+      // The one server fault the route names: it could not generate a free id
+      // or join code. Worded here rather than shown from the body, the way the
+      // 413 above is — the wire is English, for the logs and the CLI, and the
+      // organiser reading this page is owed Hungarian.
+      if (err.response?.status === 503) {
+        throw new Error('A szerver nem tudott szabad azonosítót vagy belépőkódot generálni, ezért semmit sem importált. '
+          + 'Ez a szerver hibája, nem a fájlé.', { cause: e });
+      }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
   }

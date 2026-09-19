@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import * as http from 'node:http';
+import { randomInt } from 'node:crypto';
 import { readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import type { AddressInfo } from 'node:net';
@@ -10,6 +11,14 @@ import { TEAM_IMPORT_HEADER } from 'schemas';
 import { TeamsRepository } from './db';
 import { ADMIN_USER, requireAdmin } from './admin_session';
 import { configureTeamsRouter } from './router';
+
+// Only `randomInt` is replaceable, and only the one test below replaces it;
+// everywhere else this is the real thing, which the join codes in every other
+// test depend on.
+vi.mock('node:crypto', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:crypto')>();
+  return { ...actual, randomInt: vi.fn(actual.randomInt) };
+});
 
 const HEADER = TEAM_IMPORT_HEADER.join('\t');
 const TSV = [HEADER, ['Alpha', 'C', 'a@b.com', 'x', '', '', ''].join('\t')].join('\n');
@@ -22,6 +31,7 @@ describe('PUT /team/admin/import', () => {
   const servers: http.Server[] = [];
 
   afterEach(async () => {
+    (randomInt as unknown as Mock).mockReset();
     await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
   });
 
@@ -102,6 +112,29 @@ describe('PUT /team/admin/import', () => {
 
     expect(response.status).toBe(415);
     expect(uploads()).toEqual(before);
+  });
+
+  // The draws are bounded so a broken generator cannot hang the request. Giving
+  // up throws, and an uncaught throw is a 500 whose body koa replaces with
+  // "Internal Server Error" — which leaves an admin unable to tell a dead
+  // generator from a dead database, or to know whether any teams were written.
+  it('says so, readably, when it cannot generate a join code', async () => {
+    (randomInt as unknown as Mock).mockImplementation(() => 1);
+    const teams = {
+      takenIdentifiers: vi.fn().mockResolvedValue({
+        teamIds: new Set<string>(), teamNames: new Set<string>(), joinCodes: new Set(['111-1111-111']),
+      }),
+      insertTeams: vi.fn().mockResolvedValue(null),
+    } as unknown as TeamsRepository;
+    const put = await serve(teams);
+
+    const response = await put(TSV);
+
+    expect(response.status).toBe(503);
+    expect(await response.text()).toBe(
+      'Could not generate an unused join code in 100 tries. Nothing was imported.');
+    // The draws all happen before the insert, so "nothing was imported" holds.
+    expect(teams.insertTeams).not.toHaveBeenCalled();
   });
 
   it('imports without writing a file', async () => {

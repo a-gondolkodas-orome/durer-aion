@@ -7,7 +7,7 @@ import { InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
-import { importTeamsFromTsv } from './team_import';
+import { CouldNotGenerate, importTeamsFromTsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
@@ -388,7 +388,18 @@ export function configureTeamsRouter(
       ctx.throw(400, "Expected a TSV body.");
     }
 
-    ctx.body = await importTeamsFromTsv(teams, content, { dryRun });
+    try {
+      ctx.body = await importTeamsFromTsv(teams, content, { dryRun });
+    } catch (error) {
+      if (!(error instanceof CouldNotGenerate)) throw error;
+      // A hundred generated values in a row already in use is a broken
+      // generator, not a fault in the file, so it is not one of the problems an
+      // ImportResult carries. `expose` because koa keeps a 5xx message to
+      // itself — without it the admin gets "Internal Server Error" and no way
+      // to tell a dead generator from a dead database. Nothing was written:
+      // the draws all happen before the insert.
+      ctx.throw(503, `${error.message} Nothing was imported.`, { expose: true });
+    }
   })
 
   /**

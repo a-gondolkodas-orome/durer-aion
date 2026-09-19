@@ -170,25 +170,6 @@ describe('importTeamsFromTsv', () => {
       expect(result.imported).toBe(1);
     });
 
-    // The draws are bounded so a broken generator cannot hang the request. What
-    // it hung on instead was an error nobody caught, which the route answers as
-    // a 500 — telling the admin that something went wrong and not what.
-    it('refuses the file when it runs out of draws, rather than throwing', async () => {
-      // Every draw is the same code, and a live team holds it.
-      (randomInt as unknown as Mock).mockImplementation(() => 1);
-      const teams = stubTeams({ joinCodes: ['111-1111-111'] });
-
-      const result = await importTeamsFromTsv(teams, file(row('Alpha')));
-
-      expect(teams.insertTeams).not.toHaveBeenCalled();
-      expect(result.imported).toBe(0);
-      expect(result.exportTable).toEqual([]);
-      // Against the file: it is the generator that is broken, not this team.
-      expect(result.problems).toEqual([
-        { row: 0, column: 'Login Code', severity: 'error', code: 'could-not-generate' },
-      ]);
-    });
-
     it('does not give two rows of one file the same generated join code', async () => {
       const digits = [...Array<number>(10).fill(1), ...Array<number>(10).fill(2)];
       let drawn = 0;
