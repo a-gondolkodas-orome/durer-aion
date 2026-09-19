@@ -17,10 +17,14 @@ function apiAxiosInstance(timeoutMs = 10000): AxiosInstance {
 
 // A team import is one request that loads the whole file in one transaction,
 // so it is one wait rather than many — but a wait long enough that the default
-// would cut it. Timing out client-side does not stop the server, so the admin
-// would be left unable to tell whether the teams landed. nginx is given longer
-// still (apps/online-frontend/nginx/nginx.conf).
-const IMPORT_TIMEOUT_MS = 60000;
+// would cut it. Set above nginx's `proxy_read_timeout`
+// (apps/online-frontend/nginx/nginx.conf) rather than under it, so the browser
+// is never the first to give up: timing out here does not stop the server, and
+// the response it drops carries the join codes the import just generated, which
+// nothing else keeps — no screen shows a join code, so they would have to be
+// dug out of the database by hand. Past the proxy's own ceiling they are lost
+// either way; this only makes sure the whole of that ceiling is usable.
+const IMPORT_TIMEOUT_MS = 180000;
 
 function makeAxiosError(any_error: unknown): AxiosError {
   if (!axios.isAxiosError(any_error)) {
