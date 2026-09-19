@@ -30,10 +30,7 @@ added later is covered without anyone remembering to opt in.
 // resolves vite/client's overload differently, so the two disagree here.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const boardModules = import.meta.glob(
-  [
-    './components/games/**/{gameplay,start-boards}.ts',
-    '../../../packages/strategy-games/src/**/{gameplay,start-boards}.ts'
-  ],
+  './components/games/**/{gameplay,start-boards}.ts',
   { eager: true }
 ) as Record<string, Record<string, unknown>>;
 

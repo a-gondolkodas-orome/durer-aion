@@ -3,5 +3,4 @@
 # subdirectory overrides an earlier, broader one.
 
 /apps/strategy-practice/   @czeildi
-/packages/strategy-games/  @czeildi
 /packages/strategy-engine/ @czeildi

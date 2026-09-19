@@ -15,14 +15,16 @@ line here — the key, and therefore the route, never changes. Keep entries in a
 order by key. `gameList.test.ts` guards that this set of keys and
 `gameList` stay in one-to-one sync.
 
-A game that has moved to `packages/strategy-games` exports a config object rather than a
-component, and this file is where it becomes a page: the one
-`strategyGameFactory(config)` call per game, in its abc slot like any other
-entry. That keeps the package host-agnostic — a competition shell consumes the
-same config without this wrapping.
+Two games export a `StrategyGameConfig` object rather than a component, and this
+file is where each becomes a page: one `strategyGameFactory(config)` call, in the
+game's abc slot like any other entry. Which shape a game should take is open —
+see the issue linked from `src/components/CLAUDE.md` § Two game shapes.
 */
 import { strategyGameFactory } from 'strategy-game-factory';
-import { removeDivisorMultipleConfig, stonesRemoveOneNotTwiceFromLeftConfig } from 'strategy-games';
+import { removeDivisorMultipleConfig } from './remove-divisor-multiple/remove-divisor-multiple';
+import {
+  stonesRemoveOneNotTwiceFromLeftConfig
+} from './stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
 
 export { AddReduceDouble } from './add-reduce-double/add-reduce-double';
 export { AmorAndCupido } from './amor-and-cupido/amor-and-cupido';

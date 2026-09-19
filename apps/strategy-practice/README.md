@@ -112,22 +112,23 @@ To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
 1. Add the game metadata to `src/components/games/gameList.ts`.
-2. Create a folder for the game under `packages/strategy-games/src/` with the standard
+2. Create a folder for the game under `src/components/games/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.test.ts` — see [Where it lives](#where-it-lives). A game there
-   exports a `StrategyGameConfig` object rather than a component;
-   `remove-divisor-multiple` is the one to copy.
-3. Export the config from `packages/strategy-games/index.ts`, then turn it into a page in
-   the barrel at `src/components/games/index.ts` —
-   `export const MyGame = strategyGameFactory(myGameConfig);` — keyed by the
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives).
+3. Wire it into the barrel at `src/components/games/index.ts`, keyed by the
    game's `gameList` key. The router in `src/components/app/app.tsx` picks it up
    automatically — no edit needed there.
 
-   The older games still live under `src/components/games/<game>/` and export a
-   component the barrel re-exports directly. Both shapes work; new games take
-   the first.
+   Two shapes are in use. Most games export the component `strategyGameFactory`
+   returns, and the barrel re-exports it: `export { MyGame } from './my-game/my-game';`.
+   `remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` instead
+   export a `StrategyGameConfig` object and let the barrel make the page:
+   `export const MyGame = strategyGameFactory(myGameConfig);`. Which shape everything
+   should settle on is open —
+   [#517](https://github.com/a-gondolkodas-orome/durer-aion/issues/517) — so copy
+   whichever of the two your reference game uses.
 
 Every field, edge case and enforcement rule of the engine API lives in
 [src/components/CLAUDE.md](src/components/CLAUDE.md). *It is recommended to copy
