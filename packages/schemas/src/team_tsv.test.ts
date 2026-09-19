@@ -124,6 +124,7 @@ describe('parseTeamsTsv', () => {
     // The line numbers still point at the file, so the blank line is not
     // silently closed up.
     expect(result.rows.map(parsed => parsed.row)).toEqual([2, 4]);
+    expect(result.dataLines).toBe(2);
   });
 
   it('rejects a file with no data rows', () => {
@@ -136,10 +137,11 @@ describe('parseTeamsTsv', () => {
     const content = file(`${row()}\textra`);
     const result = parseTeamsTsv(content);
 
-    expect(result.problems[0].code).toBe('wrong-column-count');
-    // The shifted values are not read at all, so no second complaint about them.
-    expect(result.problems).toHaveLength(2);
-    expect(result.problems[1].code).toBe('no-rows');
+    // The shifted values are not read at all, so no second complaint about them
+    // — and none that the file holds no rows either: it holds one, a bad one.
+    expect(codes(content)).toEqual(['wrong-column-count']);
+    expect(result.rows).toEqual([]);
+    expect(result.dataLines).toBe(1);
   });
 
   describe('the cells', () => {

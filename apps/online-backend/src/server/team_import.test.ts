@@ -312,6 +312,18 @@ describe('importTeamsFromTsv', () => {
       expect(result.badRows).toBe(1);
     });
 
+    it('counts a row refused unread, and calls the file one row long', async () => {
+      const teams = stubTeams();
+
+      // A tab inside a cell: the row is never parsed, and counting the parsed
+      // rows instead would report a bad row the file supposedly does not have.
+      const result = await importTeamsFromTsv(teams, file(`Alpha\tC\ta@b.com\tSuli\textra\t\t\t`));
+
+      expect(codes(result.problems)).toEqual(['wrong-column-count']);
+      expect(result.badRows).toBe(1);
+      expect(result.rows).toBe(1);
+    });
+
     // A missing header, or no rows at all, is a problem with the file and sits
     // on no line of it.
     it('does not count a problem about the file as a bad row', async () => {

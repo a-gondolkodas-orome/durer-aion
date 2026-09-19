@@ -120,8 +120,12 @@ export function ImportTeams(props: { onImported: () => void }) {
   // The server's own count when it has answered, because it caps the problems
   // it sends: counting the rows in that list would report 200 bad rows for a
   // file with 500, right above the note saying the list is short.
-  const errorLines = new Set(errors.map(problem => problem.row));
-  const badRows = result?.badRows ?? local.rows.filter(row => errorLines.has(row.row)).length;
+  //
+  // Counted off the problems either way, as the server counts it: a row refused
+  // unread — too many columns — is not among the parsed rows, so looking for it
+  // there would hide it and blame the file as a whole for one bad line.
+  const badRows = result?.badRows
+    ?? new Set(errors.filter(problem => problem.row !== 0).map(problem => problem.row)).size;
   const imported = result !== null && result.imported > 0;
 
   const edited = (text: string) => {
@@ -257,10 +261,10 @@ export function ImportTeams(props: { onImported: () => void }) {
           : tsv.trim() === ''
             ? 'Nincs betöltött fájl.'
             : errors.length === 0
-              ? `${local.rows.length} sor, hiba nélkül.`
+              ? `${local.dataLines} sor, hiba nélkül.`
               : badRows === 0
-                ? `${local.rows.length} sor. Magával a fájllal van baj, az importálás így nem futna le.`
-                : `${local.rows.length} sor, ebből ${badRows} hibás. Az importálás így nem futna le.`}
+                ? `${local.dataLines} sor. Magával a fájllal van baj, az importálás így nem futna le.`
+                : `${local.dataLines} sor, ebből ${badRows} hibás. Az importálás így nem futna le.`}
       </Stack>
 
       {problems.length > 0 && (

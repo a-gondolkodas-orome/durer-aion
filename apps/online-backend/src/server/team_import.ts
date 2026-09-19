@@ -171,7 +171,7 @@ export async function importTeamsFromTsv(
 
   const hasError = problems.some(problem => problem.severity === 'error');
   if (hasError || options.dryRun) {
-    return finish(0, parsed.rows.length, problems, []);
+    return finish(0, parsed.dataLines, problems, []);
   }
 
   const filled = parsed.rows.map(row => ({ row: row.row, team: fill(row, taken) }));
@@ -189,10 +189,10 @@ export async function importTeamsFromTsv(
       // a row number and no reason.
       found: refused.error.errors.map(item => item.message).join(' ') || refused.error.message,
     });
-    return finish(0, parsed.rows.length, problems, []);
+    return finish(0, parsed.dataLines, problems, []);
   }
 
-  return finish(filled.length, parsed.rows.length, problems, filled.map(({ team }) => exportRow(team)));
+  return finish(filled.length, parsed.dataLines, problems, filled.map(({ team }) => exportRow(team)));
 }
 
 /** The problems in English, for the command line. The admin page words the same

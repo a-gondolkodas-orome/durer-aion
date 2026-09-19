@@ -106,6 +106,10 @@ export interface ParsedTeamRow {
 
 export interface TeamTsvParseResult {
   rows: ParsedTeamRow[];
+  /** Data rows the file held, blank lines excluded. More than `rows.length`
+   * when a row was refused unread — too many columns — so it is this, not the
+   * parsed rows, that answers how big the file is. */
+  dataLines: number;
   problems: TeamTsvProblem[];
   /** No problem has severity `error`, so the file is safe to import. */
   ok: boolean;
@@ -149,6 +153,7 @@ function looksLikeTeamRow(cells: readonly string[]): boolean {
 export function parseTeamsTsv(content: string): TeamTsvParseResult {
   const problems: TeamTsvProblem[] = [];
   const rows: ParsedTeamRow[] = [];
+  let dataLines = 0;
   const error = (detail: Omit<TeamTsvProblem, 'severity'>) => problems.push({ ...detail, severity: 'error' });
   const warn = (detail: Omit<TeamTsvProblem, 'severity'>) => problems.push({ ...detail, severity: 'warning' });
 
@@ -186,6 +191,7 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
     if (line.trim() === '') {
       continue;
     }
+    dataLines++;
 
     const cells = line.split('\t').map(cell => cell.trim());
     if (cells.length > TEAM_IMPORT_HEADER.length) {
@@ -268,9 +274,12 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
     rows.push({ row, teamname, category, email, other, teamId, joinCode, credentials });
   }
 
-  if (rows.length === 0) {
+  // The lines the file has, not the ones that parsed: a file whose every row was
+  // refused unread is a file with bad rows, and saying it holds none on top of
+  // that sends the organiser looking for the wrong mistake.
+  if (dataLines === 0) {
     error({ row: 0, code: 'no-rows' });
   }
 
-  return { rows, problems, ok: !problems.some(item => item.severity === 'error') };
+  return { rows, dataLines, problems, ok: !problems.some(item => item.severity === 'error') };
 }

@@ -329,6 +329,22 @@ test('the import tab counts the rows at fault, not the rules they break', async 
   expect(screen.getByText('2 sor, ebből 1 hibás. Az importálás így nem futna le.')).toBeInTheDocument();
 });
 
+// A row with a tab inside a cell is never parsed, so counting the parsed rows
+// blamed the file as a whole — "Magával a fájllal van baj" — for one named line,
+// and a file of nothing but such rows was reported as holding no teams at all.
+test('the import tab blames the line, not the file, for a row it could not read', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha'), `${importRow('Bravo')}\textra`].join('\n'));
+
+  expect(await screen.findByText(/tabulátor került valamelyik mezőbe/)).toBeInTheDocument();
+  expect(screen.getByText(/3\. sor/)).toBeInTheDocument();
+  expect(screen.getByText('2 sor, ebből 1 hibás. Az importálás így nem futna le.')).toBeInTheDocument();
+  expect(screen.queryByText(/egyetlen csapatsort sem tartalmaz/)).not.toBeInTheDocument();
+});
+
 test('the import tab sends the pasted text as it stands, and hands back the codes', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
