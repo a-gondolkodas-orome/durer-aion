@@ -392,6 +392,29 @@ test('the join codes stay downloadable after a look at the teams tab', async () 
   expect(download).toHaveBeenCalledTimes(2);
 });
 
+// The teams are written by the time the download is attempted, so a download
+// that fails must not take the codes with it: this button is the only other
+// copy, and handing the table over after the download meant a throw lost it.
+test('the join codes survive a download the browser refuses', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  importAlpha();
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {
+    throw new Error('download blocked');
+  });
+  renderAdmin();
+  await openImportTab();
+  paste([HEADER, importRow('Alpha')].join('\n'));
+
+  fireEvent.click(screen.getByText('Importálás indítása'));
+
+  expect(await screen.findByText('Belépőkódok letöltése újra')).toBeInTheDocument();
+  // The import worked, and is reported as having worked: told otherwise, the
+  // organiser would run it again, and the second run cannot succeed.
+  expect(screen.getByText('1 csapat importálva')).toBeInTheDocument();
+  expect(screen.getByText(/nem sikerült letölteni/)).toBeInTheDocument();
+  expect(screen.queryByText('Váratlan hiba történt')).not.toBeInTheDocument();
+});
+
 // The check's answer replaces the import's, and the import's is where the codes
 // were. It would report every row as a team that already exists, too — which is
 // the import having worked.

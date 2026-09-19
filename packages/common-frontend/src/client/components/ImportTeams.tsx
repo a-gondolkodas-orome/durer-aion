@@ -185,14 +185,22 @@ export function ImportTeams(props: {
         enqueueSnackbar('Az importálás nem futott le, egy csapat sem került be.', { variant: 'error' });
         return;
       }
-      // Handed over without being asked for: this is the only copy of the join
-      // codes the import generated, and a closed tab means digging them out of
-      // the database by hand. The button below re-downloads the same table,
-      // which is what the page holds it for — a download the browser blocked is
-      // exactly when it is needed.
-      downloadTsv(exportFileName(), teamsToImportTsv(answer.exportTable));
-      enqueueSnackbar(`${answer.imported} csapat importálva`, { variant: 'success' });
+      // Handed to the page before anything else is attempted: the teams are
+      // written by now, and this table is the only copy of the join codes the
+      // import generated. Whatever happens next, the button below can still
+      // re-download it.
       props.onImported(answer.exportTable);
+      enqueueSnackbar(`${answer.imported} csapat importálva`, { variant: 'success' });
+      // Handed over without being asked for, since a closed tab means digging
+      // the codes out of the database by hand. Its own catch because the import
+      // has already succeeded: reporting a failed download as a failed import
+      // would send the organiser to re-run one that cannot work twice.
+      try {
+        downloadTsv(exportFileName(), teamsToImportTsv(answer.exportTable));
+      } catch {
+        enqueueSnackbar('A csapatok bekerültek, de a belépőkódokat nem sikerült letölteni. '
+          + 'Használd a „Belépőkódok letöltése újra” gombot.', { variant: 'warning' });
+      }
     } catch (e: unknown) {
       failed(e);
     } finally {
