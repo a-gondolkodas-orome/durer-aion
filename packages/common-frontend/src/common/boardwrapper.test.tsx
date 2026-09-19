@@ -78,6 +78,9 @@ describe('the strategy board while the judge is thinking', () => {
     expect(queryByText(t('strategy.guide.newGame'))).not.toBeInTheDocument();
     expect(queryByText(t('strategy.testGameButton'))).not.toBeInTheDocument();
     expect(queryByText(t('strategy.realGameButton'))).not.toBeInTheDocument();
+    // The other half of what that cell does: the two buttons are replaced, not
+    // just hidden, so the team is told the game it asked for is under way.
+    expect(getByText(t('strategy.guide.liveStarted'))).toBeInTheDocument();
   });
 
   test('says it is waiting during a game as well', () => {

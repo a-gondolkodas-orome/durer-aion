@@ -38,6 +38,14 @@ function botOwesAMove(state: State, bots: LocalOpts['bots']): boolean {
 /// The kick below is the same call boardgame.io makes for the match it creates,
 /// so its own subscription is what plays the bot — none of that is duplicated
 /// here.
+///
+/// What it hands on is the state off the sync payload, which has been through
+/// `getFilterPlayerView` for this client where boardgame.io's own call passes
+/// the authoritative one: `G` through the game's `playerView`, `plugins`
+/// through the plugins'. No game here defines a `playerView`, so today the two
+/// are the same state. One that did would be handing its bot the guesser's
+/// view of the board, which for a judge that knows the opening position is the
+/// wrong half of it.
 export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'storageKey'>) {
   const makeTransport = Local({ bots, persist: true, storageKey });
   // A sync repeated at the same state — React's StrictMode mounts twice — would
@@ -51,9 +59,15 @@ export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'st
       // factory has returned, so `transport` is assigned by then.
       transportDataCallback: (data: TransportData) => {
         transportOpts.transportDataCallback(data);
-        if (data.type !== 'sync') {
-          // The match moved, so whatever was kicked for is answered.
+        if (data.type === 'update' || data.type === 'patch') {
+          // The match moved, so whatever was kicked for is answered. Only
+          // these two move it: `matchData` and `chat` leave the turn where it
+          // was, and forgetting on one of those would let the next sync at the
+          // same state kick a second time.
           lastKicked = null;
+          return;
+        }
+        if (data.type !== 'sync') {
           return;
         }
         const [matchID, { state }] = data.args;
