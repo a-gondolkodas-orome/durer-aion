@@ -10,6 +10,20 @@ services:
       - ./apps/online-frontend/dist:/usr/share/nginx/html
     depends_on:
       - backend
+    healthcheck:
+      # Without one, `up --wait` calls this service up the moment the container is
+      # running — which includes an nginx that is restart-looping on a bad
+      # /etc/nginx/tls/*.conf, the one file a deployment mounts itself
+      # (DEPLOYMENT.md § 8). The whole command then reports success on a site that
+      # answers nothing.
+      #
+      # Any answer counts: a 404 for a missing dist and the TLS setup's 301 to
+      # HTTPS are both nginx serving, which is what is being asked. curl comes from
+      # this service's own Dockerfile, since the image carries none.
+      test: ["CMD", "curl", "-sS", "-o", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
   backend:
     build: .
     restart: unless-stopped
