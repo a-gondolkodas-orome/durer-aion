@@ -297,7 +297,10 @@ overwriting one that exists, and the dev container runs it for you. Six files:
 `.env.docker` for the docker stack, `.env.local` for `common-frontend`'s build,
 and an `.env` each for `online-backend`, `online-frontend`, `offline-frontend`
 and `relay-practise-frontend`. It also names any setting a file lacks that its
-sample has — key names only, never values. [`README.md`](README.md) §
+sample has — key names only, never values. `npm run env:check` is the same scan
+without the copying: it names what is absent and exits non-zero, which is what
+`stack:prod` runs before it builds — seeding a deployed host would start it on
+the samples' credentials. [`README.md`](README.md) §
 *Configuration you may want to change* is the table of what reads which, and
 says why values are left out of that comparison.
 
