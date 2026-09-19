@@ -194,6 +194,13 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
     dataLines++;
 
     const cells = line.split('\t').map(cell => cell.trim());
+    // A row that ends in a tab is spelling out the blanks an editor would have
+    // dropped, which is the same row either way. Popped before the count below,
+    // so that check stays about the thing it is for — a tab inside a cell,
+    // which shifts every column after it and puts a value in the surplus.
+    while (cells.length > TEAM_IMPORT_HEADER.length && cells[cells.length - 1] === '') {
+      cells.pop();
+    }
     if (cells.length > TEAM_IMPORT_HEADER.length) {
       // More columns than the format has means the row is not what it looks
       // like — most often a tab inside a cell, which has shifted everything

@@ -144,6 +144,36 @@ describe('parseTeamsTsv', () => {
     expect(result.dataLines).toBe(1);
   });
 
+  it('reads a row that ends in a tab as the row it is', () => {
+    // Its blanks written out rather than dropped — a spreadsheet asked for one
+    // column too many. The count is for a tab inside a cell; a row saying the
+    // last cells are empty is saying what a short row says, and refusing it
+    // would take the whole file with it.
+    const content = file(`${row()}\t`, `${row({ teamname: 'Bravo' })}\t\t`);
+    const result = parseTeamsTsv(content);
+
+    expect(result.problems).toEqual([]);
+    expect(result.rows.map(parsed => parsed.teamname)).toEqual(['Alpha', 'Bravo']);
+    expect(result.rows.map(parsed => parsed.credentials)).toEqual(['', '']);
+  });
+
+  it('still rejects a surplus column that carries a value', () => {
+    // The trailing blanks above are dropped; this one is not, because a tab
+    // inside a cell is what has pushed a value out here.
+    expect(codes(file(`${row()}\textra\t`))).toEqual(['wrong-column-count']);
+  });
+
+  it('still catches a shifted row whose surplus is only blanks', () => {
+    // What dropping the trailing blanks costs: this row is read rather than
+    // refused unread. It is refused all the same, and by the check that names
+    // the column and quotes the value — the shifted cell landed in "ID", and
+    // nothing a shift puts there looks like a UUIDv4.
+    const content = file(`Alpha\tC\ta@b.com\tSuli\textra\t\t\t`);
+
+    expect(codes(content)).toEqual(['invalid-team-id']);
+    expect(parseTeamsTsv(content).ok).toBe(false);
+  });
+
   describe('the cells', () => {
     it('rejects an empty team name', () => {
       expect(codes(file(row({ teamname: '' })))).toEqual(['empty-teamname']);

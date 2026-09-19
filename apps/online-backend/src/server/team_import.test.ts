@@ -315,9 +315,16 @@ describe('importTeamsFromTsv', () => {
     it('counts a row refused unread, and calls the file one row long', async () => {
       const teams = stubTeams();
 
-      // A tab inside a cell: the row is never parsed, and counting the parsed
-      // rows instead would report a bad row the file supposedly does not have.
-      const result = await importTeamsFromTsv(teams, file(`Alpha\tC\ta@b.com\tSuli\textra\t\t\t`));
+      // A tab inside "Other", on a row that fills every column: the shifted
+      // values run past the last one, so the row is never parsed — and counting
+      // the parsed rows instead would report a bad row the file supposedly does
+      // not have. (A shift on a row whose last cells are blank has nothing to
+      // push out here; the parser catches that one through the columns the
+      // values land in.)
+      const shifted = ['Alpha', 'C', 'a@b.com', 'Suli', 'extra',
+        '20638d0e-ac06-4e72-a734-b4fcdcaee425', '692-2481-797',
+        'a5303260-816d-4474-9024-42090672d74d'].join('\t');
+      const result = await importTeamsFromTsv(teams, file(shifted));
 
       expect(codes(result.problems)).toEqual(['wrong-column-count']);
       expect(result.badRows).toBe(1);
