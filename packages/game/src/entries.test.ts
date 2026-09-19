@@ -27,18 +27,31 @@ const collect = (dir: string) => {
 collect(root);
 
 // 'a/b.ts' + '../c' -> 'c.ts' (or c.tsx, c/index.ts, c/index.tsx — whichever
-// exists). A specifier this cannot place — one with an extension, say — must
-// fail loudly: an edge dropped here is a hole in every check below.
+// exists). A specifier this cannot place must fail loudly: an edge dropped here
+// is a hole in every check below.
+//
+// The `.js` spelling of a TypeScript file resolves too — `./moveMap.js` is
+// `moveMap.ts`. That is not a courtesy: tsc and rolldown both resolve it, so a
+// game written that way builds and ships, and a walk that stopped there would
+// refuse valid code rather than catch anything. Only `.js`/`.jsx`, the two a TS
+// source can be spelled as; every other extension, `.json` among them, still
+// throws, because this walk reads TypeScript and nothing else.
 const resolvePath = (fromFile: string, specifier: string): string => {
   const segments = fromFile.split("/").slice(0, -1);
   for (const part of specifier.split("/")) {
     if (part === "..") segments.pop();
     else if (part !== ".") segments.push(part);
   }
-  const base = segments.join("/");
+  const base = segments.join("/").replace(/\.jsx?$/, "");
   const target = [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]
     .find(candidate => sources.has(candidate));
-  if (target === undefined) throw new Error(`${fromFile} imports '${specifier}', which this walk cannot resolve`);
+  if (target === undefined) {
+    throw new Error(
+      `${fromFile} imports '${specifier}', which this walk cannot resolve. `
+      + "Imports inside this package name a .ts or .tsx file, with no extension or with the .js one; "
+      + "anything else — a .json table, an asset — has to become a TypeScript module.",
+    );
+  }
   return target;
 };
 
@@ -141,7 +154,8 @@ describe("the package's entries", () => {
     // Every game folder's strategy.ts, whether or not a registry names it.
     const bots = [...sources.keys()].filter(file => file.endsWith("/strategy.ts"));
     expect(bots.length).toBeGreaterThan(0);
-    expect(reached).toEqual(expect.arrayContaining(bots));
+    expect(reached, "a game folder's strategy.ts is reached by registering it in strategy-bots.ts")
+      .toEqual(expect.arrayContaining(bots));
     expect(reached.filter(isBoard)).toEqual([]);
   });
 
@@ -215,6 +229,27 @@ describe("the package's entries", () => {
       expect(() => relativeImports("probe.ts")).toThrow(/cannot read/);
     } finally {
       sources.delete("probe.ts");
+    }
+  });
+
+  // The resolver's own two cases, which the walks above only exercise on the
+  // spellings this package happens to use today. `./x.js` is a TypeScript file
+  // named the way tsc and rolldown both accept: the walk has to follow it, or a
+  // game written that way fails these tests while building and shipping fine.
+  // Everything else it cannot place still stops the run, because a dropped edge
+  // is a hole in every check above.
+  it("follows the .js spelling of a TypeScript file and stops on any other", () => {
+    sources.set("probe/target.ts", "export const a = 1;");
+    sources.set("probe/board.tsx", "export const B = () => null;");
+    try {
+      expect(resolvePath("probe/from.ts", "./target.js")).toBe("probe/target.ts");
+      expect(resolvePath("probe/from.ts", "./board.jsx")).toBe("probe/board.tsx");
+      expect(resolvePath("probe/from.ts", "./target")).toBe("probe/target.ts");
+      expect(() => resolvePath("probe/from.ts", "./target.json")).toThrow(/cannot resolve/);
+      expect(() => resolvePath("probe/from.ts", "./missing")).toThrow(/cannot resolve/);
+    } finally {
+      sources.delete("probe/target.ts");
+      sources.delete("probe/board.tsx");
     }
   });
 });
