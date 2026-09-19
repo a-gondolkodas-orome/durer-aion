@@ -160,7 +160,11 @@ export async function importTeamsFromTsv(
       row: refused.failedRow,
       severity: 'error',
       code: 'database-refused',
-      found: refused.error.errors.map(item => item.message).join(' '),
+      // `errors` is what sequelize's own validators fill in. A constraint the
+      // database itself refused can arrive with it empty — `UniqueConstraintError`
+      // defaults it to `[]` — and a refusal quoting nothing leaves the admin with
+      // a row number and no reason.
+      found: refused.error.errors.map(item => item.message).join(' ') || refused.error.message,
     });
     return finish(0, parsed.rows.length, problems, []);
   }

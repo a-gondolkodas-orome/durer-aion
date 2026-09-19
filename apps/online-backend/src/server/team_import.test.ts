@@ -184,6 +184,22 @@ describe('importTeamsFromTsv', () => {
     });
   });
 
+  // A constraint the database refused, rather than a rule sequelize checked
+  // itself: `UniqueConstraintError` defaults `errors` to `[]`, and a refusal
+  // quoting nothing would leave the admin a row number and no reason.
+  it('quotes the error itself when the database gave no per-field message', async () => {
+    const teams = stubTeams();
+    const error = { errors: [], message: 'duplicate key value violates unique constraint' } as unknown as ValidationError;
+    (teams.insertTeams as unknown as Mock).mockResolvedValue({ failedRow: 2, error });
+
+    const result = await importTeamsFromTsv(teams, file(row('Alpha')));
+
+    expect(result.problems).toEqual([{
+      row: 2, severity: 'error', code: 'database-refused',
+      found: 'duplicate key value violates unique constraint',
+    }]);
+  });
+
   it('names the row the database refused, and imports nothing', async () => {
     const teams = stubTeams();
     // Only the messages are read, so this is the shape rather than the class,
