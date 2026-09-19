@@ -12,8 +12,8 @@ import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './ra
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { appendOtherNote } from './model';
-import { addMinutesToEveryRunningMatch, addMinutesToMatch, type ExtendRefusal, type MatchClock, type MatchQueue }
-  from './add_minutes';
+import { addMinutesToEveryRunningMatch, addMinutesToMatch, isGrant, isMinutes, MINUTES_LIMIT, type ExtendRefusal,
+  type MatchClock, type MatchQueue } from './add_minutes';
 import { UniqueConstraintError } from 'sequelize';
 
 /**
@@ -61,19 +61,19 @@ export function configureTeamsRouter(
 
   /** The minutes an add-minutes route was asked for, or nothing.
    *
-   * A non-integer used to reach `setMinutes`, where it becomes an Invalid Date
-   * and throws on the way out of `toISOString` — a 500 for a typo. A negative
-   * one is not a typo: taking time back is the same operation.
+   * A number `setMinutes` cannot use reaches `toISOString` as an Invalid Date
+   * and throws — a 500 for a typo — so `isMinutes` is both the whole-number
+   * test and the bound; `add_minutes.ts` says why there is a bound at all.
    *
    * `Number` is not the test. It reads `null` and `[]` as nought and `true` as
    * one, so a body nobody meant would have moved every running match. */
-  const bodyMinutes = (sent: unknown): number | undefined =>
-    typeof sent === "number" && Number.isInteger(sent) ? sent : undefined;
+  const bodyMinutes = (sent: unknown): number | undefined => isMinutes(sent) ? sent : undefined;
 
   /** {@link bodyMinutes} for a path segment, which is always a string. Digits
-   *  rather than `Number`, which also reads `1e3` and `0x10`. */
+   *  rather than `Number`, which also reads `1e3` and `0x10`; the digits alone
+   *  are not enough, since enough of them are an Invalid Date too. */
   const pathMinutes = (raw: string): number | undefined =>
-    /^-?\d+$/.test(raw) ? Number(raw) : undefined;
+    /^-?\d+$/.test(raw) ? bodyMinutes(Number(raw)) : undefined;
 
   /** The status a refusal answers with, and the line that says why. */
   const refusalStatus = (reason: ExtendRefusal, matchID: string): [number, string] => {
@@ -154,7 +154,8 @@ export function configureTeamsRouter(
   router.post("/game/admin/:matchId/addminutes/:minutes", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = pathMinutes(ctx.params.minutes)
-      ?? ctx.throw(400, "The minutes in the path must be a whole number.");
+      ?? ctx.throw(400,
+        `The minutes in the path must be a whole number between -${MINUTES_LIMIT} and ${MINUTES_LIMIT}.`);
     const result = await addMinutesToMatch(matchClock(ctx), { matchID, minutes });
     if (result.status === "refused") refuse(ctx, result.reason, matchID);
     else ctx.body = { updatedEndTime: result.endAt, matchID: result.matchID, team: result.team };
@@ -176,11 +177,12 @@ export function configureTeamsRouter(
   router.post("/game/admin/addminutes", adminAuth, koaBody(), async (ctx) => {
     const body = ctx.request.body as { minutes?: unknown; grant?: unknown } | undefined;
     const minutes = bodyMinutes(body?.minutes)
-      ?? ctx.throw(400, "Expected { minutes: integer, grant: string }.");
+      ?? ctx.throw(400,
+        `Expected minutes to be a whole number between -${MINUTES_LIMIT} and ${MINUTES_LIMIT}.`);
     const sent: unknown = body?.grant;
-    const grant = typeof sent === "string" && sent !== ""
+    const grant = isGrant(sent)
       ? sent
-      : ctx.throw(400, "Expected { minutes: integer, grant: string }.");
+      : ctx.throw(400, "Expected grant to be 1 to 32 characters of A-Z, a-z, 0-9, - or _.");
 
     ctx.body = await addMinutesToEveryRunningMatch(matchClock(ctx), { minutes, grant });
   });

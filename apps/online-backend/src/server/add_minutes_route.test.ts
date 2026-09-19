@@ -7,6 +7,7 @@ import type { Server, StorageAPI } from "boardgame.io";
 import type { TeamsRepository } from "./db";
 import type { TeamModel } from "./model";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
+import { MINUTES_LIMIT } from "./add_minutes";
 import { configureTeamsRouter } from "./router";
 
 const PASSWORD = "organiser-password";
@@ -79,7 +80,9 @@ describe("POST /game/admin/addminutes", () => {
   // and throws on the way out of `toISOString` — a 500 for a typo. The three
   // after the fraction are what `Number` alone let through: it reads `null`
   // and `[]` as nought and `true` as one, so a body nobody meant extended
-  // every running match by a number nobody typed.
+  // every running match by a number nobody typed. A whole number is not enough
+  // either: `Number.isInteger(1e21)` is true, and 1e21 minutes is that same
+  // Invalid Date.
   it.each([
     ["no minutes", { grant: "a1b2c3d4" }],
     ["minutes that are not a number", { minutes: "soon", grant: "a1b2c3d4" }],
@@ -88,9 +91,18 @@ describe("POST /game/admin/addminutes", () => {
     ["null minutes", { minutes: null, grant: "a1b2c3d4" }],
     ["minutes sent as a boolean", { minutes: true, grant: "a1b2c3d4" }],
     ["minutes sent as an array", { minutes: [], grant: "a1b2c3d4" }],
+    ["minutes no date can hold", { minutes: 1e21, grant: "a1b2c3d4" }],
+    ["more minutes than the bound", { minutes: MINUTES_LIMIT + 1, grant: "a1b2c3d4" }],
+    ["more minutes taken back than the bound", { minutes: -MINUTES_LIMIT - 1, grant: "a1b2c3d4" }],
     ["no grant", { minutes: 10 }],
     ["an empty grant", { minutes: 10, grant: "" }],
     ["a grant that is not a string", { minutes: 10, grant: 7 }],
+    // `other` has a length, and a note too long to fit is not written at all —
+    // which would leave the retry it exists for applying a second time.
+    ["a grant too long for the team's notes", { minutes: 10, grant: "a".repeat(33) }],
+    // The note is delimited by these, so a grant carrying them runs into it.
+    ["a grant with a space in it", { minutes: 10, grant: "a1b2 c3d4" }],
+    ["a grant with a bracket in it", { minutes: 10, grant: "a1b2]c3d4" }],
   ])("refuses %s", async (_case, body) => {
     const request = await serve();
 
@@ -102,6 +114,12 @@ describe("POST /game/admin/addminutes", () => {
     const request = await serve();
 
     expect((await request({ minutes: -10, grant: "a1b2c3d4" })).status).toBe(200);
+  });
+
+  it("takes the bound itself", async () => {
+    const request = await serve();
+
+    expect((await request({ minutes: MINUTES_LIMIT, grant: "a1b2c3d4" })).status).toBe(200);
   });
 });
 
@@ -144,11 +162,12 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
       });
   }
 
-  it.each(["soon", "1.5", "1e3", "0x10"])("refuses %s minutes", async (minutes) => {
-    const request = await serve();
+  it.each(["soon", "1.5", "1e3", "0x10", "9".repeat(30), `${MINUTES_LIMIT + 1}`])(
+    "refuses %s minutes", async (minutes) => {
+      const request = await serve();
 
-    expect((await request(minutes)).status).toBe(400);
-  });
+      expect((await request(minutes)).status).toBe(400);
+    });
 
   it.each(["10", "-10"])("goes on to look for the match for %s minutes", async (minutes) => {
     const request = await serve();

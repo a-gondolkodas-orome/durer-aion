@@ -45,6 +45,36 @@ export interface MatchClock {
   pubSub: Parameters<typeof TransportAPI>[3];
 }
 
+/**
+ * The most one extension may move a clock, in either direction.
+ *
+ * A bound rather than only a whole-number check: `setMinutes` turns a large
+ * enough number into an Invalid Date, which throws on the way out of
+ * `toISOString` — the very failure refusing a fractional number was meant to
+ * stop, and `Number.isInteger(1e21)` is true. A day is far longer than a round,
+ * so past it is a typo, and this is the one operation that reaches every
+ * running match at once.
+ */
+export const MINUTES_LIMIT = 24 * 60;
+
+/** Minutes an extension may be asked for. Negative is not a typo: taking time
+ *  back is the same operation. */
+export const isMinutes = (value: unknown): value is number =>
+  typeof value === "number" && Number.isSafeInteger(value) && Math.abs(value) <= MINUTES_LIMIT;
+
+/**
+ * A grant that can be recorded against the matches it moves.
+ *
+ * Bounded because the record is a note in `other`, which holds the organisers'
+ * own text and has a length (`OTHER_MAX_LENGTH` in model.ts): a grant long
+ * enough to push the note past it is a grant nothing records, and an unrecorded
+ * grant is one a retry applies a second time — the opposite of what a grant is
+ * for. The charset keeps the trail readable, since `[`, `]` and spaces are what
+ * delimit a note from its neighbours.
+ */
+export const isGrant = (value: unknown): value is string =>
+  typeof value === "string" && /^[A-Za-z0-9_-]{1,32}$/.test(value);
+
 /** What one extension writes into the team's notes, and what a repeat of the
  *  same grant looks for. The match id is part of it so a grant applied to a
  *  team with two matches running is not taken for the other one. */
