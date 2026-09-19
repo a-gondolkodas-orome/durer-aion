@@ -263,7 +263,10 @@ are nginx's, and Vite's proxy shows you neither.
   clash, still nothing written. This is the check only the server can make.
 - `scripts/test.tsv`, all 999 rows — the size check. The generated join codes
   download on their own when it succeeds, the Csapatok tab shows the teams with
-  no reload, and one of those codes logs a team in at `http://localhost`.
+  no reload, and one of those codes logs a team in at `http://localhost`. Coming
+  back to Importálás from that tab, *Belépőkódok letöltése újra* is still there
+  and still gives those codes: no screen here shows a join code, so that button
+  is the last copy on the page if the browser blocked the first download.
 - that same downloaded file fed straight back: every row refused as a
   duplicate, and no team doubled.
 - the archive round trip: delete all, download the batch as import-TSV, import

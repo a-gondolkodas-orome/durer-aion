@@ -38,6 +38,11 @@ export function Admin(props: { teamId?: string }) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
   const [tab, setTab] = useState<AdminTab>('teams');
+  // The join codes the last import generated, held here rather than in the tab
+  // that made them: the import's own download is their only copy — no screen on
+  // this page shows a join code — and the first thing an organiser does after
+  // an import is go and look at the teams, which unmounts that tab.
+  const [importedCodes, setImportedCodes] = useState<string[][] | null>(null);
 
   // Read off the list rather than kept as state, so a team deleted from the
   // `/admin/<teamId>` page drops out with the list's next load and the page
@@ -111,7 +116,9 @@ export function Admin(props: { teamId?: string }) {
         </Tabs>}
         {!teamFromPath && tab === 'deleted' &&
           <DeletedTeams setConfirmDialog={setConfirmDialog} onRestored={() => { void mutate(); }}/>}
-        {!teamFromPath && tab === 'import' && <ImportTeams onImported={() => { void mutate(); }}/>}
+        {!teamFromPath && tab === 'import' && <ImportTeams
+          exported={importedCodes}
+          onImported={(exportTable) => { setImportedCodes(exportTable); void mutate(); }}/>}
         {showTeams && <Stack sx={{
           height: "635px",
         }}>

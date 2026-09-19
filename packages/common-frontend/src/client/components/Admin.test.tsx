@@ -366,6 +366,52 @@ test('the import tab sends the pasted text as it stands, and hands back the code
   expect(download).toHaveBeenCalledOnce();
 });
 
+/** An import that works, so a test can go on to what happens after one. */
+const importAlpha = () => vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+  imported: 1, rows: 1, exportTable: [['Alpha', 'C', 'a@b.com', 'x', 'id', '111-2222-333', 'creds']],
+}));
+
+// The table those codes are in is the page's, not the tab's: no screen here
+// shows a join code, and the first thing an organiser does after an import is
+// go and look at the teams that just landed — which unmounts the tab.
+test('the join codes stay downloadable after a look at the teams tab', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  importAlpha();
+  const download = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  renderAdmin();
+  await openImportTab();
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(await screen.findByText('Belépőkódok letöltése újra')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('Csapatok'));
+  await openImportTab();
+  fireEvent.click(await screen.findByText('Belépőkódok letöltése újra'));
+
+  // The import's own download, then this one: the same table both times.
+  expect(download).toHaveBeenCalledTimes(2);
+});
+
+// The check's answer replaces the import's, and the import's is where the codes
+// were. It would report every row as a team that already exists, too — which is
+// the import having worked.
+test('the import tab stops a check on text it has just imported', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = importAlpha();
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  renderAdmin();
+  await openImportTab();
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  await screen.findByText('Belépőkódok letöltése újra');
+  importTeams.mockClear();
+
+  fireEvent.click(screen.getByText('Ellenőrzés'));
+
+  expect(importTeams).not.toHaveBeenCalled();
+  expect(screen.getByText('Belépőkódok letöltése újra')).toBeInTheDocument();
+});
+
 // Only the server knows what the live teams hold, so "Ellenőrzés" is the one
 // way to find out before writing anything.
 test('the import tab reports what a live team blocks, without importing', async () => {

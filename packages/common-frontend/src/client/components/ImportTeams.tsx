@@ -96,8 +96,14 @@ function exportFileName(): string {
 /// rather than a file left on the server.
 ///
 /// `onImported` fires when teams are live, since the list the page's other tab
-/// shows is stale from that moment.
-export function ImportTeams(props: { onImported: () => void }) {
+/// shows is stale from that moment, and it carries the join codes the import
+/// generated. Those are held by the page rather than here: no admin screen
+/// shows a join code, so this table is the only copy, and this tab is unmounted
+/// the moment the organiser goes to look at the teams that just landed.
+export function ImportTeams(props: {
+  exported: string[][] | null,
+  onImported: (exportTable: string[][]) => void,
+}) {
   const importTeams = useImportTeams();
   const { enqueueSnackbar } = useSnackbar();
   const [tsv, setTsv] = useState('');
@@ -127,6 +133,9 @@ export function ImportTeams(props: { onImported: () => void }) {
   const badRows = result?.badRows
     ?? new Set(errors.filter(problem => problem.row !== 0).map(problem => problem.row)).size;
   const imported = result !== null && result.imported > 0;
+  // Read out of props once so the button below can be sure of it: a narrowing
+  // on `props.exported` would not hold inside the click handler.
+  const exported = props.exported;
 
   const edited = (text: string) => {
     setTsv(text);
@@ -170,10 +179,12 @@ export function ImportTeams(props: { onImported: () => void }) {
       }
       // Handed over without being asked for: this is the only copy of the join
       // codes the import generated, and a closed tab means digging them out of
-      // the database by hand. The button below re-downloads the same file.
+      // the database by hand. The button below re-downloads the same table,
+      // which is what the page holds it for — a download the browser blocked is
+      // exactly when it is needed.
       downloadTsv(exportFileName(), teamsToImportTsv(answer.exportTable));
       enqueueSnackbar(`${answer.imported} csapat importálva`, { variant: 'success' });
-      props.onImported();
+      props.onImported(answer.exportTable);
     } catch (e: unknown) {
       failed(e);
     } finally {
@@ -210,7 +221,10 @@ export function ImportTeams(props: { onImported: () => void }) {
         <Button
           variant="outlined"
           color="primary"
-          disabled={busy !== null || tsv.trim() === ''}
+          // Stopped once this text is imported, like the button beside it: a
+          // check now would report every row of it as a team that already
+          // exists, which is the import having worked.
+          disabled={busy !== null || tsv.trim() === '' || imported}
           onClick={() => { void check(tsv); }}
         >
           Ellenőrzés
@@ -226,11 +240,11 @@ export function ImportTeams(props: { onImported: () => void }) {
         >
           {busy === 'import' ? `${local.rows.length} csapat importálása…` : 'Importálás indítása'}
         </Button>
-        {imported && result !== null && (
+        {exported !== null && (
           <Button
             variant="outlined"
             color="primary"
-            onClick={() => { downloadTsv(exportFileName(), teamsToImportTsv(result.exportTable)); }}
+            onClick={() => { downloadTsv(exportFileName(), teamsToImportTsv(exported)); }}
           >
             Belépőkódok letöltése újra
           </Button>
