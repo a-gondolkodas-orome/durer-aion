@@ -207,7 +207,8 @@ part of them; the rest are checked by someone actually doing them:
   the browser: `packages/common-frontend/src/common/local-with-bots.test.ts`
 - a strategy match played over a real socket — the player's move, the bot's
   answer, a reload resuming where it left off, and a match left on the judge's
-  turn played on: `apps/online-backend/src/socketio_transport.test.ts`. The only
+  turn played on for the team and nobody else:
+  `apps/online-backend/src/socketio_transport.test.ts`. The only
   suite that crosses the wire, and it is still no substitute for the round
   against `npm run stack:up`: it has no nginx and no built frontend in front of
   it.

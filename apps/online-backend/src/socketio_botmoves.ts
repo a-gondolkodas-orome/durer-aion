@@ -138,7 +138,9 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Refuses a `sync` naming a match that storage does not have.
+        /** Refuses a `sync` naming a match that storage does not have, and for
+         * one it does, hands the packet to `resumeBotTurn` before letting it
+         * through.
          *
          * boardgame.io's `Master.onSync` skips its credential check when
          * `playerID` is null — the spectator case it is written for — and
@@ -157,7 +159,7 @@ export class SocketIOButBotMoves extends SocketIO {
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
-        socket.use(([event, matchID]: IOTypes.Event, next) => {
+        socket.use(([event, matchID, playerID, credentials]: IOTypes.Event, next) => {
           if (event !== "sync") {
             next();
             return;
@@ -167,8 +169,13 @@ export class SocketIOButBotMoves extends SocketIO {
             return;
           }
           void fetch(app.context.db, matchID, { metadata: true } as const).then(
-            ({ metadata }) => {
-              next(metadata === undefined ? new Error(`sync for unknown match ${matchID}`) : undefined);
+            async ({ metadata }) => {
+              if (metadata === undefined) {
+                next(new Error(`sync for unknown match ${matchID}`));
+                return;
+              }
+              await this.resumeBotTurn(app, game, bot, matchID, metadata, playerID, credentials);
+              next();
             },
             (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
           );
@@ -203,35 +210,82 @@ export class SocketIOButBotMoves extends SocketIO {
           }
           await this.takeBotTurn(app, game, socket, bot, matchID);
         });
-
-        /** The other half of the same job. A player's move is the only thing
-         *  that asks the bot to play, so a match whose bot move never happened
-         *  — the backend restarted mid-turn, or the bot's own update lost a
-         *  stateID race — is one nobody will ever move again: the team cannot
-         *  play out of turn, and the board sits on "waiting for the server"
-         *  for good (issue #133). A reconnect is the moment someone is there
-         *  to be stuck, so it is where the server looks again.
-         *
-         *  Only ever reached for a match storage has: the middleware above
-         *  refuses a sync naming any other. The move it produces goes out over
-         *  the match's pubsub channel, which boardgame.io's own sync handler
-         *  puts this socket on before the bot has finished thinking. */
-        socket.on("sync", async (...args: Parameters<Master['onSync']>) => {
-          const [matchID] = args;
-          await this.takeBotTurn(app, game, socket, bot, matchID);
-        });
       });
+    }
+  }
+
+  /** The other half of the job `update` does. A player's move is the only
+   *  other thing that asks the bot to play, so a match whose bot move never
+   *  happened — the backend restarted mid-turn, or the bot's own update lost a
+   *  stateID race — is one nobody will ever move again: the team cannot play
+   *  out of turn, and the board sits on "waiting for the server" for good
+   *  (issue #133). A reconnect is the moment someone is there to be stuck, so
+   *  it is where the server looks again.
+   *
+   *  Run from the sync middleware rather than from a second `sync` listener,
+   *  because a listener beside boardgame.io's own can do neither of the two
+   *  things this needs. It cannot see the credential check: `Master.onSync`
+   *  makes it and answers nothing when it fails, so a sibling would take the
+   *  turn for a caller boardgame.io had just refused. And it cannot order
+   *  itself against the answer: boardgame.io puts the socket on the match's
+   *  pubsub channel only after `onSync` returns, so a bot move published
+   *  before that reaches nobody, while the answer already on its way carries
+   *  the state from before it — #133 again, on the very reload meant to cure
+   *  it. From the middleware the turn is taken *first*, and `onSync` reads it
+   *  back out of storage, so the answer carries the bot's move instead of
+   *  racing it. What that costs is the bot's thinking time added to the one
+   *  sync that lands on its turn, which is the right way round: the team waits
+   *  once and sees the board it should, rather than seeing a stale one at once
+   *  and depending on a push that may never arrive.
+   *
+   *  Answers nothing and throws nothing: a bot that could not play is no
+   *  reason to drop the team's sync. */
+  private async resumeBotTurn(
+    app: Server.App,
+    game: Game,
+    bot: Bot,
+    matchID: string,
+    metadata: Server.MatchData,
+    playerID: unknown,
+    credentials: unknown
+  ): Promise<void> {
+    // `Master.onSync` skips this when playerID is null — the spectator case —
+    // and a spectator is not who the bot owes a move to, so this skips the
+    // turn instead of the check.
+    if (typeof playerID !== "string") {
+      return;
+    }
+    try {
+      const authentic = await app.context.auth.authenticateCredentials({
+        playerID,
+        credentials: typeof credentials === "string" ? credentials : undefined,
+        metadata,
+      });
+      if (!authentic) {
+        return;
+      }
+      // No socket: `Master.onUpdate` only ever publishes to the match's
+      // channel, and this caller is not on it yet — the router's add-minutes
+      // handler passes null for the same reason.
+      await this.takeBotTurn(app, game, null, bot, matchID);
+    } catch (error) {
+      console.error(`could not take the bot's turn on a sync for match ${matchID}`, error);
     }
   }
 
   /** Plays the bot's turn if the match is waiting on one, and closes the match
    *  if that turn ended it. Both halves go through the match's own queue, which
    *  is what lets a player's move and a reconnect both call this: whichever
-   *  runs second finds the turn already taken and does nothing. */
+   *  runs second finds the turn already taken and does nothing.
+   *
+   *  The second half runs whether or not the first played: the move that ends
+   *  a match is often the team's own, `turn.onMove` calling `events.endGame()`
+   *  on a move made after the clock ran out (a game's `game.ts`). Reading the
+   *  state back for a reconnect that moved nothing is the price of that. */
   private async takeBotTurn(
     app: Server.App,
     game: Game,
-    socket: IOTypes.Socket,
+    socket: IOTypes.Socket | null,
     bot: Bot,
     matchID: string
   ): Promise<void> {

@@ -21,13 +21,18 @@ import { Server } from "boardgame.io/server";
 import { MyGameWrappers, gameWrapper, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
 import botWrapper from "./botwrapper";
-import { BOT_ID, SocketIOButBotMoves } from "./socketio_botmoves";
+import { BOT_ID, SocketIOButBotMoves, fetch as fetchMatch } from "./socketio_botmoves";
+import { getBotCredentials } from "./server/common";
 
 const GAME_NAME = strategyNames.E;
 const game = { ...gameWrapper(MyGameWrappers.E()), name: GAME_NAME };
 const HUMAN_ID = "0";
 // Each test gets its own server and its own store, so one id is enough.
 const MATCH_ID = "match-under-test";
+/** Stands in for what `server/team_manage.ts` injects into a real match. Only
+ *  the tests that need boardgame.io to ask for credentials use it — it is
+ *  having them at all that turns the check on. */
+const TEAM_CREDENTIALS = "the-team's-credentials";
 
 /** How long a step may take before the test calls it a hang. The bot pauses
  *  400ms for UX (botwrapper.ts) and then the move travels back, so this is
@@ -127,10 +132,22 @@ describe("the socket transport a browser talks to", () => {
     return socket;
   }
 
-  /** A match as the router makes one, straight into the server's store. */
-  async function createStoredMatch(): Promise<void> {
+  /** A match as the router makes one, straight into the server's store.
+   *
+   *  With `teamCredentials`, both players are given theirs the way
+   *  `server/team_manage.ts` does — the team's and the bot's. It has to be both
+   *  or neither: boardgame.io asks for credentials on a match where *any*
+   *  player has them, so injecting only the team's would have the bot's own
+   *  move refused, and a test could then pass because the bot was never
+   *  allowed to play rather than because it was never asked. Left out, the
+   *  match asks for none, which is what every other test here wants. */
+  async function createStoredMatch(teamCredentials?: string): Promise<void> {
     const match = createMatch({ game, numPlayers: 2, setupData: undefined, unlisted: true });
     if ("setupDataError" in match) throw new Error(match.setupDataError);
+    if (teamCredentials !== undefined) {
+      match.metadata.players[HUMAN_ID].credentials = teamCredentials;
+      match.metadata.players[BOT_ID].credentials = getBotCredentials();
+    }
     await server.db.createMatch(MATCH_ID, match);
   }
 
@@ -205,20 +222,42 @@ describe("the socket transport a browser talks to", () => {
 
   /** The regression: a player's move used to be the only thing that asked the
    *  bot to play, so a match left on the judge's turn stayed there however
-   *  often the team came back to it (#133). */
+   *  often the team came back to it (#133).
+   *
+   *  Asserted on the sync's own answer rather than on a later `update`: the
+   *  turn is taken in front of boardgame.io's sync handler, so the state it
+   *  reads back out of storage already carries the bot's move. There is no
+   *  push to wait for here, which is the point — the socket is not yet on the
+   *  match's channel to receive one. */
   it("plays the judge's turn a team comes back to", async () => {
     await createStoredMatch();
     const stuck = stateOnTheJudgesTurn();
     expect(stuck.ctx.currentPlayer).toBe(BOT_ID);
     await server.db.setState(MATCH_ID, stuck);
 
-    const socket = await connectClient();
-    const botAnswered = updateMatching(socket, ({ G }) => G.stonesLeft > 0);
-    await syncAs(socket, MATCH_ID, HUMAN_ID);
-    const state = await botAnswered;
+    const state = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
 
     expect(state.G.stonesRight).toBeGreaterThan(0);
     expect(state.ctx.currentPlayer).not.toBe(BOT_ID);
+  });
+
+  /** The credential check belongs to boardgame.io's `Master.onSync`, which
+   *  answers a sync it refuses with nothing at all. The bot's turn is taken in
+   *  front of that, so it makes the same check itself — otherwise anyone who
+   *  learned a matchID could drive a competition match along. */
+  it("leaves the judge's turn alone for a sync it cannot authenticate", async () => {
+    await createStoredMatch(TEAM_CREDENTIALS);
+    await server.db.setState(MATCH_ID, stateOnTheJudgesTurn());
+
+    const socket = await connectClient();
+    socket.emit("sync", MATCH_ID, HUMAN_ID, "not-the-team's-credentials", 2);
+    // Asserting a non-event, so it is waited out rather than awaited: the bot
+    // pauses 400ms for UX (botwrapper.ts) and the store is in memory, so a
+    // turn that was going to be taken has been by now.
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    const { state } = await fetchMatch(server.db, MATCH_ID, { state: true } as const);
+    expect(state.ctx.currentPlayer).toBe(BOT_ID);
   });
 
   it("refuses a sync for a match nobody created", async () => {
