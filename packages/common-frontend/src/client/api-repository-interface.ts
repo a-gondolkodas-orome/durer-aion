@@ -1,6 +1,6 @@
 // cspell:ignore asjdgaskjd
 
-import { DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import { BulkAddMinutesDto, DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';
 import type { BoardProps } from 'boardgame.io/react';
 
@@ -33,6 +33,8 @@ export interface ClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
+  /** Every running match at once, under one grant — see BulkAddMinutesDto. */
+  addMinutesToEveryone(minutes: number, grant: string): Promise<BulkAddMinutesDto>;
   removeTeam(teamId: string): Promise<void>;
   /** Every team at once, archived as one batch: how many, and the batch's `deletedAt`. */
   removeAllTeams(): Promise<{ deleted: number, deletedAt: string }>;
@@ -275,6 +277,9 @@ export class MockClientRepository implements ClientRepository {
   }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
+  }
+  addMinutesToEveryone(_minutes: number, _grant: string): Promise<BulkAddMinutesDto> {
+    return Promise.resolve({ extended: [], alreadyGranted: [], problems: [] });
   }
   removeTeam(_teamId: string): Promise<void> {
     throw Error("NOT call this");

@@ -3,16 +3,48 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, BulkAddMinutesDto } from "common-frontend";
+
+/** Long enough for the bulk time extension.
+ *
+ * It walks every running match one at a time, each behind that match's own
+ * queue and so behind any bot move already on it — two matches per team, and a
+ * thousand teams is a file `scripts/test.tsv` already has. Ten seconds is the
+ * request timeout for everything else and it aborted the walk mid-round, which
+ * costs more than waiting: a retry re-reads every match it had already done.
+ * nginx has to allow the same (`apps/online-frontend/nginx/nginx.conf`) — the
+ * route sends nothing until the walk is over, so its read timeout is what the
+ * browser is really waiting on. */
+const BULK_TIMEOUT_MS = 300_000;
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
 // (vite.config.ts) the way nginx does in the docker stack.
-function apiAxiosInstance(): AxiosInstance {
+function apiAxiosInstance(timeout = 10000): AxiosInstance {
   return axios.create({
     baseURL: '/',
-    timeout: 10000,
+    timeout,
   });
+}
+
+/** What a refused extension says to the organiser, or nothing for a refusal
+ *  this does not know.
+ *
+ * The route answers a refusal with the kind beside the status
+ * (`server/router.ts`), because the status does not tell the two apart: a match
+ * that has finished and an id the team has moved on from are both 501, and
+ * they need different things said. The keys are written out rather than built
+ * from the kind so `npm run i18n:check` can see them.
+ */
+function refusalMessage(kind: string | undefined, running: string | undefined): string | undefined {
+  switch (kind) {
+    case 'other-match-running':
+      return i18n.t('admin.addMinutes.otherMatchRunning', { running });
+    case 'no-match-running':
+      return i18n.t('admin.addMinutes.noMatchRunning');
+    default:
+      return undefined;
+  }
 }
 
 function makeAxiosError(any_error: unknown): AxiosError {
@@ -185,12 +217,36 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      if (err.code === "501") {
-        throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
+      // `err.response?.status`, as every other branch here reads it. `err.code`
+      // is axios's own string — "ERR_BAD_REQUEST" — never the HTTP status, so
+      // this never fired and both of the route's 501s reached the organiser as
+      // "Váratlan hiba történt" (#507).
+      if (err.response?.status === 501) {
+        const refusal = err.response.data as { kind?: string, running?: string } | undefined;
+        const said = refusalMessage(refusal?.kind, refusal?.running);
+        if (said !== undefined) {
+          throw new Error(said, { cause: e });
+        }
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
+  }
+
+  /** Every running match at once. One request rather than one per team: the
+   *  server walks the list as it is, and puts each write on its match's own
+   *  queue. `grant` must be the same on a retry — that is what stops a match
+   *  the server already moved from moving twice. */
+  async addMinutesToEveryone(minutes: number, grant: string): Promise<BulkAddMinutesDto> {
+    let result;
+    try {
+      result = await apiAxiosInstance(BULK_TIMEOUT_MS).post('/game/admin/addminutes', { minutes, grant });
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+    return result.data as BulkAddMinutesDto;
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {

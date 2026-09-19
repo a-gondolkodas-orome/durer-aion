@@ -42,6 +42,18 @@ export interface DeletedTeamDto extends TeamModelDto {
   deletionId: number;
 }
 
+/// What one bulk time extension did, by team name.
+///
+/// `alreadyGranted` is what makes asking twice safe: a match already carrying
+/// the grant is reported rather than moved again. `problems` names the teams a
+/// reviewer has to look at, with the server's own reason code — rendered where
+/// the organiser reads it, not here.
+export interface BulkAddMinutesDto {
+  extended: string[];
+  alreadyGranted: string[];
+  problems: { teamName: string; matchID: string; reason: string }[];
+}
+
 /// What a batch restore did: team names live again, and team names a live
 /// team blocked, which stay archived.
 export interface RestoreResultDto {

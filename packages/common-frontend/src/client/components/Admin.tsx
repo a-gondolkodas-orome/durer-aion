@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
+import { useAddMinutesToEveryone, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
@@ -15,6 +15,8 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { bulkAddMinutesMessage, bulkAddMinutesRetryMessage, bulkAddMinutesVariant, forgetGrant, grantFor }
+  from '../utils/bulk-add-minutes';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -29,7 +31,7 @@ type AdminTab = 'teams' | 'deleted';
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
-  const addMinutes = useAddMinutes();
+  const addMinutesToEveryone = useAddMinutesToEveryone();
   const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
@@ -37,6 +39,10 @@ export function Admin(props: { teamId?: string }) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
   const [tab, setTab] = useState<AdminTab>('teams');
+  // A walk is in flight: the button that starts one stays down until it
+  // answers, because the dialog that confirmed it has already closed and there
+  // would otherwise be nothing on the page saying the round is being extended.
+  const [extending, setExtending] = useState(false);
 
   // Read off the list rather than kept as state, so a team deleted from the
   // `/admin/<teamId>` page drops out with the list's next load and the page
@@ -229,22 +235,45 @@ export function Admin(props: { teamId?: string }) {
               .required('Nincs megadva érték')
             })}
           onSubmit={(values) => {
+            // Formik keeps what was typed, and `FormikValues` is `any`, so the
+            // number Yup validated above is still a string here.
+            const minutes = Number(values.time);
+            // The same grant as the walk that never answered, if there was one:
+            // the server refuses to apply it twice, so pressing again is the
+            // retry. A fresh one would be a second, deliberate extension and
+            // would move every match the abandoned walk had already reached.
+            const grant = grantFor(minutes);
             setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${minutes} perccel`,
               confirm: async () => {
+                setExtending(true);
                 try {
-                  for (const a of data ?? []) {
-                    if (a.relayMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.relayMatch.matchID, values.time);
-                    }
-                    if (a.strategyMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.strategyMatch.matchID, values.time);
-                    }
-                  }
-                  enqueueSnackbar("Sikeres művelet", { variant: 'success' });
+                  const result = await addMinutesToEveryone(minutes, grant);
+                  // Answered, so the next press means a second extension.
+                  forgetGrant();
+                  enqueueSnackbar(bulkAddMinutesMessage(result, minutes), {
+                    variant: bulkAddMinutesVariant(result),
+                    // The problems name the teams left out, which takes longer
+                    // to read than the default five seconds. Not `persist`: the
+                    // provider (Layout.tsx) gives a snackbar no dismiss action.
+                    autoHideDuration: result.problems.length > 0 ? 15000 : undefined,
+                  });
                 } catch (e) {
+                  // The grant is kept, so the same button is the retry. Saying
+                  // so is the point: an organiser who thinks the extension did
+                  // not happen would otherwise go looking for another way to
+                  // give it, and the walk may well have finished server-side.
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                  enqueueSnackbar(message, { variant: 'error' });
+                  enqueueSnackbar(bulkAddMinutesRetryMessage(message), {
+                    variant: 'error',
+                    autoHideDuration: 15000,
+                  });
+                } finally {
+                  // The rows carry each match's end time; the walk moved them.
+                  // Before the button comes back up, so what it comes back to
+                  // is a list that has been told.
+                  await mutate().catch(() => undefined);
+                  setExtending(false);
                 }
               },
             })
@@ -269,8 +298,8 @@ export function Admin(props: { teamId?: string }) {
             width: '150px',
             alignSelf: 'center',
             textTransform: 'none',
-          }} variant='contained' color='primary' type="submit">
-            hozzáadás
+          }} variant='contained' color='primary' type="submit" disabled={extending}>
+            {extending ? 'folyamatban…' : 'hozzáadás'}
           </Button>
           </Stack>
           <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (

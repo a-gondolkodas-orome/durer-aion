@@ -118,6 +118,59 @@ describe("removing a team", () => {
   });
 });
 
+describe("adding minutes to one match", () => {
+  const matchID = "0EKBiMgbJ5A";
+
+  test("is a POST naming the match and the minutes", async () => {
+    const calls = fakeAxios(ok);
+
+    await new RealClientRepository().addMinutes(matchID, 10);
+
+    expect(calls).toStrictEqual([
+      { method: "post", url: `/game/admin/${matchID}/addminutes/10`, body: undefined },
+    ]);
+  });
+
+  // The route refuses two different things with a 501 — a match that has
+  // finished, and an id the team has moved on from — so the status alone does
+  // not say which, and the kind it sends beside it is what picks the line. The
+  // branch tested `err.code`, which carries axios's own string rather than the
+  // status, so it never fired and both read as an unexpected error (#507).
+  //
+  // The messages are translation keys, not Hungarian strings: the admin page
+  // carries the language switcher, and `npm run i18n:check` is what pins that
+  // hu and en both have them. i18next answers with the key itself here.
+  test.each([
+    ["an id the team has moved on from",
+      { kind: "other-match-running", running: "0EKBiMgbJ5A" },
+      "admin.addMinutes.otherMatchRunning"],
+    ["a match that has finished",
+      { kind: "no-match-running" },
+      "admin.addMinutes.noMatchRunning"],
+  ])("says which refusal a 501 was for %s", async (_case, refusal, key) => {
+    fakeAxios(() => status(501, refusal));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow(key);
+  });
+
+  // A kind this build does not know — the server learning a new refusal ahead
+  // of the page — is better as the generic line than as a missing key.
+  test("falls back to the generic message for a refusal it does not know", async () => {
+    fakeAxios(() => status(501, { kind: "moon-phase" }));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow("Váratlan hiba történt");
+  });
+
+  test("any other failure is reported like the other admin actions", async () => {
+    fakeAxios(() => status(500));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow("Váratlan hiba történt");
+  });
+});
+
 describe("the archive of deleted teams", () => {
   const deletedAt = "2026-09-07T10:00:00.123Z";
 

@@ -1,4 +1,4 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BulkAddMinutesDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
@@ -75,6 +75,12 @@ export class OfflineClientRepository implements ClientRepository {
 
   async addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
+  }
+
+  // Nothing to walk: `getAll` has no teams here either, so an empty result is
+  // what the admin page's message is honestly made of.
+  async addMinutesToEveryone(_minutes: number, _grant: string): Promise<BulkAddMinutesDto> {
+    return { extended: [], alreadyGranted: [], problems: [] };
   }
 
   async getMatchState(_matchId: string): Promise<MatchStateDto> {

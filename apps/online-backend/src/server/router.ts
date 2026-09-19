@@ -4,8 +4,6 @@ import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { InProgressMatchStatus } from 'schemas';
-import { TransportAPI } from '../socketio_botmoves';
-import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
@@ -14,6 +12,8 @@ import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './ra
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { appendOtherNote } from './model';
+import { addMinutesToEveryRunningMatch, addMinutesToMatch, isGrant, isMinutes, MINUTES_LIMIT, type ExtendRefusal,
+  type MatchClock, type MatchQueue } from './add_minutes';
 import { UniqueConstraintError } from 'sequelize';
 
 /**
@@ -38,6 +38,77 @@ export function configureTeamsRouter(
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  /** What `add_minutes.ts` needs, taken off the request.
+   *
+   * `durer_transport` is the socket transport `server.ts` hangs on the koa
+   * context; koa types that context with an index signature, so the shape is
+   * named here rather than inferred from nothing. */
+  interface DurerTransport {
+    getMatchQueue: (matchID: string) => MatchQueue;
+    pubSub: MatchClock['pubSub'];
+  }
+  const matchClock = (ctx: Server.AppCtx): MatchClock => {
+    const transport = ctx.durer_transport as DurerTransport;
+    return {
+      db: ctx.db,
+      teams,
+      games,
+      queueFor: matchID => transport.getMatchQueue(matchID),
+      pubSub: transport.pubSub,
+    };
+  };
+
+  /** The minutes an add-minutes route was asked for, or nothing.
+   *
+   * A number `setMinutes` cannot use reaches `toISOString` as an Invalid Date
+   * and throws — a 500 for a typo — so `isMinutes` is both the whole-number
+   * test and the bound; `add_minutes.ts` says why there is a bound at all.
+   *
+   * `Number` is not the test. It reads `null` and `[]` as nought and `true` as
+   * one, so a body nobody meant would have moved every running match. */
+  const bodyMinutes = (sent: unknown): number | undefined => isMinutes(sent) ? sent : undefined;
+
+  /** {@link bodyMinutes} for a path segment, which is always a string. Digits
+   *  rather than `Number`, which also reads `1e3` and `0x10`; the digits alone
+   *  are not enough, since enough of them are an Invalid Date too. */
+  const pathMinutes = (raw: string): number | undefined =>
+    /^-?\d+$/.test(raw) ? bodyMinutes(Number(raw)) : undefined;
+
+  /** The status a refusal answers with, and the line that says why. */
+  const refusalStatus = (reason: ExtendRefusal, matchID: string): [number, string] => {
+    switch (reason.kind) {
+      case "match-not-found":
+        return [404, `Match ${matchID} not found`];
+      case "team-not-found":
+        return [500, `Match found, but assigned team ${reason.teamId} was not found.`];
+      case "other-match-running":
+        return [501, `IN PROGRESS match found (${reason.running}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`];
+      case "no-match-running":
+        return [501, 'Restarting an already finished match is not supported right now.'];
+      case "game-not-found":
+        return [404, `Match found, but game ${reason.gameName} was not found.`];
+    }
+  };
+
+  /** A refusal as the status the admin page already knows how to read, with the
+   *  kind beside it.
+   *
+   * The status alone does not say which refusal it was — a match that has
+   * finished and an id the team has moved on from are both 501, and they need
+   * different things said to the organiser. So the kind travels in the body —
+   * the same vocabulary the bulk walk reports in its `problems`, so the page
+   * picks its line from a kind rather than by matching English prose.
+   * `message` is the line the route answered before, for whoever reads the API
+   * rather than the page.
+   *
+   * Set rather than thrown: a refusal is a routine answer to a stale id, and
+   * koa logs a stack trace for every error it writes. */
+  const refuse = (ctx: Server.AppCtx, reason: ExtendRefusal, matchID: string): void => {
+    const [status, message] = refusalStatus(reason, matchID);
+    ctx.status = status;
+    ctx.body = { ...reason, message };
+  };
 
   /**
    * Get the log data about a specific match.
@@ -74,107 +145,46 @@ export function configureTeamsRouter(
   });
 
   /**
- * Add extra timeto a specific match.
+ * Add extra time to a specific match.
  *
  * @param {string} matchId - The ID of the match.
  * @param {integer} minutes - How many minutes to add
- * @returns {State<any>} - A match state object object.
+ * @returns {{updatedEndTime: Date, matchID: string, team: TeamModel}}
  */
   router.post("/game/admin/:matchId/addminutes/:minutes", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
-    const minutes = Number(ctx.params.minutes);
-    const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
-      matchID,
-      {
-      state: true,
-        metadata: true,
-      }
-    );
-    if (!state) {
-      ctx.throw(404, "Match " + matchID + " not found");
-    }
-    // Fetch team
-    const teamId = metadata.players[0].name;
-    const team = await teams.getTeam({ teamId });
+    const minutes = pathMinutes(ctx.params.minutes)
+      ?? ctx.throw(400,
+        `The minutes in the path must be a whole number between -${MINUTES_LIMIT} and ${MINUTES_LIMIT}.`);
+    const result = await addMinutesToMatch(matchClock(ctx), { matchID, minutes });
+    if (result.status === "refused") refuse(ctx, result.reason, matchID);
+    else ctx.body = { updatedEndTime: result.endAt, matchID: result.matchID, team: result.team };
+  });
 
-    if (!team) {
-      ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
-      return;
-    }
+  /**
+   * Give every running match more time, under one grant.
+   *
+   * The grant is the caller's, and is what makes asking twice safe: a match
+   * already carrying it is reported as `alreadyGranted` and not moved again.
+   * That is the case a long walk needs — the browser giving up on a request the
+   * server went on to finish — so the same grant must be sent on a retry, and a
+   * new one only when the organiser means a second extension.
+   *
+   * @param {{minutes: number, grant: string}} body
+   * @returns {BulkExtendResult} - team names extended, already granted, and the
+   *   ones with a problem, each with why.
+   */
+  router.post("/game/admin/addminutes", adminAuth, koaBody(), async (ctx) => {
+    const body = ctx.request.body as { minutes?: unknown; grant?: unknown } | undefined;
+    const minutes = bodyMinutes(body?.minutes)
+      ?? ctx.throw(400,
+        `Expected minutes to be a whole number between -${MINUTES_LIMIT} and ${MINUTES_LIMIT}.`);
+    const sent: unknown = body?.grant;
+    const grant = isGrant(sent)
+      ? sent
+      : ctx.throw(400, "Expected grant to be 1 to 32 characters of A-Z, a-z, 0-9, - or _.");
 
-    const new_state = {
-      ...state,
-      //manually increment stateID
-      _stateID: state._stateID + 1
-    }
-
-    //Update  new_state
-    const newEndDate = new Date(state.G.end)
-    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
-    new_state.G.end = newEndDate.toISOString();
-    new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
-
-    //Update team
-    if (team.strategyMatch.state === "IN PROGRESS") {
-      if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        strategyMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else if (team.relayMatch.state === "IN PROGRESS") {
-      if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        relayMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else {
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
-    }
-
-    await ctx.db.setState(matchID, new_state);
-
-    //Reconstruct game name from metadata
-    const game = games.find(g => g.name === metadata.gameName);
-    if (!game) {
-      ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
-      return
-    }
-
-    /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
-    This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
-    This is generally equal to what would happen if multiple players play the game, and one does some actions.
-    The other players would see the updated gamestate, and the frontend would update accordingly.
-    The normal way to use this, is to create a Master authoritative object, which handles validations, and other logics.
-    Here we already handled the validation, and uploaded it to the database, so we can just send the updated gamestate to the frontend.
-    This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
-    const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
-
-    my_transportAPI.sendAll(
-      {
-        type: 'update',
-        args: [matchID, new_state]
-      }
-    )
-
-    team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
-    await team.save();
-
-    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
-
+    ctx.body = await addMinutesToEveryRunningMatch(matchClock(ctx), { minutes, grant });
   });
 
   /**

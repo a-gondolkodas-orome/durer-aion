@@ -1,4 +1,10 @@
-{   
+{
+  "admin": {
+    "addMinutes": {
+      "otherMatchRunning": "A csapatnak másik meccse fut ({{running}}) — valószínűleg elavult meccsazonosítóval próbálkozol.",
+      "noMatchRunning": "Lejárt játékot már nem lehet módosítani."
+    }
+  },
   "chooser": {
     "achievedPoint": "Elért pontszám",
     "filledAt": "Kitöltve ekkor",

@@ -57,6 +57,46 @@ paths:
         "404":
           description: Match not found
 
+  /game/admin/addminutes:
+    post:
+      summary: Give every running match more time, under one grant
+      description: >
+        The grant is what makes asking twice safe: a match already carrying it
+        is reported in alreadyGranted and not moved again. Send the same grant
+        on a retry; send a new one only for a second, deliberate extension.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [minutes, grant]
+              properties:
+                minutes:
+                  type: integer
+                  minimum: -1440
+                  maximum: 1440
+                grant:
+                  type: string
+                  pattern: "^[A-Za-z0-9_-]{1,32}$"
+                  description: >
+                    Bounded because it is recorded as a note in the team's
+                    notes field, which has a length: a grant nothing could
+                    record is one a retry applies a second time.
+      responses:
+        "200":
+          description: What the walk did, by team name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkAddMinutesResponse"
+        "400":
+          description: Body was not { minutes, grant }, or one of them was out of range
+
   /game/admin/{matchId}/addminutes/{minutes}:
     post:
       summary: Add extra time to a specific match
@@ -71,6 +111,8 @@ paths:
           required: true
           schema:
             type: integer
+            minimum: -1440
+            maximum: 1440
       security:
       - basicAdminAuth: []
       tags:
@@ -82,12 +124,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AddMinutesResponse"
+        "400":
+          description: Minutes in the path was not a whole number between -1440 and 1440
         "404":
-          description: Match not found
+          description: Match or its game not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesRefusal"
         "500":
           description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesRefusal"
         "501":
-          description: Restarting finished match not supported
+          description: No match running, or the id names one the team has moved on from
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddMinutesRefusal"
 
   /game/admin/{matchId}/metadata:
     get:
@@ -762,6 +818,54 @@ components:
         - ctx
         - plugins
         - _stateID
+
+    BulkAddMinutesResponse:
+      type: object
+      properties:
+        extended:
+          type: array
+          items:
+            type: string
+        alreadyGranted:
+          type: array
+          items:
+            type: string
+        problems:
+          type: array
+          items:
+            type: object
+            properties:
+              teamName:
+                type: string
+              matchID:
+                type: string
+              reason:
+                type: string
+                enum: [match-not-found, team-not-found, other-match-running, no-match-running, game-not-found, error]
+
+    AddMinutesRefusal:
+      type: object
+      description: >
+        Why one match was not given more time. The status does not say on its
+        own — a match that has finished and an id the team has moved on from are
+        both 501 — so the kind travels with it, the same kinds the bulk walk
+        reports in its problems.
+      properties:
+        kind:
+          type: string
+          enum: [match-not-found, team-not-found, other-match-running, no-match-running, game-not-found]
+        message:
+          type: string
+        running:
+          type: string
+          description: With other-match-running, the match the team does have running.
+        teamId:
+          type: string
+        gameName:
+          type: string
+      required:
+        - kind
+        - message
 
     AddMinutesResponse:
       type: object
