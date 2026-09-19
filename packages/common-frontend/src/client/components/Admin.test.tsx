@@ -368,6 +368,27 @@ test('the import tab reports what a live team blocks, without importing', async 
   expect(importTeams).toHaveBeenCalledWith(expect.any(String), { dryRun: true });
 });
 
+// The file itself is fine, so the browser has no objection to it; only the
+// dry run knows the name is taken. Leaving the button live meant the check's
+// own answer did not reach the one control it was run for.
+test('the import tab stops the import a check has already refused', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    rows: 1,
+    problems: [{ row: 2, column: 'Teamname', severity: 'error', code: 'teamname-taken', found: 'Alpha' }],
+  }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Ellenőrzés'));
+  await screen.findByText('Már van ilyen nevű csapat.');
+
+  importTeams.mockClear();
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(importTeams).not.toHaveBeenCalled();
+});
+
 test('the import tab reports a refused file as a failure, not a success', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({

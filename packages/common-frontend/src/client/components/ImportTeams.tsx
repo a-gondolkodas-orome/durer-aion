@@ -210,7 +210,10 @@ export function ImportTeams(props: { onImported: () => void }) {
         <Button
           variant="contained"
           color="primary"
-          disabled={busy !== null || tsv.trim() === '' || !local.ok || imported}
+          // Every error we are showing, the server's included: an *Ellenőrzés*
+          // that came back with a clash should stop the button it was run for,
+          // and its answer is about this exact text — any edit drops it.
+          disabled={busy !== null || tsv.trim() === '' || errors.length > 0 || imported}
           onClick={() => { void runImport(); }}
         >
           {busy === 'import' ? `${local.rows.length} csapat importálása…` : 'Importálás indítása'}
