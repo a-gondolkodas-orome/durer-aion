@@ -118,6 +118,44 @@ describe("removing a team", () => {
   });
 });
 
+describe("adding minutes to one match", () => {
+  const matchID = "0EKBiMgbJ5A";
+
+  test("is a POST naming the match and the minutes", async () => {
+    const calls = fakeAxios(ok);
+
+    await new RealClientRepository().addMinutes(matchID, 10);
+
+    expect(calls).toStrictEqual([
+      { method: "post", url: `/game/admin/${matchID}/addminutes/10`, body: undefined },
+    ]);
+  });
+
+  // The route refuses two different things with a 501 — a match that has
+  // finished, and an id the team has moved on from — and the message is what
+  // tells them apart. The branch tested `err.code`, which carries axios's own
+  // string rather than the status, so it never fired and both read as an
+  // unexpected error (#507).
+  test.each([
+    ["an id the team has moved on from",
+      "IN PROGRESS match found (0EKBiMgbJ5A), but it does not match with matchID (an-older-match). "
+      + "(Probably you are using an old matchID.)"],
+    ["a match that has finished", "Restarting an already finished match is not supported right now."],
+  ])("carries the route's own reason for refusing %s", async (_case, reason) => {
+    fakeAxios(() => status(501, reason));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow(reason);
+  });
+
+  test("any other failure is reported like the other admin actions", async () => {
+    fakeAxios(() => status(500));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes(matchID, 10)).rejects.toThrow("Váratlan hiba történt");
+  });
+});
+
 describe("the archive of deleted teams", () => {
   const deletedAt = "2026-09-07T10:00:00.123Z";
 

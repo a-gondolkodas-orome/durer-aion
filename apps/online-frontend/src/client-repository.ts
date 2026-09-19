@@ -197,8 +197,15 @@ export class RealClientRepository implements ClientRepository {
       const err = makeAxiosError(e);
       console.error(err.message)
       // here we can set message according to status (or data)
-      if (err.code === "501") {
-        throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
+      // `err.response?.status`, as every other branch here reads it. `err.code`
+      // is axios's own string — "ERR_BAD_REQUEST" — never the HTTP status, so
+      // this never fired and both of the route's 501s reached the organiser as
+      // "Váratlan hiba történt" (#507).
+      if (err.response?.status === 501) {
+        // The route's own message: which match is running, and that the id may
+        // be a stale one. English, as the admin routes' messages are, and more
+        // than one fixed line could say about two different refusals.
+        throw new Error(String(err.response.data), { cause: e });
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
