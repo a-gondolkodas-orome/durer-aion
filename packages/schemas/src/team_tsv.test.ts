@@ -98,6 +98,38 @@ describe('parseTeamsTsv', () => {
     });
   });
 
+  describe('a file that starts with a blank line', () => {
+    // A paste can begin with one. Taking it for the header read the real header
+    // as a team: four broken cells reported on line 2, and nothing pointing at
+    // the line that actually caused it.
+    it('finds the header below it and reports nothing', () => {
+      const result = parseTeamsTsv(['', HEADER, row()].join('\n'));
+
+      expect(result.problems).toEqual([]);
+      expect(result.rows.map(parsed => parsed.teamname)).toEqual(['Alpha']);
+      // Still the file's own numbering: the blank line is not closed up.
+      expect(result.rows.map(parsed => parsed.row)).toEqual([3]);
+      expect(result.dataLines).toBe(1);
+    });
+
+    it('still knows a paste with no header at all for one', () => {
+      // The first line that holds anything is a team, so the header is missing
+      // whatever precedes it.
+      const content = ['', row({ teamname: 'Alpha' })].join('\n');
+
+      expect(codes(content)).toEqual(['missing-header']);
+      expect(parseTeamsTsv(content).rows.map(parsed => parsed.row)).toEqual([2]);
+    });
+
+    it('names the line the header is actually on when it is a strange one', () => {
+      const content = ['', 'Name\tCat\tMail\tNotes\tID\tCode\tCreds', row()].join('\n');
+      const [problem] = parseTeamsTsv(content).problems;
+
+      expect(problem.code).toBe('header-mismatch');
+      expect(problem.row).toBe(2);
+    });
+  });
+
   it('numbers problems by the line of the file, header included', () => {
     const content = file(row(), row({ teamname: 'Bravo', category: 'X' }));
     const [problem] = parseTeamsTsv(content).problems;
