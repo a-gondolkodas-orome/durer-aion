@@ -5,15 +5,18 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // CI test job never builds — the same reason sendData.test.ts mocks its way off
 // the workspace packages. A name of its own also pins that the handler reaches
 // for the namespaced key rather than writing a bare one.
-const { bgioStoragePrefix, relayPointsStorageKey, sendGameData, RelayWrapper, Client } = vi.hoisted(() => ({
+const {
+  bgioStoragePrefix, localWithBots, relayPointsStorageKey, sendGameData, RelayWrapper, Client,
+} = vi.hoisted(() => ({
   bgioStoragePrefix: () => "relay-practise/bgio_",
+  localWithBots: vi.fn(),
   relayPointsStorageKey: () => "relay-practise/RelayPoints",
   sendGameData: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
-vi.mock("common-frontend", () => ({ bgioStoragePrefix, relayPointsStorageKey }));
+vi.mock("common-frontend", () => ({ bgioStoragePrefix, localWithBots, relayPointsStorageKey }));
 vi.mock("./sendData", () => ({ sendGameData }));
 // The wiring test reads the callback the app hands the reducer; building a real
 // boardgame.io client around it is not what is under test here.
