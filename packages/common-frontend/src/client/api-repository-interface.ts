@@ -2,16 +2,10 @@
 
 import { DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import { createContext, useContext } from 'react';
-import type { BoardProps } from 'boardgame.io/react';
+import { MatchMoveDispatch } from "./match-moves";
+import type { MatchConnection, MatchTimeMoves, RelayMoves } from "./match-moves";
 
 export { LOCAL_STORAGE_TEAMSTATE } from "./utils/storage-keys";
-
-// The relay match is judged and timed where it runs — on the server online,
-// by the local bot offline — so the board's actions stay boardgame.io moves
-// in both builds. The board hands over its whole `moves` prop, which
-// boardgame.io types as a plain string-keyed record, and the repository owns
-// knowing which move carries each action.
-export type BoardMoves = BoardProps['moves'];
 
 // The session is the repository's to keep, not the caller's: online it is an
 // HttpOnly cookie the server set on `joinWithCode` (issue #89), which no script
@@ -39,15 +33,16 @@ export interface ClientRepository {
   getDeleted(): Promise<DeletedTeamDto[]>;
   restoreTeam(deletionId: number): Promise<void>;
   restoreBatch(deletedAt: string): Promise<RestoreResultDto>;
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
-  // Unlike startRelay, which moves the team to the relay page, this dispatches
-  // the opening move of the match once the board is up.
-  startRelayGame(moves: BoardMoves): Promise<void>;
-  syncRelayTime(moves: BoardMoves): Promise<void>;
+  // The three below are what `MatchMoveDispatch` implements for every build;
+  // see that class for why they take the board's moves rather than replacing
+  // them, and why only the first two care about the connection.
+  submitRelayAnswer(answer: number, moves: RelayMoves, connection: MatchConnection): Promise<void>;
+  startRelayGame(moves: RelayMoves, connection: MatchConnection): Promise<void>;
+  syncMatchTime(moves: MatchTimeMoves): Promise<void>;
 
 }
 
-export class MockClientRepository implements ClientRepository {
+export class MockClientRepository extends MatchMoveDispatch implements ClientRepository {
   version = "MOCK" as const;
   // The join code last logged in with; the fixtures below are keyed by it.
   private session: string | null = null;
@@ -290,18 +285,6 @@ export class MockClientRepository implements ClientRepository {
   }
   restoreBatch(_deletedAt: string): Promise<RestoreResultDto> {
     throw Error("NOT call this");
-  }
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
   }
 }
 

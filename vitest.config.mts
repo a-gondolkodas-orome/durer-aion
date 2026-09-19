@@ -32,6 +32,7 @@ export default defineConfig({
       { find: /^game\/client$/, replacement: source('game/client.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },
       { find: /^relay-bot$/, replacement: source('relay-bot/index.ts') },
+      { find: /^common-frontend\/match-moves$/, replacement: source('common-frontend/match-moves.ts') },
     ],
   },
   test: {

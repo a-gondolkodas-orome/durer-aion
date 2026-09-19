@@ -11,7 +11,8 @@ const envVars = Object.keys(process.env)
   }, {} as Record<string, string>);
 
 export default defineConfig({
-  entry: ['index.ts'],
+  // One entry per export: everything, and the match actions on their own.
+  entry: ['index.ts', 'match-moves.ts'],
   // ESM only: the frontends import it and the backend bundles the source; a
   // CommonJS half would have no consumer.
   format: ['esm'],

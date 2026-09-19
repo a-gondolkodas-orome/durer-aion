@@ -192,13 +192,17 @@ note saying which PR did and what replaced it. The README's own setup steps are
 on the list too: `npm ci`, `npm run setup` and the `dev:*` and `stack:*`
 commands must keep doing what it says they do.
 
-It is a hand-walked checklist, not a suite. Six items have a unit test pinning
+It is a hand-walked checklist, not a suite. Seven items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
 
 - a join code loading its team, and a logout dropping the saved match with it:
   `packages/common-frontend/src/client/hooks/user-model.test.ts`
 - the relay round against the bot — problems served, the three tries and what
   each is still worth: `packages/relay-bot/src/games/relay/strategy.test.ts`
+- an answer dispatched with the socket down reported rather than lost, and the
+  board's moves narrowed to what the game actually defines:
+  `packages/common-frontend/src/client/match-moves.test.ts`, with
+  `ExerciseForm.test.tsx` next to it for how the form shows the failure
 - what a returning team may start, and the closing of a match whose time ran
   out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
 - the time left recomputed from the match's own end, and only the team allowed

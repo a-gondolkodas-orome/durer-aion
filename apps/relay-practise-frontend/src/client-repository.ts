@@ -1,10 +1,11 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto } from "common-frontend";
+import { MatchMoveDispatch } from "common-frontend/match-moves";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
-export class OfflineClientRepository implements ClientRepository {
+export class OfflineClientRepository extends MatchMoveDispatch implements ClientRepository {
 
   version = "OFFLINE" as const;
 
@@ -97,24 +98,6 @@ export class OfflineClientRepository implements ClientRepository {
   }
   async restoreBatch(_deletedAt: string): Promise<RestoreResultDto> {
     throw Error("NOT call this");
-  }
-
-  // The local boardgame.io client judges the answer with the bundled bot, and
-  // its step report already goes out through RelayWrapper's sendGameData hook,
-  // so nothing is sent from here.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
   }
 
   joinWithCode(joinCode: string): Promise<void> {

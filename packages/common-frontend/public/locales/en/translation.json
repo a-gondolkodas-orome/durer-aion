@@ -25,6 +25,7 @@
     "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!"
   },
   "error": {
+    "disconnected": "The connection to the server dropped, so this may not have arrived. Check, and send it again if needed.",
     "unexpected": "An unexpected error occurred"
   },
   "general": {
