@@ -25,6 +25,9 @@ const setPageState = (pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY') =
 
 export const MockTeamState = {
   get teamState() { return teamState; },
+  /** No session at all, which is where the file starts — named so a test can
+   *  ask for it rather than relying on running before the ones that log in. */
+  mockLoggedOut: () => { teamState = null; },
   mockHome: () => setPageState("HOME"),
   mockDisclaimer: () => setPageState("DISCLAIMER"),
   mockRelay: () => setPageState("RELAY"),
