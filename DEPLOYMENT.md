@@ -262,7 +262,8 @@ npm run stack:prod
 
 Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
 checks that every env file above exists, builds the frontend, builds the backend image,
-starts the three containers detached, and returns only once the backend is healthy. It
+starts the three containers detached, and returns only once the backend and nginx are
+healthy. It
 stops at the check rather than writing the missing files from their samples: those carry
 `ADMIN_CREDENTIALS=admin` and a postgres password to match, and the frontend is built
 before the stack starts, so a seeded file would go into the bundle before anyone read it.

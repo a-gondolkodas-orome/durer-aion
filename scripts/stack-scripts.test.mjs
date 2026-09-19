@@ -53,3 +53,41 @@ describe('the dev overlay', () => {
     expect(scriptsMatching(OVERLAY).map(([name]) => name)).toStrictEqual(['stack:up']);
   });
 });
+
+describe('every deployed service', () => {
+  // `up --wait` is what `stack:up` and `stack:prod` end on, and it waits for a healthy
+  // container only where there is a healthcheck to be healthy by; everywhere else it
+  // settles for "the process started". nginx restart-looping on a mounted TLS snippet and
+  // a turbo watcher that kept its packages alive after the server task died are both
+  // containers that pass "started", so the answer is that every service has one rather
+  // than the two that have been caught being wrong.
+  const services = () => {
+    const lines = readFileSync(`${repoRoot}docker-compose.yml`, 'utf8').split('\n');
+    const found = new Map();
+    // The file's other top-level key is `volumes:`, whose entries are indented like a
+    // service and are not one, so this follows the block rather than the indentation.
+    let inServices = false;
+    let current = null;
+    for (const line of lines) {
+      if (/^\S/.test(line)) {
+        inServices = line.startsWith('services:');
+        current = null;
+      } else if (!inServices) {
+        continue;
+      } else if (/^ {2}\S+:\s*$/.test(line)) {
+        current = line.trim().slice(0, -1);
+        found.set(current, false);
+      } else if (current && /^ {4}healthcheck:/.test(line)) {
+        found.set(current, true);
+      }
+    }
+    return found;
+  };
+
+  it('is one `up --wait` can wait for', () => {
+    const withoutOne = [...services()].filter(([, has]) => !has).map(([name]) => name);
+
+    expect([...services()].length).toBeGreaterThan(0);
+    expect(withoutOne).toStrictEqual([]);
+  });
+});
