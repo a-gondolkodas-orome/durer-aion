@@ -286,12 +286,13 @@ describe("addMinutesToEveryRunningMatch", () => {
       ...fields,
     });
 
-  /** Storage answering for any match, owned by whoever the id names. */
-  const anyMatch = () =>
+  /** Storage answering for any match. `owner` says which team's id the match
+   *  carries, so a team playing two of them can be described. */
+  const anyMatch = (owner: (matchID: string) => string = matchID => `team-of-${matchID}`) =>
     ({
       fetch: vi.fn().mockImplementation((matchID: string) => Promise.resolve({
         state: { _stateID: 7, G: { start: START, end: END }, ctx: {} },
-        metadata: { gameName: "relay_c", players: [{ name: `team-of-${matchID}` }] },
+        metadata: { gameName: "relay_c", players: [{ name: owner(matchID) }] },
       })),
       setState: vi.fn().mockResolvedValue(undefined),
     }) as unknown as StorageAPI.Async;
@@ -318,14 +319,26 @@ describe("addMinutesToEveryRunningMatch", () => {
     expect(rows[2].update).not.toHaveBeenCalled();
   });
 
+  // Two matches of one team, with the ids they really would have: distinct.
+  // Giving both sides the same id would let the side resolution find `relay`
+  // twice and still read as two extensions.
   it("extends both of a team's matches when both are running", async () => {
     const both = playing("team-of-m1", "Alpha", "m1", {
-      strategyMatch: { state: "IN PROGRESS", matchID: "m1", startAt: new Date(START), endAt: new Date(END) },
+      strategyMatch: { state: "IN PROGRESS", matchID: "m2", startAt: new Date(START), endAt: new Date(END) },
     });
 
-    const result = await addMinutesToEveryRunningMatch(clockOver([both]), { minutes: 10, grant: GRANT });
+    const result = await addMinutesToEveryRunningMatch(
+      clockOver([both], anyMatch(() => "team-of-m1")), { minutes: 10, grant: GRANT });
 
     expect(result.extended).toStrictEqual(["Alpha", "Alpha"]);
+    // Each side moved on its own id, which is what resolving by id rather than
+    // by looking at one side first is for.
+    expect(both.update).toHaveBeenCalledWith(expect.objectContaining({
+      relayMatch: expect.objectContaining({ matchID: "m1", endAt: new Date("2026-03-21T19:10:00.000Z") }),
+    }));
+    expect(both.update).toHaveBeenCalledWith(expect.objectContaining({
+      strategyMatch: expect.objectContaining({ matchID: "m2", endAt: new Date("2026-03-21T19:10:00.000Z") }),
+    }));
   });
 
   // The defect this replaces: one `try` around the whole walk in the browser, so
