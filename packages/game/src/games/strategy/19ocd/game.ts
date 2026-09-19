@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, LATE_MOVE_GRACE_MS, PlayerIDType } from '../../../common/types';
 
 export interface MyGameState {
   numbersOnTable: boolean[];
@@ -84,8 +84,8 @@ export const MyGameWrapper = function (category: "C" | "D") {
 
         if (playerID === GUESSER_PLAYER) {
           const currentTime = new Date();
-          if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
-            // Do not accept any answer if the time is over since more than 10 seconds
+          if (currentTime.getTime() - new Date(G.end).getTime() > LATE_MOVE_GRACE_MS) {
+            // Too late to take the move; the match is over.
             events.endGame();
           }
         }
@@ -94,8 +94,8 @@ export const MyGameWrapper = function (category: "C" | "D") {
 
         if (playerID === JUDGE_PLAYER) {
           const currentTime = new Date();
-          if (currentTime.getTime() - new Date(G.end).getTime() >= 0) {
-            // Do not accept any answer if the time is over
+          if (currentTime.getTime() - new Date(G.end).getTime() > LATE_MOVE_GRACE_MS) {
+            // The bot has answered and the allowance is spent; the match is over.
             events.endGame();
           }
         }
