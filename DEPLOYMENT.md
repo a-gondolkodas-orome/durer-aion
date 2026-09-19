@@ -261,8 +261,12 @@ npm run stack:prod
 ```
 
 Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
-builds the frontend, builds the backend image, starts the three containers detached, and
-returns only once the backend is healthy. When it is not:
+checks that every env file above exists, builds the frontend, builds the backend image,
+starts the three containers detached, and returns only once the backend is healthy. It
+stops at the check rather than writing the missing files from their samples: those carry
+`ADMIN_CREDENTIALS=admin` and a postgres password to match, and the frontend is built
+before the stack starts, so a seeded file would go into the bundle before anyone read it.
+When the stack does not come up:
 
 ```bash
 npm run stack:ps
@@ -373,10 +377,13 @@ services:
 
 Rebuild with the override. `npm run deps` is the install `npm run stack:prod` does for
 itself and this path does not — without it a pull that moved the lockfile builds the
-frontend against the tree the previous release installed:
+frontend against the tree the previous release installed. It does not check the env files
+either, so run that too — `npm run env:check` names what is missing without writing
+anything:
 
 ```bash
 npm run deps
+npm run env:check
 npm run build
 docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
 ```

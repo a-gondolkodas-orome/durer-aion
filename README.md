@@ -471,7 +471,9 @@ be fixed from here and why `npm audit fix --force` must never be run — are in
 
 `npm run setup` creates each of these from its committed `*.sample` twin, and
 never overwrites one that already exists. The sample values run the stack locally
-and are meaningless anywhere else. Whatever reads one takes the change at start:
+and are meaningless anywhere else — which is why a deployment gets
+`npm run env:check` instead: it names the files that are absent and stops, rather
+than writing credentials nobody chose. `npm run stack:prod` runs it for itself. Whatever reads one takes the change at start:
 vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 `up`.
 

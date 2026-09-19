@@ -7,6 +7,15 @@
 //
 // An existing file is never overwritten: a developer's own values live there,
 // and in `.env.docker` those are credentials worth keeping.
+//
+// `--check` reports what is missing and exits non-zero instead of writing it,
+// for `stack:prod` and any other deployment path. Seeding is right for a
+// developer and wrong for a deployed host: the samples carry
+// `ADMIN_CREDENTIALS=admin` and a postgres password to match, so a deployment
+// that seeded them would come up on credentials nobody chose. The check earns
+// its place by running before the frontend build rather than after it, and by
+// naming every missing file at once — `docker compose --env-file` sees only
+// `.env.docker`, and the frontends' values are inlined into the bundle.
 
 import { copyFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -43,16 +52,22 @@ function samplesIn(dir) {
 }
 
 export function main() {
+  const check = process.argv.includes('--check');
   const appDirs = readdirSync(join(repoRoot, 'apps'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => join('apps', entry.name));
 
   const seeded = [];
+  const absent = [];
   const behind = [];
 
   for (const sample of ['.', ...appDirs].flatMap(samplesIn)) {
     const target = sample.slice(0, -SUFFIX.length);
     if (!existsSync(join(repoRoot, target))) {
+      if (check) {
+        absent.push({ target, sample });
+        continue;
+      }
       copyFileSync(join(repoRoot, sample), join(repoRoot, target));
       seeded.push(target);
       continue;
@@ -76,6 +91,17 @@ export function main() {
     console.log(`Seeded ${seeded.length} env file(s) with the sample values. They are enough to run
 the stack locally; see "Configuration you may want to change" in README.md for
 the ones worth editing.`);
+  }
+
+  for (const { target, sample } of absent) {
+    console.log(`${target} does not exist — copy it from ${sample} and fill in the values`);
+  }
+
+  if (absent.length > 0) {
+    console.log(`Missing ${absent.length} env file(s). Locally, "npm run setup" writes them from the
+samples; a deployment fills in its own values — see "Configuration you may want
+to change" in README.md.`);
+    process.exitCode = 1;
   }
 }
 
