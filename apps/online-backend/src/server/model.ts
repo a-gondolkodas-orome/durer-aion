@@ -5,7 +5,7 @@ import {
   Model,
   ModelAttributes,
 } from "sequelize";
-import { MatchStatus } from "schemas";
+import { EMAIL_MAX_LENGTH, MatchStatus, TEAMNAME_MAX_LENGTH } from "schemas";
 
 // Sequelize adds the timestamp columns itself, and only for names the attribute
 // list leaves free. Omitting them from the attribute types therefore keeps them
@@ -104,8 +104,8 @@ export const teamAttributes: ModelAttributes<
     type: DataTypes.STRING,
     validate: {
       len: {
-        args: [0, 255],
-        msg: 'Email must be between 0 and 255 characters.'
+        args: [0, EMAIL_MAX_LENGTH],
+        msg: `Email must be between 0 and ${EMAIL_MAX_LENGTH} characters.`
       }
     }
   },
@@ -130,8 +130,8 @@ export const teamAttributes: ModelAttributes<
     },
     validate: {
       len: {
-        args: [1, 255],
-        msg: 'Teamname must be between 1 and 255 characters.'
+        args: [1, TEAMNAME_MAX_LENGTH],
+        msg: `Teamname must be between 1 and ${TEAMNAME_MAX_LENGTH} characters.`
       }
     }
   },
