@@ -5,6 +5,8 @@
   "description": "Past competition games for the strategy practice site, as self-contained folders: gameplay, bot, curated start boards, board client and specs.",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

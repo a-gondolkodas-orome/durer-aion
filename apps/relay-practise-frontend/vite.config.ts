@@ -13,7 +13,7 @@ export default defineConfig(() => {
   return {
     // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
     // subpages move together (scripts/assemble-site.mjs). This app is served from /valto/.
-    base: process.env.SITE_BASE || process.env.PUBLIC_URL || '/',
+    base: process.env.SITE_BASE || '/',
     plugins: [react()],
     resolve: {
       // Anchored patterns, not string keys, so `game` cannot match `game/bot` or

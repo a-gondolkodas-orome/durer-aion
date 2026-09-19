@@ -49,22 +49,26 @@ describe('TeamsRepository.fetch', () => {
     vi.restoreAllMocks();
   });
 
-  it('matches teams whose other field contains the fragment', async () => {
-    expect(await fetchQuery(['Budapest'])).toContain(`"other" LIKE '%Budapest%'`);
+  it('matches teams whose other field contains the fragment, whatever its case', async () => {
+    // Rendered SQL is all these tests see, so the operator is what they can
+    // hold: `ILIKE` is what makes `budapest` find `Budapest`.
+    const query = await fetchQuery(['Budapest']);
+    expect(query).toContain(`"other" ILIKE '%Budapest%'`);
+    expect(query).not.toContain(' LIKE ');
   });
 
   it('requires every fragment', async () => {
     const query = await fetchQuery(['Budapest', 'C']);
-    expect(query).toContain(`"other" LIKE '%Budapest%' AND`);
-    expect(query).toContain(`"other" LIKE '%C%'`);
+    expect(query).toContain(`"other" ILIKE '%Budapest%' AND`);
+    expect(query).toContain(`"other" ILIKE '%C%'`);
   });
 
   it('treats % in a fragment as a literal, not as "match everything"', async () => {
-    expect(await fetchQuery(['100%'])).toContain(`"other" LIKE '%100\\%%'`);
+    expect(await fetchQuery(['100%'])).toContain(`"other" ILIKE '%100\\%%'`);
   });
 
   it('treats _ in a fragment as a literal, not as "match any character"', async () => {
-    expect(await fetchQuery(['a_b'])).toContain(`"other" LIKE '%a\\_b%'`);
+    expect(await fetchQuery(['a_b'])).toContain(`"other" ILIKE '%a\\_b%'`);
   });
 
   it('returns every team for an empty filter', async () => {

@@ -31,13 +31,15 @@ first two are the practice sites; the dry run is a rehearsal of the
 competition round, not a practice site.
 
 **`apps/strategy-practice` is a workspace, but not like the others.** One root `npm ci`
-installs it, and turbo builds and typechecks it with everything else — but it
-keeps its own `eslint.config.js` and its own vitest config. Neither is a second
-command: ESLint resolves a config per directory as it walks, so one `eslint .` at
-the root lints this app through *its* config and everything else through the
-root one, in one pass; and the root `vitest.config.mts` lists that vitest config
-as a second project, so one `npm test` runs its suite next to the root's, each
-under its own setup. What that ESLint config differs on is the *rule set* —
+installs it, and turbo builds, typechecks and lints it with everything else — but
+it keeps its own `eslint.config.js` and its own vitest config. Neither is a second
+command: `npm run lint` runs one ESLint process per workspace through turbo, and
+each resolves the config nearest the files it is given, so this app is linted
+through *its* config and everything else through the root one; and the root
+`vitest.config.mts` lists that vitest config as a second project, so one
+`npm test` runs its suite next to the root's, each under its own setup. (One
+`eslint .` over the whole repo did the same job in a single process, and needed
+3072 MB of V8 heap to do it — `turbo.json` says what that cost and why the split.) What that ESLint config differs on is the *rule set* —
 `@eslint-react`, react-hooks, and a stylistic dialect (no trailing comma,
 `max-len` 120) the root does not impose. Single quotes are not part of that
 difference: the root config applies the same rule to `packages/strategy-engine` and
@@ -144,7 +146,8 @@ npm run dev:relay-practice
 # Build all packages
 npm run build
 
-# Lint — also the formatter: `lint:fix` applies it, and the editor runs it on save
+# Lint — also the formatter: `lint:fix` applies it, and the editor runs it on save.
+# One eslint per workspace, via turbo; `lint:root` is the pass for files in none.
 npm run lint
 npm run lint:fix
 
@@ -231,12 +234,24 @@ start boards, board client and specs together.
    No `index.ts` barrel: the three files are registered separately, below,
    and a barrel re-exporting the bot next to the board would undo that.
 
+   More files are fine — `stones/` keeps its `moveMap.ts` beside the bot — but
+   what the bot and the board *both* need goes in `game.ts`. A helper beside
+   them is a file the bot entry and the client entry have in common, which the
+   walk below reads as the bot reaching the served bundle, and fails.
+
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:
    `strategy-games.ts` (the game definition and its name — the `game` entry),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
    `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the
    live client `game` and `game/client`; the offline dry run all three.
+
+**The rules and the bot are typechecked twice.** The server reads this
+package's source rather than its `dist`, under its own `lib` and without the
+DOM (`apps/online-backend/tsconfig.json` says why), so a `document` in
+`game.ts` or `strategy.ts` passes `packages/game`'s own typecheck and fails the
+server's, naming the game package. A board may use whatever the browser gives
+it: the server never imports `game/client`.
 
 **The live client must not ship the bot.** The bots are reachable only
 through the `game/bot` entry, and only the server and the offline dry run may
@@ -312,6 +327,14 @@ the deploy's own code, not a copy of it.
 **A push to `main` deploys the public site.** There is no staging step and no
 separate approval — the workflow going green is the cutover.
 
+The testers' dry run is the other Pages deploy and not part of that artifact:
+`.github/workflows/dry-run-deploy.yml` publishes `apps/offline-frontend` to the
+year's *private* repo's Pages, on demand only, and runs the same
+`scripts/deploy-dry-run.mjs` that `npm run deploy` does. Its base path is the
+repository's own name rather than a value anyone edits. The two workflows are
+guarded in opposite directions — `pages-deploy.yml` to the public repo, this one
+away from it — and `scripts/workflow-safety.test.mjs` pins both.
+
 ## Competition Secrecy
 
 A new competition's game must stay secret until after the competition, so each
@@ -375,13 +398,21 @@ that were previously written down only here or nowhere.
   reviewer can accept or reject them separately.
 - An agent opening a PR assigns the person it is working for, so it lands in
   their queue rather than going unnoticed.
+- An agent names its session for what the work is about, not for the ticket
+  alone — `#461 duplicate socket.io copy in the lockfile`, not `Issue 461
+  investigation`. Keep the number, but the session list is read at a glance, and
+  a bare number says nothing about which one to go back to.
 - Permission to commit to someone else's branch is not permission to comment on
   their PR. An agent asks first before posting to a thread it does not own — the
   commit messages already carry the reasoning, and the thread is the author's.
 - Keep PR descriptions and review comments short. Say what changed and why, and
   stop; the diff, the commit messages and the linked docs carry the rest. Length
   is not thoroughness — it costs the reviewer the time the change was meant to
-  save.
+  save. The template's own comments say the shape, section by section.
+- A PR body carries one Claude Code footer, and it is not the agent's to write —
+  the integration appends one, with the session link, to every body it opens, so
+  a footer in the text leaves two. A *comment* is the other way round: the
+  duplicate is stripped there, so write it.
 - Do not `@`-mention anyone not already involved in the thread: a mention is a
   notification. Naming a person plainly, or referring to their PR by number,
   says the same thing without pulling them in.

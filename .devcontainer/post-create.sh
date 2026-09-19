@@ -13,7 +13,11 @@ if command -v sudo >/dev/null; then
   sudo chown -R "$(id -u):$(id -g)" "$HOME/.config/gh" "$HOME/.claude"
 fi
 
+# Recorded, so the first `dev:*` script in here does not take the same install
+# as missing and run it again — scripts/ensure-deps.mjs says why `npm ci` alone
+# leaves nothing behind.
 npm ci
+node scripts/ensure-deps.mjs --record
 
 # The same seeding `npm run setup` does outside the container — the step a
 # ready-to-run container should not make you remember.

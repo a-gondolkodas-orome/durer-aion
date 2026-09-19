@@ -307,8 +307,8 @@ all interfaces and pins port 8012, so it forwards out of the dev container with
 no extra setup and does not collide with the 5173 the other frontends share.
 
 `npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and `npm test` at
-the root cover it — the lint through its own config, which ESLint picks up as it
-walks into the directory, the tests through its own vite config, which the root
+the root cover it — the lint as one more workspace turbo runs eslint in, under its
+own config, the tests through its own vite config, which the root
 `vitest.config.mts` lists as a second project; [`CLAUDE.md`](CLAUDE.md) § Project
 Structure has the why. Its suite alone is
 `npm test --workspace=strategy-practice`, from anywhere.
@@ -347,16 +347,29 @@ the backend and nginx — without starting anything, and is the one gate that
 reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
 `nginx.conf`. The round itself is still walked by hand, above.
 
-`npm run lint` is the whole of the lint and formatting gate. ESLint resolves a
-config per directory as it walks, so `apps/strategy-practice` is checked against
-its own `eslint.config.js` and everything else against the root
-`eslint.config.mjs`, in one pass.
+`npm run lint` is the whole of the lint and formatting gate. It runs one ESLint
+process per workspace through turbo, plus `lint:root` for the files in no
+workspace — `scripts/`, the root configs — and each resolves the config nearest
+what it is given, so `apps/strategy-practice` is checked against its own
+`eslint.config.js` and everything else against the root `eslint.config.mjs`.
+
+It was a single `eslint .` over the repository until it stopped fitting: that
+process holds a TypeScript program per `tsconfig.json` at once, each with its own
+parsed copy of `lib.*.d.ts`, React and MUI, and needed 3072 MB of V8 heap where
+every workspace on its own needs under 1024 MB. Node sizes its default heap at
+about half of the memory it can see, so the same command passed on a 16 GB runner
+and died at a 2048 MB limit on a smaller one — which is how CI first failed on a
+private repository. `turbo.json` carries the reasoning, `.devcontainer/README.md`
+the measurements, and `scripts/lint-coverage.test.mjs` pins that the split leaves
+no file unlinted: a workspace with no `lint` script would otherwise be skipped in
+silence.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 
-No workspace carries a `lint` script of its own — to lint one package while you
-work in it, `npx eslint .` from its directory gives exactly that subtree, under
-whichever config governs it. `eslint.stylistic.mjs` holds the character-level rules both configs import —
+Every workspace carries `lint` and `lint:fix`, which is what turbo runs; to lint
+one while you work in it, `npm run lint --workspace=<name>` is that one process,
+and `npx eslint .` from its directory is the same subtree under whichever config
+governs it. `eslint.stylistic.mjs` holds the character-level rules both configs import —
 spacing, blank lines, final newlines — while the rules that decide where a line
 *breaks* stay per-workspace. `npm run lint:fix` applies them, and
 `.vscode/settings.json` runs the same fixes on save. They are `@stylistic` rules
@@ -521,23 +534,44 @@ PR publishes it afterwards as a strategy practice game. Nothing about an
 unreleased game may appear in a public commit — including engine changes phrased
 around its needs.
 
+The mirroring itself is
+[`scripts/sync-mirror.mjs`](scripts/sync-mirror.mjs), which that workflow only
+calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
+otherwise derive:
+
+```bash
+SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
+  node scripts/sync-mirror.mjs
+```
+
 When the year's repo is created:
 
+- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
+  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
+  token that both fetches from it and pushes to it. A fine-grained token scoped
+  to that one repository with **Contents: Read and write** is enough
 - **Decide about Actions.** The mirror carries `.github/workflows` too, so every
   workflow here also lands there under that repo's own triggers. Leaving them on
   is what gets lint, typecheck and tests run against the game while it is being
   developed, which is when they are worth the most; the two that would reach
   outside the repository — `pages-deploy.yml` and `sync.yml` — are already
-  guarded to run only in the public one. What is left to weigh is cost: Actions
+  guarded to run only in the public one. A third, `dry-run-deploy.yml`, is
+  guarded the other way and *is* meant to run here: it is the one-button deploy
+  of the testers' dry run, so turning Actions off costs that button and leaves
+  `npm run deploy` from a checkout. What is left to weigh is cost: Actions
   minutes are metered on a private repository where the public one runs free,
   and so is the GitHub Packages storage a private image would take should #202
   publish one from there. TBD — neither has been measured against this
   organisation's plan.
-- **Enable Pages**, which is what serves the testers' dry run — see *The dry run
-  for testers* in [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public,
-  protected only by the repository's unguessable name.
-- **Set `PUBLIC_URL`** in `apps/offline-frontend/package.json` to the new repo's
-  name, so the dry run's asset paths resolve.
+- **Enable Pages**, serving from the `gh-pages` branch — that is what the
+  testers' dry run is pushed to, see *The dry run for testers* in
+  [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public, protected only by the
+  repository's unguessable name, which is why the deploy ships no `CNAME`.
+- **Get `dry-run-deploy.yml` onto the default branch** if you want the Run
+  workflow button. GitHub lists a `workflow_dispatch` workflow only when the file
+  is on the repo's default branch — `dev` here — so a sync branch has to be
+  merged there before the button exists. The dispatch form then picks which
+  branch gets published. Nothing else about this repo needs `main`.
 
 # Debugging
 

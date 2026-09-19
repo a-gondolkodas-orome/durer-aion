@@ -38,7 +38,16 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # A ceiling rather than a reservation: it caps each eslint process turbo spawns
+      # instead of leaving V8 to size the heap at half of whatever RAM the runner
+      # happens to have — 8 GB on a public repo's, a third of that on a smaller one,
+      # which is how this step first failed. Every workspace lints in under 1024 MB,
+      # so this is headroom and a regression guard at once: if lint's memory creeps
+      # back up, it fails here, where it is visible, rather than only where the
+      # runner is smallest. .devcontainer/README.md has the measurements.
       - run: npm run lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=2048
 
   typecheck:
     name: typecheck

@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError } from 'sequelize';
 import { TeamsRepository } from './db';
+import { OTHER_IMPORT_MAX_LENGTH } from './model';
 
 function arraysEqual(a: string[], b: string[]) {
   if (a === b) return true;
@@ -104,9 +105,10 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       onwarn(`"Other" field not set for team ${teamname}`);
       onwarn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
     }
-    //this is stricter than the modell definition, because other can increase it's size
-    if (other !== undefined && other.length > 700) {
-      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < 700)`);
+    // Stricter than the column, on purpose: the admin routes append an audit
+    // trail to this field, and `model.ts` says what the gap is for.
+    if (other !== undefined && other.length > OTHER_IMPORT_MAX_LENGTH) {
+      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < ${OTHER_IMPORT_MAX_LENGTH})`);
       ok = false;
     }
 

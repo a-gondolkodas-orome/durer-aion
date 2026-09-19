@@ -1,0 +1,66 @@
+name: dry-run-deploy
+# On demand only. A push must not publish: the year's game is developed on this repo's branches
+# while it is still secret, and the site this deploys is public to anyone with the URL. A
+# maintainer dispatches it when there is something for testers to see — and the branch picked in
+# the dispatch form is the branch published, since the checkout below takes github.ref.
+on: workflow_dispatch
+
+permissions:
+  # gh-pages pushes a branch. Nothing else here writes anything.
+  contents: write
+
+jobs:
+  deploy:
+    # The mirror image of pages-deploy.yml's guard. This workflow syncs into the year's private
+    # repo, where it is meant to run — but it lands in the public repo too, and a dispatch there
+    # would replace gyakorlo.durerinfo.hu with the dry run.
+    if: github.repository != 'a-gondolkodas-orome/durer-aion'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-dry-run
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # The same three opening steps as pages-deploy.yml and every job in ci.yml: the Node in
+      # .nvmrc is the one a contributor builds with locally.
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # scripts/deploy-dry-run.mjs, the same script `npm run deploy` runs on a maintainer's
+      # machine. It reads the base path off this checkout's origin remote rather than taking it
+      # from here: one source of truth for the string, and the local run and this one stay the
+      # same code path.
+      - name: Build and publish the dry run
+        env:
+          # As in pages-deploy.yml: unset — no repository variable — leaves error reporting off
+          # rather than pointing the site at a dead endpoint.
+          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
+          # The vite configs read HEAD when this is unset. Setting it keeps the banner exact even
+          # if a build ever comes from a turbo cache rather than from these sources.
+          VITE_GIT_COMMIT_HASH: ${{ github.sha }}
+          # gh-pages publishes from a clone it makes itself, which inherits none of the credentials
+          # actions/checkout leaves in this checkout's config — so this job's token has to reach git
+          # a second time. Without it the clone of a private repo fails before anything is pushed.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # The token reaches git through this helper rather than through the remote's URL, for the
+          # reason sync.yml gives at more length: a URL carrying it is written into .git/config and
+          # read by whatever comes after it. The helper holds no secret of its own — git runs it and
+          # it prints what this step's environment holds, so the token lives as long as the job.
+          printf '%s\n' '#!/bin/sh' 'printf "%s\n" "$GITHUB_TOKEN"' > "$RUNNER_TEMP/askpass"
+          chmod 700 "$RUNNER_TEMP/askpass"
+          export GIT_ASKPASS="$RUNNER_TEMP/askpass"
+
+          # The username is the half of the credential that is not a secret, and this remote is
+          # both what the script reads the base path off and what gh-pages clones to publish.
+          git remote set-url origin "https://x-access-token@github.com/$GITHUB_REPOSITORY.git"
+
+          npm run deploy

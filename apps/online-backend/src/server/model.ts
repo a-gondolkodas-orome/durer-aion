@@ -39,6 +39,38 @@ export class TeamModel extends Model<
   declare readonly updatedAt: Date;
 }
 
+/** How much the `other` column holds, and all its validator asks of it.
+ *
+ * The two were 1024 and 700, and the gap was not headroom but a wall: `other`
+ * carries the organisers' notes *and* an audit trail the admin routes append to
+ * (`server/router.ts`), and sequelize validates a changed attribute on every
+ * save. A team imported with notes near 700 characters therefore had its first
+ * reset refused — and, since the route's other assignments were in memory only,
+ * refused for good, with a message naming a field the organiser had not touched.
+ *
+ * The import keeps the lower limit of its own below, which is what leaves room
+ * for the trail; the column's width is what the column is allowed to hold.
+ */
+export const OTHER_MAX_LENGTH = 1024;
+
+/** What the team import accepts, which is deliberately less than the column
+ * holds: the difference is the room the audit trail grows into. */
+export const OTHER_IMPORT_MAX_LENGTH = 700;
+
+/** A team's notes with one audit note appended, or unchanged when it will not
+ * fit.
+ *
+ * The trail is a convenience and the admin action is the point, so a full field
+ * costs the note rather than the reset. Callers pass the field as it came off
+ * the row: a team imported from a row with no `Other` column has null there, and
+ * `+=` on that used to write the string "null" into the notes.
+ */
+export function appendOtherNote(other: string | null | undefined, note: string): string {
+  const current = other ?? '';
+  const appended = current === '' ? note : `${current} ${note}`;
+  return appended.length > OTHER_MAX_LENGTH ? current : appended;
+}
+
 // Naming the attributes is what makes the column list exhaustive: a field
 // declared above with no column here — or a column here that no field
 // declares — is a type error.
@@ -118,11 +150,11 @@ export const teamAttributes: ModelAttributes<
     type: DataTypes.JSON,
   },
   other: {
-    type: DataTypes.STRING(1024),
+    type: DataTypes.STRING(OTHER_MAX_LENGTH),
     validate: {
       len: {
-        args: [0, 700],
-        msg: 'Other field must be between 0 and 700 characters.'
+        args: [0, OTHER_MAX_LENGTH],
+        msg: `Other field must be between 0 and ${OTHER_MAX_LENGTH} characters.`
       },
     }
   },

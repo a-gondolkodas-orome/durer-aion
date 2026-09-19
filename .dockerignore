@@ -13,12 +13,18 @@
 **/.env
 **/.env.*
 
-# Real team lists are dropped into scripts/ on the host — that is why
-# .gitignore carries `scripts/*.tsv*`. docker-compose.yml bind-mounts ./scripts
-# in production too and `npm run teams:import` reads the file through that
-# mount, so a TSV baked into the image would be competitors' data shipped for
-# nothing.
-scripts/*.tsv
+# Real team lists are dropped into scripts/ on the host, and the importer writes
+# `<file>.tsv.export` back beside them — the same rows plus the generated join
+# codes and credentials. docker-compose.yml bind-mounts ./scripts in production
+# too and `npm run teams:import` reads the file through that mount, so either
+# baked into the image would be competitors' data shipped for nothing.
+#
+# The trailing `*` is what covers the export, and is why this matches
+# .gitignore's pattern exactly: docker matches against the whole path with
+# filepath.Match semantics, so `scripts/*.tsv` alone does not match
+# `scripts/teams.tsv.export`. The Dockerfile's leak check needs the same
+# trailing `*` for the same reason, and the two have to be changed together.
+scripts/*.tsv*
 
 # Build output, caches and history. Each is rebuilt or unused inside the image
 # and only churns the `COPY . .` layer; apps/online-backend/dist is also what

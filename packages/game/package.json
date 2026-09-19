@@ -23,6 +23,8 @@
   "types": "./dist/index.d.mts",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt game\""

@@ -8,10 +8,12 @@
     "node": ">=24.20.0 <25"
   },
   "scripts": {
-    "check": "npm run build && npx cspell \"src/**/*.{ts,tsx}\" --no-progress && npm run typecheck && npm test && npx eslint . --max-warnings=0",
+    "check": "npm run build && npx cspell \"src/**/*.{ts,tsx}\" --no-progress && npm run typecheck && npm test && npm run lint",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "dev": "vite",
     "build": "vite build"

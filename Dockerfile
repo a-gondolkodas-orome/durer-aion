@@ -31,15 +31,26 @@ COPY . .
 # the build if one of those patterns ever stops matching. Docker matches a
 # pattern against the whole path, so the `**/` prefixes are load-bearing and
 # easy to drop by accident — that is how apps/online-backend/.env used to get
-# baked in (#443). CI seeds the env files before building, so a regression
+# baked in (#443). Both names here are prefix globs for the same reason: the
+# importer writes `<file>.tsv.export` next to the list it read, and `*.tsv`
+# does not match it. CI seeds the env files before building, so a regression
 # surfaces in the docker job rather than in a deployed image. node_modules is
 # pruned because npm ci has already filled it above.
-RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.tsv' \) -print); \
+RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.tsv*' \) -print); \
     if [ -n "$leaked" ]; then \
       echo "These must not reach the image — check .dockerignore:" >&2; \
       echo "$leaked" >&2; \
       exit 1; \
     fi
+
+# The install above leaves no stamp, and the dev server docker-compose.dev.yml
+# runs in here begins by reading one (scripts/ensure-deps.mjs) — so it found "no
+# install recorded" and reinstalled all 900 packages before starting, on every
+# container whose writable layer was new, which `COPY . .` makes that of every
+# edit. In `dev` and not in `deps`, because .nvmrc and the script itself arrive
+# with the source above, and copying them earlier would rebuild the install
+# layer whenever either changed.
+RUN node scripts/ensure-deps.mjs --record
 
 EXPOSE 8000
 
