@@ -335,6 +335,10 @@ that were previously written down only here or nowhere.
 - Comment what is not evident from the code — a rule the condition alone does
   not imply, a non-obvious invariant, why an apparently redundant branch
   exists. A comment restating the line below it is noise.
+- **A comment describes the code as it stands.** What it did before, and which
+  change moved it, belong to the commit and the PR — no "previously", no "this
+  PR removes". Where the past is the point, state it in the present, as a
+  standing hazard. Suites are the exception: a regression test names its bug.
 - Say a thing once: rationale lives in the doc that owns the decision, and
   comments point at it rather than restating it.
 - Cover major new functionality with unit tests. For a new game that means the

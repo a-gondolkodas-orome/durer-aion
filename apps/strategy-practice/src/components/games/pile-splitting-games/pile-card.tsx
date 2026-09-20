@@ -31,8 +31,7 @@ interface PileCardProps {
  * Whether this device can preview a piece before the click that plays it. Where
  * it can, a click plays the turn outright, as this family always has; where it
  * cannot, the first tap previews and the second plays (see either client's
- * `clickPiece`), which is what replaces the split the pieces used to be
- * labelled with.
+ * `clickPiece`), which is how a touch device reads a split off a piece at all.
  *
  * Asking the device rather than reading the preview back is what keeps the
  * mouse a single click: hover and click can land in one frame, and the click
