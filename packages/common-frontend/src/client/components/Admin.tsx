@@ -38,10 +38,14 @@ export function Admin(props: { teamId?: string }) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
   const [tab, setTab] = useState<AdminTab>('teams');
-  // The join codes the last import generated, held here rather than in the tab
-  // that made them: the import's own download is their only copy — no screen on
-  // this page shows a join code — and the first thing an organiser does after
-  // an import is go and look at the teams, which unmounts that tab.
+  // The join codes this page's imports generated, held here rather than in the
+  // tab that made them: the import's own download is their only copy — no
+  // screen on this page shows a join code — and the first thing an organiser
+  // does after an import is go and look at the teams, which unmounts that tab.
+  //
+  // Every import's rows, not the last one's: a browser that blocked the first
+  // download leaves the re-download button as the only way to those codes, and
+  // importing the next batch before pressing it must not be what loses them.
   const [importedCodes, setImportedCodes] = useState<string[][] | null>(null);
 
   // Read off the list rather than kept as state, so a team deleted from the
@@ -118,7 +122,10 @@ export function Admin(props: { teamId?: string }) {
           <DeletedTeams setConfirmDialog={setConfirmDialog} onRestored={() => { void mutate(); }}/>}
         {!teamFromPath && tab === 'import' && <ImportTeams
           exported={importedCodes}
-          onImported={(exportTable) => { setImportedCodes(exportTable); void mutate(); }}/>}
+          onImported={(exportTable) => {
+            setImportedCodes(held => [...held ?? [], ...exportTable]);
+            void mutate();
+          }}/>}
         {showTeams && <Stack sx={{
           height: "635px",
         }}>

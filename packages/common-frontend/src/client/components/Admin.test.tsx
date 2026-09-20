@@ -416,6 +416,42 @@ test('the join codes survive a download the browser refuses', async () => {
   expect(screen.queryByText('Váratlan hiba történt')).not.toBeInTheDocument();
 });
 
+// A blocked first download leaves the re-download button as the only way to
+// those codes. Replacing the table on the next import made importing the late
+// teams before pressing it the thing that lost the first batch.
+test('a second import keeps the codes of the first', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    imported: 1, rows: 1, exportTable: [['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds']],
+  }));
+  const saved: string[] = [];
+  vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
+    void (blob as Blob).text().then(text => saved.push(text));
+    return 'blob:codes';
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(await screen.findByText('Belépőkódok letöltése újra')).toBeInTheDocument();
+
+  importTeams.mockResolvedValue(importResult({
+    imported: 1, accepted: 1, rows: 2,
+    exportTable: [['Bravo', 'C', 'a@b.com', 'x', 'id-b', '444-5555-666', 'creds']],
+  }));
+  paste([HEADER, importRow('Alpha'), importRow('Bravo')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(await screen.findByText('1 új csapat importálva, 1 már létezett')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('Belépőkódok letöltése újra'));
+  await waitFor(() => { expect(saved).toHaveLength(3); });
+  // Both batches, not just the one that came last.
+  expect(saved[2]).toContain('111-2222-333');
+  expect(saved[2]).toContain('444-5555-666');
+});
+
 // Re-uploading a registration list is how late teams are added, so a file whose
 // teams are all there already is the ordinary answer, not a failure. Reported as
 // one, an organiser goes looking for a fault that is not there.
