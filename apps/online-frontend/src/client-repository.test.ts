@@ -171,6 +171,33 @@ describe("adding minutes to one match", () => {
   });
 });
 
+describe("adding minutes to every running match", () => {
+  // One request, where the page used to send one per team out of a list it
+  // held. The body is what the walk is asked for, and the grant in it is what
+  // makes sending it again safe, so a typo in either is worth a test rather
+  // than a hand-walk.
+  test("is one POST carrying the minutes and the grant", async () => {
+    const calls = fakeAxios(ok);
+
+    await new RealClientRepository().addMinutesToEveryone(10, "a1b2c3d4");
+
+    expect(calls).toStrictEqual([
+      { method: "post", url: "/game/admin/addminutes", body: { minutes: 10, grant: "a1b2c3d4" } },
+    ]);
+  });
+
+  // The route sends nothing until every running match has been walked, so what
+  // the browser waits on is the whole round. The ten seconds every other call
+  // here takes aborted that mid-walk.
+  test("waits far longer than the other calls do", async () => {
+    fakeAxios(ok);
+
+    await new RealClientRepository().addMinutesToEveryone(10, "a1b2c3d4");
+
+    expect(vi.mocked(axios.create).mock.calls.at(-1)?.[0]).toMatchObject({ timeout: 300_000 });
+  });
+});
+
 describe("the archive of deleted teams", () => {
   const deletedAt = "2026-09-07T10:00:00.123Z";
 
