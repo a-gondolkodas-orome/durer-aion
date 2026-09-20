@@ -619,6 +619,7 @@ megnézzük
 megnöveljük
 Megnyert
 megnyerte
+megnyomás
 megoldhatja
 megoldjátok
 megoldóak

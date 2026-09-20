@@ -118,11 +118,38 @@ const REASONS: Record<string, string> = {
   error: 'hiba',
 };
 
+/**
+ * Whether what the walk left out is worth pressing the button again for.
+ *
+ * A refusal is a decision about the match — it has finished, the id names
+ * another one — and comes back the same however often it is asked. A throw is
+ * not: something was in the way of that one match, and asking again is exactly
+ * what it needs. So this is also what decides whether the grant is kept
+ * ({@link forgetGrant}'s caller): a retry has to be the same extension, while a
+ * walk whose problems are all refusals is finished, and the next press is a
+ * second, deliberate one.
+ */
+export const bulkAddMinutesRetryable = (result: BulkAddMinutesDto): boolean =>
+  result.problems.some(problem => problem.reason === 'error');
+
+/** Said where the same button is the retry: it carries the grant the walk
+ *  already used, so the matches it moved are not moved again. */
+const RETRY_IS_SAFE = 'nyomd meg újra, a már meghosszabbított meccsek nem kapnak kétszer időt';
+
+/** Said where it is not. These matches were refused rather than missed, so
+ *  pressing again cannot give them anything — and, the walk being finished,
+ *  would be a second extension for every match it did move. Naming the teams
+ *  left out is what invites that second press, so the same line has to say
+ *  what it would cost. */
+const PRESSING_AGAIN_EXTENDS_EVERYONE =
+  'ezeken az újbóli megnyomás sem segít, a többi meccs viszont újra kapna időt';
+
 /** The one line the organiser reads afterwards.
  *
  * It names the teams that were left out, because not being able to tell which
  * is what made the old button dangerous to press again — up to
- * {@link NAMED_PROBLEMS} of them, and a count for the rest.
+ * {@link NAMED_PROBLEMS} of them, and a count for the rest — and then says what
+ * pressing it again would do.
  */
 export function bulkAddMinutesMessage(result: BulkAddMinutesDto, minutes: number): string {
   const parts = [`${result.extended.length} meccs kapott +${minutes} percet`];
@@ -138,7 +165,13 @@ export function bulkAddMinutesMessage(result: BulkAddMinutesDto, minutes: number
     parts.push(`${result.problems.length} sikertelen: ${named}`
       + (unnamed > 0 ? ` és még ${unnamed}` : ''));
   }
-  return parts.join(', ');
+  const line = parts.join(', ');
+  if (result.problems.length === 0) return line;
+  if (bulkAddMinutesRetryable(result)) return `${line} — ${RETRY_IS_SAFE}.`;
+  // With nothing moved there is nothing a second press could move twice, so
+  // the warning would be about a cost that is not there.
+  const moved = result.extended.length + result.alreadyGranted.length;
+  return moved === 0 ? line : `${line} — ${PRESSING_AGAIN_EXTENDS_EVERYONE}.`;
 }
 
 /** How loudly to report it: everything moved, some of it, or none of it. */
@@ -155,5 +188,5 @@ export function bulkAddMinutesVariant(result: BulkAddMinutesDto): 'success' | 'w
  * may well have finished on the server after the browser stopped waiting.
  */
 export function bulkAddMinutesRetryMessage(error: string): string {
-  return `${error} — nyomd meg újra, a már meghosszabbított meccsek nem kapnak kétszer időt.`;
+  return `${error} — ${RETRY_IS_SAFE}.`;
 }

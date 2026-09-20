@@ -228,8 +228,11 @@ test('a team the server could not move is named, and the rest still got theirs',
 
   await addMinutesTo(teams, '10');
 
+  // And the line says what pressing the button again would do, because naming
+  // the team left out is exactly what invites that press.
   expect(await screen.findByText(
     '1 meccs kapott +10 percet, 1 sikertelen: Bravo (nem fut meccs)'
+    + ' — ezeken az újbóli megnyomás sem segít, a többi meccs viszont újra kapna időt.'
   )).toBeInTheDocument();
 });
 
@@ -294,6 +297,46 @@ test('a walk that answered leaves no grant behind', async () => {
   await addMinutesTo(teams, '10');
 
   await waitFor(() => expect(window.localStorage.getItem(pendingGrantStorageKey)).toBeNull());
+});
+
+// A walk can leave a team out because something was in the way of that one
+// match, and asking again is what that needs. Forgetting the grant there would
+// make the retry a second extension for every match the walk did move.
+test('a team left out by a failure is retried under the same grant', async () => {
+  const teams = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone').mockResolvedValue(walked({
+    extended: ['Alpha'],
+    problems: [{ teamName: 'Bravo', matchID: 'relay-b', reason: 'error' }],
+  }));
+
+  await addMinutesTo(teams, '10');
+  await waitFor(() => expect(walk).toHaveBeenCalledOnce());
+  await pressAddMinutes('10');
+
+  await waitFor(() => expect(walk).toHaveBeenCalledTimes(2));
+  const [first, second] = grantsOf(walk);
+  expect(second).toBe(first);
+});
+
+// A refusal is not that: the match has finished, and asking again refuses it
+// again. So that walk is over and its grant goes, which is what lets the
+// organiser ask for a second extension at all.
+test('a team left out by a refusal does not hold the grant open', async () => {
+  const teams = [playing(alpha, 'relay-a'), playing(bravo, 'relay-b')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone').mockResolvedValue(walked({
+    extended: ['Alpha'],
+    problems: [{ teamName: 'Bravo', matchID: 'relay-b', reason: 'no-match-running' }],
+  }));
+
+  await addMinutesTo(teams, '10');
+  await waitFor(() => expect(walk).toHaveBeenCalledOnce());
+  await pressAddMinutes('10');
+
+  await waitFor(() => expect(walk).toHaveBeenCalledTimes(2));
+  const [first, second] = grantsOf(walk);
+  expect(second).not.toBe(first);
 });
 
 // A walk that answered is finished, so pressing again means a second, deliberate

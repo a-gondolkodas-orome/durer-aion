@@ -15,8 +15,8 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
-import { bulkAddMinutesMessage, bulkAddMinutesRetryMessage, bulkAddMinutesVariant, forgetGrant, grantFor }
-  from '../utils/bulk-add-minutes';
+import { bulkAddMinutesMessage, bulkAddMinutesRetryable, bulkAddMinutesRetryMessage, bulkAddMinutesVariant,
+  forgetGrant, grantFor } from '../utils/bulk-add-minutes';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -249,8 +249,12 @@ export function Admin(props: { teamId?: string }) {
                 setExtending(true);
                 try {
                   const result = await addMinutesToEveryone(minutes, grant);
-                  // Answered, so the next press means a second extension.
-                  forgetGrant();
+                  // A walk that answered is finished, so the next press means a
+                  // second, deliberate extension — unless something in it is
+                  // worth asking again for, where keeping the grant is what
+                  // stops that press from moving every match it already moved
+                  // a second time. The message says which of the two it is.
+                  if (!bulkAddMinutesRetryable(result)) forgetGrant();
                   enqueueSnackbar(bulkAddMinutesMessage(result, minutes), {
                     variant: bulkAddMinutesVariant(result),
                     // The problems name the teams left out, which takes longer

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { BulkAddMinutesDto } from '../dto/TeamStateDto';
 import {
   bulkAddMinutesMessage,
+  bulkAddMinutesRetryable,
   bulkAddMinutesRetryMessage,
   bulkAddMinutesVariant,
   forgetGrant,
@@ -140,7 +141,41 @@ describe('bulkAddMinutesMessage', () => {
     });
 
     expect(bulkAddMinutesMessage(walked, 10)).toBe(
-      '1 meccs kapott +10 percet, 2 sikertelen: Bravo (nem fut meccs), Charlie (hiba)');
+      '1 meccs kapott +10 percet, 2 sikertelen: Bravo (nem fut meccs), Charlie (hiba)'
+      + ' — nyomd meg újra, a már meghosszabbított meccsek nem kapnak kétszer időt.');
+  });
+
+  // Naming the teams left out is what invites the second press, so the same
+  // line has to say what that press would do. Here it can only help: the
+  // grant is kept, and the matches already moved are not moved again.
+  test('says the button is the retry when something threw', () => {
+    const walked = result({
+      extended: ['Alpha'],
+      problems: [{ teamName: 'Bravo', matchID: 'm2', reason: 'error' }],
+    });
+
+    expect(bulkAddMinutesMessage(walked, 10)).toContain('nyomd meg újra');
+  });
+
+  // And here it cannot: a refused match is refused again, and the walk being
+  // finished, the press is a second extension for everyone it did move.
+  test('says what pressing again would cost when nothing can be retried', () => {
+    const walked = result({
+      extended: ['Alpha'],
+      problems: [{ teamName: 'Bravo', matchID: 'm2', reason: 'no-match-running' }],
+    });
+
+    const message = bulkAddMinutesMessage(walked, 10);
+
+    expect(message).toContain('az újbóli megnyomás sem segít');
+    expect(message).toContain('újra kapna időt');
+  });
+
+  // With nothing moved there is nothing a second press could move twice.
+  test('warns about no second extension when the walk moved nothing', () => {
+    const walked = result({ problems: [{ teamName: 'Bravo', matchID: 'm2', reason: 'no-match-running' }] });
+
+    expect(bulkAddMinutesMessage(walked, 10)).toBe('0 meccs kapott +10 percet, 1 sikertelen: Bravo (nem fut meccs)');
   });
 
   // The retry case: the walk ran again and found its own work already done.
@@ -170,7 +205,9 @@ describe('bulkAddMinutesMessage', () => {
   test('counts nothing extra when every team left out is named', () => {
     const walked = result({ problems: [{ teamName: 'Bravo', matchID: 'm2', reason: 'error' }] });
 
-    expect(bulkAddMinutesMessage(walked, 10)).toBe('0 meccs kapott +10 percet, 1 sikertelen: Bravo (hiba)');
+    expect(bulkAddMinutesMessage(walked, 10)).toBe(
+      '0 meccs kapott +10 percet, 1 sikertelen: Bravo (hiba)'
+      + ' — nyomd meg újra, a már meghosszabbított meccsek nem kapnak kétszer időt.');
   });
 
   // A reason the server learns to send that this does not know yet should read
@@ -179,6 +216,32 @@ describe('bulkAddMinutesMessage', () => {
     const walked = result({ problems: [{ teamName: 'Bravo', matchID: 'm2', reason: 'moon-phase' }] });
 
     expect(bulkAddMinutesMessage(walked, 10)).toContain('Bravo (moon-phase)');
+  });
+});
+
+describe('bulkAddMinutesRetryable', () => {
+  // The grant hangs on this: kept, the same button is the retry; forgotten,
+  // the next press is a second extension for every match the walk moved.
+  test('is true for a match that threw, which asking again may well fix', () => {
+    expect(bulkAddMinutesRetryable(result({
+      extended: ['Alpha'],
+      problems: [{ teamName: 'Bravo', matchID: 'm2', reason: 'error' }],
+    }))).toBe(true);
+  });
+
+  // A refusal is a decision about the match, and comes back the same however
+  // often it is asked — so holding the grant for it would only stand in the
+  // way of the second extension the organiser may actually want.
+  test.each(['no-match-running', 'other-match-running', 'match-not-found'])(
+    'is false for %s, which will be refused again', (reason) => {
+      expect(bulkAddMinutesRetryable(result({
+        extended: ['Alpha'],
+        problems: [{ teamName: 'Bravo', matchID: 'm2', reason }],
+      }))).toBe(false);
+    });
+
+  test('is false for a walk that left nothing out', () => {
+    expect(bulkAddMinutesRetryable(result({ extended: ['Alpha'] }))).toBe(false);
   });
 });
 
