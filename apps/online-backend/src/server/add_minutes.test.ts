@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import type { StorageAPI } from "boardgame.io";
 import type { AnyBgioGame } from "game";
 import type { TeamsRepository } from "./db";
@@ -62,6 +62,13 @@ const clockOf = (
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-03-21T18:30:00.000Z"));
+});
+
+// The walk logs what a match threw, so a test that reaches that path stubs
+// `console.error` — and has to hand it back, or every later test's output goes
+// into a stub nobody reads.
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("addMinutesToMatch", () => {
@@ -360,15 +367,22 @@ describe("addMinutesToEveryRunningMatch", () => {
     ]);
   });
 
-  it("treats a match that threw as that match's problem", async () => {
+  // The organiser gets a team name, which is all a snackbar can carry. What
+  // went wrong is only ever readable in the server's log, so the walk has to
+  // put it there before going on: caught and dropped, the one thing that says
+  // why a team was left out is gone.
+  it("treats a match that threw as that match's problem, and logs what it was", async () => {
     const rows = [playing("team-of-m1", "Alpha", "m1"), playing("team-of-m2", "Bravo", "m2")];
     const db = anyMatch();
-    vi.mocked(db.setState).mockRejectedValueOnce(new Error("the database went away"));
+    const wentWrong = new Error("the database went away");
+    vi.mocked(db.setState).mockRejectedValueOnce(wentWrong);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     const result = await addMinutesToEveryRunningMatch(clockOver(rows, db), { minutes: 10, grant: GRANT });
 
     expect(result.extended).toStrictEqual(["Bravo"]);
     expect(result.problems).toStrictEqual([{ teamName: "Alpha", matchID: "m1", reason: "error" }]);
+    expect(logged).toHaveBeenCalledWith(expect.stringContaining("m1"), wentWrong);
   });
 
   // The same grant twice is the retry case: the second ask moves nothing.

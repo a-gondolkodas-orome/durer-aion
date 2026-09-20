@@ -54,6 +54,11 @@ export interface MatchClock {
  * stop, and `Number.isInteger(1e21)` is true. A day is far longer than a round,
  * so past it is a typo, and this is the one operation that reaches every
  * running match at once.
+ *
+ * `MINUTES_LIMIT` in `common-frontend`'s `utils/minutes-field.ts` is the
+ * organiser's side of the same number: this one is the rule, that one is what
+ * says so in the form rather than letting a 400 arrive as an unexplained
+ * failure.
  */
 export const MINUTES_LIMIT = 24 * 60;
 
@@ -245,9 +250,12 @@ export async function addMinutesToEveryRunningMatch(
         if (outcome.status === "extended") result.extended.push(teamName);
         else if (outcome.status === "already-granted") result.alreadyGranted.push(teamName);
         else result.problems.push({ teamName, matchID, reason: outcome.reason.kind });
-      } catch {
-        // A throw is one match's problem, not the round's. What it was is in
-        // the server's own log; the organiser needs to know which team to look at.
+      } catch (error) {
+        // A throw is one match's problem, not the round's. The organiser is
+        // told which team to look at; what actually failed is of no use in a
+        // snackbar and is lost altogether if nothing writes it down, so it
+        // goes to the server's log on the way past.
+        console.error(`Extending match ${matchID} of team ${teamName} failed:`, error);
         result.problems.push({ teamName, matchID, reason: "error" });
       }
     }
