@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { ValidationError } from 'sequelize';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { OTHER_IMPORT_MAX_LENGTH, TEAM_IMPORT_HEADER } from 'schemas';
-import { NewTeam, TeamsRepository } from './db';
+import { LiveTeam, NewTeam, TeamsRepository } from './db';
 import { import_teams_from_tsv_locally, importTeamsFromTsv } from './team_import';
 
 // Only `randomInt` is replaceable, and `beforeEach` puts the real one back —
@@ -36,16 +36,27 @@ const row = (teamname: string, rest: string[] = []) =>
 
 const file = (...rows: string[]) => [HEADER, ...rows].join('\n');
 
+const LIVE_ID = '20638d0e-ac06-4e72-a734-b4fcdcaee425';
+const LIVE_CODE = '692-2481-797';
+
+/** A team the database already holds. The defaults are what `row` above writes,
+ * so a test spells out only the column it is actually about — and a row naming
+ * this team, with nothing else filled in, is the same team. */
+const liveTeam = (team: Partial<LiveTeam> = {}): LiveTeam => ({
+  teamId: LIVE_ID,
+  teamName: 'Alpha',
+  joinCode: LIVE_CODE,
+  category: 'C',
+  email: 'a@b.com',
+  ...team,
+});
+
 /** A repository that answers but records, in the style of `team_remove.test.ts`:
  * no database, and the calls are what the assertions read. */
-function stubTeams(taken: Partial<{ teamIds: string[], teamNames: string[], joinCodes: string[] }> = {}) {
+function stubTeams(live: LiveTeam[] = []) {
   return {
     connect: vi.fn(),
-    takenIdentifiers: vi.fn().mockResolvedValue({
-      teamIds: new Set(taken.teamIds ?? []),
-      teamNames: new Set(taken.teamNames ?? []),
-      joinCodes: new Set(taken.joinCodes ?? []),
-    }),
+    liveTeams: vi.fn().mockResolvedValue(live),
     insertTeams: vi.fn().mockResolvedValue(null),
   } as unknown as TeamsRepository;
 }
@@ -157,10 +168,13 @@ describe('importTeamsFromTsv', () => {
     // The clashes with live teams are found only after the file is parsed, so
     // without a sort this answer would read line 3 before line 2 — and the
     // grid the admin page draws lists them in the order they arrive.
-    const teams = stubTeams({ teamNames: ['Alpha'] });
+    const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
     const bad = ['Bravo', 'X', 'a@b.com', 'x'].join('\t');
+    // A join code the live Alpha does not hold, so this row is a different team
+    // wanting a name that is taken rather than the team that already has it.
+    const clash = row('Alpha', ['', '999-9999-999']);
 
-    const result = await importTeamsFromTsv(teams, file(row('Alpha'), bad));
+    const result = await importTeamsFromTsv(teams, file(clash, bad));
 
     expect(codes(result.problems)).toEqual(['teamname-taken', 'invalid-category']);
     expect(result.problems.map(problem => problem.row)).toEqual([2, 3]);
@@ -168,9 +182,11 @@ describe('importTeamsFromTsv', () => {
 
   describe('against the teams already in the database', () => {
     it('refuses a team name a live team holds, naming the row', async () => {
-      const teams = stubTeams({ teamNames: ['Alpha'] });
+      // Identity is the name, so this row has to disagree with the live Alpha
+      // on something to be a different team wanting its name: the join code.
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
 
-      const result = await importTeamsFromTsv(teams, file(row('Alpha')));
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', ['', '999-9999-999'])));
 
       expect(teams.insertTeams).not.toHaveBeenCalled();
       expect(result.problems).toEqual([
@@ -179,20 +195,133 @@ describe('importTeamsFromTsv', () => {
     });
 
     it('refuses a join code a live team holds', async () => {
-      const teams = stubTeams({ joinCodes: ['692-2481-797'] });
+      const teams = stubTeams([liveTeam({ teamName: 'Zulu', joinCode: LIVE_CODE })]);
 
-      const result = await importTeamsFromTsv(teams, file(row('Alpha', ['', '692-2481-797'])));
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', ['', LIVE_CODE])));
 
       expect(codes(result.problems)).toEqual(['join-code-taken']);
     });
 
     it('refuses an id a live team holds', async () => {
-      const teamId = '20638d0e-ac06-4e72-a734-b4fcdcaee425';
-      const teams = stubTeams({ teamIds: [teamId] });
+      const teams = stubTeams([liveTeam({ teamName: 'Zulu', teamId: LIVE_ID })]);
 
-      const result = await importTeamsFromTsv(teams, file(row('Alpha', [teamId])));
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', [LIVE_ID])));
 
       expect(codes(result.problems)).toEqual(['team-id-taken']);
+    });
+
+    // Re-uploading a registration list is how late teams are added: the teams
+    // already there are recognised and left alone rather than refusing the file
+    // and sending the organiser to trim it by hand on a competition morning.
+    it('accepts a row naming a team that is already there, and writes nothing', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha')));
+
+      expect(teams.insertTeams).not.toHaveBeenCalled();
+      expect(result.imported).toBe(0);
+      expect(result.accepted).toBe(1);
+      expect(result.refused).toBe(false);
+      expect(codes(result.problems)).toEqual(['already-exists']);
+    });
+
+    it('imports the new teams of a file whose others are already there', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha'), row('Bravo')));
+
+      expect(result.imported).toBe(1);
+      expect(result.accepted).toBe(1);
+      expect(inserted(teams).map(entry => entry.team.teamname)).toEqual(['Bravo']);
+    });
+
+    it('takes the identifiers the row supplies as confirmation, not as a clash', async () => {
+      // What feeding an export straight back looks like: every cell filled in,
+      // and every one of them this team's own.
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', [LIVE_ID, LIVE_CODE])));
+
+      expect(result.accepted).toBe(1);
+      expect(codes(result.problems)).toEqual(['already-exists']);
+    });
+
+    // The name says one team and the id another. Accepting either reading would
+    // be a guess, and one of them writes a team under an identifier it does not
+    // own, so the file is refused and the organiser decides.
+    it('refuses a row whose identifiers point at different live teams', async () => {
+      const otherId = 'b5646f04-2591-4afc-9ae7-4350562c0649';
+      const teams = stubTeams([
+        liveTeam({ teamName: 'Alpha' }),
+        liveTeam({ teamName: 'Zulu', teamId: otherId, joinCode: '111-1111-111' }),
+      ]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', [otherId])));
+
+      expect(teams.insertTeams).not.toHaveBeenCalled();
+      expect(codes(result.problems)).toEqual(['teamname-taken', 'team-id-taken']);
+    });
+
+    // An organiser who fixed a category in the file and re-uploaded it has to
+    // learn that the fix did not land: the team would otherwise be served the
+    // wrong games for the whole round, with the page reporting a clean import.
+    it('warns when an accepted row disagrees with the live team, and changes nothing', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha', category: 'E', email: 'old@b.com' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha')));
+
+      expect(teams.insertTeams).not.toHaveBeenCalled();
+      expect(codes(result.problems)).toEqual(['already-exists', 'category-differs', 'email-differs']);
+      expect(result.problems[1]).toMatchObject({ column: 'Category', found: 'C ≠ E' });
+      // Warnings: the file still loads, and these are not rows at fault.
+      expect(result.badRows).toBe(0);
+    });
+
+    // `other` is the one column the admin routes write to themselves, appending
+    // an audit trail. Comparing it would warn on every re-upload of a file that
+    // is otherwise exactly right.
+    it('says nothing about an accepted row whose notes have moved on', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+      const content = file(['Alpha', 'C', 'a@b.com', 'quite different notes'].join('\t'));
+
+      const result = await importTeamsFromTsv(teams, content);
+
+      expect(codes(result.problems)).toEqual(['already-exists']);
+    });
+
+    // One upload of a whole list should give back one file to mail, not a new
+    // one to splice onto the last. The accepted teams' codes come from the file
+    // itself, never read back out of the database: no screen here shows a join
+    // code, and this download is not the place to become the first.
+    it('carries an accepted team whose code the file supplied into the export', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', [LIVE_ID, LIVE_CODE]), row('Bravo')));
+
+      expect(result.exportTable).toHaveLength(2);
+      // The file's own order, so it reads against the file the organiser sent.
+      expect(result.exportTable[0]).toEqual([
+        'Alpha', 'C', 'a@b.com', 'Kovács Anna — Példa Gimnázium', LIVE_ID, LIVE_CODE, '',
+      ]);
+      expect(result.exportTable[1][0]).toBe('Bravo');
+    });
+
+    it('leaves out an accepted team the file had no code for', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha'), row('Bravo')));
+
+      expect(result.exportTable.map(exported => exported[0])).toEqual(['Bravo']);
+    });
+
+    it('exports nothing when every team in the file is already there', async () => {
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+
+      const result = await importTeamsFromTsv(teams, file(row('Alpha', [LIVE_ID, LIVE_CODE])));
+
+      // There are no new codes to mail, so handing the organiser their own file
+      // back as a download would be noise.
+      expect(result.exportTable).toEqual([]);
     });
 
     it('draws again rather than generating a join code that is already in use', async () => {
@@ -200,7 +329,7 @@ describe('importTeamsFromTsv', () => {
       const digits = [...Array<number>(10).fill(1), ...Array<number>(10).fill(2)];
       let drawn = 0;
       (randomInt as unknown as Mock).mockImplementation(() => digits[drawn++]);
-      const teams = stubTeams({ joinCodes: ['111-1111-111'] });
+      const teams = stubTeams([liveTeam({ teamName: 'Zulu', joinCode: '111-1111-111' })]);
 
       const result = await importTeamsFromTsv(teams, file(row('Alpha')));
 
@@ -256,9 +385,11 @@ describe('importTeamsFromTsv', () => {
 
   describe('a dry run', () => {
     it('checks the file and writes nothing', async () => {
-      const teams = stubTeams({ teamNames: ['Alpha'] });
+      const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
 
-      const result = await importTeamsFromTsv(teams, file(row('Alpha'), row('Bravo')), { dryRun: true });
+      const clash = row('Alpha', ['', '999-9999-999']);
+
+      const result = await importTeamsFromTsv(teams, file(clash, row('Bravo')), { dryRun: true });
 
       expect(teams.insertTeams).not.toHaveBeenCalled();
       expect(result.imported).toBe(0);
@@ -309,8 +440,31 @@ describe('importTeamsFromTsv', () => {
 
       const result = await importTeamsFromTsv(teams, file(...rows));
 
-      expect(result.problems).toHaveLength(200);
-      expect(result.problemsTruncated).toBe(300);
+      expect(codes(result.problems)).toEqual(Array<string>(20).fill('other-missing'));
+      expect(result.problemsTruncated).toBe(480);
+      // The list is short; the count is the file's own, so a caller collapsing
+      // these into one line can still say how many rows it stands for.
+      expect(result.warningCounts).toEqual({ 'other-missing': 500 });
+    });
+
+    // A flat cap sorted the warnings by line and took the first 200, so the one
+    // warning that says a value was *changed* on its way in could be pushed off
+    // the end by a column of cosmetic ones — and the row went in truncated with
+    // nothing naming it. It is the archive round trip in README.md § *Checking
+    // it works* that this would quietly break.
+    it('keeps a warning about changed data behind a column of repeated ones', async () => {
+      const teams = stubTeams();
+      const grown = `${'a'.repeat(OTHER_IMPORT_MAX_LENGTH)} prevstratid:0EKBiMgbJ5A`;
+      const rows = [
+        ...Array.from({ length: 400 }, (_, index) => `Team ${index}\tC\ta@b.com\t`),
+        ['Late', 'C', 'a@b.com', grown].join('\t'),
+      ];
+
+      const result = await importTeamsFromTsv(teams, file(...rows));
+
+      expect(result.imported).toBe(401);
+      expect(codes(result.problems)).toContain('other-truncated');
+      expect(result.warningCounts).toEqual({ 'other-missing': 400, 'other-truncated': 1 });
     });
 
     // The cap decides how much is listed. A caller counting the rows in that
@@ -398,6 +552,29 @@ describe('import_teams_from_tsv_locally', () => {
 
     expect(vi.mocked(writeFileSync).mock.calls[0][0]).toBe('teams.tsv.export');
     expect(logged).toContain('Successfully imported 1 teams.');
+  });
+
+  // Re-running a file is how late teams are added, so running one that has not
+  // grown since is the ordinary answer rather than a failure: exit 0, and the
+  // export from the run that did import is left where it is.
+  it('succeeds without writing when every team in the file is already there', async () => {
+    const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+    vi.mocked(readFileSync).mockReturnValue(file(row('Alpha')));
+
+    expect(await import_teams_from_tsv_locally(teams, 'teams.tsv')).toBe(true);
+
+    expect(writeFileSync).not.toHaveBeenCalled();
+    expect(logged).toContain('Nothing to import: all 1 teams in the file are already there.');
+  });
+
+  it('says how many were already there alongside what it imported', async () => {
+    const teams = stubTeams([liveTeam({ teamName: 'Alpha' })]);
+    vi.mocked(readFileSync).mockReturnValue(file(row('Alpha'), row('Bravo')));
+
+    expect(await import_teams_from_tsv_locally(teams, 'teams.tsv')).toBe(true);
+
+    expect(logged).toContain('Successfully imported 1 teams.');
+    expect(logged).toContain('1 more were already there and were left as they are.');
   });
 
   // Returning normally made `import_teams.js` exit 0, so a shell — and

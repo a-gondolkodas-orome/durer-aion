@@ -36,6 +36,10 @@ const PROBLEM_TEXT: Record<TeamTsvProblemCode, string> = {
   'teamname-taken': 'Már van ilyen nevű csapat.',
   'team-id-taken': 'Már van ilyen ID-jú csapat.',
   'join-code-taken': 'Már van ilyen belépőkódú csapat.',
+  'already-exists': 'Ez a csapat már létezik: változatlanul marad, nem importáljuk újra.',
+  'category-differs': 'A csapat már létezik, más kategóriával (fájlban ≠ élőben). NEM változtattuk meg — '
+    + 'ha tényleg át kell sorolni, az admin felületen kell.',
+  'email-differs': 'A csapat már létezik, más e-mail címmel (fájlban ≠ élőben). NEM változtattuk meg.',
   'database-refused': 'Az adatbázis visszautasította ezt a sort.',
 };
 
@@ -58,8 +62,15 @@ function describe(problem: TeamTsvProblem): string {
 }
 
 /** The problems as grid rows: errors one by one, since each is a line to go and
- * fix, and repeated warnings as one row with a count. */
-function problemRows(problems: TeamTsvProblem[]): ProblemRow[] {
+ * fix, and repeated warnings as one row with a count.
+ *
+ * `counts` is how many of each the file really drew: the server caps what it
+ * lists, so `problems` is the wrong thing to count — a 500-row re-import would
+ * say 20. It is absent only before the server has answered, when the browser's
+ * own list is the whole of it. */
+function problemRows(
+  problems: TeamTsvProblem[], counts: Partial<Record<TeamTsvProblemCode, number>> = {},
+): ProblemRow[] {
   const row = (problem: TeamTsvProblem, id: number): ProblemRow => ({
     id,
     where: problem.row === 0 ? 'A fájl' : `${problem.row}. sor`,
@@ -80,7 +91,8 @@ function problemRows(problems: TeamTsvProblem[]): ProblemRow[] {
     if (group.length < COLLAPSE_WARNINGS_FROM) {
       rows.push(...group.map(row));
     } else {
-      rows.push({ ...row(group[0], 0), where: `${group.length} sor`, column: '', found: '' });
+      const total = counts[group[0].code] ?? group.length;
+      rows.push({ ...row(group[0], 0), where: `${total} sor`, column: '', found: '' });
     }
   }
   return rows.map((entry, id) => ({ ...entry, id }));
@@ -184,8 +196,15 @@ export function ImportTeams(props: {
     try {
       const answer = await importTeams(tsv);
       setResult(answer);
-      if (answer.imported === 0) {
+      if (answer.refused) {
         enqueueSnackbar('Az importálás nem futott le, egy csapat sem került be.', { variant: 'error' });
+        return;
+      }
+      if (answer.imported === 0) {
+        // Every team in the file was already there. Not a failure — re-running a
+        // file is how late teams are added — and there is nothing to download.
+        enqueueSnackbar(`Nem került be új csapat: mind a(z) ${answer.accepted} már létezett.`,
+          { variant: 'info' });
         return;
       }
       // Handed to the page before anything else is attempted: the teams are
@@ -193,7 +212,12 @@ export function ImportTeams(props: {
       // import generated. Whatever happens next, the button below can still
       // re-download it.
       props.onImported(answer.exportTable);
-      enqueueSnackbar(`${answer.imported} csapat importálva`, { variant: 'success' });
+      enqueueSnackbar(
+        answer.accepted === 0
+          ? `${answer.imported} csapat importálva`
+          : `${answer.imported} új csapat importálva, ${answer.accepted} már létezett`,
+        { variant: 'success' },
+      );
       // Handed over without being asked for, since a closed tab means digging
       // the codes out of the database by hand. Its own catch because the import
       // has already succeeded: reporting a failed download as a failed import
@@ -209,6 +233,30 @@ export function ImportTeams(props: {
     } finally {
       setBusy(null);
     }
+  };
+
+  /** The one line above the problem grid: what this file is, or was. */
+  const summary = (): string => {
+    if (imported && result !== null) {
+      return `${result.rows} sorból ${result.imported} csapat importálva`
+        + (result.accepted === 0 ? '.' : `, ${result.accepted} már létezett.`);
+    }
+    if (tsv.trim() === '') return 'Nincs betöltött fájl.';
+    if (errors.length > 0) {
+      return badRows === 0
+        ? `${local.dataLines} sor. Magával a fájllal van baj, az importálás így nem futna le.`
+        : `${local.dataLines} sor, ebből ${badRows} hibás. Az importálás így nem futna le.`;
+    }
+    // Which teams are already there is the server's answer alone, so this is
+    // said only once it has looked. Without it a re-upload reads "N sor, hiba
+    // nélkül" and the organiser waits for teams this file is not going to add.
+    if (result !== null && result.accepted > 0) {
+      return result.accepted === result.rows
+        ? `${result.rows} sor, és mind a(z) ${result.accepted} csapat már létezik — nincs mit importálni.`
+        : `${result.rows} sor: ${result.rows - result.accepted} új csapat, ${result.accepted} már létezik. `
+          + 'A meglévőket nem módosítjuk.';
+    }
+    return `${local.dataLines} sor, hiba nélkül.`;
   };
 
   return (
@@ -288,17 +336,7 @@ export function ImportTeams(props: {
         style={{ width: '100%', fontFamily: 'monospace', fontSize: 13, whiteSpace: 'pre', overflowX: 'auto' }}
       />
 
-      <Stack data-testid="importTeamsSummary">
-        {imported && result !== null
-          ? `${result.rows} sorból ${result.imported} csapat importálva.`
-          : tsv.trim() === ''
-            ? 'Nincs betöltött fájl.'
-            : errors.length === 0
-              ? `${local.dataLines} sor, hiba nélkül.`
-              : badRows === 0
-                ? `${local.dataLines} sor. Magával a fájllal van baj, az importálás így nem futna le.`
-                : `${local.dataLines} sor, ebből ${badRows} hibás. Az importálás így nem futna le.`}
-      </Stack>
+      <Stack data-testid="importTeamsSummary">{summary()}</Stack>
 
       {problems.length > 0 && (
         <DataGrid
@@ -308,7 +346,7 @@ export function ImportTeams(props: {
             { field: 'message', headerName: 'Hiba', flex: 1, minWidth: 300 },
             { field: 'found', headerName: 'Érték', width: 200 },
           ]}
-          rows={problemRows(problems)}
+          rows={problemRows(problems, result?.warningCounts)}
           getRowClassName={(params) => `import-problem-${String(params.row.severity)}`}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           pageSizeOptions={[10, 25, 50]}

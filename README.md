@@ -259,20 +259,34 @@ are nginx's, and Vite's proxy shows you neither.
   import button disabled, and the team list unchanged. Through the command line
   the same file exits non-zero (`echo $?`), and leaves an `.export` from an
   earlier run alone, saying so.
-- *Ellenőrzés* on a file naming a team that already exists: reported as a
-  clash, still nothing written. This is the check only the server can make.
+- *Ellenőrzés* on a file whose teams already exist: reported as already there,
+  nothing written. This is the check only the server can make.
+- *Ellenőrzés* on a file giving an existing team's name to a different team —
+  same `Teamname`, a `Login Code` that team does not hold: reported as a clash,
+  and the import button held. Identity is the name, so a row that disagrees
+  with the live team about an identifier is a different team laying claim to it.
 - `scripts/test.tsv`, all 999 rows — the size check. The generated join codes
   download on their own when it succeeds, the Csapatok tab shows the teams with
   no reload, and one of those codes logs a team in at `http://localhost`. Coming
   back to Importálás from that tab, *Belépőkódok letöltése újra* is still there
   and still gives those codes: no screen here shows a join code, so that button
   is the last copy on the page if the browser blocked the first download.
-- that same downloaded file fed straight back: every row refused as a
-  duplicate, and no team doubled.
+- that same downloaded file fed straight back: every row accepted as already
+  there, no team doubled, no code reissued, and nothing offered as a download —
+  there is nothing new to mail. It used to be refused wholesale instead; #487
+  made re-running a file the way late teams are added, so this is now the
+  ordinary answer rather than an error.
+- the same file with twenty teams appended: the twenty imported, the rest
+  accepted, and the download holding all of them — the twenty new codes and the
+  999 the file itself carried — so one upload still gives one file to mail.
+- a team's `Category` changed in the file and the file re-uploaded: warned
+  against that row and **not** applied; check in the Csapatok tab that the live
+  category is unchanged. An import never modifies a team that is already there.
 - the archive round trip: delete all, download the batch as import-TSV, import
   it back. A team whose `Other` outgrew what the import keeps — the audit trail
   the admin routes append to that field — comes back cut to length with a
-  warning naming its row, rather than refusing the batch.
+  warning naming its row, rather than refusing the batch. The warning survives a
+  batch where hundreds of other rows warn about something else.
 
 Two fixtures feed it by hand, which is why no code names either.
 `scripts/test.tsv` is the happy path — the file `teams:import` loads.
@@ -283,8 +297,9 @@ shape, a team name, an ID and a login code each used by two rows, and the two
 warnings that do not refuse a file — a row with no `Other`, and one whose
 `Other` is longer than the import keeps, which is cut rather than refused. Load
 it and every one of them should be reported at once, against the line it is on,
-with **no team written** — the import is all or nothing, so a file with one bad
-row leaves the database as it was and can be fixed and loaded again.
+with **no team written** — a file with one bad row leaves the database as it was
+and can be fixed and loaded again, and the rows that are written are written
+together or not at all.
 
 `scripts/admin.py` is the post-competition scoring pull, holding no credential
 of its own:

@@ -283,6 +283,11 @@ A refused file writes nothing and exits non-zero, so an `.export` already sittin
 earlier run's and holds that run's codes — the command says so rather than leaving you to
 notice the timestamp.
 
+Re-running a file is how late teams are added: the teams already loaded are recognised and
+left as they are, and only the new rows are written. An import never changes a team that is
+already there, so a category fixed in the file is reported and not applied — use the admin
+page for that.
+
 The admin page's **Importálás** tab does the same job through the browser, and hands
 the join codes back as a download rather than leaving them on the host — the path for
 an organiser who has the admin password but no shell here. It is the one import path

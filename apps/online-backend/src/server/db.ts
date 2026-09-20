@@ -27,6 +27,25 @@ export interface TakenIdentifiers {
   joinCodes: Set<string>;
 }
 
+/** A live team as the import reads it.
+ *
+ * Whole rows rather than a set per column, because the import has to tell a row
+ * that *is* one of these teams from a row that merely clashes with one, and
+ * three independent sets cannot say which team a value belongs to.
+ *
+ * `category` and `email` come along so an accepted row can be checked against
+ * what is live and the differences named. `other` deliberately does not: the
+ * admin routes append an audit trail to it (`appendOtherNote`), so it diverges
+ * from the file in the normal course of a competition and reporting that would
+ * be noise on every re-import. */
+export interface LiveTeam {
+  teamId: string;
+  teamName: string;
+  joinCode: string;
+  category: string;
+  email: string;
+}
+
 /** Carries a refused row out of the transaction it has to abort. A managed
  * transaction commits on a normal return, and the whole point here is that one
  * refused row takes the file with it. */
@@ -125,20 +144,25 @@ export class TeamsRepository {
   }
 
   /**
-   * The identifiers live teams hold. Read before an import so a generated join
-   * code is checked against them rather than trusted, and so a clash is
-   * reported against the row that causes it.
+   * The teams an import has to reckon with. Read before one so a generated join
+   * code is checked against them rather than trusted, so a clash is reported
+   * against the row that causes it, and so a row naming a team that is already
+   * there can be recognised as that team rather than refused.
    *
    * It is not the guard — the unique constraints are, and `insertTeams` rolls
    * the file back on one. This read only buys the readable answer.
    */
-  async takenIdentifiers(): Promise<TakenIdentifiers> {
-    const teams = await TeamModel.findAll({ attributes: ['teamId', 'teamName', 'joinCode'] });
-    return {
-      teamIds: new Set(teams.map(team => team.teamId)),
-      teamNames: new Set(teams.map(team => team.teamName)),
-      joinCodes: new Set(teams.map(team => team.joinCode)),
-    };
+  async liveTeams(): Promise<LiveTeam[]> {
+    const teams = await TeamModel.findAll({
+      attributes: ['teamId', 'teamName', 'joinCode', 'category', 'email'],
+    });
+    return teams.map(team => ({
+      teamId: team.teamId,
+      teamName: team.teamName,
+      joinCode: team.joinCode,
+      category: team.category,
+      email: team.email,
+    }));
   }
 
   /**

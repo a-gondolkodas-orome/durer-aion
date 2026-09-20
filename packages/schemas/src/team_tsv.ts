@@ -92,6 +92,11 @@ export type TeamTsvProblemCode =
   | 'teamname-taken'
   | 'team-id-taken'
   | 'join-code-taken'
+  // The row *is* a team that is already there, rather than clashing with one:
+  // accepted and not written again. Server-only for the same reason.
+  | 'already-exists'
+  | 'category-differs'
+  | 'email-differs'
   | 'database-refused';
 
 export interface TeamTsvProblem {

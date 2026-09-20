@@ -36,9 +36,7 @@ describe('PUT /team/admin/import', () => {
   });
 
   const stubTeams = () => ({
-    takenIdentifiers: vi.fn().mockResolvedValue({
-      teamIds: new Set<string>(), teamNames: new Set<string>(), joinCodes: new Set<string>(),
-    }),
+    liveTeams: vi.fn().mockResolvedValue([]),
     insertTeams: vi.fn().mockResolvedValue(null),
   }) as unknown as TeamsRepository;
 
@@ -76,6 +74,35 @@ describe('PUT /team/admin/import', () => {
     const result = await response.json() as { imported: number, exportTable: string[][] };
     expect(result.imported).toBe(1);
     expect(result.exportTable[0][3]).toBe('Kovács Anna — Példa Gimnázium');
+  });
+
+  // The page decides what to say, whether to download anything and whether the
+  // import button stays live off these three, so they have to survive the wire.
+  it('answers with what was accepted, not only with what was written', async () => {
+    const teams = {
+      liveTeams: vi.fn().mockResolvedValue([{
+        teamId: '20638d0e-ac06-4e72-a734-b4fcdcaee425',
+        teamName: 'Alpha',
+        joinCode: '692-2481-797',
+        category: 'C',
+        email: 'a@b.com',
+      }]),
+      insertTeams: vi.fn().mockResolvedValue(null),
+    } as unknown as TeamsRepository;
+    const put = await serve(teams);
+    const body = [HEADER, 'Alpha\tC\ta@b.com\t\t\t\t'].join('\n');
+
+    const response = await put(body);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      imported: 0,
+      accepted: 1,
+      refused: false,
+      exportTable: [],
+      warningCounts: { 'already-exists': 1, 'other-missing': 1 },
+    });
+    expect(teams.insertTeams).not.toHaveBeenCalled();
   });
 
   it('answers 401 without the organisers\' password', async () => {
@@ -121,9 +148,13 @@ describe('PUT /team/admin/import', () => {
   it('says so, readably, when it cannot generate a join code', async () => {
     (randomInt as unknown as Mock).mockImplementation(() => 1);
     const teams = {
-      takenIdentifiers: vi.fn().mockResolvedValue({
-        teamIds: new Set<string>(), teamNames: new Set<string>(), joinCodes: new Set(['111-1111-111']),
-      }),
+      liveTeams: vi.fn().mockResolvedValue([{
+        teamId: '20638d0e-ac06-4e72-a734-b4fcdcaee425',
+        teamName: 'Zulu',
+        joinCode: '111-1111-111',
+        category: 'C',
+        email: 'a@b.com',
+      }]),
       insertTeams: vi.fn().mockResolvedValue(null),
     } as unknown as TeamsRepository;
     const put = await serve(teams);

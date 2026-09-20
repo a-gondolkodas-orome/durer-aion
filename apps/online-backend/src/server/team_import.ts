@@ -4,6 +4,7 @@ import {
   OTHER_IMPORT_MAX_LENGTH,
   ParsedTeamRow,
   TeamTsvProblem,
+  TeamTsvProblemCode,
   parseTeamsTsv,
   teamsToImportTsv,
 } from 'schemas';
@@ -16,28 +17,55 @@ import { NewTeam, TakenIdentifiers, TeamsRepository } from './db';
  * 500-team file, which is the largest part of a response nobody reads.
  */
 export interface ImportResult {
-  /** Teams written. Zero whenever the file was refused — the import is
-   * all-or-nothing, so there is no third case. */
+  /** Teams written. Zero whenever the file was refused — the rows that are
+   * written are written together or not at all. */
   imported: number;
+  /** Rows naming a team that is already there, which are left exactly as they
+   * are: not written again, and not counted in `imported`. */
+  accepted: number;
+  /** The file was not loaded and nothing was written. Distinguishes a refusal
+   * from the two other ways `imported` can be zero — a dry run, and a file
+   * whose every team is already there. */
+  refused: boolean;
   /** Data rows the file held, blank lines excluded. */
   rows: number;
   /** Errors first, then warnings, each in the order of the file. */
   problems: TeamTsvProblem[];
-  /** Problems past the cap, which are not in `problems`. */
+  /** Problems past the caps, which are not in `problems`. */
   problemsTruncated: number;
+  /** How many warnings of each code the file drew, counted before any cap, so
+   * a caller collapsing repeats into one line can label it with the file's own
+   * number rather than with what happened to fit. */
+  warningCounts: Partial<Record<TeamTsvProblemCode, number>>;
   /** Data rows holding at least one error — the rows that refused the file.
    * Counted before the cap, so it stays the file's own number when `problems`
    * is truncated and a caller cannot recover it from the list. */
   badRows: number;
-  /** One row per imported team, in `TEAM_IMPORT_HEADER` order, with the
-   * generated cells filled in. This is the only copy of the join codes the
-   * import created. */
+  /** The teams of a load that wrote something, in the file's own order and in
+   * `TEAM_IMPORT_HEADER` order, with the generated cells filled in — so one
+   * upload of a whole list yields one file to mail out rather than a new one to
+   * splice onto the last. Empty unless `imported` is non-zero: with nothing
+   * written there are no new codes, and handing back the uploaded file is not
+   * worth a download.
+   *
+   * It carries an accepted team only where the *file* already supplied that
+   * team's join code. The codes this app holds are deliberately not read back
+   * into it: no screen here shows a join code, and the import tab is not the
+   * place to become the first. */
   exportTable: string[][];
 }
 
 // A file wrong in every row would otherwise answer with thousands of problems.
 // Nobody reads past the first few before fixing the file and trying again.
 const MAX_PROBLEMS = 200;
+
+// And no single kind of warning may fill that list. Two of them are one per row
+// by nature — `already-exists` on a re-import, `other-missing` on a file with no
+// `Other` column — and under a flat cap either would bury `other-truncated`,
+// the one warning that says a value was changed on its way in. Warnings only:
+// the errors are why a file was refused and are all worth listing, and
+// `badRows` reports their true scale regardless.
+const MAX_PER_WARNING_CODE = 20;
 
 function randomDigits(numDigits: number) {
   let result = '';
@@ -108,7 +136,9 @@ function exportRow(team: NewTeam): string[] {
 }
 
 function finish(
-  imported: number, rows: number, problems: TeamTsvProblem[], exportTable: string[][],
+  counts: { imported: number, accepted: number, rows: number },
+  problems: TeamTsvProblem[],
+  exportTable: string[][],
 ): ImportResult {
   // Errors first: they are why the file was refused, and a file with no `Other`
   // column would otherwise bury them under a warning per row.
@@ -120,20 +150,40 @@ function finish(
   // `row: 0` — the file as a whole — comes first.
   const byLine = (severity: TeamTsvProblem['severity']) =>
     problems.filter(problem => problem.severity === severity).sort((a, b) => a.row - b.row);
-  const ordered = [...byLine('error'), ...byLine('warning')];
+  const errors = byLine('error');
+  const warnings = byLine('warning');
+
+  const warningCounts: Partial<Record<TeamTsvProblemCode, number>> = {};
+  for (const warning of warnings) {
+    warningCounts[warning.code] = (warningCounts[warning.code] ?? 0) + 1;
+  }
+
+  // Each code keeps its first few and no more, so one warning per row cannot
+  // push a rarer one off the end. What is dropped here is still counted in
+  // `warningCounts` and in `problemsTruncated`.
+  const listedPerCode = new Map<TeamTsvProblemCode, number>();
+  const keptWarnings = warnings.filter(warning => {
+    const listed = listedPerCode.get(warning.code) ?? 0;
+    if (listed >= MAX_PER_WARNING_CODE) return false;
+    listedPerCode.set(warning.code, listed + 1);
+    return true;
+  });
+
+  const listed = [...errors, ...keptWarnings].slice(0, MAX_PROBLEMS);
   // Rows, not problems: one row can break several rules at once, and `row: 0`
   // — the file as a whole — is no row at all. Counted from every problem
-  // rather than from the slice below, so the cap decides what is listed and
+  // rather than from the list above, so the caps decide what is listed and
   // not what is reported.
-  const badRows = new Set(
-    problems.filter(problem => problem.severity === 'error' && problem.row !== 0).map(problem => problem.row),
-  ).size;
+  const badRows = new Set(errors.filter(problem => problem.row !== 0).map(problem => problem.row)).size;
   return {
-    imported,
-    rows,
-    problems: ordered.slice(0, MAX_PROBLEMS),
-    problemsTruncated: Math.max(0, ordered.length - MAX_PROBLEMS),
+    imported: counts.imported,
+    accepted: counts.accepted,
+    refused: errors.length > 0,
+    rows: counts.rows,
+    problems: listed,
+    problemsTruncated: errors.length + warnings.length - listed.length,
     badRows,
+    warningCounts,
     exportTable,
   };
 }
@@ -154,11 +204,55 @@ export async function importTeamsFromTsv(
   const parsed = parseTeamsTsv(content);
   const problems = [...parsed.problems];
 
-  // A file can be well-formed and still name a team that exists. The unique
-  // constraints would catch it, but only as a constraint name and only after
-  // the rows before it were written.
-  const taken = await teams.takenIdentifiers();
+  // A file can be well-formed and still name teams the database knows about.
+  // The unique constraints would catch those, but only as a constraint name and
+  // only after the rows before them were written.
+  const live = await teams.liveTeams();
+  const byName = new Map(live.map(team => [team.teamName, team]));
+  const taken: TakenIdentifiers = {
+    teamIds: new Set(live.map(team => team.teamId)),
+    teamNames: new Set(live.map(team => team.teamName)),
+    joinCodes: new Set(live.map(team => team.joinCode)),
+  };
+
+  const accepted = new Set<number>();
   for (const row of parsed.rows) {
+    const existing = byName.get(row.teamname);
+    // Identity is the team name: it is the one identifier every row carries,
+    // since a blank one is already an error. The other two only have to
+    // corroborate it — supplied, they must be this team's own; blank, the row
+    // is not asking for anything in particular.
+    if (
+      existing !== undefined
+      && (row.teamId === '' || row.teamId === existing.teamId)
+      && (row.joinCode === '' || row.joinCode === existing.joinCode)
+    ) {
+      accepted.add(row.row);
+      problems.push({
+        row: row.row, column: 'Teamname', severity: 'warning', code: 'already-exists', found: row.teamname,
+      });
+      // Said rather than silently ignored: an organiser who fixed a category in
+      // the file and re-uploaded it has to learn that the fix did not land, or
+      // the team plays the wrong games all round. `other` is deliberately not
+      // compared — the admin routes append an audit trail to it, so it diverges
+      // from the file in the normal course of a competition.
+      if (row.category !== existing.category) {
+        problems.push({
+          row: row.row, column: 'Category', severity: 'warning', code: 'category-differs',
+          found: `${row.category} ≠ ${existing.category}`,
+        });
+      }
+      if (row.email !== existing.email) {
+        problems.push({
+          row: row.row, column: 'Email', severity: 'warning', code: 'email-differs',
+          found: `${row.email} ≠ ${existing.email}`,
+        });
+      }
+      continue;
+    }
+    // Not that team, so anything it shares with a live one is a clash. An
+    // accepted row cannot reach here, which is why these stay exactly as they
+    // were: whichever identifier collides names itself.
     if (row.teamname !== '' && taken.teamNames.has(row.teamname)) {
       problems.push({ row: row.row, column: 'Teamname', severity: 'error', code: 'teamname-taken', found: row.teamname });
     }
@@ -170,12 +264,22 @@ export async function importTeamsFromTsv(
     }
   }
 
+  const counts = { imported: 0, accepted: accepted.size, rows: parsed.dataLines };
   const hasError = problems.some(problem => problem.severity === 'error');
   if (hasError || options.dryRun) {
-    return finish(0, parsed.dataLines, problems, []);
+    return finish(counts, problems, []);
   }
 
-  const filled = parsed.rows.map(row => ({ row: row.row, team: fill(row, taken) }));
+  const filled = parsed.rows
+    .filter(row => !accepted.has(row.row))
+    .map(row => ({ row: row.row, team: fill(row, taken) }));
+  // Every team in the file is already there, so there is nothing to write and
+  // nothing to mail: no transaction, and no export of the organiser's own file
+  // handed back to them as though it were new codes.
+  if (filled.length === 0) {
+    return finish(counts, problems, []);
+  }
+
   const refused = await teams.insertTeams(filled);
   if (refused) {
     // The checks above missed it — a team added between the read and the write,
@@ -190,10 +294,20 @@ export async function importTeamsFromTsv(
       // a row number and no reason.
       found: refused.error.errors.map(item => item.message).join(' ') || refused.error.message,
     });
-    return finish(0, parsed.dataLines, problems, []);
+    return finish(counts, problems, []);
   }
 
-  return finish(filled.length, parsed.dataLines, problems, filled.map(({ team }) => exportRow(team)));
+  // In the file's own order, and carrying the accepted teams the file already
+  // had codes for, so one upload of a whole list gives back one complete file.
+  const written = new Map(filled.map(({ row, team }) => [row, team]));
+  const exportTable = parsed.rows.flatMap(row => {
+    const team = written.get(row.row);
+    if (team !== undefined) return [exportRow(team)];
+    // An accepted team whose code the file did not carry: leaving it out keeps
+    // this download to what the organiser already held plus what was just made.
+    return row.joinCode === '' ? [] : [exportRow(row)];
+  });
+  return finish({ ...counts, imported: filled.length }, problems, exportTable);
 }
 
 /** The problems in English, for the command line. The admin page words the same
@@ -224,6 +338,9 @@ function describe(problem: TeamTsvProblem): string {
     'teamname-taken': 'a team of this name already exists',
     'team-id-taken': 'a team with this ID already exists',
     'join-code-taken': 'a team with this login code already exists',
+    'already-exists': 'this team is already there and was left as it is, not imported again',
+    'category-differs': 'the team is already there with a different category (file, then live); it was not changed',
+    'email-differs': 'the team is already there with a different email (file, then live); it was not changed',
     'database-refused': 'the database refused this row',
   };
   const first = problem.otherRow === undefined ? '' : ` (first used on line ${problem.otherRow})`;
@@ -259,7 +376,7 @@ export async function import_teams_from_tsv_locally(
 
   const exportFile = `${filename}.export`;
   console.info('Summary:');
-  if (result.imported === 0) {
+  if (result.refused) {
     console.error(`Imported nothing. The file has ${result.rows} rows; fix the errors above and run it again.`);
     // Nothing was written, so an export from an earlier run is still lying
     // there with that run's join codes — the file DEPLOYMENT.md has organisers
@@ -271,7 +388,18 @@ export async function import_teams_from_tsv_locally(
     }
     return false;
   }
+  if (result.imported === 0) {
+    // Not a failure: every team in the file is already there. Re-running a file
+    // is how late teams are added, so this is the ordinary answer to running one
+    // that has not grown since. The export is left alone — there are no new
+    // codes, and rewriting it with the uploaded file would lose the last run's.
+    console.info(`Nothing to import: all ${result.accepted} teams in the file are already there.`);
+    return true;
+  }
   console.info(`Successfully imported ${result.imported} teams.`);
+  if (result.accepted > 0) {
+    console.info(`${result.accepted} more were already there and were left as they are.`);
+  }
   const exportTsv = teamsToImportTsv(result.exportTable);
   try {
     writeFileSync(exportFile, exportTsv, { encoding: 'utf-8' });

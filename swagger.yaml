@@ -327,10 +327,16 @@ paths:
     put:
       summary: Import teams from a TSV
       description: |
-        Loads a TSV of teams: the whole file or none of it. One row that
-        breaks a rule refuses every row, so a rejected file can be corrected
-        and sent again without the teams that already landed clashing with
-        themselves.
+        Loads a TSV of teams: the rows that are missing, all of them or none.
+        One row that breaks a rule refuses every row, so a rejected file can be
+        corrected and sent again.
+
+        A row naming a team that is already there is accepted and left exactly
+        as it is — never written again and never modified — so a registration
+        list can be re-sent once late teams are added to it. It is the team
+        name that identifies a team; an "ID" or "Login Code" the row supplies
+        must be that team's own, or the row is a different team laying claim to
+        an identifier and the file is refused.
 
         The TSV is the request body, not an upload. It must be UTF-8, quote
         nothing, and carry the columns "Teamname", "Category", "Email",
@@ -363,8 +369,10 @@ paths:
       responses:
         "200":
           description: >
-            The outcome, whether the file loaded or was refused. The import is
-            all-or-nothing, so `imported` is either every row or zero.
+            The outcome, whether the file loaded or was refused. The rows that
+            are written are written together or not at all, so `imported` is
+            either all of them or zero — see `refused` and `accepted` for which
+            of the three zeroes it is.
           content:
             application/json:
               schema:
@@ -716,6 +724,18 @@ components:
         imported:
           type: integer
           description: Teams written; zero whenever the file was refused
+        accepted:
+          type: integer
+          description: >
+            Rows naming a team that is already there. Left exactly as they
+            are: an import adds the teams that are missing, it never modifies
+            a live one. Reported for a dry run too.
+        refused:
+          type: boolean
+          description: >
+            The file was not loaded and nothing was written. Tells a refusal
+            apart from the other two ways `imported` is zero — a dry run, and
+            a file whose every team is already there.
         rows:
           type: integer
           description: Data rows the file held, blank lines excluded
@@ -726,7 +746,15 @@ components:
           description: Errors first, then warnings, each in the order of the file
         problemsTruncated:
           type: integer
-          description: Problems past the cap, which are not in `problems`
+          description: Problems past the caps, which are not in `problems`
+        warningCounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: >
+            Warnings of each code the file drew, counted before the caps, so a
+            client collapsing repeats into one line can say how many rows it
+            stands for rather than how many happened to be listed
         badRows:
           type: integer
           description: >
@@ -739,8 +767,12 @@ components:
             items:
               type: string
           description: >
-            One row per imported team, in header order, with the generated
-            cells filled in. The only copy of the join codes the import created.
+            The teams of a load that wrote something, in header order and the
+            file's own order, with the generated cells filled in. The only copy
+            of the join codes the import created. It carries an accepted team
+            only where the file itself supplied that team's join code: the
+            codes the server holds are never read back into it. Empty when
+            nothing was written.
 
     ActionShape:
       type: string

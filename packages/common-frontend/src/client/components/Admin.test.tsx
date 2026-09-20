@@ -274,7 +274,8 @@ const paste = (tsv: string) =>
   fireEvent.change(screen.getByTestId('importTeamsTsv'), { target: { value: tsv } });
 
 const importResult = (overrides: Partial<ImportResultDto> = {}): ImportResultDto => ({
-  imported: 0, rows: 0, problems: [], problemsTruncated: 0, badRows: 0, exportTable: [], ...overrides,
+  imported: 0, accepted: 0, refused: false, rows: 0, problems: [], problemsTruncated: 0, badRows: 0,
+  warningCounts: {}, exportTable: [], ...overrides,
 });
 
 // The browser knows the file's own rules, so a mistake in it is named before a
@@ -415,6 +416,61 @@ test('the join codes survive a download the browser refuses', async () => {
   expect(screen.queryByText('Váratlan hiba történt')).not.toBeInTheDocument();
 });
 
+// Re-uploading a registration list is how late teams are added, so a file whose
+// teams are all there already is the ordinary answer, not a failure. Reported as
+// one, an organiser goes looking for a fault that is not there.
+test('the import tab calls a file of teams that already exist no failure', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const download = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    imported: 0, accepted: 2, rows: 2,
+    problems: [
+      { row: 2, column: 'Teamname', severity: 'warning', code: 'already-exists', found: 'Alpha' },
+      { row: 3, column: 'Teamname', severity: 'warning', code: 'already-exists', found: 'Bravo' },
+    ],
+    warningCounts: { 'already-exists': 2 },
+  }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha'), importRow('Bravo')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+
+  expect(await screen.findByText('Nem került be új csapat: mind a(z) 2 már létezett.')).toBeInTheDocument();
+  expect(screen.queryByText('Az importálás nem futott le, egy csapat sem került be.')).not.toBeInTheDocument();
+  // Nothing new was written, so there are no codes to hand over and no file to
+  // push at the organiser.
+  expect(download).not.toHaveBeenCalled();
+  expect(screen.queryByText('Belépőkódok letöltése újra')).not.toBeInTheDocument();
+});
+
+// The server caps the warnings it lists, so counting the rows in that list said
+// "20 sor" for a re-upload of 500 — directly above the line saying the list is
+// not all of them.
+test('the import tab collapses repeated warnings with the count the file has', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    rows: 500,
+    accepted: 500,
+    problems: Array.from({ length: 20 }, (_, index) => ({
+      row: index + 2, column: 'Teamname' as const, severity: 'warning' as const,
+      code: 'already-exists' as const, found: `Team ${index}`,
+    })),
+    problemsTruncated: 480,
+    warningCounts: { 'already-exists': 500 },
+  }));
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, ...Array.from({ length: 500 }, (_, index) => importRow(`Team ${index}`))].join('\n'));
+  fireEvent.click(screen.getByText('Ellenőrzés'));
+
+  expect(await screen.findByText('500 sor')).toBeInTheDocument();
+  expect(screen.getByText(
+    '500 sor, és mind a(z) 500 csapat már létezik — nincs mit importálni.',
+  )).toBeInTheDocument();
+});
+
 // The check's answer replaces the import's, and the import's is where the codes
 // were. It would report every row as a team that already exists, too — which is
 // the import having worked.
@@ -494,6 +550,7 @@ test('the import tab reports a refused file as a failure, not a success', async 
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
     rows: 2,
+    refused: true,
     problems: [{ row: 3, severity: 'error', code: 'database-refused', found: 'Teamname already exists.' }],
   }));
   renderAdmin();

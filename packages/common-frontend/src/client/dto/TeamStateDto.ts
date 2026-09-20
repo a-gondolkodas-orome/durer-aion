@@ -1,6 +1,6 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
-import { TeamTsvProblem } from "schemas";
+import { TeamTsvProblem, TeamTsvProblemCode } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -51,21 +51,32 @@ export interface RestoreResultDto {
 }
 
 /// What a team import did, and everything wrong with the file it was given.
-/// The import is all or nothing, so `imported` is either every row or zero —
-/// and it is zero for a dry run, which checks and writes nothing.
+/// The rows that get written are written together or not at all, so `imported`
+/// is either all of them or zero — and it is zero in three quite different
+/// cases, which `refused` and `accepted` tell apart: the file was refused, it
+/// was a dry run, or every team in it was already there.
 export interface ImportResultDto {
   imported: number;
+  /// Rows naming a team that is already there. Left exactly as they are: an
+  /// import never modifies a live team, it only adds the ones that are missing.
+  accepted: number;
+  /// The file was not loaded and nothing was written.
+  refused: boolean;
   rows: number;
   /// Errors first, then warnings, each in the order of the file.
   problems: TeamTsvProblem[];
-  /// Problems past the server's cap, which are not in `problems`.
+  /// Problems past the server's caps, which are not in `problems`.
   problemsTruncated: number;
   /// Data rows holding at least one error. Counted before the cap, so it is
   /// the file's own number even when `problems` does not list them all.
   badRows: number;
-  /// One row per imported team, in `TEAM_IMPORT_HEADER` order. The only copy
-  /// of the join codes the import generated, which is why the page hands it
-  /// to the browser to save rather than only offering to.
+  /// Warnings of each code the file drew, counted before the caps — so a row
+  /// collapsing repeats into one line can say how many there really were.
+  warningCounts: Partial<Record<TeamTsvProblemCode, number>>;
+  /// The teams of a load that wrote something, in `TEAM_IMPORT_HEADER` order
+  /// and the file's own order. The only copy of the join codes the import
+  /// generated, which is why the page hands it to the browser to save rather
+  /// than only offering to. Empty when nothing was written.
   exportTable: string[][];
 }
 
