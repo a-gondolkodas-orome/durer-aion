@@ -17,6 +17,7 @@ import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import { bulkAddMinutesMessage, bulkAddMinutesRetryable, bulkAddMinutesRetryMessage, bulkAddMinutesVariant,
   forgetGrant, grantFor } from '../utils/bulk-add-minutes';
+import { minutesField } from '../utils/minutes-field';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -228,12 +229,7 @@ export function Admin(props: { teamId?: string }) {
           idő hozzáadása minden aktív játékosnak:
           <Form
           initialValues={{ time: '' }}
-          validationSchema={Yup.object().shape({
-            time: Yup.number()
-              .integer('Egész számot kell írni')
-              .typeError('Számot kell írni')
-              .required('Nincs megadva érték')
-            })}
+          validationSchema={Yup.object().shape({ time: minutesField() })}
           onSubmit={(values) => {
             // Formik keeps what was typed, and `FormikValues` is `any`, so the
             // number Yup validated above is still a string here.

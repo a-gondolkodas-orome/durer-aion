@@ -299,6 +299,29 @@ test('a walk that answered leaves no grant behind', async () => {
   await waitFor(() => expect(window.localStorage.getItem(pendingGrantStorageKey)).toBeNull());
 });
 
+// Both routes refuse anything past a day either way with a 400, which the page
+// has no line for and reports as "Váratlan hiba történt". The form says what is
+// wrong instead, and nothing is sent — which matters most here, where the one
+// press reaches every running match.
+test.each([
+  ['5000', 'Legfeljebb 1440 percet lehet adni'],
+  ['-5000', 'Legfeljebb 1440 percet lehet elvenni'],
+])('minutes past the bound (%s) are refused by the form, not by the server', async (minutes, said) => {
+  const teams = [playing(alpha, 'relay-a')];
+  vi.spyOn(repo, 'getAll').mockResolvedValue(teams);
+  const walk = vi.spyOn(repo, 'addMinutesToEveryone');
+
+  renderAdmin();
+  await screen.findByText('Alpha');
+  fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: minutes } });
+  fireEvent.click(await screen.findByText('hozzáadás'));
+
+  // Twice over: the form renders the message plainly and again in red.
+  expect(await screen.findAllByText(said)).not.toHaveLength(0);
+  expect(screen.queryByText('Megerősítés')).not.toBeInTheDocument();
+  expect(walk).not.toHaveBeenCalled();
+});
+
 // A walk can leave a team out because something was in the way of that one
 // match, and asking again is what that needs. Forgetting the grant there would
 // make the retry a second extension for every match the walk did move.

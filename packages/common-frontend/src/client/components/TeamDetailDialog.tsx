@@ -13,6 +13,7 @@ import { ConfirmDialogInterface } from './ConfirmDialog';
 import { Countdown } from './Countdown';
 import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
+import { minutesField } from '../utils/minutes-field';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -142,12 +143,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
         <Stack><MatchStatusDataField matchId={inProgressState.matchID} isRelay={props.isRelay}/></Stack>
         <Form
         initialValues={{ time: '' }}
-        validationSchema={Yup.object().shape({
-          time: Yup.number()
-            .integer('Egész számot kell írni')
-            .typeError('Számot kell írni')
-            .required('Nincs megadva érték')
-          })}
+        validationSchema={Yup.object().shape({ time: minutesField() })}
         onSubmit={(values) => {
           props.setConfirmDialog({
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
