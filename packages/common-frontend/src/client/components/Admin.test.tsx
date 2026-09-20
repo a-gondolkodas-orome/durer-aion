@@ -6,6 +6,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
+import { parseTeamsTsv } from 'schemas';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
 import { DeletedTeamDto, ImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
@@ -278,6 +279,20 @@ const importResult = (overrides: Partial<ImportResultDto> = {}): ImportResultDto
   warningCounts: {}, exportTable: [], ...overrides,
 });
 
+// Real values, since a test that reads a download back has to parse it.
+const ALPHA_CREDENTIALS = 'c0ffee00-1111-2222-3333-444444444444';
+const BRAVO_CREDENTIALS = 'decafbad-5555-6666-7777-888888888888';
+
+/** The text of every file the page hands the browser, in order. */
+const savedDownloads = (): string[] => {
+  const saved: string[] = [];
+  vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
+    void (blob as Blob).text().then(text => saved.push(text));
+    return 'blob:codes';
+  });
+  return saved;
+};
+
 // The browser knows the file's own rules, so a mistake in it is named before a
 // request is made — and the button that would write 500 teams stays disabled.
 test('the import tab refuses a bad row without asking the server', async () => {
@@ -424,11 +439,7 @@ test('a second import keeps the codes of the first', async () => {
   const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
     imported: 1, rows: 1, exportTable: [['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds']],
   }));
-  const saved: string[] = [];
-  vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
-    void (blob as Blob).text().then(text => saved.push(text));
-    return 'blob:codes';
-  });
+  const saved = savedDownloads();
   vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
   renderAdmin();
   await openImportTab();
@@ -450,6 +461,45 @@ test('a second import keeps the codes of the first', async () => {
   // Both batches, not just the one that came last.
   expect(saved[2]).toContain('111-2222-333');
   expect(saved[2]).toContain('444-5555-666');
+});
+
+// The other half of that: an import's answer carries the rows it accepted as
+// already there too, wherever the file itself supplied their codes — so
+// re-running a registration list that has grown by one team hands back the
+// whole list. Appended to what was already held, every team of the first run
+// stood in the table twice, and the re-download was a file that cannot be
+// imported again: `duplicate-teamname` refuses it.
+test('a re-import of a grown list keeps one row per team', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const alphaRow = ['Alpha', 'C', 'a@b.com', 'x', alpha.teamId ?? '', '111-2222-333', ALPHA_CREDENTIALS];
+  const importTeams = vi.spyOn(repo, 'importTeams').mockResolvedValue(importResult({
+    imported: 1, rows: 1, exportTable: [alphaRow],
+  }));
+  const saved = savedDownloads();
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  renderAdmin();
+  await openImportTab();
+
+  paste([HEADER, importRow('Alpha')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(await screen.findByText('Belépőkódok letöltése újra')).toBeInTheDocument();
+
+  // That download with a late team appended to it, which is how a registration
+  // list grows: Alpha comes back accepted, carrying the code the file supplied.
+  importTeams.mockResolvedValue(importResult({
+    imported: 1, accepted: 1, rows: 2,
+    exportTable: [alphaRow, ['Bravo', 'C', 'a@b.com', 'x', bravo.teamId ?? '', '444-5555-666', BRAVO_CREDENTIALS]],
+  }));
+  paste([HEADER, importRow('Alpha'), importRow('Bravo')].join('\n'));
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  expect(await screen.findByText('1 új csapat importálva, 1 már létezett')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('Belépőkódok letöltése újra'));
+  await waitFor(() => { expect(saved).toHaveLength(3); });
+  const again = parseTeamsTsv(saved[2]);
+  expect(again.rows.map(row => row.teamname)).toEqual(['Alpha', 'Bravo']);
+  // Which is what makes the download a backup: it goes straight back in.
+  expect(again.problems.filter(problem => problem.severity === 'error')).toEqual([]);
 });
 
 // Re-uploading a registration list is how late teams are added, so a file whose

@@ -22,6 +22,27 @@ import { FieldProps } from "formik"
 
 const TeamsToolbar = csvToolbar('durer-csapatok');
 
+/** The join codes of every import this page has made, one row per team.
+ *
+ * An import's answer carries the teams it wrote *and* the rows it accepted as
+ * already there, wherever the file itself supplied their join codes — so
+ * re-running a list that has grown by twenty teams hands back the whole list,
+ * not the twenty. Appending that to what is already held would keep a team
+ * once per import it appeared in, and the re-download would be a file that
+ * cannot be imported again: `duplicate-teamname` refuses it.
+ *
+ * Keyed by team name, which the import treats as a team's identity. The later
+ * row wins and keeps the earlier one's place, so the table stays in the order
+ * the codes were first handed out.
+ */
+function mergeExported(held: string[][] | null, imported: string[][]): string[][] {
+  const byTeamName = new Map<string, string[]>();
+  for (const row of [...held ?? [], ...imported]) {
+    byTeamName.set(row[0], row);
+  }
+  return [...byTeamName.values()];
+}
+
 // The page's tabs. Component state rather than a path: `Main.tsx` reads
 // `/admin/<teamId>` off the URL, so a path for the archive would be taken for
 // a team id. Issue #135 is the rest of the page's layout.
@@ -46,6 +67,8 @@ export function Admin(props: { teamId?: string }) {
   // Every import's rows, not the last one's: a browser that blocked the first
   // download leaves the re-download button as the only way to those codes, and
   // importing the next batch before pressing it must not be what loses them.
+  // Merged rather than appended, so a team an import saw twice is held once:
+  // `mergeExported` above says why an import can hand back the same team again.
   const [importedCodes, setImportedCodes] = useState<string[][] | null>(null);
 
   // Read off the list rather than kept as state, so a team deleted from the
@@ -123,7 +146,7 @@ export function Admin(props: { teamId?: string }) {
         {!teamFromPath && tab === 'import' && <ImportTeams
           exported={importedCodes}
           onImported={(exportTable) => {
-            setImportedCodes(held => [...held ?? [], ...exportTable]);
+            setImportedCodes(held => mergeExported(held, exportTable));
             void mutate();
           }}/>}
         {showTeams && <Stack sx={{
