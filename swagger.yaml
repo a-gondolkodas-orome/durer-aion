@@ -710,7 +710,8 @@ components:
              "other-truncated", "other-too-long", "invalid-team-id", "invalid-join-code",
              "invalid-credentials",
              "duplicate-teamname", "duplicate-team-id", "duplicate-join-code",
-             "teamname-taken", "team-id-taken", "join-code-taken", "database-refused"]
+             "teamname-taken", "team-id-taken", "join-code-taken",
+             "already-exists", "category-differs", "email-differs", "database-refused"]
         found:
           type: string
           description: The offending value, when quoting it helps
