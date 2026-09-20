@@ -48,9 +48,11 @@ function botOwesAMove(state: State, bots: LocalOpts['bots']): boolean {
 /// wrong half of it.
 export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'storageKey'>) {
   const makeTransport = Local({ bots, persist: true, storageKey });
-  // A sync repeated at the same state — React's StrictMode mounts twice — would
-  // otherwise send the bot's move twice, the second one rejected as stale.
-  let lastKicked: { matchID: string, stateID: number } | null = null;
+  // The state the bot was last asked to play from, whether by the kick below
+  // or by boardgame.io itself. A sync at that same state — React's StrictMode
+  // mounting twice, or a remount inside the bot's pause after a move — would
+  // otherwise ask again, and the second answer is rejected as stale.
+  let askedAt: { matchID: string, stateID: number } | null = null;
 
   return (transportOpts: TransportOpts) => {
     const transport = makeTransport({
@@ -60,11 +62,16 @@ export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'st
       transportDataCallback: (data: TransportData) => {
         transportOpts.transportDataCallback(data);
         if (data.type === 'update' || data.type === 'patch') {
-          // The match moved, so whatever was kicked for is answered. Only
-          // these two move it: `matchData` and `chat` leave the turn where it
-          // was, and forgetting on one of those would let the next sync at the
-          // same state kick a second time.
-          lastKicked = null;
+          // The match moved, and the bot has already been asked about where
+          // it landed: `Master.onUpdate` calls its subscribe callback before
+          // it sends this, so if the bot owes a move here, boardgame.io's own
+          // 100ms timer for it is running. A sync at this state inside that
+          // pause is the remount case, not the restore one, and kicking for
+          // it would put the same move twice. Only these two move the match:
+          // `matchData` and `chat` leave the turn where it was.
+          const [matchID] = data.args;
+          const stateID = data.type === 'update' ? data.args[1]._stateID : data.args[2];
+          askedAt = { matchID, stateID };
           return;
         }
         if (data.type !== 'sync') {
@@ -74,10 +81,10 @@ export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'st
         if (!botOwesAMove(state, bots)) {
           return;
         }
-        if (lastKicked?.matchID === matchID && lastKicked.stateID === state._stateID) {
+        if (askedAt?.matchID === matchID && askedAt.stateID === state._stateID) {
           return;
         }
-        lastKicked = { matchID, stateID: state._stateID };
+        askedAt = { matchID, stateID: state._stateID };
         transport.master.subscribeCallback({ state, matchID });
       },
     });

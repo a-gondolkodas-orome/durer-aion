@@ -136,6 +136,28 @@ describe('a match restored with the bot to move', () => {
     second.stop();
   });
 
+  /// The other repeat: a client mounted inside the pause boardgame.io keeps
+  /// before it lets the bot answer a move syncs at a state the bot has already
+  /// been asked about — by boardgame.io itself, from the move. The wrapper
+  /// used to forget on the move and kick again on that sync.
+  test('is not asked again by a sync inside the pause after a move', async () => {
+    const storageKey = 'sync-inside-the-pause';
+    const plays = { count: 0 };
+    const game = { ...testGame };
+    const multiplayer = transportFor(storageKey, botThatMarks(plays));
+    const first = clientPlaying(game, multiplayer);
+    first.start();
+    first.moves.mark('human');
+    const remounted = clientPlaying(game, multiplayer);
+    remounted.start();
+    await letTheBotPlay();
+
+    expect(plays.count).toStrictEqual(1);
+    expect(stateOf(remounted).G.marks).toStrictEqual(['human', 'bot']);
+    first.stop();
+    remounted.stop();
+  });
+
   test('is left alone when the turn is the team\'s', async () => {
     const storageKey = 'not-the-bots-turn';
     const before = clientPlaying({ ...testGame }, transportFor(storageKey, botThatMarks({ count: 0 }, neverAnswers)));
