@@ -21,9 +21,11 @@ jobs:
       # one scripts/sync-mirror.test.mjs exercises.
       - uses: actions/checkout@v7
         with:
-          # Otherwise actions/checkout writes an `http.https://github.com/.extraheader` credential
-          # into the config, and that header is host-wide: git would send this repository's token
-          # to the private mirror in place of the PAT.
+          # Otherwise actions/checkout leaves an `http.https://github.com/.extraheader` credential
+          # in this checkout's .git/config. The sync clones into a fresh RUNNER_TEMP directory that
+          # never reads it, so today it would reach nothing — it is kept out so the PAT is the only
+          # credential on the runner, and so a step that ran git here would not pick it up in
+          # place of the PAT.
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:

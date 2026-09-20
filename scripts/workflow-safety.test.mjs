@@ -113,10 +113,11 @@ describe('the mirror sync', () => {
     expect(source('sync.yml')).toContain(`if: github.repository == '${PUBLIC_REPO}'`);
   });
 
-  it('checks out without a credential, which would otherwise outrank the PAT', () => {
-    // actions/checkout writes `http.https://github.com/.extraheader`, and that header is
-    // host-wide rather than per-repository: git sends this repository's token to the private
-    // mirror too, in place of the PAT the push needs.
+  it('checks out without a credential, so the PAT is the only one on the runner', () => {
+    // actions/checkout writes `http.https://github.com/.extraheader` into the checkout's own
+    // .git/config. The sync clones elsewhere and never reads it, so this is not what keeps the
+    // token off the mirror today; it is what keeps a git step run in the workspace from ever
+    // sending this repository's token in place of the PAT.
     expect(source('sync.yml')).toContain('persist-credentials: false');
   });
 });
