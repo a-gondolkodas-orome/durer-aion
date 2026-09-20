@@ -184,7 +184,7 @@ export class SocketIOButBotMoves extends SocketIO {
                 next(new Error(`sync for unknown match ${matchID}`));
                 return;
               }
-              await this.resumeBotTurn(app, game, bot, matchID, metadata, playerID, credentials);
+              await this.resumeBotTurn(app, game, socket, bot, matchID, metadata, playerID, credentials);
               next();
             },
             (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
@@ -253,10 +253,12 @@ export class SocketIOButBotMoves extends SocketIO {
    *  never settles would be worse than the stale answer this replaced — the
    *  packet would never reach boardgame.io's listener, and `addClient` is
    *  there too, so the socket would be left off the match's channel and no
-   *  later push could reach it either. */
+   *  later push could reach it either. A turn that outlasts the wait is
+   *  answered again when it is over (`resyncAfterTurn`). */
   private async resumeBotTurn(
     app: Server.App,
     game: Game,
+    socket: IOTypes.Socket,
     bot: Bot,
     matchID: string,
     metadata: Server.MatchData,
@@ -295,9 +297,10 @@ export class SocketIOButBotMoves extends SocketIO {
       try {
         if (await Promise.race([turn, expired]) === "expired") {
           // Not an abandoned turn: it stays on the match queue and its move is
-          // persisted, so the next sync reads it back. Only this packet stops
-          // waiting for it.
+          // persisted. Only this packet stops waiting for it; the answer it
+          // gets now is the stored state, and the turn's own comes after.
           console.warn(`the judge's turn outlasted the sync for match ${matchID}; answering with the stored state`);
+          void this.resyncAfterTurn(app, game, socket, matchID, playerID, credentials, turn);
         }
       } finally {
         clearTimeout(timer);
@@ -306,6 +309,69 @@ export class SocketIOButBotMoves extends SocketIO {
       // Only the credential check reaches here; the turn carries its own
       // handler above.
       console.error(`could not check who the sync for match ${matchID} is from`, error);
+    }
+  }
+
+  /** The second answer to a sync that stopped waiting for the judge's turn.
+   *
+   *  Once the wait is over, the packet goes on to `Master.onSync`, which reads
+   *  storage and answers, and only then is the socket put on the match's
+   *  channel. A turn that finishes between that read and `addClient` is
+   *  published to a channel this socket is not on yet, while the answer on its
+   *  way carries the state from before it — the team is on the judge's turn
+   *  again, and nothing but another reload would show them otherwise. So when
+   *  the turn is over the socket is handed the stored state once more.
+   *
+   *  Once more *after* the first answer has gone out: the browser takes a sync
+   *  as it comes, so the later of the two has to be the newer one, and two
+   *  storage reads in flight together do not promise to come back in order.
+   *  `answered` watches the socket's own outgoing packets for the first one,
+   *  so it has to be armed before the packet is let through — which it is,
+   *  in the executor below, before the first `await`. The bot's `update`
+   *  reaches the socket too when the turn ends after `addClient`; the client
+   *  keeps whichever of the two is newer, so the repeat costs nothing. */
+  private async resyncAfterTurn(
+    app: Server.App,
+    game: Game,
+    socket: IOTypes.Socket,
+    matchID: string,
+    playerID: string,
+    credentials: unknown,
+    turn: Promise<void>
+  ): Promise<void> {
+    const answered = new Promise<boolean>(resolve => {
+      function onOutgoing(event: string, ...args: unknown[]) {
+        if (event === "sync" && args[0] === matchID) {
+          settle(true);
+        }
+      }
+      function onDisconnect() {
+        settle(false);
+      }
+      function settle(wasAnswered: boolean) {
+        socket.offAnyOutgoing(onOutgoing);
+        socket.off("disconnect", onDisconnect);
+        resolve(wasAnswered);
+      }
+      socket.onAnyOutgoing(onOutgoing);
+      socket.on("disconnect", onDisconnect);
+    });
+    const [, wasAnswered] = await Promise.all([turn, answered]);
+    if (!wasAnswered || !socket.connected) {
+      // Nobody left to answer: a reload in the meantime is a fresh sync, and
+      // that one reads the finished turn out of storage by itself.
+      return;
+    }
+    try {
+      const master = new Master(
+        game,
+        app.context.db,
+        TransportAPI(matchID, socket, getFilterPlayerView(game), this.pubSub),
+        app.context.auth
+      );
+      await master.onSync(matchID, playerID, typeof credentials === "string" ? credentials : undefined);
+    } catch (error) {
+      console.error(`could not answer the sync for match ${matchID} again after the judge's turn`, error);
     }
   }
 

@@ -359,7 +359,7 @@ describe("the socket transport a browser talks to", () => {
    *  packet boardgame.io answers *and* registers the socket on, so a turn that
    *  never came back would not only lose this answer — it would leave the
    *  socket off the match's channel, where no later push could reach it
-   *  either. Late is recoverable; never is not. */
+   *  either. Never is not recoverable; late is, below. */
   it("answers a sync whose judge's turn never comes back", async () => {
     const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     onTestFinished(() => { warned.mockRestore(); });
@@ -377,6 +377,36 @@ describe("the socket transport a browser talks to", () => {
     // Late, not wrong: the stored state, with the judge still to move.
     expect(state.ctx.currentPlayer).toBe(BOT_ID);
     expect(warned).toHaveBeenCalledWith(expect.stringContaining(MATCH_ID));
+  });
+
+  /** The regression: a turn that outlasted the wait used to be published to
+   *  a channel the socket was not on yet if it ended before `addClient`, while
+   *  the answer already sent carried the state from before it — so the team
+   *  was back on the judge's turn, and only another reload would have moved
+   *  them off it. Now the socket is answered a second time once the turn is
+   *  over, and that answer carries the move. */
+  it("answers again, with the judge's move, once a turn that outlasted the wait is over", async () => {
+    const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    onTestFinished(() => { warned.mockRestore(); });
+    const judge = heldJudge();
+    await restartServerWith(judge.bot, 200);
+    await createStoredMatch();
+    await server.db.setState(MATCH_ID, stateOnTheJudgesTurn());
+
+    const socket = await connectClient();
+    const first = await syncAs(socket, MATCH_ID, HUMAN_ID);
+    expect(first.ctx.currentPlayer).toBe(BOT_ID);
+    expect(warned).toHaveBeenCalledWith(expect.stringContaining(MATCH_ID));
+
+    const again = nextEvent(socket, "sync");
+    judge.release();
+    const [, payload] = await again as [string, { state: BgioState; }];
+
+    expect(judge.asked).toHaveLength(1);
+    expect(payload.state.ctx.currentPlayer).toBe(HUMAN_ID);
+    expect(payload.state._stateID).toBe(first._stateID + 1);
+    const { state } = await fetchMatch(server.db, MATCH_ID, { state: true } as const);
+    expect(payload.state.G).toStrictEqual(state.G);
   });
 
   it("refuses a sync for a match nobody created", async () => {
