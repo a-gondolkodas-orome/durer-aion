@@ -152,7 +152,10 @@ const PRESSING_AGAIN_EXTENDS_EVERYONE =
  * pressing it again would do.
  */
 export function bulkAddMinutesMessage(result: BulkAddMinutesDto, minutes: number): string {
-  const parts = [`${result.extended.length} meccs kapott +${minutes} percet`];
+  // The sign is the number's own: taking time back is the same operation
+  // with negative minutes, and `+${minutes}` read as "+-10".
+  const signed = minutes < 0 ? `${minutes}` : `+${minutes}`;
+  const parts = [`${result.extended.length} meccs kapott ${signed} percet`];
   if (result.alreadyGranted.length > 0) {
     parts.push(`${result.alreadyGranted.length} már megkapta`);
   }

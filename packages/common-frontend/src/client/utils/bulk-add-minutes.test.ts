@@ -129,6 +129,12 @@ describe('bulkAddMinutesMessage', () => {
       .toBe('2 meccs kapott +10 percet');
   });
 
+  // Taking time back is the same operation, and the organisers use it.
+  test('says minus once when time was taken back, not "+-"', () => {
+    expect(bulkAddMinutesMessage(result({ extended: ['Alpha'] }), -10))
+      .toBe('1 meccs kapott -10 percet');
+  });
+
   // Naming them is the point: the organiser could not tell which teams were
   // left out, which is what made pressing again dangerous.
   test('names every team that was left out, and why', () => {
