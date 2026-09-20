@@ -123,24 +123,19 @@ export async function allowedToStart(
   gameType: "RELAY" | "STRATEGY"
 ) {
   if (team.pageState === "DISCLAIMER")
-    //no start from this point
     return false;
   if (team.pageState === gameType)
-    //restart attempt
     return false;
   if (
     team.relayMatch.state === "IN PROGRESS" ||
     team.strategyMatch.state === "IN PROGRESS"
   )
-    // they are already playing one game
     return false;
   if (gameType === "STRATEGY" && team.strategyMatch.state === "FINISHED")
-    // they are already finished the strategy
     return false;
-  if (gameType === 'RELAY' && team.relayMatch.state === 'FINISHED') // they are already finished the relay
+  if (gameType === 'RELAY' && team.relayMatch.state === 'FINISHED')
     return false;
 
-  //default
   return true;
 }
 
@@ -150,7 +145,6 @@ export async function checkStaleMatch(
   | { isStale: false }
   | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
 > {
-  // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
   if (team.relayMatch.state === "IN PROGRESS") {
     if (typeof team.relayMatch.endAt === "string")
@@ -232,7 +226,6 @@ export async function getNewGame(
   if (!(await allowedToStart(team, gameType))) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  //find gameName based on team category
   const gameName =
     gameType === "RELAY"
       ? relayNames[team.category as keyof typeof relayNames]

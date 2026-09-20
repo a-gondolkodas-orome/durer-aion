@@ -1,10 +1,8 @@
 import { thiefSurvives, copMoveWins, winningPlacements, chooseCopMove } from './bot-strategy';
 import { neighbours, VERTEX_COUNT } from './gameplay';
 
-// ---------------------------------------------------------------------------
 // Independent, from-scratch reference solver (no memoisation, no shared code
 // with the module) to cross-check the strategy's correctness.
-// ---------------------------------------------------------------------------
 const refJointMoves = (cops: number[]): number[][] => {
   let acc: number[][] = [[]];
   for (const c of cops) {

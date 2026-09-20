@@ -10,7 +10,6 @@ import botWrapper from './botwrapper';
 import type { BotStrategy } from './botwrapper';
 import { handleGameReport } from './game-report';
 import type { ReactNode } from 'react';
-//import { Debug } from 'boardgame.io/debug';
 
 export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   game: GameType<T_SpecificGameState>,
@@ -32,7 +31,6 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
       }
     ),
     numPlayers: 2,
-    //debug: { impl: Debug },
   });
 }
 
@@ -54,6 +52,5 @@ export function ClientRelayWithBot(
       }
     ),
     numPlayers: 2,
-    //debug: { impl: Debug },
   });
 }

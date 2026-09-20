@@ -8,7 +8,6 @@ export interface MyGameState {
 }
 
 export const MyGameWrapper = (_category: "E") => {
-  // Set initial stones based on category
   const initialConfig = { left: 0, right: 0 };
 
   const MyGame: GameType<MyGameState> = {
@@ -48,11 +47,9 @@ export const MyGameWrapper = (_category: "E") => {
         };
 
         if (!nextPlayerCanMove()) {
-          // Current player wins (opponent cannot move)
           G.winner = ctx.currentPlayer as PlayerIDType;
         }
 
-        // Handle winning streak for live difficulty
         if (G.difficulty === "live" && G.winner) {
           if (G.winner === GUESSER_PLAYER) {
             G.winningStreak = G.winningStreak + 1;

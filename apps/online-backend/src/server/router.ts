@@ -93,7 +93,6 @@ export function configureTeamsRouter(
     if (!state) {
       ctx.throw(404, "Match " + matchID + " not found");
     }
-    // Fetch team
     const teamId = metadata.players[0].name;
     const team = await teams.getTeam({ teamId });
 
@@ -104,17 +103,14 @@ export function configureTeamsRouter(
 
     const new_state = {
       ...state,
-      //manually increment stateID
       _stateID: state._stateID + 1
     }
 
-    //Update  new_state
     const newEndDate = new Date(state.G.end)
     newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
     new_state.G.end = newEndDate.toISOString();
     new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
-    //Update team
     if (team.strategyMatch.state === "IN PROGRESS") {
       if (team.strategyMatch.matchID !== matchID) {
         ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
@@ -147,7 +143,6 @@ export function configureTeamsRouter(
 
     await ctx.db.setState(matchID, new_state);
 
-    //Reconstruct game name from metadata
     const game = games.find(g => g.name === metadata.gameName);
     if (!game) {
       ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
@@ -208,11 +203,9 @@ export function configureTeamsRouter(
       ctx.throw(404, `Team not found with teamID ${teamId}.`);
       return;
     }
-    // reset the strategy game while playing
     if (team.pageState === 'STRATEGY')
       team.pageState = 'HOME'
 
-    //log earlier matchid
     if (team.strategyMatch.state !== 'NOT STARTED')
       team.other = appendOtherNote(team.other, `prevstratid:${team.strategyMatch.matchID}`)
     team.strategyMatch = { state: 'NOT STARTED' }
@@ -234,11 +227,9 @@ export function configureTeamsRouter(
       ctx.throw(404, `Team not found with teamID ${teamId}.`);
       return;
     }
-    // reset the strategy game while playing
     if (team.pageState === 'RELAY')
       team.pageState = 'HOME'
 
-    //log earlier matchid
     if (team.relayMatch.state !== 'NOT STARTED')
       team.other = appendOtherNote(team.other, `prevrelayid:${team.relayMatch.matchID}`)
     team.relayMatch = { state: 'NOT STARTED' }
@@ -352,13 +343,11 @@ export function configureTeamsRouter(
  */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    // Check if multiple files are uploaded
     if (Array.isArray(file)) {
       ctx.throw(400, 'Multiple files are not supported.');
       return;
     }
 
-    // Check if the file is a TSV file
     if (!file || !file.filepath?.endsWith('.tsv')) {
       ctx.status = 400;
       ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
@@ -432,16 +421,12 @@ export function configureTeamsRouter(
    * Let the logged-in team start a RELAY match.
    */
   router.post<TeamState>("/team/me/relay/play", requireTeam(teams), async (ctx) => {
-    //check if in progress, it is not allowed to play
-    //check if it can be started, throw error if not
     const { game, team } = await getNewGame(ctx, teams, games, "RELAY", ctx.state.team);
 
-    // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    //created new game, updated team state accordingly
     const match = await startMatchStatus(body.matchID, ctx);
     if (match.startAt === null || match.endAt === null) {
       console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
@@ -457,16 +442,12 @@ export function configureTeamsRouter(
    * Let the logged-in team start a STRATEGY match.
    */
   router.post<TeamState>("/team/me/strategy/play", requireTeam(teams), async (ctx) => {
-    //check if in progress, it is not allowed to play
-    //check if it can be started, throw error if not
     const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY", ctx.state.team);
-    //about to start
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    //created new game, updated team state accordingly
     await team.update({
       pageState: "STRATEGY",
       strategyMatch: await startMatchStatus(body.matchID, ctx),
@@ -482,7 +463,6 @@ export function configureTeamsRouter(
     if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
 
-    //update team state to go home
     await team.update({
       pageState: "HOME",
     });
@@ -498,7 +478,6 @@ export function configureTeamsRouter(
    */
   router.post("/games/:nameid/create", async (ctx, next) => {
     await next();
-    //Figured out where match id is stored
     console.log(`Injecting bot in :${ctx.response.body.matchID}`);
     await injectBot(ctx.db, ctx.response.body.matchID);
   });

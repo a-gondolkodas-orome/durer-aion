@@ -19,7 +19,6 @@ export class TeamModel extends Model<
   InferCreationAttributes<TeamModel, OmitTimestamps>
 > {
   declare teamId: string;
-  // Important fields
   declare joinCode: string;
   declare teamName: string;
   declare category: string;
@@ -31,10 +30,8 @@ export class TeamModel extends Model<
   declare relayMatch: MatchStatus;
   declare strategyMatch: MatchStatus;
 
-  // Search fields
   declare other: string;
 
-  // timestamps!
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -62,8 +59,7 @@ export const OTHER_IMPORT_MAX_LENGTH = 700;
  *
  * The trail is a convenience and the admin action is the point, so a full field
  * costs the note rather than the reset. Callers pass the field as it came off
- * the row: a team imported from a row with no `Other` column has null there, and
- * `+=` on that used to write the string "null" into the notes.
+ * the row: a team imported from a row with no `Other` column has null there.
  */
 export function appendOtherNote(other: string | null | undefined, note: string): string {
   const current = other ?? '';
@@ -92,7 +88,6 @@ export const teamAttributes: ModelAttributes<
       }
     }
   },
-  // metadata
   category: {
     type: DataTypes.STRING,
   },
