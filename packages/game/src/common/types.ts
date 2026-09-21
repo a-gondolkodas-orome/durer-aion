@@ -58,8 +58,8 @@ interface GameMixin<G> {
   // sends it as the `setStartingPosition` move; the live games do the latter.
   // Prefer this one when the position is not the bot's secret: it receives
   // bgio's seeded `random`, so server and client agree on what was drawn,
-  // which `Math.random` in a strategy cannot give you. See CLAUDE.md,
-  // *Creating a New Game*.
+  // which `Math.random` in a strategy cannot give you. See README.md,
+  // *Creating a new game*.
   startingPosition?: StartingPositionFunction<G>;
 }
 

@@ -88,8 +88,8 @@ request one by hand — otherwise nobody is notified.
 ## The rest
 
 - [`CLAUDE.md` § *Key Conventions*](CLAUDE.md#key-conventions) — the house rules
-  in full: why formatting is ESLint's and not prettier's, what to comment, how
-  games are laid out.
+  this page does not carry: formatting through ESLint rather than prettier, what
+  to comment, which language user-facing text is in.
 - [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the
   authority on everything under that directory, testing and PR scope included.
 - [`README.md`](README.md) — running the round,

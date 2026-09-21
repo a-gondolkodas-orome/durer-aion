@@ -232,8 +232,9 @@ no extra setup and does not collide with the 5173 the other frontends share.
 `npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and `npm test` at
 the root cover it — the lint as one more workspace turbo runs eslint in, under its
 own config, the tests through its own vite config, which the root
-`vitest.config.mts` lists as a second project; [`CLAUDE.md`](CLAUDE.md) § Project
-Structure has the why. Its suite alone is
+`vitest.config.mts` lists as a second project;
+[`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) § *How
+this app sits in the monorepo* has the why. Its suite alone is
 `npm test --workspace=strategy-practice`, from anywhere.
 
 **Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
@@ -388,9 +389,33 @@ agreeing.
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 
-Both halves of the boardgame.io situation — why its transitive advisories cannot
-be fixed from here and why `npm audit fix --force` must never be run — are in
-[`CLAUDE.md`](CLAUDE.md).
+### boardgame.io, and what `npm audit` reports against it
+
+A plan to replace boardgame.io with the strategy practice engine was drafted and
+then deprioritized — upstream is actively maintained again
+([#277](https://github.com/a-gondolkodas-orome/durer-aion/issues/277)) — so
+nothing should be built toward that replacement.
+
+Its remaining `npm audit` advisories are its own transitive tree: `@koa/cors@3`,
+`cookie` through `react-cookies`, and `svelte`. None can be fixed from here.
+**Never run `npm audit fix --force`**: its fix for them is `boardgame.io@0.22.1`,
+a four-year downgrade that would take the competition with it. What is behind
+otherwise is `npm run report:outdated`'s job, monthly.
+
+`ws` and `engine.io` were on that list until
+[#461](https://github.com/a-gondolkodas-orome/durer-aion/issues/461).
+boardgame.io builds its socket layer from `koa-socket-2`, which asks for
+`socket.io ^3`, so npm nested a 3.x copy under it — and *that* copy, not the 4.x
+one `apps/online-backend` declares, served every match. Nothing showed it: a 4.x
+browser client and a 3.x server both speak Engine.IO 4, so the round worked while
+the transport was type-checked against a version it was not running and the
+advisories were counted against a tree nobody loaded. The `overrides` block in
+the root `package.json` points `koa-socket-2`'s dependency at 4, which makes the
+tree one install. Two tests keep it that way:
+`scripts/socketio-single-copy.test.mjs` reads the lockfile and fails the moment a
+second copy appears, and `apps/online-backend/src/socketio_transport.test.ts`
+plays a match over a real socket, which is what a version change has to keep
+working.
 
 # Configuration you may want to change
 
@@ -508,9 +533,59 @@ work until someone updates it.
 
 # Creating a new game
 
-A game for the live competition is one folder under
-`packages/game/src/games/strategy/`; [`CLAUDE.md`](CLAUDE.md) § *Creating a New
-Game* has the files it holds, where to register it, and the rule that the served
-bundle must not carry the bot. A game for the strategy practice site is a
-different shape entirely: see
-[`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game).
+This is a game for the **live competition** (boardgame.io). A game for the
+strategy practice site is a different shape entirely — see
+[`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game),
+and the `new-game` skill under that directory is the route.
+[`CLAUDE.md`](CLAUDE.md) § *Creating a New Game* is the same recipe in brief,
+with the two rules an agent must not get wrong.
+
+1. One self-contained folder in `packages/game/src/games/strategy/<game-name>/`
+   — `stones/` and `19ocd/` are the live examples:
+
+   - `game.ts` — the boardgame.io game definition
+   - `strategy.ts` — the server bot, plus any lookup tables it imports
+   - `board.tsx` — the React component for the game board
+   - `main.tsx` — the game description shown to players
+
+   No `index.ts` barrel: the three files are registered separately, below, and a
+   barrel re-exporting the bot next to the board would undo that. More files are
+   fine — `stones/` keeps its `moveMap.ts` beside the bot — but what the bot and
+   the board *both* need goes in `game.ts`. A helper beside them is a file the
+   bot entry and the client entry have in common, which the walk below reads as
+   the bot reaching the served bundle, and fails.
+
+2. Register it in the three registries under
+   `packages/game/src/games/strategy/`, one per package entry:
+   `strategy-games.ts` (the game definition and its name — the `game` entry),
+   `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
+   `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the live
+   client `game` and `game/client`; the offline dry run all three.
+
+The game's shape — `setup`, `moves`, `turn`, and the wrapper's own
+`possibleMoves` and `startingPosition` — is typed in
+`packages/game/src/common/types.ts`, and `GameMixin.startingPosition` there says
+which of the opening position's two homes to use. A move takes as many arguments
+as you give it: `moves.changeCoins(K, L)` for a "pick two values, then commit"
+turn, driven by form inputs rather than a click on the board. Both live games are
+single-click and single-argument; nothing in the wrapper requires that.
+
+**The rules and the bot are typechecked twice.** The server reads the game
+package's source rather than its `dist`, under its own `lib` and without the DOM
+(`apps/online-backend/tsconfig.json` says why), so a `document` in `game.ts` or
+`strategy.ts` passes `packages/game`'s own typecheck and fails the server's,
+naming the game package. A board may use whatever the browser gives it: the
+server never imports `game/client`.
+
+**The live client must not ship the bot.** The bots are reachable only through
+the `game/bot` entry, and only the server and the offline dry run may import it:
+ESLint forbids the specifier everywhere else (`eslint.config.mjs`),
+`packages/common-frontend` included, since the served bundle carries that
+package too. `packages/game/src/entries.test.ts` walks the package's own graph to
+pin that everything the bot entry shares with the two entries the live client
+ships is a rules file — `src/common/` or a game's `game.ts` — so a lookup table
+under whatever name, reached from a board or pulled into the rules, fails the
+tests instead of handing every competitor the tables. The offline dry-run build
+imports `game/bot` on purpose: its bot runs in the browser, after the game is
+public. Before a competition, still check by hand: `npm run build`, then grep
+`apps/online-frontend/dist` for a lookup-table key.

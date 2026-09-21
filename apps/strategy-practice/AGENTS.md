@@ -23,6 +23,33 @@ GitHub Pages.
 lodash is already used extensively; feel free to reach for it where it helps
 readability.
 
+## How this app sits in the monorepo
+
+It is a workspace of the `durer-aion` monorepo, but not like the others. One
+root `npm ci` installs it, and turbo builds, typechecks and lints it with
+everything else — but it keeps its own `eslint.config.js` and its own vitest
+config, which the root `vitest.config.mts` runs as a second project. Neither is
+a second command: `npm run lint` runs one ESLint process per workspace through
+turbo (`turbo.json` says why), and each resolves the config nearest the files it
+is given, so this app is linted through *its* config and the rest of the
+repository through the root one; and one `npm test` at the root runs this app's
+suite next to the other project's, each under its own setup.
+
+What this ESLint config differs on is the *rule set* — `@eslint-react`,
+react-hooks, and a stylistic dialect (no trailing comma, `max-len` 120) the root
+does not impose. Single quotes are not part of that difference: the root config
+applies the same rule to `packages/strategy-engine`, this app's engine moved
+out. It is not a second toolchain either — eslint, typescript, vitest and vite
+are pinned to the same versions as the root, and npm hoists them, this app's own
+plugins included. It came in as a subtree merge from `durer-jatekok` with that
+dialect already set, and reconciling the two would be a rewrite rather than a
+merge, so the two configs stay and ESLint applies each where it belongs.
+
+**Never run `npm ci` from this directory.** There is one lockfile, at the root.
+From here npm installs this workspace's subtree, leaves the root's own
+dependencies unmet — which the other apps then fail to build against — and exits
+0 while doing it.
+
 ## Architecture
 
 Every game lives under `src/components/games/`, one folder per game, registered
