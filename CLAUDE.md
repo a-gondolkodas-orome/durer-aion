@@ -189,7 +189,7 @@ note saying which PR did and what replaced it. The README's own setup steps are
 on the list too: `npm ci`, `npm run setup` and the `dev:*` and `stack:*`
 commands must keep doing what it says they do.
 
-It is a hand-walked checklist, not a suite. Six items have a unit test pinning
+It is a hand-walked checklist, not a suite. Seven items have a unit test pinning
 part of them; the rest are checked by someone actually doing them:
 
 - a join code loading its team, and a logout dropping the saved match with it:
@@ -198,6 +198,8 @@ part of them; the rest are checked by someone actually doing them:
   each is still worth: `packages/relay-bot/src/games/relay/strategy.test.ts`
 - what a returning team may start, and the closing of a match whose time ran
   out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
+- the same closing for a team that never comes back:
+  `apps/online-backend/src/server/stale_sweep.test.ts`
 - the time left recomputed from the match's own end, and only the team allowed
   to poll for it: `packages/game/src/common/gamewrapper.test.ts`
 - the admin API asking for the organisers' password on every route under
