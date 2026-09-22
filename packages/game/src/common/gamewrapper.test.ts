@@ -5,6 +5,7 @@ import {
   createGameWithoutStartingPosition,
   createGameWithMoveWithoutStartingPosition,
 } from "./game_for_testing";
+import { GUESSER_PLAYER, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
@@ -234,6 +235,27 @@ describe("gameWrapper clock", () => {
     expect(isMakeMovePayloadReadOnly("getTime")).toBe(true);
     expect(isMakeMovePayloadReadOnly("chooseRole")).toBe(false);
   });
+});
+
+test("polling the clock does not spend a limited turn's move", () => {
+  const oneMovePerTurn: GameType<{ data: string }> = {
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G }) => { G.data = "stepped"; } },
+    turn: { minMoves: 1, maxMoves: 1 },
+  };
+  const client = Client({ game: gameWrapper(oneMovePerTurn), numPlayers: 2 });
+  client.start();
+  client.moves.chooseNewGameType("live");
+  client.moves.setStartingPosition({ data: "startingPosition" });
+  client.moves.chooseRole(GUESSER_PLAYER);
+
+  client.moves.getTime();
+  client.moves.getTime();
+
+  expect(client.getState()?.ctx.numMoves).toStrictEqual(0);
+  expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
 });
 
 describe("gameWrapper move guards", () => {
