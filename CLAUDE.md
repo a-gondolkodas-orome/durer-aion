@@ -79,9 +79,6 @@ second copy appears, and `apps/online-backend/src/socketio_transport.test.ts`
 plays a match over a real socket, which is what a version change has to keep
 working.
 
-*What must keep working* below is the standing regression checklist every
-change is measured against.
-
 ## Tech Stack
 
 - **Frontend**: React 19, Vite, MUI (Material-UI), React Router
@@ -173,43 +170,7 @@ cd apps/strategy-practice && npm run coverage
 
 Every long docker invocation lives in a root npm script rather than in prose,
 so it is written down once. [`README.md`](README.md) is the authority on
-running things locally: how to bring the stack up, and — under *Checking it
-works* — the regression checklist, with how to exercise each item by hand.
-
-## What must keep working
-
-[`README.md`](README.md) § *Checking it works* is the standing regression
-checklist: what the competition round, the admin side and the public sites
-must keep doing, with how to exercise each item by hand. **A change is done only
-when every item it reaches still holds** — that section opens with the table of
-which items a change reaches, and one fitting none of its rows reaches all of
-them. Before a competition the whole list is walked whatever the last change
-was. An item is removed only when the capability is deliberately retired, with a
-note saying which PR did and what replaced it. The README's own setup steps are
-on the list too: `npm ci`, `npm run setup` and the `dev:*` and `stack:*`
-commands must keep doing what it says they do.
-
-It is a hand-walked checklist, not a suite. Seven items have a unit test pinning
-part of them; the rest are checked by someone actually doing them:
-
-- a join code loading its team, and a logout dropping the saved match with it:
-  `packages/common-frontend/src/client/hooks/user-model.test.ts`
-- the relay round against the bot — problems served, the three tries and what
-  each is still worth: `packages/relay-bot/src/games/relay/strategy.test.ts`
-- what a returning team may start, and the closing of a match whose time ran
-  out while it was away: `apps/online-backend/src/server/team_manage.test.ts`
-- the same closing for a team that never comes back:
-  `apps/online-backend/src/server/stale_sweep.test.ts`
-- the time left recomputed from the match's own end, and only the team allowed
-  to poll for it: `packages/game/src/common/gamewrapper.test.ts`
-- the admin API asking for the organisers' password on every route under
-  `/team/admin` and `/game/admin`, whatever the path's case:
-  `apps/online-backend/src/server/admin_session.test.ts`
-- a strategy match played over a real socket — the player's move, the bot's
-  answer and a reload resuming where it left off:
-  `apps/online-backend/src/socketio_transport.test.ts`. The only suite that
-  crosses the wire, and it is still no substitute for the round against
-  `npm run stack:up`: it has no nginx and no built frontend in front of it.
+running things locally.
 
 ## Creating a New Game
 
@@ -258,9 +219,8 @@ client ships is a rules file — `src/common/` or a game's `game.ts` — so a ta
 under whatever name, reached from a board or pulled into the rules, fails the
 tests instead of handing every competitor the tables. The offline dry-run build
 imports `game/bot` on purpose (its bot runs in the browser, after the game
-is public). Before a competition, still do the by-hand check in
-`README.md` § *Checking it works*: build, then grep `apps/online-frontend/dist`
-for a lookup-table key.
+is public). Before a competition, still check by hand: `npm run build`, then
+grep `apps/online-frontend/dist` for a lookup-table key.
 
 ### Game Structure (boardgame.io)
 
@@ -382,10 +342,8 @@ that were previously written down only here or nowhere.
   a wrong branch decides a competition. Trivial wiring (exports, registration,
   pass-through props) needs no tests, and exhausting every branch is not the
   goal: test the rules and the edge cases that could plausibly be gotten wrong.
-- Every regression fixed gets a unit test that fails without the fix.
-  The README's checklist (*What must keep working* above) catches
-  whole-feature breakage by hand; the test pins the specific bug so it cannot
-  quietly return.
+- Every regression fixed gets a unit test that fails without the fix, so the
+  specific bug cannot quietly return.
 - A test run writes its report and nothing else: a console call during it fails
   the test that made it, and a test that exercises a logging path on purpose
   stubs the method and asserts on the spy. `vitest.setup.mts` says why and how.
