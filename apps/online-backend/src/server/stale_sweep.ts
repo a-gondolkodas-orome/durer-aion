@@ -3,7 +3,6 @@ import type { InProgressMatchStatus } from "schemas";
 import type { TeamsRepository } from "./db";
 import { checkStaleMatch, closeMatch } from "./team_manage";
 
-/** What one sweep did: the matches it closed, and the ones it could not. */
 export interface SweepResult {
   closed: string[];
   failed: { matchID: string; message: string }[];
@@ -11,17 +10,12 @@ export interface SweepResult {
 
 export const STALE_SWEEP_INTERVAL_MS = 60 * 1000;
 
-/**
- * Closes every match whose time has run out, whatever the team's browser is
- * doing.
+/** Closes every match whose time has run out, with no team present.
  *
- * Every other place a match is closed from needs the team: the socket handler
- * needs a packet, `/team/me`'s stale check needs the page loaded again. So a
- * team that closed the tab at the buzzer kept `IN PROGRESS` and no score. The
- * rule is the one `/team/me` already applies, without the team.
- *
- * One match per team per sweep, since `checkStaleMatch` names the first it
- * finds; the next sweep takes the second.
+ *  Every other close path needs the team's browser — the socket handler needs a
+ *  packet, `/team/me`'s stale check needs the page loaded again — so a team that
+ *  closed the tab at the buzzer kept `IN PROGRESS` and no score. The rule is
+ *  unchanged: `checkStaleMatch` decides, `closeMatch` writes the score.
  */
 export async function sweepStaleMatches(
   teams: TeamsRepository,
@@ -36,23 +30,14 @@ export async function sweepStaleMatches(
       await closeMatch(matchID, teams, db);
       result.closed.push(matchID);
     } catch (error) {
-      // One unclosable match must not cost every later team its score, which is
-      // the whole reason this runs unattended.
-      result.failed.push({
-        matchID,
-        message: error instanceof Error ? error.message : String(error),
-      });
+      // One unclosable match must not cost every later team its score.
+      result.failed.push({ matchID, message: error instanceof Error ? error.message : String(error) });
     }
   }
   return result;
 }
 
-/**
- * Runs {@link sweepStaleMatches} until the returned function is called.
- *
- * `report` is handed every sweep that did something, so what is written about
- * it stays with the server rather than in here.
- */
+/** Runs {@link sweepStaleMatches} until the returned function is called. */
 export function startStaleSweep(
   teams: TeamsRepository,
   db: StorageAPI.Async | StorageAPI.Sync,
@@ -60,8 +45,8 @@ export function startStaleSweep(
   intervalMs: number = STALE_SWEEP_INTERVAL_MS,
 ): () => void {
   const tick = setInterval(() => {
-    // setInterval ignores what its callback returns, so a rejection here would
-    // be an unhandled one — which ends the process and every match on it.
+    // setInterval drops what its callback returns, and an unhandled rejection
+    // ends the process and every match being played on it.
     void sweepStaleMatches(teams, db).then(
       result => {
         if (result.closed.length > 0 || result.failed.length > 0) report(result);
@@ -71,7 +56,6 @@ export function startStaleSweep(
       },
     );
   }, intervalMs);
-  // Never the reason the process stays up.
-  tick.unref();
+  tick.unref(); // never the reason the process stays up
   return () => { clearInterval(tick); };
 }
