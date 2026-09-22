@@ -138,7 +138,7 @@ any backend route the vite proxy carries — and it reloads while you are still
 reading the diff. Take `stack:up` when the change is one Vite cannot stand in
 for: nginx and its routing, the socket transport, the session cookie's `Secure`
 flag, the built bundle itself, or the admin pages, whose behaviour behind the
-proxy nobody has walked (see *Admin and operations* below). When in doubt the
+proxy nobody has walked (see *Admin* below). When in doubt the
 paragraph above is the rule — Vite is standing in for nginx, so anything about
 nginx wants the stack.
 
@@ -155,88 +155,14 @@ postgres is reachable only from the `backend` container. Detached like
 `stack:up`. Worth a run before a competition, and before merging anything that
 touches the `Dockerfile`, nginx or the routes.
 
-# Checking it works
+# Operations
 
-This is the standing regression checklist: what the competition round, the admin
-side and the public sites must keep doing through any change. Do the round
-against `npm run stack:up` — the only setup that covers nginx, the socket
-transport and the built frontend at once. [`CLAUDE.md`](CLAUDE.md) § What must
-keep working says how the list binds a change, and which items a unit test pins.
+## Admin
 
-## How much of it your change needs
+The admin pages are at `http://localhost/admin`, user `admin`, password from
+`.env.docker`; `/admin/<teamId>` opens one team directly.
 
-The list is what must keep working, not what every change has to walk. Find the
-row your change fits, and walk the sections it names:
-
-| your change touches | walk |
-| --- | --- |
-| a practice site or the dry run only — `apps/strategy-practice`, `apps/relay-practise-frontend`, `apps/offline-frontend` | *The other sites*, the one you touched |
-| a game's rules or bot under `packages/game` | that game in *A team playing the round* |
-| the admin pages, or team import | *Admin and operations* |
-| the backend, `packages/common-frontend`, nginx, routing, auth, the socket transport, the build, or a dependency | all of it |
-| documentation or CI only | nothing here |
-
-Two things do not scope down, and they are the point of the table rather than
-exceptions to it. **Before a competition the whole list is walked**, whatever the
-last change was — that run is what the checklist exists for. And a change that
-fits no row above walks all of it: the rows are the cases someone has already
-thought through, not a closed set.
-
-## A team playing the round
-
-1. `http://localhost`, join code `000-0000-000`: disclaimer, then the chooser
-   offers the relay and the strategy game. (`001-0000-000` and `002-0000-000`
-   are categories D and E, which get different games.)
-2. Play the **relay** through to the end: the problems are served in turn, three
-   tries each at decreasing points, on the 60-minute clock.
-3. Play the **strategy** game through to the end against the server bot,
-   choosing a role first: a test game, then live ones, with the winning streak
-   scored and the 30-minute countdown running.
-4. Reload mid-match, in both. Resuming without loss of state is the thing that
-   breaks quietly.
-5. Open the same join code in a second tab mid-match: the running match must not
-   fork, and the countdown must read the same in both tabs — the time left comes
-   from the server, never from the client.
-6. Finish both and check the combined score on the finished screen.
-7. Log out and reload: the login form is back. The session is an HttpOnly
-   cookie, so devtools show `durer_team` under Cookies while logged in and gone
-   after; localStorage holds no GUID, only the `loggedIn` flag other tabs hear a
-   login through.
-8. `npm run build`, then grep `apps/online-frontend/dist` for a string from the
-   bot's lookup tables: the served bundle must contain no bot.
-
-<details><summary>What items 7 and 8 are guarding</summary>
-
-The GUID does not come back in the `GET /team/me` response either: it is the
-cookie's value, so a copy there would be the session in a form a script can
-read. boardgame.io still gives the same GUID out as the match's player name, so
-this narrows the exposure rather than ending it — issue #434. On the deployed
-host the login response's `Set-Cookie` also carries `Secure`, which the backend
-takes from nginx's own scheme — a proxy in front of the container's nginx would
-silently lose it.
-
-Since #429 the bots sit behind the `game/bot` entry, ESLint forbids importing it
-anywhere but the server and the offline dry run, and
-`packages/game/src/entries.test.ts` pins that the other two entries never reach
-a bot. The grep is the final check before a competition, not the only one;
-[`CLAUDE.md`](CLAUDE.md) § Creating a New Game has the layout.
-</details>
-
-## Admin and operations
-
-At `http://localhost/admin`, user `admin`, password from `.env.docker`:
-
-- the team list, and a team's details from it — `/admin/<teamId>` opens one team
-  directly;
-- per-match state dump, per-match log dump, per-category stats;
-- the actions on a running match: add minutes, relay reset, strategy reset.
-  Start a match as a team in another tab first, then act on it here;
-- deleting one team from its details, and every team from the list. The rows
-  leave the grid with no reload, and each lands in `DeletedTeams` (look at
-  `localhost:5432`), where it stays when the team is imported again and
-  deleted a second time.
-
-Team import has two paths and both need checking: `npm run teams:import`, which
+Team import has two paths: `npm run teams:import`, which
 runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
 admin page. The first is its own process — `dist/import_teams.js`, which reads
 `DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
@@ -271,14 +197,13 @@ the `dev:online` proxy has not been walked, so check them against `stack:up`.
 
 ## The other sites
 
-Each runs with no backend and no database, and each persists to localStorage —
-reload mid-game to check it resumes.
+Each runs with no backend and no database, and each persists to localStorage.
 
 | what | run it | notes |
 | --- | --- | --- |
 | the offline dry run (`/proba-verseny/`) | `npm run dev:offline` | the rehearsal of the competition round, against the in-browser bot. With `VITE_S3_*` set — the competition-year build, not this one — every strategy move also uploads a `_stratstep_` file, and its `log` is the entries the live round's admin dump serves |
-| the relay practice site (`/valto/`) | `npm run dev:relay-practice` | pick a past year's problem set and play it through (#224 replaced the frozen 2023 build) |
-| the strategy practice site (`/jatekok/`) | `npm run dev:strategy-practice` | on port 8012, not 5173; every game playable both against the computer and two players in one browser |
+| the relay practice site (`/valto/`) | `npm run dev:relay-practice` | #224 replaced the frozen 2023 build |
+| the strategy practice site (`/jatekok/`) | `npm run dev:strategy-practice` | on port 8012, not 5173 |
 
 The Pages site assembles all three plus a home page:
 
@@ -338,12 +263,12 @@ gate was retired in #431; that app's own `npm run coverage` stays, on demand —
 `npm run check` runs the six that need no docker, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
-needs docker, and the round itself is still walked by hand.
+needs docker.
 
 `npm run stack:build` builds the two images the competition is deployed from —
 the backend and nginx — without starting anything, and is the one gate that
 reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
-`nginx.conf`. The round itself is still walked by hand, above.
+`nginx.conf`.
 
 `npm run lint` is the whole of the lint and formatting gate. It runs one ESLint
 process per workspace through turbo, plus `lint:root` for the files in no
