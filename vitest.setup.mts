@@ -15,6 +15,10 @@ recorder below for that test, and hands the test the calls to assert on.
 import { afterAll, afterEach } from 'vitest';
 import { format } from 'node:util';
 
+import { installSeededRandom } from './vitest.seed.mjs';
+
+installSeededRandom();
+
 const written: string[] = [];
 
 // `log`, `info`, `warn` and `error` are what leaks in practice; the rest are
