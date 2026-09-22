@@ -389,20 +389,6 @@ agreeing.
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 
-### boardgame.io, and what `npm audit` reports against it
-
-A plan to replace boardgame.io with the strategy practice engine was
-deprioritized once upstream became actively maintained again
-([#277](https://github.com/a-gondolkodas-orome/durer-aion/issues/277)); don't
-build toward it. Its remaining `npm audit` advisories — `@koa/cors@3`, `cookie`
-through `react-cookies`, `svelte` — are its own transitive tree and cannot be
-fixed from here. **Never run `npm audit fix --force`**: its fix is
-`boardgame.io@0.22.1`, a four-year downgrade that would take the competition
-with it. `ws` and `engine.io` were on that list until
-[#461](https://github.com/a-gondolkodas-orome/durer-aion/issues/461); the
-header of `scripts/socketio-single-copy.test.mjs` says why the root
-`overrides` block exists.
-
 # Configuration you may want to change
 
 `npm run setup` creates each of these from its committed `*.sample` twin, and

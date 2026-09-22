@@ -47,11 +47,8 @@ root. From a workspace npm installs that subtree, leaves the root's own
 dependencies unmet — which the other apps then fail to build against — and exits
 0 while doing it.
 
-**Never run `npm audit fix --force`.** Its fix for boardgame.io's transitive
-advisories is a four-year downgrade that would take the competition with it, and
-don't build toward replacing boardgame.io either: [`README.md`](README.md) §
-*boardgame.io, and what `npm audit` reports against it* is the standing
-situation, the `overrides` block included.
+**Never run `npm audit fix --force`**: its fix for boardgame.io's advisories is a
+four-year downgrade of it. Don't build toward replacing boardgame.io either (#277).
 
 ## Tech Stack
 
