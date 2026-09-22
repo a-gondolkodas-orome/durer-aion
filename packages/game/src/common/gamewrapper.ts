@@ -50,6 +50,10 @@ function getTime({ G, playerID }: MoveContext) {
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
+/// boardgame.io counts a move against the turn's move limit unless the move
+/// says otherwise, and a clock poll is not a step of the game.
+const clockPoll = { move: getTime, noLimit: true };
+
 /// What the wrapper reports after each step and at the end of a match; hosts
 /// accept a superset of this shape (the offline frontend's SendGameDataParams).
 /// The match's move log is not in here: a move context carries boardgame.io's
@@ -89,7 +93,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     maxPlayers: 2,
     phases: {
       startNewGame: {
-        moves: { chooseNewGameType, setStartingPosition, getTime },
+        moves: { chooseNewGameType, setStartingPosition, getTime: clockPoll },
         endIf: ({ G }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
@@ -98,7 +102,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       chooseRole: {
-        moves: { chooseRole, getTime },
+        moves: { chooseRole, getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: "play",
         turn: {
@@ -106,7 +110,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       play: {
-        moves: { ...game.moves, getTime },
+        moves: { ...game.moves, getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
         next: "startNewGame",
         turn: {
