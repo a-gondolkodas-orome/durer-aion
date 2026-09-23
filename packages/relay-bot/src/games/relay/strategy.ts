@@ -182,17 +182,14 @@ export function relayStrategy(problemList: Problem[]) {
     if (state.G.answer === problemList[state.G.currentProblem].answer) {
       correctnessPreviousAnswer = true;
     } else if (state.G.numberOfTry < 3) {
-      // One more try
       return [[state.G.currentProblemMaxPoints - 1], "nextTry"];
     }
 
-    // Next problem if there is one and the time is not over
     if (state.G.currentProblem < problemList.length - 1) {
       const url = problemList[state.G.currentProblem + 1].url ?? "";
       const nextProblem = problemList[state.G.currentProblem + 1];
       return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
     }
-    // End of the game
     return [[correctnessPreviousAnswer], "endGame"];
   }
 }

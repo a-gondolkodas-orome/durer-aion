@@ -2,11 +2,10 @@
 Registered via `test.setupFiles`, so it applies to every test file.
 
 A run writes its report and nothing else, so a real message stands out. Anything
-the code under test logs breaks that: issue #294 was a run buried under a few
-hundred lines of state dumps, ads and React warnings, and once cleaned up the
-noise came back within days, because nothing stopped the next stray
-`console.log` from landing. So console output is a failure here, named against
-the test that wrote it, rather than a line that scrolls past.
+the code under test logs breaks that, and a report cleaned up by hand fills
+with noise again as soon as the next stray `console.log` lands. So console
+output is a failure here, named against the test that wrote it, rather than a
+line that scrolls past (issue #294).
 
 A test that exercises a logging path on purpose stubs the method:
 `vi.spyOn(console, 'error').mockImplementation(() => undefined)` replaces the

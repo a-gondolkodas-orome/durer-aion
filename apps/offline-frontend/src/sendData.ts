@@ -28,7 +28,6 @@ function sendData(fileName: string, data: string) {
   const fd = new FormData();
   fd.append('key', folder + '/' + fileName);
   fd.append('file', data);
-  // utf8 charset
   fd.append('Content-Type', 'text/plain; charset=utf-8');
   fetch(
     bucketName,

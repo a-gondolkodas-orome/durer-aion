@@ -40,8 +40,8 @@ jobs:
       - run: npm ci
       # A ceiling rather than a reservation: it caps each eslint process turbo spawns
       # instead of leaving V8 to size the heap at half of whatever RAM the runner
-      # happens to have — 8 GB on a public repo's, a third of that on a smaller one,
-      # which is how this step first failed. Every workspace lints in under 1024 MB,
+      # happens to have — 8 GB on a public repo's, a third of that on a smaller one.
+      # Every workspace lints in under 1024 MB,
       # so this is headroom and a regression guard at once: if lint's memory creeps
       # back up, it fails here, where it is visible, rather than only where the
       # runner is smallest. .devcontainer/README.md has the measurements.
@@ -136,8 +136,8 @@ jobs:
         # nothing here starts a container, so they are never used as credentials.
         run: npm run setup
       # The competition is deployed from these two images and nothing else in CI
-      # touches them, so a broken Dockerfile or nginx.conf used to surface at
-      # deploy time. No compose overlay: this is the production image set, the
+      # touches them, so a broken Dockerfile or nginx.conf would otherwise surface
+      # at deploy time. No compose overlay: this is the production image set, the
       # one `npm run stack:prod` builds.
       - name: Build the deployed images
         run: npm run stack:build

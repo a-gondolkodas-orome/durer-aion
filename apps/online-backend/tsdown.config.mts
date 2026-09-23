@@ -10,9 +10,9 @@ const source = (file: string) =>
   fileURLToPath(new URL(`../../packages/${file}`, import.meta.url))
 
 export default defineConfig({
-  // Two entries: the server, and the team import, which used to be a mode of
-  // it (#190). rolldown puts what they share — the database and the team
-  // repository — in a chunk beside them, which each `require`s by name.
+  // Two entries: the server and the team import. rolldown puts what they share
+  // — the database and the team repository — in a chunk beside them, which each
+  // `require`s by name.
   entry: ['src/server.ts', 'src/import_teams.ts'],
   // CommonJS, not ESM: every dependency stays a bare `require()` below, and
   // boardgame.io ships no `exports` map — its subpaths are directories, which

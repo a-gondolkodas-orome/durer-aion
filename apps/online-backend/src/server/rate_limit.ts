@@ -7,11 +7,12 @@ import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 
 /** Rate limiting for the routes that answer a guess at a secret (issue #437).
  *
- * `POST /team/join` used to accept unlimited attempts at a team's join code.
- * The code is ten digits (`server/team_import.ts`), so a few thousand live
- * codes sit in ten billion — wide enough that guessing one is hopeless at
- * human speed, and not wide enough to survive a client trying continuously
- * for the length of a round. What bounds that is the attempts, not the codes.
+ * `POST /team/join` answers a guess at a team's join code, so what it needs is
+ * a ceiling on the attempts. The code is ten digits (`server/team_import.ts`),
+ * so a few thousand live codes sit in ten billion — wide enough that guessing
+ * one is hopeless at human speed, and not wide enough to survive a client
+ * trying continuously for the length of a round. What bounds that is the
+ * attempts, not the codes.
  *
  * The counting is `rate-limiter-flexible`'s, which is where the fiddly parts
  * live: the window, the expiry, and a burst of guesses arriving at once being

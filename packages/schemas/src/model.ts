@@ -21,7 +21,6 @@ export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | Finish
 
 export class TeamModel {
   public teamId!: string;
-  // Important fields
   public joinCode!: string;
   public teamName!: string;
   public category!: string;
@@ -33,10 +32,8 @@ export class TeamModel {
   public relayMatch!: MatchStatus;
   public strategyMatch!: MatchStatus;
 
-  // Search fields
   public other!: string;
 
-  // timestamps!
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }

@@ -10,7 +10,7 @@ const noBotMessage = 'The live client must not ship the bot: import `game` or `g
 // The `game/bot` entry and every relative spelling of it, of the package's source
 // and of its build: `../../packages/game/...` from an app, `../../game/...` from a
 // sibling package, with or without an extension (`../../game/bot.js` resolves to
-// bot.ts and used to slip through). See the block that uses it, below.
+// bot.ts). See the block that uses it, below.
 const noBotInTheClient = {
   group: [
     'game/bot',
@@ -102,7 +102,6 @@ const typeAwareRulesOff = Object.fromEntries(
 );
 
 export default defineConfig(
-  // Apply recommended rules to all files
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
     extends: [
@@ -124,10 +123,10 @@ export default defineConfig(
   // `projectService`, not `project: true`: one TypeScript project service shared
   // across the run, rather than a program held open per tsconfig — and there are
   // eleven tsconfigs here. It is what typescript-eslint 8 recommends for this
-  // shape, and it was one 512 MB step less heap. What actually brought the run
-  // inside a small machine's default heap was giving each workspace its own
-  // process, so that a run holds one project rather than eleven — turbo.json says
-  // how, and .devcontainer/README.md has the measurements.
+  // shape. What brings the run inside a small machine's default heap is giving
+  // each workspace its own process, so that a run holds one project rather than
+  // eleven — turbo.json says how, and .devcontainer/README.md has the
+  // measurements.
   {
     files: ['**/*.{ts,tsx}'],
     ignores: ['**/*.config.{ts,mts}', '**/dist/**', '**/build/**'],
@@ -139,9 +138,8 @@ export default defineConfig(
     },
     // 'error', not 'warn': the lint script fails on any warning anyway
     // (--max-warnings=0), so 'warn' only made the editor and a bare `npx eslint`
-    // disagree with CI. These were warnings while the repo had violations to
-    // surface without blocking; it no longer does. The cap stays as a backstop,
-    // so a rule added at 'warn' severity later cannot quietly accumulate either.
+    // disagree with CI. The cap stays as a backstop, so a rule added at 'warn'
+    // severity later cannot quietly accumulate either.
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
@@ -264,7 +262,6 @@ export default defineConfig(
       globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' },
     },
   },
-  // Global ignores
   {
     ignores: [
       '**/dist/**',

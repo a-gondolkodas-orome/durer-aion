@@ -3,7 +3,7 @@
 // packages' dist builds, which the CI test job does not produce.
 
 // The two names the apps have always used. `LOCAL_STORAGE_TEAMSTATE` is also
-// re-exported from api-repository-interface.ts, where it used to live.
+// re-exported from api-repository-interface.ts.
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
 export const BGIO_LOCALSTORAGE_PREFIX = "bgio_";
 

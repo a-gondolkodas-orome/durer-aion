@@ -73,7 +73,6 @@ const server = Server({
 
 const PORT = parseInt(env.PORT || "8000");
 
-// Set up transport layer for updates
 server.app.context.durer_transport = socketio;
 
 // Behind nginx every request arrives over plain HTTP; `X-Forwarded-Proto` is
