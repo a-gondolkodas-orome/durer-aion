@@ -17,7 +17,7 @@ import { getAdminCredentials, getBotCredentials, relayNames } from './server/com
 import { requireAdmin } from './server/admin_session';
 
 import { closeMatch } from './server/team_manage';
-import { startStaleSweep } from './server/stale_sweep';
+import { closeStaleMatches } from './server/stale_sweep';
 
 import * as Sentry from '@sentry/node';
 
@@ -111,13 +111,10 @@ server.app.on("error", (err, ctx) => {
   });
 });
 
-// For the matches nobody is left to finish: a team that closes the tab at the
-// buzzer, or whose laptop dies. See server/stale_sweep.ts.
-startStaleSweep(teams, db, ({ closed, failed }) => {
-  if (closed.length > 0) console.log(`Closed ${closed.length} match(es) whose time had run out: ${closed.join(", ")}`);
-  for (const { matchID, message } of failed) {
-    Sentry.captureException(new Error(`Could not close match ${matchID}: ${message}`));
-  }
-});
+// An unhandled rejection would end the process and every match played on it.
+setInterval(() => {
+  void closeStaleMatches(teams, db, error => Sentry.captureException(error))
+    .catch((error: unknown) => Sentry.captureException(error));
+}, 60 * 1000);
 
 void server.run(PORT);
