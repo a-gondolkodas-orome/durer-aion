@@ -483,12 +483,7 @@ docker compose --env-file=.env.docker exec backend bash   # a shell in one
 URL — port 8000 is not published, nginx is the way in — and `DURER_ADMIN_PASSWORD` to
 `ADMIN_CREDENTIALS`, or let it prompt.
 
-## Checking it works
-
-Walk [`README.md`](./README.md)'s *Checking it works* list against the public URL instead
-of `http://localhost`. Reloading mid-match and opening a second tab on the same join code
-are the two items only a deployed instance exercises: both go through the websocket, where
-a proxy misconfiguration behind TLS shows up.
+## Error reporting
 
 > **Test drive:** the frontend reports nothing unless its `.env` sets `VITE_SENTRY_DSN`,
 > which the samples leave empty. The backend still reports from a DSN written into

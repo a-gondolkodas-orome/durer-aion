@@ -15,10 +15,8 @@ import { makeCtx, moveValidator } from 'test-utils';
 
 const isWindowAllowed = moveValidator(moves.placeWindow);
 
-// ---------------------------------------------------------------------------
 // Independent oracle: enumerate legal moves straight from the raw rules (no
 // block-decomposition), so it cross-checks the production block reduction.
-// ---------------------------------------------------------------------------
 const rawMaxMoves = (board: Board): { a: number; b: number }[] => {
   const { n, edges } = board;
   const sizes = [1];
@@ -67,8 +65,6 @@ const reachableStates = (n: number): Board[] => {
   visit(emptyBoard(n));
   return [...seen.values()];
 };
-
-// ---------------------------------------------------------------------------
 
 describe('official characterisation', () => {
   // Answer: the second player wins iff n = 7, n = 8m+1, or n = 8m+4.

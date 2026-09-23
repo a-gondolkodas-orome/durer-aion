@@ -7,19 +7,11 @@ the why — what you did goes below. --->
 
 ## Key changes
 
-<!---
-- Shortly describe major updates in bullet points, one line each.
---->
+<!--- One bullet per major update, under 80 characters. A change that needs
+more is two bullets, the *Details* section, or the diff saying it itself. --->
   
 ## Details
 
-<!--- What was prior logic & what is current logic. Only what the diff cannot
-say for itself — a retelling of the change costs the reviewer the time the
-change was meant to save. --->
-
-<!--- List open questions and other things your reviewer should know. --->
-
-<!--- Any edge cases you’re aware of that you have not solved for? --->
-
-<!--- Do not write that lint, the typecheck, the spell check or the tests pass:
-the checks on this PR report that themselves. --->
+<!--- Only what the diff cannot say for itself: logic that is not obvious from
+it, open questions, edge cases left unsolved, anything else the reviewer should
+know — but never that the checks pass, which they report themselves. --->

@@ -118,8 +118,6 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   joinWithCode(joinCode: string): Promise<void> {
-    // return the joincode if it is in the teamData.ts file
-
     const i = teamData.findIndex(e => e.join_code === joinCode);
 
     if (i > -1) {

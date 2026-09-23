@@ -23,10 +23,9 @@ describe("readPersistedLog", () => {
     localStorage.clear();
   });
 
-  // The bug this replaced (#322) uploaded `{}` for every step, because the
-  // reducer's context carries boardgame.io's log *plugin* rather than the
-  // entries. These are the entries — the same ones the live round's admin dump
-  // reads from the server's storage.
+  // The entries, not the reducer context's log *plugin* that sendData.test.ts
+  // describes (#322) — the same ones the live round's admin dump reads from the
+  // server's storage.
   test("reads the entries boardgame.io persisted for the match", () => {
     persist([["default", [entry(0), entry(1)]]]);
 

@@ -64,10 +64,9 @@ describe("the socket transport", () => {
     expect(await synced).toBe(KNOWN_MATCH);
   });
 
-  // The closing check used to sit behind the returns that decide whether the
-  // *bot* owes an answer, and a clock poll is exactly a packet the bot has
-  // nothing to say to while being the move that ends a match whose time has run
-  // out. So the matches it was meant to catch were the ones it skipped.
+  // The bug: gating the closing check on whether the bot owes an answer skips
+  // the clock poll — the one packet the bot has nothing to say to, and the move
+  // that ends a match whose time has run out.
   it("closes a finished match on a packet the bot does not answer", async () => {
     const closed: string[] = [];
     let onClosed: () => void = () => undefined;

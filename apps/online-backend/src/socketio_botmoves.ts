@@ -1,10 +1,7 @@
-// Demultiplexes to real transport or bots
-
-// The types below describe the socket.io this workspace declares. That used to
-// be a different copy from the one boardgame.io actually serves matches with,
-// which reaches it through `koa-socket-2`; the root package.json's `overrides`
-// block is what makes them one install, and socketio_transport.test.ts fails if
-// they split again (#461).
+// The types below describe the socket.io this workspace declares. It must stay
+// the same copy boardgame.io serves matches with through `koa-socket-2`: the
+// root package.json's `overrides` block is what makes them one install, and
+// socketio_transport.test.ts fails if they split (#461).
 import type IOTypes from 'socket.io';
 import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
 import type { Bot } from "boardgame.io/ai";
@@ -211,7 +208,6 @@ export class SocketIOButBotMoves extends SocketIO {
               return;
             }
             if (state.ctx.gameover) {
-              // Game is over, no need to react
               return;
             }
             const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
@@ -259,7 +255,8 @@ export class SocketIOButBotMoves extends SocketIO {
           // Every packet, not only the ones the bot answers: a move arriving
           // past the deadline ends the match through the game's own turn guard,
           // and the clock poll the countdown sends as time runs out is such a
-          // move — so gating this left exactly those matches open.
+          // move. Gating this on the bot having work to do leaves those
+          // matches open.
           await matchQueue.add(async () => {
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,

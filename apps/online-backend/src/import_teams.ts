@@ -1,8 +1,6 @@
-// The team import, as its own process. It was a mode of the server
-// (`server.js import <file>`) until #190, which meant a TSV load first had to
-// satisfy the bot password and the admin password — neither of which it reads
-// — and pulled in the games, the bots and the socket transport to do it.
-// `import_teams.test.ts` keeps it separate.
+// The team import, as its own process rather than a mode of the server: a TSV
+// load reads neither the bot password nor the admin password, and needs none of
+// the games, bots or socket transport. `import_teams.test.ts` keeps it separate.
 import './env';
 import { argv, exit } from 'process';
 import { getDb } from './server/db';

@@ -10,7 +10,6 @@ import { handleGameReport } from './game-report';
 // second copy of the module, one the app's setLocalStorageNamespace never set.
 import { bgioStoragePrefix } from 'common-frontend';
 import type { ReactNode } from 'react';
-//import { Debug } from 'boardgame.io/debug';
 
 export function ClientRelayWithBot(
   game: typeof GameRelay,
@@ -30,6 +29,5 @@ export function ClientRelayWithBot(
       }
     ),
     numPlayers: 2,
-    //debug: { impl: Debug },
   });
 }

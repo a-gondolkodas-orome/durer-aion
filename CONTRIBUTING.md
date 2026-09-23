@@ -39,11 +39,7 @@ npm run check
 ```
 
 That is the six CI gates that need no docker, cheapest first, in two or three
-minutes. CI runs a seventh, `npm run stack:build`, and the competition round
-itself is walked by hand — [`README.md` § *Checking it
-works*](README.md#checking-it-works) is that checklist. It opens with a table of
-how much of it a given change actually needs, and says which parts a unit test
-already pins.
+minutes. CI runs a seventh, `npm run stack:build`.
 
 Working only in `apps/strategy-practice`? `npm run check` from that directory is
 the same idea scoped to it, in about seventy seconds — the loop to iterate on.
@@ -96,7 +92,7 @@ request one by hand — otherwise nobody is notified.
   games are laid out.
 - [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the
   authority on everything under that directory, testing and PR scope included.
-- [`README.md`](README.md) — running the round, the regression checklist,
+- [`README.md`](README.md) — running the round,
   dependency policy, deployment.
 
 ## Traps that cost the most time
