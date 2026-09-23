@@ -6,7 +6,7 @@ import { TeamsRepository } from './db';
 import { InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
-import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+import { closeMatch, getNewGame, checkStaleMatch, extensionTarget, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
@@ -111,35 +111,21 @@ export function configureTeamsRouter(
     new_state.G.end = newEndDate.toISOString();
     new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
-    if (team.strategyMatch.state === "IN PROGRESS") {
-      if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        strategyMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
+    const target = extensionTarget(team, matchID, state.ctx.gameover);
+    if ("refusal" in target) {
+      ctx.throw(501, target.refusal);
+      return;
     }
-    else if (team.relayMatch.state === "IN PROGRESS") {
-      if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        relayMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else {
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
-    }
+    await team.update({
+      [target.column]: {
+        state: "IN PROGRESS",
+        matchID: matchID,
+        startAt: new Date(new_state.G.start),
+        endAt: newEndDate,
+      },
+      // A reopened match's team may have gone home since.
+      pageState: target.column === "relayMatch" ? "RELAY" : "STRATEGY",
+    })
 
     await ctx.db.setState(matchID, new_state);
 

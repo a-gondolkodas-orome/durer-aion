@@ -163,6 +163,32 @@ export async function checkStaleMatch(
   return { isStale: false };
 }
 
+/** Which of the team's matches an organiser's time extension for `matchID`
+ *  goes to, or why it is refused.
+ *
+ *  A `FINISHED` row is still extended: the stale sweep (`stale_sweep.ts`)
+ *  closes the team's row within about a minute of the end, but not the game,
+ *  which only a move ends — and the team that loses its time to a dead laptop
+ *  is the one that phones for more after the buzzer. What the game itself has
+ *  ended stays ended, and so does a match the team has left for its other one.
+ */
+export function extensionTarget(
+  team: TeamModel,
+  matchID: string,
+  gameover: unknown,
+): { column: "relayMatch" | "strategyMatch" } | { refusal: string } {
+  const column = (["relayMatch", "strategyMatch"] as const)
+    .find(key => team[key].state !== "NOT STARTED" && team[key].matchID === matchID);
+  if (!column)
+    return { refusal: `No match of the team is ${matchID}. (Probably you are using an old matchID.)` };
+  if (gameover !== undefined)
+    return { refusal: `Match ${matchID} has ended in the game itself; it cannot be extended.` };
+  const other = column === "relayMatch" ? "strategyMatch" : "relayMatch";
+  if (team[other].state === "IN PROGRESS")
+    return { refusal: `The team is playing its other match (${team[other].matchID}); ${matchID} cannot be reopened.` };
+  return { column };
+}
+
 function inferenceGameType(gameName: string) {
   let key: keyof typeof relayNames | keyof typeof strategyNames;
   for (key in relayNames) {
