@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process'
 
-// https://vite.dev/config/
 const backend = 'http://localhost:8000';
 
 export default defineConfig(() => {

@@ -46,7 +46,6 @@ export function MyOnlineClient<T_SpecificGameState>(
     board: boardWrapper(board, description),
     multiplayer: serverUrl === undefined ? SocketIO() :
       SocketIO({ server: serverUrl }),
-    //debug: { impl: Debug },
   });
 }
 
@@ -61,6 +60,5 @@ export function MyOnlineRelayClient(
     board: board,
     multiplayer: serverUrl === undefined ? SocketIO() :
       SocketIO({ server: serverUrl }),
-    //debug: { impl: Debug },
   });
 }

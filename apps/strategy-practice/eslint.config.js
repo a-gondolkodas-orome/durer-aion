@@ -176,8 +176,8 @@ export default defineConfig(
     // (AGENTS.md § Files in a game folder). Beyond each game's gameplay.ts that
     // is start-boards.ts, the curated data a competition hands out, and the .ts
     // half of games/shared/ — its *-svg.tsx siblings are deliberately unmatched.
-    // The engine's own React-free half is no longer here to list; it is guarded
-    // by the root config, which is what lints packages/strategy-engine.
+    // The engine's own React-free half is guarded by the root config, which is
+    // what lints packages/strategy-engine.
     files: [
       'src/components/games/**/gameplay.ts',
       'src/components/games/**/bot-strategy.ts',

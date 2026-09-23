@@ -5,11 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { configDefaults, defineConfig } from 'vitest/config';
 
 // The suites run against the packages' TypeScript sources, with no build in
-// front of them — the CI test job installs and runs vitest, nothing more. That
-// used to happen by accident: resolution fell through each package's unbuilt
-// `main` to the source barrel next to it. Their exports maps close that path
-// now, so say it outright, which also stops a stale `dist` on a developer's
-// machine from being what the suites test.
+// front of them — the CI test job installs and runs vitest, nothing more. The
+// packages' exports maps do not resolve to their sources, so name them here
+// outright, which also stops a stale `dist` on a developer's machine from being
+// what the suites test.
 const source = (file: string) =>
   fileURLToPath(new URL(`packages/${file}`, import.meta.url));
 

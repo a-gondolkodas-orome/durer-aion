@@ -53,7 +53,6 @@ export default defineConfig(() => {
     },
     build: {
       rollupOptions: {
-        // Don’t bundle test files
         output: {
           manualChunks(id) {
             // Split game description files into a separate chunk

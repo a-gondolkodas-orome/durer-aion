@@ -24,10 +24,9 @@
   "containerEnv": {
     "DEV_SERVER_HOST": "true",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
-    // `npm run lint` is one eslint process per workspace now, each of which finishes
-    // in under 1024 MB — it was one `eslint .` over the whole repository, needing
-    // 3072 MB, which is what a container's default heap could not give it. This
-    // matches what CI caps the lint step at, so the two agree on what "enough" is;
+    // `npm run lint` is one eslint process per workspace, each of which finishes in
+    // under 1024 MB. This matches what CI caps the lint step at, so the two agree
+    // on what "enough" is;
     // README.md § What's in it has the measurements and what to do if lint is
     // `Killed` outright instead. It is a ceiling, not a reservation.
     "NODE_OPTIONS": "--max-old-space-size=2048"
