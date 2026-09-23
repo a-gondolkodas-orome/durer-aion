@@ -4,7 +4,7 @@
   "private": true,
   "//": [
     "deploy publishes the testers' dry run to the year's PRIVATE repo's Pages, and .github/workflows/dry-run-deploy.yml runs the same script on demand from inside that repo. pages-deploy.yml is guarded to the public repository, so nothing replaces this there - see DEPLOYMENT.md and README.md section Competition secrecy. Removed as dead twice now; it is neither.",
-    "overrides: koa-socket-2 asks for socket.io ^3, and its copy - not the one apps/online-backend declares - is the one that serves every match. A range, not a pin: the exact version stays in the workspace that declares it, and update:minors does not walk this block. CLAUDE.md, under the boardgame.io note, says what this changed."
+    "overrides: koa-socket-2 asks for socket.io ^3, and its copy - not the one apps/online-backend declares - is the one that serves every match. A range, not a pin: the exact version stays in the workspace that declares it, and update:minors does not walk this block. scripts/socketio-single-copy.test.mjs says why the override is needed."
   ],
   "scripts": {
     "deploy": "node scripts/deploy-dry-run.mjs",

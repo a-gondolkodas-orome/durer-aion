@@ -232,8 +232,9 @@ no extra setup and does not collide with the 5173 the other frontends share.
 `npm ci`, `npm run lint`, `npm run build`, `npm run typecheck` and `npm test` at
 the root cover it — the lint as one more workspace turbo runs eslint in, under its
 own config, the tests through its own vite config, which the root
-`vitest.config.mts` lists as a second project; [`CLAUDE.md`](CLAUDE.md) § Project
-Structure has the why. Its suite alone is
+`vitest.config.mts` lists as a second project;
+[`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) § *How
+this app sits in the monorepo* has the why. Its suite alone is
 `npm test --workspace=strategy-practice`, from anywhere.
 
 **Do not run `npm ci` from `apps/strategy-practice`.** There is one lockfile, at
@@ -388,10 +389,6 @@ agreeing.
 - **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
   Node major the repo actually runs (`.nvmrc`), so they move when Node does.
 
-Both halves of the boardgame.io situation — why its transitive advisories cannot
-be fixed from here and why `npm audit fix --force` must never be run — are in
-[`CLAUDE.md`](CLAUDE.md).
-
 # Configuration you may want to change
 
 `npm run setup` creates each of these from its committed `*.sample` twin, and
@@ -508,9 +505,40 @@ work until someone updates it.
 
 # Creating a new game
 
-A game for the live competition is one folder under
-`packages/game/src/games/strategy/`; [`CLAUDE.md`](CLAUDE.md) § *Creating a New
-Game* has the files it holds, where to register it, and the rule that the served
-bundle must not carry the bot. A game for the strategy practice site is a
-different shape entirely: see
-[`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game).
+This is a game for the **live competition** (boardgame.io). A game for the
+strategy practice site is a different shape entirely — see
+[`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game),
+and the `new-game` skill under that directory is the route.
+[`CLAUDE.md`](CLAUDE.md) § *Creating a New Game* holds the rules that keep it
+safe: why the bot must not reach the served bundle, and the by-hand check for
+that before a competition.
+
+1. One self-contained folder in `packages/game/src/games/strategy/<game-name>/`
+   — `stones/` and `19ocd/` are the live examples:
+
+   - `game.ts` — the boardgame.io game definition
+   - `strategy.ts` — the server bot, plus any lookup tables it imports
+   - `board.tsx` — the React component for the game board
+   - `main.tsx` — the game description shown to players
+
+   No `index.ts` barrel: the three files are registered separately, below, and a
+   barrel re-exporting the bot next to the board would undo that. More files are
+   fine — `stones/` keeps its `moveMap.ts` beside the bot — but what the bot and
+   the board *both* need goes in `game.ts`. A helper beside them is a file the
+   bot entry and the client entry have in common, which the walk below reads as
+   the bot reaching the served bundle, and fails.
+
+2. Register it in the three registries under
+   `packages/game/src/games/strategy/`, one per package entry:
+   `strategy-games.ts` (the game definition and its name — the `game` entry),
+   `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
+   `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the live
+   client `game` and `game/client`; the offline dry run all three.
+
+The game's shape — `setup`, `moves`, `turn`, and the wrapper's own
+`possibleMoves` and `startingPosition` — is typed in
+`packages/game/src/common/types.ts`, and `GameMixin.startingPosition` there says
+which of the opening position's two homes to use. A move takes as many arguments
+as you give it: `moves.changeCoins(K, L)` for a "pick two values, then commit"
+turn, driven by form inputs rather than a click on the board. Both live games are
+single-click and single-argument; nothing in the wrapper requires that.

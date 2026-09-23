@@ -23,6 +23,16 @@ GitHub Pages.
 lodash is already used extensively; feel free to reach for it where it helps
 readability.
 
+## How this app sits in the monorepo
+
+It is a workspace of the `durer-aion` monorepo with its own `eslint.config.js`
+and vitest config, which root `npm run lint` and `npm test` run next to the
+root's, each under its own setup. The ESLint difference is the rule set
+(`@eslint-react`, react-hooks, no trailing comma, `max-len` 120), not the
+toolchain: eslint, typescript, vitest and vite are the root's pins, hoisted. It
+came in as a subtree merge from `durer-jatekok` with that dialect already set,
+and reconciling the two would be a rewrite, so both configs stay.
+
 ## Architecture
 
 Every game lives under `src/components/games/`, one folder per game, registered
