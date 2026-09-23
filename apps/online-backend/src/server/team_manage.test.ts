@@ -110,6 +110,17 @@ describe("checkStaleMatch", () => {
   it("has nothing to close for a team that has not started anything", async () => {
     expect(await checkStaleMatch(team({}))).toStrictEqual({ isStale: false });
   });
+
+  it("judges against the moment it is given, not the clock", async () => {
+    const endAt = new Date(Date.now() - 1000);
+    const expired = team({ relayMatch: inProgressUntil(endAt) });
+
+    expect(await checkStaleMatch(expired, new Date(endAt.getTime() - 1))).toStrictEqual({ isStale: false });
+    expect(await checkStaleMatch(expired, new Date(endAt.getTime() + 1))).toStrictEqual({
+      isStale: true,
+      gameState: "relayMatch",
+    });
+  });
 });
 
 // boardgame.io serves listed matches, metadata and all, from an
