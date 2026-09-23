@@ -3,7 +3,7 @@ import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
 import { AnyBgioGame } from "game";
 import { Server } from "boardgame.io";
-import { allowedToStart, checkStaleMatch, createGame } from "./team_manage";
+import { allowedToStart, checkStaleMatch, createGame, extensionTarget } from "./team_manage";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -109,6 +109,39 @@ describe("checkStaleMatch", () => {
 
   it("has nothing to close for a team that has not started anything", async () => {
     expect(await checkStaleMatch(team({}))).toStrictEqual({ isStale: false });
+  });
+});
+
+// A team back after its time ran out has its row closed on arrival, and the
+// team whose laptop died is the one that asks for more time after that.
+describe("extensionTarget", () => {
+  it("reopens a match whose row is closed but whose game has not ended", () => {
+    expect(extensionTarget(team({ relayMatch: finished }), "match-1", undefined))
+      .toStrictEqual({ column: "relayMatch" });
+  });
+
+  it("extends the running match", () => {
+    const playing = team({ strategyMatch: inProgressUntil(new Date("2099-01-01T00:00:00Z")) });
+
+    expect(extensionTarget(playing, "match-1", undefined)).toStrictEqual({ column: "strategyMatch" });
+  });
+
+  it("refuses a match the game itself has ended", () => {
+    expect(extensionTarget(team({ relayMatch: finished }), "match-1", { winner: "0" }))
+      .toHaveProperty("refusal");
+  });
+
+  it("refuses to reopen a match once the team is playing its other one", () => {
+    const moved = team({
+      relayMatch: finished,
+      strategyMatch: { ...inProgressUntil(new Date("2099-01-01T00:00:00Z")), matchID: "match-2" } as MatchStatus,
+    });
+
+    expect(extensionTarget(moved, "match-1", undefined)).toHaveProperty("refusal");
+  });
+
+  it("refuses a match that is not the team's", () => {
+    expect(extensionTarget(team({ relayMatch: finished }), "match-0", undefined)).toHaveProperty("refusal");
   });
 });
 
