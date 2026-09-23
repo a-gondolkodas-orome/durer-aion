@@ -139,26 +139,24 @@ export async function allowedToStart(
   return true;
 }
 
-/** Names the team's running match whose time ran out before `endedBefore` —
- *  by default, right now. `stale_sweep.ts` says why it asks about earlier. */
 export async function checkStaleMatch(
-  team: TeamModel,
-  endedBefore = new Date(),
+  team: TeamModel
 ): Promise<
   | { isStale: false }
   | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
 > {
+  const now = new Date(Date());
   if (team.relayMatch.state === "IN PROGRESS") {
     if (typeof team.relayMatch.endAt === "string")
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    if (team.relayMatch.endAt.getTime() < endedBefore.getTime())
+    if (team.relayMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: "relayMatch" };
   }
 
   if (team.strategyMatch.state === "IN PROGRESS") {
     if (typeof team.strategyMatch.endAt === "string")
       team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
-    if (team.strategyMatch.endAt.getTime() < endedBefore.getTime())
+    if (team.strategyMatch.endAt.getTime() < now.getTime())
       return { isStale: true, gameState: "strategyMatch" };
   }
 
