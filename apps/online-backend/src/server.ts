@@ -111,8 +111,8 @@ server.app.on("error", (err, ctx) => {
   });
 });
 
-// For the matches nobody is left to finish: a team that closed the tab at the
-// buzzer, or whose laptop died. See server/stale_sweep.ts.
+// For the matches nobody is left to finish: a team that closes the tab at the
+// buzzer, or whose laptop dies. See server/stale_sweep.ts.
 startStaleSweep(teams, db, ({ closed, failed }) => {
   if (closed.length > 0) console.log(`Closed ${closed.length} match(es) whose time had run out: ${closed.join(", ")}`);
   for (const { matchID, message } of failed) {

@@ -50,8 +50,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The regression: a match was only ever closed by the team's own browser, so a
-// team that closed the tab at the buzzer kept `IN PROGRESS` and no score.
+// The bug: with every close path needing the team's own browser, a team that
+// closes the tab at the buzzer sits on `IN PROGRESS` with no score.
 it("closes both kinds of stale match and leaves a running one alone", async () => {
   const alpha = team("alpha", { relayMatch: running("relay-alpha", RAN_OUT) });
   const bravo = team("bravo", { strategyMatch: running("strategy-bravo", RAN_OUT) });

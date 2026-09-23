@@ -14,8 +14,8 @@ export const STALE_SWEEP_INTERVAL_MS = 60 * 1000;
  *
  *  Every other close path needs the team's browser — the socket handler needs a
  *  packet, `/team/me`'s stale check needs the page loaded again — so a team that
- *  closed the tab at the buzzer kept `IN PROGRESS` and no score. The rule is
- *  unchanged: `checkStaleMatch` decides, `closeMatch` writes the score.
+ *  closes the tab at the buzzer would otherwise sit on `IN PROGRESS` with no
+ *  score. `checkStaleMatch` decides and `closeMatch` writes it, as elsewhere.
  */
 export async function sweepStaleMatches(
   teams: TeamsRepository,
