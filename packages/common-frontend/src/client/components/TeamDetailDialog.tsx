@@ -30,13 +30,11 @@ export function TeamDetailDialog(props: {
   const [teamState, setTeamState] = useState(props.data);
   const [removing, setRemoving] = useState(false);
 
-  let sum = 0;
-  switch (props.data.relayMatch.state) {
-    case "FINISHED": { sum += props.data.relayMatch.score}
-  }
-  switch (props.data.strategyMatch.state) {
-    case "FINISHED": { sum += props.data.strategyMatch.score}
-  }
+  // The games' own points, not the FINISHED scores stored on the team, which
+  // are copies that can lag behind them (FinishedMatchStatus says why).
+  const relayPoints = useMatchPoints(teamState.relayMatch);
+  const strategyPoints = useMatchPoints(teamState.strategyMatch);
+  const sum = relayPoints === undefined || strategyPoints === undefined ? undefined : relayPoints + strategyPoints;
 
   const removeTeam = async (teamId: string) => {
     setRemoving(true);
@@ -81,7 +79,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását`,
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja, a régi játék azonosítója az Egyéb mezőbe kerül.`,
               confirm: async () => {
                 try {
                   const changed = await resetRelay(adminTeamId(teamState));
@@ -103,7 +101,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását`,
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja, a régi játék azonosítója az Egyéb mezőbe kerül.`,
               confirm: async () => {
                 try {
                   const changed = await resetStrategy(adminTeamId(teamState));
@@ -118,7 +116,7 @@ export function TeamDetailDialog(props: {
           }}
           >reset
       </Button>}
-      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum} pont</Stack>
+      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? '…'} pont</Stack>
     </Stack>
   )
 }
@@ -193,6 +191,9 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           </Stack>
         )}/>
       </Form>
+      <Stack sx={{ fontSize: '0.875rem', marginBottom: '8px' }}>
+        Időt csak folyamatban lévő játékhoz lehet adni: a befejezett játékot nem lehet újraindítani, csak alaphelyzetbe állítani.
+      </Stack>
       <Button
       sx={{
         width: '200px',
@@ -230,7 +231,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           end: {formatTime(finishedState.endAt)}<br/>
 
           <Stack><MatchStatusDataField matchId={finishedState.matchID} isRelay={props.isRelay}/></Stack>
-          teamStateScore: {finishedState.score}<br/>
+          <StoredScore matchId={finishedState.matchID} score={finishedState.score}/>
           <Button
           sx={{
             width: '200px',
@@ -268,10 +269,31 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   }
 }
 
-function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
+/// One SWR key per match, so every field of the dialog reading the same match
+/// shares one request. `null` fetches nothing.
+function useMatchStateData(matchId: string | null) {
   const matchState = useMatchState();
+  return useSWR(matchId === null ? null : [`users/${matchId}`, matchId], ([, id]) => matchState(id));
+}
+
+/// The match's points, 0 before it starts, `undefined` while loading.
+function useMatchPoints(status: MatchStatus): number | undefined {
+  const { data } = useMatchStateData(status.state === "NOT STARTED" ? null : status.matchID);
+  return status.state === "NOT STARTED" ? 0 : data?.G.points;
+}
+
+function StoredScore(props: { matchId: string, score: number }) {
+  const { data } = useMatchStateData(props.matchId);
+  return (<>
+    <Stack>Csapatnál tárolt pontszám: {props.score} (a lezáráskor készült másolat; az eredmény a fenti pontszám)</Stack>
+    {data && data.G.points !== props.score &&
+      <Stack sx={{ color: 'red' }}>Eltér a játék pontszámától ({data.G.points}): a játék a lezárás után még kapott pontot.</Stack>}
+  </>);
+}
+
+function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
   const [msRemaining, setMsRemaining] = useState<number>(10000);
-  const { data } = useSWR([`users/${props.matchId}`, props.matchId], ([, matchId]) => matchState(matchId))
+  const { data } = useMatchStateData(props.matchId);
   if (!data) {
     return null;
   }

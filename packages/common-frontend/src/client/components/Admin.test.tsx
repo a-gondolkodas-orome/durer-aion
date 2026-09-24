@@ -7,9 +7,11 @@ import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
-import { DeletedTeamDto, TeamModelDto } from '../dto/TeamStateDto';
+import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
+// The team dialog's countdown translates its warning.
+import '../../common/i18n';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -160,6 +162,27 @@ test('a failed bulk delete is reported, and the list kept', async () => {
   expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
   expect(screen.getByText('Alpha')).toBeInTheDocument();
   expect(screen.getByText('Bravo')).toBeInTheDocument();
+});
+
+// The score a FINISHED match stores on the team is a copy taken when the match
+// closed, and the game can still score after that; the dialog's total is the
+// games' own points, and it says where the copy fell behind.
+test('the team dialog totals the games\' points, and flags a stale stored score', async () => {
+  const finished: TeamModelDto = {
+    ...alpha,
+    relayMatch: { state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 },
+  };
+  vi.spyOn(repo, 'getAll').mockResolvedValue([finished]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
+    G: { points: 7, end: LATER } as MatchStateDto['G'],
+    ctx: {} as MatchStateDto['ctx'],
+    deltalog: [],
+  });
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('Összesen: 7 pont')).toBeInTheDocument();
+  expect(screen.getByText(/^Eltér a játék pontszámától \(7\)/)).toBeInTheDocument();
+  expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
 const openDeletedTab = async () => {

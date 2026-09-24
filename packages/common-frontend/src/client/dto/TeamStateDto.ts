@@ -69,6 +69,9 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
+/// The match states as the server sends them. What each one means, and why a
+/// FINISHED `score` is not the result, is on the same types in the `schemas`
+/// package.
 export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;

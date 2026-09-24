@@ -143,6 +143,7 @@ Elhelyeztünk
 elhelyezünk
 elhelyezve
 élhossznyit
+elindíthatja
 elindítva
 elindulni
 elindult
@@ -307,6 +308,7 @@ huszárjait
 huszárok
 hússzorosánál
 húzhatunk
+indíthatja
 indulása
 írhattunk
 írhatunk
@@ -869,6 +871,7 @@ tulajdonsággal
 tulajdonságot
 tükrözéssel
 újraértékeljük
+újraindítani
 Újraosztom
 úszhatsz
 Ügyesné
