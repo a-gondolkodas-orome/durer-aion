@@ -10,11 +10,18 @@ import { ClientRepoProvider, MockClientRepository } from '../api-repository-inte
 import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
-// The team dialog's countdown translates its warning.
-import '../../common/i18n';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
+}));
+
+// Without an i18next instance react-i18next warns on the console, which the
+// setup file fails the test for; this stand-in also keeps the interpolated
+// values visible, which the key alone would drop.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, values?: object) => values === undefined ? key : `${key} ${JSON.stringify(values)}`,
+  }),
 }));
 
 // The grid measures its container and jsdom lays nothing out, so the real one
@@ -179,8 +186,8 @@ test('the team dialog totals the games\' points, not the lower scores stored whe
   });
   renderAdmin(alpha.teamId);
 
-  expect(await screen.findByText('Összesen: 7 pont')).toBeInTheDocument();
-  expect(screen.getByText(/^Eltér a játék pontszámától \(7\)/)).toBeInTheDocument();
+  expect(await screen.findByText('admin.total {"points":7}')).toBeInTheDocument();
+  expect(screen.getByText('admin.storedScoreMismatch {"points":7}')).toBeInTheDocument();
   expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
