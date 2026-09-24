@@ -118,6 +118,8 @@ for lockfile in package-lock.json apps/*/package-lock.json; do
   project=$(dirname "$lockfile")
   if ! (cd "$project" && npm ls --depth=0 > /dev/null 2>&1); then
     echo "session-start: installing $project"
-    (cd "$project" && npm ci)
+    # The audit footer lands in the agent's context, and it recommends
+    # `npm audit fix --force`, which CLAUDE.md forbids.
+    (cd "$project" && npm ci --no-audit --no-fund)
   fi
 done
