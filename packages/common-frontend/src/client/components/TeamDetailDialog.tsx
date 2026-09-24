@@ -15,6 +15,7 @@ import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTranslation } from 'react-i18next';
 
 /// `onRemoved` fires once the server has dropped the team: the list this dialog
 /// was opened from is stale from that moment, and the dialog cannot refresh it.
@@ -29,6 +30,7 @@ export function TeamDetailDialog(props: {
   const { enqueueSnackbar } = useSnackbar();
   const [teamState, setTeamState] = useState(props.data);
   const [removing, setRemoving] = useState(false);
+  const { t } = useTranslation();
 
   // The games' own points, not the FINISHED scores stored on the team, which
   // are copies that can lag behind them (FinishedMatchStatus says why).
@@ -79,7 +81,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja, a régi játék azonosítója az Egyéb mezőbe kerül.`,
+              text: t('admin.resetRelayConfirm', { teamName: teamState.teamName }),
               confirm: async () => {
                 try {
                   const changed = await resetRelay(adminTeamId(teamState));
@@ -101,7 +103,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja, a régi játék azonosítója az Egyéb mezőbe kerül.`,
+              text: t('admin.resetStrategyConfirm', { teamName: teamState.teamName }),
               confirm: async () => {
                 try {
                   const changed = await resetStrategy(adminTeamId(teamState));
@@ -116,7 +118,7 @@ export function TeamDetailDialog(props: {
           }}
           >reset
       </Button>}
-      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? '…'} pont</Stack>
+      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>{t('admin.total', { points: sum ?? '…' })}</Stack>
     </Stack>
   )
 }
@@ -127,6 +129,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   const { enqueueSnackbar } = useSnackbar();
   const getLogs = useGetLogs();
   const [matchLogs, setMatchLogs] = useState<unknown | null>(null);
+  const { t } = useTranslation();
 
   switch (props.data.state) {
     case "IN PROGRESS": {
@@ -192,7 +195,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
         )}/>
       </Form>
       <Stack sx={{ fontSize: '0.875rem', marginBottom: '8px' }}>
-        Időt csak folyamatban lévő játékhoz lehet adni: a befejezett játékot nem lehet újraindítani, csak alaphelyzetbe állítani.
+        {t('admin.addTimeNote')}
       </Stack>
       <Button
       sx={{
@@ -284,10 +287,11 @@ function useMatchPoints(status: MatchStatus): number | undefined {
 
 function StoredScore(props: { matchId: string, score: number }) {
   const { data } = useMatchStateData(props.matchId);
+  const { t } = useTranslation();
   return (<>
-    <Stack>Csapatnál tárolt pontszám: {props.score} (a lezáráskor készült másolat; az eredmény a fenti pontszám)</Stack>
+    <Stack>{t('admin.storedScore', { score: props.score })}</Stack>
     {data && data.G.points !== props.score &&
-      <Stack sx={{ color: 'red' }}>Eltér a játék pontszámától ({data.G.points}): a játék a lezárás után még kapott pontot.</Stack>}
+      <Stack sx={{ color: 'red' }}>{t('admin.storedScoreMismatch', { points: data.G.points })}</Stack>}
   </>);
 }
 

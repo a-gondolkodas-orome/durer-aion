@@ -3,6 +3,7 @@ import { useAddMinutes, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -26,16 +27,13 @@ const TeamsToolbar = csvToolbar('durer-csapatok');
 // a team id. Issue #135 is the rest of the page's layout.
 type AdminTab = 'teams' | 'deleted';
 
-/// What the match states mean to an organiser; FinishedMatchStatus in the
-/// schemas package is the full story.
-const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, ekkor lehet időt hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma a vége után 10 másodpercig még nőhet; a hivatalos eredmény a játék pontszáma, nem a csapatnál tárolt másolat.';
-
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
+  const { t } = useTranslation();
   const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
@@ -138,7 +136,7 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'pageState',
               headerName: 'Állapot',
-              description: 'Melyik oldalt látja a csapat. DISCLAIMER: még nem fogadta el a szabályokat; HOME: főoldal; RELAY / STRATEGY: az adott játék oldala, a játék vége után is, amíg vissza nem lép.',
+              description: t('admin.pageStateDescription'),
               width: 150,
               editable: false,
             },
@@ -151,14 +149,14 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'relayMatchState',
               headerName: 'Relay',
-              description: MATCH_STATE_DESCRIPTION,
+              description: t('admin.matchStateDescription'),
               width: 120,
               editable: false,
             },
             {
               field: 'strategyMatchState',
               headerName: 'Strategy',
-              description: MATCH_STATE_DESCRIPTION,
+              description: t('admin.matchStateDescription'),
               width: 120,
               editable: false,
             },
