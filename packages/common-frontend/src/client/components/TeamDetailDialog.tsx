@@ -279,10 +279,15 @@ function useMatchStateData(matchId: string | null) {
   return useSWR(matchId === null ? null : [`users/${matchId}`, matchId], ([, id]) => matchState(id));
 }
 
-/// The match's points, 0 before it starts, `undefined` while loading.
+/// What the match adds to the total: its game's points once it is FINISHED, 0
+/// before that, so a mid-round total never reads as final. When the match
+/// state cannot be fetched, the score stored at close stands in for it.
+/// `undefined` while loading.
 function useMatchPoints(status: MatchStatus): number | undefined {
-  const { data } = useMatchStateData(status.state === "NOT STARTED" ? null : status.matchID);
-  return status.state === "NOT STARTED" ? 0 : data?.G.points;
+  const { data, error } = useMatchStateData(status.state === "FINISHED" ? status.matchID : null);
+  if (status.state !== "FINISHED")
+    return 0;
+  return data?.G.points ?? (error ? status.score : undefined);
 }
 
 function StoredScore(props: { matchId: string, score: number }) {

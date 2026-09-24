@@ -191,6 +191,36 @@ test('the team dialog totals the games\' points, not the lower scores stored whe
   expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
+test('the team dialog leaves a match in progress out of the total', async () => {
+  const playing: TeamModelDto = {
+    ...alpha,
+    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
+  };
+  vi.spyOn(repo, 'getAll').mockResolvedValue([playing]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
+    G: { points: 4, end: LATER } as MatchStateDto['G'],
+    ctx: {} as MatchStateDto['ctx'],
+    deltalog: [],
+  });
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
+  expect(screen.getByText('admin.total {"points":0}')).toBeInTheDocument();
+});
+
+test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
+  const storedScore = 5;
+  const finished: TeamModelDto = {
+    ...alpha,
+    relayMatch: { state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: storedScore },
+  };
+  vi.spyOn(repo, 'getAll').mockResolvedValue([finished]);
+  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('admin.total {"points":5}')).toBeInTheDocument();
+});
+
 const openDeletedTab = async () => {
   fireEvent.click(await screen.findByText('Törölt csapatok'));
 };
