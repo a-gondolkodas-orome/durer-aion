@@ -1,6 +1,6 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { InProgressMatchStatus } from 'schemas';
+import { FinishedMatchStatus, InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { InferAttributes, InferCreationAttributes, Sequelize, Op, Transaction, UniqueConstraintError, WhereOptions } from 'sequelize';
@@ -82,6 +82,24 @@ export class TeamsRepository {
     return await TeamModel.findOne({ where:
       (searchCondition)
     });
+  }
+  /**
+   * Records the team's match as finished, but only while that match is still
+   * the team's: the match id is checked in the same UPDATE that writes, so an
+   * admin reset landing after the caller read the team is not overwritten.
+   * Whether a row was written.
+   */
+  async finishMatch(
+    teamId: string,
+    type: "relayMatch" | "strategyMatch",
+    matchId: string,
+    status: FinishedMatchStatus,
+  ): Promise<boolean> {
+    const [updated] = await TeamModel.update({ [type]: status }, {
+      // A JSON path on the column: ("strategyMatch"#>>'{matchID}') = matchId.
+      where: { teamId, [type]: { matchID: matchId } } as WhereOptions<TeamModel>,
+    });
+    return updated > 0;
   }
   async insertTeam(
       { teamname, category, email, other, teamId, joinCode, credentials } :

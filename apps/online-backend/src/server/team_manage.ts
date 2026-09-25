@@ -210,7 +210,8 @@ export async function closeMatch(
   console.log(
     `Closing match: ${matchId}, points: ${currentMatch.state.G.points}`
   );
-  await team.update({ [type]: finishState });
+  if (!(await teams.finishMatch(teamId, type, matchId, finishState)))
+    console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
 
 export async function getNewGame(

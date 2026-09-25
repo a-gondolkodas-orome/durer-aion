@@ -75,3 +75,24 @@ describe('TeamsRepository.fetch', () => {
     expect(await fetchQuery([])).not.toContain('WHERE');
   });
 });
+
+describe('TeamsRepository.finishMatch', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('writes only while the team still holds that match', async () => {
+    const update = vi.spyOn(TeamModel, 'update').mockResolvedValue([0]);
+    const finished = { state: 'FINISHED', matchID: 'm-1', startAt: new Date(), endAt: new Date(), score: 3 } as const;
+
+    const written = await new TeamsRepository({ sequelize } as unknown as PostgresStore)
+      .finishMatch('team-1', 'strategyMatch', 'm-1', finished);
+
+    expect(written).toBe(false);
+    const [values, options] = update.mock.calls[0];
+    expect(values).toStrictEqual({ strategyMatch: finished });
+    const query = queryGenerator.selectQuery('Teams', { where: options.where, model: TeamModel }, TeamModel);
+    expect(query).toContain(`"teamId" = 'team-1'`);
+    expect(query).toContain(`."strategyMatch"#>>'{matchID}') = 'm-1'`);
+  });
+});
