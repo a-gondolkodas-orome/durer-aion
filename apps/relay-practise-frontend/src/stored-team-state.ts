@@ -1,15 +1,9 @@
-import { teamStateStorageKey, TeamModelDto, MatchStatus } from "common-frontend";
+import { teamStateStorageKey, TeamModelDto, MatchStatus, isPageState } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
 // not match TeamModelDto — missing, corrupt, or hand-edited — reads as null,
 // the same as no stored state at all.
-
-const PAGE_STATES: readonly string[] = ['DISCLAIMER', 'HOME', 'RELAY', 'STRATEGY'] satisfies TeamModelDto['pageState'][];
-
-function isPageState(value: unknown): value is TeamModelDto['pageState'] {
-  return typeof value === 'string' && PAGE_STATES.includes(value);
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;

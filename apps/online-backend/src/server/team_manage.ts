@@ -6,6 +6,7 @@ import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
   FinishedMatchStatus,
+  GameType,
   InProgressMatchStatus,
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
@@ -120,7 +121,7 @@ export async function endMatchStatus(
 
 export async function allowedToStart(
   team: TeamModel,
-  gameType: "RELAY" | "STRATEGY"
+  gameType: GameType
 ) {
   if (team.pageState === "DISCLAIMER")
     return false;
@@ -218,7 +219,7 @@ export async function getNewGame(
   ctx: Server.AppCtx,
   teams: TeamsRepository,
   games: AnyBgioGame[],
-  gameType: "RELAY" | "STRATEGY",
+  gameType: GameType,
   team: TeamModel
 ) {
   //if middleware setup was better understood, this should be in a separate middleware
