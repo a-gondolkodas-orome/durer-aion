@@ -1,13 +1,9 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, PAGE_STATES, PageState } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, isPageState } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
 // not match TeamModelDto — missing, corrupt, or hand-edited — reads as null,
 // the same as no stored state at all.
-
-function isPageState(value: unknown): value is PageState {
-  return typeof value === 'string' && PAGE_STATES.some(it => it === value);
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;

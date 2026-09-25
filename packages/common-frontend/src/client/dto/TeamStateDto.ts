@@ -2,7 +2,7 @@ import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
 import { PageState } from "schemas";
 
-export { PAGE_STATES, type PageState } from "schemas";
+export { isPageState, type PageState } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with

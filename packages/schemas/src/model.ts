@@ -42,6 +42,10 @@ export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | Finish
 export const PAGE_STATES = ['DISCLAIMER', 'HOME', 'RELAY', 'STRATEGY'] as const;
 export type PageState = typeof PAGE_STATES[number];
 
+export function isPageState(value: unknown): value is PageState {
+  return PAGE_STATES.some(it => it === value);
+}
+
 /// A match's page shares its name with the match's game type, which
 /// `allowedToStart` in the backend relies on when it compares the two.
 export type GameType = Extract<PageState, 'RELAY' | 'STRATEGY'>;
