@@ -68,6 +68,7 @@
     "roundTypeSelector": "Forduló típusa:",
     "categorySelector": "Kategória:",
     "yearOption": "{{num}}.",
+    "yearOptionLegacy": "{{num}}. ({{category}})",
     "roundType": {
       "local": "Helyi",
       "final": "Döntő",
