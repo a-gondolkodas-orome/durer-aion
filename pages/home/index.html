@@ -15,15 +15,18 @@
     -->
     <script>
       // The page shows both languages; only its title and `lang` pick one. A choice
-      // stored by /jatekok/ (same origin, same key) wins, then the browser's
-      // languages — the order browserLanguage in /jatekok/'s language-context.tsx uses.
+      // stored by /jatekok/ (same origin, same key) wins; then Hungarian if the browser
+      // lists it anywhere, else English — browserLanguage in /jatekok/'s
+      // language-context.tsx, which says why.
       (function () {
         var lang = null;
         try { lang = localStorage.getItem('lang'); } catch (e) { /* storage blocked */ }
         var tags = navigator.languages || [navigator.language];
-        for (var i = 0; !lang && i < tags.length; i++) {
-          var base = String(tags[i]).toLowerCase().split('-')[0];
-          if (base === 'hu' || base === 'en') lang = base;
+        if (!lang && tags.length) {
+          lang = 'en';
+          for (var i = 0; i < tags.length; i++) {
+            if (String(tags[i]).toLowerCase().split('-')[0] === 'hu') lang = 'hu';
+          }
         }
         if (lang === 'en') {
           document.documentElement.lang = 'en';

@@ -76,7 +76,7 @@ describe('LanguageProvider', () => {
   });
 
   it('follows the browser language when nothing was chosen, without storing it', () => {
-    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB', 'hu']);
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB', 'de']);
     renderAt();
     expect(language()).toBe('en');
     expect(localStorage.getItem('lang')).toBeNull();
@@ -113,13 +113,17 @@ describe('LanguageProvider', () => {
 });
 
 describe('browserLanguage', () => {
-  it('takes the first language the site speaks, ignoring the region', () => {
-    expect(browserLanguage(['de-DE', 'EN-gb', 'hu'])).toBe('en');
-    expect(browserLanguage(['hu-HU', 'en'])).toBe('hu');
+  it('is Hungarian when the browser lists it anywhere, even after English', () => {
+    expect(browserLanguage(['en-US', 'HU'])).toBe('hu');
+    expect(browserLanguage(['hu-HU'])).toBe('hu');
   });
 
-  it('is null when the browser lists none of them', () => {
-    expect(browserLanguage(['de', 'fr'])).toBeNull();
+  it('is English when the browser lists no Hungarian, whatever it lists instead', () => {
+    expect(browserLanguage(['en-GB'])).toBe('en');
+    expect(browserLanguage(['de-DE', 'fr'])).toBe('en');
+  });
+
+  it('is null for an empty list', () => {
     expect(browserLanguage([])).toBeNull();
   });
 });

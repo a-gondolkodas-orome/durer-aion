@@ -3,15 +3,14 @@ import { useSearchParams } from 'react-router';
 import { LanguageProvider as ProvideLanguage } from 'strategy-engine/react';
 import type { Language } from 'strategy-engine';
 
-// The browser's preference, for a visitor who has not chosen: the first of its
-// languages this site speaks, with any region dropped (`en-GB` is `en`).
+// The browser's preference, for a visitor who has not chosen. Hungarian if the
+// browser lists it anywhere: the audience is overwhelmingly Hungarian, often with
+// an English browser. Otherwise English, which someone reading neither language
+// is likelier to manage. An empty list says nothing, and the caller's default holds.
 // `pages/home/index.html` repeats this, having no build to import it with.
 export const browserLanguage = (languages: readonly string[]): Language | null => {
-  for (const tag of languages) {
-    const base = tag.toLowerCase().split('-')[0];
-    if (base === 'hu' || base === 'en') return base;
-  }
-  return null;
+  if (languages.length === 0) return null;
+  return languages.some(tag => tag.toLowerCase().split('-')[0] === 'hu') ? 'hu' : 'en';
 };
 
 // The stateful half of the language plumbing, and the reason it stays in this
