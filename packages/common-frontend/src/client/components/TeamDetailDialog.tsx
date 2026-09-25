@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useRemoveTeam } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { TeamModelDto, MatchStatus, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
@@ -30,13 +30,13 @@ export function TeamDetailDialog(props: {
   const [teamState, setTeamState] = useState(props.data);
   const [removing, setRemoving] = useState(false);
 
-  let sum = 0;
-  switch (props.data.relayMatch.state) {
-    case "FINISHED": { sum += props.data.relayMatch.score}
-  }
-  switch (props.data.strategyMatch.state) {
-    case "FINISHED": { sum += props.data.strategyMatch.score}
-  }
+  // The games' own points, not the scores stored on the team (see
+  // FinishedMatchStatus in the `schemas` package).
+  const relayPoints = useMatchPoints(teamState.relayMatch);
+  const strategyPoints = useMatchPoints(teamState.strategyMatch);
+  const sum = relayPoints === undefined || strategyPoints === undefined
+    ? undefined
+    : relayPoints + strategyPoints;
 
   const removeTeam = async (teamId: string) => {
     setRemoving(true);
@@ -81,7 +81,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását`,
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
                   const changed = await resetRelay(adminTeamId(teamState));
@@ -103,7 +103,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását`,
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
                   const changed = await resetStrategy(adminTeamId(teamState));
@@ -118,7 +118,7 @@ export function TeamDetailDialog(props: {
           }}
           >reset
       </Button>}
-      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum} pont</Stack>
+      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? "?"} pont</Stack>
     </Stack>
   )
 }
@@ -129,6 +129,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   const { enqueueSnackbar } = useSnackbar();
   const getLogs = useGetLogs();
   const [matchLogs, setMatchLogs] = useState<unknown | null>(null);
+  const { mutate } = useSWRConfig();
 
   switch (props.data.state) {
     case "IN PROGRESS": {
@@ -154,6 +155,8 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             confirm: async () => {
               try {
                 await addMinutes(inProgressState.matchID, values.time);
+                // The dialog's total reads the new `G.end` from here.
+                await mutate(matchStateKey(inProgressState.matchID));
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -230,7 +233,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           end: {formatTime(finishedState.endAt)}<br/>
 
           <Stack><MatchStatusDataField matchId={finishedState.matchID} isRelay={props.isRelay}/></Stack>
-          teamStateScore: {finishedState.score}<br/>
+          <StoredScore matchId={finishedState.matchID} score={finishedState.score}/>
           <Button
           sx={{
             width: '200px',
@@ -268,10 +271,45 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   }
 }
 
-function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
+/// One SWR key per match, so every field of the dialog reading the same match
+/// shares one request.
+function matchStateKey(matchId: string) {
+  return [`users/${matchId}`, matchId];
+}
+
+function useMatchStateData(matchId: string | null) {
   const matchState = useMatchState();
+  return useSWR(matchId === null ? null : matchStateKey(matchId), ([, id]) => matchState(id));
+}
+
+/// A match's share of the total, `undefined` until it is known, so a
+/// mid-round total never reads as final. An IN PROGRESS match past its end
+/// counts: a team that left before the end never closes it. The end is
+/// `G.end`, not the team's `endAt`, which adding minutes does not reload.
+function useMatchPoints(status: MatchStatus): number | undefined {
+  const matchId = status.state === "NOT STARTED" ? null : status.matchID;
+  const { data, error } = useMatchStateData(matchId);
+  if (status.state === "NOT STARTED")
+    return 0;
+  if (data)
+    return status.state === "FINISHED" || new Date(data.G.end).getTime() < Date.now() ? data.G.points : undefined;
+  if (error && status.state === "FINISHED")
+    return status.score;
+  return undefined;
+}
+
+function StoredScore(props: { matchId: string, score: number }) {
+  const { data } = useMatchStateData(props.matchId);
+  return (<>
+    <Stack>Csapatnál tárolt pontszám: {props.score}</Stack>
+    {data && data.G.points !== props.score &&
+      <Stack sx={{ color: 'red' }}>Eltér a játék pontszámától ({data.G.points}), az a hivatalos.</Stack>}
+  </>);
+}
+
+function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
   const [msRemaining, setMsRemaining] = useState<number>(10000);
-  const { data } = useSWR([`users/${props.matchId}`, props.matchId], ([, matchId]) => matchState(matchId))
+  const { data } = useMatchStateData(props.matchId);
   if (!data) {
     return null;
   }

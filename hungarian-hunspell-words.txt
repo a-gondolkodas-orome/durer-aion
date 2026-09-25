@@ -143,6 +143,7 @@ Elhelyeztünk
 elhelyezünk
 elhelyezve
 élhossznyit
+elindíthatja
 elindítva
 elindulni
 elindult
@@ -307,6 +308,7 @@ huszárjait
 huszárok
 hússzorosánál
 húzhatunk
+indíthatja
 indulása
 írhattunk
 írhatunk
