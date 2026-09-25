@@ -1,5 +1,6 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
+import type { MatchStatus } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -69,26 +70,4 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-/// The match states as the server sends them. What each one means, and why a
-/// FINISHED `score` is not the result, is on the same types in the `schemas`
-/// package.
-export interface FinishedMatchStatus {
-  state: 'FINISHED';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-  score: number;
-}
-
-export interface NotStartedMatchStatus {
-  state: 'NOT STARTED';
-}
-
-export interface InProgressMatchStatus {
-  state: 'IN PROGRESS';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-}
-
-export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
+export type { FinishedMatchStatus, InProgressMatchStatus, MatchStatus, NotStartedMatchStatus } from "schemas";
