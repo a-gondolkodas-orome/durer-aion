@@ -101,7 +101,7 @@ server's, naming the game package; a board may use whatever the browser gives it
 
 ## Environment, deployment, secrecy
 
-`npm run setup` seeds the six gitignored `.env` files from their committed
+`npm run setup` seeds the five gitignored `.env` files from their committed
 samples; [`README.md`](README.md) § *Configuration you may want to change* is the
 table of what reads which. The real competition, `verseny.durerinfo.hu`, runs on
 nginx + docker compose (`npm run stack:prod`), not GitHub Pages —

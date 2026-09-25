@@ -404,7 +404,6 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
 | `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
 | `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
-| `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
 Because setup never overwrites, a file you already have goes stale when its
 sample gains a setting — so setup, and each `dev:*` script that runs it first,
