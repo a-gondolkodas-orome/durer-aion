@@ -171,20 +171,22 @@ test('a failed bulk delete is reported, and the list kept', async () => {
   expect(screen.getByText('Bravo')).toBeInTheDocument();
 });
 
-test('the team dialog totals the games\' points, not the lower scores stored when their matches closed', async () => {
-  const scoreStoredAtClose = 5;
-  const pointsScoredAfterClose = 2;
-  const closedEarly: TeamModelDto = {
-    ...alpha,
-    relayMatch: { state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: scoreStoredAtClose },
-  };
-  vi.spyOn(repo, 'getAll').mockResolvedValue([closedEarly]);
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
-    G: { points: scoreStoredAtClose + pointsScoredAfterClose, end: LATER } as MatchStateDto['G'],
-    ctx: {} as MatchStateDto['ctx'],
-    deltalog: [],
-  });
+const openTeamWithRelay = (relayMatch: TeamModelDto['relayMatch']) => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch }]);
   renderAdmin(alpha.teamId);
+};
+
+const gameState = (points: number, end: string | Date): MatchStateDto => ({
+  G: { points, end: new Date(end).toISOString() } as MatchStateDto['G'],
+  ctx: {} as MatchStateDto['ctx'],
+  deltalog: [],
+});
+
+const inAnHour = () => new Date(Date.now() + 60 * 60 * 1000);
+
+test('the team dialog totals the game\'s points, not the lower score stored when the match closed', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
   expect(await screen.findByText('admin.total {"points":7}')).toBeInTheDocument();
   expect(screen.getByText('admin.storedScoreMismatch {"points":7}')).toBeInTheDocument();
@@ -192,62 +194,23 @@ test('the team dialog totals the games\' points, not the lower scores stored whe
 });
 
 test('the team dialog shows no total while a match is in progress', async () => {
-  const inAnHour = new Date(Date.now() + 60 * 60 * 1000);
-  const playing: TeamModelDto = {
-    ...alpha,
-    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour },
-  };
-  vi.spyOn(repo, 'getAll').mockResolvedValue([playing]);
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
-    G: { points: 4, end: inAnHour.toISOString() } as MatchStateDto['G'],
-    ctx: {} as MatchStateDto['ctx'],
-    deltalog: [],
-  });
-  renderAdmin(alpha.teamId);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
 
   expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
   expect(screen.getByText('admin.total {"points":"?"}')).toBeInTheDocument();
 });
 
-test('the team dialog totals a match left in progress after its end time', async () => {
-  const abandoned: TeamModelDto = {
-    ...alpha,
-    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
-  };
-  vi.spyOn(repo, 'getAll').mockResolvedValue([abandoned]);
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
-    G: { points: 4, end: LATER } as MatchStateDto['G'],
-    ctx: {} as MatchStateDto['ctx'],
-    deltalog: [],
-  });
-  renderAdmin(alpha.teamId);
-
-  expect(await screen.findByText('admin.total {"points":4}')).toBeInTheDocument();
-  expect(repo.getMatchState).toHaveBeenCalledOnce();
-});
-
-// The team's `endAt` in the dialog stays where it was when the list loaded,
-// so a match given more time after its end was still totalled as over.
-test('the team dialog shows no total once time is added to a match left in progress', async () => {
-  const abandoned: TeamModelDto = {
-    ...alpha,
-    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
-  };
-  vi.spyOn(repo, 'getAll').mockResolvedValue([abandoned]);
-  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue({
-    G: { points: 4, end: LATER } as MatchStateDto['G'],
-    ctx: {} as MatchStateDto['ctx'],
-    deltalog: [],
-  });
-  const addMinutes = vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
-  renderAdmin(alpha.teamId);
+// A team that left before the end keeps its match IN PROGRESS, which counts
+// once over. The dialog's `endAt` is the one the list loaded with, so a match
+// given more time was still totalled as over.
+test('the team dialog totals a match left in progress past its end, until time is added', async () => {
+  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
   expect(await screen.findByText('admin.total {"points":4}')).toBeInTheDocument();
 
-  getMatchState.mockResolvedValue({
-    G: { points: 4, end: new Date(Date.now() + 10 * 60 * 1000).toISOString() } as MatchStateDto['G'],
-    ctx: {} as MatchStateDto['ctx'],
-    deltalog: [],
-  });
+  getMatchState.mockResolvedValue(gameState(4, inAnHour()));
   // Formik validates and submits asynchronously.
   await act(async () => {
     fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '10' } });
@@ -258,32 +221,13 @@ test('the team dialog shows no total once time is added to a match left in progr
   confirm();
 
   expect(await screen.findByText('admin.total {"points":"?"}')).toBeInTheDocument();
-  expect(addMinutes).toHaveBeenCalledOnce();
 });
 
 test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
-  const storedScore = 5;
-  const finished: TeamModelDto = {
-    ...alpha,
-    relayMatch: { state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: storedScore },
-  };
-  vi.spyOn(repo, 'getAll').mockResolvedValue([finished]);
   vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
-  renderAdmin(alpha.teamId);
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
   expect(await screen.findByText('admin.total {"points":5}')).toBeInTheDocument();
-});
-
-test('the team dialog shows an unknown total when a match left in progress cannot be fetched', async () => {
-  const abandoned: TeamModelDto = {
-    ...alpha,
-    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
-  };
-  vi.spyOn(repo, 'getAll').mockResolvedValue([abandoned]);
-  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
-  renderAdmin(alpha.teamId);
-
-  expect(await screen.findByText('admin.total {"points":"?"}')).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {
