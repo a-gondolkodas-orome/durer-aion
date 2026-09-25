@@ -22,10 +22,19 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
+/// A practice ("test") game or a scored ("live") one. The team's client sends
+/// this as a move argument, so the move checks it against the list at runtime.
+export const DIFFICULTIES = ['test', 'live'] as const;
+export type Difficulty = typeof DIFFICULTIES[number];
+
+export function isDifficulty(value: unknown): value is Difficulty {
+  return DIFFICULTIES.some(it => it === value);
+}
+
 export interface GameStateMixin extends GameStateTimer {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;
-  difficulty: null | undefined | string;
+  difficulty: null | undefined | Difficulty;
   numberOfTries: number;
   numberOfLoss: number;
   winningStreak: number;

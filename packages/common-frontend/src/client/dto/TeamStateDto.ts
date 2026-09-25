@@ -1,6 +1,8 @@
 import { Ctx } from "boardgame.io";
 import { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { MatchStatus } from "schemas";
+import type { MatchStatus, PageState } from "schemas";
+
+export { isPageState, type PageState } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -14,7 +16,7 @@ export interface TeamModelDto {
   category: string;
   credentials: string;
   email?: string;
-  pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY'
+  pageState: PageState
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
 }
