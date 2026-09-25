@@ -19,7 +19,12 @@ const renderAt = (entry: string) => render(
 
 const [gameId, game] = Object.entries(gameList)[0];
 
-beforeEach(() => localStorage.clear());
+// jsdom's browser is American English, which the provider would follow; the
+// site's audience browses in Hungarian.
+beforeEach(() => {
+  localStorage.clear();
+  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['hu-HU']);
+});
 
 describe('useDocumentTitle', () => {
   it('names the site in Hungarian by default', () => {

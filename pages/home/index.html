@@ -13,6 +13,24 @@
       a custom domain alike, with nothing to rebase. A designed version can replace it
       later; until then a bare 404 at the site root is the thing to avoid.
     -->
+    <script>
+      // The page shows both languages; only its title and `lang` pick one. A choice
+      // stored by /jatekok/ (same origin, same key) wins, then the browser's
+      // languages — the order browserLanguage in /jatekok/'s language-context.tsx uses.
+      (function () {
+        var lang = null;
+        try { lang = localStorage.getItem('lang'); } catch (e) { /* storage blocked */ }
+        var tags = navigator.languages || [navigator.language];
+        for (var i = 0; !lang && i < tags.length; i++) {
+          var base = String(tags[i]).toLowerCase().split('-')[0];
+          if (base === 'hu' || base === 'en') lang = base;
+        }
+        if (lang === 'en') {
+          document.documentElement.lang = 'en';
+          document.title = 'Dürer practice';
+        }
+      })();
+    </script>
     <style>
       :root {
         color-scheme: light dark;
