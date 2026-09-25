@@ -128,6 +128,10 @@ export const teamAttributes: ModelAttributes<
   },
   credentials: {
     type: DataTypes.STRING,
+    unique: {
+      name: "credentials",
+      msg: 'Credentials already exist.'
+    },
     validate: {
       is: {
         args: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,

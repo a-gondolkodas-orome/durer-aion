@@ -275,7 +275,8 @@ export function configureTeamsRouter(
    *
    * @param {number} deletionId - The archive row.
    * @returns {TeamModel} - The team, live again. 404 for an unknown row; 409
-   *   when a live team holds its id, join code or name, saying which.
+   *   when a live team holds its id, join code, name or credentials,
+   *   saying which.
    */
   router.post("/team/admin/deleted/:deletionId/restore", adminAuth, async (ctx) => {
     const deletionId = Number(ctx.params.deletionId);
