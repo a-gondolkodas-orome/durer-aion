@@ -36,7 +36,9 @@ export function TeamDetailDialog(props: {
   // are copies that can lag behind them (FinishedMatchStatus says why).
   const relayPoints = useMatchPoints(teamState.relayMatch);
   const strategyPoints = useMatchPoints(teamState.strategyMatch);
-  const sum = relayPoints === undefined || strategyPoints === undefined ? undefined : relayPoints + strategyPoints;
+  const sum = typeof relayPoints === "number" && typeof strategyPoints === "number"
+    ? relayPoints + strategyPoints
+    : relayPoints === "…" || strategyPoints === "…" ? "…" : "?";
 
   const removeTeam = async (teamId: string) => {
     setRemoving(true);
@@ -118,7 +120,7 @@ export function TeamDetailDialog(props: {
           }}
           >reset
       </Button>}
-      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>{t('admin.total', { points: sum ?? '…' })}</Stack>
+      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>{t('admin.total', { points: sum })}</Stack>
     </Stack>
   )
 }
@@ -293,15 +295,19 @@ function endedMatchId(status: MatchStatus): string | null {
 
 /// What the match adds to the total: its game's points once its time is up, 0
 /// before that, so a mid-round total never reads as final. When the match
-/// state cannot be fetched, the score stored at close stands in for it.
-/// `undefined` while loading.
-function useMatchPoints(status: MatchStatus): number | undefined {
+/// state cannot be fetched, the score stored at close stands in for it, and a
+/// match that never closed has none, so its points are unknown: "?". "…" while
+/// loading.
+function useMatchPoints(status: MatchStatus): number | "…" | "?" {
   const matchId = endedMatchId(status);
   const { data, error } = useMatchStateData(matchId);
   if (matchId === null)
     return 0;
-  const storedScore = status.state === "FINISHED" ? status.score : 0;
-  return data?.G.points ?? (error ? storedScore : undefined);
+  if (data)
+    return data.G.points;
+  if (!error)
+    return "…";
+  return status.state === "FINISHED" ? status.score : "?";
 }
 
 function StoredScore(props: { matchId: string, score: number }) {

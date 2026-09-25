@@ -238,6 +238,18 @@ test('the team dialog totals the stored score when the match state cannot be fet
   expect(await screen.findByText('admin.total {"points":5}')).toBeInTheDocument();
 });
 
+test('the team dialog shows an unknown total when a match left in progress cannot be fetched', async () => {
+  const abandoned: TeamModelDto = {
+    ...alpha,
+    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
+  };
+  vi.spyOn(repo, 'getAll').mockResolvedValue([abandoned]);
+  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('admin.total {"points":"?"}')).toBeInTheDocument();
+});
+
 const openDeletedTab = async () => {
   fireEvent.click(await screen.findByText('Törölt csapatok'));
 };
