@@ -293,16 +293,16 @@ function endedMatchId(status: MatchStatus): string | null {
   return null;
 }
 
-/// What the match adds to the total: its game's points once its time is up, 0
-/// before that, so a mid-round total never reads as final. When the match
-/// state cannot be fetched, the score stored at close stands in for it, and a
-/// match that never closed has none, so its points are unknown: "?". "…" while
-/// loading.
+/// What the match adds to the total: its game's points once its time is up,
+/// 0 if it has not started. A match still running is "…", as while loading, so
+/// a mid-round total never reads as final. When the match state cannot be
+/// fetched, the score stored at close stands in for it, and a match that never
+/// closed has none, so its points are unknown: "?".
 function useMatchPoints(status: MatchStatus): number | "…" | "?" {
   const matchId = endedMatchId(status);
   const { data, error } = useMatchStateData(matchId);
   if (matchId === null)
-    return 0;
+    return status.state === "NOT STARTED" ? 0 : "…";
   if (data)
     return data.G.points;
   if (!error)

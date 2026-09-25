@@ -191,7 +191,7 @@ test('the team dialog totals the games\' points, not the lower scores stored whe
   expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
-test('the team dialog leaves a match in progress out of the total', async () => {
+test('the team dialog shows no total while a match is in progress', async () => {
   const playing: TeamModelDto = {
     ...alpha,
     relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(Date.now() + 60 * 60 * 1000) },
@@ -205,7 +205,7 @@ test('the team dialog leaves a match in progress out of the total', async () => 
   renderAdmin(alpha.teamId);
 
   expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
-  expect(screen.getByText('admin.total {"points":0}')).toBeInTheDocument();
+  expect(screen.getByText('admin.total {"points":"…"}')).toBeInTheDocument();
 });
 
 test('the team dialog totals a match left in progress after its end time', async () => {
