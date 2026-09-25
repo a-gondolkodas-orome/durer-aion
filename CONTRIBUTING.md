@@ -22,7 +22,8 @@ Two shapes of first change fit in there:
 
 - **A word or a screen.** The games site carries its own text as
   `{ hu: '…', en: '…' }` objects next to the code that shows it, so changing what
-  a player reads is one edit in one file.
+  a player reads is one edit in one file. The English is British: colour,
+  neighbour, disc.
 - **A new game.** One self-contained folder, and
   [`apps/strategy-practice/README.md` § *Adding a new
   game*](apps/strategy-practice/README.md#adding-a-new-game) is the recipe — it
