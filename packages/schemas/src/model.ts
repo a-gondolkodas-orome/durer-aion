@@ -37,6 +37,15 @@ export interface FinishedMatchStatus {
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 
+/// Every screen a team can be on. The list is here, not just the type, because
+/// the frontends validate stored team state against it.
+export const PAGE_STATES = ['DISCLAIMER', 'HOME', 'RELAY', 'STRATEGY'] as const;
+export type PageState = typeof PAGE_STATES[number];
+
+/// A match's page shares its name with the match's game type, which
+/// `allowedToStart` in the backend relies on when it compares the two.
+export type GameType = Extract<PageState, 'RELAY' | 'STRATEGY'>;
+
 export class TeamModel {
   public teamId!: string;
   public joinCode!: string;
@@ -49,7 +58,7 @@ export class TeamModel {
   /// HOME; starting a match moves it to that match's page, and it stays there
   /// after the match finishes until the team goes home, which the server
   /// refuses while either match is IN PROGRESS.
-  public pageState!: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY';
+  public pageState!: PageState;
 
   public relayMatch!: MatchStatus;
   public strategyMatch!: MatchStatus;
