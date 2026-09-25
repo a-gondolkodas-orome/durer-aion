@@ -1,9 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
 import { AnyBgioGame } from "game";
-import { Server } from "boardgame.io";
-import { allowedToStart, checkStaleMatch, createGame } from "./team_manage";
+import { Server, StorageAPI } from "boardgame.io";
+import { allowedToStart, checkStaleMatch, closeMatch, createGame } from "./team_manage";
+import { TeamsRepository } from "./db";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -128,5 +129,47 @@ describe("createGame", () => {
 
     expect(created).toHaveLength(1);
     expect(created[0].unlisted).toBe(true);
+  });
+});
+
+describe("closeMatch", () => {
+  beforeEach(() => { vi.spyOn(console, "log").mockImplementation(() => undefined); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  const closing = (matchId: string, points: number, strategyMatch: MatchStatus) => {
+    const updates: Partial<TeamModel>[] = [];
+    const stored = team({ strategyMatch });
+    stored.update = async (fields: Partial<TeamModel>) => { updates.push(fields); return stored; };
+    const teams = { getTeam: async () => stored } as unknown as TeamsRepository;
+    const db = {
+      fetch: async () => ({
+        state: { G: { points } },
+        metadata: { gameName: "stones_e", players: { 0: { name: "team-1" } } },
+      }),
+    } as unknown as StorageAPI.Async;
+    return { updates, close: () => closeMatch(matchId, teams, db) };
+  };
+
+  it("finishes the team's current match with the game's points", async () => {
+    const { updates, close } = closing("match-1", 9, inProgressUntil(new Date("2026-03-21T11:00:00Z")));
+
+    await close();
+
+    expect(updates).toStrictEqual([{ strategyMatch: { ...finished, score: 9 } }]);
+  });
+
+  it("leaves the team's new match alone when a match replaced by a reset ends", async () => {
+    const { updates, close } = closing("match-before-reset", 12, inProgressUntil(new Date("2026-03-21T11:00:00Z")));
+
+    await close();
+
+    expect(updates).toStrictEqual([]);
+  });
+
+  it("leaves a reset match alone when the old match ends before the team restarts", async () => {
+    const { updates, close } = closing("match-before-reset", 12, { state: "NOT STARTED" });
+
+    await expect(close()).resolves.toBeUndefined();
+    expect(updates).toStrictEqual([]);
   });
 });
