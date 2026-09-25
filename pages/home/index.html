@@ -80,6 +80,8 @@
         background: color-mix(in srgb, var(--primary) 6%, var(--card));
       }
       .card h2 { margin: 0 0 0.25rem; font-size: 1.15rem; }
+      .card h2 span { color: var(--muted); font-weight: normal; font-style: italic; }
+      .card h2 span::before { content: " | "; font-style: normal; }
       .card p { margin: 0; color: var(--muted); }
       .card p + p { margin-top: 0.35rem; font-style: italic; }
       footer { margin-top: 3rem; color: var(--muted); font-size: 0.9rem; }
@@ -96,7 +98,7 @@
     <main>
 
       <a class="card" href="jatekok/">
-        <h2>Játékok</h2>
+        <h2>Játékok<span lang="en">Strategy Games</span></h2>
         <!-- The intro atop jatekok/'s own overview (overview.tsx), minus its link: a card is already one. -->
         <p>
           A <i>stratégiás játék</i> egy két szereplős játék, amelyben nincs szerencsefaktor:
@@ -111,7 +113,7 @@
       </a>
 
       <a class="card" href="valto/">
-        <h2>Váltóverseny</h2>
+        <h2>Váltóverseny<span lang="en">Relay</span></h2>
         <p>Korábbi évek váltóversenyeinek feladatsorai, 60 perces gyakorlásra.</p>
         <p>Relay problem sets from past years, for a 60-minute practice round.</p>
       </a>
