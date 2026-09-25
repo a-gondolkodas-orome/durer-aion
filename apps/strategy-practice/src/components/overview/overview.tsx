@@ -126,7 +126,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
         </>,
         en: <>
           A <i>strategy game</i> is a two-player game with no luck involved:
-          the right strategy always wins, making it essentially a math puzzle.
+          the right strategy always wins, making it essentially a maths puzzle.
           The games below, ranging from category A to E+ in difficulty,
           all featured in the <a href="https://durerinfo.hu">Dürer Competition</a>.
         </>

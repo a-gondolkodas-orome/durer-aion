@@ -26,11 +26,11 @@ const rule = {
   </>,
   en: <>
     In double-starting tic-tac-toe, played on a 3 × 3 board, the first player begins
-    by placing two red disks on any two cells. Players then alternate turns,
-    each placing one disk on an empty cell — the first player using red disks
+    by placing two red discs on any two cells. Players then alternate turns,
+    each placing one disc on an empty cell — the first player using red discs
     and the second using blue. The game ends when the board is full.
-    The first player wins if there are three red disks in a row, column, or diagonal,
-    but no three blue disks form such a line. Otherwise, the second player wins.
+    The first player wins if there are three red discs in a row, column, or diagonal,
+    but no three blue discs form such a line. Otherwise, the second player wins.
   </>
 };
 

@@ -33,7 +33,7 @@
     "points_other": "{{count}} points",
     "remainingTime": "Remaining time",
     "warning": {
-      "timeNotMatch": "Your computer's clock is not synchronized with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
+      "timeNotMatch": "Your computer's clock is not synchronised with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
       "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."
     }
   },

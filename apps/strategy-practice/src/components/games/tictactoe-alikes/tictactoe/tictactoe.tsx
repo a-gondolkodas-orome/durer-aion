@@ -77,10 +77,10 @@ const rule = {
   </>,
   en: <>
     Two players play a game of ordinary tic-tac-toe on a 3 × 3 board with red and
-    blue disks. That is, if there are three disks of the same colour in a row, column or diagonal,
+    blue discs. That is, if there are three discs of the same colour in a row, column or diagonal,
     then the person placing that colour wins. In case no one wins after the placement of the first
-    9 disks, the next player colours one of the other player&apos;s already placed disks white. Now
-    whoever first creates three white disks in a row, column or diagonal, wins.
+    9 discs, the next player colours one of the other player&apos;s already placed discs white. Now
+    whoever first creates three white discs in a row, column or diagonal, wins.
   </>
 };
 
