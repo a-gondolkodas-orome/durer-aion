@@ -1,9 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
 import { AnyBgioGame } from "game";
-import { Server } from "boardgame.io";
-import { allowedToStart, checkStaleMatch, createGame } from "./team_manage";
+import { Server, StorageAPI } from "boardgame.io";
+import { allowedToStart, checkStaleMatch, closeMatch, createGame } from "./team_manage";
+import { TeamsRepository } from "./db";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -128,5 +129,64 @@ describe("createGame", () => {
 
     expect(created).toHaveLength(1);
     expect(created[0].unlisted).toBe(true);
+  });
+});
+
+describe("closeMatch", () => {
+  beforeEach(() => { vi.spyOn(console, "log").mockImplementation(() => undefined); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  /** `written` is what the repository's conditional write reports: false when
+   * the stored match id no longer matches by the time it runs. */
+  const closing = (matchId: string, points: number, strategyMatch: MatchStatus, written = true) => {
+    const writes: unknown[][] = [];
+    const teams = {
+      getTeam: async () => team({ strategyMatch }),
+      finishMatch: async (...args: unknown[]) => { writes.push(args); return written; },
+    } as unknown as TeamsRepository;
+    const db = {
+      fetch: async () => ({
+        state: { G: { points } },
+        metadata: { gameName: "stones_e", players: { 0: { name: "team-1" } } },
+      }),
+    } as unknown as StorageAPI.Async;
+    return { writes, close: () => closeMatch(matchId, teams, db) };
+  };
+
+  it("finishes the team's current match with the game's points", async () => {
+    const { writes, close } = closing("match-1", 9, inProgressUntil(new Date("2026-03-21T11:00:00Z")));
+
+    await close();
+
+    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9 }]]);
+  });
+
+  it("closes a finished match again with the points boardgame.io ended it on", async () => {
+    const { writes, close } = closing("match-1", 9, finished);
+
+    await close();
+
+    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9 }]]);
+  });
+
+  it("leaves the team's new match alone when a match replaced by a reset ends", async () => {
+    const { writes, close } = closing("match-before-reset", 12, inProgressUntil(new Date("2026-03-21T11:00:00Z")));
+
+    await close();
+
+    expect(writes).toStrictEqual([]);
+  });
+
+  it("leaves a reset match alone when the old match ends before the team restarts", async () => {
+    const { writes, close } = closing("match-before-reset", 12, { state: "NOT STARTED" });
+
+    await expect(close()).resolves.toBeUndefined();
+    expect(writes).toStrictEqual([]);
+  });
+
+  it("gives up quietly when a reset lands between reading the team and writing it", async () => {
+    const { close } = closing("match-1", 9, inProgressUntil(new Date("2026-03-21T11:00:00Z")), false);
+
+    await expect(close()).resolves.toBeUndefined();
   });
 });
