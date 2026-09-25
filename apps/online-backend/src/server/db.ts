@@ -170,7 +170,7 @@ export class TeamsRepository {
    * and out of the archive, in one transaction. `null` for a `deletionId` the
    * archive does not have.
    *
-   * A live team holding the same id, join code or name fails the insert on its
+   * A live team holding the same id, join code, name or credentials fails the insert on its
    * unique constraint, and sequelize's `UniqueConstraintError` propagates: the
    * transaction rolls back and the archive keeps its row. There is no check
    * ahead of the insert, because the constraint is the check and cannot race.

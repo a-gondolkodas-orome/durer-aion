@@ -84,3 +84,16 @@ describe('appendOtherNote', () => {
     await expect(team(appended).validate()).resolves.toBeDefined();
   });
 });
+
+// A team's credentials sign its moves in every match it plays (`injectPlayer` in
+// router.ts), so two teams sharing them could move in each other's matches.
+// `uniqueKeys` is what `sync()` turns into constraints — on a fresh database
+// only, since it never alters an existing table — and where the message a
+// `UniqueConstraintError` carries comes from.
+describe('the Teams table', () => {
+  const uniqueKeys = (TeamModel as unknown as { uniqueKeys: Record<string, { fields: string[] }> }).uniqueKeys;
+
+  it.each(['teamId', 'joinCode', 'teamName', 'credentials'])('makes %s unique', (column) => {
+    expect(Object.values(uniqueKeys).map(key => key.fields)).toContainEqual([column]);
+  });
+});
