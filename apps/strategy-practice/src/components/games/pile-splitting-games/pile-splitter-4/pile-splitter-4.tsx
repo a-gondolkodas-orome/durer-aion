@@ -5,7 +5,7 @@ import { generateStartBoard, generateTestStartBoard, moves } from './gameplay';
 
 const getPlayerStepDescription = () => ({
   hu: 'Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.',
-  en: 'First click the pile you wish to remove, then the disk where you want to split.'
+  en: 'First click the pile you wish to remove, then the disc where you want to split.'
 });
 
 const rule = {
@@ -16,7 +16,7 @@ const rule = {
     Egy lépést követően tehát újra 4 kupac marad. Az veszít, aki nem tud lépni.
   </>,
   en: <>
-    At the beginning of the game there are 4 piles of disks on the table.
+    At the beginning of the game there are 4 piles of discs on the table.
     The player who is in turn takes away a pile, then divides one of the remaining piles into
     two nonempty piles. Whoever is unable to move, loses.
   </>
