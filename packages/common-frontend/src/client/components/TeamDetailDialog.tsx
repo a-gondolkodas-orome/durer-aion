@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useRemoveTeam } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { TeamModelDto, MatchStatus, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
@@ -132,6 +132,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   const getLogs = useGetLogs();
   const [matchLogs, setMatchLogs] = useState<unknown | null>(null);
   const { t } = useTranslation();
+  const { mutate } = useSWRConfig();
 
   switch (props.data.state) {
     case "IN PROGRESS": {
@@ -157,6 +158,8 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             confirm: async () => {
               try {
                 await addMinutes(inProgressState.matchID, values.time);
+                // The dialog's total reads the new `G.end` from here.
+                await mutate(matchStateKey(inProgressState.matchID));
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -275,39 +278,42 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
 }
 
 /// One SWR key per match, so every field of the dialog reading the same match
-/// shares one request. `null` fetches nothing.
-function useMatchStateData(matchId: string | null) {
-  const matchState = useMatchState();
-  return useSWR(matchId === null ? null : [`users/${matchId}`, matchId], ([, id]) => matchState(id));
+/// shares one request.
+function matchStateKey(matchId: string) {
+  return [`users/${matchId}`, matchId];
 }
 
-/// The match whose points count towards the total: a FINISHED one, or one still
-/// IN PROGRESS past its `endAt` — a match is only closed at game over or when
-/// the team itself reads its state, so a team that left before the end keeps
-/// it IN PROGRESS for good.
-function endedMatchId(status: MatchStatus): string | null {
-  if (status.state === "FINISHED")
-    return status.matchID;
-  if (status.state === "IN PROGRESS" && new Date(status.endAt).getTime() < Date.now())
-    return status.matchID;
-  return null;
+/// `null` fetches nothing.
+function useMatchStateData(matchId: string | null) {
+  const matchState = useMatchState();
+  return useSWR(matchId === null ? null : matchStateKey(matchId), ([, id]) => matchState(id));
 }
 
 /// What the match adds to the total: its game's points once its time is up,
 /// 0 if it has not started. A match still running is "…", as while loading, so
-/// a mid-round total never reads as final. When the match state cannot be
-/// fetched, the score stored at close stands in for it, and a match that never
-/// closed has none, so its points are unknown: "?".
+/// a mid-round total never reads as final.
+///
+/// A match IN PROGRESS counts once the game's `G.end` has passed: a match is
+/// only closed at game over or when the team itself reads its state, so a team
+/// that left before the end keeps it IN PROGRESS for good. `G.end`, not the
+/// team's `endAt`, because adding minutes moves both but only the match state
+/// is fetched again here.
+///
+/// When the match state cannot be fetched, the score stored at close stands in
+/// for it, and a match that never closed has none, so its points are unknown:
+/// "?" — or "…" while even the team's `endAt` is still ahead.
 function useMatchPoints(status: MatchStatus): number | "…" | "?" {
-  const matchId = endedMatchId(status);
+  const matchId = status.state === "NOT STARTED" ? null : status.matchID;
   const { data, error } = useMatchStateData(matchId);
-  if (matchId === null)
-    return status.state === "NOT STARTED" ? 0 : "…";
+  if (status.state === "NOT STARTED")
+    return 0;
   if (data)
-    return data.G.points;
+    return status.state === "FINISHED" || new Date(data.G.end).getTime() < Date.now() ? data.G.points : "…";
   if (!error)
     return "…";
-  return status.state === "FINISHED" ? status.score : "?";
+  if (status.state === "FINISHED")
+    return status.score;
+  return new Date(status.endAt).getTime() < Date.now() ? "?" : "…";
 }
 
 function StoredScore(props: { matchId: string, score: number }) {

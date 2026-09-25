@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
@@ -192,13 +192,14 @@ test('the team dialog totals the games\' points, not the lower scores stored whe
 });
 
 test('the team dialog shows no total while a match is in progress', async () => {
+  const inAnHour = new Date(Date.now() + 60 * 60 * 1000);
   const playing: TeamModelDto = {
     ...alpha,
-    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(Date.now() + 60 * 60 * 1000) },
+    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour },
   };
   vi.spyOn(repo, 'getAll').mockResolvedValue([playing]);
   vi.spyOn(repo, 'getMatchState').mockResolvedValue({
-    G: { points: 4, end: LATER } as MatchStateDto['G'],
+    G: { points: 4, end: inAnHour.toISOString() } as MatchStateDto['G'],
     ctx: {} as MatchStateDto['ctx'],
     deltalog: [],
   });
@@ -223,6 +224,41 @@ test('the team dialog totals a match left in progress after its end time', async
 
   expect(await screen.findByText('admin.total {"points":4}')).toBeInTheDocument();
   expect(repo.getMatchState).toHaveBeenCalledOnce();
+});
+
+// The team's `endAt` in the dialog stays where it was when the list loaded,
+// so a match given more time after its end was still totalled as over.
+test('the team dialog shows no total once time is added to a match left in progress', async () => {
+  const abandoned: TeamModelDto = {
+    ...alpha,
+    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
+  };
+  vi.spyOn(repo, 'getAll').mockResolvedValue([abandoned]);
+  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue({
+    G: { points: 4, end: LATER } as MatchStateDto['G'],
+    ctx: {} as MatchStateDto['ctx'],
+    deltalog: [],
+  });
+  const addMinutes = vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  renderAdmin(alpha.teamId);
+  expect(await screen.findByText('admin.total {"points":4}')).toBeInTheDocument();
+
+  getMatchState.mockResolvedValue({
+    G: { points: 4, end: new Date(Date.now() + 10 * 60 * 1000).toISOString() } as MatchStateDto['G'],
+    ctx: {} as MatchStateDto['ctx'],
+    deltalog: [],
+  });
+  // Formik validates and submits asynchronously.
+  await act(async () => {
+    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '10' } });
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('idő hozzáadása'));
+  });
+  confirm();
+
+  expect(await screen.findByText('admin.total {"points":"…"}')).toBeInTheDocument();
+  expect(addMinutes).toHaveBeenCalledOnce();
 });
 
 test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
