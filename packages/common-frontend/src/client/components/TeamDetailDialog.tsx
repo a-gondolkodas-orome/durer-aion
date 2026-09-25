@@ -283,23 +283,15 @@ function matchStateKey(matchId: string) {
   return [`users/${matchId}`, matchId];
 }
 
-/// `null` fetches nothing.
 function useMatchStateData(matchId: string | null) {
   const matchState = useMatchState();
   return useSWR(matchId === null ? null : matchStateKey(matchId), ([, id]) => matchState(id));
 }
 
-/// What the match adds to the total: its game's points once its time is up,
-/// 0 if it has not started, and `undefined` while that is not known — the match
-/// is still running or loading, or its state could not be fetched and it never
-/// closed. A mid-round total never reads as final that way.
-///
-/// A match IN PROGRESS counts once the game's `G.end` has passed: a match is
-/// only closed at game over or when the team itself reads its state, so a team
-/// that left before the end keeps it IN PROGRESS for good. `G.end`, not the
-/// team's `endAt`, because adding minutes moves both but only the match state
-/// is fetched again here. When the state cannot be fetched, a FINISHED match's
-/// score stored at close stands in for it.
+/// A match's share of the total, `undefined` until it is known, so a
+/// mid-round total never reads as final. An IN PROGRESS match past its end
+/// counts (FinishedMatchStatus says why one stays there). The end is `G.end`,
+/// not the team's `endAt`: adding minutes refetches only the match state.
 function useMatchPoints(status: MatchStatus): number | undefined {
   const matchId = status.state === "NOT STARTED" ? null : status.matchID;
   const { data, error } = useMatchStateData(matchId);

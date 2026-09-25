@@ -201,9 +201,8 @@ test('the team dialog shows no total while a match is in progress', async () => 
   expect(screen.getByText('admin.total {"points":"?"}')).toBeInTheDocument();
 });
 
-// A team that left before the end keeps its match IN PROGRESS, which counts
-// once over. The dialog's `endAt` is the one the list loaded with, so a match
-// given more time was still totalled as over.
+// The dialog's `endAt` is the one the list loaded with, so a match given more
+// time was still totalled as over.
 test('the team dialog totals a match left in progress past its end, until time is added', async () => {
   const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
   vi.spyOn(repo, 'addMinutes').mockResolvedValue('');

@@ -102,6 +102,8 @@
     "prevrelayid",
     "prevstratid",
     "privkey",
+    "refetch",
+    "refetches",
     "Robbable",
     "RRBBBB",
     "skimmable",
