@@ -1,6 +1,5 @@
 import { Stack } from '@mui/system';
-import { FinishedMatchStatus } from 'schemas';
-import { TeamModelDto } from '../../dto/TeamStateDto';
+import { FinishedMatchStatus, TeamModelDto } from '../../dto/TeamStateDto';
 import { useTheme } from '@mui/material/styles';
 
 
