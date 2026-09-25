@@ -21,6 +21,9 @@ export enum Category {
 export const listedAs = (cat: Category): Category =>
   cat === Category.Cp ? Category.E : cat === Category.Dp ? Category.Ep : cat;
 
+const categoryOptionLabel = (cat: Category) =>
+  cat === Category.E ? 'E / C+' : cat === Category.Ep ? 'E+ / D+' : cat;
+
 interface TestListElement {
   local?: Category[],
   final?: Category[],
@@ -155,7 +158,7 @@ export default function SelectRelayRound() {
           >
             {availableCategories.map(cat =>
               <MenuItem key={cat} value={cat}>
-                {cat}
+                {categoryOptionLabel(cat)}
               </MenuItem>
             )}
           </Select>
