@@ -206,7 +206,7 @@ test('the team dialog shows no total while a match is in progress', async () => 
   renderAdmin(alpha.teamId);
 
   expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
-  expect(screen.getByText('admin.total {"points":"…"}')).toBeInTheDocument();
+  expect(screen.getByText('admin.total {"points":"?"}')).toBeInTheDocument();
 });
 
 test('the team dialog totals a match left in progress after its end time', async () => {
@@ -257,7 +257,7 @@ test('the team dialog shows no total once time is added to a match left in progr
   });
   confirm();
 
-  expect(await screen.findByText('admin.total {"points":"…"}')).toBeInTheDocument();
+  expect(await screen.findByText('admin.total {"points":"?"}')).toBeInTheDocument();
   expect(addMinutes).toHaveBeenCalledOnce();
 });
 

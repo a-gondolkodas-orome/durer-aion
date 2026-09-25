@@ -36,9 +36,9 @@ export function TeamDetailDialog(props: {
   // are copies that can lag behind them (FinishedMatchStatus says why).
   const relayPoints = useMatchPoints(teamState.relayMatch);
   const strategyPoints = useMatchPoints(teamState.strategyMatch);
-  const sum = typeof relayPoints === "number" && typeof strategyPoints === "number"
-    ? relayPoints + strategyPoints
-    : relayPoints === "…" || strategyPoints === "…" ? "…" : "?";
+  const sum = relayPoints === undefined || strategyPoints === undefined
+    ? undefined
+    : relayPoints + strategyPoints;
 
   const removeTeam = async (teamId: string) => {
     setRemoving(true);
@@ -120,7 +120,7 @@ export function TeamDetailDialog(props: {
           }}
           >reset
       </Button>}
-      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>{t('admin.total', { points: sum })}</Stack>
+      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>{t('admin.total', { points: sum ?? "?" })}</Stack>
     </Stack>
   )
 }
@@ -290,30 +290,26 @@ function useMatchStateData(matchId: string | null) {
 }
 
 /// What the match adds to the total: its game's points once its time is up,
-/// 0 if it has not started. A match still running is "…", as while loading, so
-/// a mid-round total never reads as final.
+/// 0 if it has not started, and `undefined` while that is not known — the match
+/// is still running or loading, or its state could not be fetched and it never
+/// closed. A mid-round total never reads as final that way.
 ///
 /// A match IN PROGRESS counts once the game's `G.end` has passed: a match is
 /// only closed at game over or when the team itself reads its state, so a team
 /// that left before the end keeps it IN PROGRESS for good. `G.end`, not the
 /// team's `endAt`, because adding minutes moves both but only the match state
-/// is fetched again here.
-///
-/// When the match state cannot be fetched, the score stored at close stands in
-/// for it, and a match that never closed has none, so its points are unknown:
-/// "?" — or "…" while even the team's `endAt` is still ahead.
-function useMatchPoints(status: MatchStatus): number | "…" | "?" {
+/// is fetched again here. When the state cannot be fetched, a FINISHED match's
+/// score stored at close stands in for it.
+function useMatchPoints(status: MatchStatus): number | undefined {
   const matchId = status.state === "NOT STARTED" ? null : status.matchID;
   const { data, error } = useMatchStateData(matchId);
   if (status.state === "NOT STARTED")
     return 0;
   if (data)
-    return status.state === "FINISHED" || new Date(data.G.end).getTime() < Date.now() ? data.G.points : "…";
-  if (!error)
-    return "…";
-  if (status.state === "FINISHED")
+    return status.state === "FINISHED" || new Date(data.G.end).getTime() < Date.now() ? data.G.points : undefined;
+  if (error && status.state === "FINISHED")
     return status.score;
-  return new Date(status.endAt).getTime() < Date.now() ? "?" : "…";
+  return undefined;
 }
 
 function StoredScore(props: { matchId: string, score: number }) {
