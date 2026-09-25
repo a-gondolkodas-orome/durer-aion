@@ -279,15 +279,29 @@ function useMatchStateData(matchId: string | null) {
   return useSWR(matchId === null ? null : [`users/${matchId}`, matchId], ([, id]) => matchState(id));
 }
 
-/// What the match adds to the total: its game's points once it is FINISHED, 0
+/// The match whose points count towards the total: a FINISHED one, or one still
+/// IN PROGRESS past its `endAt` — a match is only closed at game over or when
+/// the team itself reads its state, so a team that left before the end keeps
+/// it IN PROGRESS for good.
+function endedMatchId(status: MatchStatus): string | null {
+  if (status.state === "FINISHED")
+    return status.matchID;
+  if (status.state === "IN PROGRESS" && new Date(status.endAt).getTime() < Date.now())
+    return status.matchID;
+  return null;
+}
+
+/// What the match adds to the total: its game's points once its time is up, 0
 /// before that, so a mid-round total never reads as final. When the match
 /// state cannot be fetched, the score stored at close stands in for it.
 /// `undefined` while loading.
 function useMatchPoints(status: MatchStatus): number | undefined {
-  const { data, error } = useMatchStateData(status.state === "FINISHED" ? status.matchID : null);
-  if (status.state !== "FINISHED")
+  const matchId = endedMatchId(status);
+  const { data, error } = useMatchStateData(matchId);
+  if (matchId === null)
     return 0;
-  return data?.G.points ?? (error ? status.score : undefined);
+  const storedScore = status.state === "FINISHED" ? status.score : 0;
+  return data?.G.points ?? (error ? storedScore : undefined);
 }
 
 function StoredScore(props: { matchId: string, score: number }) {

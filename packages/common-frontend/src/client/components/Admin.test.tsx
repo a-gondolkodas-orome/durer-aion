@@ -194,7 +194,7 @@ test('the team dialog totals the games\' points, not the lower scores stored whe
 test('the team dialog leaves a match in progress out of the total', async () => {
   const playing: TeamModelDto = {
     ...alpha,
-    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
+    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(Date.now() + 60 * 60 * 1000) },
   };
   vi.spyOn(repo, 'getAll').mockResolvedValue([playing]);
   vi.spyOn(repo, 'getMatchState').mockResolvedValue({
@@ -206,6 +206,23 @@ test('the team dialog leaves a match in progress out of the total', async () => 
 
   expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
   expect(screen.getByText('admin.total {"points":0}')).toBeInTheDocument();
+});
+
+test('the team dialog totals a match left in progress after its end time', async () => {
+  const abandoned: TeamModelDto = {
+    ...alpha,
+    relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) },
+  };
+  vi.spyOn(repo, 'getAll').mockResolvedValue([abandoned]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
+    G: { points: 4, end: LATER } as MatchStateDto['G'],
+    ctx: {} as MatchStateDto['ctx'],
+    deltalog: [],
+  });
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('admin.total {"points":4}')).toBeInTheDocument();
+  expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
 test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
