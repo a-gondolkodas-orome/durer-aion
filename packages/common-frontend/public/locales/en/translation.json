@@ -70,7 +70,6 @@
     "roundTypeSelector": "Round type:",
     "categorySelector": "Category:",
     "yearOption": "#{{num}}",
-    "yearOptionLegacy": "#{{num}} ({{category}})",
     "roundType": {
       "local": "Local",
       "final": "Final",

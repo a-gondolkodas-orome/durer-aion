@@ -190,11 +190,9 @@ export default function SelectRelayRound() {
             label={t('login.yearSelector')}
             onChange={handleYearChange}
           >
-            {availableYears.map(({ yearIdx, category: testCategory }) =>
+            {availableYears.map(({ yearIdx }) =>
               <MenuItem key={yearIdx} value={String(yearIdx)}>
-                {testCategory === category
-                  ? t('login.yearOption', { num: yearIdx + 1 })
-                  : t('login.yearOptionLegacy', { num: yearIdx + 1, category: testCategory })}
+                {t('login.yearOption', { num: yearIdx + 1 })}
               </MenuItem>
             )}
           </Select>
