@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { TeamModelDto } from "../dto/TeamStateDto";
+import { PageState, TeamModelDto } from "../dto/TeamStateDto";
 
 export const mockTeamState: TeamModelDto = {
   teamId: "Long Id",
@@ -19,7 +19,7 @@ export const mockTeamState: TeamModelDto = {
 
 let teamState: TeamModelDto | null = null;
 
-const setPageState = (pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY') => {
+const setPageState = (pageState: PageState) => {
   teamState = { ...mockTeamState, pageState };
 };
 
