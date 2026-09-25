@@ -15,13 +15,11 @@ vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
 }));
 
-// Without an i18next instance react-i18next warns on the console, which the
-// setup file fails the test for; this stand-in also keeps the interpolated
-// values visible, which the key alone would drop.
+// A finished relay's dialog shows RelayEndTable, which is translated; without
+// an i18next instance react-i18next warns on the console, which the setup
+// file fails the test for.
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, values?: object) => values === undefined ? key : `${key} ${JSON.stringify(values)}`,
-  }),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 // The grid measures its container and jsdom lays nothing out, so the real one
@@ -188,8 +186,8 @@ test('the team dialog totals the game\'s points, not the lower score stored when
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
-  expect(await screen.findByText('admin.total {"points":7}')).toBeInTheDocument();
-  expect(screen.getByText('admin.storedScoreMismatch {"points":7}')).toBeInTheDocument();
+  expect(await screen.findByText('Összesen: 7 pont')).toBeInTheDocument();
+  expect(screen.getByText('Eltér a játék pontszámától (7), az a hivatalos.')).toBeInTheDocument();
   expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
@@ -198,7 +196,7 @@ test('the team dialog shows no total while a match is in progress', async () => 
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
 
   expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
-  expect(screen.getByText('admin.total {"points":"?"}')).toBeInTheDocument();
+  expect(screen.getByText('Összesen: ? pont')).toBeInTheDocument();
 });
 
 // The dialog's `endAt` is the one the list loaded with, so a match given more
@@ -207,7 +205,7 @@ test('the team dialog totals a match left in progress past its end, until time i
   const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
   vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
-  expect(await screen.findByText('admin.total {"points":4}')).toBeInTheDocument();
+  expect(await screen.findByText('Összesen: 4 pont')).toBeInTheDocument();
 
   getMatchState.mockResolvedValue(gameState(4, inAnHour()));
   // Formik validates and submits asynchronously.
@@ -219,14 +217,14 @@ test('the team dialog totals a match left in progress past its end, until time i
   });
   confirm();
 
-  expect(await screen.findByText('admin.total {"points":"?"}')).toBeInTheDocument();
+  expect(await screen.findByText('Összesen: ? pont')).toBeInTheDocument();
 });
 
 test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
   vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
-  expect(await screen.findByText('admin.total {"points":5}')).toBeInTheDocument();
+  expect(await screen.findByText('Összesen: 5 pont')).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {

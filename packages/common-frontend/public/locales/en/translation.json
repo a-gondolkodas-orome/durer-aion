@@ -1,14 +1,4 @@
 {
-  "admin": {
-    "addTimeNote": "Time can only be added to a match in progress: a finished match cannot be restarted, only reset.",
-    "matchStateDescription": "NOT STARTED: not begun yet. IN PROGRESS: running, time can be added; still IN PROGRESS after its end means the team has not opened its page since, and it counts in the total. FINISHED: cannot be started again, but its score can still grow shortly after the end, from the last answer or move the team sent. The official result is the game's score, not the copy stored on the team.",
-    "pageStateDescription": "Which page the team sees. DISCLAIMER: has not accepted the rules yet; HOME: main page; RELAY / STRATEGY: that game's page, also after the game ends, until the team goes back.",
-    "resetRelayConfirm": "Confirm that you want to reset the relay of team {{teamName}}. The match goes back to NOT STARTED, the team can start it again, and the old match ID is kept in the Other field.",
-    "resetStrategyConfirm": "Confirm that you want to reset the strategy game of team {{teamName}}. The match goes back to NOT STARTED, the team can start it again, and the old match ID is kept in the Other field.",
-    "storedScore": "Score stored on the team: {{score}} (a copy taken at close; the result is the score above)",
-    "storedScoreMismatch": "Differs from the game's score ({{points}}): the game scored after it was closed.",
-    "total": "Total: {{points}} points"
-  },
   "chooser": {
     "achievedPoint": "Points achieved",
     "filledAt": "Filled at",

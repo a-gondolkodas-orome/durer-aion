@@ -871,7 +871,6 @@ tulajdonsággal
 tulajdonságot
 tükrözéssel
 újraértékeljük
-újraindítani
 Újraosztom
 úszhatsz
 Ügyesné

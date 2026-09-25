@@ -3,7 +3,6 @@ import { useAddMinutes, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
 import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -27,13 +26,15 @@ const TeamsToolbar = csvToolbar('durer-csapatok');
 // a team id. Issue #135 is the rest of the page's layout.
 type AdminTab = 'teams' | 'deleted';
 
+// What the states mean is on MatchStatus in the `schemas` package.
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
+
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
-  const { t } = useTranslation();
   const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
@@ -136,7 +137,7 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'pageState',
               headerName: 'Állapot',
-              description: t('admin.pageStateDescription'),
+              description: 'Melyik oldalt látja a csapat: DISCLAIMER, HOME, RELAY vagy STRATEGY. A játék oldalán a vége után is ott marad, amíg vissza nem lép.',
               width: 150,
               editable: false,
             },
@@ -149,14 +150,14 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'relayMatchState',
               headerName: 'Relay',
-              description: t('admin.matchStateDescription'),
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
             {
               field: 'strategyMatchState',
               headerName: 'Strategy',
-              description: t('admin.matchStateDescription'),
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },

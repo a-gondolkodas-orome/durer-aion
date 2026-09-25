@@ -21,14 +21,12 @@ export interface InProgressMatchStatus {
 /// navigation: the team may not start this match again and may go back home.
 ///
 /// It does not freeze the result. `score` is a copy of `G.points` taken when
-/// the match was closed, and a game goes on accepting moves after `G.end`: it
-/// ends at the bot's first move after `G.end`, or at a move of the team's more
-/// than ten seconds after it. The relay ends before scoring that late answer,
-/// but a strategy game applies the move before it ends, so a late winning move
-/// still scores. So `G.points` can grow after an early close; a later game over
-/// closes the match again and overwrites the copy, a match that never reaches
-/// game over keeps it. `G.points` in the match state is the result —
-/// `scripts/admin.py` scores from it and reports where `score` disagrees.
+/// the match was closed, and a game still accepts some moves shortly after
+/// `G.end` (each game's `onMove`/`onEnd` says which), so `G.points` can grow
+/// after an early close. A later game over closes the match again and
+/// overwrites the copy; a match that never reaches game over keeps it.
+/// `G.points` in the match state is the result — `scripts/admin.py` scores
+/// from it and reports where `score` disagrees.
 export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;

@@ -1,14 +1,4 @@
 {   
-  "admin": {
-    "addTimeNote": "Időt csak folyamatban lévő játékhoz lehet adni: a befejezett játékot nem lehet újraindítani, csak alaphelyzetbe állítani.",
-    "matchStateDescription": "NOT STARTED: még nem kezdte el. IN PROGRESS: fut, ekkor lehet időt hozzáadni; ha a vége után is IN PROGRESS, a csapat azóta nem nyitotta meg az oldalt, és beleszámít az összesbe. FINISHED: nem indíthatja újra, de a pontszáma a vége után még rövid ideig nőhet a csapat utolsó válaszától vagy lépésétől. A hivatalos eredmény a játék pontszáma, nem a csapatnál tárolt másolat.",
-    "pageStateDescription": "Melyik oldalt látja a csapat. DISCLAIMER: még nem fogadta el a szabályokat; HOME: főoldal; RELAY / STRATEGY: az adott játék oldala, a játék vége után is, amíg vissza nem lép.",
-    "resetRelayConfirm": "Erősítsd meg, hogy {{teamName}} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja, a régi játék azonosítója az Egyéb mezőbe kerül.",
-    "resetStrategyConfirm": "Erősítsd meg, hogy {{teamName}} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja, a régi játék azonosítója az Egyéb mezőbe kerül.",
-    "storedScore": "Csapatnál tárolt pontszám: {{score}} (a lezáráskor készült másolat; az eredmény a fenti pontszám)",
-    "storedScoreMismatch": "Eltér a játék pontszámától ({{points}}): a játék a lezárás után még kapott pontot.",
-    "total": "Összesen: {{points}} pont"
-  },
   "chooser": {
     "achievedPoint": "Elért pontszám",
     "filledAt": "Kitöltve ekkor",

@@ -15,7 +15,6 @@ import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useTranslation } from 'react-i18next';
 
 /// `onRemoved` fires once the server has dropped the team: the list this dialog
 /// was opened from is stale from that moment, and the dialog cannot refresh it.
@@ -30,10 +29,9 @@ export function TeamDetailDialog(props: {
   const { enqueueSnackbar } = useSnackbar();
   const [teamState, setTeamState] = useState(props.data);
   const [removing, setRemoving] = useState(false);
-  const { t } = useTranslation();
 
-  // The games' own points, not the FINISHED scores stored on the team, which
-  // are copies that can lag behind them (FinishedMatchStatus says why).
+  // The games' own points, not the scores stored on the team (see
+  // FinishedMatchStatus in the `schemas` package).
   const relayPoints = useMatchPoints(teamState.relayMatch);
   const strategyPoints = useMatchPoints(teamState.strategyMatch);
   const sum = relayPoints === undefined || strategyPoints === undefined
@@ -83,7 +81,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: t('admin.resetRelayConfirm', { teamName: teamState.teamName }),
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
                   const changed = await resetRelay(adminTeamId(teamState));
@@ -105,7 +103,7 @@ export function TeamDetailDialog(props: {
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: t('admin.resetStrategyConfirm', { teamName: teamState.teamName }),
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
                   const changed = await resetStrategy(adminTeamId(teamState));
@@ -120,7 +118,7 @@ export function TeamDetailDialog(props: {
           }}
           >reset
       </Button>}
-      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>{t('admin.total', { points: sum ?? "?" })}</Stack>
+      <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? "?"} pont</Stack>
     </Stack>
   )
 }
@@ -131,7 +129,6 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   const { enqueueSnackbar } = useSnackbar();
   const getLogs = useGetLogs();
   const [matchLogs, setMatchLogs] = useState<unknown | null>(null);
-  const { t } = useTranslation();
   const { mutate } = useSWRConfig();
 
   switch (props.data.state) {
@@ -199,9 +196,6 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           </Stack>
         )}/>
       </Form>
-      <Stack sx={{ fontSize: '0.875rem', marginBottom: '8px' }}>
-        {t('admin.addTimeNote')}
-      </Stack>
       <Button
       sx={{
         width: '200px',
@@ -290,8 +284,8 @@ function useMatchStateData(matchId: string | null) {
 
 /// A match's share of the total, `undefined` until it is known, so a
 /// mid-round total never reads as final. An IN PROGRESS match past its end
-/// counts (FinishedMatchStatus says why one stays there). The end is `G.end`,
-/// not the team's `endAt`: adding minutes refetches only the match state.
+/// counts: a team that left before the end never closes it. The end is
+/// `G.end`, not the team's `endAt`, which adding minutes does not reload.
 function useMatchPoints(status: MatchStatus): number | undefined {
   const matchId = status.state === "NOT STARTED" ? null : status.matchID;
   const { data, error } = useMatchStateData(matchId);
@@ -306,11 +300,10 @@ function useMatchPoints(status: MatchStatus): number | undefined {
 
 function StoredScore(props: { matchId: string, score: number }) {
   const { data } = useMatchStateData(props.matchId);
-  const { t } = useTranslation();
   return (<>
-    <Stack>{t('admin.storedScore', { score: props.score })}</Stack>
+    <Stack>Csapatnál tárolt pontszám: {props.score}</Stack>
     {data && data.G.points !== props.score &&
-      <Stack sx={{ color: 'red' }}>{t('admin.storedScoreMismatch', { points: data.G.points })}</Stack>}
+      <Stack sx={{ color: 'red' }}>Eltér a játék pontszámától ({data.G.points}), az a hivatalos.</Stack>}
   </>);
 }
 
