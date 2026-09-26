@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { test, expect, vi } from 'vitest';
+import { beforeEach, test, expect, vi } from 'vitest';
 import { MockTeamState } from '../hooks/mock-user-hooks';
 import { render } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
@@ -8,7 +8,8 @@ import '@testing-library/jest-dom';
 // `Main` calls `i18next.changeLanguage` while rendering, so i18next has to be
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
-import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
+import { ClientRepoProvider } from '../api-repository-interface';
+import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
 
@@ -34,6 +35,10 @@ const renderMain = () =>
       </ClientRepoProvider>
     </ThemeProvider>
   );
+
+beforeEach(() => {
+  MockTeamState.mockLoggedOut();
+});
 
 test('renders', () => {
   const { getByTestId } = renderMain();
