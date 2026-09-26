@@ -200,8 +200,12 @@ export class SocketIOButBotMoves extends SocketIO {
             // These happen after the player stepped.
             // The state is written to storage, and the server now returned
             // the authoritative state to the player.
-            // TODO: do not load the result from storage, reuse from the redux?
-            // TODO: try do not send an authoritative state to the player...?
+            // Re-reading it is deliberate: this listener gets only the
+            // player's action, not the state boardgame.io's own listener
+            // produced, and `master.onUpdate` below reads storage again
+            // anyway. The push the player already got stays too: without it
+            // the player's move and the bot's reply land as one update.
+            // See #346.
             console.log("Bot moves");
 
             const {  state  } = await fetch(app.context.db, matchID, {
