@@ -35,6 +35,7 @@ alátámasztottuk
 átvizsgálni
 azonosítója
 beállította
+beállítva
 becsomagolni
 bedobnunk
 beérkezett

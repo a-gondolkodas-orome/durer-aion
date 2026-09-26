@@ -25,7 +25,15 @@
     "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!"
   },
   "error": {
+    "noRelayClient": "No relay game is set up for this competition",
+    "noStrategyClient": "No strategy game is set up for this competition",
     "unexpected": "An unexpected error occurred"
+  },
+  "finished": {
+    "score_one": "{{count}} <unit>point</unit>",
+    "score_other": "{{count}} <unit>points</unit>",
+    "title": "The game is over",
+    "yourScore": "Your score"
   },
   "general": {
     "loading": "Loading game or task…",
@@ -79,6 +87,7 @@
   "relay": {
     "endTable": {
       "all": "Total points",
+      "answers": "Answers",
       "back": "Back to competition",
       "selectOtherRound": "Select other round",
       "point": "Points",

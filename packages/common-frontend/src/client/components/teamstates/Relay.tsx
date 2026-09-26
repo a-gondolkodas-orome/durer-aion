@@ -20,7 +20,7 @@ export function Relay(props: { state: TeamModelDto }) {
               credentials={props.state.credentials}
               matchID={(props.state.relayMatch  as InProgressMatchStatus).matchID}
             />
-          </Suspense> : <>no relay client in game context</>}
+          </Suspense> : <>{t('error.noRelayClient')}</>}
         </div>
       );
     case "NOT STARTED":

@@ -19,7 +19,7 @@ export function Strategy(props: { state: TeamModelDto }) {
               credentials={props.state.credentials}
               matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
             />
-          </Suspense> : <>no strategy client in game context</>}
+          </Suspense> : <>{t('error.noStrategyClient')}</>}
         </div>
       );
     case "NOT STARTED":

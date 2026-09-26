@@ -203,7 +203,7 @@ export function RelayEndTableData(props: { allPoints: number, task: { max: numbe
                 </TableCell>)}
             </TableRow>
             <TableRow>
-                <TableCell>Válaszok</TableCell>
+                <TableCell>{t('relay.endTable.answers')}</TableCell>
                 {chunk.map((data, idx) => <TableCell key={idx}>
                     {data.answers.join(", ")}
                 </TableCell>)}

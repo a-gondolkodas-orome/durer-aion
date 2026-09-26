@@ -2,6 +2,7 @@ import { Stack } from '@mui/system';
 import { FinishedMatchStatus } from 'schemas';
 import { TeamModelDto } from '../../dto/TeamStateDto';
 import { useTheme } from '@mui/material/styles';
+import { Trans, useTranslation } from 'react-i18next';
 
 
 /**
@@ -16,6 +17,7 @@ import { useTheme } from '@mui/material/styles';
  */
 export function Finished(props: { state: TeamModelDto }) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score;
   const stratScore = (props.state.strategyMatch as FinishedMatchStatus).score;
   return (
@@ -34,13 +36,13 @@ export function Finished(props: { state: TeamModelDto }) {
         textAlign: 'center',
         marginBottom: '30px',
       }}>
-        Vége a játéknak
+        {t('finished.title')}
       </Stack>
       <Stack sx={{
         fontSize: 18,
         marginBottom: '20px',
       }}>
-        Az elért pontszámotok
+        {t('finished.yourScore')}
       </Stack>
       <Stack sx={{
         fontSize: 80,
@@ -50,7 +52,11 @@ export function Finished(props: { state: TeamModelDto }) {
         alignItems: 'baseline',
       }}>
         { /*TODO: add additional metrics */ }
-        {stratScore + relayScore} <span style={{ fontSize: '16px', color: '#000', marginLeft: '5px' }}>pont</span>
+        <Trans
+          i18nKey='finished.score'
+          count={stratScore + relayScore}
+          components={{ unit: <span style={{ fontSize: '16px', color: '#000', marginLeft: '5px' }} /> }}
+        />
       </Stack>
 
     </Stack>

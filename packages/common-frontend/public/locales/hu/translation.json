@@ -25,7 +25,14 @@
     "welcome": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!"
   },
   "error": {
+    "noRelayClient": "Ehhez a versenyhez nincs váltó játék beállítva",
+    "noStrategyClient": "Ehhez a versenyhez nincs stratégiás játék beállítva",
     "unexpected": "Váratlan hiba történt"
+  },
+  "finished": {
+    "score": "{{count}} <unit>pont</unit>",
+    "title": "Vége a játéknak",
+    "yourScore": "Az elért pontszámotok"
   },
   "general": {
     "loading": "Játék vagy feladat betöltése…",
@@ -77,6 +84,7 @@
   "relay": {
     "endTable": {
       "all": "Összpontszám",
+      "answers": "Válaszok",
       "back": "Vissza a versenyhez",
       "selectOtherRound": "Fordulóválasztás",
       "point": "Pontszám",
