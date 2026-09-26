@@ -9,8 +9,8 @@
 // restores output built against source that has since moved.
 //
 // tsconfig.json's `paths` is what this reads, because it is the one place every
-// such alias appears: apps/online-backend/tsdown.config.mts and
-// apps/strategy-practice/vite.config.js each say their aliases are mirrored
+// such alias appears: apps/online-backend/tsdown.config.mts resolves through it
+// directly, apps/strategy-practice/vite.config.js says its aliases are mirrored
 // there, and it is `paths` that makes the typecheck read source in the first
 // place. A path into a package *directory* or into its `dist` is not a crossing
 // — that resolves through the exports map to built output, which the two

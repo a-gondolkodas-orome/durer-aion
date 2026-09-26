@@ -19,7 +19,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
-    "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt strategy\""
+    "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt relay-bot\""
   },
   "dependencies": {
     "boardgame.io": "0.50.2",
