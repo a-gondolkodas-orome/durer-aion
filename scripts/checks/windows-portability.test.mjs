@@ -67,7 +67,7 @@ describe('an npm script', () => {
 
   it('sets no environment variable the way only a POSIX shell understands', () => {
     // `FOO=bar cmd` is not syntax on cmd.exe, which reads it as the name of a program to run.
-    // cross-env is a dependency here for exactly this, and turbo passes declared vars through.
+    // cross-env is the portable way, and turbo passes declared vars through.
     const offenders = commands
       .filter(({ command }) =>
         command.split('&&').some(part => /^\s*[A-Za-z_][A-Za-z0-9_]*=/.test(part))
@@ -77,7 +77,7 @@ describe('an npm script', () => {
     expect(
       offenders,
       `These prefix a command with an environment variable, which cmd.exe cannot do:\n${
-        list(offenders)}\nUse cross-env, or set it in the script the command runs.`
+        list(offenders)}\nUse cross-env (declared by the workspace that runs it), or set it in the script the command runs.`
     ).toStrictEqual([]);
   });
 
