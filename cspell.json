@@ -149,23 +149,13 @@
     "xors",
     "yearidx"
   ],
-  "flagWords": [],
   "ignorePaths": [
     "node_modules",
     "dist",
     "build",
     "site",
-    "*.log",
-    "package.json",
     "coverage/**/*",
-    "docker-compose*",
-    "scripts/test.tsv*",
     "**/src/teamData.ts"
-  ],
-  "languageSettings": [
-    {
-      "languageId": "typescript"
-    }
   ],
   "dictionaryDefinitions": [
     {
