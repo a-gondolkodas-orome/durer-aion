@@ -5,10 +5,9 @@ import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io"
 // which is not an API and can be rearranged by a patch release.
 export type RandomAPI = DefaultPluginAPIs['random'];
 
-// boardgame.io's own Game interface defaults its generics to `any` (quoted
-// below); a caller that spells that out trips no-explicit-any on bgio's
-// defaults rather than on a choice of ours. One caged alias keeps the ban
-// meaningful everywhere else.
+// boardgame.io's own Game interface defaults its generics to `any`; a caller
+// that spells that out trips no-explicit-any on bgio's defaults rather than on
+// a choice of ours. One caged alias keeps the ban meaningful everywhere else.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyBgioGame = Game<any, Record<string, unknown>, any>;
 
@@ -80,24 +79,6 @@ interface WrappableGame<G = unknown, PluginAPIs extends Record<string, unknown> 
   moves?: MoveMap<G, PluginAPIs>;
   turn?: TurnConfig<G, PluginAPIs>;
 }
-
-/* Game Interface fragment for reference (bitch.)
-export interface Game<
-  G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
-  SetupData extends any = any
-> {
-  name?: string;
-  minPlayers?: number;
-  maxPlayers?: number;
-  setup?: (
-    context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
-    setupData?: SetupData
-  ) => G;
-  moves?: MoveMap<G, PluginAPIs>;
-  turn?: TurnConfig<G, PluginAPIs>;
-}
-*/
 
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 

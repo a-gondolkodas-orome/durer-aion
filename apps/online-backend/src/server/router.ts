@@ -405,7 +405,6 @@ export function configureTeamsRouter(
     let team = ctx.state.team;
     const staleInfo = await checkStaleMatch(team);
     if (staleInfo.isStale) {
-      console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
       await closeMatch(
         (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
         teams,
