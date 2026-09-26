@@ -1,3 +1,5 @@
+# Written by hand. apps/online-backend/src/server/swagger.test.ts fails when
+# the routes here and the ones router.ts serves differ.
 openapi: 3.0.0
 info:
   title: Teams and Games API
