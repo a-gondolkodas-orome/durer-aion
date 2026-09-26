@@ -7,7 +7,6 @@ import type { Language } from 'strategy-engine';
 // browser lists it anywhere: the audience is overwhelmingly Hungarian, often with
 // an English browser. Otherwise English, which someone reading neither language
 // is likelier to manage. An empty list says nothing, and the caller's default holds.
-// `pages/home/index.html` repeats this, having no build to import it with.
 export const browserLanguage = (languages: readonly string[]): Language | null => {
   if (languages.length === 0) return null;
   return languages.some(tag => tag.toLowerCase().split('-')[0] === 'hu') ? 'hu' : 'en';
