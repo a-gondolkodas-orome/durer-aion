@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-import { every } from 'lodash';
 import { gameList, categories, iconKeys, type Category, type GameList, type IconKey } from '../../games/gameList';
 import { useTranslation, type I18nString } from 'language';
 import { GameIcon, iconLabels } from '../game-icons';
@@ -12,9 +11,7 @@ export const filterByCategories = (
   list: GameList
 ): string[] => {
   if (selected.length === 0) return ids;
-  return ids.filter(id =>
-    !every(list[id].category, c => !selected.includes(c))
-  );
+  return ids.filter(id => list[id].category.some(c => selected.includes(c)));
 };
 
 // The distinct icons actually used by the catalog, in canonical `iconKeys`

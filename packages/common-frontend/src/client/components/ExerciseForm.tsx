@@ -121,7 +121,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
         </Stack>
         <Stack sx={{ marginTop: '20px' }}>
           {props.previousTries.map((data, idx) => {
-            return <Stack sx={{
+            return <Stack key={idx} sx={{
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
@@ -132,7 +132,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
                 fontSize: '18px',
                 marginLeft: '10px',
               }}>{data}</Stack>
-              {props.previousCorrectness === false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />}
+              {props.previousCorrectness === false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18px' }} />}
             </Stack>
           })}
         </Stack>
