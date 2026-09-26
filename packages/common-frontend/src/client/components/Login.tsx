@@ -5,27 +5,8 @@ import { useLogin } from '../hooks/user-hooks';
 import Form from './form';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
-import * as reactTextMask from "react-text-mask";
-
-// react-text-mask's 2018 UMD build assigns __esModule at runtime, where
-// Vite 8's rolldown prebundle cannot see it, so a plain default import hands
-// this component to React as the raw CJS exports object and the login form
-// crashes. Unwrap however many .default layers the bundler of the day adds.
-const unwrapDefault = (mod: unknown): unknown => {
-  let current = mod;
-  while (
-    current &&
-    typeof current !== "function" &&
-    (current as { default?: unknown }).default !== undefined
-  ) {
-    current = (current as { default: unknown }).default;
-  }
-  return current;
-};
-const MaskedInput = unwrapDefault(reactTextMask) as typeof reactTextMask.default;
+import { formatJoinCode } from "../utils/join-code";
 import { useTranslation } from 'react-i18next';
-
-const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
 export function Login() {
   const theme = useTheme();
@@ -99,11 +80,12 @@ export function Login() {
         {
           ({
             field,
-            form: { handleChange },
-          }: FieldProps) => <MaskedInput
+            form: { setFieldValue },
+          }: FieldProps) => <input
             {...field}
-            mask={idMask}
-            onChange={handleChange}
+            onChange={(event) => void setFieldValue(field.name, formatJoinCode(event.target.value))}
+            inputMode="numeric"
+            autoComplete="off"
             className="text-input"
               placeholder="111-2222-333"
               style={{
