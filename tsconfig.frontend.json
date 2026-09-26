@@ -1,0 +1,15 @@
+{
+  // The three boardgame.io frontends: vite builds them, so tsc only checks.
+  // Each adds its own `include` and `paths`, which resolve against the file
+  // that names them.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "types": ["vite/client"]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  // What the four packages and the three boardgame.io frontends compile under
+  // alike. A package extends this and adds its declarations and target; a
+  // frontend extends it through tsconfig.frontend.json. Options that
+  // are relative paths (`include`, `outDir`, `paths`) stay in each workspace,
+  // since they resolve against the file that names them. The backend
+  // (nodenext, no DOM), apps/strategy-practice and packages/strategy-engine
+  // keep configs of their own.
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    // bundler resolution requires an ES `module`; tsdown and vite do the real
+    // emit, so this only tells tsc how to read the sources.
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true
+  }
+}
