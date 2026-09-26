@@ -3,6 +3,15 @@ import { useSearchParams } from 'react-router';
 import { LanguageProvider as ProvideLanguage } from 'strategy-engine/react';
 import type { Language } from 'strategy-engine';
 
+// The browser's preference, for a visitor who has not chosen. Hungarian if the
+// browser lists it anywhere: the audience is overwhelmingly Hungarian, often with
+// an English browser. Otherwise English, which someone reading neither language
+// is likelier to manage. An empty list says nothing, and the caller's default holds.
+export const browserLanguage = (languages: readonly string[]): Language | null => {
+  if (languages.length === 0) return null;
+  return languages.some(tag => tag.toLowerCase().split('-')[0] === 'hu') ? 'hu' : 'en';
+};
+
 // The stateful half of the language plumbing, and the reason it stays in this
 // app: the language lives in the URL (`?lang=`) and localStorage, and the URL
 // half rides this app's router. The engine's provider is deliberately
@@ -11,7 +20,8 @@ import type { Language } from 'strategy-engine';
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [language, setLanguageState] = useState<Language>(
-    () => (searchParams.get('lang') ?? localStorage.getItem('lang') ?? 'hu') as Language
+    () => (searchParams.get('lang') ?? localStorage.getItem('lang')
+      ?? browserLanguage(navigator.languages) ?? 'hu') as Language
   );
 
   // When the URL ?lang= param changes (e.g. direct link or back/forward),
@@ -30,16 +40,16 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     const langFromUrl = searchParams.get('lang') as Language | null;
     if (langFromUrl !== null && langFromUrl !== language) {
       setLanguageState(langFromUrl);
-      if (langFromUrl === 'hu') localStorage.removeItem('lang');
-      else localStorage.setItem('lang', langFromUrl);
+      localStorage.setItem('lang', langFromUrl);
     }
   }, [searchParams]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    if (lang === 'hu') localStorage.removeItem('lang');
-    else localStorage.setItem('lang', lang);
+    // Stored even when it is the default: a stored choice is what outranks the
+    // browser's language, so Hungarian picked in an English browser has to stick.
+    localStorage.setItem('lang', lang);
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
