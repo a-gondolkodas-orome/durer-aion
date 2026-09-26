@@ -29,10 +29,9 @@ export function Countdown(
     const endMs = new Date(endTime).getTime();
     // How far our clock is from the server's, measured once per server reading:
     // re-measuring on every render would fold the time elapsed since the reading
-    // into it. Object.is, because an unparseable endTime makes endMs NaN, which
-    // `!==` would take for a new reading on every render.
+    // into it.
     const [clock, setClock] = useState(() => measureClock(endMs, serverRemainingMs));
-    if (!Object.is(clock.endMs, endMs) || !Object.is(clock.serverRemainingMs, serverRemainingMs)) {
+    if (clock.serverRemainingMs !== serverRemainingMs) {
         setClock(measureClock(endMs, serverRemainingMs));
     }
     const { offset } = clock;
@@ -66,7 +65,7 @@ export function Countdown(
 }
 
 function measureClock(endMs: number, serverRemainingMs: number) {
-    return { endMs, serverRemainingMs, offset: endMs - new Date().getTime() - serverRemainingMs };
+    return { serverRemainingMs, offset: endMs - new Date().getTime() - serverRemainingMs };
 }
 
 function formatCountdown(msRemaining: number) {
