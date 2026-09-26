@@ -145,7 +145,7 @@ export async function checkStaleMatch(
   | { isStale: false }
   | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
 > {
-  const now = new Date(Date());
+  const now = new Date();
   if (team.relayMatch.state === "IN PROGRESS") {
     if (typeof team.relayMatch.endAt === "string")
       team.relayMatch.endAt = new Date(team.relayMatch.endAt);
