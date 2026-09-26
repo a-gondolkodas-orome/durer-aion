@@ -129,9 +129,7 @@ its contents here. What follows is the rest.
   and the winner is tracked in `G.winner`
 - Use Hungarian for user-facing text (the competition is in Hungarian). The
   strategy practice site is the exception: it has an HU/EN switcher (and a
-  `?lang=` param). The relay practice site is pinned to Hungarian — `LANGUAGE` in
-  `apps/relay-practise-frontend/src/App.tsx`. User-facing English uses British
-  spelling
+  `?lang=` param). User-facing English uses British spelling
 - **Formatting is ESLint's, through `@stylistic`, not prettier's.**
   `eslint.stylistic.mjs`, which both configs import, holds the character-level
   rules and says why a rule joins that set only if it fixes characters, never
