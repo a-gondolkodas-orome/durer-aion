@@ -1,5 +1,6 @@
-import { Ctx, Game } from "boardgame.io";
+import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { timestampMoves } from "../../common/timestamp";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 
 interface Answer {
@@ -45,6 +46,14 @@ export interface RelayEndReport {
 
 export type RelayReport = RelayStepReport | RelayEndReport;
 
+/// A clock poll, not a step of the match, so it stays out of timestampMoves.
+function getTime({ G, playerID }: FnContext<MyGameState> & { playerID: PlayerID }) {
+  if (playerID !== GUESSER_PLAYER) {
+    return INVALID_MOVE;
+  }
+  G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
+}
+
 export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
@@ -68,7 +77,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
     phases:
     {
       startNewGame: {
-        moves: {
+        moves: timestampMoves<MyGameState>({
           startGame: ({ G, _ctx, playerID, events }) => {
             if (playerID !== GUESSER_PLAYER || G.numberOfTry !== 0) {
               return INVALID_MOVE;
@@ -86,7 +95,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.numberOfTry = 1;
             events.endTurn();
           },
-        },
+        }),
         turn: {
           order: TurnOrder.ONCE,
           onMove: ({ G, _ctx, playerID, events }) => {
@@ -134,7 +143,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         onEnd: ({ G, ctx, _playerID, _events, _random, _log }) => {
           sendRelayFunction({ component: "relay", phase: "end", G: G, ctx: ctx });
         },
-        moves: {
+        moves: { getTime, ...timestampMoves<MyGameState>({
           newProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               // He is not the bot OR G.answer is null (and it is not the first question)
@@ -189,13 +198,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
               events.endGame();
           },
-          getTime({ G, _ctx, playerID, _events }) {
-            if (playerID !== GUESSER_PLAYER) {
-              return INVALID_MOVE;
-            }
-            G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
-          }
-        },
+        }) },
       },
     },
 

@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import { Client } from "boardgame.io/client";
 import { GameRelay, RelayWrapper } from "./game";
 
@@ -54,5 +54,37 @@ describe("RelayWrapper end report", () => {
     expect(client.getState()?.ctx.gameover).toBeDefined();
     const endReports = reports.filter((report) => report.phase === "end");
     expect(endReports).toStrictEqual([{ phase: "end", points: 2 }]);
+  });
+});
+
+describe("GameRelay move log", () => {
+  const timeOfMoves = new Date("2026-11-14T09:30:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(timeOfMoves);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("every step of a relay is logged with the time it was made, but not a clock poll", () => {
+    const client = Client({ game: GameRelay, numPlayers: 2 });
+    client.start();
+    client.moves.startGame();
+    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.getTime();
+    client.moves.submitAnswer(120);
+    client.moves.nextTry(1);
+
+    const moves = client.getState()?.log.filter(entry => entry.action.type === "MAKE_MOVE");
+    expect(moves?.map(entry => [entry.action.payload.type, entry.metadata])).toStrictEqual([
+      ["startGame", { time: timeOfMoves.toISOString() }],
+      ["firstProblem", { time: timeOfMoves.toISOString() }],
+      ["getTime", undefined],
+      ["submitAnswer", { time: timeOfMoves.toISOString() }],
+      ["nextTry", { time: timeOfMoves.toISOString() }],
+    ]);
   });
 });
