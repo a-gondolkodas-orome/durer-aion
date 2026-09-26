@@ -88,6 +88,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             .catch((e: unknown) => {
               console.log(e);
               enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+              // A guess that never reached the server brings on no attempt of ours.
+              setSentFromAttempt(null);
             });
           setSentFromAttempt(props.attempt);
         }}>
