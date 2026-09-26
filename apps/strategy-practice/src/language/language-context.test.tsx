@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import { render, screen, fireEvent } from '@testing-library/react';
+import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
-import { LanguageProvider } from './language-context';
+import { LanguageProvider, browserLanguage } from './language-context';
 import { useLanguage } from 'strategy-engine/react';
 
 // The provider reads the language from two places at once — the `?lang=` param and
@@ -29,7 +29,12 @@ const renderAt = (entry = '/') => render(
 const language = () => screen.getByTestId('language').textContent;
 const search = () => screen.getByTestId('search').textContent;
 
-beforeEach(() => localStorage.clear());
+// jsdom's browser is American English, which the provider would follow; the
+// site's audience browses in Hungarian.
+beforeEach(() => {
+  localStorage.clear();
+  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['hu-HU']);
+});
 
 describe('LanguageProvider', () => {
   it('is Hungarian when nothing says otherwise', () => {
@@ -59,7 +64,7 @@ describe('LanguageProvider', () => {
     expect(localStorage.getItem('lang')).toBe('en');
   });
 
-  it('clears both when Hungarian — the default — is chosen back', () => {
+  it('clears the URL but stores the choice when Hungarian — the default — is chosen back', () => {
     localStorage.setItem('lang', 'en');
     renderAt('/?lang=en');
 
@@ -67,7 +72,25 @@ describe('LanguageProvider', () => {
 
     expect(language()).toBe('hu');
     expect(search()).toBe('');
+    expect(localStorage.getItem('lang')).toBe('hu');
+  });
+
+  it('follows the browser language when nothing was chosen, without storing it', () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB', 'de']);
+    renderAt();
+    expect(language()).toBe('en');
     expect(localStorage.getItem('lang')).toBeNull();
+  });
+
+  it('keeps Hungarian chosen in an English browser', () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
+    renderAt('/?lang=en');
+
+    fireEvent.click(screen.getByText('choose hu'));
+    cleanup();
+    renderAt();
+
+    expect(language()).toBe('hu');
   });
 
   it('follows a navigation that carries a lang param', () => {
@@ -86,6 +109,22 @@ describe('LanguageProvider', () => {
 
     expect(search()).toBe('');
     expect(language()).toBe('en');
+  });
+});
+
+describe('browserLanguage', () => {
+  it('is Hungarian when the browser lists it anywhere, even after English', () => {
+    expect(browserLanguage(['en-US', 'HU'])).toBe('hu');
+    expect(browserLanguage(['hu-HU'])).toBe('hu');
+  });
+
+  it('is English when the browser lists no Hungarian, whatever it lists instead', () => {
+    expect(browserLanguage(['en-GB'])).toBe('en');
+    expect(browserLanguage(['de-DE', 'fr'])).toBe('en');
+  });
+
+  it('is null for an empty list', () => {
+    expect(browserLanguage([])).toBeNull();
   });
 });
 
