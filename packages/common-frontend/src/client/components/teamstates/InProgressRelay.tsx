@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
-import { useEffect, useState } from 'react';
-import { Countdown } from '../Countdown';
+import { useEffect, useEffectEvent } from 'react';
+import { Countdown, useMsRemaining } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState } from 'game';
 import { Dialog } from '@mui/material';
@@ -25,8 +25,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
   maxPointsList?: number[],
   selectRoundOnEnd?: boolean,
 }) {
-  const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
-  const [gameover, setGameover] = useState(ctx.gameover);
+  const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining);
   const clientRepo = useClientRepo();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
@@ -40,23 +39,22 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
     window.location.reload();
   };
 
-  useEffect(() => {
-    if (!ctx.gameover) {
-      // This function runs only once (on page reload) because it is inside a useEffect.
-      // Otherwise, it would run on every render.
-      const gameNotStarted = G.numberOfTry === 0;
-      if (gameNotStarted) {
-        void clientRepo.startRelayGame(moves);
-      } else {
-        void clientRepo.syncRelayTime(moves);
-      }
+  const startOrSync = useEffectEvent(() => {
+    const gameNotStarted = G.numberOfTry === 0;
+    if (gameNotStarted) {
+      void clientRepo.startRelayGame(moves);
+    } else {
+      void clientRepo.syncRelayTime(moves);
     }
-    setGameover(ctx.gameover)
-  }, [ctx.gameover]);
+  });
   useEffect(() => {
-    setMsRemaining(G.millisecondsRemaining);
-  }, [G.millisecondsRemaining]);
-  const finished = msRemaining < - 5000 || gameover === true
+    // Keyed on ctx.gameover alone, so this runs once on page load rather than
+    // on every render or every answer.
+    if (!ctx.gameover) {
+      startOrSync();
+    }
+  }, [ctx.gameover]);
+  const finished = msRemaining < - 5000 || ctx.gameover === true
   const isOffline = clientRepo.version === "OFFLINE";
   return (
     <>

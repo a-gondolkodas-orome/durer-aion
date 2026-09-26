@@ -1,7 +1,7 @@
-import { ComponentProps, useEffect, useMemo, useState } from "react";
+import { ComponentProps, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { GameRelay } from "game";
-import { relayStrategy, Problem } from "relay-bot";
+import { relayStrategy } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
 import { loadProblemSet } from "./problems";
@@ -16,22 +16,16 @@ export function RelayClient({ teamName }: {
   credentials?: string,
 }) {
   const { t } = useTranslation();
-  const [problems, setProblems] = useState<Problem[] | null>(null);
-  const [missing, setMissing] = useState(false);
-
-  useEffect(() => {
-    setProblems(null);
-    setMissing(false);
+  const problems = useMemo(() => {
     if (!teamName) {
-      setMissing(true);
-      return;
+      return null;
     }
     // loadProblemSet throws on a code with no bundled set — reachable through a
     // stale stored teamState, never through the round selector.
     try {
-      setProblems(loadProblemSet(teamName));
+      return loadProblemSet(teamName);
     } catch {
-      setMissing(true);
+      return null;
     }
   }, [teamName]);
 
@@ -56,11 +50,8 @@ export function RelayClient({ teamName }: {
     ).ClientWithBot;
   }, [teamName, problems]);
 
-  if (missing) {
-    return <p>{t('relay.error.missingTest', { test: teamName })}</p>;
-  }
   if (!ClientWithBot) {
-    return <div>{t('general.loading')}</div>;
+    return <p>{t('relay.error.missingTest', { test: teamName })}</p>;
   }
   return <ClientWithBot />;
 }

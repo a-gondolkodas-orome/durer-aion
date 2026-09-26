@@ -14,19 +14,11 @@ import i18next from "i18next";
 export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
   const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
-  const [admin, setAdmin] = useState<boolean>(false);
+  const admin = window.location.pathname.includes('/admin');
 
   useEffect(() => {
     void i18next.changeLanguage(props.language);
   }, [props.language])
-
-  useEffect(() => {
-    if (window.location.pathname.includes('/admin')) {
-      setAdmin(true);
-    } else {
-      setAdmin(false);
-    }
-  }, [])
 
   return (
     <Layout>

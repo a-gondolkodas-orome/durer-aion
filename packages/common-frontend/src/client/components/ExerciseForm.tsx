@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import * as Yup from 'yup';
 import { Button, Stack } from "@mui/material";
 import Form from "./form";
@@ -28,18 +28,22 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
-  const [sentAnswer, setSentAnswer] = useState<number>(0);
+  // The attempt a guess was sent from. The form below remounts on each new
+  // attempt, and focuses its input only when a guess of ours is what moved it on.
+  const [sentFromAttempt, setSentFromAttempt] = useState<number | null>(null);
   const { t } = useTranslation();
-  useEffect(() => {
-    if (props.previousCorrectness != null) {
-      if (props.previousCorrectness) {
+  const announceResult = useEffectEvent((correct: boolean | null) => {
+    if (correct != null) {
+      if (correct) {
         enqueueSnackbar(t('relay.goodGuess'), { variant: 'success' });
       } else {
         enqueueSnackbar(t('relay.wrongGuess'), { variant: 'error' });
       }
     }
-    setSentAnswer((p) => {return p - 1;});
-  }, [props.previousCorrectness, props.attempt, enqueueSnackbar])
+  });
+  useEffect(() => {
+    announceResult(props.previousCorrectness);
+  }, [props.previousCorrectness, props.attempt])
   return <Stack>
     <Stack sx={{
       fontSize: '22px',
@@ -79,7 +83,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
               console.log(e);
               enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
             });
-          setSentAnswer(1);
+          setSentFromAttempt(props.attempt);
         }}>
         <Field
           name="result"
@@ -89,7 +93,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             field,
             form: { handleChange },
           }: FieldProps<number>) => <input
-            autoFocus={sentAnswer > 0}
+            autoFocus={sentFromAttempt !== null && sentFromAttempt < props.attempt}
             autoComplete="off"
             {...field}
             onChange={(e) => {

@@ -1,6 +1,6 @@
 import { Button, Dialog, Stack, alpha } from "@mui/material";
-import { useEffect, useState } from "react";
-import { Countdown } from "../client/components/Countdown";
+import { useEffect } from "react";
+import { Countdown, useMsRemaining } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
@@ -20,10 +20,7 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
   return (props: StrategyBoardProps<G>) => {
     const { G, ctx, moves } = props;
-    const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining); // asked from the server
-    // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
-    // only ever asks whether it is `true`.
-    const [gameover, setGameover] = useState<unknown>(ctx.gameover);
+    const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining); // asked from the server
     const toHome = useToHome();
     const refreshState = useRefreshTeamState();
     const isOffline = useClientRepo().version === "OFFLINE";
@@ -41,12 +38,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
       if (!ctx.gameover) {
         moves.getTime();
       }
-      setGameover(ctx.gameover)
     }, [ctx.gameover, moves]);
-    useEffect(() => {
-      setMsRemaining(G.millisecondsRemaining);
-    }, [G.millisecondsRemaining]);
-    const finished = msRemaining < - 5000 || gameover === true
+    // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
+    // only ever asks whether it is `true`.
+    const finished = msRemaining < - 5000 || ctx.gameover === true
     return (
       <>
         <Dialog
