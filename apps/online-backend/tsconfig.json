@@ -22,9 +22,9 @@
     // is what keeps the boards out of the server: this compile has no `jsx`, so
     // an import of it here fails with `--jsx is not set` errors naming the game
     // package. Left unmapped it would resolve through the exports map to the
-    // declarations in `dist` instead and pass, and tsdown — which aliases only
-    // what is listed below — would leave a bare `require("game/client")` in a
-    // bundle whose image never builds that `dist`.
+    // declarations in `dist` instead and pass, and tsdown — which bundles only
+    // what its `deps.alwaysBundle` names — would leave a bare
+    // `require("game/client")` in a bundle whose image never builds that `dist`.
     // The flip side of reading source: those packages are compiled under this
     // file's `lib` and `target` as well as their own, so an error in them shows
     // up in both typechecks, and the game package must stay DOM-free.

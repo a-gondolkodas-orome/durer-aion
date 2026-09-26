@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process'
+import { manualChunks } from '../../vite.shared.mts'
 
 const backend = 'http://localhost:8000';
 
@@ -32,16 +33,8 @@ export default defineConfig(() => {
     },
     build: {
       rollupOptions: {
-        output: {
-          manualChunks(id) {
-            // Split game description files into a separate chunk
-            // These contain the problem text that should only load when the game starts
-            if (id.includes('/ReactClient.')) {
-              return 'react-client';
-            }
-          }
-        }
-      }
-    }
+        output: { manualChunks },
+      },
+    },
   }
 })

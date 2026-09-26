@@ -2,8 +2,15 @@
   "$schema": "https://turbo.build/schema.json",
   // Both forms: `.env.*` matches .env.docker, and matches neither a bare `.env`
   // nor apps/*/.env — which seed-env-files.mjs writes and which vite reads at
-  // build time for the VITE_* settings it inlines.
-  "globalDependencies": ["**/.env", "**/.env.*"],
+  // build time for the VITE_* settings it inlines. The rest are root files that
+  // workspace configs extend or import, which no workspace's own hash covers.
+  "globalDependencies": [
+    "**/.env",
+    "**/.env.*",
+    "tsconfig.base.json",
+    "tsconfig.frontend.json",
+    "vite.shared.mts"
+  ],
   "globalEnv": [
     "BOT_CREDENTIALS",
     "ADMIN_CREDENTIALS",
