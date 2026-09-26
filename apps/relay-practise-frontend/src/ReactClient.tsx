@@ -1,7 +1,7 @@
 import { ComponentProps, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { GameRelay } from "game";
-import { relayStrategy } from "relay-bot";
+import { relayStrategy, Problem } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
 import { loadProblemSet } from "./problems";
@@ -16,21 +16,16 @@ export function RelayClient({ teamName }: {
   credentials?: string,
 }) {
   const { t } = useTranslation();
-  const problems = useMemo(() => {
+  const ClientWithBot = useMemo(() => {
     if (!teamName) {
       return null;
     }
+    let problems: Problem[];
     // loadProblemSet throws on a code with no bundled set — reachable through a
     // stale stored teamState, never through the round selector.
     try {
-      return loadProblemSet(teamName);
+      problems = loadProblemSet(teamName);
     } catch {
-      return null;
-    }
-  }, [teamName]);
-
-  const ClientWithBot = useMemo(() => {
-    if (!teamName || !problems) {
       return null;
     }
     // The game name ends up in the localStorage key, so every test keeps its own saved match
@@ -48,7 +43,7 @@ export function RelayClient({ teamName }: {
       relayStrategy(problems),
       description,
     ).ClientWithBot;
-  }, [teamName, problems]);
+  }, [teamName]);
 
   if (!ClientWithBot) {
     return <p>{t('relay.error.missingTest', { test: teamName })}</p>;
