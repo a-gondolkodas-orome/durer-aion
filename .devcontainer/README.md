@@ -24,7 +24,6 @@ where the file does not exist yet, so your own values are never overwritten:
 | sample | seeded file | used by |
 | --- | --- | --- |
 | `.env.docker.sample` | `.env.docker` | `docker compose --env-file` |
-| `.env.local.sample` | `.env.local` | `common-frontend`'s tsdown config |
 | `apps/<app>/.env.sample` | `apps/<app>/.env` | that app's dev server |
 
 ## What's in it
