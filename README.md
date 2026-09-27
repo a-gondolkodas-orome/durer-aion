@@ -320,8 +320,8 @@ reason.
 
 Vocabulary the dictionaries lack lives in three places: technical identifiers in
 `cspell.json`'s `words` list; the competition's own coinages and proper nouns in
-`hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
-`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no one
+`cspell/hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `cspell/hungarian-hunspell-words.txt`, which no one
 maintains by hand — `npm run spell-check:hu-triage` regenerates it from the same
 globs, validating every word against real hunspell (needs
 `apt install hunspell hunspell-hu`) and printing whatever hunspell rejects for a
