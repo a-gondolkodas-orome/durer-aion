@@ -109,7 +109,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
       if "score" in team_states_dict[code]["strategyMatch"]:
         team_state_points = team_states_dict[code]["strategyMatch"]["score"]
       if strategy_states[code]["G"]["points"] != team_state_points:
-        print(f"ERROR strategy {code}: team_states says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
+        print(f"ERROR strategy {code}: team_states says {team_state_points}, while gamestate {strategy_states[code]['G']['points']}")
 
   # Get results
   for code in login_codes:
