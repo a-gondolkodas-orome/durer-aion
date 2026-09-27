@@ -13,32 +13,24 @@
 // Arguments are passed on to compose: `node scripts/compose-prod.mjs ps`.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
-export const OPTIONAL_FILES = ['docker-compose.override.yml', 'docker-compose.tls.yml'];
+const OPTIONAL_FILES = ['docker-compose.override.yml', 'docker-compose.tls.yml'];
 
-export function composeArgs(presentFiles, args) {
-  return [
+const present = OPTIONAL_FILES.filter(file => existsSync(`${repoRoot}${file}`));
+for (const file of present) console.log(`Including ${file}.`);
+const { status, error } = spawnSync(
+  'docker',
+  [
     'compose',
     '--env-file=.env.docker',
     '-f', 'docker-compose.yml',
-    ...OPTIONAL_FILES.filter(file => presentFiles.includes(file)).flatMap(file => ['-f', file]),
-    ...args,
-  ];
-}
-
-// Real paths on both sides: through a symlink the two differ, and a mismatch
-// here would skip compose and exit 0 — a deploy that reports success.
-if (realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const present = OPTIONAL_FILES.filter(file => existsSync(`${repoRoot}${file}`));
-  for (const file of present) console.log(`Including ${file}.`);
-  const { status, error } = spawnSync(
-    'docker',
-    composeArgs(present, process.argv.slice(2)),
-    { cwd: repoRoot, stdio: 'inherit' },
-  );
-  if (error) throw error;
-  process.exitCode = status ?? 1;
-}
+    ...present.flatMap(file => ['-f', file]),
+    ...process.argv.slice(2),
+  ],
+  { cwd: repoRoot, stdio: 'inherit' },
+);
+if (error) throw error;
+process.exitCode = status ?? 1;
