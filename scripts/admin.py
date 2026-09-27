@@ -33,9 +33,6 @@ BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
 # this folder out.
 OUTPUT_DIR = Path(__file__).resolve().parent / 'admin-output'
 OUTPUT_DIR.mkdir(exist_ok=True)
-# False reuses the match data files a previous run left in OUTPUT_DIR, which
-# only suits rerunning the export on data already known to be final.
-FORCE_DOWNLOAD = True
 
 # %%
 def get_request(username:str, password:str, baseurl:str, endpoint:str):
@@ -67,18 +64,12 @@ for team in team_states:
 MATCH_TYPES = ['relay', 'strategy']
 MATCH_DATA_TYPES = ['state', 'logs']
 
-def get_match_data(team_states, match_type:str, match_data_type:str, force_download:bool):
+def get_match_data(team_states, match_type:str, match_data_type:str):
   if match_type not in MATCH_TYPES:
       raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
   if match_data_type not in MATCH_DATA_TYPES:
       raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
   file_name = OUTPUT_DIR / f'match_data_{match_type}_{match_data_type}.json'
-  if not force_download:
-    try:
-      with open(file_name, 'r') as f:
-        return json.load(f)
-    except FileNotFoundError:
-      pass
   match_data = {}
   match_type_id = 'relayMatch' if match_type == 'relay' else 'strategyMatch'
   for team_state in tqdm(team_states, f"Downloading {match_type} {match_data_type}"):
@@ -90,12 +81,12 @@ def get_match_data(team_states, match_type:str, match_data_type:str, force_downl
   return match_data
 
 # %%
-relay_states = get_match_data(team_states, 'relay', 'state', FORCE_DOWNLOAD)
-strategy_states = get_match_data(team_states, 'strategy', 'state', FORCE_DOWNLOAD)
+relay_states = get_match_data(team_states, 'relay', 'state')
+strategy_states = get_match_data(team_states, 'strategy', 'state')
 # Nothing below reads the logs: they are downloaded to keep a record of every
 # move beside the results, for settling a disputed score after the round.
-relay_logs = get_match_data(team_states, 'relay', 'logs', FORCE_DOWNLOAD)
-strategy_logs = get_match_data(team_states, 'strategy', 'logs', FORCE_DOWNLOAD)
+relay_logs = get_match_data(team_states, 'relay', 'logs')
+strategy_logs = get_match_data(team_states, 'strategy', 'logs')
 
 # %%
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
