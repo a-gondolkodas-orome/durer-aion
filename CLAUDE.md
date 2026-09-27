@@ -123,9 +123,9 @@ and deployed from the year's private synced repo until the competition is over;
 ## Key Conventions
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) carries the rules about working: commit
-subjects, where a test goes and what it must not print, pull request scope and
-reviewers, and the traps that cost the most time. Read it rather than repeating
-its contents here. What follows is the rest.
+subjects, where a test goes and what it must not print, pull request scope, and
+the traps that cost the most time. Read it rather than repeating its contents
+here. What follows is the rest.
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay),
   and the winner is tracked in `G.winner`
