@@ -61,7 +61,7 @@ picks it up follows from where it is, not from what it is called.
 
 Both halves matter, because a suite no glob reaches does not fail: it is simply
 never run, and the green tick says nothing was wrong. `npm test` refuses either
-mistake by name (`scripts/checks/test-file-naming.test.mjs`).
+mistake by name (`test-file-naming.test.mjs`).
 
 One more: **a test that writes to the console fails.** `vitest/setup.mts` says
 why and how to opt out when a test means to exercise a logging path. If a

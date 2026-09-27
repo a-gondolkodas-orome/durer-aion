@@ -31,7 +31,7 @@ where the file does not exist yet, so your own values are never overwritten:
 - **Node**, the exact version in `.nvmrc` — the one every CI job and the
   `Dockerfile` run. The image tag names only the major, and the patch it bakes
   lags — the `node` feature in `devcontainer.json` is what pins it, so bumping
-  `.nvmrc` means bumping that too (`scripts/checks/check-versions.test.mjs` lists every
+  `.nvmrc` means bumping that too (`check-versions.test.mjs` lists every
   file that repeats the version, and `npm test` fails until they agree).
 - **Docker inside the container**, so every documented flow works unchanged
   from a terminal in here — `npm run db:up` for the database on its own, and

@@ -11,7 +11,7 @@
     // packages/* change into these hashes. Reading source across the workspace
     // boundary is what buys the build its independence, and what costs it a
     // cache — a hit here would restore a bundle built against a game/ that has
-    // since moved. scripts/checks/turbo-source-crossing.test.mjs pins the pair.
+    // since moved. turbo-source-crossing.test.mjs pins the pair.
     "build": { "dependsOn": [], "cache": false },
     "dev": { "dependsOn": [] },
     "typecheck": { "dependsOn": [], "cache": false }

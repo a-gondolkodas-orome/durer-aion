@@ -112,7 +112,7 @@ nginx + docker compose (`npm run stack:prod`), not GitHub Pages —
 `/proba-verseny/` in one artifact, with no staging step and no approval; the
 workflow going green is the cutover. The testers' dry run is the *other* Pages
 deploy, published on demand to the year's *private* repo; the two workflows are
-guarded in opposite directions and `scripts/checks/workflow-safety.test.mjs` pins both.
+guarded in opposite directions and `workflow-safety.test.mjs` pins both.
 
 **Nothing about an unreleased game may appear in a public commit** — including
 engine changes phrased around its needs. A new competition's game is developed
@@ -149,6 +149,9 @@ here. What follows is the rest.
   standing hazard. Suites are the exception: a regression test names its bug
 - Say a thing once: rationale lives in the doc that owns the decision, and
   comments point at it rather than restating it
+- In prose and comments, name a file by its basename when that is unique in the
+  repo — a path goes stale on every move, a basename does not. A path is for what
+  reads it, for a name the repo repeats, and for a markdown link worth clicking
 - Cover major new functionality with unit tests — for a new game, the game logic
   first: move validators and the strategy, the pure functions where a wrong
   branch decides a competition. Trivial wiring (exports, registration,

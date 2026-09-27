@@ -2,7 +2,7 @@
 // released yesterday until something asks. This reports what is behind (docs/DEPENDENCIES.md),
 // across every workspace at once.
 //
-// It is the outward-facing half of checks/check-versions.test.mjs: that one compares the versions
+// It is the outward-facing half of check-versions.test.mjs: that one compares the versions
 // written down in this repo against *each other* and fails the test run on a mismatch; this one compares them against *upstream* and never fails anything.
 //
 // Four sources, each read-only over the network:
@@ -26,7 +26,7 @@ const read = file => readFileSync(`${repoRoot}${file}`, 'utf8');
 const WORKFLOWS = '.github/workflows/';
 
 // Places a version is written down that no package.json names, so a bump has to touch them in the
-// same commit. checks/check-versions.test.mjs fails until they agree; this only says where to look.
+// same commit. check-versions.test.mjs fails until they agree; this only says where to look.
 export const ALSO_WRITTEN_IN = {
   playwright: ['apps/strategy-practice/.devcontainer/Dockerfile']
 };
@@ -45,9 +45,9 @@ export const HELD_BACK = {
 };
 
 // Node is written down far more often than it is depended on, and listing all of it in a table cell
-// would crowd out the version. checks/check-versions.test.mjs carries the list; the row carries the count.
+// would crowd out the version. check-versions.test.mjs carries the list; the row carries the count.
 const NVMRC_COMPANIONS = {
-  '.nvmrc': ['4 more files — see scripts/checks/check-versions.test.mjs']
+  '.nvmrc': ['4 more files — see check-versions.test.mjs']
 };
 
 // The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart

@@ -230,7 +230,7 @@ describe('the command line', () => {
 describe('the credential', () => {
   const script = readFileSync(fileURLToPath(new URL('./sync-mirror.mjs', import.meta.url)), 'utf8');
 
-  // #462, as scripts/checks/workflow-safety.test.mjs pins it for the workflows. The logic moved out of a
+  // #462, as workflow-safety.test.mjs pins it for the workflows. The logic moved out of a
   // workflow and out of the reach of that test, so the rule it enforced moves with it.
   it('is never interpolated into a URL, which git writes into .git/config', () => {
     expect(script).not.toMatch(/https?:\/\/[^\s'"`]*\$[^\s'"`]*@/);
