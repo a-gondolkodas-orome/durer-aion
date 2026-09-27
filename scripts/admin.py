@@ -28,6 +28,8 @@ def read_admin_password():
 
 ADMIN_PASSWORD = read_admin_password()
 BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
+# False reuses the match data files a previous run left in the working directory.
+# If the results look wrong or the script fails, set it to True to download again.
 FORCE_DOWNLOAD = False
 
 # %%
@@ -83,10 +85,10 @@ def get_match_data(team_states, match_type:str, match_data_type:str, force_downl
   return match_data
 
 # %%
-relay_states = get_match_data(team_states, 'relay', 'state')
-strategy_states = get_match_data(team_states, 'strategy', 'state')
-relay_logs = get_match_data(team_states, 'relay', 'logs')
-strategy_logs = get_match_data(team_states, 'strategy', 'logs')
+relay_states = get_match_data(team_states, 'relay', 'state', FORCE_DOWNLOAD)
+strategy_states = get_match_data(team_states, 'strategy', 'state', FORCE_DOWNLOAD)
+relay_logs = get_match_data(team_states, 'relay', 'logs', FORCE_DOWNLOAD)
+strategy_logs = get_match_data(team_states, 'strategy', 'logs', FORCE_DOWNLOAD)
 
 # %%
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
