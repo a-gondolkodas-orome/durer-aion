@@ -371,15 +371,16 @@ services:
       - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-Rebuild with the override. `npm run deps` is the install `npm run stack:prod` does for
-itself and this path does not — without it a pull that moved the lockfile builds the
-frontend against the tree the previous release installed:
+Rebuild. `stack:prod` includes `docker-compose.tls.yml` whenever the checkout has one
+(`scripts/compose-prod.mjs`), so from here on every `stack:prod*` command serves TLS:
 
 ```bash
-npm run deps
-npm run build
-docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
+npm run stack:prod
 ```
+
+A bare `docker compose … up` does not: without `-f docker-compose.tls.yml` it recreates
+`web` with port 80 only, and the domain stops answering over HTTPS while compose reports
+success. Go through the npm scripts.
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
 adding this to `nginx-tls.conf` and rebuilding again. Certbot's renewal fetches its
@@ -455,9 +456,21 @@ git pull
 npm run stack:prod
 ```
 
-With TLS set up, use the three-command form from step 8 instead — `stack:prod` takes no
-arguments. A change to `nginx-tls.conf` itself is the reload in step 8 rather than either:
-`up` does not recreate `web` for it.
+That installs, builds the frontend and the images, and recreates only the containers
+whose image or configuration changed; with TLS set up it is still the same command. A
+change to `nginx-tls.conf` itself is the reload in step 8 instead: `up` does not recreate
+`web` for it.
+
+To restart the stack without deploying anything — the backend misbehaves, the machine
+needs a kick:
+
+```bash
+npm run stack:prod:restart
+```
+
+It recreates all three containers from the images already built, starting postgres before
+the backend, and returns once they are healthy. What a restart mid-round costs the teams
+running a match is in *Restarting during a competition* below.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
@@ -471,6 +484,21 @@ itself — with whatever image and `dist` were last built, since nothing rebuild
 > **Delete the DNS record too.** The IP goes back to the provider's pool, and a record left
 > pointing at it lets whoever gets that IP next serve their own content — with their own
 > valid certificate — on a subdomain of your domain.
+
+## Restarting during a competition
+
+Teams, matches and logins are all in postgres, and open pages reconnect on their own and
+fetch the match state again. What a restart does cost:
+
+- **The clock keeps running.** A match ends at a wall-clock time fixed when it starts, so
+  the downtime comes out of every running match. Note how long the site was down and give
+  it back per match with `POST /game/admin/:matchId/addminutes/:minutes`.
+- **A bot move in flight is lost.** The bot answers a team's move after a short wait
+  (`apps/online-backend/src/botwrapper.ts`), and only in response to that move. A restart
+  inside that window leaves the match on the bot's turn with nothing to prompt it, so the
+  team's board stays frozen until the match's time runs out.
+- **`stack:prod` deploys whatever the checkout holds.** To restart without also putting a
+  `git pull` live, use `stack:prod:restart`, which rebuilds nothing.
 
 ## Getting inside a container
 
