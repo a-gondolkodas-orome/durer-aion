@@ -180,12 +180,20 @@ upload is the only thing that exercises those.
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
 server: it needs Python packages the server has no reason to carry, and what it
-writes is keyed by join code, the teams' login secret.
+writes is keyed by join code, the teams' login secret. On macOS or Linux:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r scripts/requirements.txt
 DURER_BASE_URL=https://verseny.durerinfo.hu .venv/bin/python scripts/admin.py   # prompts for the password
+```
+
+On Windows, in PowerShell:
+
+```powershell
+py -m venv .venv
+.venv\Scripts\pip install -r scripts\requirements.txt
+$env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scripts\admin.py
 ```
 
 It writes the match data (`match_data_*.json`) and the results

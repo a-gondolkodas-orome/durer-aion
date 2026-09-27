@@ -67,7 +67,7 @@ for team in team_states:
 MATCH_TYPES = ['relay', 'strategy']
 MATCH_DATA_TYPES = ['state', 'logs']
 
-def get_match_data(team_states, match_type:str, match_data_type:str, force_download:bool = False):
+def get_match_data(team_states, match_type:str, match_data_type:str, force_download:bool):
   if match_type not in MATCH_TYPES:
       raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
   if match_data_type not in MATCH_DATA_TYPES:
@@ -125,13 +125,13 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
       results[code]["strategy"] = strategy_states[code]["G"]["points"]
 
   # Export: one column per relay problem, as many as the longest relay, and
-  # padded, so every row has the header's cells. Sorted, as the set of codes
-  # above has no order of its own.
+  # padded, so every row has the header's cells.
   relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
   with open(OUTPUT_DIR / f'durer-results-{date.today().year}.tsv', 'w', encoding='utf-8') as f:
     f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
                       + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
-    for code in sorted(results.keys()):
+    for code in sorted(results, key=lambda code: (team_states_dict[code]["category"],
+                                                  team_states_dict[code]["teamName"], code)):
       detailed = list(map(str, results[code]["relay_detailed"]))
       f.write('\t'.join([
         code,

@@ -27,16 +27,16 @@ FROM deps AS dev
 # Copy source code
 COPY . .
 
-# .dockerignore keeps credentials, team lists and scripts/admin.py's output out
-# of the context; this fails the build if one of those patterns ever stops
-# matching. Docker matches a pattern against the whole path, so the `**/`
-# prefixes are load-bearing and easy to drop by accident — that is how
-# apps/online-backend/.env used to get baked in (#443). The first two names are
-# prefix globs for the same reason: the importer writes `<file>.tsv.export` next
-# to the list it read, and `*.tsv` does not match it. CI seeds the env files
-# before building, so a regression surfaces in the docker job rather than in a
-# deployed image. node_modules is pruned because npm ci has already filled it
-# above.
+# .dockerignore keeps credentials and team lists out of the context; this fails
+# the build if one of those patterns ever stops matching. Docker matches a
+# pattern against the whole path, so the `**/` prefixes are load-bearing and
+# easy to drop by accident — that is how apps/online-backend/.env used to get
+# baked in (#443). The first two names are prefix globs for the same reason: the
+# importer writes `<file>.tsv.export` next to the list it read, and `*.tsv`
+# does not match it. CI seeds the env files before building, so a regression
+# surfaces in the docker job rather than in a deployed image. node_modules is
+# pruned because npm ci has already filled it above. admin-output is
+# scripts/admin.py's output, keyed by join code.
 RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.tsv*' -o -name admin-output \) -print); \
     if [ -n "$leaked" ]; then \
       echo "These must not reach the image — check .dockerignore:" >&2; \
