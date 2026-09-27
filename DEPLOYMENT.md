@@ -383,7 +383,7 @@ A bare `docker compose … up` does not: without `-f docker-compose.tls.yml` it 
 success. Go through the npm scripts.
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
-adding this to `nginx-tls.conf` and rebuilding again. Certbot's renewal fetches its
+adding this to `nginx-tls.conf` and reloading nginx (below). Certbot's renewal fetches its
 challenge over plain HTTP, so that one path has to survive the redirect; everything else on
 port 80 goes to HTTPS before it can reach a proxied location, which is what keeps a
 plaintext request from ever reporting the wrong scheme to the backend.
@@ -399,8 +399,8 @@ Adding it before the first certificate exists is what breaks issuance, which is 
 comes second.
 
 This one is a reload, not a rebuild. `docker compose up` recreates a container only when its
-*configuration* changes, and editing a file that is already bind-mounted is not that — the
-three commands above would leave `web` running with the config it parsed at startup, the
+*configuration* changes, and editing a file that is already bind-mounted is not that —
+`npm run stack:prod` would leave `web` running with the config it parsed at startup, the
 redirect correct on disk and not being served:
 
 ```bash
