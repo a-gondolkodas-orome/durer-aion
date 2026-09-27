@@ -120,7 +120,8 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
   # Export: one column per relay problem, as many as the longest relay, and
   # padded, so every row has the header's cells.
   relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
-  with open(OUTPUT_DIR / f'durer-results-{date.today().year}.tsv', 'w', encoding='utf-8') as f:
+  results_path = OUTPUT_DIR / f'durer-results-{date.today().year}.tsv'
+  with open(results_path, 'w', encoding='utf-8') as f:
     f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
                       + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
     for code in sorted(results, key=lambda code: (team_states_dict[code]["category"],
@@ -133,6 +134,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
         str(results[code]["strategy"]),
         str(results[code]["relay"]),
       ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")
+  print(f"Results of {len(results)} teams written to {results_path}")
 export_results_tsv(team_states_dict, relay_states, strategy_states)
 
 # %%

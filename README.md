@@ -188,7 +188,8 @@ $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scrip
 
 It writes the match data (`match_data_*.json`) and the results
 (`durer-results-<year>.tsv`) to `scripts/admin-output/`, wherever it is run
-from; `.gitignore` and `.dockerignore` both keep that folder out.
+from, and prints the results file's full path when it is done; `.gitignore`
+and `.dockerignore` both keep that folder out.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
   no credential of its own. Unset it prompts, and with no terminal to prompt on
