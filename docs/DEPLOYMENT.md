@@ -527,9 +527,9 @@ npm run stack:ps                                          # what is running
 docker compose --env-file=.env.docker exec backend bash   # a shell in one
 ```
 
-`scripts/admin.py` is the post-competition scoring pull. Set `DURER_BASE_URL` to the site's
-URL — port 8000 is not published, nginx is the way in — and `DURER_ADMIN_PASSWORD` to
-`ADMIN_CREDENTIALS`, or let it prompt.
+`scripts/admin.py` is the post-competition scoring pull. Run it from your own checkout
+against the site's URL, not on this host; [`README.md`](../README.md) § *Admin* has the
+command and why.
 
 ## Error reporting
 
