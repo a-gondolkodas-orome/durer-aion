@@ -498,7 +498,8 @@ fetch the match state again. What a restart does cost:
   inside that window leaves the match on the bot's turn with nothing to prompt it, so the
   team's board stays frozen until the match's time runs out.
 - **`stack:prod` deploys whatever the checkout holds.** To restart without also putting a
-  `git pull` live, use `stack:prod:restart`, which rebuilds nothing.
+  `git pull` live, use `stack:prod:restart`, which rebuilds no image. Changes to the compose
+  files and `.env.docker` do take effect: it recreates every container from them.
 
 ## Getting inside a container
 
