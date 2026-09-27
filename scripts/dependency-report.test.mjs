@@ -157,13 +157,13 @@ describe('formatReport', () => {
   });
 });
 
-// The report's captions and README § Held back deliberately are two lists of the same four holds,
-// and only the README argues them. Lifting one there and forgetting the other would leave the next
+// The report's captions and DEPENDENCIES.md § Held back deliberately are two lists of the same four
+// holds, and only DEPENDENCIES.md argues them. Lifting one there and forgetting the other would leave the next
 // monthly issue still calling a finished hold a hold — a month before anyone noticed.
-describe('HELD_BACK against README', () => {
-  it('names the same packages as README § Held back deliberately', () => {
-    const readme = readFileSync(fileURLToPath(new URL('../README.md', import.meta.url)), 'utf8');
-    const section = readme.split('### Held back deliberately')[1]?.split(/^#/m)[0] ?? '';
+describe('HELD_BACK against DEPENDENCIES.md', () => {
+  it('names the same packages as DEPENDENCIES.md § Held back deliberately', () => {
+    const doc = readFileSync(fileURLToPath(new URL('../docs/DEPENDENCIES.md', import.meta.url)), 'utf8');
+    const section = doc.split('## Held back deliberately')[1]?.split(/^#/m)[0] ?? '';
     const documented = [...section.matchAll(/^- \*\*`([^`]+)`/gm)].map(([, name]) => name);
 
     expect(documented.sort()).toEqual(Object.keys(HELD_BACK).sort());
