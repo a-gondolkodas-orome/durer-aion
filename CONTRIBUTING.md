@@ -82,10 +82,6 @@ PR; two unrelated one-line fixes are two.
 Fill the template in. Its prompts are HTML comments, so you have them in front
 of you while writing the description and they leave no trace in the body.
 
-`.github/CODEOWNERS` requests a reviewer automatically for the strategy practice
-paths. It does not cover the rest of the repository yet, so for anything else,
-request one by hand — otherwise nobody is notified.
-
 ## The rest
 
 - [`CLAUDE.md` § *Key Conventions*](CLAUDE.md#key-conventions) — the house rules

@@ -1,6 +1,6 @@
 // A lockfile pins every dependency exactly, so a package four minors behind looks exactly like one
-// released yesterday until something asks. This reports what is behind (README § Dependency
-// updates), across every workspace at once.
+// released yesterday until something asks. This reports what is behind (docs/DEPENDENCIES.md),
+// across every workspace at once.
 //
 // It is the outward-facing half of check-versions.test.mjs: that one compares the versions
 // written down in this repo against *each other* and fails the test run on a mismatch; this one compares them against *upstream* and never fails anything.
@@ -34,9 +34,9 @@ export const ALSO_WRITTEN_IN = {
 // Majors this repo has decided not to take yet, and the one line that says why. Listing them
 // among the real work made every month's issue read as five upgrades when only one was: they are
 // reported, because a hold worth keeping is worth re-reading, but in their own section.
-// README § Held back deliberately owns the reasoning and is where a hold is argued or lifted; the
-// value here is only the caption a table cell has room for. The spec fails when the two lists stop
-// naming the same packages, so a hold cannot be lifted in one of them alone.
+// DEPENDENCIES.md § Held back deliberately owns the reasoning and is where a hold is argued or
+// lifted; the value here is only the caption a table cell has room for. The spec fails when the two
+// lists stop naming the same packages, so a hold cannot be lifted in one of them alone.
 export const HELD_BACK = {
   koa: 'boardgame.io constructs the Koa app, at koa@^2',
   '@koa/router': 'the backend types boardgame.io\'s own @koa/router@10 instance',
@@ -261,12 +261,12 @@ export const formatReport = rows => {
       major,
       'One at a time, against the upstream upgrade guide — see [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168) for the shape.'
     ),
-    // Absolute, not relative: this report's home is an issue body, where `README.md#…` resolves
+    // Absolute, not relative: this report's home is an issue body, where `DEPENDENCIES.md#…` resolves
     // against the issue rather than the repository.
     ...table(
       `Held back deliberately (${held.length})`,
       held,
-      'Not work: each stays until its named blocker moves — see [README § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion#held-back-deliberately).',
+      'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#held-back-deliberately).',
       ['held back by', ({ name }) => HELD_BACK[name]]
     ),
     ...(failed.length === 0
