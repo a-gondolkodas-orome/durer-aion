@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Mirrors one pushed `sync-*` branch of the public repository into the year's PRIVATE repo — the
-// mechanism behind README.md § Competition secrecy. .github/workflows/sync.yml is the trigger;
-// this is the whole of what it does.
+// mechanism behind README.md § Competition secrecy, set up per docs/DEPLOYMENT.md § The year's
+// private repo. .github/workflows/sync.yml is the trigger; this is the whole of what it does.
 //
 // It lives here rather than as inline shell in that workflow for the reason
 // scripts/deploy-dry-run.mjs does: a workflow's secrets are single-valued, so exercising logic

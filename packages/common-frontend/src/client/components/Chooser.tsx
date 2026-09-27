@@ -3,7 +3,7 @@ import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -56,13 +56,7 @@ export function Chooser(props: {
           >
             {t('chooser.finish.title')}
           </p>
-          <span>
-            <Trans
-              i18nKey='chooser.finish.content'
-              components={{
-                a: <a href={process.env.VITE_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" />
-              }} />
-          </span>
+          <span>{t('chooser.finish.content')}</span>
           <p
             style={{
               fontSize: "24px",

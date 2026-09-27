@@ -3,7 +3,7 @@
     "achievedPoint": "Points achieved",
     "filledAt": "Filled at",
     "finish": {
-      "content": "Thank you for participating, we hope you enjoyed the competition. We are curious about your feedback on this round, so please <a>fill out this form</a>. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
+      "content": "Thank you for participating, we hope you enjoyed the competition. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
       "final": "Final score",
       "title": "Competition ended!"
     },
