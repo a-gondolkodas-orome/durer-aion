@@ -91,7 +91,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
           }/>}
         </Dialog>
       <Stack sx={{
-        with: "100%",
+        width: "100%",
         display: 'flex',
         flexDirection: {
           xs: 'column',

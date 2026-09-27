@@ -14,7 +14,7 @@ recorder below for that test, and hands the test the calls to assert on.
 import { afterAll, afterEach } from 'vitest';
 import { format } from 'node:util';
 
-import { installSeededRandom } from './vitest.seed.mjs';
+import { installSeededRandom } from './seed.mjs';
 
 installSeededRandom();
 

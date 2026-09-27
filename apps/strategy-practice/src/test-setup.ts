@@ -9,7 +9,7 @@ it run after every test in every file.
 */
 import { cleanup } from '@testing-library/react';
 
-import { installSeededRandom } from '../../../vitest.seed.mjs';
+import { installSeededRandom } from '../../../vitest/seed.mjs';
 
 installSeededRandom();
 

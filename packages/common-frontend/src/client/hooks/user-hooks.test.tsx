@@ -2,7 +2,8 @@
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
-import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
+import { ClientRepoProvider } from '../api-repository-interface';
+import { MockClientRepository } from '../mock-client-repository';
 import { setTeamState, useTeamStateValue } from './team-state-store';
 import { useLogin, useLogout } from './user-hooks';
 

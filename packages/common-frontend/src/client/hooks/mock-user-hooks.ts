@@ -25,6 +25,8 @@ const setPageState = (pageState: PageState) => {
 
 export const MockTeamState = {
   get teamState() { return teamState; },
+  // Module state outlives a test, so a suite resets it before each one.
+  mockLoggedOut: () => { teamState = null; },
   mockHome: () => setPageState("HOME"),
   mockDisclaimer: () => setPageState("DISCLAIMER"),
   mockRelay: () => setPageState("RELAY"),

@@ -12,7 +12,7 @@ Testers who only need to try the games and the UX get a lighter option with no s
 all — see *The dry run for testers* at the end.
 
 `npm run stack:prod` starts three containers, defined in
-[`docker-compose.yml`](./docker-compose.yml):
+[`docker-compose.yml`](../docker-compose.yml):
 
 | service | what it is |
 | --- | --- |
@@ -59,7 +59,9 @@ costs at the time of writing and what actually stops the bill:
 | DigitalOcean | Basic, 2 vCPU / 4 GB / 80 GB | $24/mo, $0.036/h | **destroy** the droplet; powering it off still bills |
 | AWS | t3.medium | ~$30/mo, ~$0.042/h | stopping stops compute, the EBS volume keeps billing |
 
-## First minutes on the machine
+## 0. First minutes on the machine
+
+### Patching
 
 Patch it — the realistic risk to a box that lives for weeks is an unpatched service:
 
@@ -78,7 +80,8 @@ has not taken effect:
 sudo reboot   # then reconnect
 ```
 
-Cheapest here, before anything is installed or running.
+<details>
+<summary>Optional: keep it patched automatically</summary>
 
 **Optional, for a machine that will live longer than the drive:** keep it patched by
 itself. The rest of this section's upgrade advice only applies if you do this.
@@ -109,6 +112,10 @@ playing:
 sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer   # start them again afterwards
 ```
 
+</details>
+
+### Users
+
 Then make a non-root user. Everything below runs as that user — `npm` as root leaves
 root-owned files in `node_modules`:
 
@@ -136,6 +143,8 @@ A drop-in rather than an edit to `/etc/ssh/sshd_config`, because the `Include` a
 that file means later lines in it lose to whatever the directory already sets. `sshd -t`
 validates before the reload.
 
+### Swap
+
 Add swap on anything at or below 4 GB — the builds are what need it:
 
 ```bash
@@ -151,6 +160,8 @@ one:
 ```bash
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
+
+### Tmux
 
 Optionally work inside `tmux`, since a dropped ssh session kills the build in progress:
 
@@ -190,9 +201,7 @@ Never `sudo npm run …`; it leaves root-owned files in `node_modules`.
 ## 2. Get the code
 
 The competition game stays secret until after the competition, so the live deployment
-clones the year's **private** repository (see *Competition secrecy* in
-[`README.md`](./README.md), which also covers what to set up when that repo is
-created). That needs a deploy key:
+clones the year's **private** repository. That needs a deploy key:
 [generate a keypair](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 on the machine, add the public half to that repository's deploy keys, and point ssh at the
 private half in `~/.ssh/config` — an `ssh-agent` does not survive a reboot:
@@ -214,7 +223,7 @@ cd <the-private-repo>
 
 ## 3. Install Node
 
-The exact version in [`.nvmrc`](./.nvmrc) — the same one CI and the backend image pin.
+The exact version in [`.nvmrc`](../.nvmrc) — the same one CI and the backend image pin.
 From inside the checkout, [nvm](https://github.com/nvm-sh/nvm) reads it:
 
 ```bash
@@ -238,7 +247,7 @@ Edit `.env.docker` before the first `up`:
   `DATABASE_URL`, so change it here and nowhere else.
 
 The other files `npm run setup` creates are frontend build settings; the samples are fine.
-[`README.md`](./README.md), under *Configuration you may want to change*, says what reads
+[`README.md`](../README.md), under *Configuration you may want to change*, says what reads
 which.
 
 > **Test drive:** throwaway values are fine, but still change all three credentials off the
@@ -281,9 +290,7 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
 
-If the backend will not stay up, `exec` has nothing to enter. Run the importer as a
-one-off container instead — it needs postgres and `DATABASE_URL`, not a server that
-boots:
+You can also run the importer as a one-off container without the stack:
 
 ```bash
 docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh scripts/<file>.tsv
@@ -488,7 +495,7 @@ URL — port 8000 is not published, nginx is the way in — and `DURER_ADMIN_PAS
 > **Test drive:** the frontend reports nothing unless its `.env` sets `VITE_SENTRY_DSN`,
 > which the samples leave empty. The backend still reports from a DSN written into
 > `apps/online-backend/src/server.ts`, so its errors do leave the machine — see *Error
-> reporting* in [`README.md`](./README.md).
+> reporting* in [`README.md`](../README.md).
 
 ## Troubleshooting
 
@@ -501,6 +508,48 @@ sudo chown -R `whoami` node_modules
 **The site loads but every request 502s.** The backend is not healthy; `npm run stack:logs`
 says why. Usually a missing variable in `.env.docker` — the server validates them at boot
 and exits.
+
+## The year's private repo
+
+Why the repo exists, and the rule it serves, is *Competition secrecy* in
+[`README.md`](../README.md). `.github/workflows/sync.yml` mirrors any pushed `sync-*`
+branch of the public repository into it; the mirroring itself is
+[`scripts/sync-mirror.mjs`](../scripts/sync-mirror.mjs), which that workflow only
+calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
+otherwise derive:
+
+```bash
+SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
+  node scripts/sync-mirror.mjs
+```
+
+When the year's repo is created:
+
+- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
+  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
+  token that both fetches from it and pushes to it. A fine-grained token scoped
+  to that one repository with **Contents: Read and write** is enough
+- **Decide about Actions.** The mirror carries `.github/workflows` too, so every
+  workflow here also lands there under that repo's own triggers. Leaving them on
+  is what gets lint, typecheck and tests run against the game while it is being
+  developed, which is when they are worth the most; the two that would reach
+  outside the repository — `pages-deploy.yml` and `sync.yml` — are already
+  guarded to run only in the public one. A third, `dry-run-deploy.yml`, is
+  guarded the other way and *is* meant to run here: it is the one-button deploy
+  of the testers' dry run, so turning Actions off costs that button and leaves
+  `npm run deploy` from a checkout. What is left to weigh is cost: Actions
+  minutes are metered on a private repository where the public one runs free,
+  and so is the GitHub Packages storage a private image would take should #202
+  publish one from there. TBD — neither has been measured against this
+  organisation's plan.
+- **Enable Pages**, serving from the `gh-pages` branch — that is what the
+  testers' dry run is pushed to, see *The dry run for testers* below. That site is public, protected only by the
+  repository's unguessable name, which is why the deploy ships no `CNAME`.
+- **Get `dry-run-deploy.yml` onto the default branch** if you want the Run
+  workflow button. GitHub lists a `workflow_dispatch` workflow only when the file
+  is on the repo's default branch — `dev` here — so a sync branch has to be
+  merged there before the button exists. The dispatch form then picks which
+  branch gets published. Nothing else about this repo needs `main`.
 
 ## The dry run for testers
 
@@ -516,8 +565,8 @@ npm run deploy
 
 Or, inside that repo on GitHub, **Actions → dry-run-deploy → Run workflow**, which needs
 nothing checked out and lets you pick the branch to publish. The workflow only appears once
-the file is on the repo's default branch, and it is dispatch-only — see *Competition
-secrecy* in [`README.md`](./README.md).
+the file is on the repo's default branch, and it is dispatch-only — see *The year's private
+repo* above.
 
 Either way the script builds `offline-frontend` through turbo and pushes `dist` to the
 `gh-pages` branch, which Pages serves. **There is nothing to edit first.** The base path is

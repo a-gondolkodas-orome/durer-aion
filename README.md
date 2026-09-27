@@ -8,21 +8,15 @@ English as well.
 
 # Getting Started
 
-New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in: a first
-change that needs no docker, the one command to run before pushing, and the
-conventions a review will otherwise be the first to tell you about.
+New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in.
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
   `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work
-  too, but CI runs exactly this one. An **older** Node will not work at all:
-  `devEngines` in the root `package.json` requires npm 11, which 24.x bundles
-  and 22.x does not, and npm treats that as an error rather than a warning — so
-  every `npm run …` fails before your command runs, complaining about the
-  package manager rather than about Node.
+  too, but CI runs exactly this one.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
-  commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
+  commands below need no `sudo` — `docs/DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
   as root and leaves root-owned files behind in `node_modules`.
 
@@ -38,10 +32,7 @@ npm run teams:import  # loads scripts/test.tsv
 Coming back to a checkout you already have — switching to a branch to review it,
 say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
 `scripts/prepare.mjs` first, which installs and seeds only if it has to: the
-install happens when the lockfile or a workspace manifest actually moved, which
-most branches leave alone, and nothing happens at all otherwise. `npm run deps`
-runs that check by itself, for when you want the install out of the way before
-starting anything.
+install happens when the lockfile or a workspace manifest actually moved.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
@@ -54,8 +45,7 @@ and the database behind it.
 | `localhost:5432` | postgres, if you want to look at the data directly |
 
 `stack:up` returns once the containers are actually up and fails if they are
-not, and it runs in the background — so that is one terminal, not two, and
-closing it leaves the stack up. `npm run stack:logs` follows all three
+not, and it runs in the background. `npm run stack:logs` follows all three
 containers (Ctrl-C stops watching, not the stack); `npm run stack:down` stops
 it. The imported teams cover the three age categories: `000-0000-000` is C,
 `001-0000-000` is D, `002-0000-000` is E, with a thousand more behind them.
@@ -148,7 +138,7 @@ nginx wants the stack.
 npm run stack:prod
 ```
 
-What a deployed instance runs (see [`DEPLOYMENT.md`](./DEPLOYMENT.md)): the same
+What a deployed instance runs (see [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)): the same
 compose file without the dev overlay, so the container runs the server compiled
 into the image instead of a watcher, code changes need the command again, and
 postgres is reachable only from the `backend` container. Detached like
@@ -256,37 +246,10 @@ npm run spell-check
 npm run stack:build   # needs docker; the other six do not
 ```
 
-Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
-`apps/strategy-practice` too — it has no workflow of its own. (Its patch-coverage
-gate was retired in #431; that app's own `npm run coverage` stays, on demand —
-`npm run coverage --workspace=strategy-practice`, with no root script.)
-
 `npm run check` runs the six that need no docker, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
 needs docker.
-
-`npm run stack:build` builds the two images the competition is deployed from —
-the backend and nginx — without starting anything, and is the one gate that
-reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
-`nginx.conf`.
-
-`npm run lint` is the whole of the lint and formatting gate. It runs one ESLint
-process per workspace through turbo, plus `lint:root` for the files in no
-workspace — `scripts/`, the root configs — and each resolves the config nearest
-what it is given, so `apps/strategy-practice` is checked against its own
-`eslint.config.js` and everything else against the root `eslint.config.mjs`.
-
-It was a single `eslint .` over the repository until it stopped fitting: that
-process holds a TypeScript program per `tsconfig.json` at once, each with its own
-parsed copy of `lib.*.d.ts`, React and MUI, and needed 3072 MB of V8 heap where
-every workspace on its own needs under 1024 MB. Node sizes its default heap at
-about half of the memory it can see, so the same command passed on a 16 GB runner
-and died at a 2048 MB limit on a smaller one — which is how CI first failed on a
-private repository. `turbo.json` carries the reasoning, `.devcontainer/README.md`
-the measurements, and `scripts/lint-coverage.test.mjs` pins that the split leaves
-no file unlinted: a workspace with no `lint` script would otherwise be skipped in
-silence.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 
@@ -320,8 +283,8 @@ reason.
 
 Vocabulary the dictionaries lack lives in three places: technical identifiers in
 `cspell.json`'s `words` list; the competition's own coinages and proper nouns in
-`hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
-`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no one
+`cspell/hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `cspell/hungarian-hunspell-words.txt`, which no one
 maintains by hand — `npm run spell-check:hu-triage` regenerates it from the same
 globs, validating every word against real hunspell (needs
 `apt install hunspell hunspell-hu`) and printing whatever hunspell rejects for a
@@ -330,64 +293,8 @@ human to fix or bless.
 
 ## Dependency updates
 
-Every dependency is pinned exactly, in every workspace — `save-exact` in
-`.npmrc` keeps new ones that way — so nothing moves without a visible diff. A
-shared package is pinned to the same number everywhere, since differing exact
-pins force npm to nest a duplicate, which some packages do not survive (the
-typescript note in
-[`apps/strategy-practice/package.json`](apps/strategy-practice/package.json));
-`npm ls <package>` showing one deduped install is the check. Peer dependencies
-keep ranges: they state compatibility, not an install.
-
-`npm run update:minors` is the routine sweep: it bumps every pin to the newest
-release inside its major, across all workspaces at once, then prints what to run
-next. It never crosses a major.
-
-`.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
-one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
-every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
-each deployment runs. `npm run report:outdated` prints the same table on demand,
-and needs no install.
-
-<details><summary>Why a report rather than dependabot, and what a row means</summary>
-
-A row is one *upgrade*, not one package. The same name pinned at two versions is
-two rows rather than one reporting a version it is not; the `written down in`
-column lists every file the bump has to touch, which is the honest measure of how
-big it is. `DOCKER_IMAGES` in `scripts/dependency-report.mjs` says how far each
-image is allowed to reach, and the header comment of the same file says why this
-is a report rather than dependabot or renovate. `package-lock.json` is still what
-`npm ci` installs, and everything here that compares a version reads it.
-
-The report opens no pull requests — upgrading stays deliberate, majors one at a
-time as in
-[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Two
-versions are written down in files no `package.json` names: Node and Playwright.
-`npm test` fails until every copy agrees, and
-[`scripts/check-versions.test.mjs`](scripts/check-versions.test.mjs) is the list
-of where they are — the `.nvmrc` row's count comes from it.
-</details>
-
-### Held back deliberately
-
-The report still lists these, in a section of their own, so the `Major` count
-above it is the work actually waiting (#409). Each stays until its named blocker
-moves (#317). `HELD_BACK` in
-[`scripts/dependency-report.mjs`](scripts/dependency-report.mjs) mirrors the four
-names, and `scripts/dependency-report.test.mjs` fails when the two lists stop
-agreeing.
-
-- **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
-  pins `koa@^2` — the backend's own `koa` entry only has to agree with the
-  instance it receives. Nothing here constructs a Koa 3 app to upgrade.
-- **`@koa/router` 10 → 15**: same shape — the backend never constructs a router,
-  it types `server.router`, boardgame.io's own `@koa/router@10` instance. v15's
-  types do not even structurally match that object.
-- **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at `<6.1.0`,
-  and 6.0 is the highest version inside the cap. That cap is the only remaining
-  blocker: every tsconfig is off the `node10` resolution 7.0 removes.
-- **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
-  Node major the repo actually runs (`.nvmrc`), so they move when Node does.
+[`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) is the authority: why pins are exact, what a
+report row means, and the majors held back deliberately.
 
 # Configuration you may want to change
 
@@ -404,7 +311,6 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
 | `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
 | `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
-| `.env.local` | `VITE_FEEDBACK_URL`, read by `common-frontend`'s build |
 
 Because setup never overwrites, a file you already have goes stale when its
 sample gains a setting — so setup, and each `dev:*` script that runs it first,
@@ -448,50 +354,10 @@ repository; set it here once there is one.
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
-branch into it, the game is developed and deployed from there, and a merge-back
-PR publishes it afterwards as a strategy practice game. Nothing about an
-unreleased game may appear in a public commit — including engine changes phrased
-around its needs.
+why each year has a private synced repo
 
-The mirroring itself is
-[`scripts/sync-mirror.mjs`](scripts/sync-mirror.mjs), which that workflow only
-calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
-otherwise derive:
-
-```bash
-SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
-  node scripts/sync-mirror.mjs
-```
-
-When the year's repo is created:
-
-- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
-  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
-  token that both fetches from it and pushes to it. A fine-grained token scoped
-  to that one repository with **Contents: Read and write** is enough
-- **Decide about Actions.** The mirror carries `.github/workflows` too, so every
-  workflow here also lands there under that repo's own triggers. Leaving them on
-  is what gets lint, typecheck and tests run against the game while it is being
-  developed, which is when they are worth the most; the two that would reach
-  outside the repository — `pages-deploy.yml` and `sync.yml` — are already
-  guarded to run only in the public one. A third, `dry-run-deploy.yml`, is
-  guarded the other way and *is* meant to run here: it is the one-button deploy
-  of the testers' dry run, so turning Actions off costs that button and leaves
-  `npm run deploy` from a checkout. What is left to weigh is cost: Actions
-  minutes are metered on a private repository where the public one runs free,
-  and so is the GitHub Packages storage a private image would take should #202
-  publish one from there. TBD — neither has been measured against this
-  organisation's plan.
-- **Enable Pages**, serving from the `gh-pages` branch — that is what the
-  testers' dry run is pushed to, see *The dry run for testers* in
-  [`DEPLOYMENT.md`](./DEPLOYMENT.md). That site is public, protected only by the
-  repository's unguessable name, which is why the deploy ships no `CNAME`.
-- **Get `dry-run-deploy.yml` onto the default branch** if you want the Run
-  workflow button. GitHub lists a `workflow_dispatch` workflow only when the file
-  is on the repo's default branch — `dev` here — so a sync branch has to be
-  merged there before the button exists. The dispatch form then picks which
-  branch gets published. Nothing else about this repo needs `main`.
+Setting up that repo each year, and the mirroring behind `sync.yml`, are in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#the-years-private-repo) § *The year's private repo*.
 
 # Debugging
 
@@ -540,5 +406,4 @@ The game's shape — `setup`, `moves`, `turn`, and the wrapper's own
 `packages/game/src/common/types.ts`, and `GameMixin.startingPosition` there says
 which of the opening position's two homes to use. A move takes as many arguments
 as you give it: `moves.changeCoins(K, L)` for a "pick two values, then commit"
-turn, driven by form inputs rather than a click on the board. Both live games are
-single-click and single-argument; nothing in the wrapper requires that.
+turn.
