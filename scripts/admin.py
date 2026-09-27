@@ -6,6 +6,7 @@ from requests.auth import HTTPBasicAuth
 import json
 from datetime import date
 from pathlib import Path
+import unicodedata
 from tqdm import tqdm
 
 def read_admin_password():
@@ -89,6 +90,15 @@ relay_logs = get_match_data(team_states, 'relay', 'logs')
 strategy_logs = get_match_data(team_states, 'strategy', 'logs')
 
 # %%
+def name_sort_key(name:str):
+  """
+    Python compares code points, which puts every accented capital after Z:
+    "Ábel" after "Zoli". Accents dropped and case folded, the name sorts beside
+    its plain spelling; the name itself breaks the ties.
+  """
+  plain = ''.join(c for c in unicodedata.normalize('NFD', name) if not unicodedata.combining(c))
+  return (plain.casefold(), name)
+
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
   # Init: if a game is not started, a "-" will be written
   login_codes = set(relay_states.keys()).union(set(strategy_states.keys()))
@@ -125,7 +135,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
     f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
                       + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
     for code in sorted(results, key=lambda code: (team_states_dict[code]["category"],
-                                                  team_states_dict[code]["teamName"], code)):
+                                                  name_sort_key(team_states_dict[code]["teamName"]), code)):
       detailed = list(map(str, results[code]["relay_detailed"]))
       f.write('\t'.join([
         code,
