@@ -283,7 +283,7 @@ For an example of internationalizing an existing game, see
 ## Dependency updates
 
 The monthly report covers this app along with the rest of the monorepo, and the
-root [`README.md`](../../README.md) § Dependency updates is the authority on it.
+root [`DEPENDENCIES.md`](../../DEPENDENCIES.md) is the authority on it.
 This app appears in its own rows rather than the shared ones wherever it runs
 ahead. Its eslint, typescript and vitest pins match the root's and its vite
 matches the other frontends'.

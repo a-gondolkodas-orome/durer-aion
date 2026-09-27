@@ -1,4 +1,4 @@
-// The routine half of README § Dependency updates: bump every dependency in every workspace to
+// The routine half of DEPENDENCIES.md: bump every dependency in every workspace to
 // the newest release inside its pinned major, in one edit. A package several workspaces share
 // lands on one number by construction, so the tree keeps deduping it to a single install. Majors
 // never move here — a major is a decision, taken one at a time (#168) — which is also what keeps
