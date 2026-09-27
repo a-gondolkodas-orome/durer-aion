@@ -8,19 +8,13 @@ English as well.
 
 # Getting Started
 
-New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in: a first
-change that needs no docker, the one command to run before pushing, and the
-conventions a review will otherwise be the first to tell you about.
+New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in.
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/), the version in [`.nvmrc`](./.nvmrc) —
   `nvm use` anywhere in the repo picks it up. Another 24.x will most likely work
-  too, but CI runs exactly this one. An **older** Node will not work at all:
-  `devEngines` in the root `package.json` requires npm 11, which 24.x bundles
-  and 22.x does not, and npm treats that as an error rather than a warning — so
-  every `npm run …` fails before your command runs, complaining about the
-  package manager rather than about Node.
+  too, but CI runs exactly this one.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
   commands below need no `sudo` — `docs/DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
@@ -38,10 +32,7 @@ npm run teams:import  # loads scripts/test.tsv
 Coming back to a checkout you already have — switching to a branch to review it,
 say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
 `scripts/prepare.mjs` first, which installs and seeds only if it has to: the
-install happens when the lockfile or a workspace manifest actually moved, which
-most branches leave alone, and nothing happens at all otherwise. `npm run deps`
-runs that check by itself, for when you want the install out of the way before
-starting anything.
+install happens when the lockfile or a workspace manifest actually moved.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
@@ -54,8 +45,7 @@ and the database behind it.
 | `localhost:5432` | postgres, if you want to look at the data directly |
 
 `stack:up` returns once the containers are actually up and fails if they are
-not, and it runs in the background — so that is one terminal, not two, and
-closing it leaves the stack up. `npm run stack:logs` follows all three
+not, and it runs in the background. `npm run stack:logs` follows all three
 containers (Ctrl-C stops watching, not the stack); `npm run stack:down` stops
 it. The imported teams cover the three age categories: `000-0000-000` is C,
 `001-0000-000` is D, `002-0000-000` is E, with a thousand more behind them.
@@ -256,37 +246,10 @@ npm run spell-check
 npm run stack:build   # needs docker; the other six do not
 ```
 
-Those are the seven jobs in `.github/workflows/ci.yml`, and they cover
-`apps/strategy-practice` too — it has no workflow of its own. (Its patch-coverage
-gate was retired in #431; that app's own `npm run coverage` stays, on demand —
-`npm run coverage --workspace=strategy-practice`, with no root script.)
-
 `npm run check` runs the six that need no docker, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
 needs docker.
-
-`npm run stack:build` builds the two images the competition is deployed from —
-the backend and nginx — without starting anything, and is the one gate that
-reaches the `Dockerfile`, `apps/online-frontend/nginx/Dockerfile` and
-`nginx.conf`.
-
-`npm run lint` is the whole of the lint and formatting gate. It runs one ESLint
-process per workspace through turbo, plus `lint:root` for the files in no
-workspace — `scripts/`, the root configs — and each resolves the config nearest
-what it is given, so `apps/strategy-practice` is checked against its own
-`eslint.config.js` and everything else against the root `eslint.config.mjs`.
-
-It was a single `eslint .` over the repository until it stopped fitting: that
-process holds a TypeScript program per `tsconfig.json` at once, each with its own
-parsed copy of `lib.*.d.ts`, React and MUI, and needed 3072 MB of V8 heap where
-every workspace on its own needs under 1024 MB. Node sizes its default heap at
-about half of the memory it can see, so the same command passed on a 16 GB runner
-and died at a 2048 MB limit on a smaller one — which is how CI first failed on a
-private repository. `turbo.json` carries the reasoning, `.devcontainer/README.md`
-the measurements, and `scripts/lint-coverage.test.mjs` pins that the split leaves
-no file unlinted: a workspace with no `lint` script would otherwise be skipped in
-silence.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 
@@ -330,9 +293,6 @@ human to fix or bless.
 
 ## Dependency updates
 
-Every dependency is pinned exactly, in every workspace. `npm run update:minors` is
-the routine sweep inside each major, and `npm run report:outdated` prints what is
-behind — the same table the monthly `OPS` issue carries.
 [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) is the authority: why pins are exact, what a
 report row means, and the majors held back deliberately.
 
@@ -394,11 +354,7 @@ repository; set it here once there is one.
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo: `sync.yml` mirrors any pushed `sync-*`
-branch into it, the game is developed and deployed from there, and a merge-back
-PR publishes it afterwards as a strategy practice game. Nothing about an
-unreleased game may appear in a public commit — including engine changes phrased
-around its needs.
+why each year has a private synced repo
 
 Setting up that repo each year, and the mirroring behind `sync.yml`, are in
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#the-years-private-repo) § *The year's private repo*.
@@ -450,5 +406,4 @@ The game's shape — `setup`, `moves`, `turn`, and the wrapper's own
 `packages/game/src/common/types.ts`, and `GameMixin.startingPosition` there says
 which of the opening position's two homes to use. A move takes as many arguments
 as you give it: `moves.changeCoins(K, L)` for a "pick two values, then commit"
-turn, driven by form inputs rather than a click on the board. Both live games are
-single-click and single-argument; nothing in the wrapper requires that.
+turn.

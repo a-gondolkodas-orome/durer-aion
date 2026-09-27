@@ -59,7 +59,9 @@ costs at the time of writing and what actually stops the bill:
 | DigitalOcean | Basic, 2 vCPU / 4 GB / 80 GB | $24/mo, $0.036/h | **destroy** the droplet; powering it off still bills |
 | AWS | t3.medium | ~$30/mo, ~$0.042/h | stopping stops compute, the EBS volume keeps billing |
 
-## First minutes on the machine
+## 0. First minutes on the machine
+
+### Patching
 
 Patch it — the realistic risk to a box that lives for weeks is an unpatched service:
 
@@ -78,7 +80,8 @@ has not taken effect:
 sudo reboot   # then reconnect
 ```
 
-Cheapest here, before anything is installed or running.
+<details>
+<summary>Optional: keep it patched automatically</summary>
 
 **Optional, for a machine that will live longer than the drive:** keep it patched by
 itself. The rest of this section's upgrade advice only applies if you do this.
@@ -109,6 +112,10 @@ playing:
 sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer   # start them again afterwards
 ```
 
+</details>
+
+### Users
+
 Then make a non-root user. Everything below runs as that user — `npm` as root leaves
 root-owned files in `node_modules`:
 
@@ -136,6 +143,8 @@ A drop-in rather than an edit to `/etc/ssh/sshd_config`, because the `Include` a
 that file means later lines in it lose to whatever the directory already sets. `sshd -t`
 validates before the reload.
 
+### Swap
+
 Add swap on anything at or below 4 GB — the builds are what need it:
 
 ```bash
@@ -151,6 +160,8 @@ one:
 ```bash
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
+
+### Tmux
 
 Optionally work inside `tmux`, since a dropped ssh session kills the build in progress:
 
@@ -190,9 +201,7 @@ Never `sudo npm run …`; it leaves root-owned files in `node_modules`.
 ## 2. Get the code
 
 The competition game stays secret until after the competition, so the live deployment
-clones the year's **private** repository (see *Competition secrecy* in
-[`README.md`](../README.md), and *The year's private repo* below for what to set up
-when that repo is created). That needs a deploy key:
+clones the year's **private** repository. That needs a deploy key:
 [generate a keypair](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 on the machine, add the public half to that repository's deploy keys, and point ssh at the
 private half in `~/.ssh/config` — an `ssh-agent` does not survive a reboot:
@@ -281,9 +290,7 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
 
-If the backend will not stay up, `exec` has nothing to enter. Run the importer as a
-one-off container instead — it needs postgres and `DATABASE_URL`, not a server that
-boots:
+You can also run the importer as a one-off container without the stack:
 
 ```bash
 docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh scripts/<file>.tsv
