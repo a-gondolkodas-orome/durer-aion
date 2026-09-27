@@ -378,16 +378,17 @@ services:
       - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-Rebuild. `stack:prod` includes `docker-compose.tls.yml` whenever the checkout has one
-(`scripts/compose-prod.mjs`), so from here on every `stack:prod*` command serves TLS:
+Name both files in `.env.docker`, so that every `docker compose --env-file=.env.docker`
+command — the npm scripts and the ones below — includes the override, then rebuild:
 
 ```bash
+echo 'COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml' >> .env.docker
 npm run stack:prod
 ```
 
-A bare `docker compose … up` does not: without `-f docker-compose.tls.yml` it recreates
-`web` with port 80 only, and the domain stops answering over HTTPS while compose reports
-success. Go through the npm scripts.
+Without that line, `up` recreates `web` with port 80 only, and the domain stops answering
+over HTTPS while compose reports success. A `docker-compose.override.yml` on the host goes
+in the list too: compose stops reading it on its own once `COMPOSE_FILE` is set.
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
 adding this to `nginx-tls.conf` and reloading nginx (below). Certbot's renewal fetches its
@@ -468,15 +469,15 @@ whose image or configuration changed; with TLS set up it is still the same comma
 change to `nginx-tls.conf` itself is the reload in step 8 instead: `up` does not recreate
 `web` for it.
 
-To restart the stack without deploying anything — the backend misbehaves, the machine
-needs a kick:
+To restart a misbehaving backend without deploying anything:
 
 ```bash
-npm run stack:prod:restart
+docker compose --env-file=.env.docker restart backend
+npm run stack:ps   # restart does not wait until it is healthy
 ```
 
-It restarts the backend container alone, as it is: no rebuild, and postgres and nginx keep
-running. What a restart mid-round costs the teams running a match is in *Restarting during
+That restarts the container as it is: no rebuild, and postgres and nginx keep running.
+What a restart mid-round costs the teams running a match is in *Restarting during
 a competition* below.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
@@ -504,9 +505,6 @@ fetch the match state again. What a restart does cost:
   (`apps/online-backend/src/botwrapper.ts`), and only in response to that move. A restart
   inside that window leaves the match on the bot's turn with nothing to prompt it, so the
   team's board stays frozen until the match's time runs out.
-- **`stack:prod` deploys whatever the checkout holds.** To restart without also putting a
-  `git pull` live, use `stack:prod:restart`, which rebuilds nothing and applies no change
-  to the compose files or `.env.docker`.
 
 ## Getting inside a container
 
