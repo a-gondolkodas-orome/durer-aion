@@ -63,7 +63,7 @@ Both halves matter, because a suite no glob reaches does not fail: it is simply
 never run, and the green tick says nothing was wrong. `npm test` refuses either
 mistake by name (`scripts/test-file-naming.test.mjs`).
 
-One more: **a test that writes to the console fails.** `vitest.setup.mts` says
+One more: **a test that writes to the console fails.** `vitest/setup.mts` says
 why and how to opt out when a test means to exercise a logging path. If a
 `console.log` you left in from debugging fails an unrelated assertion, that is
 this.

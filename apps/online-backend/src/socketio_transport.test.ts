@@ -88,7 +88,7 @@ describe("the socket transport a browser talks to", () => {
   beforeEach(async () => {
     // boardgame.io announces the port it bound on, and the bot transport logs
     // each turn it takes. Both are the code under test talking, so the spy
-    // stands in for the recorder in vitest.setup.mts for this file.
+    // stands in for the recorder in vitest/setup.mts for this file.
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     // What the bot signs its moves with; the server reads it from the

@@ -12,7 +12,7 @@ Testers who only need to try the games and the UX get a lighter option with no s
 all — see *The dry run for testers* at the end.
 
 `npm run stack:prod` starts three containers, defined in
-[`docker-compose.yml`](./docker-compose.yml):
+[`docker-compose.yml`](../docker-compose.yml):
 
 | service | what it is |
 | --- | --- |
@@ -191,7 +191,7 @@ Never `sudo npm run …`; it leaves root-owned files in `node_modules`.
 
 The competition game stays secret until after the competition, so the live deployment
 clones the year's **private** repository (see *Competition secrecy* in
-[`README.md`](./README.md), which also covers what to set up when that repo is
+[`README.md`](../README.md), which also covers what to set up when that repo is
 created). That needs a deploy key:
 [generate a keypair](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 on the machine, add the public half to that repository's deploy keys, and point ssh at the
@@ -214,7 +214,7 @@ cd <the-private-repo>
 
 ## 3. Install Node
 
-The exact version in [`.nvmrc`](./.nvmrc) — the same one CI and the backend image pin.
+The exact version in [`.nvmrc`](../.nvmrc) — the same one CI and the backend image pin.
 From inside the checkout, [nvm](https://github.com/nvm-sh/nvm) reads it:
 
 ```bash
@@ -238,7 +238,7 @@ Edit `.env.docker` before the first `up`:
   `DATABASE_URL`, so change it here and nowhere else.
 
 The other files `npm run setup` creates are frontend build settings; the samples are fine.
-[`README.md`](./README.md), under *Configuration you may want to change*, says what reads
+[`README.md`](../README.md), under *Configuration you may want to change*, says what reads
 which.
 
 > **Test drive:** throwaway values are fine, but still change all three credentials off the
@@ -480,7 +480,7 @@ docker compose --env-file=.env.docker exec backend bash   # a shell in one
 ```
 
 `scripts/admin.py` is the post-competition scoring pull. Run it from your own checkout
-against the site's URL, not on this host; [`README.md`](./README.md) § *Admin* has the
+against the site's URL, not on this host; [`README.md`](../README.md) § *Admin* has the
 command and why.
 
 ## Error reporting
@@ -488,7 +488,7 @@ command and why.
 > **Test drive:** the frontend reports nothing unless its `.env` sets `VITE_SENTRY_DSN`,
 > which the samples leave empty. The backend still reports from a DSN written into
 > `apps/online-backend/src/server.ts`, so its errors do leave the machine — see *Error
-> reporting* in [`README.md`](./README.md).
+> reporting* in [`README.md`](../README.md).
 
 ## Troubleshooting
 
@@ -517,7 +517,7 @@ npm run deploy
 Or, inside that repo on GitHub, **Actions → dry-run-deploy → Run workflow**, which needs
 nothing checked out and lets you pick the branch to publish. The workflow only appears once
 the file is on the repo's default branch, and it is dispatch-only — see *Competition
-secrecy* in [`README.md`](./README.md).
+secrecy* in [`README.md`](../README.md).
 
 Either way the script builds `offline-frontend` through turbo and pushes `dist` to the
 `gh-pages` branch, which Pages serves. **There is nothing to edit first.** The base path is
