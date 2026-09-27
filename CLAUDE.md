@@ -105,7 +105,7 @@ server's, naming the game package; a board may use whatever the browser gives it
 samples; [`README.md`](README.md) § *Configuration you may want to change* is the
 table of what reads which. The real competition, `verseny.durerinfo.hu`, runs on
 nginx + docker compose (`npm run stack:prod`), not GitHub Pages —
-[`DEPLOYMENT.md`](DEPLOYMENT.md) is the walkthrough.
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the walkthrough.
 
 **A push to `main` deploys the public site** — `/jatekok/`, `/valto/` and
 `/proba-verseny/` in one artifact, with no staging step and no approval; the
