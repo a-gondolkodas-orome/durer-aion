@@ -29,9 +29,9 @@ def read_admin_password():
 
 ADMIN_PASSWORD = read_admin_password()
 BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
-# In the working directory; .gitignore and .dockerignore keep a folder of this
-# name out wherever it is in the checkout.
-OUTPUT_DIR = Path('admin-output')
+# Beside the script, wherever it is run from; .gitignore and .dockerignore keep
+# this folder out.
+OUTPUT_DIR = Path(__file__).resolve().parent / 'admin-output'
 OUTPUT_DIR.mkdir(exist_ok=True)
 # False reuses the match data files a previous run left in OUTPUT_DIR, which
 # only suits rerunning the export on data already known to be final.
