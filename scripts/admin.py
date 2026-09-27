@@ -32,7 +32,16 @@ BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
 # Beside the script rather than in the working directory, so wherever the script
 # is run from, its output lands in the one folder .gitignore and .dockerignore
 # keep out.
-OUTPUT_DIR = Path(__file__).resolve().parent / 'admin-output'
+try:
+  SCRIPT_DIR = Path(__file__).resolve().parent
+except NameError:
+  # Run cell by cell, where a kernel may not define __file__. Its working
+  # directory stands in only when it is this script's, else the output would
+  # land where nothing ignores it.
+  SCRIPT_DIR = Path.cwd()
+  if not (SCRIPT_DIR / 'admin.py').is_file():
+    raise SystemExit('Start the kernel in scripts/, the folder admin.py is in.')
+OUTPUT_DIR = SCRIPT_DIR / 'admin-output'
 OUTPUT_DIR.mkdir(exist_ok=True)
 # False reuses the match data files a previous run left in OUTPUT_DIR, which
 # only suits rerunning the export on data already known to be final.
