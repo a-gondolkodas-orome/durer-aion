@@ -1,36 +1,42 @@
 #!/usr/bin/env node
 // `docker compose` as the deployed stack is run: `.env.docker` for the
-// secrets, and `docker-compose.tls.yml` on top whenever the checkout has one.
-// Every `stack:prod*` script goes through here, so no command on a TLS host
-// can bring `web` back without its port 443 and certificates by leaving the
-// override out. DEPLOYMENT.md § 8 is where that file comes from; it is
-// untracked, so its presence is what says this host serves TLS.
+// secrets, and on top of `docker-compose.yml` whichever per-machine overrides
+// the checkout has. Every `stack:prod*` script goes through here, so no
+// command on a TLS host can bring `web` back without its port 443 and
+// certificates by leaving the override out. DEPLOYMENT.md § 8 is where the TLS
+// file comes from; both are untracked, so their presence is what says this
+// host uses them.
+//
+// `docker-compose.override.yml` is listed because compose reads it on its own
+// only when no `-f` is given, and this always gives one.
 //
 // Arguments are passed on to compose: `node scripts/compose-prod.mjs ps`.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
-export const TLS_OVERRIDE = 'docker-compose.tls.yml';
+export const OPTIONAL_FILES = ['docker-compose.override.yml', 'docker-compose.tls.yml'];
 
-export function composeArgs(hasTlsOverride, args) {
+export function composeArgs(presentFiles, args) {
   return [
     'compose',
     '--env-file=.env.docker',
     '-f', 'docker-compose.yml',
-    ...(hasTlsOverride ? ['-f', TLS_OVERRIDE] : []),
+    ...OPTIONAL_FILES.filter(file => presentFiles.includes(file)).flatMap(file => ['-f', file]),
     ...args,
   ];
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const hasTlsOverride = existsSync(`${repoRoot}${TLS_OVERRIDE}`);
-  if (hasTlsOverride) console.log(`Including ${TLS_OVERRIDE}.`);
+// Real paths on both sides: through a symlink the two differ, and a mismatch
+// here would skip compose and exit 0 — a deploy that reports success.
+if (realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const present = OPTIONAL_FILES.filter(file => existsSync(`${repoRoot}${file}`));
+  for (const file of present) console.log(`Including ${file}.`);
   const { status, error } = spawnSync(
     'docker',
-    composeArgs(hasTlsOverride, process.argv.slice(2)),
+    composeArgs(present, process.argv.slice(2)),
     { cwd: repoRoot, stdio: 'inherit' },
   );
   if (error) throw error;

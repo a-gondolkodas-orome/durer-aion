@@ -1,20 +1,24 @@
 // What is pinned is the file list, since a missing `-f` is what fails quietly:
-// compose brings `web` up without port 443 and reports success.
+// compose brings the stack up without that file and reports success.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { composeArgs, TLS_OVERRIDE } from './compose-prod.mjs';
+import { composeArgs } from './compose-prod.mjs';
+
+const base = ['compose', '--env-file=.env.docker', '-f', 'docker-compose.yml'];
 
 describe('composeArgs', () => {
   it('adds the TLS override after the base file when the host has one', () => {
-    expect(composeArgs(true, ['up'])).toStrictEqual([
-      'compose', '--env-file=.env.docker', '-f', 'docker-compose.yml', '-f', TLS_OVERRIDE, 'up',
-    ]);
+    expect(composeArgs(['docker-compose.tls.yml'], ['up']))
+      .toStrictEqual([...base, '-f', 'docker-compose.tls.yml', 'up']);
   });
 
-  it('runs the base file alone on a host without TLS', () => {
-    expect(composeArgs(false, ['ps'])).toStrictEqual([
-      'compose', '--env-file=.env.docker', '-f', 'docker-compose.yml', 'ps',
-    ]);
+  it('keeps docker-compose.override.yml, which compose drops once any -f is given', () => {
+    expect(composeArgs(['docker-compose.tls.yml', 'docker-compose.override.yml'], ['up']))
+      .toStrictEqual([...base, '-f', 'docker-compose.override.yml', '-f', 'docker-compose.tls.yml', 'up']);
+  });
+
+  it('runs the base file alone on a host without overrides', () => {
+    expect(composeArgs([], ['ps'])).toStrictEqual([...base, 'ps']);
   });
 });
 
