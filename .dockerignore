@@ -37,6 +37,7 @@ scripts/admin-output
 **/build
 **/.turbo
 **/coverage
+**/.venv
 site
 
 # The backend image has no use for the practice site, and copying it would
