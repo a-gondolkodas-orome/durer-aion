@@ -333,7 +333,7 @@ human to fix or bless.
 Every dependency is pinned exactly, in every workspace. `npm run update:minors` is
 the routine sweep inside each major, and `npm run report:outdated` prints what is
 behind — the same table the monthly `OPS` issue carries.
-[`DEPENDENCIES.md`](DEPENDENCIES.md) is the authority: why pins are exact, what a
+[`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) is the authority: why pins are exact, what a
 report row means, and the majors held back deliberately.
 
 # Configuration you may want to change

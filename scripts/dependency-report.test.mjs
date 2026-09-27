@@ -162,7 +162,7 @@ describe('formatReport', () => {
 // monthly issue still calling a finished hold a hold — a month before anyone noticed.
 describe('HELD_BACK against DEPENDENCIES.md', () => {
   it('names the same packages as DEPENDENCIES.md § Held back deliberately', () => {
-    const doc = readFileSync(fileURLToPath(new URL('../DEPENDENCIES.md', import.meta.url)), 'utf8');
+    const doc = readFileSync(fileURLToPath(new URL('../docs/DEPENDENCIES.md', import.meta.url)), 'utf8');
     const section = doc.split('## Held back deliberately')[1]?.split(/^#/m)[0] ?? '';
     const documented = [...section.matchAll(/^- \*\*`([^`]+)`/gm)].map(([, name]) => name);
 

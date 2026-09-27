@@ -1,5 +1,5 @@
 // A lockfile pins every dependency exactly, so a package four minors behind looks exactly like one
-// released yesterday until something asks. This reports what is behind (DEPENDENCIES.md),
+// released yesterday until something asks. This reports what is behind (docs/DEPENDENCIES.md),
 // across every workspace at once.
 //
 // It is the outward-facing half of check-versions.test.mjs: that one compares the versions
@@ -266,7 +266,7 @@ export const formatReport = rows => {
     ...table(
       `Held back deliberately (${held.length})`,
       held,
-      'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/DEPENDENCIES.md#held-back-deliberately).',
+      'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#held-back-deliberately).',
       ['held back by', ({ name }) => HELD_BACK[name]]
     ),
     ...(failed.length === 0

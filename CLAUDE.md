@@ -4,7 +4,7 @@ Real-time multiplayer framework for online math competitions with interactive
 games, built on boardgame.io.
 
 [`README.md`](README.md) is the authority on running things, operations and
-deployment, [`DEPENDENCIES.md`](DEPENDENCIES.md) on dependency updates;
+deployment, [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) on dependency updates;
 [`CONTRIBUTING.md`](CONTRIBUTING.md) is the human front door and carries the
 commit and pull request rules. This file is the map and the rules an agent must
 not get wrong.

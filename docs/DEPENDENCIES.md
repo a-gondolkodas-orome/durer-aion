@@ -5,7 +5,7 @@ Every dependency is pinned exactly, in every workspace — `save-exact` in
 shared package is pinned to the same number everywhere, since differing exact
 pins force npm to nest a duplicate, which some packages do not survive (the
 typescript note in
-[`apps/strategy-practice/package.json`](apps/strategy-practice/package.json));
+[`apps/strategy-practice/package.json`](../apps/strategy-practice/package.json));
 `npm ls <package>` showing one deduped install is the check. Peer dependencies
 keep ranges: they state compatibility, not an install.
 
@@ -34,7 +34,7 @@ time as in
 [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Two
 versions are written down in files no `package.json` names: Node and Playwright.
 `npm test` fails until every copy agrees, and
-[`scripts/check-versions.test.mjs`](scripts/check-versions.test.mjs) is the list
+[`scripts/check-versions.test.mjs`](../scripts/check-versions.test.mjs) is the list
 of where they are — the `.nvmrc` row's count comes from it.
 </details>
 
@@ -43,7 +43,7 @@ of where they are — the `.nvmrc` row's count comes from it.
 The report still lists these, in a section of their own, so the `Major` count
 above it is the work actually waiting (#409). Each stays until its named blocker
 moves (#317). `HELD_BACK` in
-[`scripts/dependency-report.mjs`](scripts/dependency-report.mjs) mirrors the four
+[`scripts/dependency-report.mjs`](../scripts/dependency-report.mjs) mirrors the four
 names, and `scripts/dependency-report.test.mjs` fails when the two lists stop
 agreeing.
 
