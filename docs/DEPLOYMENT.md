@@ -379,11 +379,18 @@ services:
 ```
 
 Name both files in `.env.docker`, so that every `docker compose --env-file=.env.docker`
-command — the npm scripts and the ones below — includes the override, then rebuild:
+command without an `-f` of its own — `stack:prod`, `stack:ps` and the ones below — includes
+the override. Add this line to `.env.docker`:
+
+```
+COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml
+```
+
+Then rebuild, and check that `web` now publishes 443 — compose reports success either way:
 
 ```bash
-echo 'COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml' >> .env.docker
 npm run stack:prod
+npm run stack:ps   # web's PORTS must include 0.0.0.0:443->443/tcp
 ```
 
 Without that line, `up` recreates `web` with port 80 only, and the domain stops answering
@@ -483,6 +490,8 @@ a competition* below.
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
 (`npm run stack:down -- --volumes`, then import the teams again) if the data is expendable.
+`stack:down` names its files with `-f`, so it ignores `COMPOSE_FILE`; that does not matter
+to `down`, which finds the containers by project name.
 
 All three services are `restart: unless-stopped`, so a reboot brings the stack back by
 itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
@@ -495,6 +504,9 @@ itself — with whatever image and `dist` were last built, since nothing rebuild
 
 ## Restarting during a competition
 
+Restart only when the site is not working anyway: the costs below are accepted then, not
+before.
+
 Teams, matches and logins are all in postgres, and open pages reconnect on their own and
 fetch the match state again. What a restart does cost:
 
@@ -504,7 +516,9 @@ fetch the match state again. What a restart does cost:
 - **A bot move in flight is lost.** The bot answers a team's move after a short wait
   (`apps/online-backend/src/botwrapper.ts`), and only in response to that move. A restart
   inside that window leaves the match on the bot's turn with nothing to prompt it, so the
-  team's board stays frozen until the match's time runs out.
+  team's board stays frozen until the match's time runs out. A team that reports this
+  can only start that match over from the beginning, after
+  `POST /team/admin/:teamID/reset/strategy` or `/reset/relay`.
 
 ## Getting inside a container
 
