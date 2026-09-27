@@ -7,7 +7,7 @@
  * understand each other (#461): they are separate installs of separate
  * packages, and a client that cannot sync is a round nobody can play, on a tree
  * that installs and typechecks perfectly. That they stay *one* install of
- * socket.io on the server side is scripts/socketio-single-copy.test.mjs.
+ * socket.io on the server side is scripts/checks/socketio-single-copy.test.mjs.
  *
  * Still no substitute for the round against `npm run stack:up`: nginx and the
  * built frontend are not in front of this, and postgres is not behind it.

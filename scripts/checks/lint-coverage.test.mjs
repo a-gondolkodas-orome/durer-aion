@@ -16,10 +16,10 @@ import { fileURLToPath } from 'node:url';
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
 
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
 // turbo.json allows comments and uses them, every one on a line of its own — the same
-// shape scripts/turbo-source-crossing.test.mjs reads it in. package.json has none and
+// shape scripts/checks/turbo-source-crossing.test.mjs reads it in. package.json has none and
 // does not mind being read this way.
 const readJsonc = file =>
   JSON.parse(
@@ -94,7 +94,7 @@ describe('the per-workspace lint split', () => {
 
   it('does not cache a task that reads another workspace\'s source', () => {
     // Type-aware lint reads across package boundaries, which a per-package input hash
-    // does not cover — the reasoning is scripts/turbo-source-crossing.test.mjs's, and
+    // does not cover — the reasoning is scripts/checks/turbo-source-crossing.test.mjs's, and
     // this pins the same property for the tasks that test's `coveredByAnEdge` cannot
     // reason about, having no `^build` edge to follow.
     for (const task of ['lint', 'lint:fix', '//#lint:root', '//#lint:fix:root']) {

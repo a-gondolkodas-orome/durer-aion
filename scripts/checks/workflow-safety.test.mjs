@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const WORKFLOWS = '.github/workflows/';
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
 // Normalised so CRLF line endings stay off every pattern below. sync.yml was the file that had
 // them, until the shell in it moved to scripts/sync-mirror.mjs.

@@ -7,11 +7,11 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { resolvedVersion } from './resolved-versions.mjs';
+import { resolvedVersion } from '../resolved-versions.mjs';
 
 // Every path here is repository-relative: Node is the whole repository's pin, and GitHub only
 // reads .github/workflows at the repository root anyway. Only Playwright is the practice app's alone.
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const read = file => readFileSync(`${repoRoot}${file}`, 'utf8');
 const app = 'apps/strategy-practice/';
 

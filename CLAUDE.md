@@ -112,7 +112,7 @@ nginx + docker compose (`npm run stack:prod`), not GitHub Pages —
 `/proba-verseny/` in one artifact, with no staging step and no approval; the
 workflow going green is the cutover. The testers' dry run is the *other* Pages
 deploy, published on demand to the year's *private* repo; the two workflows are
-guarded in opposite directions and `scripts/workflow-safety.test.mjs` pins both.
+guarded in opposite directions and `scripts/checks/workflow-safety.test.mjs` pins both.
 
 **Nothing about an unreleased game may appear in a public commit** — including
 engine changes phrased around its needs. A new competition's game is developed

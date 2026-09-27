@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const readJson = file => JSON.parse(readFileSync(`${repoRoot}${file}`, 'utf8'));
 
 // Every place npm may put a package: hoisted at the root, or nested under whichever dependency
