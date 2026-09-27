@@ -20,7 +20,7 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const TASKS = ['build', 'typecheck'];
 
 // tsconfig and turbo both allow comments, and both use them here. Every comment

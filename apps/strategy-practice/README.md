@@ -49,7 +49,7 @@ The hook lives at the repository root because only the root
 - **Node** is pinned by the devcontainer feature in
   `.devcontainer/devcontainer.json` (the image tag only fixes the major) to the
   version in the repository root's `.nvmrc`; the root
-  `scripts/check-versions.test.mjs` lists every file that repeats it. Bump them
+  `check-versions.test.mjs` lists every file that repeats it. Bump them
   together, or the container quietly runs a different Node than CI. The root `npm test` fails on either mismatch, so
   you will not find out the hard way.
 - **npm's update notifier is off** (`NPM_CONFIG_UPDATE_NOTIFIER`): the npm that
@@ -293,7 +293,7 @@ Every dependency here is pinned exactly, as everywhere else in the monorepo
 that: the devcontainer image bakes browser binaries for one specific version, so
 the pin has to agree with `.devcontainer/Dockerfile` as well as with the
 lockfile. The root `npm test` fails when they disagree
-(`scripts/check-versions.test.mjs`), and does the same for every file the Node
+(`check-versions.test.mjs`), and does the same for every file the Node
 version is written down in — that test lists them.
 
 ## License

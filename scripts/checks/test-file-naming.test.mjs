@@ -12,7 +12,7 @@ import { join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const SUITE = /\.(test|spec)\.tsx?$/;
 // Build output and dependencies hold copies of suites that no project runs.
 const SKIP = new Set(['node_modules', 'dist', 'build', 'reports', 'coverage']);

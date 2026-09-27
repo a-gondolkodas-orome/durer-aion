@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const configPath = 'apps/online-frontend/nginx/nginx.conf';
-const config = readFileSync(fileURLToPath(new URL(`../${configPath}`, import.meta.url)), 'utf8');
+const config = readFileSync(fileURLToPath(new URL(`../../${configPath}`, import.meta.url)), 'utf8');
 
 // Comments are stripped first: a directive quoted in one of them is not a directive, and the file
 // carries several. No value in this config contains a `#`, which is the only thing this would
