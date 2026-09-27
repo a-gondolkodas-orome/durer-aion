@@ -3,7 +3,7 @@
 // secrets, and on top of `docker-compose.yml` whichever per-machine overrides
 // the checkout has. Every `stack:prod*` script goes through here, so no
 // command on a TLS host can bring `web` back without its port 443 and
-// certificates by leaving the override out. DEPLOYMENT.md § 8 is where the TLS
+// certificates by leaving the override out. docs/DEPLOYMENT.md § 8 is where the TLS
 // file comes from; both are untracked, so their presence is what says this
 // host uses them.
 //

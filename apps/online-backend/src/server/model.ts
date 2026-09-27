@@ -5,7 +5,7 @@ import {
   Model,
   ModelAttributes,
 } from "sequelize";
-import { MatchStatus } from "schemas";
+import { MatchStatus, PageState } from "schemas";
 
 // Sequelize adds the timestamp columns itself, and only for names the attribute
 // list leaves free. Omitting them from the attribute types therefore keeps them
@@ -25,7 +25,7 @@ export class TeamModel extends Model<
   declare credentials: string;
   declare email: string;
 
-  declare pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY';
+  declare pageState: PageState;
 
   declare relayMatch: MatchStatus;
   declare strategyMatch: MatchStatus;
@@ -128,6 +128,10 @@ export const teamAttributes: ModelAttributes<
   },
   credentials: {
     type: DataTypes.STRING,
+    unique: {
+      name: "credentials",
+      msg: 'Credentials already exist.'
+    },
     validate: {
       is: {
         args: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,

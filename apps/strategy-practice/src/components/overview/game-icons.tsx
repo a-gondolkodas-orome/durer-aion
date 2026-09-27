@@ -160,7 +160,7 @@ export const GameIcon = ({ iconKey, ...rest }: { iconKey: IconKey } & IconProps)
 export const iconLabels: Record<IconKey, I18nString> = {
   chess: { hu: 'Sakk', en: 'Chess' },
   board: { hu: 'Tábla', en: 'Board' },
-  coloring: { hu: 'Színezés', en: 'Coloring' },
+  coloring: { hu: 'Színezés', en: 'Colouring' },
   coins: { hu: 'Érmék', en: 'Coins' },
   number: { hu: 'Számok', en: 'Numbers' },
   'small-graph': { hu: 'Gráf', en: 'Graph' },

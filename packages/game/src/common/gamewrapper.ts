@@ -1,6 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
+import { GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -14,8 +14,8 @@ function chooseRole({ G }: MoveContext, firstPlayer: PlayerIDType): void {
   G.firstPlayer = firstPlayer;
 }
 
-function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: string) {
-  if (playerID !== GUESSER_PLAYER) {
+function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: unknown) {
+  if (playerID !== GUESSER_PLAYER || !isDifficulty(difficulty)) {
     return INVALID_MOVE;
   };
   G.difficulty = difficulty;

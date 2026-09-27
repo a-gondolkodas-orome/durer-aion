@@ -5,10 +5,9 @@ import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io"
 // which is not an API and can be rearranged by a patch release.
 export type RandomAPI = DefaultPluginAPIs['random'];
 
-// boardgame.io's own Game interface defaults its generics to `any` (quoted
-// below); a caller that spells that out trips no-explicit-any on bgio's
-// defaults rather than on a choice of ours. One caged alias keeps the ban
-// meaningful everywhere else.
+// boardgame.io's own Game interface defaults its generics to `any`; a caller
+// that spells that out trips no-explicit-any on bgio's defaults rather than on
+// a choice of ours. One caged alias keeps the ban meaningful everywhere else.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyBgioGame = Game<any, Record<string, unknown>, any>;
 
@@ -22,10 +21,19 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
+/// A practice ("test") game or a scored ("live") one. The team's client sends
+/// this as a move argument, so the move checks it against the list at runtime.
+export const DIFFICULTIES = ['test', 'live'] as const;
+export type Difficulty = typeof DIFFICULTIES[number];
+
+export function isDifficulty(value: unknown): value is Difficulty {
+  return DIFFICULTIES.some(it => it === value);
+}
+
 export interface GameStateMixin extends GameStateTimer {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;
-  difficulty: null | undefined | string;
+  difficulty: null | undefined | Difficulty;
   numberOfTries: number;
   numberOfLoss: number;
   winningStreak: number;
@@ -71,24 +79,6 @@ interface WrappableGame<G = unknown, PluginAPIs extends Record<string, unknown> 
   moves?: MoveMap<G, PluginAPIs>;
   turn?: TurnConfig<G, PluginAPIs>;
 }
-
-/* Game Interface fragment for reference (bitch.)
-export interface Game<
-  G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
-  SetupData extends any = any
-> {
-  name?: string;
-  minPlayers?: number;
-  maxPlayers?: number;
-  setup?: (
-    context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
-    setupData?: SetupData
-  ) => G;
-  moves?: MoveMap<G, PluginAPIs>;
-  turn?: TurnConfig<G, PluginAPIs>;
-}
-*/
 
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 

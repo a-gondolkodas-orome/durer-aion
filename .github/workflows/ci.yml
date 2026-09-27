@@ -27,10 +27,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: lint
+  # The six gates that need only an install, one job each so they run in
+  # parallel and each reports under its own check name. The name is the npm
+  # script too, except where an entry below says otherwise.
+  checks:
+    name: ${{ matrix.check }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      # Each gate says something on its own; a lint failure should not hide
+      # whether the tests pass.
+      fail-fast: false
+      matrix:
+        check: [lint, typecheck, test, build, i18n, spell-check]
+        include:
+          - check: i18n
+            script: i18n:check
+          # A ceiling rather than a reservation: it caps each eslint process turbo spawns
+          # instead of leaving V8 to size the heap at half of whatever RAM the runner
+          # happens to have — 8 GB on a public repo's, a third of that on a smaller one.
+          # Every workspace lints in under 1024 MB,
+          # so this is headroom and a regression guard at once: if lint's memory creeps
+          # back up, it fails here, where it is visible, rather than only where the
+          # runner is smallest. .devcontainer/README.md has the measurements.
+          - check: lint
+            node-options: --max-old-space-size=2048
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -38,81 +59,10 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # A ceiling rather than a reservation: it caps each eslint process turbo spawns
-      # instead of leaving V8 to size the heap at half of whatever RAM the runner
-      # happens to have — 8 GB on a public repo's, a third of that on a smaller one.
-      # Every workspace lints in under 1024 MB,
-      # so this is headroom and a regression guard at once: if lint's memory creeps
-      # back up, it fails here, where it is visible, rather than only where the
-      # runner is smallest. .devcontainer/README.md has the measurements.
-      - run: npm run lint
+      - run: npm run "$SCRIPT"
         env:
-          NODE_OPTIONS: --max-old-space-size=2048
-
-  typecheck:
-    name: typecheck
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm test
-
-  build:
-    name: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-
-  i18n:
-    name: i18n
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run i18n:check
-
-  spell-check:
-    name: spell-check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run spell-check
+          SCRIPT: ${{ matrix.script || matrix.check }}
+          NODE_OPTIONS: ${{ matrix.node-options }}
 
   docker:
     name: docker

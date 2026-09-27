@@ -62,7 +62,13 @@ const socketio = new SocketIOButBotMoves(
   { https: undefined },
   botSetup,
   async function onFinishedMatch(matchID) {
-    await closeMatch(matchID, teams, db);
+    // This runs inside a socket listener nothing awaits, so an error escaping
+    // it is an unhandled rejection, which ends the process and the round with it.
+    try {
+      await closeMatch(matchID, teams, db);
+    } catch (error) {
+      console.error(`Could not close match: ${matchID}`, error);
+    }
   },
 );
 const server = Server({

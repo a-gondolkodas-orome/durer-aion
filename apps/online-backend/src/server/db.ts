@@ -1,6 +1,6 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { InProgressMatchStatus } from 'schemas';
+import { FinishedMatchStatus, InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { InferAttributes, InferCreationAttributes, Sequelize, Op, Transaction, UniqueConstraintError, WhereOptions } from 'sequelize';
@@ -83,6 +83,24 @@ export class TeamsRepository {
       (searchCondition)
     });
   }
+  /**
+   * Records the team's match as finished, but only while that match is still
+   * the team's: the match id is checked in the same UPDATE that writes, so an
+   * admin reset landing after the caller read the team is not overwritten.
+   * Whether a row was written.
+   */
+  async finishMatch(
+    teamId: string,
+    type: "relayMatch" | "strategyMatch",
+    matchId: string,
+    status: FinishedMatchStatus,
+  ): Promise<boolean> {
+    const [updated] = await TeamModel.update({ [type]: status }, {
+      // A JSON path on the column: ("strategyMatch"#>>'{matchID}') = matchId.
+      where: { teamId, [type]: { matchID: matchId } } as WhereOptions<TeamModel>,
+    });
+    return updated > 0;
+  }
   async insertTeam(
       { teamname, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string }) {
@@ -125,7 +143,7 @@ export class TeamsRepository {
    * Every team into the archive under one `deletedAt`, then all of them
    * dropped, in one transaction. The shared timestamp is what makes the rows a
    * batch: the archive has no column for one, and `sequelize.sync()` would not
-   * add it to an existing table (DEPLOYMENT.md), so the timestamp is what a
+   * add it to an existing table (docs/DEPLOYMENT.md), so the timestamp is what a
    * caller names the batch by when restoring it.
    */
   async removeAllTeams(): Promise<{ deleted: number, deletedAt: Date }> {
@@ -152,7 +170,7 @@ export class TeamsRepository {
    * and out of the archive, in one transaction. `null` for a `deletionId` the
    * archive does not have.
    *
-   * A live team holding the same id, join code or name fails the insert on its
+   * A live team holding the same id, join code, name or credentials fails the insert on its
    * unique constraint, and sequelize's `UniqueConstraintError` propagates: the
    * transaction rolls back and the archive keeps its row. There is no check
    * ahead of the insert, because the constraint is the check and cannot race.

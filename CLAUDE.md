@@ -3,10 +3,11 @@
 Real-time multiplayer framework for online math competitions with interactive
 games, built on boardgame.io.
 
-[`README.md`](README.md) is the authority on running things, operations,
-dependencies and deployment; [`CONTRIBUTING.md`](CONTRIBUTING.md) is
-the human front door and carries the commit and pull request rules. This file is
-the map and the rules an agent must not get wrong.
+[`README.md`](README.md) is the authority on running things, operations and
+deployment, [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) on dependency updates;
+[`CONTRIBUTING.md`](CONTRIBUTING.md) is the human front door and carries the
+commit and pull request rules. This file is the map and the rules an agent must
+not get wrong.
 
 ## Project Structure
 
@@ -101,11 +102,11 @@ server's, naming the game package; a board may use whatever the browser gives it
 
 ## Environment, deployment, secrecy
 
-`npm run setup` seeds the six gitignored `.env` files from their committed
+`npm run setup` seeds the five gitignored `.env` files from their committed
 samples; [`README.md`](README.md) § *Configuration you may want to change* is the
 table of what reads which. The real competition, `verseny.durerinfo.hu`, runs on
 nginx + docker compose (`npm run stack:prod`), not GitHub Pages —
-[`DEPLOYMENT.md`](DEPLOYMENT.md) is the walkthrough.
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the walkthrough.
 
 **A push to `main` deploys the public site** — `/jatekok/`, `/valto/` and
 `/proba-verseny/` in one artifact, with no staging step and no approval; the
@@ -116,7 +117,8 @@ guarded in opposite directions and `scripts/workflow-safety.test.mjs` pins both.
 **Nothing about an unreleased game may appear in a public commit** — including
 engine changes phrased around its needs. A new competition's game is developed
 and deployed from the year's private synced repo until the competition is over;
-[`README.md`](README.md) § *Competition secrecy* is the authority.
+[`README.md`](README.md) § *Competition secrecy* is the authority, and
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) § *The year's private repo* is how that repo is set up.
 
 ## Key Conventions
 
@@ -130,7 +132,8 @@ its contents here. What follows is the rest.
 - Use Hungarian for user-facing text (the competition is in Hungarian). The
   strategy practice site is the exception: it has an HU/EN switcher (and a
   `?lang=` param). The relay practice site is pinned to Hungarian — `LANGUAGE` in
-  `apps/relay-practise-frontend/src/App.tsx`
+  `apps/relay-practise-frontend/src/App.tsx`. User-facing English uses British
+  spelling
 - **Formatting is ESLint's, through `@stylistic`, not prettier's.**
   `eslint.stylistic.mjs`, which both configs import, holds the character-level
   rules and says why a rule joins that set only if it fixes characters, never

@@ -18,8 +18,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
-const generatedFile = join(root, "hungarian-hunspell-words.txt");
-const handFile = join(root, "hungarian-words.txt");
+const generatedFile = join(root, "cspell/hungarian-hunspell-words.txt");
+const handFile = join(root, "cspell/hungarian-words.txt");
 
 const hunspellCheck = spawnSync("hunspell", ["-v"], { encoding: "utf-8" });
 if (hunspellCheck.error) {

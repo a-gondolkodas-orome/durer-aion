@@ -1,14 +1,4 @@
 import { defineConfig } from 'tsdown'
-import * as dotenv from 'dotenv'
-
-dotenv.config({ path: "../../.env.local", quiet: true });
-
-const envVars = Object.keys(process.env)
-  .filter(key => key.startsWith('VITE_'))
-  .reduce((acc, key) => {
-    acc[`process.env.${key}`] = JSON.stringify(process.env[key]);
-    return acc;
-  }, {} as Record<string, string>);
 
 export default defineConfig({
   entry: ['index.ts'],
@@ -35,10 +25,6 @@ export default defineConfig({
     // entry — `@mui/material/Stack` becomes `@mui/material/node/Stack/index.js`
     // — so the frontend apps bundle CommonJS builds that tree-shake far worse.
     resolveDepSubpath: false,
-  },
-
-  define: {
-    ...envVars,
   },
 
   outputOptions: {

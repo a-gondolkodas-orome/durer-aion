@@ -6,6 +6,7 @@ import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
   FinishedMatchStatus,
+  GameType,
   InProgressMatchStatus,
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
@@ -32,7 +33,6 @@ export const injectPlayer = async (
 }
 ) => {
   const match = await fetch(db, matchId, { metadata: true });
-  console.log(`Match is indeed empty, and thus in need for a bot!`);
   match.metadata.players[playerID].name = name;
   match.metadata.players[playerID].credentials = credentials;
   match.metadata.players[playerID].isConnected = true;
@@ -120,7 +120,7 @@ export async function endMatchStatus(
 
 export async function allowedToStart(
   team: TeamModel,
-  gameType: "RELAY" | "STRATEGY"
+  gameType: GameType
 ) {
   if (team.pageState === "DISCLAIMER")
     return false;
@@ -192,25 +192,33 @@ export async function closeMatch(
     );
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
-  //check if the match is already started. We are allowing to close the gamestate even if teamstate id FINISHED, because it may happen,
-  //that the game is closed before the BGIO backend closes the game. (Even though it should not happen, and we made some progress to prevent it)
-  if (team[type].state === "NOT STARTED")
-    throw new Error(
-      `The match{${matchId}} is not started yet, you can't close it`
+  // A FINISHED match is closed again on purpose: the stale check can close it
+  // before boardgame.io's game over, the game still scores some late moves, and
+  // this overwrites the score copied then.
+  const status = team[type];
+  // After an admin reset the old match still runs, and reaches game over while
+  // the team is NOT STARTED again or already playing its new match. Neither
+  // may be closed with the old match's points.
+  if (status.state === "NOT STARTED" || status.matchID !== matchId) {
+    console.log(
+      `Not closing match: ${matchId}, the team's current match is ${status.state === "NOT STARTED" ? "none" : status.matchID}`
     );
-  const mStat = team[type] as InProgressMatchStatus;
+    return;
+  }
+  const mStat = status as InProgressMatchStatus;
   const finishState = await endMatchStatus(mStat, currentMatch.state.G.points);
   console.log(
     `Closing match: ${matchId}, points: ${currentMatch.state.G.points}`
   );
-  await team.update({ [type]: finishState });
+  if (!(await teams.finishMatch(teamId, type, matchId, finishState)))
+    console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
 
 export async function getNewGame(
   ctx: Server.AppCtx,
   teams: TeamsRepository,
   games: AnyBgioGame[],
-  gameType: "RELAY" | "STRATEGY",
+  gameType: GameType,
   team: TeamModel
 ) {
   //if middleware setup was better understood, this should be in a separate middleware

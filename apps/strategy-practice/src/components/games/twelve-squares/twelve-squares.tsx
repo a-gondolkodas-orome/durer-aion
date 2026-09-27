@@ -53,7 +53,7 @@ const rule = {
   </>,
   en: <>
     A 1 × 12 board is given with one piece placed on each end.
-    Players take turns moving their piece toward the other, advancing one or two squares at a time.
+    Players take turns moving their piece towards the other, advancing one or two squares at a time.
     A player may not move to a square already occupied by the other player's piece.
     The player who jumps over the other player's piece wins.
   </>

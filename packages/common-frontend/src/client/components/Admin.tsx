@@ -13,7 +13,6 @@ import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
@@ -25,6 +24,9 @@ const TeamsToolbar = csvToolbar('durer-csapatok');
 // `/admin/<teamId>` off the URL, so a path for the archive would be taken for
 // a team id. Issue #135 is the rest of the page's layout.
 type AdminTab = 'teams' | 'deleted';
+
+// What the states mean is on MatchStatus in the `schemas` package.
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
 
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
@@ -134,6 +136,7 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'pageState',
               headerName: 'Állapot',
+              description: 'Melyik oldalt látja a csapat: DISCLAIMER, HOME, RELAY vagy STRATEGY. A játék oldalán a vége után is ott marad, amíg vissza nem lép.',
               width: 150,
               editable: false,
             },
@@ -146,12 +149,14 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'relayMatchState',
               headerName: 'Relay',
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
             {
               field: 'strategyMatchState',
               headerName: 'Strategy',
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
@@ -319,8 +324,8 @@ function Stats(props: { data: TeamModelDto[] }) {
     const bothNotStarted = current.filter(it => it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
     const relayInProgress = current.filter(it => it.relayMatch.state === "IN PROGRESS").length;
     const strategyInProgress = current.filter(it => it.strategyMatch.state === "IN PROGRESS").length;
-    const finishedRelayScores = current.filter(it => it.relayMatch.state === "FINISHED").map(it => (it.relayMatch as FinishedMatchStatus).score);
-    const finishedStrategyScores = current.filter(it => it.strategyMatch.state === "FINISHED").map(it => (it.strategyMatch as FinishedMatchStatus).score);
+    const finishedRelayScores = current.flatMap(it => it.relayMatch.state === "FINISHED" ? [it.relayMatch.score] : []);
+    const finishedStrategyScores = current.flatMap(it => it.strategyMatch.state === "FINISHED" ? [it.strategyMatch.score] : []);
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {

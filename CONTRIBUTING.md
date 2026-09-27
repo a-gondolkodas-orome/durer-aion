@@ -22,7 +22,8 @@ Two shapes of first change fit in there:
 
 - **A word or a screen.** The games site carries its own text as
   `{ hu: '…', en: '…' }` objects next to the code that shows it, so changing what
-  a player reads is one edit in one file.
+  a player reads is one edit in one file. The English is British: colour,
+  neighbour, disc.
 - **A new game.** One self-contained folder, and
   [`apps/strategy-practice/README.md` § *Adding a new
   game*](apps/strategy-practice/README.md#adding-a-new-game) is the recipe — it
@@ -62,7 +63,7 @@ Both halves matter, because a suite no glob reaches does not fail: it is simply
 never run, and the green tick says nothing was wrong. `npm test` refuses either
 mistake by name (`scripts/test-file-naming.test.mjs`).
 
-One more: **a test that writes to the console fails.** `vitest.setup.mts` says
+One more: **a test that writes to the console fails.** `vitest/setup.mts` says
 why and how to opt out when a test means to exercise a logging path. If a
 `console.log` you left in from debugging fails an unrelated assertion, that is
 this.
