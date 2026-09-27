@@ -28,8 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 scripts/*.tsv*
 # scripts/admin.py's output, keyed by join code
-/match_data_*.json
-/durer-results-*.tsv
+scripts/admin-output/
 __pycache__
 .env
 .venv

@@ -5,6 +5,7 @@ from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
 from datetime import date
+from pathlib import Path
 from tqdm import tqdm
 
 def read_admin_password():
@@ -28,8 +29,13 @@ def read_admin_password():
 
 ADMIN_PASSWORD = read_admin_password()
 BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
-# False reuses the match data files a previous run left in the working directory,
-# which only suits rerunning the export on data already known to be final.
+# Beside the script rather than in the working directory, so wherever the script
+# is run from, its output lands in the one folder .gitignore and .dockerignore
+# keep out.
+OUTPUT_DIR = Path(__file__).resolve().parent / 'admin-output'
+OUTPUT_DIR.mkdir(exist_ok=True)
+# False reuses the match data files a previous run left in OUTPUT_DIR, which
+# only suits rerunning the export on data already known to be final.
 FORCE_DOWNLOAD = True
 
 # %%
@@ -67,7 +73,7 @@ def get_match_data(team_states, match_type:str, match_data_type:str, force_downl
       raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
   if match_data_type not in MATCH_DATA_TYPES:
       raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
-  file_name = f'match_data_{match_type}_{match_data_type}.json'
+  file_name = OUTPUT_DIR / f'match_data_{match_type}_{match_data_type}.json'
   if not force_download:
     try:
       with open(file_name, 'r') as f:
@@ -123,7 +129,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
   # padded, so every row has the header's cells. Sorted, as the set of codes
   # above has no order of its own.
   relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
-  with open(f'durer-results-{date.today().year}.tsv', 'w', encoding='utf-8') as f:
+  with open(OUTPUT_DIR / f'durer-results-{date.today().year}.tsv', 'w', encoding='utf-8') as f:
     f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
                       + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
     for code in sorted(results.keys()):

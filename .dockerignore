@@ -26,6 +26,9 @@
 # trailing `*` for the same reason, and the two have to be changed together.
 scripts/*.tsv*
 
+# scripts/admin.py's match data and results, keyed by join code.
+scripts/admin-output
+
 # Build output, caches and history. Each is rebuilt or unused inside the image
 # and only churns the `COPY . .` layer; apps/online-backend/dist is also what
 # CMD runs, so host output landing there is a correctness hazard, not just noise.
