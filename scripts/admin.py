@@ -4,6 +4,7 @@ import requests
 from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
+from datetime import date
 from tqdm import tqdm
 
 def read_admin_password():
@@ -120,7 +121,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
   # padded, so every row has the header's cells. Sorted, as the set of codes
   # above has no order of its own.
   relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
-  with open('durer-results-2024.tsv', 'w') as f:
+  with open(f'durer-results-{date.today().year}.tsv', 'w') as f:
     f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
                       + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
     for code in sorted(results.keys()):
