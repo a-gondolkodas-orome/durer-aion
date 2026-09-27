@@ -27,7 +27,7 @@
 scripts/*.tsv*
 
 # scripts/admin.py's match data and results, keyed by join code.
-scripts/admin-output
+**/admin-output
 
 # Build output, caches and history. Each is rebuilt or unused inside the image
 # and only churns the `COPY . .` layer; apps/online-backend/dist is also what

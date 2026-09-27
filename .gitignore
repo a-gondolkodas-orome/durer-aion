@@ -28,7 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 scripts/*.tsv*
 # scripts/admin.py's output, keyed by join code
-scripts/admin-output/
+admin-output/
 __pycache__
 .env
 .venv
