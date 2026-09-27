@@ -116,16 +116,22 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
     if code in strategy_states:
       results[code]["strategy"] = strategy_states[code]["G"]["points"]
 
-  # Export
+  # Export: one column per relay problem, as many as the longest relay, and
+  # padded, so every row has the header's cells. Sorted, as the set of codes
+  # above has no order of its own.
+  relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
   with open('durer-results-2024.tsv', 'w') as f:
-    f.write("login\tstrategy\trelay\trelay_detailed\n")
-    for code in results.keys():
-      f.write("{}\t{}\t{}\t{}\n".format(
+    f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
+                      + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
+    for code in sorted(results.keys()):
+      detailed = list(map(str, results[code]["relay_detailed"]))
+      f.write('\t'.join([
         code,
-        results[code]["strategy"],
-        results[code]["relay"],
-        '\t'.join(map(str,results[code]["relay_detailed"]))
-      ))
+        team_states_dict[code]["teamName"],
+        team_states_dict[code]["category"],
+        str(results[code]["strategy"]),
+        str(results[code]["relay"]),
+      ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")
 export_results_tsv(team_states_dict, relay_states, strategy_states)
 
 # %%
