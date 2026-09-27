@@ -21,7 +21,7 @@ const entry = {
 } as unknown as LogEntry;
 
 // Never resolves: sendData logs the response status, and a test run keeps its
-// output to the report (vitest.setup.mts). What it sent is what matters here.
+// output to the report (vitest/setup.mts). What it sent is what matters here.
 const fetchMock = vi.fn(
   (_input: RequestInfo | URL, _init?: RequestInit) => new Promise<Response>(() => undefined)
 );
