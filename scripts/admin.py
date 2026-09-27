@@ -61,51 +61,32 @@ MATCH_TYPES = ['relay', 'strategy']
 MATCH_DATA_TYPES = ['state', 'logs']
 
 def get_match_data(team_states, match_type:str, match_data_type:str, force_download:bool = False):
-  """
-    The match data of every team that started a match of this type, by join
-    code. A team's cached copy is reused only while the team's match status is
-    FINISHED and the same as when it was downloaded: a match still in progress
-    keeps changing, and a new match ID (an admin reset) or a new score (a match
-    closed again after late moves) means the cached copy is of an older state.
-  """
   if match_type not in MATCH_TYPES:
       raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
   if match_data_type not in MATCH_DATA_TYPES:
       raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
   file_name = f'match_data_{match_type}_{match_data_type}.json'
-  cache = {}
   if not force_download:
     try:
       with open(file_name, 'r') as f:
-        cache = json.load(f)
+        return json.load(f)
     except FileNotFoundError:
       pass
   match_data = {}
   match_type_id = 'relayMatch' if match_type == 'relay' else 'strategyMatch'
   for team_state in tqdm(team_states, f"Downloading {match_type} {match_data_type}"):
-    status = team_state[match_type_id]
-    if status["state"] == "NOT STARTED":
-      continue
-    code = team_state["joinCode"]
-    cached = cache.get(code)
-    # A cache written before entries carried their status is a plain match
-    # state, which has no "status" key and so is never reused.
-    if status["state"] == "FINISHED" and isinstance(cached, dict) and cached.get("status") == status:
-      match_data[code] = cached
-    else:
-      match_data[code] = {
-        "status": status,
-        "data": get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/game/admin/{status["matchID"]}/{match_data_type}'),
-      }
+    if team_state[match_type_id]["state"] != "NOT STARTED":
+      matchID = team_state[match_type_id]["matchID"]
+      match_data[team_state["joinCode"]] = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/game/admin/{matchID}/{match_data_type}')
   with open(file_name, 'w') as f:
     json.dump(match_data, f)
-  return {code: entry["data"] for code, entry in match_data.items()}
+  return match_data
 
 # %%
-relay_states = get_match_data(team_states, 'relay', 'state', FORCE_DOWNLOAD)
-strategy_states = get_match_data(team_states, 'strategy', 'state', FORCE_DOWNLOAD)
-relay_logs = get_match_data(team_states, 'relay', 'logs', FORCE_DOWNLOAD)
-strategy_logs = get_match_data(team_states, 'strategy', 'logs', FORCE_DOWNLOAD)
+relay_states = get_match_data(team_states, 'relay', 'state')
+strategy_states = get_match_data(team_states, 'strategy', 'state')
+relay_logs = get_match_data(team_states, 'relay', 'logs')
+strategy_logs = get_match_data(team_states, 'strategy', 'logs')
 
 # %%
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
