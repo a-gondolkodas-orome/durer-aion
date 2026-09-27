@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // `docker compose` as the deployed stack is run: `.env.docker` for the
 // secrets, and on top of `docker-compose.yml` whichever per-machine overrides
-// the checkout has. Every `stack:prod*` script goes through here, so no
-// command on a TLS host can bring `web` back without its port 443 and
-// certificates by leaving the override out. docs/DEPLOYMENT.md § 8 is where the TLS
+// the checkout has. `stack:prod` goes through here, so on a TLS host it
+// cannot bring `web` back without its port 443 and certificates by leaving
+// the override out. docs/DEPLOYMENT.md § 8 is where the TLS
 // file comes from; both are untracked, so their presence is what says this
 // host uses them.
 //

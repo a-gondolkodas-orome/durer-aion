@@ -475,9 +475,9 @@ needs a kick:
 npm run stack:prod:restart
 ```
 
-It recreates all three containers from the images already built, starting postgres before
-the backend, and returns once they are healthy. What a restart mid-round costs the teams
-running a match is in *Restarting during a competition* below.
+It restarts the backend container alone, as it is: no rebuild, and postgres and nginx keep
+running. What a restart mid-round costs the teams running a match is in *Restarting during
+a competition* below.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
@@ -505,8 +505,8 @@ fetch the match state again. What a restart does cost:
   inside that window leaves the match on the bot's turn with nothing to prompt it, so the
   team's board stays frozen until the match's time runs out.
 - **`stack:prod` deploys whatever the checkout holds.** To restart without also putting a
-  `git pull` live, use `stack:prod:restart`, which rebuilds no image. Changes to the compose
-  files and `.env.docker` do take effect: it recreates every container from them.
+  `git pull` live, use `stack:prod:restart`, which rebuilds nothing and applies no change
+  to the compose files or `.env.docker`.
 
 ## Getting inside a container
 
