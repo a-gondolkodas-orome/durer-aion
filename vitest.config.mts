@@ -49,7 +49,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, ...strategyPracticeProject],
     // Keeps the run's output to the report itself — see the file for how a test
     // that means to log opts out.
-    setupFiles: ['./vitest.setup.mts'],
+    setupFiles: ['./vitest/setup.mts'],
     // apps/strategy-practice runs as a second project, under its own vite
     // config: its aliases, setup file and `isolate: false` are its own, and
     // apps/strategy-practice/AGENTS.md § How this app sits in the monorepo says

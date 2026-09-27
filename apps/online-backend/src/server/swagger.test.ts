@@ -18,7 +18,7 @@ const HTTP_METHODS = ["get", "put", "post", "delete", "patch", "options", "head"
 interface Operation { parameters?: { in: string; name: string }[] }
 interface Spec { paths: Record<string, Record<string, Operation>> }
 
-const spec = parse(readFileSync(join(__dirname, "..", "..", "..", "..", "swagger.yaml"), "utf8")) as Spec;
+const spec = parse(readFileSync(join(__dirname, "..", "..", "swagger.yaml"), "utf8")) as Spec;
 
 function servedRoutes() {
   const router = new Router<Koa.DefaultState, Server.AppCtx>();

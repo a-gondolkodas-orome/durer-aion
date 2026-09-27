@@ -160,12 +160,12 @@
   "dictionaryDefinitions": [
     {
       "name": "hu-extra",
-      "path": "./hungarian-words.txt",
+      "path": "./cspell/hungarian-words.txt",
       "addWords": true
     },
     {
       "name": "hu-hunspell",
-      "path": "./hungarian-hunspell-words.txt"
+      "path": "./cspell/hungarian-hunspell-words.txt"
     }
   ],
   "overrides": [

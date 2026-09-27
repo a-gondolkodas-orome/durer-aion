@@ -106,7 +106,7 @@ server's, naming the game package; a board may use whatever the browser gives it
 samples; [`README.md`](README.md) § *Configuration you may want to change* is the
 table of what reads which. The real competition, `verseny.durerinfo.hu`, runs on
 nginx + docker compose (`npm run stack:prod`), not GitHub Pages —
-[`DEPLOYMENT.md`](DEPLOYMENT.md) is the walkthrough.
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the walkthrough.
 
 **A push to `main` deploys the public site** — `/jatekok/`, `/valto/` and
 `/proba-verseny/` in one artifact, with no staging step and no approval; the
@@ -118,7 +118,7 @@ guarded in opposite directions and `scripts/workflow-safety.test.mjs` pins both.
 engine changes phrased around its needs. A new competition's game is developed
 and deployed from the year's private synced repo until the competition is over;
 [`README.md`](README.md) § *Competition secrecy* is the authority, and
-[`DEPLOYMENT.md`](DEPLOYMENT.md) § *The year's private repo* is how that repo is set up.
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) § *The year's private repo* is how that repo is set up.
 
 ## Key Conventions
 

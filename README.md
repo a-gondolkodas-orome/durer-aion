@@ -22,7 +22,7 @@ conventions a review will otherwise be the first to tell you about.
   every `npm run …` fails before your command runs, complaining about the
   package manager rather than about Node.
 - [Docker](https://www.docker.com/), with your user in the `docker` group so the
-  commands below need no `sudo` — `DEPLOYMENT.md` has the three lines that do
+  commands below need no `sudo` — `docs/DEPLOYMENT.md` has the three lines that do
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
   as root and leaves root-owned files behind in `node_modules`.
 
@@ -148,7 +148,7 @@ nginx wants the stack.
 npm run stack:prod
 ```
 
-What a deployed instance runs (see [`DEPLOYMENT.md`](./DEPLOYMENT.md)): the same
+What a deployed instance runs (see [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)): the same
 compose file without the dev overlay, so the container runs the server compiled
 into the image instead of a watcher, code changes need the command again, and
 postgres is reachable only from the `backend` container. Detached like
@@ -320,8 +320,8 @@ reason.
 
 Vocabulary the dictionaries lack lives in three places: technical identifiers in
 `cspell.json`'s `words` list; the competition's own coinages and proper nouns in
-`hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
-`@cspell/dict-hu-hu` misses in `hungarian-hunspell-words.txt`, which no one
+`cspell/hungarian-words.txt` (hand-curated, small); and the everyday agglutinated forms
+`@cspell/dict-hu-hu` misses in `cspell/hungarian-hunspell-words.txt`, which no one
 maintains by hand — `npm run spell-check:hu-triage` regenerates it from the same
 globs, validating every word against real hunspell (needs
 `apt install hunspell hunspell-hu`) and printing whatever hunspell rejects for a
@@ -401,7 +401,7 @@ unreleased game may appear in a public commit — including engine changes phras
 around its needs.
 
 Setting up that repo each year, and the mirroring behind `sync.yml`, are in
-[`DEPLOYMENT.md`](DEPLOYMENT.md#the-years-private-repo) § *The year's private repo*.
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#the-years-private-repo) § *The year's private repo*.
 
 # Debugging
 
