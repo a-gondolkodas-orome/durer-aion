@@ -53,7 +53,7 @@ export function Login() {
     }} data-testid="loginRoot">
       <Stack sx={{
         marginTop: {
-          sx: "25px",
+          xs: "25px",
           md: "80px",
         },
       }}>
@@ -68,11 +68,11 @@ export function Login() {
         </Stack>
         <Stack sx={{
           marginTop: {
-            sx: "7px",
+            xs: "7px",
             md: "15px",
           },
           fontSize: {
-            sx: "15px",
+            xs: "15px",
             md: "30px",
           }
         }}>

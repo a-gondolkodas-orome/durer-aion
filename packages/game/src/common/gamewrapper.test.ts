@@ -261,7 +261,7 @@ test("polling the clock does not spend a limited turn's move", () => {
 describe("gameWrapper move guards", () => {
   const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "setup" })));
 
-  // Both tests here provoke a move boardgame.io rejects, and it reports every
+  // Every test here provokes a move boardgame.io rejects, and it reports every
   // one of those on the console, so each takes the message it causes rather
   // than leaving it in the test report.
   let rejected: MockInstance<typeof console.error>;
@@ -293,6 +293,17 @@ describe("gameWrapper move guards", () => {
 
     expect(client.getState()?.G.difficulty).toStrictEqual("live");
     expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
+    expect(rejected).toHaveBeenCalledOnce();
+  });
+
+  test("the team cannot choose a difficulty that does not exist", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+
+    client.moves.chooseNewGameType("expert");
+
+    expect(client.getState()?.G.difficulty).toBeNull();
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
     expect(rejected).toHaveBeenCalledOnce();
   });
 });

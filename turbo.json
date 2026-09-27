@@ -1,8 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  // Both forms: `.env.*` matches .env.docker and .env.local, and matches
-  // neither a bare `.env` nor apps/*/.env — which seed-env-files.mjs writes and
-  // which vite reads at build time for the VITE_* settings it inlines.
+  // Both forms: `.env.*` matches .env.docker, and matches neither a bare `.env`
+  // nor apps/*/.env — which seed-env-files.mjs writes and which vite reads at
+  // build time for the VITE_* settings it inlines.
   "globalDependencies": ["**/.env", "**/.env.*"],
   "globalEnv": [
     "BOT_CREDENTIALS",
