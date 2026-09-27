@@ -92,6 +92,8 @@ def get_match_data(team_states, match_type:str, match_data_type:str, force_downl
 # %%
 relay_states = get_match_data(team_states, 'relay', 'state', FORCE_DOWNLOAD)
 strategy_states = get_match_data(team_states, 'strategy', 'state', FORCE_DOWNLOAD)
+# Nothing below reads the logs: they are downloaded to keep a record of every
+# move beside the results, for settling a disputed score after the round.
 relay_logs = get_match_data(team_states, 'relay', 'logs', FORCE_DOWNLOAD)
 strategy_logs = get_match_data(team_states, 'strategy', 'logs', FORCE_DOWNLOAD)
 
