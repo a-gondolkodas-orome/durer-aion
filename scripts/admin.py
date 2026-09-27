@@ -28,9 +28,9 @@ def read_admin_password():
 
 ADMIN_PASSWORD = read_admin_password()
 BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
-# False reuses the match data files a previous run left in the working directory.
-# If the results look wrong or the script fails, set it to True to download again.
-FORCE_DOWNLOAD = False
+# False reuses the match data files a previous run left in the working directory,
+# which only suits rerunning the export on data already known to be final.
+FORCE_DOWNLOAD = True
 
 # %%
 def get_request(username:str, password:str, baseurl:str, endpoint:str):
