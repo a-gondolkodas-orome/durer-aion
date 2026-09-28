@@ -1,16 +1,17 @@
 # Changelog
 
-The notable changes, a month at a time. A section is written once the month is
-over, from the pull requests merged in it, and is a summary of them rather than a
-list. A quiet month gets one line. The merged pull requests are the full record.
+The notable changes, about a month at a time. Each section covers the pull
+requests merged since the previous one, up to the date in its heading, and is a
+summary of them rather than a list. A quiet month gets one line. The merged pull
+requests are the full record.
 
-Each month opens with what a contestant, an organiser, a tester or a visitor to
+Each section opens with what a contestant, an organiser, a tester or a visitor to
 the practice sites would notice, at most about eight bullets. *For developers*
 follows, at most about five: only what changes how someone works in this repo —
 a new command or gate, a removed package, a new convention — or a decision they
 need to know. What was refactored is not enough.
 
-## September 2026
+## September 2026, as of 2026-09-28
 
 - **Team sessions are safer.** A team's session lives in an HttpOnly cookie
   instead of the URL, team secrets and match metadata are no longer served to
@@ -40,8 +41,10 @@ need to know. What was refactored is not enough.
   repo — no prettier (#398, #407)
 - DEPLOYMENT.md is rewritten against the real stack; nginx takes TLS through an
   include, and CI builds the deployed docker images (#305, #455, #435)
+- Agent instructions live in `AGENTS.md`, for every agent; `CLAUDE.md` only
+  imports it (#581)
 
-## August 2026
+## August 2026, as of 2026-08-31
 
 - **The strategy practice site joins the other public sites**: it moved into
   this repo, and one deploy serves `/jatekok/`, `/valto/` and `/proba-verseny/`
