@@ -378,20 +378,12 @@ services:
       - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-Name both files in `.env.docker`, so that every `docker compose --env-file=.env.docker`
-command without an `-f` of its own — `stack:prod`, `stack:ps` and the ones below — includes
-the override. Add this line to `.env.docker`:
-
-```
-COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml
-```
-
-Check that compose picked it up *before* rebuilding. Without it, `up` recreates `web`
-with port 80 only, and the domain stops answering over HTTPS while compose reports
-success — and whether `--env-file` sets `COMPOSE_FILE` depends on the compose version:
+Add `COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml` to `.env.docker`, so every
+`--env-file=.env.docker` command, `stack:prod` included, picks up the override. Without it
+`up` drops port 443 and still reports success, so check before rebuilding:
 
 ```bash
-docker compose --env-file=.env.docker config | grep 443   # must print the 443 port
+docker compose --env-file=.env.docker config | grep 443   # must print the port
 npm run stack:prod
 ```
 
@@ -469,23 +461,12 @@ git pull
 npm run stack:prod
 ```
 
-That installs, builds the frontend and the images, and recreates only the containers
-whose image or configuration changed. With TLS it is the same command only while
-`.env.docker` names the override (step 8): on a TLS host whose `.env.docker` lacks that
-line, add it and run the check there first, or this deploy drops port 443. A change to
-`nginx-tls.conf` itself is the reload in step 8 instead: `up` does not recreate
-`web` for it.
+On a TLS host this needs the `COMPOSE_FILE` line from step 8 first. A change to
+`nginx-tls.conf` alone is the reload in step 8.
 
-To restart a misbehaving backend without deploying anything:
-
-```bash
-docker compose --env-file=.env.docker restart backend
-npm run stack:ps   # restart does not wait until it is healthy
-```
-
-That restarts the container as it is: no rebuild, and postgres and nginx keep running.
-What a restart mid-round costs the teams running a match is in *Restarting during
-a competition* below.
+To restart the backend without deploying: `docker compose --env-file=.env.docker restart
+backend`, then `npm run stack:ps` until it is healthy. Mid-round, read *Restarting during a
+competition* first.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
