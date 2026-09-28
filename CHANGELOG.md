@@ -9,7 +9,8 @@ Each section opens with what a contestant, an organiser, a tester or a visitor t
 the practice sites would notice, at most about eight bullets. *For developers*
 follows, at most about five: only what changes how someone works in this repo —
 a new command or gate, a removed package, a new convention — or a decision they
-need to know. What was refactored is not enough.
+need to know. What was refactored is not enough. In both parts the most important
+comes first, not the earliest merged.
 
 ## September 2026, as of 2026-09-28
 
@@ -18,6 +19,8 @@ need to know. What was refactored is not enough.
   unauthenticated callers, and guessing a join code is rate-limited (#433, #419,
   #458)
 - **The bot's strategy is no longer in the page contestants load** (#429)
+- **Round fixes**: resetting a match closes only the team's current match, and
+  the clock poll no longer uses up a turn's move limit (#535, #510)
 - **Organisers can undo a team deletion**: a tab lists deleted teams, with
   restore and batch delete. Team lookup ignores case, and the results TSV has the
   right columns and is built from fresh match data (#477, #478, #506, #569)
@@ -27,8 +30,6 @@ need to know. What was refactored is not enough.
   after the online round, the homepage takes the practice sites' green, and
   mobile layouts are fixed. `/jatekok/` falls back to the browser's language
   (#404, #538, #482, #548)
-- **Round fixes**: resetting a match closes only the team's current match, and
-  the clock poll no longer uses up a turn's move limit (#535, #510)
 
 ### For developers
 
