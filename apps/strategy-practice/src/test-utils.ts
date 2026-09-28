@@ -66,7 +66,7 @@ export const playBotMove = <TBoard, TTurnState = unknown>(
 // Playouts that disagree therefore say nothing about the board — they mean the
 // bot threw the win away on some line, a bug rather than a fact about the
 // position — so this throws instead of returning a winner nobody can trust.
-// See src/components/CLAUDE.md § Curated start boards.
+// See src/components/AGENTS.md § Curated start boards.
 export const forcedWinnerIndex = <TBoard, TTurnState = unknown>({
   gameplay,
   botStrategy,
