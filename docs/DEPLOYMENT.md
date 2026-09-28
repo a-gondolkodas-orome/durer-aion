@@ -378,14 +378,13 @@ services:
       - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-Rebuild with the override. `npm run deps` is the install `npm run stack:prod` does for
-itself and this path does not — without it a pull that moved the lockfile builds the
-frontend against the tree the previous release installed:
+Add `COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml` to `.env.docker`, so every
+`--env-file=.env.docker` command, `stack:prod` included, picks up the override. Without it
+`up` drops port 443 and still reports success, so check before rebuilding:
 
 ```bash
-npm run deps
-npm run build
-docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
+docker compose --env-file=.env.docker config | grep 443   # must print the port
+npm run stack:prod
 ```
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
@@ -405,8 +404,8 @@ Adding it before the first certificate exists is what breaks issuance, which is 
 comes second.
 
 This one is a reload, not a rebuild. `docker compose up` recreates a container only when its
-*configuration* changes, and editing a file that is already bind-mounted is not that — the
-three commands above would leave `web` running with the config it parsed at startup, the
+*configuration* changes, and editing a file that is already bind-mounted is not that —
+`npm run stack:prod` would leave `web` running with the config it parsed at startup, the
 redirect correct on disk and not being served:
 
 ```bash
@@ -462,9 +461,8 @@ git pull
 npm run stack:prod
 ```
 
-With TLS set up, use the three-command form from step 8 instead — `stack:prod` takes no
-arguments. A change to `nginx-tls.conf` itself is the reload in step 8 rather than either:
-`up` does not recreate `web` for it.
+On a TLS host this needs the `COMPOSE_FILE` line from step 8 first. A change to
+`nginx-tls.conf` alone is the reload in step 8.
 
 `sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
