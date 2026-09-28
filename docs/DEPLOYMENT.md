@@ -386,16 +386,14 @@ the override. Add this line to `.env.docker`:
 COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml
 ```
 
-Then rebuild, and check that `web` now publishes 443 — compose reports success either way:
+Check that compose picked it up *before* rebuilding. Without it, `up` recreates `web`
+with port 80 only, and the domain stops answering over HTTPS while compose reports
+success — and whether `--env-file` sets `COMPOSE_FILE` depends on the compose version:
 
 ```bash
+docker compose --env-file=.env.docker config | grep 443   # must print the 443 port
 npm run stack:prod
-npm run stack:ps   # web's PORTS must include 0.0.0.0:443->443/tcp
 ```
-
-Without that line, `up` recreates `web` with port 80 only, and the domain stops answering
-over HTTPS while compose reports success. A `docker-compose.override.yml` on the host goes
-in the list too: compose stops reading it on its own once `COMPOSE_FILE` is set.
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
 adding this to `nginx-tls.conf` and reloading nginx (below). Certbot's renewal fetches its
@@ -472,8 +470,10 @@ npm run stack:prod
 ```
 
 That installs, builds the frontend and the images, and recreates only the containers
-whose image or configuration changed; with TLS set up it is still the same command. A
-change to `nginx-tls.conf` itself is the reload in step 8 instead: `up` does not recreate
+whose image or configuration changed. With TLS it is the same command only while
+`.env.docker` names the override (step 8): on a TLS host whose `.env.docker` lacks that
+line, add it and run the check there first, or this deploy drops port 443. A change to
+`nginx-tls.conf` itself is the reload in step 8 instead: `up` does not recreate
 `web` for it.
 
 To restart a misbehaving backend without deploying anything:
@@ -511,12 +511,12 @@ fetch the match state again. What a restart does cost:
   the downtime comes out of every running match. Note how long the site was down and give
   it back to all of them at once with the admin page's *idő hozzáadása minden aktív
   játékosnak*.
-- **A bot move in flight is lost.** The bot answers a team's move after a short wait
-  (`apps/online-backend/src/botwrapper.ts`), and only in response to that move. A restart
-  inside that window leaves the match on the bot's turn with nothing to prompt it, so the
-  team's board stays frozen until the match's time runs out. A team that reports this
-  can only start that match over from the beginning, after the *reset* button beside it
-  in the team's dialog on the admin page.
+- **A bot move in flight can be lost** — rarely, since the window is short. The bot answers
+  a team's move after a short wait (`apps/online-backend/src/botwrapper.ts`), and only in
+  response to that move. A restart inside that window leaves the match on the bot's turn with nothing to prompt it, so the
+  team's board stays frozen until the match's time runs out. The only way out is the
+  *reset* button beside that match in the team's dialog on the admin page: the team then
+  starts it over from scratch, and what it had scored in the frozen match is lost.
 
 ## Getting inside a container
 
