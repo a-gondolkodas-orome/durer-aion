@@ -16,7 +16,7 @@ export type Phase = 'roleSelection' | 'play' | 'gameEnd'
 export type Mode = 'vsComputer' | 'vsHuman'
 
 // TTurnState names the mid-turn payload only — the engine adds the `| null`
-// every turn starts and ends in. See src/components/CLAUDE.md § Pinning the
+// every turn starts and ends in. See src/components/AGENTS.md § Pinning the
 // turn state.
 export interface Ctx<TTurnState = unknown> {
   isHumanVsHumanGame: boolean
@@ -65,7 +65,7 @@ export type MoveFunction<TBoard, TTurnState = unknown> = (
 ) => MoveOutcome<TBoard, TTurnState>
 // The single source of truth for a move's legality, colocated with its `apply`
 // and free of React so the UI, the engine and a future server can share it.
-// See src/components/CLAUDE.md § validate.
+// See src/components/AGENTS.md § validate.
 // Exported so a validator shared by sibling games can be written outside any
 // `moves` object and still be typed by the contract rather than by hand.
 export type MoveValidator<TBoard, TTurnState = unknown> = (
@@ -77,7 +77,7 @@ export interface MoveDefinition<TBoard, TTurnState = unknown> {
 }
 // What a game's `moves` object is checked against, always as a `satisfies`
 // clause rather than an annotation — see apps/strategy-practice
-// src/components/CLAUDE.md § moves for why, and for what it types.
+// src/components/AGENTS.md § moves for why, and for what it types.
 export type MoveDefs<TBoard, TTurnState = unknown> =
   Record<string, MoveDefinition<TBoard, TTurnState>>
 export interface Gameplay<TBoard, TTurnState = unknown> {
@@ -125,7 +125,7 @@ export type BotMove<TMoves extends string | AnyMoves = string> =
     ? { [K in keyof TMoves]: { move: K; args?: MoveArgs<TMoves[K]['apply']> } }[keyof TMoves]
     : never
 // A pure function of the position that names what it wants played; the engine
-// plays it out (see src/components/CLAUDE.md § Bot contract). Deliberately not
+// plays it out (see src/components/AGENTS.md § Bot contract). Deliberately not
 // parameterised over the turn state: a bot is asked again with a fresh `ctx`
 // for every move it owes, so it plans a whole turn rather than reading its own
 // half-made selection back.
@@ -158,14 +158,14 @@ export interface Variant {
 export interface VariantInput<TBoard> {
   // Stable slug this variant is addressable by in the URL (`?variant=3-5-7`).
   // Optional — without one a variant is addressed by its index, which no
-  // reordering survives. See src/components/CLAUDE.md § Variants.
+  // reordering survives. See src/components/AGENTS.md § Variants.
   id?: string
   label?: I18nString
   isDefault?: boolean
   generateStartBoard?: () => TBoard
   // A curated list of start boards, in place of generating one: the variant
   // plays a random entry. Its order is part of the contract — see
-  // src/components/CLAUDE.md § Curated start boards.
+  // src/components/AGENTS.md § Curated start boards.
   startBoards?: TBoard[]
   botStrategy?: BotStrategy<TBoard>
   notAlwaysOptimal?: boolean

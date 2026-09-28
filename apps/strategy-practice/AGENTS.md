@@ -56,7 +56,7 @@ sibling of `games/`:
   is in `packages/strategy-engine`, imported as `strategy-engine`, and `index.ts` here re-exports
   it. Games import through that barrel — no deep imports. The barrel is a path
   alias, so no `../../` either, which is what makes the rule self-enforcing.
-  [src/components/CLAUDE.md](src/components/CLAUDE.md) has the detail.
+  [src/components/AGENTS.md](src/components/AGENTS.md) has the detail.
 
 Each game folder implements the optimal strategy (computer AI) and its own UI
 against that API. Strategy is implemented however is simplest: calculated on the
@@ -101,8 +101,8 @@ Two rules keep the boundary meaningful rather than nominal:
 A variant states its start position either as `generateStartBoard` or as
 `startBoards`, a curated list. Prefer the list whenever the positions are
 enumerable, and verify each entry with `forcedWinnerIndex` — the contract and
-the reasoning are in [src/components/CLAUDE.md § Curated start
-boards](src/components/CLAUDE.md#curated-start-boards).
+the reasoning are in [src/components/AGENTS.md § Curated start
+boards](src/components/AGENTS.md#curated-start-boards).
 
 ### Where a test lives
 
@@ -200,7 +200,7 @@ the rest in-repo.
 The steps are in [README.md § Adding a new
 game](README.md#adding-a-new-game). The `strategyGameFactory` API, the move and
 bot contracts, the store architecture and the new-game checklist are in
-`src/components/CLAUDE.md`, which loads automatically when working under
+`src/components/AGENTS.md`, which loads automatically when working under
 `src/components/`; read it directly when discussing that design without opening
 a file there.
 
