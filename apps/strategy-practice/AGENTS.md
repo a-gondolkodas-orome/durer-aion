@@ -184,7 +184,7 @@ the reasons above have not changed.
 drafted — this app and the live competition round are the same repository, and
 `packages/strategy-engine` was pulled out of here partly with that in mind — and then
 deprioritized, because upstream boardgame.io is under active development again
-(issue #277). The root [`CLAUDE.md`](../../CLAUDE.md) is the authority: don't
+(issue #277). The root [`AGENTS.md`](../../AGENTS.md) is the authority: don't
 build toward that replacement. What survives it is the engine work that pays
 for itself either way — a game's rules and its bot each importable with no
 React, which is why `gameplay.ts` and `bot-strategy.ts` are separate files.

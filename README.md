@@ -392,7 +392,7 @@ This is a game for the **live competition** (boardgame.io). A game for the
 strategy practice site is a different shape entirely — see
 [`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game),
 and the `new-game` skill under that directory is the route.
-[`CLAUDE.md`](CLAUDE.md) § *Creating a New Game* holds the rules that keep it
+[`AGENTS.md`](AGENTS.md) § *Creating a New Game* holds the rules that keep it
 safe: why the bot must not reach the served bundle, and the by-hand check for
 that before a competition.
 
