@@ -483,22 +483,13 @@ itself — with whatever image and `dist` were last built, since nothing rebuild
 
 ## Restarting during a competition
 
-Restart only when there is no other way out: every live match is affected.
+Only as a last resort. State is in postgres and open pages reconnect, but:
 
-Teams, matches and logins are all in postgres, and open pages reconnect on their own and
-fetch the match state again. What a restart does cost:
-
-- **The clock keeps running.** A match ends at a wall-clock time fixed when it starts, so
-  the downtime comes out of every running match. Note how long the site was down and give
-  it back to all of them at once with the admin page's *idő hozzáadása minden aktív
-  játékosnak*.
-- **A bot move in flight can be lost** — rarely, since the window is short. The bot answers
-  a team's move after a short wait (`apps/online-backend/src/botwrapper.ts`), and only in
-  response to that move. A restart inside that window leaves the match on the bot's turn
-  with nothing to prompt it, so the team's board stays frozen until the match's time runs
-  out. The only way out is the
-  *reset* button beside that match in the team's dialog on the admin page: the team then
-  starts it over from scratch, and what it had scored in the frozen match is lost.
+- **The clock keeps running.** Give the downtime back with the admin page's *idő
+  hozzáadása minden aktív játékosnak*.
+- **A bot move in flight can be lost** (rare): the bot only moves in response to a team's
+  move, so that match stays frozen. Its *reset* button in the team's dialog on the admin
+  page lets the team start it over, losing that match's score.
 
 ## Getting inside a container
 
