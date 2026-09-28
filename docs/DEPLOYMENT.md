@@ -494,8 +494,9 @@ fetch the match state again. What a restart does cost:
   játékosnak*.
 - **A bot move in flight can be lost** — rarely, since the window is short. The bot answers
   a team's move after a short wait (`apps/online-backend/src/botwrapper.ts`), and only in
-  response to that move. A restart inside that window leaves the match on the bot's turn with nothing to prompt it, so the
-  team's board stays frozen until the match's time runs out. The only way out is the
+  response to that move. A restart inside that window leaves the match on the bot's turn
+  with nothing to prompt it, so the team's board stays frozen until the match's time runs
+  out. The only way out is the
   *reset* button beside that match in the team's dialog on the admin page: the team then
   starts it over from scratch, and what it had scored in the frozen match is lost.
 
