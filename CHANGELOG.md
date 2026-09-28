@@ -35,10 +35,12 @@ line. The merged pull requests are the full record.
 
 ## August 2026
 
-- **One repo, one deploy for the public sites.** The strategy practice site
-  moved in from durer-jatekok and joined the npm workspaces, and one Pages
-  workflow builds `/jatekok/`, `/valto/` and `/proba-verseny/` together, served
-  from gyakorlo.durerinfo.hu (#238, #244, #256, #262)
+- **The strategy practice site moved into this repo.** The durer-jatekok repo,
+  history and all, became `apps/strategy-practice`, a workspace whose lint and
+  tests run with everything else (#238, #256)
+- **One deploy for the public sites**: one Pages workflow builds `/jatekok/`,
+  `/valto/` and `/proba-verseny/` together, served from gyakorlo.durerinfo.hu
+  (#244, #262)
 - **New relay practice site** at `/valto/`, with a way back to the choice between
   relay and strategy practice (#224, #403)
 - **boardgame.io stays.** A plan to replace it was started and then retired, and
@@ -46,11 +48,6 @@ line. The merged pull requests are the full record.
   `packages/strategy-engine` (#225, #261, #287, #288)
 - **React 19 across the monorepo**, with Recoil replaced by a
   `useSyncExternalStore` store and tsup by tsdown (#253, #252, #282)
-- **Every strategy game checks its moves.** Before the merge, each game on the
-  strategy practice site gained a move legality layer and a move contract that
-  returns the outcome, with every bot tested against its own game's moves and
-  end-of-game tests throughout; several bots that gave up won positions were
-  fixed (durer-jatekok #335–#393, #445, #472)
 - **CI gates the basics**: typecheck, vitest suites and spell-check in Hungarian
   and British English, on a pinned toolchain, with `no-explicit-any` and the
   type-aware lint rules on (#233, #232, #391, #229, #292, #357)
@@ -60,19 +57,3 @@ line. The merged pull requests are the full record.
 - **The admin page can export the team table**, and the twelve unreferenced past
   games are gone (#312, #333)
 
-## July 2026
-
-Nothing was merged into this repo; the work was on the strategy practice site,
-then still the separate durer-jatekok repo, whose history came in with #238.
-Numbers below are that repo's pull requests.
-
-- **About thirty more games from past competitions** on the practice site,
-  among them chocolate breaking, the Latin square, modified mill and the ten
-  coins (durer-jatekok #272–#306, #332)
-- **Sibling games merged into single games with variants**, and the variant
-  labels renamed to plain words (durer-jatekok #309, #310)
-- **A redesigned overview**, with reworked filtering and routing, and the games
-  in their own folders (durer-jatekok #275)
-- **Self-hosted Umami analytics** instead of GoatCounter (durer-jatekok #276)
-- **A written plan for supporting real competitions** from the practice
-  engine (durer-jatekok #318)
