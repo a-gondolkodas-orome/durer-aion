@@ -292,7 +292,7 @@ export function Admin(props: { teamId?: string }) {
             sx={{ margin: '10px 0', maxWidth: 300 }}
             onClick={() => {
               setConfirmDialog({
-                text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza.',
+                text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza. A verseny közben semmiképpen se törölj csapatokat.',
                 requiredWords: DELETE_WORDS,
                 confirm: async () => {
                   try {

@@ -67,7 +67,7 @@ export function TeamDetailDialog(props: {
         disabled={removing}
         onClick={() => {
           props.setConfirmDialog({
-            text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot?`,
+            text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot? A verseny közben semmiképpen se törölj csapatokat.`,
             requiredWords: DELETE_WORDS,
             confirm: async () => removeTeam(adminTeamId(teamState)),
           });
