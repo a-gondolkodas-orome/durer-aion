@@ -7,8 +7,7 @@ games, built on boardgame.io.
 deployment, [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) on dependency updates;
 [`CONTRIBUTING.md`](CONTRIBUTING.md) is the human front door and carries the
 commit and pull request rules. This file is the map and the rules an agent must
-not get wrong — any agent: `CLAUDE.md` beside it only imports it, for Claude
-Code, which does not read `AGENTS.md` on its own.
+not get wrong.
 
 ## Project Structure
 
