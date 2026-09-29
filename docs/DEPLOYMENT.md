@@ -37,10 +37,9 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | domain | the real subdomain, static IP | a subdomain of one you already own |
 | `.env.docker` | real secrets, rotated afterwards | throwaway values, still off the samples |
 | teams | the real TSV; the `.export` goes back to the organisers | `scripts/test.tsv` |
-| database | must survive; there are no backups | expendable |
-| HTTP→HTTPS redirect | wanted; goes in the untracked `nginx-tls.conf` | skip |
+| database | must survive until results are exported; there are no backups | expendable |
+| HTTP→HTTPS redirect | wanted; goes in the untracked `nginx-tls.conf` | optional |
 | certificate renewal | set up the cron | skip |
-| unattended upgrades | stop the timers for the competition window | leave them running |
 | afterwards | stays up | tear the machine down **and delete the DNS record** |
 
 ## What the machine needs
@@ -72,13 +71,7 @@ apt update && apt upgrade -y
 If it asks about a locally modified `sshd_config`, keep the local version: those edits are
 the image's, and the patched binary installs either way.
 
-**Then reboot, if it asks for one.** `*** System restart required ***` in the MOTD means a
-kernel or library was replaced and the running system is still on the old one — a patch that
-has not taken effect:
-
-```bash
-sudo reboot   # then reconnect
-```
+Then reboot, with `sudo reboot` if it asks for one.
 
 <details>
 <summary>Optional: keep it patched automatically</summary>
@@ -125,9 +118,7 @@ usermod -aG sudo deploy
 rsync --archive --chown=deploy:deploy ~/.ssh /home/deploy
 ```
 
-**Log in as it from a second terminal before closing the first.** A broken `sshd` config or
-a mis-copied key only shows up on the next login, which is when you no longer have a way
-in.
+**Log in as it from a second terminal before closing the first.**
 
 **Optional, and worth it on anything that outlives the drive:** close root's own door, since
 cloud images often ship `PermitRootLogin yes`.
@@ -310,8 +301,7 @@ dig +short @1.1.1.1 verseny.durerinfo.hu   # the machine's IP, once it answers a
 A public resolver rather than the machine's own, which may still be holding the `NXDOMAIN`
 it cached before the record existed. A name nobody has asked for yet answers within seconds
 of the record being created; one you queried too early takes as long as the zone's negative
-cache instead, typically 5 to 60 minutes. Neither is the "24 to 48 hours" that belongs to
-changing a domain's nameservers, which this is not.
+cache instead, typically 5 to 60 minutes.
 
 The machine's address is its own for as long as it exists, so that is enough. A reserved
 address (DigitalOcean reserved IP, AWS elastic IP) buys something else — rebuilding the
