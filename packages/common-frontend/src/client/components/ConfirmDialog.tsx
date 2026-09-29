@@ -6,10 +6,16 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 export interface ConfirmDialogInterface {
   text: string;
   confirm: () => Promise<void>;
-  /// When set, the confirm button stays disabled until this word is typed,
-  /// for actions that are too easy to trigger by a stray click.
-  requiredInput?: string;
+  /// When set, the confirm button stays disabled until one of these words is
+  /// typed, for actions that are too easy to trigger by a stray click.
+  requiredWords?: string[];
 }
+
+/// Both spellings, so an admin without a Hungarian keyboard need not paste the accents.
+export const DELETE_WORDS = ['törlés', 'delete'];
+
+// Case, accents and surrounding spaces do not matter: "torles" is accepted.
+const fold = (s: string) => s.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
 export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const [confirmDialog, setConfirmDialog] = [props.confirmDialog, props.setConfirmDialog];
@@ -56,15 +62,15 @@ export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | n
 function ConfirmControls(props: { confirmDialog: ConfirmDialogInterface, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const { confirmDialog, setConfirmDialog } = props;
   const [typed, setTyped] = useState('');
-  const { requiredInput } = confirmDialog;
-  const allowed = requiredInput === undefined || typed.trim().toLowerCase() === requiredInput.toLowerCase();
+  const { requiredWords } = confirmDialog;
+  const allowed = requiredWords === undefined || requiredWords.some(w => fold(w) === fold(typed));
   return <>
-    {requiredInput !== undefined && <TextField
+    {requiredWords !== undefined && <TextField
       sx={{ margin: '16px 0' }}
       size="small"
       autoComplete="off"
       autoFocus
-      label={`Írd be: ${requiredInput}`}
+      label={`Írd be: ${requiredWords.join(' (vagy ')}${')'.repeat(requiredWords.length - 1)}`}
       value={typed}
       onChange={e => setTyped(e.target.value)}
     />}

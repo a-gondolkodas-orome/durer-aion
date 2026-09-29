@@ -9,7 +9,7 @@ import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface } from './ConfirmDialog';
+import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
 import { Countdown } from './Countdown';
 import { RelayEndTableData } from './RelayEndTable';
 import * as Yup from 'yup';
@@ -68,7 +68,7 @@ export function TeamDetailDialog(props: {
         onClick={() => {
           props.setConfirmDialog({
             text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot?`,
-            requiredInput: 'törlés',
+            requiredWords: DELETE_WORDS,
             confirm: async () => removeTeam(adminTeamId(teamState)),
           });
         }}

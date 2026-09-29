@@ -104,7 +104,7 @@ const renderAdmin = (teamId?: string) =>
     </ThemeProvider>
   );
 
-const typeDelete = () => fireEvent.change(screen.getByLabelText(/Írd be/), { target: { value: 'törlés' } });
+const typeDelete = (word = 'törlés') => fireEvent.change(screen.getByLabelText(/Írd be/), { target: { value: word } });
 const confirm = () => fireEvent.click(screen.getByText('Megerősítés'));
 const confirmDelete = () => {
   typeDelete();
@@ -122,6 +122,18 @@ test('a team delete cannot be confirmed until the word is typed', async () => {
   typeDelete();
   expect(screen.getByText('Megerősítés').closest('button')).toBeEnabled();
   expect(repo.removeTeam).not.toHaveBeenCalled();
+});
+
+test.each(['delete', 'DELETE ', 'torles', 'Törlés'])('a delete accepts %j', async (word) => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha, bravo]);
+  renderAdmin();
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  fireEvent.click(await screen.findByText('Csapat törlése'));
+
+  typeDelete('nope');
+  expect(screen.getByText('Megerősítés').closest('button')).toBeDisabled();
+  typeDelete(word);
+  expect(screen.getByText('Megerősítés').closest('button')).toBeEnabled();
 });
 
 // The list used to stay as it was after a delete, so the next click asked the

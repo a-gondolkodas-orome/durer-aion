@@ -13,7 +13,7 @@ import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialogInterface, ConfirmDialog, DELETE_WORDS } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -293,7 +293,7 @@ export function Admin(props: { teamId?: string }) {
             onClick={() => {
               setConfirmDialog({
                 text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza.',
-                requiredInput: 'törlés',
+                requiredWords: DELETE_WORDS,
                 confirm: async () => {
                   try {
                     // One request, one transaction: all of them go, or none,
