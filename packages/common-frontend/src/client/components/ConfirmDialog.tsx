@@ -70,7 +70,7 @@ function ConfirmControls(props: { confirmDialog: ConfirmDialogInterface, setConf
       size="small"
       autoComplete="off"
       autoFocus
-      label={`Írd be: ${requiredWords.join(' (vagy ')}${')'.repeat(requiredWords.length - 1)}`}
+      label={`Írd be: ${requiredWords.join(' / ')}`}
       value={typed}
       onChange={e => setTyped(e.target.value)}
     />}
