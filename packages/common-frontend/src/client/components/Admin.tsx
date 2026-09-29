@@ -293,6 +293,7 @@ export function Admin(props: { teamId?: string }) {
             onClick={() => {
               setConfirmDialog({
                 text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza.',
+                requiredInput: 'törlés',
                 confirm: async () => {
                   try {
                     // One request, one transaction: all of them go, or none,

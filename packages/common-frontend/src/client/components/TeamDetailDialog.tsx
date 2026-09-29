@@ -68,6 +68,7 @@ export function TeamDetailDialog(props: {
         onClick={() => {
           props.setConfirmDialog({
             text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot?`,
+            requiredInput: 'törlés',
             confirm: async () => removeTeam(adminTeamId(teamState)),
           });
         }}

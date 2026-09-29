@@ -1,11 +1,14 @@
 import { Stack } from '@mui/system';
-import { Button, Dialog } from '@mui/material';
-import { Dispatch } from 'react';
+import { Button, Dialog, TextField } from '@mui/material';
+import { Dispatch, useState } from 'react';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 export interface ConfirmDialogInterface {
   text: string;
   confirm: () => Promise<void>;
+  /// When set, the confirm button stays disabled until this word is typed,
+  /// for actions that are too easy to trigger by a stray click.
+  requiredInput?: string;
 }
 
 export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
@@ -44,17 +47,38 @@ export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | n
     >
       <WarningAmberIcon sx={{ color: '#FF0000', fontSize: '150px' }} />
       <Stack>{confirmDialog.text}</Stack>
-      <Button
-        sx={{ width: "130px", height: "45px", alignSelf: "center" }}
-        color='primary'
-        variant='contained'
-        onClick={() => {
-          void confirmDialog.confirm()
-          setConfirmDialog(null);
-        }}
-      >
-        Megerősítés
-      </Button>
+      <ConfirmControls confirmDialog={confirmDialog} setConfirmDialog={setConfirmDialog} />
     </Stack>}
   </Dialog>
+}
+
+// Mounted only while a dialog is open, so the typed word starts empty each time.
+function ConfirmControls(props: { confirmDialog: ConfirmDialogInterface, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+  const { confirmDialog, setConfirmDialog } = props;
+  const [typed, setTyped] = useState('');
+  const { requiredInput } = confirmDialog;
+  const allowed = requiredInput === undefined || typed.trim().toLowerCase() === requiredInput.toLowerCase();
+  return <>
+    {requiredInput !== undefined && <TextField
+      sx={{ margin: '16px 0' }}
+      size="small"
+      autoComplete="off"
+      autoFocus
+      label={`Írd be: ${requiredInput}`}
+      value={typed}
+      onChange={e => setTyped(e.target.value)}
+    />}
+    <Button
+      sx={{ width: "130px", height: "45px", alignSelf: "center" }}
+      color='primary'
+      variant='contained'
+      disabled={!allowed}
+      onClick={() => {
+        void confirmDialog.confirm()
+        setConfirmDialog(null);
+      }}
+    >
+      Megerősítés
+    </Button>
+  </>;
 }
