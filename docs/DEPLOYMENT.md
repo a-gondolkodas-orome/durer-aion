@@ -478,12 +478,13 @@ itself — with whatever image and `dist` were last built, since nothing rebuild
 Only as a last resort. State is in postgres and open pages reconnect, but:
 
 - **The clock keeps running.** Give the downtime back with the admin page's *idő
-  hozzáadása minden aktív játékosnak* right away, from a freshly loaded admin page. A match
-  whose time ran out meanwhile gets it too, unless the team reloaded its page first: that is
-  what closes it.
+  hozzáadása minden aktív játékosnak* right away, from a freshly loaded admin page (it only
+  covers the matches it loaded). A match whose time ran out during the outage is over:
+  adding time does not reopen it, since an open page's clock poll ends it on reconnect.
 - **A bot move in flight can be lost** (rare): the bot only moves in response to a team's
   move, so that match stays frozen. Its *reset* button in the team's dialog on the admin
-  page lets the team start it over, losing that match's score.
+  page lets the team start it over after reloading its page, losing every point scored in
+  that match.
 
 ## Getting inside a container
 
