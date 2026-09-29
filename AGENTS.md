@@ -77,8 +77,8 @@ written down once.
 
 ## Creating a New Game
 
-For a game on the *strategy practice* site, the `new-game` skill under
-`apps/strategy-practice` is the route. For the *live competition*
+For a game on the *strategy practice* site, the `new-game` skill,
+`apps/strategy-practice/.claude/skills/new-game/`, is the route. For the *live competition*
 (boardgame.io), [`README.md`](README.md) § *Creating a new game* is the recipe:
 one self-contained folder under `packages/game/src/games/strategy/<game-name>/`
 holding `game.ts`, `strategy.ts`, `board.tsx` and `main.tsx`, registered in the

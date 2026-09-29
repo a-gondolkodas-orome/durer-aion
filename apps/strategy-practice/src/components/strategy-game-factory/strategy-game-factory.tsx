@@ -202,7 +202,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
 
     // Follows a `?variant=` link to the game already open, which a same-route
     // hash navigation would otherwise leave on the old board (see
-    // src/components/CLAUDE.md § Variants).
+    // src/components/AGENTS.md § Variants).
     //
     // Guarded on the index because `resetGameState` writes the param itself, so
     // an unguarded effect would re-enter. Not derivable during render either: it
@@ -273,7 +273,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     // What the BoardClient receives: the same moves, but a dispatch that fails
     // `isAllowed` is silently ignored, judged against the current store state.
     // Bots and the auto `endOfTurnMove` use `wrappedGameMoves` instead, where an
-    // illegal move fails loudly. See src/components/CLAUDE.md § validate.
+    // illegal move fails loudly. See src/components/AGENTS.md § validate.
     const clientGameMoves: ClientGameMoves<TBoard, TTurnState> = mapValues(moves, ({ validate }, name) => {
       const isAllowed = (moveBoard: TBoard, ...args: unknown[]) => {
         const liveCtx = buildCtx(store.getState(), resolvedPlayerNames);

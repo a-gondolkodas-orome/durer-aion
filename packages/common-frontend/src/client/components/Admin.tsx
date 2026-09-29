@@ -13,7 +13,7 @@ import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialogInterface, ConfirmDialog, DELETE_WORDS } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -285,33 +285,37 @@ export function Admin(props: { teamId?: string }) {
           )}/>
         </Form>
         </Stack>}
-        {showTeams && data &&
-          <Button
-            color="error"
-            variant="contained"
-            sx={{ margin: '10px 0', maxWidth: 300 }}
-            onClick={() => {
-              setConfirmDialog({
-                text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza.',
-                confirm: async () => {
-                  try {
-                    // One request, one transaction: all of them go, or none,
-                    // and they land in the archive as one batch.
-                    const { deleted } = await removeAllTeams();
-                    enqueueSnackbar(`${deleted} csapat törölve`, { variant: 'success' });
-                  } catch (e) {
-                    const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                    enqueueSnackbar(message, { variant: 'error' });
-                  } finally {
-                    await mutate();
-                  }
-                }
-              });
-            }}
-          >
-            Összes csapat törlése
-          </Button>}
       {showTeams && data && <Stats data={data}/>}
+        {showTeams && data &&
+          <Stack sx={{ marginTop: "24px", padding: "12px", border: "1px solid", borderColor: "error.main", borderRadius: "4px", maxWidth: 400 }}>
+            <Stack sx={{ fontSize: 16, fontWeight: "bold", color: "error.main" }}>Veszélyzóna</Stack>
+            <Button
+              color="error"
+              variant="contained"
+              sx={{ margin: '10px 0', maxWidth: 300 }}
+              onClick={() => {
+                setConfirmDialog({
+                  text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza. A verseny közben semmiképpen se törölj csapatokat.',
+                  requiredWords: DELETE_WORDS,
+                  confirm: async () => {
+                    try {
+                      // One request, one transaction: all of them go, or none,
+                      // and they land in the archive as one batch.
+                      const { deleted } = await removeAllTeams();
+                      enqueueSnackbar(`${deleted} csapat törölve`, { variant: 'success' });
+                    } catch (e) {
+                      const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                      enqueueSnackbar(message, { variant: 'error' });
+                    } finally {
+                      await mutate();
+                    }
+                  }
+                });
+              }}
+            >
+              Összes csapat törlése
+            </Button>
+          </Stack>}
       </>}
     </Stack>
   )

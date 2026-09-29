@@ -1,6 +1,0 @@
-# Review requests are opened automatically for the owner of every path a pull
-# request touches. Patterns are matched last-one-wins, so a later line for a
-# subdirectory overrides an earlier, broader one.
-
-/apps/strategy-practice/   @czeildi
-/packages/strategy-engine/ @czeildi

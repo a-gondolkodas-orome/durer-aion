@@ -84,7 +84,7 @@ of you while writing the description and they leave no trace in the body.
 
 ## The rest
 
-- [`CLAUDE.md` § *Key Conventions*](CLAUDE.md#key-conventions) — the house rules
+- [`AGENTS.md` § *Key Conventions*](AGENTS.md#key-conventions) — the house rules
   this page does not carry: formatting through ESLint rather than prettier, what
   to comment, which language user-facing text is in.
 - [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the

@@ -13,8 +13,16 @@ import { useStartRelay } from 'common-frontend';
 import { hasProblemSet } from './problems';
 
 export enum Category {
-  A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Cp = 'C+', Dp = 'D+', Ep = 'E+'
+  A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Ep = 'E+', Cp = 'C+', Dp = 'D+'
 }
+
+// C+ and D+ (years 9–11) match E and E+ in difficulty, so the selector lists
+// them under those; the join code and the header keep the real category.
+export const listedAs = (cat: Category): Category =>
+  cat === Category.Cp ? Category.E : cat === Category.Dp ? Category.Ep : cat;
+
+const categoryOptionLabel = (cat: Category) =>
+  cat === Category.E ? 'E / C+' : cat === Category.Ep ? 'E+ / D+' : cat;
 
 interface TestListElement {
   local?: Category[],
@@ -49,6 +57,22 @@ export const availableRelayTests: TestListElement[] = [
     { online: [Category.C, Category.D, Category.E] },
 ]
 
+const roundTypes: RoundType[] = ['local', 'final', 'online'];
+
+interface PlayableTest {
+  yearIdx: number,
+  category: Category,
+}
+
+// The tests offered under a listed category in a round, one per year. A test is
+// only offered if its problem set is already bundled with the app.
+export const playableTests = (listed: Category, round: RoundType): PlayableTest[] =>
+  availableRelayTests.flatMap((test, yearIdx) =>
+    (test[round] ?? [])
+      .filter(cat => listedAs(cat) === listed && hasProblemSet(relayTestCode(yearIdx, round, cat)))
+      .map(cat => ({ yearIdx, category: cat }))
+  );
+
 export default function SelectRelayRound() {
   const [year, setYear] = useState('');
   const [round, setRound] = useState('');
@@ -59,36 +83,19 @@ export default function SelectRelayRound() {
   const { t } = useTranslation();
   const startRelay = useStartRelay();
 
-  const testHasCategory = (test: TestListElement, round: RoundType, cat: Category) =>
-    test[round]?.includes(cat) ?? false;
-
-  // A test can only be offered if its problem set is already bundled with the app
-  const testIsPlayable = (yearIdx: number, roundType: RoundType, cat: Category) =>
-    testHasCategory(availableRelayTests[yearIdx], roundType, cat)
-      && hasProblemSet(relayTestCode(yearIdx, roundType, cat));
-
-  const roundTypes: RoundType[] = ['local', 'final', 'online'];
-
   const availableCategories: Category[] = Object.values(Category).filter(cat =>
-    availableRelayTests.some((_test, idx) =>
-      roundTypes.some(roundType => testIsPlayable(idx, roundType, cat))
-    )
+    listedAs(cat) === cat && roundTypes.some(roundType => playableTests(cat, roundType).length > 0)
   );
 
   const availableRounds: RoundType[] =
     category === ''
       ? []
-      : roundTypes.filter(roundType =>
-          availableRelayTests.some((_test, idx) => testIsPlayable(idx, roundType, category as Category))
-        );
+      : roundTypes.filter(roundType => playableTests(category as Category, roundType).length > 0);
 
-  const availableYears: number[] =
+  const availableYears: PlayableTest[] =
     category === '' || round === ''
       ? []
-      : availableRelayTests.reduce<number[]>((years, _test, idx) => {
-          if (testIsPlayable(idx, round as RoundType, category as Category)) years.push(idx);
-          return years;
-        }, []);
+      : playableTests(category as Category, round as RoundType);
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value);
@@ -118,7 +125,12 @@ export default function SelectRelayRound() {
       enqueueSnackbar(t('login.error.noRound'), { variant: 'error' });
       return;
     }
-    const code = relayTestCode(Number(year), round as RoundType, category);
+    const test = availableYears.find(({ yearIdx }) => String(yearIdx) === year);
+    if (!test) {
+      enqueueSnackbar(t('login.error.noRound'), { variant: 'error' });
+      return;
+    }
+    const code = relayTestCode(test.yearIdx, round as RoundType, test.category);
     try {
       await login(code);
       await startRelay();
@@ -146,7 +158,7 @@ export default function SelectRelayRound() {
           >
             {availableCategories.map(cat =>
               <MenuItem key={cat} value={cat}>
-                {cat}
+                {categoryOptionLabel(cat)}
               </MenuItem>
             )}
           </Select>
@@ -178,9 +190,9 @@ export default function SelectRelayRound() {
             label={t('login.yearSelector')}
             onChange={handleYearChange}
           >
-            {availableYears.map(yearidx =>
-              <MenuItem key={yearidx} value={String(yearidx)}>
-                {t('login.yearOption', { num: yearidx + 1 })}
+            {availableYears.map(({ yearIdx }) =>
+              <MenuItem key={yearIdx} value={String(yearIdx)}>
+                {t('login.yearOption', { num: yearIdx + 1 })}
               </MenuItem>
             )}
           </Select>

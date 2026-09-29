@@ -4,7 +4,7 @@ Loaded when working under `src/components/` — the games in `games/` and the
 `strategy-game-factory` engine they are built on. Project-wide context (what
 this project is, testing policy, styling, i18n, PR conventions) lives in
 `AGENTS.md` at the root of this app, `apps/strategy-practice/`. The repository
-root has `CLAUDE.md` instead, which owns the monorepo-wide conventions.
+root has its own `AGENTS.md`, which owns the monorepo-wide conventions.
 
 ## Adding a new game
 
