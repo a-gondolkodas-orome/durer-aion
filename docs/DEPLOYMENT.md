@@ -394,7 +394,7 @@ if ($to_https)                                     { return 301 https://$host$re
 Adding it before the first certificate exists is what breaks issuance, which is why it
 comes second.
 
-A rebuild would not do: `docker compose up` recreates a container only when its
+Reload, not rebuild: `docker compose up` recreates a container only when its
 *configuration* changes, and editing a file that is already bind-mounted is not that — the
 three commands above would leave `web` running with the config it parsed at startup, the
 redirect correct on disk and not being served:
@@ -478,9 +478,9 @@ itself — with whatever image and `dist` were last built, since nothing rebuild
 Only as a last resort. State is in postgres and open pages reconnect, but:
 
 - **The clock keeps running.** Give the downtime back with the admin page's *idő
-  hozzáadása minden aktív játékosnak* right away, from a freshly loaded admin page (it only
-  covers the matches it loaded). A match whose time ran out during the outage is over:
-  adding time does not reopen it, since an open page's clock poll ends it on reconnect.
+  hozzáadása minden aktív játékosnak* right away, from a freshly loaded admin page. A match
+  whose time ran out during the outage is over: adding time does not reopen it, since an
+  open page's clock poll ends it on reconnect.
 - **A bot move in flight can be lost** (rare): the bot only moves in response to a team's
   move, so that match stays frozen. Its *reset* button in the team's dialog on the admin
   page lets the team start it over after reloading its page, losing every point scored in
