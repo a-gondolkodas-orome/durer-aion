@@ -458,44 +458,38 @@ docker compose --env-file=.env.docker exec web nginx -s reload
 
 ## 9. Updating a deployment
 
+During a competition, only as a last resort because the clock keeps running
+and a bot move in flight can be lost.
+
+**To deploy a new release**, the same commands as step 8:
+
 ```bash
 git pull
-npm run stack:prod
+npm run deps
+npm run build
+docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
 ```
 
-With TLS set up, use the three-command form from step 8 instead — `stack:prod` takes no
-arguments. A change to `nginx-tls.conf` itself is the reload in step 8 rather than either:
-`up` does not recreate `web` for it.
+Before step 8 has been done, `npm run stack:prod` is the whole update, after step
+8 it would drop the site off https.
 
-To restart the backend without deploying: `docker compose --env-file=.env.docker restart
-backend`, then `npm run stack:ps` until it is healthy. Mid-round, read *Restarting during a
-competition* first.
-
-`sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
+There are no DB migrations, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
 (`npm run stack:down -- --volumes`, then import the teams again) if the data is expendable.
+
+
+## Restarting the backend
+
+During a competition, only as a last resort because the clock keeps running
+and a bot move in flight can be lost.
 
 All three services are `restart: unless-stopped`, so a reboot brings the stack back by
 itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
 
-> **Test drive:** tear the machine down instead, per the last column of the provider table.
-> Stopping is not deleting on any of them, and on DigitalOcean it does not stop the bill.
-> **Delete the DNS record too.** The IP goes back to the provider's pool, and a record left
-> pointing at it lets whoever gets that IP next serve their own content — with their own
-> valid certificate — on a subdomain of your domain.
-
-## Restarting during a competition
-
-Only as a last resort. State is in postgres and open pages reconnect, but:
-
-- **The clock keeps running.** Give the downtime back with the admin page's *idő
-  hozzáadása minden aktív játékosnak* right away, from a freshly loaded admin page. A match
-  whose time ran out during the outage is over: adding time does not reopen it, since an
-  open page's clock poll ends it on reconnect.
-- **A bot move in flight can be lost** (rare): the bot only moves in response to a team's
-  move, so that match stays frozen. Its *reset* button in the team's dialog on the admin
-  page lets the team start it over after reloading its page, losing every point scored in
-  that match.
+```bash
+docker compose --env-file=.env.docker restart backend
+npm run stack:ps   # until backend is healthy
+```
 
 ## Getting inside a container
 
@@ -503,17 +497,6 @@ Only as a last resort. State is in postgres and open pages reconnect, but:
 npm run stack:ps                                          # what is running
 docker compose --env-file=.env.docker exec backend bash   # a shell in one
 ```
-
-`scripts/admin.py` is the post-competition scoring pull. Run it from your own checkout
-against the site's URL, not on this host; [`README.md`](../README.md) § *Admin* has the
-command and why.
-
-## Error reporting
-
-> **Test drive:** the frontend reports nothing unless its `.env` sets `VITE_SENTRY_DSN`,
-> which the samples leave empty. The backend still reports from a DSN written into
-> `apps/online-backend/src/server.ts`, so its errors do leave the machine — see *Error
-> reporting* in [`README.md`](../README.md).
 
 ## Troubleshooting
 
@@ -527,85 +510,18 @@ sudo chown -R `whoami` node_modules
 says why. Usually a missing variable in `.env.docker` — the server validates them at boot
 and exits.
 
-## The year's private repo
+## Deploying the dry run for testers in the year's private repo
 
-Why the repo exists, and the rule it serves, is *Competition secrecy* in
-[`README.md`](../README.md). `.github/workflows/sync.yml` mirrors any pushed `sync-*`
-branch of the public repository into it; the mirroring itself is
-[`scripts/sync-mirror.mjs`](../scripts/sync-mirror.mjs), which that workflow only
-calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
-otherwise derive:
-
-```bash
-SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
-  node scripts/sync-mirror.mjs
-```
-
-When the year's repo is created:
-
-- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
-  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
-  token that both fetches from it and pushes to it. A fine-grained token scoped
-  to that one repository with **Contents: Read and write** is enough
-- **Decide about Actions.** The mirror carries `.github/workflows` too, so every
-  workflow here also lands there under that repo's own triggers. Leaving them on
-  is what gets lint, typecheck and tests run against the game while it is being
-  developed, which is when they are worth the most; the two that would reach
-  outside the repository — `pages-deploy.yml` and `sync.yml` — are already
-  guarded to run only in the public one. A third, `dry-run-deploy.yml`, is
-  guarded the other way and *is* meant to run here: it is the one-button deploy
-  of the testers' dry run, so turning Actions off costs that button and leaves
-  `npm run deploy` from a checkout. What is left to weigh is cost: Actions
-  minutes are metered on a private repository where the public one runs free,
-  and so is the GitHub Packages storage a private image would take should #202
-  publish one from there. TBD — neither has been measured against this
-  organisation's plan.
-- **Enable Pages**, serving from the `gh-pages` branch — that is what the
-  testers' dry run is pushed to, see *The dry run for testers* below. That site is public, protected only by the
-  repository's unguessable name, which is why the deploy ships no `CNAME`.
-- **Get `dry-run-deploy.yml` onto the default branch** if you want the Run
-  workflow button. GitHub lists a `workflow_dispatch` workflow only when the file
-  is on the repo's default branch — `dev` here — so a sync branch has to be
-  merged there before the button exists. The dispatch form then picks which
-  branch gets published. Nothing else about this repo needs `main`.
-
-## The dry run for testers
-
-The offline build of the competition, published to GitHub Pages from the year's private
-repo, so testers can play the upcoming games and try the UX before there is a server. Two
-ways to publish it, running the same `scripts/deploy-dry-run.mjs` either way.
-
-From a checkout of that repo:
-
-```bash
-npm run deploy
-```
-
-Or, inside that repo on GitHub, **Actions → dry-run-deploy → Run workflow**, which needs
-nothing checked out and lets you pick the branch to publish. The workflow only appears once
-the file is on the repo's default branch, and it is dispatch-only — see *The year's private
-repo* above.
-
-Either way the script builds `offline-frontend` through turbo and pushes `dist` to the
-`gh-pages` branch, which Pages serves. **There is nothing to edit first.** The base path is
-the repository's own name, read off the checkout's `origin` remote, so it is right in both
-routes and there is no per-competition value to set — or to leak by committing it, which is
-what the `PUBLIC_URL` placeholder it replaced was for (#296). It also refuses to publish to
-the public repository, and refuses to ship a `CNAME`: the site's protection is that its
-`github.io` URL is unguessable, and a custom domain would undo that.
-
-**The site is public.** Pages serves it to anyone; the deliberately unguessable repository
-name is the whole of the protection. Treat the link as the secret, and understand that this
-is obscurity rather than access control — a known risk, accepted, because the audience is a
-handful of testers and the exposure lasts weeks.
-
-**Nothing publishes it automatically.** No push deploys it; a maintainer runs the command
-or dispatches the workflow when there is something for testers to see.
+Either use `npm run deploy` or the `dry-run-deploy` GitHub Action, there is
+no automatic deploy partly because the site's only protection is that its `github.io`
+URL is unguessable.
 
 ---
 
 The public practice site (`gyakorlo.durerinfo.hu`) is a different thing entirely: built and
-published by `.github/workflows/pages-deploy.yml` on every push to `main`, no server
-involved. `scripts/assemble-site.mjs` is what it runs. That workflow is guarded to the
-public repository and this one guarded away from it, so neither can publish the other's
-site.
+published by `.github/workflows/pages-deploy.yml` on every push to `main`.
+
+## Tear down
+
+- tear down the machine, stopping only usually does not stop the bill
+- remove the DSN record too

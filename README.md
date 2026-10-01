@@ -371,10 +371,22 @@ repository; set it here once there is one.
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo
+why each year has a private synced repo.
 
-Setting up that repo each year, and the mirroring behind `sync.yml`, are in
-[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#the-years-private-repo) § *The year's private repo*.
+
+When the year's repo is created:
+
+- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
+  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
+  fine-grained token scoped to that one repository with **Contents: Read and write** plus optionally workflows.
+- **Decide about Actions.**: Actions minutes are metered on a private repository
+
+The sync workflow can be used locally with:
+
+```bash
+SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
+  node scripts/sync-mirror.mjs
+```
 
 # Debugging
 
