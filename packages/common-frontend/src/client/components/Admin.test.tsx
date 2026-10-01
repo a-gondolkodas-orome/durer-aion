@@ -104,7 +104,37 @@ const renderAdmin = (teamId?: string) =>
     </ThemeProvider>
   );
 
+const typeDelete = (word = 'törlés') => fireEvent.change(screen.getByLabelText(/Írd be/), { target: { value: word } });
 const confirm = () => fireEvent.click(screen.getByText('Megerősítés'));
+const confirmDelete = () => {
+  typeDelete();
+  confirm();
+};
+
+test('a team delete cannot be confirmed until the word is typed', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha, bravo]);
+  vi.spyOn(repo, 'removeTeam').mockResolvedValue();
+  renderAdmin();
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  fireEvent.click(await screen.findByText('Csapat törlése'));
+
+  expect(screen.getByText('Megerősítés').closest('button')).toBeDisabled();
+  typeDelete();
+  expect(screen.getByText('Megerősítés').closest('button')).toBeEnabled();
+  expect(repo.removeTeam).not.toHaveBeenCalled();
+});
+
+test.each(['delete', 'DELETE ', 'torles', 'Törlés'])('a delete accepts %j', async (word) => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha, bravo]);
+  renderAdmin();
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  fireEvent.click(await screen.findByText('Csapat törlése'));
+
+  typeDelete('nope');
+  expect(screen.getByText('Megerősítés').closest('button')).toBeDisabled();
+  typeDelete(word);
+  expect(screen.getByText('Megerősítés').closest('button')).toBeEnabled();
+});
 
 // The list used to stay as it was after a delete, so the next click asked the
 // server to delete a team it no longer had, and got a 404 for it.
@@ -115,7 +145,7 @@ test('deleting a team from its dialog closes the dialog and drops the row', asyn
   fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
   fireEvent.click(await screen.findByText('Csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('Csapat törölve')).toBeInTheDocument();
   expect(repo.removeTeam).toHaveBeenCalledWith(alpha.teamId);
@@ -132,7 +162,7 @@ test('deleting the team a page was opened on takes the page back to the list', a
   renderAdmin(alpha.teamId);
   fireEvent.click(await screen.findByText('Csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('Csapat törölve')).toBeInTheDocument();
   await waitFor(() => expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument());
@@ -147,7 +177,7 @@ test('deleting every team is one request, and empties the list', async () => {
   renderAdmin();
   fireEvent.click(await screen.findByText('Összes csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('2 csapat törölve')).toBeInTheDocument();
   expect(repo.removeAllTeams).toHaveBeenCalledOnce();
@@ -163,7 +193,7 @@ test('a failed bulk delete is reported, and the list kept', async () => {
   renderAdmin();
   fireEvent.click(await screen.findByText('Összes csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
   expect(screen.getByText('Alpha')).toBeInTheDocument();

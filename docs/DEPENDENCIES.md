@@ -34,7 +34,7 @@ time as in
 [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Two
 versions are written down in files no `package.json` names: Node and Playwright.
 `npm test` fails until every copy agrees, and
-[`scripts/check-versions.test.mjs`](../scripts/check-versions.test.mjs) is the list
+`check-versions.test.mjs` is the list
 of where they are — the `.nvmrc` row's count comes from it.
 </details>
 

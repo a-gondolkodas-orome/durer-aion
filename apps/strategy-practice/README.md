@@ -49,7 +49,7 @@ The hook lives at the repository root because only the root
 - **Node** is pinned by the devcontainer feature in
   `.devcontainer/devcontainer.json` (the image tag only fixes the major) to the
   version in the repository root's `.nvmrc`; the root
-  `scripts/check-versions.test.mjs` lists every file that repeats it. Bump them
+  `check-versions.test.mjs` lists every file that repeats it. Bump them
   together, or the container quietly runs a different Node than CI. The root `npm test` fails on either mismatch, so
   you will not find out the hard way.
 - **npm's update notifier is off** (`NPM_CONFIG_UPDATE_NOTIFIER`): the npm that
@@ -131,7 +131,7 @@ table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_I
    whichever of the two your reference game uses.
 
 Every field, edge case and enforcement rule of the engine API lives in
-[src/components/CLAUDE.md](src/components/CLAUDE.md). *It is recommended to copy
+[src/components/AGENTS.md](src/components/AGENTS.md). *It is recommended to copy
 and modify an existing, similar game.*
 
 ## Anatomy of a game
@@ -210,8 +210,8 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 
 **`variants[]`** — each supplies `generateStartBoard()` or `startBoards`, and a
 `botStrategy`: a pure function of the position that *names* the move it wants,
-`({ board, ctx }) => ({ move, args })`. See [src/components/CLAUDE.md § Bot
-contract](src/components/CLAUDE.md#bot-contract), and [AGENTS.md §
+`({ board, ctx }) => ({ move, args })`. See [src/components/AGENTS.md § Bot
+contract](src/components/AGENTS.md#bot-contract), and [AGENTS.md §
 Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
 **`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
@@ -234,16 +234,16 @@ player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
 `turnState` for multi-stage turns. Never modify either in place.
 
 A multi-stage game pins what its `turnState` holds ([§ Pinning the turn
-state](src/components/CLAUDE.md#pinning-the-turn-state)), and every move takes
+state](src/components/AGENTS.md#pinning-the-turn-state)), and every move takes
 the current `board` as its first argument, including subsequent moves within one
 turn ([§ Game state
-architecture](src/components/CLAUDE.md#game-state-architecture-synchronous-store-outside-react)
+architecture](src/components/AGENTS.md#game-state-architecture-synchronous-store-outside-react)
 for why, given that the store is authoritative either way).
 
 ## Before opening a PR
 
 Walk the [new game
-checklist](src/components/CLAUDE.md#new-game-checklist) — both game modes,
+checklist](src/components/AGENTS.md#new-game-checklist) — both game modes,
 balanced starting positions, an AI the player cannot beat with a losing
 strategy, keyboard and mobile usability.
 
@@ -293,7 +293,7 @@ Every dependency here is pinned exactly, as everywhere else in the monorepo
 that: the devcontainer image bakes browser binaries for one specific version, so
 the pin has to agree with `.devcontainer/Dockerfile` as well as with the
 lockfile. The root `npm test` fails when they disagree
-(`scripts/check-versions.test.mjs`), and does the same for every file the Node
+(`check-versions.test.mjs`), and does the same for every file the Node
 version is written down in — that test lists them.
 
 ## License

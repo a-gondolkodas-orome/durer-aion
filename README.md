@@ -167,20 +167,37 @@ the empty row to leave in, the duplicated login code and duplicated credentials
 only a real database refuses. `team_import.test.ts` mocks the filesystem, so the
 upload is the only thing that exercises those.
 
-`scripts/admin.py` is the post-competition scoring pull, holding no credential
-of its own:
+`scripts/admin.py` is the post-competition scoring pull. Run it on your own
+machine, from a checkout, against the production site, not on the competition
+server: it needs Python packages the server has no reason to carry, and what it
+writes is keyed by join code, the teams' login secret. On macOS or Linux:
 
 ```bash
-DURER_BASE_URL=http://localhost python3 scripts/admin.py   # prompts for the password
+python3 -m venv .venv
+.venv/bin/pip install -r scripts/requirements.txt
+DURER_BASE_URL=https://verseny.durerinfo.hu .venv/bin/python scripts/admin.py   # prompts for the password
 ```
 
-- `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`. Unset it prompts,
-  and with no terminal to prompt on it stops rather than sending an
-  unauthenticated request.
+On Windows, in PowerShell:
+
+```powershell
+py -m venv .venv
+.venv\Scripts\pip install -r scripts\requirements.txt
+$env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scripts\admin.py
+```
+
+It writes the match data (`match_data_*.json`) and the results
+(`durer-results-<year>.tsv`) to `scripts/admin-output/`, wherever it is run
+from, and prints the results file's full path when it is done; `.gitignore`
+and `.dockerignore` both keep that folder out.
+
+- `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
+  no credential of its own. Unset it prompts, and with no terminal to prompt on
+  it stops rather than sending an unauthenticated request.
 - `DURER_BASE_URL` — defaults to `http://localhost:8000`, right against
-  `dev:server`. Against the docker stack it must be `http://localhost`: port
-  8000 is not published, nginx proxies `/team` and `/game`. Production is
-  `https://verseny.durerinfo.hu`.
+  `dev:server`, for trying the script on local data. Against the docker stack it
+  must be `http://localhost`: port 8000 is not published, nginx proxies `/team`
+  and `/game`.
 
 Whether the browser's password prompt appears for the admin pages' XHRs under
 the `dev:online` proxy has not been walked, so check them against `stack:up`.
@@ -375,7 +392,7 @@ This is a game for the **live competition** (boardgame.io). A game for the
 strategy practice site is a different shape entirely — see
 [`apps/strategy-practice/README.md`](apps/strategy-practice/README.md#adding-a-new-game),
 and the `new-game` skill under that directory is the route.
-[`CLAUDE.md`](CLAUDE.md) § *Creating a New Game* holds the rules that keep it
+[`AGENTS.md`](AGENTS.md) § *Creating a New Game* holds the rules that keep it
 safe: why the bot must not reach the served bundle, and the by-hand check for
 that before a competition.
 

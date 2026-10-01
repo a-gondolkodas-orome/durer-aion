@@ -61,7 +61,7 @@ picks it up follows from where it is, not from what it is called.
 
 Both halves matter, because a suite no glob reaches does not fail: it is simply
 never run, and the green tick says nothing was wrong. `npm test` refuses either
-mistake by name (`scripts/test-file-naming.test.mjs`).
+mistake by name (`test-file-naming.test.mjs`).
 
 One more: **a test that writes to the console fails.** `vitest/setup.mts` says
 why and how to opt out when a test means to exercise a logging path. If a
@@ -82,13 +82,9 @@ PR; two unrelated one-line fixes are two.
 Fill the template in. Its prompts are HTML comments, so you have them in front
 of you while writing the description and they leave no trace in the body.
 
-`.github/CODEOWNERS` requests a reviewer automatically for the strategy practice
-paths. It does not cover the rest of the repository yet, so for anything else,
-request one by hand — otherwise nobody is notified.
-
 ## The rest
 
-- [`CLAUDE.md` § *Key Conventions*](CLAUDE.md#key-conventions) — the house rules
+- [`AGENTS.md` § *Key Conventions*](AGENTS.md#key-conventions) — the house rules
   this page does not carry: formatting through ESLint rather than prettier, what
   to comment, which language user-facing text is in.
 - [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the

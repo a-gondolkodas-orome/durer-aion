@@ -77,8 +77,8 @@ written down once.
 
 ## Creating a New Game
 
-For a game on the *strategy practice* site, the `new-game` skill under
-`apps/strategy-practice` is the route. For the *live competition*
+For a game on the *strategy practice* site, the `new-game` skill,
+`apps/strategy-practice/.claude/skills/new-game/`, is the route. For the *live competition*
 (boardgame.io), [`README.md`](README.md) § *Creating a new game* is the recipe:
 one self-contained folder under `packages/game/src/games/strategy/<game-name>/`
 holding `game.ts`, `strategy.ts`, `board.tsx` and `main.tsx`, registered in the
@@ -112,7 +112,7 @@ nginx + docker compose (`npm run stack:prod`), not GitHub Pages —
 `/proba-verseny/` in one artifact, with no staging step and no approval; the
 workflow going green is the cutover. The testers' dry run is the *other* Pages
 deploy, published on demand to the year's *private* repo; the two workflows are
-guarded in opposite directions and `scripts/workflow-safety.test.mjs` pins both.
+guarded in opposite directions and `workflow-safety.test.mjs` pins both.
 
 **Nothing about an unreleased game may appear in a public commit** — including
 engine changes phrased around its needs. A new competition's game is developed
@@ -123,9 +123,9 @@ and deployed from the year's private synced repo until the competition is over;
 ## Key Conventions
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) carries the rules about working: commit
-subjects, where a test goes and what it must not print, pull request scope and
-reviewers, and the traps that cost the most time. Read it rather than repeating
-its contents here. What follows is the rest.
+subjects, where a test goes and what it must not print, pull request scope, and
+the traps that cost the most time. Read it rather than repeating its contents
+here. What follows is the rest.
 
 - Games are organized by type: `strategy/` (two-player), `relay/` (team relay),
   and the winner is tracked in `G.winner`
@@ -147,6 +147,9 @@ its contents here. What follows is the rest.
   standing hazard. Suites are the exception: a regression test names its bug
 - Say a thing once: rationale lives in the doc that owns the decision, and
   comments point at it rather than restating it
+- In prose and comments, name a file by its basename when that is unique in the
+  repo — a path goes stale on every move, a basename does not. A path is for what
+  reads it, for a name the repo repeats, and for a markdown link worth clicking
 - Cover major new functionality with unit tests — for a new game, the game logic
   first: move validators and the strategy, the pure functions where a wrong
   branch decides a competition. Trivial wiring (exports, registration,
