@@ -291,6 +291,10 @@ docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh
 
 ## 8. A domain and HTTPS
 
+<details>
+
+<summary>Point an A record at the machine and wait for it to resolve</summary>
+
 Point an A record at the machine and wait for it to resolve — until it does, the certificate
 below has nothing to validate against:
 
@@ -307,6 +311,11 @@ The machine's address is its own for as long as it exists, so that is enough. A 
 address (DigitalOcean reserved IP, AWS elastic IP) buys something else — rebuilding the
 machine under an unchanged DNS record — which is worth having live and not on a drive. It
 also bills while *unattached*, so taking one adds a third thing to release at teardown.
+
+</details>
+
+<details>
+<summary>Set Up HTTPS</summary>
 
 Issue the certificate with the stack up — nginx serves the challenge out of `dist`, so
 nothing has to stop:
@@ -444,6 +453,8 @@ docker compose --env-file=.env.docker exec web nginx -s reload
 > `includeSubDomains` makes port 80 unusable in a browser and a cert mistake unrecoverable;
 > and the name reaches certificate transparency logs, so keep it neutral rather than a hint
 > at the unreleased game.
+
+</details>
 
 ## 9. Updating a deployment
 
