@@ -164,10 +164,10 @@ here. What follows is the rest.
   socket.io copy in the lockfile`, not `Issue 461 investigation`
 - Permission to commit to someone else's branch is not permission to comment on
   their PR: ask first before posting to a thread you do not own
-- A contributor who sets `CLAUDE_NO_PR_DISCUSSION` in their environment keeps
-  their PRs' discussion to themselves — comments, replies, resolving threads,
-  review requests — and `no-pr-discussion.mjs` refuses those calls. Push the
-  change, then say in the session what you would have posted
+- A PR's discussion is the people's, even on a PR the agent opened: comments,
+  replies, resolving threads and review requests are denied in
+  `.claude/settings.json`. Push the change, then say in the session what you
+  would have posted
 - Do not `@`-mention anyone not already involved in a thread: a mention is a
   notification. Naming a person plainly, or referring to their PR by number, says
   the same thing without pulling them in
