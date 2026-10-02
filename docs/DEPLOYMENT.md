@@ -9,7 +9,7 @@ machine, generally available almost everywhere. For cross vendor compatibility, 
 an Ubuntu installer for your instance.
 
 Testers who only need to try the games and the UX get a lighter option with no server at
-all — see *The dry run for testers* at the end.
+all — see *Deploying the dry run for testers in the year's private repo* at the end.
 
 `npm run stack:prod` starts three containers, defined in
 [`docker-compose.yml`](../docker-compose.yml):
@@ -479,8 +479,9 @@ that changed a column needs the change applied by hand**, or the volume dropped
 
 ## 10. Tear down
 
+- only after results are exported
 - tear down the machine, stopping only usually does not stop the bill
-- remove the DSN record too
+- remove the DNS record too
 
 ## Troubleshooting
 

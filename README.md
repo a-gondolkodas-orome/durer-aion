@@ -378,7 +378,7 @@ When the year's repo is created:
 
 - **Set the two secrets**, on the *public* repository, which is where `sync.yml`
   runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
-  fine-grained token scoped to that one repository with **Contents: Read and write** plus optionally workflows.
+  fine-grained token scoped to that one repository with **Contents: Read and write** and Workflows permissions.
 - **Decide about Actions.**: Actions minutes are metered on a private repository
 
 The sync workflow can be used locally with:
