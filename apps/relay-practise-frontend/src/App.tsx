@@ -72,7 +72,9 @@ function App() {
           <Layout>
             <LoadTeamState />
             <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeAddress='/..'/>
+            {/* `maxWidth={false}`: see the same Container in common-frontend's `Main` */}
             <Container
+              maxWidth={false}
               sx={{
                 paddingLeft: {
                   xs: "0px",
