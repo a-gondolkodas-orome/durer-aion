@@ -40,6 +40,12 @@ function App() {
     void i18next.changeLanguage(LANGUAGE);
   }, [])
 
+  // The language dropdown is open to everyone here, so the tab title follows it.
+  // `t` changes identity with the language.
+  useEffect(() => {
+    document.title = `${t('header.relayPractise')} – ${t('header.titlePlain')}`;
+  }, [t]);
+
   // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),
   // shown in the header as a translated round name instead of the raw code
   const testTitle = (code: string) => {
