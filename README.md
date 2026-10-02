@@ -20,7 +20,7 @@ New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in.
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
   as root and leaves root-owned files behind in `node_modules`.
 
-## The whole stack in four commands
+## The whole online-round stack in four commands
 
 ```bash
 npm ci
@@ -42,7 +42,7 @@ and the database behind it.
 | --- | --- |
 | `http://localhost` | the competition site — team login, chooser, relay and strategy matches |
 | `http://localhost/admin` | the admin pages; basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
-| `localhost:5432` | postgres, if you want to look at the data directly |
+| `localhost:5432` | postgres, not a web page: a database client or `psql -h localhost -U postgres`, password `POSTGRESQL_PASSWORD` from `.env.docker` |
 
 `stack:up` returns once the containers are actually up and fails if they are
 not, and it runs in the background. `npm run stack:logs` follows all three
@@ -371,10 +371,22 @@ repository; set it here once there is one.
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
-why each year has a private synced repo
+why each year has a private synced repo.
 
-Setting up that repo each year, and the mirroring behind `sync.yml`, are in
-[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#the-years-private-repo) § *The year's private repo*.
+
+When the year's repo is created:
+
+- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
+  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
+  fine-grained token scoped to that one repository with **Contents: Read and write** and Workflows permissions.
+- **Decide about Actions.**: Actions minutes are metered on a private repository
+
+The sync workflow can be used locally with:
+
+```bash
+SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
+  node scripts/sync-mirror.mjs
+```
 
 # Debugging
 

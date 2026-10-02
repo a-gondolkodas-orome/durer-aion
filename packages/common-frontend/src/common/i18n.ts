@@ -3,6 +3,14 @@ import { initReactI18next } from 'react-i18next';
 import enTranslation from '../../public/locales/en/translation.json';
 import huTranslation from '../../public/locales/hu/translation.json';
 
+// Registered before `init`, so the language set there reaches `<html lang>` too,
+// not only a later switch. `index.html` carries the value until then. The guard
+// is for node: suites in the node environment import this through the package.
+i18next.on('languageChanged', (lng) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lng;
+  }
+});
 
 void i18next
   .use(initReactI18next)

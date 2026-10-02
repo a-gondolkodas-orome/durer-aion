@@ -117,8 +117,8 @@ guarded in opposite directions and `workflow-safety.test.mjs` pins both.
 **Nothing about an unreleased game may appear in a public commit** — including
 engine changes phrased around its needs. A new competition's game is developed
 and deployed from the year's private synced repo until the competition is over;
-[`README.md`](README.md) § *Competition secrecy* is the authority, and
-[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) § *The year's private repo* is how that repo is set up.
+[`README.md`](README.md) § *Competition secrecy* is the authority, and says how
+that repo is set up.
 
 ## Key Conventions
 
@@ -131,9 +131,7 @@ here. What follows is the rest.
   and the winner is tracked in `G.winner`
 - Use Hungarian for user-facing text (the competition is in Hungarian). The
   strategy practice site is the exception: it has an HU/EN switcher (and a
-  `?lang=` param). The relay practice site is pinned to Hungarian — `LANGUAGE` in
-  `apps/relay-practise-frontend/src/App.tsx`. User-facing English uses British
-  spelling
+  `?lang=` param). User-facing English uses British spelling
 - **Formatting is ESLint's, through `@stylistic`, not prettier's.**
   `eslint.stylistic.mjs`, which both configs import, holds the character-level
   rules and says why a rule joins that set only if it fixes characters, never
