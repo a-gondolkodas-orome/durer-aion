@@ -1,5 +1,18 @@
 {
   "//": "Only loaded when apps/strategy-practice is opened as the project root — the supported way to work on the practice site alone, and what its own .devcontainer expects. A session opened at the monorepo root reads the root .claude/settings.json instead, which carries the union of both allowlists and the SessionStart hook. Keep the two in sync when adding a script here.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__github__update_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/../../.claude/hooks/no-review-requests.mjs"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(npm run check)",
@@ -12,6 +25,20 @@
       "Bash(npm run coverage)",
       "Bash(npx tsc --noEmit)",
       "Bash(npm view *)"
+    ],
+    "deny": [
+      "mcp__github__add_issue_comment",
+      "mcp__github__update_issue_comment",
+      "mcp__github__add_reply_to_pull_request_comment",
+      "mcp__github__resolve_review_thread",
+      "mcp__github__unresolve_review_thread",
+      "mcp__github__pull_request_review_write",
+      "mcp__github__add_comment_to_pending_review",
+      "mcp__github__request_copilot_review",
+      "Bash(gh pr comment*)",
+      "Bash(gh pr review*)",
+      "Bash(gh issue comment*)",
+      "Bash(gh pr edit*--add-reviewer*)"
     ]
   }
 }
