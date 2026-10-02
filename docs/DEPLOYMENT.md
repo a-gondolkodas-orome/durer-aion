@@ -477,26 +477,10 @@ There are no DB migrations, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
 (`npm run stack:down -- --volumes`, then import the teams again) if the data is expendable.
 
+## 10. Tear down
 
-## Restarting the backend
-
-During a competition, only as a last resort because the clock keeps running
-and a bot move in flight can be lost.
-
-All three services are `restart: unless-stopped`, so a reboot brings the stack back by
-itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
-
-```bash
-docker compose --env-file=.env.docker restart backend
-npm run stack:ps   # until backend is healthy
-```
-
-## Getting inside a container
-
-```bash
-npm run stack:ps                                          # what is running
-docker compose --env-file=.env.docker exec backend bash   # a shell in one
-```
+- tear down the machine, stopping only usually does not stop the bill
+- remove the DSN record too
 
 ## Troubleshooting
 
@@ -510,7 +494,27 @@ sudo chown -R `whoami` node_modules
 says why. Usually a missing variable in `.env.docker` — the server validates them at boot
 and exits.
 
-## Deploying the dry run for testers in the year's private repo
+### Restarting the backend
+
+During a competition, only as a last resort because the clock keeps running
+and a bot move in flight can be lost.
+
+All three services are `restart: unless-stopped`, so a reboot brings the stack back by
+itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
+
+```bash
+docker compose --env-file=.env.docker restart backend
+npm run stack:ps   # until backend is healthy
+```
+
+### Getting inside a container
+
+```bash
+npm run stack:ps                                          # what is running
+docker compose --env-file=.env.docker exec backend bash   # a shell in one
+```
+
+# Deploying the dry run for testers in the year's private repo
 
 Either use `npm run deploy` or the `dry-run-deploy` GitHub Action, there is
 no automatic deploy partly because the site's only protection is that its `github.io`
@@ -520,8 +524,3 @@ URL is unguessable.
 
 The public practice site (`gyakorlo.durerinfo.hu`) is a different thing entirely: built and
 published by `.github/workflows/pages-deploy.yml` on every push to `main`.
-
-## Tear down
-
-- tear down the machine, stopping only usually does not stop the bill
-- remove the DSN record too
