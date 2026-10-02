@@ -1,5 +1,18 @@
 {
   "//": "Only loaded when apps/strategy-practice is opened as the project root — the supported way to work on the practice site alone, and what its own .devcontainer expects. A session opened at the monorepo root reads the root .claude/settings.json instead, which carries the union of both allowlists and the SessionStart hook. Keep the two in sync when adding a script here.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__github__.*|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -z \"${CLAUDE_NO_PR_DISCUSSION:-}\" ] || node \"$CLAUDE_PROJECT_DIR\"/../../.claude/hooks/no-pr-discussion.mjs"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(npm run check)",

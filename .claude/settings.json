@@ -9,6 +9,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__github__.*|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -z \"${CLAUDE_NO_PR_DISCUSSION:-}\" ] || node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/no-pr-discussion.mjs"
+          }
+        ]
+      }
     ]
   },
   "permissions": {

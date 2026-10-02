@@ -133,6 +133,7 @@
     "unlinted",
     "unmemoised",
     "unparseable",
+    "unresolve",
     "unsplittable",
     "unstarted",
     "unstub",
