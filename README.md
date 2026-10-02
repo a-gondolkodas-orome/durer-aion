@@ -20,7 +20,7 @@ New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in.
   it. Plain `sudo docker …` works too, but never `sudo npm run …`: that runs npm
   as root and leaves root-owned files behind in `node_modules`.
 
-## The whole stack in four commands
+## The whole online-round stack in four commands
 
 ```bash
 npm ci
@@ -42,7 +42,7 @@ and the database behind it.
 | --- | --- |
 | `http://localhost` | the competition site — team login, chooser, relay and strategy matches |
 | `http://localhost/admin` | the admin pages; basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
-| `localhost:5432` | postgres, if you want to look at the data directly |
+| `localhost:5432` | postgres, not a web page: a database client or `psql -h localhost -U postgres`, password `POSTGRESQL_PASSWORD` from `.env.docker` |
 
 `stack:up` returns once the containers are actually up and fails if they are
 not, and it runs in the background. `npm run stack:logs` follows all three
