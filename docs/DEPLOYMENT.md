@@ -9,7 +9,7 @@ machine, generally available almost everywhere. For cross vendor compatibility, 
 an Ubuntu installer for your instance.
 
 Testers who only need to try the games and the UX get a lighter option with no server at
-all — see *The dry run for testers* at the end.
+all — see *Deploying the dry run for testers in the year's private repo* at the end.
 
 `npm run stack:prod` starts three containers, defined in
 [`docker-compose.yml`](../docker-compose.yml):
@@ -37,10 +37,9 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | domain | the real subdomain, static IP | a subdomain of one you already own |
 | `.env.docker` | real secrets, rotated afterwards | throwaway values, still off the samples |
 | teams | the real TSV; the `.export` goes back to the organisers | `scripts/test.tsv` |
-| database | must survive; there are no backups | expendable |
-| HTTP→HTTPS redirect | wanted; goes in the untracked `nginx-tls.conf` | skip |
+| database | must survive until results are exported; there are no backups | expendable |
+| HTTP→HTTPS redirect | wanted; goes in the untracked `nginx-tls.conf` | optional |
 | certificate renewal | set up the cron | skip |
-| unattended upgrades | stop the timers for the competition window | leave them running |
 | afterwards | stays up | tear the machine down **and delete the DNS record** |
 
 ## What the machine needs
@@ -72,13 +71,7 @@ apt update && apt upgrade -y
 If it asks about a locally modified `sshd_config`, keep the local version: those edits are
 the image's, and the patched binary installs either way.
 
-**Then reboot, if it asks for one.** `*** System restart required ***` in the MOTD means a
-kernel or library was replaced and the running system is still on the old one — a patch that
-has not taken effect:
-
-```bash
-sudo reboot   # then reconnect
-```
+Then reboot, with `sudo reboot` if it asks for one.
 
 <details>
 <summary>Optional: keep it patched automatically</summary>
@@ -125,9 +118,7 @@ usermod -aG sudo deploy
 rsync --archive --chown=deploy:deploy ~/.ssh /home/deploy
 ```
 
-**Log in as it from a second terminal before closing the first.** A broken `sshd` config or
-a mis-copied key only shows up on the next login, which is when you no longer have a way
-in.
+**Log in as it from a second terminal before closing the first.**
 
 **Optional, and worth it on anything that outlives the drive:** close root's own door, since
 cloud images often ship `PermitRootLogin yes`.
@@ -300,6 +291,10 @@ docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh
 
 ## 8. A domain and HTTPS
 
+<details>
+
+<summary>Point an A record at the machine and wait for it to resolve</summary>
+
 Point an A record at the machine and wait for it to resolve — until it does, the certificate
 below has nothing to validate against:
 
@@ -310,13 +305,17 @@ dig +short @1.1.1.1 verseny.durerinfo.hu   # the machine's IP, once it answers a
 A public resolver rather than the machine's own, which may still be holding the `NXDOMAIN`
 it cached before the record existed. A name nobody has asked for yet answers within seconds
 of the record being created; one you queried too early takes as long as the zone's negative
-cache instead, typically 5 to 60 minutes. Neither is the "24 to 48 hours" that belongs to
-changing a domain's nameservers, which this is not.
+cache instead, typically 5 to 60 minutes.
 
 The machine's address is its own for as long as it exists, so that is enough. A reserved
 address (DigitalOcean reserved IP, AWS elastic IP) buys something else — rebuilding the
 machine under an unchanged DNS record — which is worth having live and not on a drive. It
 also bills while *unattached*, so taking one adds a third thing to release at teardown.
+
+</details>
+
+<details>
+<summary>Set Up HTTPS</summary>
 
 Issue the certificate with the stack up — nginx serves the challenge out of `dist`, so
 nothing has to stop:
@@ -389,7 +388,7 @@ docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tl
 ```
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
-adding this to `nginx-tls.conf` and rebuilding again. Certbot's renewal fetches its
+adding this to `nginx-tls.conf` and reloading nginx (below). Certbot's renewal fetches its
 challenge over plain HTTP, so that one path has to survive the redirect; everything else on
 port 80 goes to HTTPS before it can reach a proxied location, which is what keeps a
 plaintext request from ever reporting the wrong scheme to the backend.
@@ -404,7 +403,7 @@ if ($to_https)                                     { return 301 https://$host$re
 Adding it before the first certificate exists is what breaks issuance, which is why it
 comes second.
 
-This one is a reload, not a rebuild. `docker compose up` recreates a container only when its
+Reload, not rebuild: `docker compose up` recreates a container only when its
 *configuration* changes, and editing a file that is already bind-mounted is not that — the
 three commands above would leave `web` running with the config it parsed at startup, the
 redirect correct on disk and not being served:
@@ -455,47 +454,34 @@ docker compose --env-file=.env.docker exec web nginx -s reload
 > and the name reaches certificate transparency logs, so keep it neutral rather than a hint
 > at the unreleased game.
 
+</details>
+
 ## 9. Updating a deployment
+
+During a competition, only as a last resort because the clock keeps running
+and a bot move in flight can be lost.
+
+**To deploy a new release**, the same commands as step 8:
 
 ```bash
 git pull
-npm run stack:prod
+npm run deps
+npm run build
+docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
 ```
 
-With TLS set up, use the three-command form from step 8 instead — `stack:prod` takes no
-arguments. A change to `nginx-tls.conf` itself is the reload in step 8 rather than either:
-`up` does not recreate `web` for it.
+Before step 8 has been done, `npm run stack:prod` is the whole update, after step
+8 it would drop the site off https.
 
-`sequelize.sync()` creates missing tables but does not alter existing ones, so **a release
+There are no DB migrations, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
 (`npm run stack:down -- --volumes`, then import the teams again) if the data is expendable.
 
-All three services are `restart: unless-stopped`, so a reboot brings the stack back by
-itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
+## 10. Tear down
 
-> **Test drive:** tear the machine down instead, per the last column of the provider table.
-> Stopping is not deleting on any of them, and on DigitalOcean it does not stop the bill.
-> **Delete the DNS record too.** The IP goes back to the provider's pool, and a record left
-> pointing at it lets whoever gets that IP next serve their own content — with their own
-> valid certificate — on a subdomain of your domain.
-
-## Getting inside a container
-
-```bash
-npm run stack:ps                                          # what is running
-docker compose --env-file=.env.docker exec backend bash   # a shell in one
-```
-
-`scripts/admin.py` is the post-competition scoring pull. Run it from your own checkout
-against the site's URL, not on this host; [`README.md`](../README.md) § *Admin* has the
-command and why.
-
-## Error reporting
-
-> **Test drive:** the frontend reports nothing unless its `.env` sets `VITE_SENTRY_DSN`,
-> which the samples leave empty. The backend still reports from a DSN written into
-> `apps/online-backend/src/server.ts`, so its errors do leave the machine — see *Error
-> reporting* in [`README.md`](../README.md).
+- only after results are exported
+- tear down the machine, stopping only usually does not stop the bill
+- remove the DNS record too
 
 ## Troubleshooting
 
@@ -509,85 +495,33 @@ sudo chown -R `whoami` node_modules
 says why. Usually a missing variable in `.env.docker` — the server validates them at boot
 and exits.
 
-## The year's private repo
+### Restarting the backend
 
-Why the repo exists, and the rule it serves, is *Competition secrecy* in
-[`README.md`](../README.md). `.github/workflows/sync.yml` mirrors any pushed `sync-*`
-branch of the public repository into it; the mirroring itself is
-[`scripts/sync-mirror.mjs`](../scripts/sync-mirror.mjs), which that workflow only
-calls. `SYNC_SOURCE` and `SYNC_TARGET` override the two repositories it would
-otherwise derive:
+During a competition, only as a last resort because the clock keeps running
+and a bot move in flight can be lost.
 
-```bash
-SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
-  node scripts/sync-mirror.mjs
-```
-
-When the year's repo is created:
-
-- **Set the two secrets**, on the *public* repository, which is where `sync.yml`
-  runs: `PRIVATE_REPO_NAME` is the mirror's `owner/repo`, and `PRIVATE_PAT` is a
-  token that both fetches from it and pushes to it. A fine-grained token scoped
-  to that one repository with **Contents: Read and write** is enough
-- **Decide about Actions.** The mirror carries `.github/workflows` too, so every
-  workflow here also lands there under that repo's own triggers. Leaving them on
-  is what gets lint, typecheck and tests run against the game while it is being
-  developed, which is when they are worth the most; the two that would reach
-  outside the repository — `pages-deploy.yml` and `sync.yml` — are already
-  guarded to run only in the public one. A third, `dry-run-deploy.yml`, is
-  guarded the other way and *is* meant to run here: it is the one-button deploy
-  of the testers' dry run, so turning Actions off costs that button and leaves
-  `npm run deploy` from a checkout. What is left to weigh is cost: Actions
-  minutes are metered on a private repository where the public one runs free,
-  and so is the GitHub Packages storage a private image would take should #202
-  publish one from there. TBD — neither has been measured against this
-  organisation's plan.
-- **Enable Pages**, serving from the `gh-pages` branch — that is what the
-  testers' dry run is pushed to, see *The dry run for testers* below. That site is public, protected only by the
-  repository's unguessable name, which is why the deploy ships no `CNAME`.
-- **Get `dry-run-deploy.yml` onto the default branch** if you want the Run
-  workflow button. GitHub lists a `workflow_dispatch` workflow only when the file
-  is on the repo's default branch — `dev` here — so a sync branch has to be
-  merged there before the button exists. The dispatch form then picks which
-  branch gets published. Nothing else about this repo needs `main`.
-
-## The dry run for testers
-
-The offline build of the competition, published to GitHub Pages from the year's private
-repo, so testers can play the upcoming games and try the UX before there is a server. Two
-ways to publish it, running the same `scripts/deploy-dry-run.mjs` either way.
-
-From a checkout of that repo:
+All three services are `restart: unless-stopped`, so a reboot brings the stack back by
+itself — with whatever image and `dist` were last built, since nothing rebuilds on boot.
 
 ```bash
-npm run deploy
+docker compose --env-file=.env.docker restart backend
+npm run stack:ps   # until backend is healthy
 ```
 
-Or, inside that repo on GitHub, **Actions → dry-run-deploy → Run workflow**, which needs
-nothing checked out and lets you pick the branch to publish. The workflow only appears once
-the file is on the repo's default branch, and it is dispatch-only — see *The year's private
-repo* above.
+### Getting inside a container
 
-Either way the script builds `offline-frontend` through turbo and pushes `dist` to the
-`gh-pages` branch, which Pages serves. **There is nothing to edit first.** The base path is
-the repository's own name, read off the checkout's `origin` remote, so it is right in both
-routes and there is no per-competition value to set — or to leak by committing it, which is
-what the `PUBLIC_URL` placeholder it replaced was for (#296). It also refuses to publish to
-the public repository, and refuses to ship a `CNAME`: the site's protection is that its
-`github.io` URL is unguessable, and a custom domain would undo that.
+```bash
+npm run stack:ps                                          # what is running
+docker compose --env-file=.env.docker exec backend bash   # a shell in one
+```
 
-**The site is public.** Pages serves it to anyone; the deliberately unguessable repository
-name is the whole of the protection. Treat the link as the secret, and understand that this
-is obscurity rather than access control — a known risk, accepted, because the audience is a
-handful of testers and the exposure lasts weeks.
+# Deploying the dry run for testers in the year's private repo
 
-**Nothing publishes it automatically.** No push deploys it; a maintainer runs the command
-or dispatches the workflow when there is something for testers to see.
+Either use `npm run deploy` or the `dry-run-deploy` GitHub Action, there is
+no automatic deploy partly because the site's only protection is that its `github.io`
+URL is unguessable.
 
 ---
 
 The public practice site (`gyakorlo.durerinfo.hu`) is a different thing entirely: built and
-published by `.github/workflows/pages-deploy.yml` on every push to `main`, no server
-involved. `scripts/assemble-site.mjs` is what it runs. That workflow is guarded to the
-public repository and this one guarded away from it, so neither can publish the other's
-site.
+published by `.github/workflows/pages-deploy.yml` on every push to `main`.

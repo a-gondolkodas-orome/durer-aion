@@ -117,8 +117,8 @@ guarded in opposite directions and `workflow-safety.test.mjs` pins both.
 **Nothing about an unreleased game may appear in a public commit** — including
 engine changes phrased around its needs. A new competition's game is developed
 and deployed from the year's private synced repo until the competition is over;
-[`README.md`](README.md) § *Competition secrecy* is the authority, and
-[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) § *The year's private repo* is how that repo is set up.
+[`README.md`](README.md) § *Competition secrecy* is the authority, and says how
+that repo is set up.
 
 ## Key Conventions
 
