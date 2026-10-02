@@ -35,9 +35,13 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
       width: '100%',
       height: 102,
     }}>
-      <Container sx={{
-        paddingLeft: '10px',
-        paddingRight: '10px',
+      {/* `maxWidth={false}`, as for the page's own Container in `Main`: otherwise
+          MUI's 1280px lg width overrides the 1200px below. The padding is
+          responsive for the same reason: MUI's own, 24px from sm up, overrides a
+          plain value. The home pages' gutter is the same, so they line up. */}
+      <Container maxWidth={false} sx={{
+        paddingLeft: { xs: '10px', sm: '24px' },
+        paddingRight: { xs: '10px', sm: '24px' },
         zIndex: 3,
         position: 'relative',
         maxWidth: '1200px',
