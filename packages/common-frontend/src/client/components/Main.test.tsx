@@ -81,3 +81,18 @@ test('no Container takes MUI\'s lg max width over its own', () => {
   const { container } = renderMain();
   expect(container.querySelector('.MuiContainer-maxWidthLg')).toBeNull();
 });
+
+test('the logo is on the login page', () => {
+  const { getByTestId } = renderMain();
+  expect(getByTestId("homeLogo")).toBeInTheDocument();
+});
+
+test.each([
+  ['HOME', () => MockTeamState.mockHome()],
+  ['RELAY', () => MockTeamState.mockRelay()],
+  ['STRATEGY', () => MockTeamState.mockStrategy()],
+])('the logo is not on the page of a team in %s state', (_, mockState) => {
+  mockState();
+  const { queryByTestId } = renderMain();
+  expect(queryByTestId("homeLogo")).toBeNull();
+});

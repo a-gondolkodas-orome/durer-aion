@@ -10,13 +10,8 @@ export function LoginToRelay() {
   return (
     <Stack sx={{
       display: 'flex',
-      minHeight: '100vh',
       width: '100%',
       alignItems: 'start',
-      justifyContent: 'center',
-      // The page's Container has no padding, so this is the gutter at every
-      // width: the header's, so the card lines up with its title.
-      px: { xs: '10px', sm: '24px' },
     }} data-testid="loginRoot">
       <Stack sx={{
         width: '100%',

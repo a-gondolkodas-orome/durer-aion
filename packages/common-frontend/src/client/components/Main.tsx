@@ -4,6 +4,7 @@ import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header } from "./Header";
 import { Layout } from "./Layout";
 import { Login } from "./Login";
+import { HomeLayout } from "./HomeLayout";
 import { Relay } from "./teamstates/Relay";
 import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
@@ -55,7 +56,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
         data-testid="mainRoot"
       >
         {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-        {!teamState && <Login />}
+        {!teamState && <HomeLayout><Login /></HomeLayout>}
         {teamState && teamState.pageState === "DISCLAIMER" && (
           <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
         )}

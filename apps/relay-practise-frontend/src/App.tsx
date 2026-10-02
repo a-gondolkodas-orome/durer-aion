@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import i18next from "i18next";
 import { useTranslation } from 'react-i18next';
-import { GameProvider, ClientRepoProvider, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
+import { GameProvider, ClientRepoProvider, Header, HomeLayout, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
@@ -93,7 +93,7 @@ function App() {
               }}
               data-testid="mainRoot"
             >
-              {!teamState && <LoginToRelay />}
+              {!teamState && <HomeLayout><LoginToRelay /></HomeLayout>}
               {teamState && <Relay state={teamState}/>}
             </Container>
             <footer style={{

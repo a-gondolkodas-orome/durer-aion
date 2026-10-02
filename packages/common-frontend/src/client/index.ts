@@ -8,6 +8,7 @@ export * from './components/Disclaimer';
 export * from './components/ExerciseForm';
 export * from './components/ExerciseTask';
 export * from './components/Header';
+export * from './components/HomeLayout';
 export * from './components/Langswitcher';
 export * from './components/Layout';
 export * from './components/Login';
