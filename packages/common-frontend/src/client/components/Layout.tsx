@@ -16,7 +16,7 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
     return <React.Fragment>
         <ThemeProvider theme={outerTheme => createTheme(deepmerge(importedTheme, outerTheme))}>
             <CssBaseline/>
-            {/* notistack's containers are `fixed`, so inside this box they position against what is on screen. */}
+            {/* useVisualViewportBox overwrites the size; the 100% is for a browser without visualViewport. */}
             <div
               ref={setSnackbarRoot}
               style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%', zIndex: 1400, pointerEvents: 'none' }}
