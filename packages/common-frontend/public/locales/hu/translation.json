@@ -32,6 +32,7 @@
     "points": "{{count}} pont",
     "remainingTime": "Hátralevő idő",
     "warning": {
+      "connectionLost": "Megszakadt a kapcsolat a szerverrel, próbálunk újra csatlakozni… Amíg ez az üzenet látszik, a lépéseitek és válaszaitok nem jutnak el a szerverhez: várjátok meg, amíg eltűnik.",
       "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
       "timeNotReal": "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni."
     }
