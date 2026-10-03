@@ -1,6 +1,7 @@
 import { Alert } from "@mui/material";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
+import { VISUAL_VIEWPORT_TOP } from "../hooks/visual-viewport";
 
 /// A red banner while the game's socket is down. boardgame.io reconnects and
 /// re-syncs on its own, and socket.io holds what is sent meanwhile until then,
@@ -17,7 +18,7 @@ export function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
     <Alert
       severity="error"
       variant="filled"
-      sx={{ position: 'sticky', top: 0, zIndex: 'appBar', borderRadius: 0 }}
+      sx={{ position: 'sticky', top: VISUAL_VIEWPORT_TOP, zIndex: 'appBar', borderRadius: 0 }}
     >
       {t('general.warning.connectionLost')}
     </Alert>
