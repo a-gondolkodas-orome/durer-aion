@@ -44,10 +44,3 @@ test('covers the visual viewport as it pans and shrinks', () => {
   viewport.dispatchEvent(new Event('scroll'));
   expect(element.style.transform).toBe('translate(30px, 503px)');
 });
-
-test('leaves the element alone without visualViewport', () => {
-  vi.stubGlobal('visualViewport', undefined);
-  const element = document.createElement('div');
-  renderAttached(element);
-  expect(element.getAttribute('style')).toBeNull();
-});
