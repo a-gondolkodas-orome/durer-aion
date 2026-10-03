@@ -430,9 +430,40 @@ that before a competition.
    `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the live
    client `game` and `game/client`; the offline dry run all three.
 
-The game's shape — `setup`, `moves`, `turn`, and the wrapper's own
-`possibleMoves` and `startingPosition` — is typed in
-`packages/game/src/common/types.ts`, and `GameMixin.startingPosition` there says
-which of the opening position's two homes to use. A move takes as many arguments
-as you give it: `moves.changeCoins(K, L)` for a "pick two values, then commit"
-turn.
+What each file provides — the names are the ones the registries import. The
+game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and
+`gameWrapper` (`gamewrapper.ts`) adds everything the files below do not mention:
+the clock, the test/live choice, choosing who starts, tries and score.
+
+- **`game.ts`** exports `MyGameWrapper(category)`, returning
+  - `name`, equal to the category's entry in `strategyNames`
+    (`strategy-games.ts`); the server and the clients use that entry, so
+    nothing catches a mismatch
+  - `setup`, the game's own half of `G` only
+  - `moves`: a move sets `G.winner` when it decides a sub-game and ends with
+    `events.endTurn()`. Each live game also scores the sub-game in its move
+    (#459)
+  - `possibleMoves`, every legal move, from which the bot picks at random
+  - optionally `turn`, which the live games use for the end-of-time checks
+    (#594)
+
+  A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
+  a "pick two values, then commit" turn.
+- **`strategy.ts`** exports `strategyWrapper(category)`, returning
+  `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
+  with `setStartingPosition` and the opening position — the bot is the only
+  source of it in both live games. `GameType.startingPosition` is typed but
+  `gameWrapper` never calls it (#35), so do not use it. `[undefined, moveName]`
+  makes the bot play a random move from `possibleMoves`.
+- **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
+  draws the board alone. The countdown, the test/live and role buttons, the
+  status line and the end table come from `boardWrapper`
+  (`packages/common-frontend/src/common/boardwrapper.tsx`).
+- **`main.tsx`** exports `description<Category>`, the rules text shown above the
+  board, one per category the game is played in.
+
+A relay is not a new game but a problem list: `Problem[]` per category in
+`packages/relay-bot/src/games/relay/strategy.ts` for the competition, and per
+problem set in `apps/relay-practise-frontend/src/problems.ts` for the relay
+practice site. The same secrecy applies to an unreleased problem set as to a
+game.
