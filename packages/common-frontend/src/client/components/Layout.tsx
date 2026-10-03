@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { SnackbarProvider } from 'notistack';
 import { SuperPicture } from './picture-component';
 import { CssBaseline, Stack } from '@mui/material';
@@ -9,21 +9,15 @@ import { useVisualViewportBox } from '../hooks/visual-viewport';
 
 export type LayoutProps = React.HTMLProps<HTMLElement>;
 
-// useVisualViewportBox overwrites the size; the 100% is for a browser without
-// visualViewport. One object for every render, so React never diffs this style
-// against what the hook wrote.
-const snackbarRootStyle: React.CSSProperties = {
-  position: 'fixed', left: 0, top: 0, width: '100%', height: '100%', zIndex: 1400, pointerEvents: 'none',
-};
-
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
-    // A state rather than a ref, so the provider gets the element once mounted.
-    const [snackbarRoot, setSnackbarRoot] = useState<HTMLDivElement | null>(null);
-    useVisualViewportBox(snackbarRoot);
+    const [snackbarRoot, setSnackbarRoot] = useVisualViewportBox<HTMLDivElement>();
     return <React.Fragment>
         <ThemeProvider theme={outerTheme => createTheme(deepmerge(importedTheme, outerTheme))}>
             <CssBaseline/>
-            <div ref={setSnackbarRoot} style={snackbarRootStyle}/>
+            {/* useVisualViewportBox overwrites the size; the 100% is for a browser without visualViewport. */}
+            <div ref={setSnackbarRoot} style={{
+              position: 'fixed', left: 0, top: 0, width: '100%', height: '100%', zIndex: 1400, pointerEvents: 'none',
+            }}/>
             <SnackbarProvider
               maxSnack={3}
               anchorOrigin={{
