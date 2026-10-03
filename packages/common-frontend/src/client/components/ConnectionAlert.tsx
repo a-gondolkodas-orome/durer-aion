@@ -1,27 +1,22 @@
 import { Alert } from "@mui/material";
-import { useState } from "react";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 
 /// A red banner while the game's socket is down. boardgame.io reconnects and
-/// re-syncs on its own, so this only tells the team why the board froze.
+/// re-syncs on its own, and socket.io holds what is sent meanwhile until then,
+/// so this only tells the team why nothing seems to happen.
 ///
-/// `isConnected` is false before the first connect too, so nothing shows until
-/// the socket has been up once: a page load must not flash the banner.
+/// No "has it ever connected" guard: boardgame.io renders its loading screen
+/// instead of the board until the first sync, which needs a connected socket.
 export function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
   const { t } = useTranslation();
-  const [wasConnected, setWasConnected] = useState(isConnected);
-  if (isConnected && !wasConnected) {
-    setWasConnected(true);
-  }
-  if (isConnected || !wasConnected) {
+  if (isConnected) {
     return null;
   }
   return (
     <Alert
       severity="error"
       variant="filled"
-      role="alert"
       sx={{ position: 'sticky', top: 0, zIndex: 'appBar', borderRadius: 0 }}
     >
       {t('general.warning.connectionLost')}
@@ -32,10 +27,12 @@ export function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
 /// For the socket.io clients only: a local client's transport reports
 /// `isConnected: false` for good, which would keep the banner up forever.
 export function withConnectionAlert<P extends { isConnected: boolean }>(Board: ComponentType<P>) {
-  return (props: P) => (
+  const WithConnectionAlert = (props: P) => (
     <>
       <ConnectionAlert isConnected={props.isConnected} />
       <Board {...props} />
     </>
   );
+  WithConnectionAlert.displayName = `withConnectionAlert(${Board.displayName ?? Board.name})`;
+  return WithConnectionAlert;
 }

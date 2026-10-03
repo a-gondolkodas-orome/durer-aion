@@ -5,12 +5,7 @@ import '@testing-library/jest-dom';
 import '../../common/i18n';
 import { ConnectionAlert } from './ConnectionAlert';
 
-test('stays hidden before the socket has connected once', () => {
-  render(<ConnectionAlert isConnected={false} />);
-  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-});
-
-test('shows while a connected socket is down, and hides on reconnect', () => {
+test('shows while the socket is down, and hides on reconnect', () => {
   const { rerender } = render(<ConnectionAlert isConnected={true} />);
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
