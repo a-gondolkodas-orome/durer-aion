@@ -1,36 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SnackbarProvider } from 'notistack';
 import { SuperPicture } from './picture-component';
-import { CssBaseline, GlobalStyles, Stack } from '@mui/material';
+import { CssBaseline, Stack } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import importedTheme from './theme';
 import { deepmerge } from '@mui/utils';
-import { VISUAL_VIEWPORT_TOP, useVisualViewportTop } from '../hooks/visual-viewport';
-
-// notistack's own distance from the top of the screen, which its class sets
-// as a fixed `top`; the provider below adds the visual viewport's offset to it.
-const SNACKBAR_TOP = '14px';
+import { useVisualViewportBox } from '../hooks/visual-viewport';
 
 export type LayoutProps = React.HTMLProps<HTMLElement>;
 
 export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps) => {
-    useVisualViewportTop();
+    // A state rather than a ref, so the provider gets the element once mounted.
+    const [snackbarRoot, setSnackbarRoot] = useState<HTMLDivElement | null>(null);
+    useVisualViewportBox(snackbarRoot);
     return <React.Fragment>
         <ThemeProvider theme={outerTheme => createTheme(deepmerge(importedTheme, outerTheme))}>
             <CssBaseline/>
-            {/* Two classes, to outrank the single one notistack sets `top` with. */}
-            <GlobalStyles styles={{
-              '.notistack-SnackbarContainer.follows-visual-viewport': {
-                top: `calc(${VISUAL_VIEWPORT_TOP} + ${SNACKBAR_TOP})`,
-              },
-            }}/>
+            {/* notistack's containers are `fixed`, so inside this box they position against what is on screen. */}
+            <div
+              ref={setSnackbarRoot}
+              style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%', zIndex: 1400, pointerEvents: 'none' }}
+            />
             <SnackbarProvider
               maxSnack={3}
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'right',
               }}
-              classes={{ containerAnchorOriginTopRight: 'follows-visual-viewport' }}
+              domRoot={snackbarRoot ?? undefined}
             >
                 <Stack sx={(theme) => ({ backgroundColor: theme.palette.background.default })}>
                   <Stack sx={{

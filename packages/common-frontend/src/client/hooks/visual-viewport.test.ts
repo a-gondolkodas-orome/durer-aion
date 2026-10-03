@@ -1,32 +1,46 @@
 // @vitest-environment jsdom
 import { afterEach, expect, test, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useVisualViewportTop } from './visual-viewport';
+import { useVisualViewportBox } from './visual-viewport';
 
 class FakeViewport extends EventTarget {
+  offsetLeft = 0;
   offsetTop = 0;
+  width = 412;
+  height = 915;
 }
-
-const rootTop = () => document.documentElement.style.getPropertyValue('--visual-viewport-top');
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test('follows the visual viewport down, never above the top, and clears on unmount', () => {
+test('covers the visual viewport as it pans and shrinks, never past the top left', () => {
   const viewport = new FakeViewport();
   vi.stubGlobal('visualViewport', viewport);
-  const { unmount } = renderHook(() => useVisualViewportTop());
-  expect(rootTop()).toBe('0px');
+  const element = document.createElement('div');
+  const { unmount } = renderHook(() => useVisualViewportBox(element));
+  expect(element.style.transform).toBe('translate(0px, 0px)');
+  expect(element.style.width).toBe('412px');
+  expect(element.style.height).toBe('915px');
 
-  viewport.offsetTop = 503;
+  Object.assign(viewport, { offsetLeft: 30, offsetTop: 503, height: 400 });
   viewport.dispatchEvent(new Event('scroll'));
-  expect(rootTop()).toBe('503px');
+  expect(element.style.transform).toBe('translate(30px, 503px)');
+  expect(element.style.height).toBe('400px');
 
-  viewport.offsetTop = -12;
+  Object.assign(viewport, { offsetLeft: -5, offsetTop: -12 });
   viewport.dispatchEvent(new Event('resize'));
-  expect(rootTop()).toBe('0px');
+  expect(element.style.transform).toBe('translate(0px, 0px)');
 
   unmount();
-  expect(rootTop()).toBe('');
+  viewport.offsetTop = 200;
+  viewport.dispatchEvent(new Event('scroll'));
+  expect(element.style.transform).toBe('translate(0px, 0px)');
+});
+
+test('leaves the element alone without visualViewport', () => {
+  vi.stubGlobal('visualViewport', undefined);
+  const element = document.createElement('div');
+  renderHook(() => useVisualViewportBox(element));
+  expect(element.getAttribute('style')).toBeNull();
 });
