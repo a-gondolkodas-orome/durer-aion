@@ -3,6 +3,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { SocketIO } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
+import { withConnectionAlert } from '../client/components/ConnectionAlert';
 import type { StrategyBoard } from './boardwrapper';
 import type { ComponentType, ReactNode } from 'react';
 import type { GameRelay, MyGameState as RelayGameState } from 'game';
@@ -43,7 +44,7 @@ export function MyOnlineClient<T_SpecificGameState>(
 ) {
   return Client({
     game: gameWrapper(game),
-    board: boardWrapper(board, description),
+    board: withConnectionAlert(boardWrapper(board, description)),
     multiplayer: serverUrl === undefined ? SocketIO() :
       SocketIO({ server: serverUrl }),
   });
@@ -57,7 +58,7 @@ export function MyOnlineRelayClient(
 ) {
   return Client({
     game: game,
-    board: board,
+    board: withConnectionAlert(board),
     multiplayer: serverUrl === undefined ? SocketIO() :
       SocketIO({ server: serverUrl }),
   });
