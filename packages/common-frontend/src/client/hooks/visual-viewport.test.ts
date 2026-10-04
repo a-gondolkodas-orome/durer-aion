@@ -4,7 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useVisualViewportBox } from './visual-viewport';
 
 // #530: with a phone keyboard open, the screen shows only part of the page,
-// panned down to the focused input. The snackbars' box must follow that part.
+// panned down to the focused input. The snackbar box must follow that part.
 
 // Round numbers rather than a real phone's: only how they relate matters.
 const SCREEN = { width: 400, height: 800 };
