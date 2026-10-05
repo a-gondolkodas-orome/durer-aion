@@ -154,24 +154,13 @@ The admin pages are at `http://localhost/admin`, user `admin`, password from
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container, and `PUT /team/admin/import`,
-which takes the TSV as an upload; the admin page has no form for it. The first
-is its own process — `dist/import_teams.js`, which reads `DATABASE_URL` and
-nothing else, so no credential has to be set for a TSV to load (#190). It
-reaches that process with `docker compose exec`, so the backend container still
-has to be up; `teams:import:local` runs the same code with nothing in front of
-it, and imports against a server that will not boot. Two fixtures feed those:
-`scripts/test.tsv` is the happy path — the file `teams:import` loads — and
-`scripts/unit_test.tsv` is the one shaped for the rejections, its team names
-saying what each row is for: the cells to blank so the importer generates them,
-the empty row to leave in, the duplicated login code and duplicated credentials
-only a real database refuses. `team_import_route.test.ts` uploads it through
-the route, but over a stub repository, so the duplicates still need importing
-it by hand against a real database.
+which takes the TSV as an upload; the admin page has no form for it (yet).
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
-server: it needs Python packages the server has no reason to carry, and what it
-writes is keyed by join code, the teams' login secret. On macOS or Linux:
+server: it needs Python packages the server has no reason to carry.
+
+On macOS or Linux:
 
 ```bash
 python3 -m venv .venv
@@ -189,8 +178,7 @@ $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scrip
 
 It writes the match data (`match_data_*.json`) and the results
 (`durer-results-<year>.tsv`) to `scripts/admin-output/`, wherever it is run
-from, and prints the results file's full path when it is done; `.gitignore`
-and `.dockerignore` both keep that folder out.
+from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
   no credential of its own. Unset it prompts, and with no terminal to prompt on
