@@ -162,6 +162,12 @@ here. What follows is the rest.
 - An agent opening a PR assigns the person it is working for, and names its
   session for what the work is about, not for the ticket alone — `#461 duplicate
   socket.io copy in the lockfile`, not `Issue 461 investigation`
+- An agent pushes its work to `claude/<topic>`, a few kebab-case words saying
+  what the change is about — `claude/snackbar-above-keyboard`, not the random
+  name its session was assigned. Rename before the first push; a branch already
+  on the remote, or one a PR already tracks, keeps its name. This is the
+  explicit permission a session's "push only to the assigned branch" rule asks
+  for
 - Permission to commit to someone else's branch is not permission to comment on
   their PR: ask first before posting to a thread you do not own
 - A PR's discussion is the people's, even on a PR the agent opened: comments,
