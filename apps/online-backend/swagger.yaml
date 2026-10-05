@@ -344,7 +344,7 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: The TSV file to be uploaded, its name ending in .tsv, at most 1 MB
+                  description: The TSV file to be uploaded, its name ending in .tsv
               required:
                 - file
       responses:

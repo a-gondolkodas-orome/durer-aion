@@ -344,7 +344,7 @@ export function configureTeamsRouter(
    * formidable stores the upload under a random name, so the extension is
    * checked on the name the client sent.
    */
-  router.put("/team/admin/import", adminAuth, koaBody({ multipart: true, formidable: { maxFileSize: 1024 * 1024 } }), async (ctx) => {
+  router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
     try {
       if (Array.isArray(file)) {
