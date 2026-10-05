@@ -346,19 +346,21 @@ export function configureTeamsRouter(
    */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true, formidable: { maxFileSize: 1024 * 1024 } }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    const files = Array.isArray(file) ? file : file ? [file] : [];
     try {
-      if (files.length > 1) {
+      if (Array.isArray(file)) {
         ctx.throw(400, 'Multiple files are not supported.');
+        return;
       }
-      if (!files[0]?.originalFilename?.endsWith('.tsv')) {
+      if (!file?.originalFilename?.endsWith('.tsv')) {
         ctx.status = 400;
         ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
         return;
       }
-      ctx.body = await import_teams_from_tsv(teams, files[0].filepath);
+      ctx.body = await import_teams_from_tsv(teams, file.filepath);
     } finally {
-      await Promise.all(files.map(f => unlink(f.filepath).catch(() => undefined)));
+      // Every field, not only `file`: formidable writes whatever is uploaded.
+      const uploaded = Object.values(ctx.request.files ?? {}).flat();
+      await Promise.all(uploaded.map(f => unlink(f.filepath).catch(() => undefined)));
     }
   })
 

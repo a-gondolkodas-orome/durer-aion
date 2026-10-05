@@ -23,7 +23,7 @@ describe("PUT /team/admin/import", () => {
     await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
   });
 
-  async function upload(teams: Partial<TeamsRepository>, filename: string, content: string) {
+  async function upload(teams: Partial<TeamsRepository>, ...files: [filename: string, content: string][]) {
     const app = new Koa<Koa.DefaultState, Server.AppCtx>();
     // The 400 is under test, and koa logs every error it writes.
     app.silent = true;
@@ -36,14 +36,16 @@ describe("PUT /team/admin/import", () => {
     await new Promise(resolve => server.once("listening", resolve));
     const { port } = server.address() as AddressInfo;
     const body = new FormData();
-    body.append("file", new Blob([content]), filename);
+    for (const [filename, content] of files) {
+      body.append("file", new Blob([content]), filename);
+    }
     return fetch(`http://127.0.0.1:${port}/team/admin/import`, { method: "PUT", headers: { authorization: CREDENTIALS }, body });
   }
 
   it("imports the uploaded TSV", async () => {
     const teams = { connect: vi.fn().mockResolvedValue(undefined), insertTeam: vi.fn().mockResolvedValue(undefined) };
 
-    const response = await upload(teams, "unit_test.tsv", UNIT_TEST_TSV);
+    const response = await upload(teams, ["unit_test.tsv", UNIT_TEST_TSV]);
 
     expect(response.status).toBe(200);
     // Every row of the fixture but the empty one; the duplicates are refused
@@ -55,7 +57,16 @@ describe("PUT /team/admin/import", () => {
   it("answers 400 for a file that is not a .tsv", async () => {
     const teams = { connect: vi.fn(), insertTeam: vi.fn() };
 
-    const response = await upload(teams, "teams.csv", UNIT_TEST_TSV);
+    const response = await upload(teams, ["teams.csv", UNIT_TEST_TSV]);
+
+    expect(response.status).toBe(400);
+    expect(teams.insertTeam).not.toHaveBeenCalled();
+  });
+
+  it("answers 400 for two files", async () => {
+    const teams = { connect: vi.fn(), insertTeam: vi.fn() };
+
+    const response = await upload(teams, ["a.tsv", UNIT_TEST_TSV], ["b.tsv", UNIT_TEST_TSV]);
 
     expect(response.status).toBe(400);
     expect(teams.insertTeam).not.toHaveBeenCalled();
