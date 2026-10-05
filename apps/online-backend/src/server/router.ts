@@ -1,4 +1,5 @@
 import koaBody from 'koa-body';
+import { unlink } from 'node:fs/promises';
 import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
@@ -339,25 +340,26 @@ export function configureTeamsRouter(
   })
 
   /**
- * Get all teams as a full object
- * @returns {TeamModel[]} - List of the selected teams
- */
-  router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
+   * Import teams from an uploaded TSV, the way `npm run teams:import` does.
+   * formidable stores the upload under a random name, so the extension is
+   * checked on the name the client sent.
+   */
+  router.put("/team/admin/import", adminAuth, koaBody({ multipart: true, formidable: { maxFileSize: 1024 * 1024 } }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    if (Array.isArray(file)) {
-      ctx.throw(400, 'Multiple files are not supported.');
-      return;
+    const files = Array.isArray(file) ? file : file ? [file] : [];
+    try {
+      if (files.length > 1) {
+        ctx.throw(400, 'Multiple files are not supported.');
+      }
+      if (!files[0]?.originalFilename?.endsWith('.tsv')) {
+        ctx.status = 400;
+        ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
+        return;
+      }
+      ctx.body = await import_teams_from_tsv(teams, files[0].filepath);
+    } finally {
+      await Promise.all(files.map(f => unlink(f.filepath).catch(() => undefined)));
     }
-
-    if (!file || !file.filepath?.endsWith('.tsv')) {
-      ctx.status = 400;
-      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
-      return;
-    }
-
-    const import_results = await import_teams_from_tsv(teams, file.filepath)
-
-    ctx.body = import_results;
   })
 
   /**

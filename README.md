@@ -152,20 +152,21 @@ touches the `Dockerfile`, nginx or the routes.
 The admin pages are at `http://localhost/admin`, user `admin`, password from
 `.env.docker`; `/admin/<teamId>` opens one team directly.
 
-Team import has two paths: `npm run teams:import`, which
-runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page. The first is its own process — `dist/import_teams.js`, which reads
-`DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
-load (#190). It reaches that process with `docker compose exec`, so the backend
-container still has to be up; `teams:import:local` runs the same code with
-nothing in front of it, and imports against a server that will not boot. Two
-fixtures feed those by hand, which is why no code names either:
+Team import has two paths: `npm run teams:import`, which runs
+`scripts/import_teams.sh` inside the container, and `PUT /team/admin/import`,
+which takes the TSV as an upload; the admin page has no form for it. The first
+is its own process — `dist/import_teams.js`, which reads `DATABASE_URL` and
+nothing else, so no credential has to be set for a TSV to load (#190). It
+reaches that process with `docker compose exec`, so the backend container still
+has to be up; `teams:import:local` runs the same code with nothing in front of
+it, and imports against a server that will not boot. Two fixtures feed those:
 `scripts/test.tsv` is the happy path — the file `teams:import` loads — and
 `scripts/unit_test.tsv` is the one shaped for the rejections, its team names
 saying what each row is for: the cells to blank so the importer generates them,
 the empty row to leave in, the duplicated login code and duplicated credentials
-only a real database refuses. `team_import.test.ts` mocks the filesystem, so the
-upload is the only thing that exercises those.
+only a real database refuses. `team_import_route.test.ts` uploads it through
+the route, but over a stub repository, so the duplicates still need importing
+it by hand against a real database.
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
