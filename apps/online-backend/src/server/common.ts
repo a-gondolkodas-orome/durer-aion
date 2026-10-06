@@ -15,8 +15,8 @@ export function getAdminCredentials() {
   return env.ADMIN_CREDENTIALS;
 }
 
-export const relayNames: Record<CompetitionCategory, string> = {
+export const relayNames = {
   C: 'relay_c',
   D: 'relay_d',
   E: 'relay_e',
-}
+} satisfies Record<CompetitionCategory, string>;

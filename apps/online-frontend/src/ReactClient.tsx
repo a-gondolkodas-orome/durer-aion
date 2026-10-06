@@ -32,7 +32,7 @@ export function RelayClient({ category, matchID, credentials }: {
   category?: CompetitionCategory, matchID?: string,
   credentials?: string
 }) {
-  if (category === undefined) return null;
+  if (category === undefined) return <>unknown category</>;
   const Client = RELAY_CLIENTS[category];
   return <Client {...{ credentials, matchID }}/>;
 }
@@ -41,7 +41,7 @@ export function StrategyClient({ category, matchID, credentials }: {
   category?: CompetitionCategory, matchID?: string,
   credentials?: string
 }) {
-  if (category === undefined) return null;
+  if (category === undefined) return <>unknown category</>;
   const Client = STRATEGY_CLIENTS[category];
   return <Client {...{ credentials, matchID }}/>;
 }

@@ -32,7 +32,7 @@ const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyClientWithBot
 export function RelayClient({ category }: {
   category?: CompetitionCategory,
 }) {
-  if (category === undefined) return null;
+  if (category === undefined) return <>unknown category</>;
   const Client = RELAY_CLIENTS[category];
   return <Client />;
 }
@@ -40,7 +40,7 @@ export function RelayClient({ category }: {
 export function StrategyClient({ category }: {
   category?: CompetitionCategory,
 }) {
-  if (category === undefined) return null;
+  if (category === undefined) return <>unknown category</>;
   const Client = STRATEGY_CLIENTS[category];
   return <Client />;
 }
