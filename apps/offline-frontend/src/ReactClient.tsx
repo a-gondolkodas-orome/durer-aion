@@ -18,6 +18,7 @@ export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({ ...Game
 export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), StrategyWrappers.E(), descriptionE);
 
 
+// Only the competition's categories reach here: they are all `teamData.ts` holds.
 const RELAY_CLIENTS: Record<CompetitionCategory, typeof RelayClientWithBotC> = {
   C: RelayClientWithBotC,
   D: RelayClientWithBotD,
@@ -30,15 +31,15 @@ const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyClientWithBot
 };
 
 export function RelayClient({ category }: {
-  category: CompetitionCategory,
+  category: string,
 }) {
-  const Client = RELAY_CLIENTS[category];
+  const Client = RELAY_CLIENTS[category as CompetitionCategory];
   return <Client />;
 }
 
 export function StrategyClient({ category }: {
-  category: CompetitionCategory,
+  category: string,
 }) {
-  const Client = STRATEGY_CLIENTS[category];
+  const Client = STRATEGY_CLIENTS[category as CompetitionCategory];
   return <Client />;
 }

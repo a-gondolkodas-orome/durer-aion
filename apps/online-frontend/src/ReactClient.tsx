@@ -17,6 +17,7 @@ export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = Client
 export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), descriptionE);
 
 
+// Only the competition's categories reach here: the import admits no other.
 const RELAY_CLIENTS: Record<CompetitionCategory, typeof RelayOnlineClient_C> = {
   C: RelayOnlineClient_C,
   D: RelayOnlineClient_D,
@@ -29,17 +30,17 @@ const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyOnlineClient_
 };
 
 export function RelayClient({ category, matchID, credentials }: {
-  category: CompetitionCategory, matchID?: string,
+  category: string, matchID?: string,
   credentials?: string
 }) {
-  const Client = RELAY_CLIENTS[category];
+  const Client = RELAY_CLIENTS[category as CompetitionCategory];
   return <Client {...{ credentials, matchID }}/>;
 }
 
 export function StrategyClient({ category, matchID, credentials }: {
-  category: CompetitionCategory, matchID?: string,
+  category: string, matchID?: string,
   credentials?: string
 }) {
-  const Client = STRATEGY_CLIENTS[category];
+  const Client = STRATEGY_CLIENTS[category as CompetitionCategory];
   return <Client {...{ credentials, matchID }}/>;
 }
