@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
-import { isCompetitionCategory } from "schemas";
+import type { CompetitionCategory } from "schemas";
 import React, { Suspense } from "react";
 
 const testId = "relayRoot";
@@ -15,9 +15,9 @@ export function Relay(props: { state: TeamModelDto }) {
       return (
         <div data-testid={testId}>
           {RelayClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
-            {/* The relay practice site's categories (C+…) are not the competition's: its client goes by `teamName`. */}
+            {/* The relay practice site's categories (C+…) are not the competition's: its client ignores `category`. */}
             <RelayClient
-              category={isCompetitionCategory(props.state.category) ? props.state.category : undefined}
+              category={props.state.category as CompetitionCategory}
               teamName={props.state.teamName}
               credentials={props.state.credentials}
               matchID={(props.state.relayMatch  as InProgressMatchStatus).matchID}

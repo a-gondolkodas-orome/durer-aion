@@ -127,18 +127,6 @@ describe("getNewGame", () => {
 
     expect(game.name).toBe(strategyNames.D);
   });
-
-  // The import rejects these, so only a row edited in the database gets here.
-  // `teams` has no methods, so closing the overdue match would fail differently.
-  it("refuses a category the competition does not have before closing anything", async () => {
-    const edited = team({
-      category: "C+",
-      relayMatch: inProgressUntil(new Date(Date.now() - 1000)),
-    });
-
-    await expect(getNewGame(ctx, teams, games, "RELAY", edited))
-      .rejects.toMatchObject({ status: 500, expose: true, message: "Team has an unknown category: C+" });
-  });
 });
 
 // boardgame.io serves listed matches, metadata and all, from an

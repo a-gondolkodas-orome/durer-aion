@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
-import { isCompetitionCategory } from "schemas";
+import type { CompetitionCategory } from "schemas";
 import { Suspense } from "react";
 
 const testId = "strategyRoot";
@@ -16,7 +16,7 @@ export function Strategy(props: { state: TeamModelDto }) {
         <div data-testid={testId}>
          {StrategyClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <StrategyClient
-              category={isCompetitionCategory(props.state.category) ? props.state.category : undefined}
+              category={props.state.category as CompetitionCategory}
               credentials={props.state.credentials}
               matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
             />

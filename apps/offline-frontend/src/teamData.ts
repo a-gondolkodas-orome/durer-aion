@@ -1,6 +1,8 @@
+import type { CompetitionCategory } from "common-frontend";
+
 export const teamData:{
   teamname: string,
-  category: string,
+  category: CompetitionCategory,
   join_code: string
 }[] = [
 { teamname: 'testC', category: 'C', join_code: '100-0000-000' },

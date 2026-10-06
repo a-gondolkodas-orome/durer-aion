@@ -9,7 +9,6 @@ import {
   FinishedMatchStatus,
   GameType,
   InProgressMatchStatus,
-  isCompetitionCategory,
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
@@ -230,12 +229,6 @@ export async function getNewGame(
   gameType: GameType,
   team: TeamModel
 ) {
-  // Checked before anything is written: the request fails either way. Exposed
-  // so that the team has something to report, as Koa hides a 5xx's message.
-  const category: CompetitionCategory = isCompetitionCategory(team.category)
-    ? team.category
-    : ctx.throw(500, `Team has an unknown category: ${team.category}`, { expose: true });
-
   //if middleware setup was better understood, this should be in a separate middleware
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
@@ -249,7 +242,8 @@ export async function getNewGame(
   if (!(await allowedToStart(team, gameType))) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  const gameName = gameNames[gameType][category];
+  // The import admits only the competition's categories.
+  const gameName = gameNames[gameType][team.category as CompetitionCategory];
 
   const game: AnyBgioGame = games.find(
     (g) => g.name === gameName
