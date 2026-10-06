@@ -15,7 +15,7 @@ export function Strategy(props: { state: TeamModelDto }) {
         <div data-testid={testId}>
          {StrategyClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <StrategyClient
-              category={props.state.category as "C" | "D" | "E"}
+              category={props.state.category}
               credentials={props.state.credentials}
               matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
             />

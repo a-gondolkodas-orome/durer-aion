@@ -19,7 +19,7 @@ export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({ ...Game
 
 
 export function RelayClient({ category }: {
-  category?: undefined | 'C' | 'D' | 'E',
+  category?: string,
 }) {
   return (
     <>
@@ -37,7 +37,7 @@ export function RelayClient({ category }: {
 }
 
 export function StrategyClient({ category }: {
-  category?: undefined | 'C' | 'D' | 'E',
+  category?: string,
 }) {
   return (
     <>

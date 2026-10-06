@@ -50,6 +50,16 @@ export function isPageState(value: unknown): value is PageState {
 /// `allowedToStart` in the backend relies on when it compares the two.
 export type GameType = Extract<PageState, 'RELAY' | 'STRATEGY'>;
 
+/// The competition's team categories. Only the competition is held to these:
+/// the relay practice site shares `TeamModelDto` with its own historical set
+/// (A–E, C+…), which is why a team's `category` stays a `string`.
+export const CATEGORIES = ['C', 'D', 'E'] as const;
+export type Category = typeof CATEGORIES[number];
+
+export function isCategory(value: unknown): value is Category {
+  return CATEGORIES.some(it => it === value);
+}
+
 export class TeamModel {
   public teamId!: string;
   public joinCode!: string;

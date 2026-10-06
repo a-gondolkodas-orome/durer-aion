@@ -5,9 +5,11 @@ import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
+  Category,
   FinishedMatchStatus,
   GameType,
   InProgressMatchStatus,
+  isCategory,
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
@@ -214,6 +216,13 @@ export async function closeMatch(
     console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
 
+// Typed here rather than at the registries so that the game package need not
+// depend on schemas: a category with no game of either type fails to compile.
+const gameNames: Record<GameType, Record<Category, string>> = {
+  RELAY: relayNames,
+  STRATEGY: strategyNames,
+};
+
 export async function getNewGame(
   ctx: Server.AppCtx,
   teams: TeamsRepository,
@@ -234,10 +243,10 @@ export async function getNewGame(
   if (!(await allowedToStart(team, gameType))) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  const gameName =
-    gameType === "RELAY"
-      ? relayNames[team.category as keyof typeof relayNames]
-      : strategyNames[team.category as keyof typeof strategyNames];
+  const category: Category = isCategory(team.category)
+    ? team.category
+    : ctx.throw(500, `Team has an unknown category: ${team.category}`);
+  const gameName = gameNames[gameType][category];
 
   const game: AnyBgioGame = games.find(
     (g) => g.name === gameName

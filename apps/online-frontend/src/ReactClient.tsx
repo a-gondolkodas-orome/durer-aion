@@ -25,7 +25,7 @@ const DURER_XVI_CLIENT_D_STRATEGY = StrategyOnlineClient_D;
 const DURER_XVI_CLIENT_E_STRATEGY = StrategyOnlineClient_E;
 
 export function RelayClient({ category, matchID, credentials }: {
-  category?: undefined | 'C' | 'D' | 'E', matchID?: string,
+  category?: string, matchID?: string,
   credentials?: string
 }) {
   return (
@@ -50,7 +50,7 @@ export function RelayClient({ category, matchID, credentials }: {
 }
 
 export function StrategyClient({ category, matchID, credentials }: {
-  category?: undefined | 'C' | 'D' | 'E', matchID?: string,
+  category?: string, matchID?: string,
   credentials?: string
 }) {
 

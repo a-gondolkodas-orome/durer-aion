@@ -15,7 +15,7 @@ export function Relay(props: { state: TeamModelDto }) {
         <div data-testid={testId}>
           {RelayClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
             <RelayClient
-              category={props.state.category as "C" | "D" | "E"}
+              category={props.state.category}
               teamName={props.state.teamName}
               credentials={props.state.credentials}
               matchID={(props.state.relayMatch  as InProgressMatchStatus).matchID}

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
-import { AnyBgioGame } from "game";
+import { AnyBgioGame, strategyNames } from "game";
 import { Server, StorageAPI } from "boardgame.io";
-import { allowedToStart, checkStaleMatch, closeMatch, createGame } from "./team_manage";
+import { allowedToStart, checkStaleMatch, closeMatch, createGame, getNewGame } from "./team_manage";
 import { TeamsRepository } from "./db";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
@@ -116,6 +116,26 @@ describe("checkStaleMatch", () => {
 // boardgame.io serves listed matches, metadata and all, from an
 // unauthenticated `GET /games/:name`, and that metadata names the playing
 // team by its GUID — which is what the session cookie carries.
+describe("getNewGame", () => {
+  const ctx = {
+    throw: (status: number, message: string) => { throw Object.assign(new Error(message), { status }); },
+  } as unknown as Server.AppCtx;
+  const games = [{ name: strategyNames.D }] as AnyBgioGame[];
+  const teams = {} as TeamsRepository;
+
+  it("finds the game registered for the team's category", async () => {
+    const { game } = await getNewGame(ctx, teams, games, "STRATEGY", team({ category: "D" }));
+
+    expect(game.name).toBe(strategyNames.D);
+  });
+
+  // The import rejects these, so only a row edited in the database gets here.
+  it("refuses a category the competition does not have", async () => {
+    await expect(getNewGame(ctx, teams, games, "RELAY", team({ category: "C+" })))
+      .rejects.toMatchObject({ status: 500, message: "Team has an unknown category: C+" });
+  });
+});
+
 describe("createGame", () => {
   it("creates the match unlisted", async () => {
     const game = { name: "test", setup: () => ({}), moves: {} } as unknown as AnyBgioGame;
