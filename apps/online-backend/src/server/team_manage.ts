@@ -5,11 +5,11 @@ import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
-  Category,
+  CompetitionCategory,
   FinishedMatchStatus,
   GameType,
   InProgressMatchStatus,
-  isCategory,
+  isCompetitionCategory,
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
@@ -216,9 +216,9 @@ export async function closeMatch(
     console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
 
-// Typed here rather than at the registries so that the game package need not
-// depend on schemas: a category with no game of either type fails to compile.
-const gameNames: Record<GameType, Record<Category, string>> = {
+// `strategyNames` is checked against the categories here rather than where it
+// is defined so that the game package need not depend on schemas.
+const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
   RELAY: relayNames,
   STRATEGY: strategyNames,
 };
@@ -230,6 +230,12 @@ export async function getNewGame(
   gameType: GameType,
   team: TeamModel
 ) {
+  // Checked before anything is written: the request fails either way. Exposed
+  // so that the team has something to report, as Koa hides a 5xx's message.
+  const category: CompetitionCategory = isCompetitionCategory(team.category)
+    ? team.category
+    : ctx.throw(500, `Team has an unknown category: ${team.category}`, { expose: true });
+
   //if middleware setup was better understood, this should be in a separate middleware
   const staleInfo = await checkStaleMatch(team);
   if (staleInfo.isStale) {
@@ -243,9 +249,6 @@ export async function getNewGame(
   if (!(await allowedToStart(team, gameType))) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  const category: Category = isCategory(team.category)
-    ? team.category
-    : ctx.throw(500, `Team has an unknown category: ${team.category}`);
   const gameName = gameNames[gameType][category];
 
   const game: AnyBgioGame = games.find(

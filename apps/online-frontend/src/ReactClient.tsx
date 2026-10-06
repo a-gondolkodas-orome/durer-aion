@@ -1,6 +1,6 @@
 import { GameRelay, MyGameWrappers, strategyNames } from "game";
 import { descriptionC, descriptionD, descriptionE, MyBoardWrapper } from "game/client";
-import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
+import { ClientFactory, ClientFactoryRelay, InProgressRelay, type CompetitionCategory } from "common-frontend";
 
 const GameC = MyGameWrappers.C();
 const GameD = MyGameWrappers.D();
@@ -17,60 +17,31 @@ export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = Client
 export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), descriptionE);
 
 
-const DURER_XVI_CLIENT_C_RELAY = RelayOnlineClient_C;
-const DURER_XVI_CLIENT_D_RELAY = RelayOnlineClient_D;
-const DURER_XVI_CLIENT_E_RELAY = RelayOnlineClient_E;
-const DURER_XVI_CLIENT_C_STRATEGY = StrategyOnlineClient_C;
-const DURER_XVI_CLIENT_D_STRATEGY = StrategyOnlineClient_D;
-const DURER_XVI_CLIENT_E_STRATEGY = StrategyOnlineClient_E;
+const RELAY_CLIENTS: Record<CompetitionCategory, typeof RelayOnlineClient_C> = {
+  C: RelayOnlineClient_C,
+  D: RelayOnlineClient_D,
+  E: RelayOnlineClient_E,
+};
+const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyOnlineClient_C> = {
+  C: StrategyOnlineClient_C,
+  D: StrategyOnlineClient_D,
+  E: StrategyOnlineClient_E,
+};
 
 export function RelayClient({ category, matchID, credentials }: {
-  category?: string, matchID?: string,
+  category?: CompetitionCategory, matchID?: string,
   credentials?: string
 }) {
-  return (
-    <>
-    {
-      category === 'C' && (
-        <DURER_XVI_CLIENT_C_RELAY {...{ credentials, matchID }}/>
-      )
-    }
-    {
-      category === 'D' && (
-        <DURER_XVI_CLIENT_D_RELAY {...{ credentials, matchID }}/>
-      )
-    }
-    {
-      category === 'E' && (
-        <DURER_XVI_CLIENT_E_RELAY {...{ credentials, matchID }}/>
-      )
-    }
-    </>
-  );
+  if (category === undefined) return null;
+  const Client = RELAY_CLIENTS[category];
+  return <Client {...{ credentials, matchID }}/>;
 }
 
 export function StrategyClient({ category, matchID, credentials }: {
-  category?: string, matchID?: string,
+  category?: CompetitionCategory, matchID?: string,
   credentials?: string
 }) {
-
-  return (
-    <>
-    {
-      category === 'C' && (
-        <DURER_XVI_CLIENT_C_STRATEGY {...{ credentials, matchID }}/>
-      )
-    }
-    {
-      category === 'D' && (
-        <DURER_XVI_CLIENT_D_STRATEGY {...{ credentials, matchID }}/>
-      )
-    }
-    {
-      category === 'E' && (
-        <DURER_XVI_CLIENT_E_STRATEGY {...{ credentials, matchID }}/>
-      )
-    }
-    </>
-  );
+  if (category === undefined) return null;
+  const Client = STRATEGY_CLIENTS[category];
+  return <Client {...{ credentials, matchID }}/>;
 }

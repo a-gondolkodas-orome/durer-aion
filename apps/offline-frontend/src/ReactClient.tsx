@@ -2,7 +2,7 @@ import { GameRelay, MyGameWrappers, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
 import { descriptionC, descriptionD, descriptionE, MyBoardWrapper } from "game/client";
 import { RelayStrategy } from "relay-bot";
-import { InProgressRelay } from "common-frontend";
+import { InProgressRelay, type CompetitionCategory } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
 
 const GameC = MyGameWrappers.C();
@@ -18,38 +18,29 @@ export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({ ...Game
 export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), StrategyWrappers.E(), descriptionE);
 
 
+const RELAY_CLIENTS: Record<CompetitionCategory, typeof RelayClientWithBotC> = {
+  C: RelayClientWithBotC,
+  D: RelayClientWithBotD,
+  E: RelayClientWithBotE,
+};
+const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyClientWithBotC> = {
+  C: StrategyClientWithBotC,
+  D: StrategyClientWithBotD,
+  E: StrategyClientWithBotE,
+};
+
 export function RelayClient({ category }: {
-  category?: string,
+  category?: CompetitionCategory,
 }) {
-  return (
-    <>
-      {category === 'C' && (
-        <RelayClientWithBotC />
-      )}
-      {category === 'D' && (
-          <RelayClientWithBotD />
-      )}
-      {category === 'E' && (
-          <RelayClientWithBotE />
-      )}
-    </>
-  );
+  if (category === undefined) return null;
+  const Client = RELAY_CLIENTS[category];
+  return <Client />;
 }
 
 export function StrategyClient({ category }: {
-  category?: string,
+  category?: CompetitionCategory,
 }) {
-  return (
-    <>
-      {category === 'C' && (
-          <StrategyClientWithBotC />
-      )}
-      {category === 'D' && (
-          <StrategyClientWithBotD />
-      )}
-      {category === 'E' && (
-          <StrategyClientWithBotE />
-      )}
-    </>
-  );
+  if (category === undefined) return null;
+  const Client = STRATEGY_CLIENTS[category];
+  return <Client />;
 }

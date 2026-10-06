@@ -113,12 +113,11 @@ describe("checkStaleMatch", () => {
   });
 });
 
-// boardgame.io serves listed matches, metadata and all, from an
-// unauthenticated `GET /games/:name`, and that metadata names the playing
-// team by its GUID — which is what the session cookie carries.
 describe("getNewGame", () => {
   const ctx = {
-    throw: (status: number, message: string) => { throw Object.assign(new Error(message), { status }); },
+    throw: (status: number, message: string, props?: object) => {
+      throw Object.assign(new Error(message), { status, ...props });
+    },
   } as unknown as Server.AppCtx;
   const games = [{ name: strategyNames.D }] as AnyBgioGame[];
   const teams = {} as TeamsRepository;
@@ -130,12 +129,21 @@ describe("getNewGame", () => {
   });
 
   // The import rejects these, so only a row edited in the database gets here.
-  it("refuses a category the competition does not have", async () => {
-    await expect(getNewGame(ctx, teams, games, "RELAY", team({ category: "C+" })))
-      .rejects.toMatchObject({ status: 500, message: "Team has an unknown category: C+" });
+  // `teams` has no methods, so closing the overdue match would fail differently.
+  it("refuses a category the competition does not have before closing anything", async () => {
+    const edited = team({
+      category: "C+",
+      relayMatch: inProgressUntil(new Date(Date.now() - 1000)),
+    });
+
+    await expect(getNewGame(ctx, teams, games, "RELAY", edited))
+      .rejects.toMatchObject({ status: 500, expose: true, message: "Team has an unknown category: C+" });
   });
 });
 
+// boardgame.io serves listed matches, metadata and all, from an
+// unauthenticated `GET /games/:name`, and that metadata names the playing
+// team by its GUID — which is what the session cookie carries.
 describe("createGame", () => {
   it("creates the match unlisted", async () => {
     const game = { name: "test", setup: () => ({}), moves: {} } as unknown as AnyBgioGame;
