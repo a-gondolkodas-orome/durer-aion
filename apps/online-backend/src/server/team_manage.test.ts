@@ -3,8 +3,7 @@ import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
 import { AnyBgioGame, strategyNames } from "game";
 import { Server, StorageAPI } from "boardgame.io";
-import { allowedToStart, checkStaleMatch, closeMatch, createGame, getNewGame } from "./team_manage";
-import { TeamsRepository } from "./db";
+import { allowedToStart, checkStaleMatch, closeMatch, createGame, getNewGame, type MatchStore } from "./team_manage";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -43,7 +42,12 @@ const appCtx = (fields: object = {}): Server.AppCtx =>
 const bgioGame = (fields: object = {}): AnyBgioGame =>
   ({ name: "test", setup: () => ({}), moves: {}, ...fields });
 
-const teamsRepo = (fields: object = {}): TeamsRepository => fields as unknown as TeamsRepository;
+/** A repository that has nothing and accepts every write, unless a test says otherwise. */
+const matchStore = (fields: Partial<MatchStore> = {}): MatchStore => ({
+  getTeam: async () => null,
+  finishMatch: async () => true,
+  ...fields,
+});
 
 // These rules are what stops a team from replaying a round for a better score,
 // or from running the relay and the strategy clock at the same time.
@@ -131,7 +135,7 @@ describe("getNewGame", () => {
   it("finds the game registered for the team's category", async () => {
     const games = [bgioGame({ name: strategyNames.D })];
 
-    const { game } = await getNewGame(appCtx(), teamsRepo(), games, "STRATEGY", team({ category: "D" }));
+    const { game } = await getNewGame(appCtx(), matchStore(), games, "STRATEGY", team({ category: "D" }));
 
     expect(game.name).toBe(strategyNames.D);
   });
@@ -162,7 +166,7 @@ describe("closeMatch", () => {
    * the stored match id no longer matches by the time it runs. */
   const closing = (matchId: string, points: number, strategyMatch: MatchStatus, written = true) => {
     const writes: unknown[][] = [];
-    const teams = teamsRepo({
+    const teams = matchStore({
       getTeam: async () => team({ strategyMatch }),
       finishMatch: async (...args: unknown[]) => { writes.push(args); return written; },
     });

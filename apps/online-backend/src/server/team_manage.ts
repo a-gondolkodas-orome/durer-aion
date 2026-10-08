@@ -175,9 +175,12 @@ function inferenceGameType(gameName: string) {
   throw new Error(`Unregistered gamename: ${gameName} `);
 }
 
+/** What closing a match needs of the repository. */
+export type MatchStore = Pick<TeamsRepository, "getTeam" | "finishMatch">;
+
 export async function closeMatch(
   matchId: string,
-  teams: TeamsRepository,
+  teams: MatchStore,
   db: StorageAPI.Async | StorageAPI.Sync
 ) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
@@ -222,7 +225,7 @@ const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
 
 export async function getNewGame(
   ctx: Server.AppCtx,
-  teams: TeamsRepository,
+  teams: MatchStore,
   games: AnyBgioGame[],
   gameType: GameType,
   team: TeamModel
