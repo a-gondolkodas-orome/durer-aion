@@ -1,3 +1,4 @@
+import type { CompetitionCategory } from 'schemas';
 import { env } from 'process';
 
 export function getBotCredentials() {
@@ -18,4 +19,4 @@ export const relayNames = {
   C: 'relay_c',
   D: 'relay_d',
   E: 'relay_e',
-}
+} satisfies Record<CompetitionCategory, string>;

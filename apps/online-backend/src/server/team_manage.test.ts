@@ -1,10 +1,9 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
-import { AnyBgioGame } from "game";
+import { AnyBgioGame, strategyNames } from "game";
 import { Server, StorageAPI } from "boardgame.io";
-import { allowedToStart, checkStaleMatch, closeMatch, createGame } from "./team_manage";
-import { TeamsRepository } from "./db";
+import { allowedToStart, checkStaleMatch, closeMatch, createGame, getNewGame, type MatchStore } from "./team_manage";
 
 const inProgressUntil = (endAt: Date | string): MatchStatus =>
   ({
@@ -30,6 +29,25 @@ const team = (fields: Partial<TeamModel>): TeamModel =>
     strategyMatch: { state: "NOT STARTED" },
     ...fields,
   }) as TeamModel;
+
+/** The parts of the request context the code under test touches, over a `throw` that fails like Koa's. */
+const appCtx = (fields: object = {}): Server.AppCtx =>
+  ({
+    throw: (status: number, message: string, props?: object) => {
+      throw Object.assign(new Error(message), { status, ...props });
+    },
+    ...fields,
+  }) as unknown as Server.AppCtx;
+
+const bgioGame = (fields: object = {}): AnyBgioGame =>
+  ({ name: "test", setup: () => ({}), moves: {}, ...fields });
+
+/** A repository that has nothing and accepts every write, unless a test says otherwise. */
+const matchStore = (fields: Partial<MatchStore> = {}): MatchStore => ({
+  getTeam: async () => null,
+  finishMatch: async () => true,
+  ...fields,
+});
 
 // These rules are what stops a team from replaying a round for a better score,
 // or from running the relay and the strategy clock at the same time.
@@ -113,19 +131,27 @@ describe("checkStaleMatch", () => {
   });
 });
 
+describe("getNewGame", () => {
+  it("finds the game registered for the team's category", async () => {
+    const games = [bgioGame({ name: strategyNames.D })];
+
+    const { game } = await getNewGame(appCtx(), matchStore(), games, "STRATEGY", team({ category: "D" }));
+
+    expect(game.name).toBe(strategyNames.D);
+  });
+});
+
 // boardgame.io serves listed matches, metadata and all, from an
 // unauthenticated `GET /games/:name`, and that metadata names the playing
 // team by its GUID — which is what the session cookie carries.
 describe("createGame", () => {
   it("creates the match unlisted", async () => {
-    const game = { name: "test", setup: () => ({}), moves: {} } as unknown as AnyBgioGame;
     const created: Server.MatchData[] = [];
-    const ctx = {
+    const ctx = appCtx({
       db: { createMatch: (_id: string, match: { metadata: Server.MatchData }) => created.push(match.metadata) },
-      throw: (_status: number, message: string) => { throw new Error(message); },
-    } as unknown as Server.AppCtx;
+    });
 
-    await createGame(game, ctx);
+    await createGame(bgioGame(), ctx);
 
     expect(created).toHaveLength(1);
     expect(created[0].unlisted).toBe(true);
@@ -140,10 +166,10 @@ describe("closeMatch", () => {
    * the stored match id no longer matches by the time it runs. */
   const closing = (matchId: string, points: number, strategyMatch: MatchStatus, written = true) => {
     const writes: unknown[][] = [];
-    const teams = {
+    const teams = matchStore({
       getTeam: async () => team({ strategyMatch }),
       finishMatch: async (...args: unknown[]) => { writes.push(args); return written; },
-    } as unknown as TeamsRepository;
+    });
     const db = {
       fetch: async () => ({
         state: { G: { points } },
