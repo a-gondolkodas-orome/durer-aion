@@ -15,12 +15,19 @@ declare global {
 
 // Both name the round by its parts rather than by the test's code (`12_D_C+`), so
 // umami can break the events down by year, round type and category separately.
+// The year goes as a string: it is a label to group by, never a quantity, and umami
+// shows a number with four decimals (`12.0000`).
+const relayRound = (code: string) => {
+  const { year, round, category } = parseRelayTestCode(code);
+  return { year: String(year), round, category };
+};
+
 export const trackRelayStarted = (code: string) => {
-  window.umami?.track('relay-started', parseRelayTestCode(code));
+  window.umami?.track('relay-started', relayRound(code));
 };
 
 // Only a round that reached its end — the last problem answered or the time up.
 // Giving up mid-round sends nothing, so started minus finished is the runs abandoned.
 export const trackRelayFinished = (code: string, points: number) => {
-  window.umami?.track('relay-finished', { ...parseRelayTestCode(code), points });
+  window.umami?.track('relay-finished', { ...relayRound(code), points });
 };
