@@ -63,7 +63,7 @@ describe("handleGameReport", () => {
       readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
       handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
 
-      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: 12, round: "final", category: "C+", points: 17 });
+      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: "12", round: "final", category: "C+", points: 17 });
     });
 
     test("is not sent for a step report", () => {
