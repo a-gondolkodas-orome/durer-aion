@@ -15,9 +15,11 @@ export function handleGameReport(report: SendGameDataParams) {
   if (report.phase === "end" && report.component === "relay") {
     const points = report.G?.points ?? 0;
     localStorage.setItem(relayPointsStorageKey(), String(points));
-    const round = readStoredTeamState()?.teamName;
-    if (round !== undefined) {
-      trackRelayFinished(round, points);
+    // The stored state is null only when storage was cleared or corrupted
+    // mid-round; the finish then goes untracked rather than mislabelled.
+    const team = readStoredTeamState();
+    if (team) {
+      trackRelayFinished(team.teamName, points);
     }
     return;
   }

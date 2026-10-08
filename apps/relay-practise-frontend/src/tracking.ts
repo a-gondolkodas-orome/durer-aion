@@ -5,20 +5,22 @@ or before the script has loaded — and the tracker drops the call itself under 
 Not Track.
 */
 
+import { parseRelayTestCode } from './SelectRound';
+
 declare global {
   interface Window {
     umami?: { track: (name: string, data?: Record<string, unknown>) => void };
   }
 }
 
-// `round` is the test's code, e.g. `12_D_C+` (relayTestCode), which this app stores
-// as the team name.
-export const trackRelayStarted = (round: string) => {
-  window.umami?.track('relay-started', { round });
+// Both name the round by its parts rather than by the test's code (`12_D_C+`), so
+// umami can break the events down by year, round type and category separately.
+export const trackRelayStarted = (code: string) => {
+  window.umami?.track('relay-started', parseRelayTestCode(code));
 };
 
 // Only a round that reached its end — the last problem answered or the time up.
 // Giving up mid-round sends nothing, so started minus finished is the runs abandoned.
-export const trackRelayFinished = (round: string, points: number) => {
-  window.umami?.track('relay-finished', { round, points });
+export const trackRelayFinished = (code: string, points: number) => {
+  window.umami?.track('relay-finished', { ...parseRelayTestCode(code), points });
 };

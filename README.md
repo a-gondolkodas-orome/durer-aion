@@ -361,15 +361,7 @@ repository; set it here once there is one.
 
 The home page, `/jatekok/` and `/valto/` report visits to one website on the
 self-hosted [umami](https://umami.durerinfo.hu), told apart by path. Each page
-carries its own copy of the tracker tag, which `umami-tags.test.mjs` keeps
-identical. The tag only sends from `gyakorlo.durerinfo.hu` and honours Do Not
-Track — so a visit from a browser with it on never shows up, by design.
-`/jatekok/` routes with a hash, which umami does not see, so it sends its
-pageviews itself (`use-pageview-tracking.ts`) as `/jatekok/game/<name>`, plus
-events for finished games and illegal moves. `/valto/` adds `relay-started` and
-`relay-finished` events naming the round by its join code (`12_D_C+`), the
-latter with the score; a round given up midway sends no `relay-finished`.
-`/proba-verseny/` is not tracked.
+carries its own copy of the tracker tag.
 
 # Competition secrecy
 

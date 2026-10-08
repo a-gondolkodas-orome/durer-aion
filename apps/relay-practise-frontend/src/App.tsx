@@ -6,6 +6,7 @@ import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
 import { LoginToRelay } from './LoginToRelay';
+import { parseRelayTestCode } from './SelectRound';
 
 
 // Branding, not configuration: every build of this app uses these, so they live
@@ -49,10 +50,9 @@ function App() {
   // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),
   // shown in the header as a translated round name instead of the raw code
   const testTitle = (code: string) => {
-    const [num, round, category] = code.split('_');
-    const roundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
+    const { year, round, category } = parseRelayTestCode(code);
     // t('login.competitionType.local'), t('login.competitionType.final'), t('login.competitionType.online');
-    return t(`login.competitionType.${roundType}`, { num, category });
+    return t(`login.competitionType.${round}`, { num: year, category });
   };
 
   // t('header.titlePlain'), t('header.relayPractise');

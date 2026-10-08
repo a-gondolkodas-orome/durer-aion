@@ -59,18 +59,11 @@ describe("handleGameReport", () => {
       delete window.umami;
     });
 
-    test("names the round and its score", () => {
+    test("names the round by its parts, with the score", () => {
       readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
       handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
 
-      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { round: "12_D_C+", points: 17 });
-    });
-
-    test("is not sent without a stored round to name", () => {
-      readStoredTeamState.mockReturnValue(null);
-      handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
-
-      expect(track).not.toHaveBeenCalled();
+      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: 12, round: "final", category: "C+", points: 17 });
     });
 
     test("is not sent for a step report", () => {
