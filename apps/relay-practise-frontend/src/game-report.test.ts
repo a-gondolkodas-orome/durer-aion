@@ -1,20 +1,22 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // The key helper comes from the package entry, which resolves to a `dist` the
 // CI test job never builds — the same reason sendData.test.ts mocks its way off
 // the workspace packages. A name of its own also pins that the handler reaches
 // for the namespaced key rather than writing a bare one.
-const { bgioStoragePrefix, relayPointsStorageKey, sendGameData, RelayWrapper, Client } = vi.hoisted(() => ({
+const { bgioStoragePrefix, relayPointsStorageKey, sendGameData, readStoredTeamState, RelayWrapper, Client } = vi.hoisted(() => ({
   bgioStoragePrefix: () => "relay-practise/bgio_",
   relayPointsStorageKey: () => "relay-practise/RelayPoints",
   sendGameData: vi.fn(),
+  readStoredTeamState: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
 vi.mock("common-frontend", () => ({ bgioStoragePrefix, relayPointsStorageKey }));
 vi.mock("./sendData", () => ({ sendGameData }));
+vi.mock("./stored-team-state", () => ({ readStoredTeamState }));
 // The wiring test reads the callback the app hands the reducer; building a real
 // boardgame.io client around it is not what is under test here.
 vi.mock("game", () => ({ RelayWrapper }));
@@ -43,6 +45,33 @@ describe("handleGameReport", () => {
     handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
 
     expect(sendGameData).not.toHaveBeenCalled();
+  });
+
+  describe("the umami finish event", () => {
+    let track: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      track = vi.fn();
+      window.umami = { track: track as NonNullable<Window["umami"]>["track"] };
+    });
+
+    afterEach(() => {
+      delete window.umami;
+    });
+
+    test("names the round by its parts, with the score", () => {
+      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
+
+      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: 12, round: "final", category: "C+", points: 17 });
+    });
+
+    test("is not sent for a step report", () => {
+      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      handleGameReport({ component: "relay", phase: "step", answer: 42, G: { currentProblem: 2 } });
+
+      expect(track).not.toHaveBeenCalled();
+    });
   });
 
   test("forwards a step report and stores nothing", () => {

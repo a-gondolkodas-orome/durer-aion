@@ -357,6 +357,12 @@ Issuing a DSN that works is a change on the Sentry server rather than in this
 repository; set it here once there is one.
 </details>
 
+## Usage tracking
+
+The home page, `/jatekok/` and `/valto/` report visits to one website on the
+self-hosted [umami](https://umami.durerinfo.hu), told apart by path. Each page
+carries its own copy of the tracker tag.
+
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
