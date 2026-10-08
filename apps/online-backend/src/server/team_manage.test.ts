@@ -31,6 +31,20 @@ const team = (fields: Partial<TeamModel>): TeamModel =>
     ...fields,
   }) as TeamModel;
 
+/** The parts of the request context the code under test touches, over a `throw` that fails like Koa's. */
+const appCtx = (fields: object = {}): Server.AppCtx =>
+  ({
+    throw: (status: number, message: string, props?: object) => {
+      throw Object.assign(new Error(message), { status, ...props });
+    },
+    ...fields,
+  }) as unknown as Server.AppCtx;
+
+const bgioGame = (fields: object = {}): AnyBgioGame =>
+  ({ name: "test", setup: () => ({}), moves: {}, ...fields });
+
+const teamsRepo = (fields: object = {}): TeamsRepository => fields as unknown as TeamsRepository;
+
 // These rules are what stops a team from replaying a round for a better score,
 // or from running the relay and the strategy clock at the same time.
 describe("allowedToStart", () => {
@@ -114,16 +128,10 @@ describe("checkStaleMatch", () => {
 });
 
 describe("getNewGame", () => {
-  const ctx = {
-    throw: (status: number, message: string, props?: object) => {
-      throw Object.assign(new Error(message), { status, ...props });
-    },
-  } as unknown as Server.AppCtx;
-  const games = [{ name: strategyNames.D }] as AnyBgioGame[];
-  const teams = {} as TeamsRepository;
-
   it("finds the game registered for the team's category", async () => {
-    const { game } = await getNewGame(ctx, teams, games, "STRATEGY", team({ category: "D" }));
+    const games = [bgioGame({ name: strategyNames.D })];
+
+    const { game } = await getNewGame(appCtx(), teamsRepo(), games, "STRATEGY", team({ category: "D" }));
 
     expect(game.name).toBe(strategyNames.D);
   });
@@ -134,14 +142,12 @@ describe("getNewGame", () => {
 // team by its GUID — which is what the session cookie carries.
 describe("createGame", () => {
   it("creates the match unlisted", async () => {
-    const game = { name: "test", setup: () => ({}), moves: {} } as unknown as AnyBgioGame;
     const created: Server.MatchData[] = [];
-    const ctx = {
+    const ctx = appCtx({
       db: { createMatch: (_id: string, match: { metadata: Server.MatchData }) => created.push(match.metadata) },
-      throw: (_status: number, message: string) => { throw new Error(message); },
-    } as unknown as Server.AppCtx;
+    });
 
-    await createGame(game, ctx);
+    await createGame(bgioGame(), ctx);
 
     expect(created).toHaveLength(1);
     expect(created[0].unlisted).toBe(true);
@@ -156,10 +162,10 @@ describe("closeMatch", () => {
    * the stored match id no longer matches by the time it runs. */
   const closing = (matchId: string, points: number, strategyMatch: MatchStatus, written = true) => {
     const writes: unknown[][] = [];
-    const teams = {
+    const teams = teamsRepo({
       getTeam: async () => team({ strategyMatch }),
       finishMatch: async (...args: unknown[]) => { writes.push(args); return written; },
-    } as unknown as TeamsRepository;
+    });
     const db = {
       fetch: async () => ({
         state: { G: { points } },
