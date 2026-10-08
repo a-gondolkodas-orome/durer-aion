@@ -2,6 +2,7 @@ import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModel
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
+import { trackRelayStarted } from "./tracking";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -24,6 +25,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     sendGameData({ component: "relay", phase: "start" });
+    trackRelayStarted(teamState.teamName);
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
