@@ -12,7 +12,7 @@ it('lists C+ years under E, keeping their real category', () => {
 });
 
 it('parses a test code back into its parts', () => {
-  expect(parseRelayTestCode(relayTestCode(11, 'final', Category.Cp))).toEqual({ year: 12, round: 'final', category: 'C+' });
-  expect(parseRelayTestCode(relayTestCode(18, 'online', Category.E))).toEqual({ year: 19, round: 'online', category: 'E' });
-  expect(parseRelayTestCode(relayTestCode(8, 'local', Category.A))).toEqual({ year: 9, round: 'local', category: 'A' });
+  expect(parseRelayTestCode(relayTestCode(11, 'final', Category.Cp))).toEqual({ year: '12', round: 'final', category: 'C+' });
+  expect(parseRelayTestCode(relayTestCode(18, 'online', Category.E))).toEqual({ year: '19', round: 'online', category: 'E' });
+  expect(parseRelayTestCode(relayTestCode(8, 'local', Category.A))).toEqual({ year: '9', round: 'local', category: 'A' });
 });

@@ -36,10 +36,12 @@ export const relayTestCode = (yearIdx: number, round: RoundType, category: Categ
   `${yearIdx + 1}_${round === 'final' ? 'D' : (round === 'online' ? 'O' : 'H')}_${category}`;
 
 // The inverse of relayTestCode; `year` is the competition's number, i.e. yearIdx + 1.
+// It stays a string: a label to group by, never a quantity, which is also how umami
+// should read it in the events that carry it.
 export const parseRelayTestCode = (code: string) => {
   const [year, round, category] = code.split('_');
   const roundType: RoundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
-  return { year: Number(year), round: roundType, category };
+  return { year, round: roundType, category };
 };
 
 export const availableRelayTests: TestListElement[] = [
