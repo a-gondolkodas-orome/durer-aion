@@ -30,17 +30,17 @@ const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyOnlineClient_
 };
 
 export function RelayClient({ category, matchID, credentials }: {
-  category: string, matchID?: string,
+  category: CompetitionCategory, matchID?: string,
   credentials?: string
 }) {
-  const Client = RELAY_CLIENTS[category as CompetitionCategory];
+  const Client = RELAY_CLIENTS[category];
   return <Client {...{ credentials, matchID }}/>;
 }
 
 export function StrategyClient({ category, matchID, credentials }: {
-  category: string, matchID?: string,
+  category: CompetitionCategory, matchID?: string,
   credentials?: string
 }) {
-  const Client = STRATEGY_CLIENTS[category as CompetitionCategory];
+  const Client = STRATEGY_CLIENTS[category];
   return <Client {...{ credentials, matchID }}/>;
 }

@@ -31,15 +31,15 @@ const STRATEGY_CLIENTS: Record<CompetitionCategory, typeof StrategyClientWithBot
 };
 
 export function RelayClient({ category }: {
-  category: string,
+  category: CompetitionCategory,
 }) {
-  const Client = RELAY_CLIENTS[category as CompetitionCategory];
+  const Client = RELAY_CLIENTS[category];
   return <Client />;
 }
 
 export function StrategyClient({ category }: {
-  category: string,
+  category: CompetitionCategory,
 }) {
-  const Client = STRATEGY_CLIENTS[category as CompetitionCategory];
+  const Client = STRATEGY_CLIENTS[category];
   return <Client />;
 }

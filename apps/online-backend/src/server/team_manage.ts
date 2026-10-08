@@ -215,8 +215,6 @@ export async function closeMatch(
     console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
 
-// `strategyNames` is checked against the categories here rather than where it
-// is defined so that the game package need not depend on schemas.
 const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
   RELAY: relayNames,
   STRATEGY: strategyNames,
