@@ -3,6 +3,7 @@ import { ClientRelayWithBot, ClientWithBot } from "./myclient";
 import { GameStateMixin, GameType } from "game";
 import type { GameRelay, MyGameState as RelayGameState } from "game";
 import type { RelayBoard, StrategyBoard } from "common-frontend";
+import type { RelayMoveArgs } from "relay-bot";
 import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
 
@@ -27,7 +28,7 @@ T_SpecificGameState
 export const ClientFactoryRelay = function (
   game: typeof GameRelay,
   board: RelayBoard,
-  strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
+  strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   description: ReactNode,
   ) {
   const ClientWithBotComponent = ClientRelayWithBot(game, board, strategy, description);

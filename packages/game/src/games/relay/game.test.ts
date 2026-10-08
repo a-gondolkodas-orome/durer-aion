@@ -11,9 +11,19 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
 
     expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
+  });
+
+  test("firstProblem keeps every problem's max points for the end tables", () => {
+    const client = Client({ game: GameRelay, numPlayers: 2 });
+    client.start();
+
+    client.moves.startGame();
+    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
+
+    expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
   });
 
   test("a first-try correct answer scores the problem's own points", () => {
@@ -21,7 +31,7 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
     client.moves.submitAnswer(120);
     client.moves.newProblem("second problem text", 3, true, "");
 
@@ -47,7 +57,7 @@ describe("RelayWrapper end report", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
     client.moves.submitAnswer(120);
     client.moves.endGame(true);
 

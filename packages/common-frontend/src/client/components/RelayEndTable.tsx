@@ -4,13 +4,25 @@ import { Fragment } from 'react';
 import { useLogout, useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import type { MyGameState } from 'game';
 
 const pointColours: string[] = ['#3fc523', '#9beb53', '#d5eb42', '#ee5555'];
 
-const pointCellStyle = (data: { max: number, got: number | null }) =>
-  data.got === null
+interface TaskPoints { max: number | null, got: number | null }
+
+const pointCellStyle = (data: TaskPoints) =>
+  data.got === null || data.max === null
     ? { backgroundColor: '#fff' }
     : { backgroundColor: pointColours[Math.min(data.max - data.got, 3)] };
+
+/**
+ * A match's points per problem, the ones not reached yet included. A match
+ * saved before the judge sent maxPointsList lists only the problems answered,
+ * with their max unknown.
+ */
+export const relayTaskPoints = (G: Pick<MyGameState, 'maxPointsList' | 'previousPoints'>): TaskPoints[] =>
+  (G.maxPointsList?.length ? G.maxPointsList : G.previousPoints.map(() => null))
+    .map((max, idx) => ({ max, got: G.previousPoints[idx] ?? null }));
 
 // The table fits 10 tasks in a row, longer task lists continue in new rows
 const chunkTasks = <T,>(tasks: T[]): T[][] => {
@@ -27,7 +39,7 @@ const chunkTasks = <T,>(tasks: T[]): T[][] => {
  * (by logging out) instead of reloading into the competition home page
  * @returns End screen
  */
-export function RelayEndTable(props: { allPoints: number, task: { max: number, got: number | null }[], selectRound?: boolean }) {
+export function RelayEndTable(props: { allPoints: number, task: TaskPoints[], selectRound?: boolean }) {
   const theme = useTheme();
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
@@ -159,7 +171,7 @@ export function RelayEndTable(props: { allPoints: number, task: { max: number, g
   )
 }
 
-export function RelayEndTableData(props: { allPoints: number, task: { max: number, got: number | null, answers: number[] }[] }) {
+export function RelayEndTableData(props: { allPoints: number, task: (TaskPoints & { answers: number[] })[] }) {
   const theme = useTheme();
   const { t } = useTranslation();
   return (

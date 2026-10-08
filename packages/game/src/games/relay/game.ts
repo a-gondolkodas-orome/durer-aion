@@ -16,6 +16,9 @@ export interface MyGameState {
   previousAnswers: Answer[][];
   previousPoints: number[];
   currentProblemMaxPoints: number;
+  // Every problem's max points, in order, so the end tables can show problems
+  // not reached yet. Absent from a match saved before the judge sent it.
+  maxPointsList?: number[];
   numberOfTry: number;
   millisecondsRemaining: number;
   start: string;
@@ -51,13 +54,16 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
     setup: () => {
       return {
         currentProblem: 0,
-        problemText: "", // TODO: get from the problem list
+        // The judge's firstProblem move fills in the problem fields: the game
+        // does not hold the problem bank, which the live client must not ship.
+        problemText: "",
         answer: null,
         points: 0,
         correctnessPreviousAnswer: null,
         previousAnswers: [[]],
         previousPoints: [],
-        currentProblemMaxPoints: 3, // placeholder; the judge's firstProblem move sets the problem list's value. TODO: rename to currentProblemAvailablePoints
+        currentProblemMaxPoints: 3, // placeholder. TODO: rename to currentProblemAvailablePoints
+        maxPointsList: [],
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
         start: new Date().toISOString(),
@@ -75,7 +81,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
             events.endTurn();
           },
-          firstProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string) {
+          firstProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string, maxPointsList: number[]) {
             if (playerID !== JUDGE_PLAYER) {
               // He is not the bot OR G.answer is null (and it is not the first question)
               return INVALID_MOVE;
@@ -83,6 +89,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.url = url;
             G.problemText = problemText;
             G.currentProblemMaxPoints = nextProblemMaxPoints;
+            G.maxPointsList = maxPointsList;
             G.numberOfTry = 1;
             events.endTurn();
           },
