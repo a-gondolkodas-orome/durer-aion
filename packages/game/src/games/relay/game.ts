@@ -116,7 +116,10 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
               // A clock poll is a move of the guesser too, but only an answer
-              // leaves G.answer set until the judge's reply clears it.
+              // leaves G.answer set until the judge's reply clears it. The report
+              // is sent here, not from submitAnswer, because under `Local` a
+              // move's body runs on the client and the master, a turn hook only
+              // on the master.
               if (G.answer !== null) {
                 sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
               }

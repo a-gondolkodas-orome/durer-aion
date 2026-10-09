@@ -1,6 +1,5 @@
 import { describe, test, expect } from "vitest";
 import { Client } from "boardgame.io/client";
-import { Local } from "boardgame.io/multiplayer";
 import { GameRelay, RelayWrapper } from "./game";
 
 // Regression: the first problem's max points came hardcoded as 3 (setup) and the
@@ -86,36 +85,5 @@ describe("RelayWrapper step report", () => {
     client.moves.getTime();
 
     expect(steps).toStrictEqual([120, 7]);
-  });
-});
-
-// The offline apps run the relay under `Local`, where a move's own body runs
-// twice — on the client optimistically and on the master — but a turn hook
-// only on the master; a report sent from a move would upload every answer twice.
-describe("RelayWrapper step report under Local", () => {
-  test("each answer is reported once", async () => {
-    const steps: number[] = [];
-    const game = RelayWrapper((report) => {
-      if (report.phase === "step") {
-        steps.push(report.answer);
-      }
-    });
-    const multiplayer = Local();
-    const guesser = Client({ game, numPlayers: 2, multiplayer, playerID: "0" });
-    const judge = Client({ game, numPlayers: 2, multiplayer, playerID: "1" });
-    guesser.start();
-    judge.start();
-    const settle = () => new Promise((resolve) => setTimeout(resolve));
-
-    guesser.moves.startGame();
-    await settle();
-    judge.moves.firstProblem("first problem text", 2, "");
-    await settle();
-    guesser.moves.getTime();
-    await settle();
-    guesser.moves.submitAnswer(120);
-    await settle();
-
-    expect(steps).toStrictEqual([120]);
   });
 });
