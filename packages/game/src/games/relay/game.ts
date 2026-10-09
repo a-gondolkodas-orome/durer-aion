@@ -34,7 +34,7 @@ const lengthOfCompetition = 60 * 60; // seconds
 export interface RelayStepReport {
   component: "relay";
   phase: "step";
-  answer: number | null;
+  answer: number;
   G: MyGameState;
   ctx: Ctx;
 }
@@ -122,7 +122,12 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
           onMove: ({ G, ctx, playerID, events }) => {
             if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
-              sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
+              // Only submitAnswer leaves G.answer set; a clock poll doesn't. Reported
+              // here, not in the move, because under `Local` a move runs on the
+              // client and the master, a turn hook only on the master.
+              if (G.answer !== null) {
+                sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
+              }
               if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();

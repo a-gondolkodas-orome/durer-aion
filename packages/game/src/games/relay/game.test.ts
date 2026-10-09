@@ -66,3 +66,30 @@ describe("RelayWrapper end report", () => {
     expect(endReports).toStrictEqual([{ phase: "end", points: 2 }]);
   });
 });
+
+// Regression: every clock poll of the countdown sent a step report too.
+describe("RelayWrapper step report", () => {
+  test("only a submitted answer is reported, not a clock poll", () => {
+    const steps: number[] = [];
+    const client = Client({
+      game: RelayWrapper((report) => {
+        if (report.phase === "step") {
+          steps.push(report.answer);
+        }
+      }),
+      numPlayers: 2,
+    });
+    client.start();
+    client.moves.startGame();
+    client.moves.firstProblem("first problem text", 2, "");
+
+    client.moves.getTime();
+    client.moves.submitAnswer(120);
+    client.moves.nextTry(1);
+    client.moves.submitAnswer(7);
+    client.moves.newProblem("second problem text", 3, true, "");
+    client.moves.getTime();
+
+    expect(steps).toStrictEqual([120, 7]);
+  });
+});
