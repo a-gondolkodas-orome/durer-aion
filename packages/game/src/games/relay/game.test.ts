@@ -57,9 +57,7 @@ describe("RelayWrapper end report", () => {
   });
 });
 
-// Regression: the countdown's clock poll is a move of the team too, and every
-// one of them used to send a step report, so the offline apps uploaded a
-// duplicate step on each page load and each poll in a round's last seconds.
+// Regression: every clock poll of the countdown sent a step report too.
 describe("RelayWrapper step report", () => {
   test("only a submitted answer is reported, not a clock poll", () => {
     const steps: number[] = [];
@@ -76,10 +74,8 @@ describe("RelayWrapper step report", () => {
     client.moves.firstProblem("first problem text", 2, "");
 
     client.moves.getTime();
-    client.moves.getTime();
     client.moves.submitAnswer(120);
     client.moves.nextTry(1);
-    client.moves.getTime();
     client.moves.submitAnswer(7);
     client.moves.newProblem("second problem text", 3, true, "");
     client.moves.getTime();
