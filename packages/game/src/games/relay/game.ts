@@ -31,7 +31,7 @@ const lengthOfCompetition = 60 * 60; // seconds
 export interface RelayStepReport {
   component: "relay";
   phase: "step";
-  answer: number | null;
+  answer: number;
   G: MyGameState;
   ctx: Ctx;
 }
@@ -44,6 +44,11 @@ export interface RelayEndReport {
 }
 
 export type RelayReport = RelayStepReport | RelayEndReport;
+
+// An answer this late is refused: the guesser's onMove ends the game instead.
+function isOverdue(G: MyGameState) {
+  return Date.now() - new Date(G.end).getTime() > 1000 * 10;
+}
 
 export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
@@ -90,12 +95,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         turn: {
           order: TurnOrder.ONCE,
           onMove: ({ G, _ctx, playerID, events }) => {
-            if (playerID === GUESSER_PLAYER) {
-              const currentTime = new Date();
-              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
-                // Do not accept any answer if the time is over since more than 10 seconds
-                events.endGame();
-              }
+            if (playerID === GUESSER_PLAYER && isOverdue(G)) {
+              events.endGame();
             }
           }
         },
@@ -112,18 +113,9 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
               return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
             }
           },
-          onMove: ({ G, ctx, playerID, events }) => {
-            if (playerID === GUESSER_PLAYER) {
-              const currentTime = new Date();
-              // The clock poll is a move of the team as well; only submitAnswer
-              // leaves an answer set, and the judge's reply clears it.
-              if (G.answer !== null) {
-                sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
-              }
-              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
-                // Do not accept any answer if the time is over since more than 10 seconds
-                events.endGame();
-              }
+          onMove: ({ G, _ctx, playerID, events }) => {
+            if (playerID === GUESSER_PLAYER && isOverdue(G)) {
+              events.endGame();
             }
           },
           onEnd: ({ G, ctx, _playerID, events }) => {
@@ -172,11 +164,14 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.currentProblemMaxPoints = maxPoints;
             events.endTurn();
           },
-          submitAnswer({ G, _ctx, playerID, events }, answer: number) {
+          submitAnswer({ G, ctx, playerID, events }, answer: number) {
             if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
               return INVALID_MOVE;
             }
             G.answer = answer;
+            if (!isOverdue(G)) {
+              sendRelayFunction({ component: "relay", phase: "step", answer, G, ctx });
+            }
             events.endTurn();
           },
           endGame({ G, _ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
