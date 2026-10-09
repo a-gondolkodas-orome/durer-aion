@@ -8,21 +8,24 @@ import type { MyGameState } from 'game';
 
 const pointColours: string[] = ['#3fc523', '#9beb53', '#d5eb42', '#ee5555'];
 
-interface TaskPoints { max: number | null, got: number | null }
+interface TaskPoints { max: number, got: number | null }
 
 const pointCellStyle = (data: TaskPoints) =>
-  data.got === null || data.max === null
+  data.got === null
     ? { backgroundColor: '#fff' }
     : { backgroundColor: pointColours[Math.min(data.max - data.got, 3)] };
 
 /**
- * A match's points per problem, the ones not reached yet included. A match
- * saved before the judge sent maxPointsList lists only the problems answered,
- * with their max unknown.
+ * The competition relay's max points, for a match saved before the judge sent
+ * maxPointsList. Those matches are finished, so the list never needs to change.
+ * A relay practice match saved then played a set of its own, which this list
+ * misreports.
  */
+const LEGACY_MAX_POINTS = [3, 3, 4, 4, 4, 5, 5, 6, 6];
+
+/** A match's points per problem, the ones not reached yet included. */
 export const relayTaskPoints = (G: Pick<MyGameState, 'maxPointsList' | 'previousPoints'>): TaskPoints[] =>
-  (G.maxPointsList ?? G.previousPoints.map(() => null))
-    .map((max, idx) => ({ max, got: G.previousPoints[idx] ?? null }));
+  (G.maxPointsList ?? LEGACY_MAX_POINTS).map((max, idx) => ({ max, got: G.previousPoints[idx] ?? null }));
 
 // The table fits 10 tasks in a row, longer task lists continue in new rows
 const chunkTasks = <T,>(tasks: T[]): T[][] => {

@@ -10,10 +10,7 @@ describe("relayTaskPoints", () => {
     ]);
   });
 
-  test("a match saved without the list shows the answered problems, max unknown", () => {
-    expect(relayTaskPoints({ previousPoints: [3, 1] })).toStrictEqual([
-      { max: null, got: 3 },
-      { max: null, got: 1 },
-    ]);
+  test("a match saved without the list falls back to the competition relay's points", () => {
+    expect(relayTaskPoints({ previousPoints: [3, 1] }).map(task => task.max)).toStrictEqual([3, 3, 4, 4, 4, 5, 5, 6, 6]);
   });
 });

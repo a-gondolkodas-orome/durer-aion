@@ -172,15 +172,13 @@ const problems : RelayProblems = {
   ],
 }
 
-// The args of the judge's moves: problem text, points, URL, correctness, and
-// for firstProblem every problem's points.
 export type RelayMoveArgs = (number | string | boolean | number[])[];
 
 export function relayStrategy(problemList: Problem[]) {
   return (state: State<MyGameState>, _botID: string): [RelayMoveArgs, string] => {
     if (state.G.numberOfTry === 0) {
       const firstProblem = problemList[state.G.currentProblem];
-      return [[firstProblem.problemText, firstProblem.url ?? "", problemList.map(p => p.points)], "firstProblem"];
+      return [[firstProblem.problemText, problemList.map(p => p.points), firstProblem.url ?? ""], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if (state.G.answer === problemList[state.G.currentProblem].answer) {

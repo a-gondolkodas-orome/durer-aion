@@ -80,7 +80,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
             events.endTurn();
           },
-          firstProblem({ G, _ctx, playerID, events }, problemText: string, url: string, maxPointsList: number[]) {
+          firstProblem({ G, _ctx, playerID, events }, problemText: string, maxPointsList: number[], url: string) {
             if (playerID !== JUDGE_PLAYER) {
               // He is not the bot OR G.answer is null (and it is not the first question)
               return INVALID_MOVE;

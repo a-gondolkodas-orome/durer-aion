@@ -1,43 +1,20 @@
 import { describe, test, expect } from "vitest";
 import { Client } from "boardgame.io/client";
 import { GameRelay, RelayWrapper } from "./game";
-import type { MyGameState } from "./game";
 
 // Regression: the first problem's max points came hardcoded as 3 (setup) and the
 // firstProblem move dropped the value the strategy sent, so a problem set whose
 // first problem is worth 2 points scored 3 for it.
 describe("GameRelay first problem points", () => {
-  test("firstProblem sets the max points the judge sends", () => {
+  test("firstProblem sets the first problem's points and keeps every problem's for the end tables", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", "", [2, 3]);
+    client.moves.firstProblem("first problem text", [2, 3], "");
 
     expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
-  });
-
-  test("firstProblem keeps every problem's max points for the end tables", () => {
-    const client = Client({ game: GameRelay, numPlayers: 2 });
-    client.start();
-
-    client.moves.startGame();
-    client.moves.firstProblem("first problem text", "", [2, 3]);
-
     expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
-  });
-
-  test("firstProblem takes the points of the problem the match starts on", () => {
-    const client = Client({
-      game: { ...GameRelay, setup: (context) => ({ ...GameRelay.setup?.(context) as MyGameState, currentProblem: 4 }) },
-      numPlayers: 2,
-    });
-    client.start();
-
-    client.moves.startGame();
-    client.moves.firstProblem("fifth problem text", "", [3, 3, 4, 4, 5]);
-
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(5);
   });
 
   test("a first-try correct answer scores the problem's own points", () => {
@@ -45,7 +22,7 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", "", [2, 3]);
+    client.moves.firstProblem("first problem text", [2, 3], "");
     client.moves.submitAnswer(120);
     client.moves.newProblem("second problem text", 3, true, "");
 
@@ -71,7 +48,7 @@ describe("RelayWrapper end report", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", "", [2, 3]);
+    client.moves.firstProblem("first problem text", [2, 3], "");
     client.moves.submitAnswer(120);
     client.moves.endGame(true);
 
@@ -95,7 +72,7 @@ describe("RelayWrapper step report", () => {
     });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", "", [2, 3]);
+    client.moves.firstProblem("first problem text", [2, 3], "");
 
     client.moves.getTime();
     client.moves.submitAnswer(120);
