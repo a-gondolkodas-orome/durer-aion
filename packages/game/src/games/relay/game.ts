@@ -112,9 +112,14 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
               return Number(otherPlayer(ctx.currentPlayer as PlayerIDType));
             }
           },
-          onMove: ({ G, _ctx, playerID, events }) => {
+          onMove: ({ G, ctx, playerID, events }) => {
             if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
+              // A clock poll is a move of the guesser too, but only an answer
+              // leaves G.answer set until the judge's reply clears it.
+              if (G.answer !== null) {
+                sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
+              }
               if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();
@@ -167,12 +172,11 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.currentProblemMaxPoints = maxPoints;
             events.endTurn();
           },
-          submitAnswer({ G, ctx, playerID, events }, answer: number) {
+          submitAnswer({ G, _ctx, playerID, events }, answer: number) {
             if (playerID !== GUESSER_PLAYER || !Number.isInteger(answer) || answer < 0 || answer > 9999) {
               return INVALID_MOVE;
             }
             G.answer = answer;
-            sendRelayFunction({ component: "relay", phase: "step", answer, G, ctx });
             events.endTurn();
           },
           endGame({ G, _ctx, playerID, events }, correctnessPreviousAnswer: boolean) {
