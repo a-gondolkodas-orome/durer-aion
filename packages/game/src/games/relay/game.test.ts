@@ -81,7 +81,7 @@ describe("RelayWrapper step report", () => {
     });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
 
     client.moves.getTime();
     client.moves.submitAnswer(120);
