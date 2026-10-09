@@ -115,7 +115,11 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
           onMove: ({ G, ctx, playerID, events }) => {
             if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
-              sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
+              // The clock poll is a move of the team as well; only submitAnswer
+              // leaves an answer set, and the judge's reply clears it.
+              if (G.answer !== null) {
+                sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
+              }
               if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();

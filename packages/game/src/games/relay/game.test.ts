@@ -56,3 +56,29 @@ describe("RelayWrapper end report", () => {
     expect(endReports).toStrictEqual([{ phase: "end", points: 2 }]);
   });
 });
+
+// Regression: the countdown's clock poll is a move of the team too, and every
+// one of them used to send a step report, so the offline apps uploaded a
+// duplicate step on each page load and each poll in a round's last seconds.
+describe("RelayWrapper step report", () => {
+  test("only a submitted answer is reported, not a clock poll", () => {
+    const steps: (number | null)[] = [];
+    const client = Client({
+      game: RelayWrapper((report) => {
+        if (report.phase === "step") {
+          steps.push(report.answer);
+        }
+      }),
+      numPlayers: 2,
+    });
+    client.start();
+
+    client.moves.startGame();
+    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.getTime();
+    client.moves.getTime();
+    client.moves.submitAnswer(120);
+
+    expect(steps).toStrictEqual([120]);
+  });
+});
