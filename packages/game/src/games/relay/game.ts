@@ -87,7 +87,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
             G.url = url;
             G.problemText = problemText;
-            G.currentProblemMaxPoints = maxPointsList[0];
+            G.currentProblemMaxPoints = maxPointsList[G.currentProblem];
             G.maxPointsList = maxPointsList;
             G.numberOfTry = 1;
             events.endTurn();

@@ -1,6 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { Client } from "boardgame.io/client";
 import { GameRelay, RelayWrapper } from "./game";
+import type { MyGameState } from "./game";
 
 // Regression: the first problem's max points came hardcoded as 3 (setup) and the
 // firstProblem move dropped the value the strategy sent, so a problem set whose
@@ -24,6 +25,19 @@ describe("GameRelay first problem points", () => {
     client.moves.firstProblem("first problem text", "", [2, 3]);
 
     expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
+  });
+
+  test("firstProblem takes the points of the problem the match starts on", () => {
+    const client = Client({
+      game: { ...GameRelay, setup: (context) => ({ ...GameRelay.setup?.(context) as MyGameState, currentProblem: 4 }) },
+      numPlayers: 2,
+    });
+    client.start();
+
+    client.moves.startGame();
+    client.moves.firstProblem("fifth problem text", "", [3, 3, 4, 4, 5]);
+
+    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(5);
   });
 
   test("a first-try correct answer scores the problem's own points", () => {
