@@ -45,11 +45,6 @@ export interface RelayEndReport {
 
 export type RelayReport = RelayStepReport | RelayEndReport;
 
-// An answer this late is refused: the guesser's onMove ends the game instead.
-function isOverdue(G: MyGameState) {
-  return Date.now() - new Date(G.end).getTime() > 1000 * 10;
-}
-
 export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void = () => undefined): Game<MyGameState> {
   const GameRelay: Game<MyGameState> = {
     name: "relay",
@@ -95,8 +90,12 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         turn: {
           order: TurnOrder.ONCE,
           onMove: ({ G, _ctx, playerID, events }) => {
-            if (playerID === GUESSER_PLAYER && isOverdue(G)) {
-              events.endGame();
+            if (playerID === GUESSER_PLAYER) {
+              const currentTime = new Date();
+              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
+                // Do not accept any answer if the time is over since more than 10 seconds
+                events.endGame();
+              }
             }
           }
         },
@@ -114,8 +113,12 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
           },
           onMove: ({ G, _ctx, playerID, events }) => {
-            if (playerID === GUESSER_PLAYER && isOverdue(G)) {
-              events.endGame();
+            if (playerID === GUESSER_PLAYER) {
+              const currentTime = new Date();
+              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
+                // Do not accept any answer if the time is over since more than 10 seconds
+                events.endGame();
+              }
             }
           },
           onEnd: ({ G, ctx, _playerID, events }) => {
@@ -169,9 +172,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
               return INVALID_MOVE;
             }
             G.answer = answer;
-            if (!isOverdue(G)) {
-              sendRelayFunction({ component: "relay", phase: "step", answer, G, ctx });
-            }
+            sendRelayFunction({ component: "relay", phase: "step", answer, G, ctx });
             events.endTurn();
           },
           endGame({ G, _ctx, playerID, events }, correctnessPreviousAnswer: boolean) {

@@ -1,4 +1,4 @@
-import { afterEach, describe, test, expect, vi } from "vitest";
+import { describe, test, expect } from "vitest";
 import { Client } from "boardgame.io/client";
 import { GameRelay, RelayWrapper } from "./game";
 
@@ -60,13 +60,9 @@ describe("RelayWrapper end report", () => {
 // Regression: the countdown's clock poll is a move of the team too, and every
 // one of them used to send a step report, so the offline apps uploaded a
 // duplicate step on each page load and each poll in a round's last seconds.
-// An answer refused for being late was reported too, as if it had been judged.
 describe("RelayWrapper step report", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  function startedClient(steps: number[]) {
+  test("only a submitted answer is reported, not a clock poll", () => {
+    const steps: number[] = [];
     const client = Client({
       game: RelayWrapper((report) => {
         if (report.phase === "step") {
@@ -78,12 +74,6 @@ describe("RelayWrapper step report", () => {
     client.start();
     client.moves.startGame();
     client.moves.firstProblem("first problem text", 2, "");
-    return client;
-  }
-
-  test("only a submitted answer is reported, not a clock poll", () => {
-    const steps: number[] = [];
-    const client = startedClient(steps);
 
     client.moves.getTime();
     client.moves.getTime();
@@ -95,17 +85,5 @@ describe("RelayWrapper step report", () => {
     client.moves.getTime();
 
     expect(steps).toStrictEqual([120, 7]);
-  });
-
-  test("an answer refused for being late is not reported", () => {
-    vi.useFakeTimers({ toFake: ["Date"] });
-    const steps: number[] = [];
-    const client = startedClient(steps);
-
-    vi.setSystemTime(Date.now() + 1000 * (60 * 60 + 15));
-    client.moves.submitAnswer(120);
-
-    expect(client.getState()?.ctx.gameover).toBeDefined();
-    expect(steps).toStrictEqual([]);
   });
 });
