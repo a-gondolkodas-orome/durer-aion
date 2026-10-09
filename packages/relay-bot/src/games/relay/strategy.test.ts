@@ -22,7 +22,7 @@ describe("relayStrategy", () => {
     );
 
     expect(move).toStrictEqual("firstProblem");
-    expect(args).toStrictEqual(["first", 2, "", [2, 3]]);
+    expect(args).toStrictEqual(["first", "", [2, 3]]);
   });
 
   test("advancing carries the next problem's points", () => {
@@ -125,7 +125,7 @@ describe("relay answers", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first", 2, "", [2, 3]);
+    client.moves.firstProblem("first", "", [2, 3]);
     return client;
   };
 

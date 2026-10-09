@@ -180,7 +180,7 @@ export function relayStrategy(problemList: Problem[]) {
   return (state: State<MyGameState>, _botID: string): [RelayMoveArgs, string] => {
     if (state.G.numberOfTry === 0) {
       const firstProblem = problemList[state.G.currentProblem];
-      return [[firstProblem.problemText, firstProblem.points, firstProblem.url ?? "", problemList.map(p => p.points)], "firstProblem"];
+      return [[firstProblem.problemText, firstProblem.url ?? "", problemList.map(p => p.points)], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if (state.G.answer === problemList[state.G.currentProblem].answer) {

@@ -38,8 +38,6 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
 export function ClientRelayWithBot(
   game: typeof GameRelay,
   board: RelayBoard,
-  // The relay bot answers with the next problem's text, points and image URL,
-  // so its move args are that mixed tuple rather than a position.
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   _description: ReactNode) {
   return Client({

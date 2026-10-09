@@ -11,7 +11,7 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
+    client.moves.firstProblem("first problem text", "", [2, 3]);
 
     expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
   });
@@ -21,7 +21,7 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
+    client.moves.firstProblem("first problem text", "", [2, 3]);
 
     expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
   });
@@ -31,7 +31,7 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
+    client.moves.firstProblem("first problem text", "", [2, 3]);
     client.moves.submitAnswer(120);
     client.moves.newProblem("second problem text", 3, true, "");
 
@@ -57,7 +57,7 @@ describe("RelayWrapper end report", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
+    client.moves.firstProblem("first problem text", "", [2, 3]);
     client.moves.submitAnswer(120);
     client.moves.endGame(true);
 
@@ -81,7 +81,7 @@ describe("RelayWrapper step report", () => {
     });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "", [2, 3]);
+    client.moves.firstProblem("first problem text", "", [2, 3]);
 
     client.moves.getTime();
     client.moves.submitAnswer(120);

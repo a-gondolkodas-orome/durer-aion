@@ -21,7 +21,7 @@ const pointCellStyle = (data: TaskPoints) =>
  * with their max unknown.
  */
 export const relayTaskPoints = (G: Pick<MyGameState, 'maxPointsList' | 'previousPoints'>): TaskPoints[] =>
-  (G.maxPointsList?.length ? G.maxPointsList : G.previousPoints.map(() => null))
+  (G.maxPointsList ?? G.previousPoints.map(() => null))
     .map((max, idx) => ({ max, got: G.previousPoints[idx] ?? null }));
 
 // The table fits 10 tasks in a row, longer task lists continue in new rows

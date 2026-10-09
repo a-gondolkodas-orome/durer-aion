@@ -63,7 +63,6 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         previousAnswers: [[]],
         previousPoints: [],
         currentProblemMaxPoints: 3, // placeholder. TODO: rename to currentProblemAvailablePoints
-        maxPointsList: [],
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
         start: new Date().toISOString(),
@@ -81,14 +80,14 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
             events.endTurn();
           },
-          firstProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, url: string, maxPointsList: number[]) {
+          firstProblem({ G, _ctx, playerID, events }, problemText: string, url: string, maxPointsList: number[]) {
             if (playerID !== JUDGE_PLAYER) {
               // He is not the bot OR G.answer is null (and it is not the first question)
               return INVALID_MOVE;
             }
             G.url = url;
             G.problemText = problemText;
-            G.currentProblemMaxPoints = nextProblemMaxPoints;
+            G.currentProblemMaxPoints = maxPointsList[0];
             G.maxPointsList = maxPointsList;
             G.numberOfTry = 1;
             events.endTurn();
