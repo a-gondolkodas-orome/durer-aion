@@ -19,7 +19,7 @@ function parseDate(value: unknown): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-const isCount = (value: unknown): value is number => Number.isInteger(value) && (value as number) >= 0;
+const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0;
 
 /// The home page's relay summary as game-report.ts saved it; anything
 /// malformed reads as absent, which the home page shows as no summary.
@@ -76,11 +76,10 @@ function parseMatchStatus(value: unknown): MatchStatus | null {
   if (typeof value.score !== 'number') {
     return null;
   }
-  const finished: FinishedMatchStatus = { state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score };
   const relayResults = parseRelayResults(value.relayResults);
   const strategyResults = parseStrategyResults(value.strategyResults);
   return {
-    ...finished,
+    state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score,
     ...(relayResults && { relayResults }),
     ...(strategyResults && { strategyResults }),
   };

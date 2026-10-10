@@ -14,10 +14,8 @@ export function handleGameReport(report: SendGameDataParams, logStorageKey?: str
     localStorage.setItem(key, String(report.G?.points ?? 0));
     const G = report.G;
     if (report.component === "relay") {
-      if (G?.maxPointsList && G.previousPoints && G.previousAnswers) {
-        localStorage.setItem(relayResultsStorageKey(), JSON.stringify(relayProblemResults({
-          maxPointsList: G.maxPointsList, previousPoints: G.previousPoints, previousAnswers: G.previousAnswers,
-        })));
+      if (G?.maxPointsList) {
+        localStorage.setItem(relayResultsStorageKey(), JSON.stringify(relayProblemResults(G)));
       }
       return;
     }

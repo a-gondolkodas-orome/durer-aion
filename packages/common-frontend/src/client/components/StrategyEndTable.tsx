@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { Stack } from '@mui/system';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import type { LiveGameResult } from 'schemas';
@@ -15,7 +15,7 @@ import { ScoreHeadline, StrategyGamesTable } from './ResultTables';
 function PointsScale(props: { points: number }) {
   const { t } = useTranslation();
   const last = STRATEGY_POINTS_BY_LOSSES.length - 1;
-  return <Stack sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center', display: 'block' }}>
+  return <Box sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center' }}>
     {t('strategy.endTable.scale')}{' '}
     {STRATEGY_POINTS_BY_LOSSES.map((points, losses) => {
       const step = `${losses}${losses === last ? '+' : ''} → ${points}`;
@@ -26,7 +26,7 @@ function PointsScale(props: { points: number }) {
     })}
     <br/>
     {t('strategy.endTable.rules')}
-  </Stack>;
+  </Box>;
 }
 
 /**

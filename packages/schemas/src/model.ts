@@ -50,7 +50,8 @@ export interface RelayProblemResult {
 }
 
 /// How one live (not practice) strategy game ended, from the team's side:
-/// `unfinished` is the game the time ran out in.
+/// `unfinished` is the game the time ran out in, when the team's page was still
+/// open to end the match; a match the server closes on time lacks that game.
 export type LiveGameResult = 'won' | 'lost' | 'unfinished';
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;

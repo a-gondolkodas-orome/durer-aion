@@ -1,12 +1,12 @@
 import { Box, Tooltip } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
+import type { SystemStyleObject, Theme } from '@mui/system';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
-import { formatDuration, relayOutcome, type RelayProblemRow } from './relay-results';
+import { formatDuration, type RelayProblemRow } from './relay-results';
 
 // A long problem set continues in further rows of this many columns, each row
 // as wide as the first so a column sits under the one above it.
@@ -23,7 +23,7 @@ const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e
 
 interface Cell {
   content: ReactNode;
-  sx?: SxProps<Theme>;
+  sx?: SystemStyleObject<Theme>;
   /// Details on hover, or on a tap on a phone; the cell gets an asterisk.
   details?: string;
 }
@@ -47,7 +47,7 @@ function CellBox(props: { cell: Cell }) {
   const { cell } = props;
   const box = <Box sx={[
     { padding: '6px 2px', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    ...(Array.isArray(cell.sx) ? cell.sx : [cell.sx]),
+    cell.sx ?? {},
     cell.details !== undefined && { cursor: 'help' },
   ]}>
     {cell.content}
@@ -56,7 +56,7 @@ function CellBox(props: { cell: Cell }) {
   return cell.details === undefined ? box : <Tooltip title={cell.details} enterTouchDelay={0} arrow>{box}</Tooltip>;
 }
 
-/** The look every result table shares: a header row, then labelled rows. */
+/** The look the end screens' and home page's tables share: a header row, then labelled rows. */
 function ResultTable(props: { headerLabel: string, columnLabels: string[], rows: Row[], centred?: boolean }) {
   const columns = Math.min(props.columnLabels.length, COLUMNS_PER_ROW);
   const header: Row = { label: props.headerLabel, cells: props.columnLabels.map(content => ({ content, sx: headerSx })) };
@@ -77,7 +77,7 @@ function ResultTable(props: { headerLabel: string, columnLabels: string[], rows:
       {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
         <CellBox cell={{
           content: row.label,
-          sx: [headerSx, { justifyContent: 'flex-start', paddingX: '8px' }],
+          sx: { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' },
         }}/>
         {chunked[rowIdx][chunkIdx].map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
       </Fragment>)}
@@ -92,29 +92,31 @@ function ResultTable(props: { headerLabel: string, columnLabels: string[], rows:
  */
 export function RelayResultsTable(props: { problems: RelayProblemRow[], details?: boolean, answers?: boolean }) {
   const { t } = useTranslation();
+  // A problem's points: solved on some try, every try wrong, or never answered.
   const pointsCell = (problem: RelayProblemRow): Cell => {
-    const outcome = relayOutcome(problem);
-    const points = t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints });
-    if (outcome === 'unanswered') {
+    if (problem.tries === 0) {
       return {
         content: `0/${problem.maxPoints}`,
         sx: { background: UNANSWERED, color: '#888' },
         details: props.details ? t('relay.endTable.unanswered') : undefined,
       };
     }
+    const solved = problem.points > 0;
     return {
       content: <span><b>{problem.points}</b>/{problem.maxPoints}</span>,
-      sx: { backgroundColor: outcome === 'wrong' ? WRONG : SOLVED_ON_TRY[outcome.solvedOnTry - 1] },
-      details: !props.details ? undefined : outcome === 'wrong'
-        ? `${points}: ${t('relay.endTable.wrongTries', { count: problem.tries })}`
-        : `${points}: ${t('relay.endTable.solvedOnTry', { try: outcome.solvedOnTry })}`,
+      sx: { backgroundColor: solved ? SOLVED_ON_TRY[problem.tries - 1] : WRONG },
+      details: props.details
+        ? `${t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints })}: ${solved
+          ? t('relay.endTable.solvedOnTry', { try: problem.tries })
+          : t('relay.endTable.wrongTries', { count: problem.tries })}`
+        : undefined,
     };
   };
-  const timeCell = (problem: RelayProblemRow, idx: number): Cell => problem.seconds === undefined
+  const timeCell = (problem: RelayProblemRow, idx: number): Cell => !problem.trySeconds?.length
     ? { content: '–', sx: { color: '#888' } }
     : {
-      content: formatDuration(problem.seconds),
-      details: `${t('relay.endTable.taskNumber', { num: idx + 1 })}: ${(problem.trySeconds ?? [])
+      content: formatDuration(problem.trySeconds.reduce((sum, it) => sum + it, 0)),
+      details: `${t('relay.endTable.taskNumber', { num: idx + 1 })}: ${problem.trySeconds
         .map((seconds, tryIdx) => t('relay.endTable.tryTime', { try: tryIdx + 1, time: formatDuration(seconds) }))
         .join(' · ')}`,
     };

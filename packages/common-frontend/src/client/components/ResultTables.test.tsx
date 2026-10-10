@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
 
 test("a relay's table shows each problem's points out of its max, and a dash for a time never spent", () => {
   render(<RelayResultsTable details problems={[
-    { maxPoints: 3, points: 2, tries: 2, seconds: 270, trySeconds: [180, 90] },
+    { maxPoints: 3, points: 2, tries: 2, trySeconds: [180, 90] },
     { maxPoints: 6, points: 0, tries: 0 },
   ]}/>);
 

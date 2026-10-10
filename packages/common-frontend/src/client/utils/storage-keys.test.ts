@@ -1,7 +1,7 @@
 // cspell:ignore aegnjrlearnjla Zrzcvp
 // @vitest-environment jsdom
 import { describe, test, expect } from "vitest";
-import { setLocalStorageNamespace, teamStateStorageKey, loginMarkerStorageKey, legacyGuidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey, relayResultsStorageKey, strategyResultsStorageKey, relayMatchStorageKey } from "./storage-keys";
+import { setLocalStorageNamespace, teamStateStorageKey, loginMarkerStorageKey, legacyGuidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey, relayResultsStorageKey, strategyResultsStorageKey, matchStorageKey } from "./storage-keys";
 import { UserModel } from "../hooks/user-model";
 import type { ClientRepository } from "../api-repository-interface";
 
@@ -38,7 +38,7 @@ describe("storage keys", () => {
     localStorage.setItem(loginMarkerStorageKey(), "own login");
     localStorage.setItem(legacyGuidStorageKey(), "own old guid");
     // boardgame.io's Local appends "_state" to the key it is given
-    localStorage.setItem(relayMatchStorageKey("relay_6_d_a") + "_state", "own saved match");
+    localStorage.setItem(matchStorageKey("relay_6_d_a") + "_state", "own saved match");
     localStorage.setItem(relayPointsStorageKey(), "own relay score");
     localStorage.setItem(strategyPointsStorageKey(), "own strategy score");
     localStorage.setItem(relayResultsStorageKey(), "own relay results");
@@ -49,7 +49,7 @@ describe("storage keys", () => {
     expect(localStorage.getItem(teamStateStorageKey())).toBeNull();
     expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
     expect(localStorage.getItem(legacyGuidStorageKey())).toBeNull();
-    expect(localStorage.getItem(relayMatchStorageKey("relay_6_d_a") + "_state")).toBeNull();
+    expect(localStorage.getItem(matchStorageKey("relay_6_d_a") + "_state")).toBeNull();
     expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
     expect(localStorage.getItem(strategyPointsStorageKey())).toBeNull();
     expect(localStorage.getItem(relayResultsStorageKey())).toBeNull();

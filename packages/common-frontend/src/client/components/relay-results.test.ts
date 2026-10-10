@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import type { MyGameState } from "game";
-import { formatDuration, relayOutcome, relayProblemRows } from "./relay-results";
+import { formatDuration, relayProblemRows } from "./relay-results";
 
 const answer = (answer: number, date: string) => ({ answer, date });
 
@@ -18,19 +18,10 @@ describe("relayProblemRows", () => {
     } as unknown as MyGameState;
 
     expect(relayProblemRows(G)).toStrictEqual([
-      { maxPoints: 3, points: 2, tries: 2, answers: [1, 2], seconds: 270, trySeconds: [180, 90] },
-      { maxPoints: 4, points: 0, tries: 3, answers: [7, 8, 9], seconds: 95, trySeconds: [30, 60, 5] },
+      { maxPoints: 3, points: 2, tries: 2, answers: [1, 2], trySeconds: [180, 90] },
+      { maxPoints: 4, points: 0, tries: 3, answers: [7, 8, 9], trySeconds: [30, 60, 5] },
       { maxPoints: 5, points: 0, tries: 0, answers: [] },
     ]);
-  });
-});
-
-describe("relayOutcome", () => {
-  test("tells a right answer's try, three wrong ones and none at all apart", () => {
-    expect(relayOutcome({ maxPoints: 4, points: 3, tries: 2 })).toStrictEqual({ solvedOnTry: 2 });
-    expect(relayOutcome({ maxPoints: 4, points: 0, tries: 3 })).toStrictEqual("wrong");
-    expect(relayOutcome({ maxPoints: 4, points: 0, tries: 1 })).toStrictEqual("wrong");
-    expect(relayOutcome({ maxPoints: 4, points: 0, tries: 0 })).toStrictEqual("unanswered");
   });
 });
 
