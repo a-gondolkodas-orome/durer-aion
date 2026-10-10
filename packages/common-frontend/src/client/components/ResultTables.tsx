@@ -76,10 +76,10 @@ function ResultTable(props: { header: Row, rows: Row[], centred?: boolean }) {
       {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
         <CellBox cell={{
           content: row.label,
-          sx: [headerSx, { justifyContent: 'flex-start', paddingX: '8px' }, rowIdx === 0 && { boxShadow: 'inset 0 -2px 0 #888' }],
+          sx: [headerSx, { justifyContent: 'flex-start', paddingX: '8px' }],
         }}/>
         {chunked[rowIdx][chunkIdx].map((cell, idx) => <CellBox key={idx} cell={
-          rowIdx === 0 ? { ...cell, sx: [headerSx, { boxShadow: 'inset 0 -2px 0 #888' }] } : cell
+          rowIdx === 0 ? { ...cell, sx: headerSx } : cell
         }/>)}
       </Fragment>)}
     </Box>)}
