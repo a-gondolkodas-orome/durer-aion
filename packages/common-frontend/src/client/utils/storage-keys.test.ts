@@ -37,6 +37,7 @@ describe("storage keys", () => {
     localStorage.setItem(teamStateStorageKey(), "own team state");
     localStorage.setItem(loginMarkerStorageKey(), "own login");
     localStorage.setItem(legacyGuidStorageKey(), "own old guid");
+    // boardgame.io's Local appends "_state" to the key it is given
     localStorage.setItem(relayMatchStorageKey("relay_6_d_a") + "_state", "own saved match");
     localStorage.setItem(relayPointsStorageKey(), "own relay score");
     localStorage.setItem(strategyPointsStorageKey(), "own strategy score");

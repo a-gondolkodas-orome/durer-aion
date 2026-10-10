@@ -4,7 +4,6 @@ import { Fragment } from 'react';
 import { useLogout, useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import type { MyGameState } from 'game';
 
 const pointColours: string[] = ['#3fc523', '#9beb53', '#d5eb42', '#ee5555'];
 
@@ -16,7 +15,7 @@ const pointCellStyle = (data: TaskPoints) =>
     : { backgroundColor: pointColours[Math.min(data.max - data.got, 3)] };
 
 /** A match's points per problem, the ones not reached yet included. */
-export const relayTaskPoints = (G: Pick<MyGameState, 'maxPointsList' | 'previousPoints'>): TaskPoints[] =>
+export const relayTaskPoints = (G: { maxPointsList: number[], previousPoints: number[] }): TaskPoints[] =>
   G.maxPointsList.map((max, idx) => ({ max, got: G.previousPoints[idx] ?? null }));
 
 // The table fits 10 tasks in a row, longer task lists continue in new rows

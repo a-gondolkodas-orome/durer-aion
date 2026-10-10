@@ -336,13 +336,10 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
       { props.isRelay && relayG && <Stack>
-      <RelayEndTableData allPoints={relayG.points} task={
-           relayTaskPoints(relayG).map((task, idx) => ({
-            ...task,
-            answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
-           })
-           )
-          }/>
+      <RelayEndTableData allPoints={relayG.points} task={relayTaskPoints(relayG).map((task, idx) => ({
+        ...task,
+        answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
+      }))}/>
       </Stack>}
     </Stack>
   </>)
