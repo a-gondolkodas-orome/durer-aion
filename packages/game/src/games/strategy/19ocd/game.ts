@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from '../../../common/types';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType, strategyPoints } from '../../../common/types';
 
 export interface MyGameState {
   numbersOnTable: boolean[];
@@ -46,26 +46,7 @@ export const MyGameWrapper = function (category: "C" | "D") {
           if (G.winner === GUESSER_PLAYER) {
             G.winningStreak = G.winningStreak + 1;
             if (G.winningStreak >= 2) {
-              switch (G.numberOfLoss) {
-                case 0:
-                  G.points = 12;
-                  break;
-                case 1:
-                  G.points = 9;
-                  break;
-                case 2:
-                  G.points = 6;
-                  break;
-                case 3:
-                  G.points = 4;
-                  break;
-                case 4:
-                  G.points = 3;
-                  break;
-                default:
-                  G.points = 2;
-                  break;
-              }
+              G.points = strategyPoints(G.numberOfLoss);
               events.endGame();
             }
           } else if (G.winner === JUDGE_PLAYER) {

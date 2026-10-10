@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Client } from "boardgame.io/client";
-import { GameRelay, RelayWrapper } from "./game";
+import { GameRelay, RelayWrapper, relayProblemResults } from "./game";
 
 // Regression: the first problem's max points came hardcoded as 3 (setup) and the
 // firstProblem move dropped the value the strategy sent, so a problem set whose
@@ -82,5 +82,32 @@ describe("RelayWrapper step report", () => {
     client.moves.getTime();
 
     expect(steps).toStrictEqual([120, 7]);
+  });
+});
+
+describe("relayProblemResults", () => {
+  test("tells a problem failed three times from one never answered, though both score 0", () => {
+    const client = Client({ game: GameRelay, numPlayers: 2 });
+    client.start();
+
+    client.moves.startGame();
+    client.moves.firstProblem("first", [4, 3, 5], "");
+    client.moves.submitAnswer(1);
+    client.moves.nextTry(3);
+    client.moves.submitAnswer(2);
+    client.moves.newProblem("second", true, "");
+    for (const lowered of [2, 1]) {
+      client.moves.submitAnswer(lowered);
+      client.moves.nextTry(lowered);
+    }
+    client.moves.submitAnswer(3);
+    client.moves.newProblem("third", false, "");
+
+    const G = client.getState()?.G;
+    expect(G && relayProblemResults(G)).toStrictEqual([
+      { maxPoints: 4, points: 3, tries: 2 },
+      { maxPoints: 3, points: 0, tries: 3 },
+      { maxPoints: 5, points: 0, tries: 0 },
+    ]);
   });
 });

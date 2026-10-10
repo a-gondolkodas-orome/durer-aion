@@ -5,7 +5,7 @@ import {
   createGameWithoutStartingPosition,
   createGameWithMoveWithoutStartingPosition,
 } from "./game_for_testing";
-import { GUESSER_PLAYER, type GameType } from "./types";
+import { GUESSER_PLAYER, strategyPoints, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
@@ -171,6 +171,28 @@ describe("gameWrapper high-level logic", () => {
     ]);
   });
 
+  test("records each live game's result in order, the match-ending win included", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    const play = (difficulty: "live" | "test", move: "win" | "lose") => {
+      client.moves.chooseNewGameType(difficulty);
+      client.moves.setStartingPosition({ data: "startingPosition" });
+      client.moves.chooseRole("0");
+      client.moves[move]();
+    };
+
+    play("live", "lose");
+    play("test", "win");
+    play("live", "win");
+    play("live", "lose");
+    play("live", "win");
+    play("live", "win");
+
+    expect(client.getState()?.ctx.gameover).toBeDefined();
+    expect(client.getState()?.G.liveResults).toStrictEqual(["lost", "won", "lost", "won", "won"]);
+    expect(client.getState()?.G.points).toStrictEqual(6);
+  });
+
   test("win in test", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
@@ -305,5 +327,11 @@ describe("gameWrapper move guards", () => {
     expect(client.getState()?.G.difficulty).toBeNull();
     expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
     expect(rejected).toHaveBeenCalledOnce();
+  });
+});
+
+describe("strategyPoints", () => {
+  test("drops with each loss and stays at its floor after five", () => {
+    expect([0, 1, 2, 3, 4, 5, 9].map(strategyPoints)).toStrictEqual([12, 9, 6, 4, 3, 2, 2]);
   });
 });

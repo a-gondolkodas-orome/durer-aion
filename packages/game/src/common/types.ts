@@ -1,4 +1,5 @@
 import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io";
+import type { LiveGameResult } from "schemas";
 
 // boardgame.io does not export its plugin APIs by name. Taking them off the
 // context type it does export keeps this out of the package's build layout,
@@ -38,6 +39,18 @@ export interface GameStateMixin extends GameStateTimer {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
+  // Every finished live game in order; gameWrapper appends to it, the games
+  // never touch it.
+  liveResults: LiveGameResult[];
+}
+
+/// What winning twice in a row earns, by the live games lost before: the last
+/// entry stands for that many losses or more. A team that never wins twice in
+/// a row scores 0.
+export const STRATEGY_POINTS_BY_LOSSES = [12, 9, 6, 4, 3, 2] as const;
+
+export function strategyPoints(numberOfLoss: number): number {
+  return STRATEGY_POINTS_BY_LOSSES[Math.min(numberOfLoss, STRATEGY_POINTS_BY_LOSSES.length - 1)];
 }
 
 export interface GameStateTimer {

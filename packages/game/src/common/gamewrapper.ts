@@ -83,6 +83,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       numberOfLoss: 0,
       winningStreak: 0,
       points: 0,
+      liveResults: [],
     }),
     turn: {
       minMoves: 1,
@@ -135,6 +136,12 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({ G, ctx }) => {
+          // The phase also ends when time runs out mid-game, with no winner:
+          // that game has no result. A second win in a row ends the match from
+          // inside the move, and boardgame.io still ends this phase first.
+          if (G.difficulty === "live" && G.winner !== null) {
+            G.liveResults.push(G.winner === "draw" ? "draw" : G.winner === GUESSER_PLAYER ? "won" : "lost");
+          }
           sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });
         }
       },
