@@ -1,9 +1,8 @@
 import { State } from "boardgame.io";
 import { ClientRelayWithBot, ClientWithBot } from "./myclient";
 import { GameStateMixin, GameType } from "game";
-import type { GameRelay, MyGameState as RelayGameState } from "game";
+import type { GameRelay, MyGameState as RelayGameState, RelayMoveArgs } from "game";
 import type { RelayBoard, StrategyBoard } from "common-frontend";
-import type { RelayMoveArgs } from "relay-bot";
 import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
 

@@ -27,6 +27,13 @@ export interface MyGameState {
   url: string;
 }
 
+// The judge's moves' arguments, one tuple per move.
+export type RelayMoveArgs =
+  | [problemText: string, maxPointsList: number[], url: string] // firstProblem
+  | [problemText: string, correctnessPreviousAnswer: boolean, url: string] // newProblem
+  | [availablePoints: number] // nextTry
+  | [correctnessPreviousAnswer: boolean]; // endGame
+
 const lengthOfCompetition = 60 * 60; // seconds
 
 // What the wrapper reports after each answered step and when the play phase
