@@ -3,7 +3,7 @@ import { Local } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameStateMixin, GameType } from 'game';
 import { boardWrapper, bgioStoragePrefix, relayMatchStorageKey } from 'common-frontend';
 import type { RelayBoard, StrategyBoard } from 'common-frontend';
-import type { GameRelay, MyGameState as RelayGameState, RelayMoveArgs } from 'game';
+import type { MyGameState as RelayGameState, RelayMoveArgs } from 'game';
 import { RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
@@ -34,8 +34,10 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   });
 }
 
+// Only the name is the caller's: RelayWrapper builds the game itself, and the
+// name keys the saved match.
 export function ClientRelayWithBot(
-  game: typeof GameRelay & { name: string },
+  gameName: string,
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   _description: ReactNode) {
@@ -46,7 +48,7 @@ export function ClientRelayWithBot(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: relayMatchStorageKey(game.name),
+        storageKey: relayMatchStorageKey(gameName),
       }
     ),
     numPlayers: 2,

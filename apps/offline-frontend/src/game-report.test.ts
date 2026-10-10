@@ -107,7 +107,7 @@ describe("the clients' report callbacks", () => {
 
   test("the relay client persists the score", async () => {
     const { ClientRelayWithBot } = await import("./myclient");
-    ClientRelayWithBot(...(stubArgs("relay_e") as unknown as Parameters<typeof ClientRelayWithBot>));
+    ClientRelayWithBot(...(["relay_e", ...stubArgs("relay_e").slice(1)] as unknown as Parameters<typeof ClientRelayWithBot>));
 
     const report = RelayWrapper.mock.calls[0]?.[0] as unknown as typeof handleGameReport;
     expect(report, "the relay client built its game with no report callback").toBeTypeOf("function");
