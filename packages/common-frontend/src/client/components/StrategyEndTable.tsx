@@ -62,7 +62,7 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
         {t('strategy.endTable.title')}
       </Stack>
       <ScoreHeadline points={props.allPoints} max={strategyPoints(0)}/>
-      {props.liveResults.length > 0 && <StrategyGamesTable results={props.liveResults}/>}
+      <StrategyGamesTable results={props.liveResults}/>
       <PointsScale points={props.allPoints}/>
       <Stack sx={{ fontSize: '15px', textAlign: 'center' }}>
         {t('strategy.endTable.reminder')}

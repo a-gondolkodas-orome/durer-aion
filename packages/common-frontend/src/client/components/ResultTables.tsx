@@ -57,9 +57,10 @@ function CellBox(props: { cell: Cell }) {
 }
 
 /** The look every result table shares: a header row, then labelled rows. */
-function ResultTable(props: { header: Row, rows: Row[], centred?: boolean }) {
-  const columns = Math.min(props.header.cells.length, COLUMNS_PER_ROW);
-  const rows = [props.header, ...props.rows];
+function ResultTable(props: { headerLabel: string, columnLabels: string[], rows: Row[], centred?: boolean }) {
+  const columns = Math.min(props.columnLabels.length, COLUMNS_PER_ROW);
+  const header: Row = { label: props.headerLabel, cells: props.columnLabels.map(content => ({ content, sx: headerSx })) };
+  const rows = [header, ...props.rows];
   const chunked = rows.map(row => chunk(row.cells));
   return <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px', alignSelf: props.centred ? 'center' : 'stretch' }}>
     {chunked[0].map((_, chunkIdx) => <Box key={chunkIdx} sx={{
@@ -78,9 +79,7 @@ function ResultTable(props: { header: Row, rows: Row[], centred?: boolean }) {
           content: row.label,
           sx: [headerSx, { justifyContent: 'flex-start', paddingX: '8px' }],
         }}/>
-        {chunked[rowIdx][chunkIdx].map((cell, idx) => <CellBox key={idx} cell={
-          rowIdx === 0 ? { ...cell, sx: headerSx } : cell
-        }/>)}
+        {chunked[rowIdx][chunkIdx].map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
       </Fragment>)}
     </Box>)}
   </Box>;
@@ -98,14 +97,14 @@ export function RelayResultsTable(props: { problems: RelayProblemRow[], details?
     const points = t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints });
     if (outcome === 'unanswered') {
       return {
-        content: `${problem.points}/${problem.maxPoints}`,
+        content: `0/${problem.maxPoints}`,
         sx: { background: UNANSWERED, color: '#888' },
         details: props.details ? t('relay.endTable.unanswered') : undefined,
       };
     }
     return {
       content: <span><b>{problem.points}</b>/{problem.maxPoints}</span>,
-      sx: { backgroundColor: outcome === 'wrong' ? WRONG : SOLVED_ON_TRY[outcome.solvedOnTry - 1] ?? WRONG },
+      sx: { backgroundColor: outcome === 'wrong' ? WRONG : SOLVED_ON_TRY[outcome.solvedOnTry - 1] },
       details: !props.details ? undefined : outcome === 'wrong'
         ? `${points}: ${t('relay.endTable.wrongTries', { count: problem.tries })}`
         : `${points}: ${t('relay.endTable.solvedOnTry', { try: outcome.solvedOnTry })}`,
@@ -130,7 +129,8 @@ export function RelayResultsTable(props: { problems: RelayProblemRow[], details?
     });
   }
   return <ResultTable
-    header={{ label: t('relay.endTable.task'), cells: props.problems.map((_, idx) => ({ content: `${idx + 1}.` })) }}
+    headerLabel={t('relay.endTable.task')}
+    columnLabels={props.problems.map((_, idx) => `${idx + 1}.`)}
     rows={rows}
   />;
 }
@@ -170,6 +170,9 @@ const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string 
 /** Each live strategy game's result, in the order played. */
 export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   const { t } = useTranslation();
+  if (props.results.length === 0) {
+    return null;
+  }
   // Spelled out key by key: the i18n check finds a key only as a literal.
   const label = (result: LiveGameResult) => {
     switch (result) {
@@ -180,7 +183,8 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   };
   return <ResultTable
     centred
-    header={{ label: t('strategy.endTable.game'), cells: props.results.map((_, idx) => ({ content: `${idx + 1}.` })) }}
+    headerLabel={t('strategy.endTable.game')}
+    columnLabels={props.results.map((_, idx) => `${idx + 1}.`)}
     rows={[{
       label: t('strategy.endTable.result'),
       cells: props.results.map(result => ({
@@ -194,16 +198,16 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
 }
 
 /** A match's score as the headline of its results: big, out of its maximum. */
-export function ScoreHeadline(props: { points: number, max?: number, size?: 'large' | 'medium' }) {
+export function ScoreHeadline(props: { points: number, max?: number, compact?: boolean }) {
   const { t } = useTranslation();
   return <Box sx={{
-    fontSize: props.size === 'medium' ? '44px' : '56px',
+    fontSize: props.compact ? '44px' : '56px',
     fontWeight: 700,
     lineHeight: 1.1,
     textAlign: 'center',
   }}>
     {props.max === undefined ? props.points : `${props.points} / ${props.max}`}{' '}
-    <Box component="span" sx={{ fontSize: props.size === 'medium' ? '18px' : '22px', fontWeight: 400 }}>
+    <Box component="span" sx={{ fontSize: props.compact ? '18px' : '22px', fontWeight: 400 }}>
       {t('general.pointsUnit', { count: props.points })}
     </Box>
   </Box>;

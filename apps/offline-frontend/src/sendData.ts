@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
-import type { MyGameState } from "game";
-import { FinishedMatchStatus, TeamModelDto } from "common-frontend";
+import type { GameStateMixin, MyGameState } from "game";
+import { TeamModelDto } from "common-frontend";
 import { readPersistedLog } from "./bgio-log";
 import { readStoredTeamState } from "./stored-team-state";
 
@@ -61,8 +61,6 @@ export function sendDataLogin(teamState: TeamModelDto) {
   sendData(code + "_" + randomID + "_login_" + now(), "code");
 }
 
-type RelayResultsSource = Pick<MyGameState, "maxPointsList" | "previousPoints" | "previousAnswers">;
-
 export interface SendGameDataParams {
   component: "relay" | "strategy";
   phase: "start" | "step" | "end";
@@ -70,7 +68,7 @@ export interface SendGameDataParams {
   // Only these fields are read here (relay's problem counter and the
   // wrapper's score), and the results game-report.ts saves for the home page;
   // the rest of G rides along in the JSON payload.
-  G?: { currentProblem?: number; points?: number } & Partial<RelayResultsSource> & { liveResults?: FinishedMatchStatus["strategyResults"] };
+  G?: Partial<Pick<MyGameState, "currentProblem" | "points" | "maxPointsList" | "previousPoints" | "previousAnswers"> & Pick<GameStateMixin, "liveResults">>;
   ctx?: Ctx;
 }
 

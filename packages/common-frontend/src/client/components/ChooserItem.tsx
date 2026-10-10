@@ -10,6 +10,7 @@ import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { strategyPoints } from 'game';
 import { RelayResultsTable, ScoreHeadline, StrategyGamesTable } from './ResultTables';
+import { relayMaxPoints } from './relay-results';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -67,14 +68,14 @@ export function ChooserItem(props: {
       </Stack>
       {props.status.state === "FINISHED" &&
         <Stack sx={{ gap: '12px', marginBottom: { xs: '10px', md: '16px' } }}>
-          <ScoreHeadline size="medium" points={props.status.score} max={
+          <ScoreHeadline compact points={props.status.score} max={
             props.type === 'relay'
-              ? props.status.relayResults?.reduce((sum, it) => sum + it.maxPoints, 0)
+              ? props.status.relayResults && relayMaxPoints(props.status.relayResults)
               : strategyPoints(0)
           }/>
           {props.type === 'relay' && props.status.relayResults &&
             <RelayResultsTable problems={props.status.relayResults}/>}
-          {props.type === 'strategy' && props.status.strategyResults && props.status.strategyResults.length > 0 &&
+          {props.type === 'strategy' && props.status.strategyResults &&
             <StrategyGamesTable results={props.status.strategyResults}/>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
             {t('chooser.filledAt')}: {formatTime(props.status.startAt)} – {formatTime(props.status.endAt)}

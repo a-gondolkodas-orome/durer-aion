@@ -72,4 +72,4 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-export type { FinishedMatchStatus, InProgressMatchStatus, MatchStatus, NotStartedMatchStatus } from "schemas";
+export type { FinishedMatchStatus, InProgressMatchStatus, LiveGameResult, MatchStatus, NotStartedMatchStatus } from "schemas";

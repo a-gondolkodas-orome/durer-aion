@@ -111,7 +111,7 @@
     "guessNum": "Guess #{{guessnum}}:",
     "name": "Relay tasks",
     "send": "Submit",
-    "task": "Task {{num}}/{{taskCount}} ({{availablePoints}})",
+    "task": "Task #{{num}} ({{availablePoints}})",
     "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)",
     "wrongGuess": "Your guess is sadly wrong",
     "progress": "So far: {{points}}"

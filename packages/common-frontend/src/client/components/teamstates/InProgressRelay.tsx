@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useEffect, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
-import { MyGameState } from 'game';
+import { MyGameState, relayProblemResults } from 'game';
 import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
@@ -130,7 +130,6 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             task={G.problemText}
             availablePoints={G.currentProblemAvailablePoints}
             serial={G.currentProblem + 1}
-            taskCount={G.maxPointsList.length}
             pictureUrl={G.url}
           />
         </Stack>
@@ -190,7 +189,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             borderTop: '1px solid #e6e6e6',
             gap: '8px',
           }}>
-            <RelayProgressTable problems={relayProblemRows(G)} current={G.currentProblem}/>
+            <RelayProgressTable problems={relayProblemResults(G)} current={G.currentProblem}/>
             <Stack sx={{ fontSize: '13px', color: '#666' }}>
               {t('relay.progress', { points: t('general.points', { count: G.points }) })}
             </Stack>

@@ -4,7 +4,7 @@ import { useLogout, useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { RelayResultsTable, ScoreHeadline } from './ResultTables';
-import type { RelayProblemRow } from './relay-results';
+import { relayMaxPoints, type RelayProblemRow } from './relay-results';
 
 /**
  * Component to display an end game screen with close button, and score
@@ -47,7 +47,7 @@ export function RelayEndTable(props: { allPoints: number, problems: RelayProblem
       <Stack sx={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center' }}>
         {t('relay.endTable.title')}
       </Stack>
-      <ScoreHeadline points={props.allPoints} max={props.problems.reduce((sum, it) => sum + it.maxPoints, 0)}/>
+      <ScoreHeadline points={props.allPoints} max={relayMaxPoints(props.problems)}/>
       <RelayResultsTable problems={props.problems} details/>
       {!props.selectRound && <Stack sx={{ fontSize: '15px', textAlign: 'center' }}>
         {t('relay.endTable.reminder')}

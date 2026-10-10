@@ -326,8 +326,7 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
   <Stack>
       { props.isRelay && relayG && <Stack>Aktuális feladatszám: {relayG.currentProblem + 1}</Stack>}
       { !props.isRelay && strategyG && <Stack>próbálkozások száma: {strategyG.numberOfTries}</Stack>}
-      { !props.isRelay && strategyG && <Stack>Éles játékok eddigi eredményei: {strategyG.numberOfTries - strategyG.numberOfLoss - Number(strategyG.winner === null && strategyG.difficulty === "live")} győzelem, {strategyG.numberOfLoss} vereség</Stack>}
-      { !props.isRelay && strategyG && strategyG.liveResults.length > 0 && <StrategyGamesTable results={strategyG.liveResults}/>}
+      { !props.isRelay && strategyG && <StrategyGamesTable results={strategyG.liveResults}/>}
       <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
       <Stack>pontszám: { data.G.points }</Stack>
       <Stack>Hátralévő idő: <Countdown

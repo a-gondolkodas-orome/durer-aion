@@ -216,7 +216,7 @@ export async function closeMatch(
   const finishState = await endMatchStatus(mStat, G.points,
     type === "relayMatch" ? { relayResults: relayProblemResults(G) } : { strategyResults: G.liveResults });
   console.log(
-    `Closing match: ${matchId}, points: ${currentMatch.state.G.points}`
+    `Closing match: ${matchId}, points: ${G.points}`
   );
   if (!(await teams.finishMatch(teamId, type, matchId, finishState)))
     console.log(`Not closing match: ${matchId}, it was replaced while being closed`);

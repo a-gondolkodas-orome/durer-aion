@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -31,11 +31,11 @@ function parseRelayResults(value: unknown): FinishedMatchStatus['relayResults'] 
   return value.map(it => ({ maxPoints: it.maxPoints, points: it.points, tries: it.tries }));
 }
 
+const isLiveGameResult = (value: unknown): value is LiveGameResult =>
+  value === 'won' || value === 'lost' || value === 'unfinished';
+
 function parseStrategyResults(value: unknown): FinishedMatchStatus['strategyResults'] {
-  if (!Array.isArray(value) || !value.every(it => it === 'won' || it === 'lost' || it === 'unfinished')) {
-    return undefined;
-  }
-  return [...value];
+  return Array.isArray(value) && value.every(isLiveGameResult) ? value : undefined;
 }
 
 /// What `JSON.parse` makes of a stored value, or undefined if there is none

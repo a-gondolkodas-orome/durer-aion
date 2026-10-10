@@ -1,4 +1,4 @@
-import type { MyGameState } from "game";
+import { relayProblemResults, type MyGameState } from "game";
 import type { RelayProblemResult } from "schemas";
 
 /// One column of a relay results table. `seconds` and `trySeconds` exist only
@@ -21,6 +21,10 @@ export function relayOutcome(problem: RelayProblemResult): RelayOutcome {
   return problem.points > 0 ? { solvedOnTry: problem.tries } : "wrong";
 }
 
+/** What the whole problem set is worth. */
+export const relayMaxPoints = (problems: RelayProblemResult[]) =>
+  problems.reduce((sum, it) => sum + it.maxPoints, 0);
+
 const secondsBetween = (from: string, to: string) =>
   Math.round((new Date(to).getTime() - new Date(from).getTime()) / 1000);
 
@@ -31,14 +35,9 @@ const secondsBetween = (from: string, to: string) =>
  */
 export function relayProblemRows(G: MyGameState): RelayProblemRow[] {
   let shownAt = G.start;
-  return G.maxPointsList.map((maxPoints, idx) => {
+  return relayProblemResults(G).map((result, idx) => {
     const answers = G.previousAnswers[idx] ?? [];
-    const row: RelayProblemRow = {
-      maxPoints,
-      points: G.previousPoints[idx] ?? 0,
-      tries: answers.length,
-      answers: answers.map(it => it.answer),
-    };
+    const row: RelayProblemRow = { ...result, answers: answers.map(it => it.answer) };
     if (answers.length > 0) {
       let previous = shownAt;
       row.trySeconds = answers.map(it => {
