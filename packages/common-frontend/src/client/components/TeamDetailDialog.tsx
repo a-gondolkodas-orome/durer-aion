@@ -337,8 +337,7 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
       /></Stack>
       { props.isRelay && relayG && <Stack>
       <RelayEndTableData allPoints={relayG.points} task={
-           // A match saved before the state held maxPointsList has none
-           relayTaskPoints({ ...relayG, maxPointsList: relayG.maxPointsList ?? [] }).map((task, idx) => ({
+           relayTaskPoints(relayG).map((task, idx) => ({
             ...task,
             answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
            })
