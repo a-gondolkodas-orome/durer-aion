@@ -16,7 +16,7 @@ export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: 
   return <Stack>
     <Trans sx={{ fontSize: '20px' }}
       i18nKey='relay.task'
-      values={{ num: props.serial, availablepoints: t('general.points', { count: props.availablePoints }) }}
+      values={{ num: props.serial, availablePoints: t('general.points', { count: props.availablePoints }) }}
       />
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
     {props.pictureUrl && <img src={props.pictureUrl} style={{ maxWidth: '80%', display: 'flex', marginLeft: 'auto', marginRight: 'auto', marginTop: "30px" }} alt={t('relay.taskImage')}/>}
