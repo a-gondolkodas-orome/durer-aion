@@ -192,9 +192,8 @@ export function relayStrategy(problemList: Problem[]) {
     }
 
     if (state.G.currentProblem < problemList.length - 1) {
-      const url = problemList[state.G.currentProblem + 1].url ?? "";
       const nextProblem = problemList[state.G.currentProblem + 1];
-      return [[nextProblem.problemText, correctnessPreviousAnswer, url], "newProblem"];
+      return [[nextProblem.problemText, correctnessPreviousAnswer, nextProblem.url ?? ""], "newProblem"];
     }
     return [[correctnessPreviousAnswer], "endGame"];
   }
