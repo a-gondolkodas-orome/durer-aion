@@ -99,7 +99,7 @@ describe("the relay client's report callback", () => {
     localStorage.clear();
     const { ClientRelayWithBot } = await import("./myclient");
     ClientRelayWithBot(...([
-      { name: "relay" },
+      "relay",
       () => null,
       () => [undefined, ""],
       null,

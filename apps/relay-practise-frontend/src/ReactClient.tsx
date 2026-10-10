@@ -1,6 +1,5 @@
 import { ComponentProps, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GameRelay } from "game";
 import { relayStrategy, Problem } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
@@ -45,7 +44,7 @@ export function RelayClient({ teamName }: {
     const Board = (props: ComponentProps<typeof InProgressRelay>) =>
       <InProgressRelay {...props} selectRoundOnEnd />;
     return ClientFactoryRelay(
-      { ...GameRelay, name: gameName },
+      gameName,
       Board,
       relayStrategy(problems),
       description,
