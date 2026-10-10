@@ -1,7 +1,7 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey } from "common-frontend";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
-import { readStoredTeamState } from "./stored-team-state";
+import { parseLiveGames, parseRelayProblems, parseStoredJson, readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -64,6 +64,7 @@ export class OfflineClientRepository implements ClientRepository {
         state: "FINISHED",
         endAt: new Date(),
         score: score,
+        relayProblems: parseRelayProblems(parseStoredJson(localStorage.getItem(relayResultsStorageKey()))),
       }
     }
     if (teamState.strategyMatch.state === "IN PROGRESS") {
@@ -72,6 +73,7 @@ export class OfflineClientRepository implements ClientRepository {
         state: "FINISHED",
         endAt: new Date(),
         score: Number(localStorage.getItem(strategyPointsStorageKey())),
+        liveGames: parseLiveGames(parseStoredJson(localStorage.getItem(strategyResultsStorageKey()))),
       }
     }
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));

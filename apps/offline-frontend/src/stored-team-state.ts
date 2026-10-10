@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, isPageState } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, isPageState } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -17,6 +17,37 @@ function parseDate(value: unknown): Date | null {
   }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+const isCount = (value: unknown): value is number => Number.isInteger(value) && (value as number) >= 0;
+
+/// The home page's relay summary as `toHome` saved it; anything malformed
+/// reads as absent, which the home page shows as no summary.
+export function parseRelayProblems(value: unknown): FinishedMatchStatus['relayProblems'] {
+  if (!Array.isArray(value) || !value.every(it =>
+    isRecord(it) && isCount(it.maxPoints) && isCount(it.points) && isCount(it.tries))) {
+    return undefined;
+  }
+  return value.map(it => ({ maxPoints: it.maxPoints, points: it.points, tries: it.tries }));
+}
+
+export function parseLiveGames(value: unknown): FinishedMatchStatus['liveGames'] {
+  if (!Array.isArray(value) || !value.every(it => it === 'won' || it === 'lost' || it === 'draw')) {
+    return undefined;
+  }
+  return [...value];
+}
+
+/// What `JSON.parse` makes of a stored value, or undefined if it is not JSON.
+export function parseStoredJson(stored: string | null): unknown {
+  if (stored === null) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return undefined;
+  }
 }
 
 function parseMatchStatus(value: unknown): MatchStatus | null {
@@ -40,7 +71,14 @@ function parseMatchStatus(value: unknown): MatchStatus | null {
   if (typeof value.score !== 'number') {
     return null;
   }
-  return { state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score };
+  const finished: FinishedMatchStatus = { state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score };
+  const relayProblems = parseRelayProblems(value.relayProblems);
+  const liveGames = parseLiveGames(value.liveGames);
+  return {
+    ...finished,
+    ...(relayProblems && { relayProblems }),
+    ...(liveGames && { liveGames }),
+  };
 }
 
 export function readStoredTeamState(): TeamModelDto | null {

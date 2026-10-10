@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // business, and a name of its own pins which of the two each branch reaches for.
 const {
   bgioStoragePrefix, boardWrapper, relayMatchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
+  relayResultsStorageKey, strategyResultsStorageKey, relayProblemResults,
   sendGameData, gameWrapper, RelayWrapper, Client,
 } = vi.hoisted(() => ({
   bgioStoragePrefix: () => "bgio_",
@@ -15,17 +16,23 @@ const {
   relayMatchStorageKey: (gameName: string) => "bgio_" + gameName,
   relayPointsStorageKey: () => "the relay key",
   strategyPointsStorageKey: () => "the strategy key",
+  relayResultsStorageKey: () => "the relay results key",
+  strategyResultsStorageKey: () => "the strategy results key",
+  relayProblemResults: vi.fn(() => [{ maxPoints: 3, points: 2, tries: 2 }]),
   sendGameData: vi.fn(),
   gameWrapper: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
-vi.mock("common-frontend", () => ({ bgioStoragePrefix, boardWrapper, relayMatchStorageKey, relayPointsStorageKey, strategyPointsStorageKey }));
+vi.mock("common-frontend", () => ({
+  bgioStoragePrefix, boardWrapper, relayMatchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
+  relayResultsStorageKey, strategyResultsStorageKey,
+}));
 vi.mock("./sendData", () => ({ sendGameData }));
 // The wiring tests read the callback the app hands each reducer; building a real
 // boardgame.io client around it is not what is under test here.
-vi.mock("game", () => ({ gameWrapper, RelayWrapper }));
+vi.mock("game", () => ({ gameWrapper, RelayWrapper, relayProblemResults }));
 vi.mock("boardgame.io/react", () => ({ Client }));
 
 import { handleGameReport } from "./game-report";
@@ -42,6 +49,20 @@ describe("handleGameReport", () => {
 
     expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
     expect(sendGameData).toHaveBeenCalledWith(end, "bgio_stones_e");
+  });
+
+  test("persists the live games of a strategy end report for the home page", () => {
+    handleGameReport({ component: "strategy", phase: "end", G: { points: 9, liveResults: ["lost", "won", "won"] } });
+
+    expect(localStorage.getItem("the strategy results key")).toStrictEqual('["lost","won","won"]');
+  });
+
+  test("persists the problems of a relay end report for the home page", () => {
+    const G = { points: 2, maxPointsList: [3], previousPoints: [2], previousAnswers: [[]] };
+    handleGameReport({ component: "relay", phase: "end", G });
+
+    expect(relayProblemResults).toHaveBeenCalledWith({ maxPointsList: [3], previousPoints: [2], previousAnswers: [[]] });
+    expect(localStorage.getItem("the relay results key")).toStrictEqual('[{"maxPoints":3,"points":2,"tries":2}]');
   });
 
   test("persists the score of a relay end report", () => {

@@ -172,7 +172,7 @@ describe("closeMatch", () => {
     });
     const db = {
       fetch: async () => ({
-        state: { G: { points } },
+        state: { G: { points, liveResults: ["lost", "won", "won"] } },
         metadata: { gameName: "stones_e", players: { 0: { name: "team-1" } } },
       }),
     } as unknown as StorageAPI.Async;
@@ -184,7 +184,32 @@ describe("closeMatch", () => {
 
     await close();
 
-    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9 }]]);
+    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9, liveGames: ["lost", "won", "won"] }]]);
+  });
+
+  it("finishes a relay match with each problem's points and tries", async () => {
+    const writes: unknown[][] = [];
+    const teams = matchStore({
+      getTeam: async () => team({ relayMatch: inProgressUntil(new Date("2026-03-21T11:00:00Z")) }),
+      finishMatch: async (...args: unknown[]) => { writes.push(args); return true; },
+    });
+    const G = {
+      points: 3,
+      maxPointsList: [3, 4],
+      previousPoints: [3],
+      previousAnswers: [[{ answer: 1, date: "" }], []],
+    };
+    const db = {
+      fetch: async () => ({ state: { G }, metadata: { gameName: "relay_e", players: { 0: { name: "team-1" } } } }),
+    } as unknown as StorageAPI.Async;
+
+    await closeMatch("match-1", teams, db);
+
+    expect(writes).toStrictEqual([["team-1", "relayMatch", "match-1", {
+      ...finished,
+      score: 3,
+      relayProblems: [{ maxPoints: 3, points: 3, tries: 1 }, { maxPoints: 4, points: 0, tries: 0 }],
+    }]]);
   });
 
   it("closes a finished match again with the points boardgame.io ended it on", async () => {
@@ -192,7 +217,7 @@ describe("closeMatch", () => {
 
     await close();
 
-    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9 }]]);
+    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9, liveGames: ["lost", "won", "won"] }]]);
   });
 
   it("leaves the team's new match alone when a match replaced by a reset ends", async () => {
