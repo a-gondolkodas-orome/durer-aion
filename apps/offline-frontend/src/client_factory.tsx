@@ -25,7 +25,7 @@ T_SpecificGameState
 };
 
 export const ClientFactoryRelay = function (
-  game: typeof GameRelay,
+  game: typeof GameRelay & { name: string },
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   description: ReactNode,

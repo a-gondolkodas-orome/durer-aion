@@ -35,7 +35,7 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
 }
 
 export function ClientRelayWithBot(
-  game: typeof GameRelay,
+  game: typeof GameRelay & { name: string },
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   _description: ReactNode) {

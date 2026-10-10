@@ -12,7 +12,7 @@ import { relayMatchStorageKey } from 'common-frontend';
 import type { ReactNode } from 'react';
 
 export function ClientRelayWithBot(
-  game: typeof GameRelay,
+  game: typeof GameRelay & { name: string },
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   _description: ReactNode) {

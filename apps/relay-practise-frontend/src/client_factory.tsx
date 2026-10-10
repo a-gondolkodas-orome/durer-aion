@@ -5,7 +5,7 @@ import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
 
 export const ClientFactoryRelay = function (
-  game: typeof GameRelay,
+  game: typeof GameRelay & { name: string },
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   description: ReactNode,
