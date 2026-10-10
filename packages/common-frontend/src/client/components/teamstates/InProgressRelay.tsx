@@ -53,6 +53,11 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
   const isOffline = clientRepo.version === "OFFLINE";
+  // Until the judge's firstProblem move, the state holds no problem to show
+  // and the form has no move to submit to.
+  if (G.numberOfTry === 0 && !finished) {
+    return <div>{t('general.loading')}</div>;
+  }
   return (
     <>
       <Dialog
