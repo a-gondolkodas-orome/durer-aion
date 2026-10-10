@@ -27,7 +27,7 @@ describe("relayStrategy", () => {
 
   test("advancing serves the next problem", () => {
     const [args, move] = relayStrategy(problemList)(
-      stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120, currentProblemAvailablePoints: 2 }),
+      stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120 }),
       "1",
     );
 

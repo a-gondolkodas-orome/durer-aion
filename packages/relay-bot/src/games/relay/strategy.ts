@@ -172,7 +172,11 @@ const problems : RelayProblems = {
   ],
 }
 
-export type RelayMoveArgs = (number | string | boolean | number[])[];
+export type RelayMoveArgs =
+  | [problemText: string, maxPointsList: number[], url: string] // firstProblem
+  | [problemText: string, correctnessPreviousAnswer: boolean, url: string] // newProblem
+  | [availablePoints: number] // nextTry
+  | [correctnessPreviousAnswer: boolean]; // endGame
 
 export function relayStrategy(problemList: Problem[]) {
   return (state: State<MyGameState>, _botID: string): [RelayMoveArgs, string] => {
