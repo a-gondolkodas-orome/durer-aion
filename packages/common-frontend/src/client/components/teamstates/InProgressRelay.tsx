@@ -7,7 +7,9 @@ import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
-import { RelayEndTable, relayTaskPoints } from '../RelayEndTable';
+import { RelayEndTable } from '../RelayEndTable';
+import { RelayProgressTable } from '../ResultTables';
+import { relayProblemRows } from '../relay-results';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
@@ -82,7 +84,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
         open={
           finished
         } onClose={() => void backToHome()}>
-          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={relayTaskPoints(G)}/>
+          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemRows(G)}/>
         </Dialog>
       <Stack sx={{
         width: "100%",
@@ -128,6 +130,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             task={G.problemText}
             availablePoints={G.currentProblemAvailablePoints}
             serial={G.currentProblem + 1}
+            total={G.maxPointsList.length}
             pictureUrl={G.url}
           />
         </Stack>
@@ -181,6 +184,17 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             ({t('general.warning.timeNotReal')})
             </Stack>
           }
+          <Stack sx={{
+            marginTop: '12px',
+            paddingTop: '12px',
+            borderTop: '1px solid #e6e6e6',
+            gap: '8px',
+          }}>
+            <RelayProgressTable problems={relayProblemRows(G)} current={G.currentProblem}/>
+            <Stack sx={{ fontSize: '13px', color: '#666' }}>
+              {t('relay.progress', { points: t('general.points', { count: G.points }) })}
+            </Stack>
+          </Stack>
         </Stack>
       </Stack>
     </>

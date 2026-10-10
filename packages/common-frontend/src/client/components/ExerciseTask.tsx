@@ -5,6 +5,8 @@ import { useTranslation, Trans } from "react-i18next";
 export interface ExerciseTaskProps {
   task: string;
   serial: number;
+  // How many problems the set has, for the "2/9." in the title.
+  total: number;
   availablePoints: number;
   pictureUrl: string | null;
 }
@@ -16,7 +18,7 @@ export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: 
   return <Stack>
     <Trans sx={{ fontSize: '20px' }}
       i18nKey='relay.task'
-      values={{ num: props.serial, availablePoints: t('general.points', { count: props.availablePoints }) }}
+      values={{ num: props.serial, total: props.total, availablePoints: t('general.points', { count: props.availablePoints }) }}
       />
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
     {props.pictureUrl && <img src={props.pictureUrl} style={{ maxWidth: '80%', display: 'flex', marginLeft: 'auto', marginRight: 'auto', marginTop: "30px" }} alt={t('relay.taskImage')}/>}

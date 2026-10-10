@@ -71,7 +71,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           open={
             finished
           } onClose={() => void backToHome()}>
-          <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
+          <StrategyEndTable allPoints={G.points} liveResults={G.liveResults} />
         </Dialog>
         <Stack sx={{
           padding: '20px',

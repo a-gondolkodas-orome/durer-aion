@@ -1,16 +1,19 @@
-import React from 'react';
+import { Fragment } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
+import { STRATEGY_POINTS_BY_LOSSES } from 'game';
+import type { LiveGameResult } from 'schemas';
 import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
+import { ScoreHeadline, StrategyGamesTable } from './ResultTables';
 
 /**
  * Component to display an end game screen with close button, and score
- * @param props {{setShow: React.Dispatch<boolean>, points: number}}
+ * @param props the match's points, and its live games' results in order
  * @returns End screen
  */
-export function StrategyEndTable(props: { allPoints: number, numOfTries: number }) {
+export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[] }) {
   const theme = useTheme();
   const toHome = useToHome();
   const refreshState = useRefreshTeamState();
@@ -22,38 +25,48 @@ export function StrategyEndTable(props: { allPoints: number, numOfTries: number 
     await toHome();
     window.location.reload();
   };
+  const losses = props.liveResults.filter(it => it === 'lost').length;
+  // The step of the scale the team's points came from, if they scored at all.
+  const reached = props.allPoints > 0 ? Math.min(losses, STRATEGY_POINTS_BY_LOSSES.length - 1) : null;
   return (
     <Stack sx={{
-      display: 'flex',
       width: "750px",
       maxWidth: '100%',
+      boxSizing: 'border-box',
       marginTop: '10px',
       marginBottom: '10px',
       borderRadius: '30px',
       backgroundColor: theme.palette.background.paper,
       padding: '25px',
+      gap: '20px',
     }}>
-    <Stack sx={{
-        fontSize: '18px',
-        fontWeight: 'bold',
-        textAlign: 'center'
-    }}>{t('strategy.endTable.all')}</Stack>
-      <Stack sx={{
-          marginTop: '25px',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-        }}>
-        <Stack>{t('strategy.endTable.gained')}: {props.allPoints}</Stack>
-        <Stack>{t('strategy.endTable.tries')}: {props.numOfTries}</Stack>
+      <Stack sx={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center' }}>
+        {t('strategy.endTable.title')}
+      </Stack>
+      <ScoreHeadline points={props.allPoints} max={STRATEGY_POINTS_BY_LOSSES[0]}/>
+      {props.liveResults.length > 0 && <StrategyGamesTable results={props.liveResults}/>}
+      <Stack sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center', display: 'block' }}>
+        {t('strategy.endTable.scale')}{' '}
+        {STRATEGY_POINTS_BY_LOSSES.map((points, idx) => {
+          const isLast = idx === STRATEGY_POINTS_BY_LOSSES.length - 1;
+          const step = `${idx}${isLast ? '+' : ''} → ${points}`;
+          return <Fragment key={idx}>
+            {idx === reached ? <b style={{ color: '#1a1a1a' }}>{step}</b> : step}
+            {isLast ? '.' : ', '}
+          </Fragment>;
+        })}
+        <br/>
+        {t('strategy.endTable.rules')}
+      </Stack>
+      <Stack sx={{ fontSize: '15px', textAlign: 'center' }}>
+        {t('strategy.endTable.reminder')}
       </Stack>
       <Button sx={{
-        width: '300px',
-        height: '75px',
-        fontSize: '26px',
+        minWidth: '300px',
+        height: '55px',
+        fontSize: '22px',
         alignSelf: 'center',
         textTransform: 'none',
-        marginTop: '15px',
       }} variant='contained' color='primary' onClick={() => void backToHome()}>
         {t('relay.endTable.back')}
       </Button>

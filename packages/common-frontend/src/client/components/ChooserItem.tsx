@@ -6,9 +6,10 @@ import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useClientRepo } from '../api-repository-interface';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
+import { STRATEGY_POINTS_BY_LOSSES } from 'game';
+import { RelayResultsTable, ScoreHeadline, StrategyGamesTable } from './ResultTables';
 
 export function ChooserItem(props: {
   status: MatchStatus,
@@ -20,7 +21,6 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
-  const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -66,16 +66,19 @@ export function ChooserItem(props: {
         }}/>)}</span>
       </Stack>
       {props.status.state === "FINISHED" &&
-        <Stack sx={{
-          height: 24,
-          fontSize: 18,
-          textAlign: 'center',
-          marginBottom: {
-            xs: '10px',
-            md: 0,
-          }
-        }}>
-          {t('chooser.filledAt')}: {formatTime(props.status.startAt)} - {formatTime(props.status.endAt)} {t('chooser.achievedPoint')}: {props.status.score}
+        <Stack sx={{ gap: '12px', marginBottom: { xs: '10px', md: '16px' } }}>
+          <ScoreHeadline size="medium" points={props.status.score} max={
+            props.type === 'relay'
+              ? props.status.relayProblems?.reduce((sum, it) => sum + it.maxPoints, 0)
+              : STRATEGY_POINTS_BY_LOSSES[0]
+          }/>
+          {props.type === 'relay' && props.status.relayProblems &&
+            <RelayResultsTable problems={props.status.relayProblems}/>}
+          {props.type === 'strategy' && props.status.liveGames && props.status.liveGames.length > 0 &&
+            <StrategyGamesTable results={props.status.liveGames}/>}
+          <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
+            {t('chooser.filledAt')}: {formatTime(props.status.startAt)} – {formatTime(props.status.endAt)}
+          </Stack>
         </Stack>
       }
       {props.type === 'relay' &&
@@ -148,7 +151,6 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {t('chooser.start')}
       </Button>
-      { !isOffline &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
@@ -164,9 +166,8 @@ export function ChooserItem(props: {
           props.setState("S");
         }
       }} disabled={props.status.state === "NOT STARTED"}>
-        {t('chooser.result')}
+        {t('chooser.detailedResults')}
       </Button>
-      }
     </Stack>
   )
 }
