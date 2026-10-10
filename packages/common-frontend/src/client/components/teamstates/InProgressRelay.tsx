@@ -82,7 +82,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
         open={
           finished
         } onClose={() => void backToHome()}>
-          {<RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={relayTaskPoints(G)}/>}
+          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={relayTaskPoints(G)}/>
         </Dialog>
       <Stack sx={{
         width: "100%",

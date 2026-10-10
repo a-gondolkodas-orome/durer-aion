@@ -84,7 +84,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
           },
           firstProblem({ G, _ctx, playerID, events }, problemText: string, maxPointsList: number[], url: string) {
             if (playerID !== JUDGE_PLAYER) {
-              // He is not the bot
+              // Only the judge serves problems
               return INVALID_MOVE;
             }
             G.url = url;
@@ -150,7 +150,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         moves: {
           newProblem({ G, _ctx, playerID, events }, problemText: string, correctnessPreviousAnswer: boolean, url: string) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
-              // He is not the bot OR G.answer is null (and it is not the first question)
+              // Only the judge serves problems, and only once an answer is in
               return INVALID_MOVE;
             }
             G.url = url;
