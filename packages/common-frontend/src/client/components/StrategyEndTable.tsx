@@ -2,11 +2,32 @@ import { Fragment } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
 import { Stack } from '@mui/system';
-import { STRATEGY_POINTS_BY_LOSSES } from 'game';
+import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import type { LiveGameResult } from 'schemas';
 import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreHeadline, StrategyGamesTable } from './ResultTables';
+
+/**
+ * How the strategy points follow from the losses, the team's own step in bold
+ * if it scored. Each step's points differ, so the points pick out the step.
+ */
+function PointsScale(props: { points: number }) {
+  const { t } = useTranslation();
+  const last = STRATEGY_POINTS_BY_LOSSES.length - 1;
+  return <Stack sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center', display: 'block' }}>
+    {t('strategy.endTable.scale')}{' '}
+    {STRATEGY_POINTS_BY_LOSSES.map((points, losses) => {
+      const step = `${losses}${losses === last ? '+' : ''} → ${points}`;
+      return <Fragment key={losses}>
+        {points === props.points ? <b style={{ color: '#1a1a1a' }}>{step}</b> : step}
+        {losses === last ? '.' : ', '}
+      </Fragment>;
+    })}
+    <br/>
+    {t('strategy.endTable.rules')}
+  </Stack>;
+}
 
 /**
  * Component to display an end game screen with close button, and score
@@ -25,9 +46,6 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
     await toHome();
     window.location.reload();
   };
-  const losses = props.liveResults.filter(it => it === 'lost').length;
-  // The step of the scale the team's points came from, if they scored at all.
-  const reached = props.allPoints > 0 ? Math.min(losses, STRATEGY_POINTS_BY_LOSSES.length - 1) : null;
   return (
     <Stack sx={{
       width: "750px",
@@ -43,21 +61,9 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       <Stack sx={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center' }}>
         {t('strategy.endTable.title')}
       </Stack>
-      <ScoreHeadline points={props.allPoints} max={STRATEGY_POINTS_BY_LOSSES[0]}/>
+      <ScoreHeadline points={props.allPoints} max={strategyPoints(0)}/>
       {props.liveResults.length > 0 && <StrategyGamesTable results={props.liveResults}/>}
-      <Stack sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center', display: 'block' }}>
-        {t('strategy.endTable.scale')}{' '}
-        {STRATEGY_POINTS_BY_LOSSES.map((points, idx) => {
-          const isLast = idx === STRATEGY_POINTS_BY_LOSSES.length - 1;
-          const step = `${idx}${isLast ? '+' : ''} → ${points}`;
-          return <Fragment key={idx}>
-            {idx === reached ? <b style={{ color: '#1a1a1a' }}>{step}</b> : step}
-            {isLast ? '.' : ', '}
-          </Fragment>;
-        })}
-        <br/>
-        {t('strategy.endTable.rules')}
-      </Stack>
+      <PointsScale points={props.allPoints}/>
       <Stack sx={{ fontSize: '15px', textAlign: 'center' }}>
         {t('strategy.endTable.reminder')}
       </Stack>

@@ -8,7 +8,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
-import { STRATEGY_POINTS_BY_LOSSES } from 'game';
+import { strategyPoints } from 'game';
 import { RelayResultsTable, ScoreHeadline, StrategyGamesTable } from './ResultTables';
 
 export function ChooserItem(props: {
@@ -70,7 +70,7 @@ export function ChooserItem(props: {
           <ScoreHeadline size="medium" points={props.status.score} max={
             props.type === 'relay'
               ? props.status.relayProblems?.reduce((sum, it) => sum + it.maxPoints, 0)
-              : STRATEGY_POINTS_BY_LOSSES[0]
+              : strategyPoints(0)
           }/>
           {props.type === 'relay' && props.status.relayProblems &&
             <RelayResultsTable problems={props.status.relayProblems}/>}

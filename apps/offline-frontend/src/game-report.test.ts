@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // business, and a name of its own pins which of the two each branch reaches for.
 const {
   bgioStoragePrefix, boardWrapper, relayMatchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
-  relayResultsStorageKey, strategyResultsStorageKey, relayProblemResults,
+  relayResultsStorageKey, strategyResultsStorageKey,
   sendGameData, gameWrapper, RelayWrapper, Client,
 } = vi.hoisted(() => ({
   bgioStoragePrefix: () => "bgio_",
@@ -18,7 +18,6 @@ const {
   strategyPointsStorageKey: () => "the strategy key",
   relayResultsStorageKey: () => "the relay results key",
   strategyResultsStorageKey: () => "the strategy results key",
-  relayProblemResults: vi.fn(() => [{ maxPoints: 3, points: 2, tries: 2 }]),
   sendGameData: vi.fn(),
   gameWrapper: vi.fn(),
   RelayWrapper: vi.fn(),
@@ -32,7 +31,7 @@ vi.mock("common-frontend", () => ({
 vi.mock("./sendData", () => ({ sendGameData }));
 // The wiring tests read the callback the app hands each reducer; building a real
 // boardgame.io client around it is not what is under test here.
-vi.mock("game", () => ({ gameWrapper, RelayWrapper, relayProblemResults }));
+vi.mock("game", async (importOriginal) => ({ ...await importOriginal<typeof import("game")>(), gameWrapper, RelayWrapper }));
 vi.mock("boardgame.io/react", () => ({ Client }));
 
 import { handleGameReport } from "./game-report";
@@ -58,11 +57,13 @@ describe("handleGameReport", () => {
   });
 
   test("persists the problems of a relay end report for the home page", () => {
-    const G = { points: 2, maxPointsList: [3], previousPoints: [2], previousAnswers: [[]] };
-    handleGameReport({ component: "relay", phase: "end", G });
+    const tries = [{ answer: 1, date: "" }, { answer: 2, date: "" }];
+    handleGameReport({ component: "relay", phase: "end", G: { points: 2, maxPointsList: [3, 4], previousPoints: [2], previousAnswers: [tries, []] } });
 
-    expect(relayProblemResults).toHaveBeenCalledWith({ maxPointsList: [3], previousPoints: [2], previousAnswers: [[]] });
-    expect(localStorage.getItem("the relay results key")).toStrictEqual('[{"maxPoints":3,"points":2,"tries":2}]');
+    expect(JSON.parse(localStorage.getItem("the relay results key") ?? "")).toStrictEqual([
+      { maxPoints: 3, points: 2, tries: 2 },
+      { maxPoints: 4, points: 0, tries: 0 },
+    ]);
   });
 
   test("persists the score of a relay end report", () => {
