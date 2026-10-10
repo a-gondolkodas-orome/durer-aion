@@ -2,7 +2,7 @@ import { Box, Tooltip } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material/styles';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import RemoveIcon from '@mui/icons-material/Remove';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
@@ -17,8 +17,8 @@ const HEADER = '#eeeeee';
 const SOLVED_ON_TRY = ['#3fc523', '#9beb53', '#d5eb42'];
 const WRONG = '#f4b4ae';
 const WON = '#c9efb8';
-// Striped rather than grey, so a problem never answered cannot be mistaken
-// for a header cell.
+// Striped rather than grey, so a problem never answered, or a game the time
+// ran out in, cannot be mistaken for a header cell.
 const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
 
 interface Cell {
@@ -164,7 +164,7 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
 const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string }> = {
   won: { icon: <CheckIcon fontSize="small" sx={{ color: '#1b5e20' }}/>, background: WON },
   lost: { icon: <CloseIcon fontSize="small" sx={{ color: '#8e2b23' }}/>, background: WRONG },
-  draw: { icon: <RemoveIcon fontSize="small" sx={{ color: '#555' }}/>, background: '#fff' },
+  unfinished: { icon: <HourglassEmptyIcon fontSize="small" sx={{ color: '#666' }}/>, background: UNANSWERED },
 };
 
 /** Each live strategy game's result, in the order played. */
@@ -173,7 +173,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   // Spelled out key by key: the i18n check finds a key only as a literal.
   const label = (result: LiveGameResult) => result === 'won'
     ? t('strategy.endTable.won')
-    : result === 'lost' ? t('strategy.endTable.lost') : t('strategy.endTable.draw');
+    : result === 'lost' ? t('strategy.endTable.lost') : t('strategy.endTable.unfinished');
   return <ResultTable
     centred
     header={{ label: t('strategy.endTable.game'), cells: props.results.map((_, idx) => ({ content: `${idx + 1}.` })) }}
@@ -183,7 +183,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
         content: <Box component="span" role="img" aria-label={label(result)} title={label(result)} sx={{ display: 'flex' }}>
           {RESULT_ICON[result].icon}
         </Box>,
-        sx: { backgroundColor: RESULT_ICON[result].background },
+        sx: { background: RESULT_ICON[result].background },
       })),
     }]}
   />;

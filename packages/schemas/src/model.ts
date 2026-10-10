@@ -49,8 +49,9 @@ export interface RelayProblemResult {
   tries: number;
 }
 
-/// How one live (not practice) strategy game ended, from the team's side.
-export type LiveGameResult = 'won' | 'lost' | 'draw';
+/// How one live (not practice) strategy game ended, from the team's side:
+/// `unfinished` is the game the time ran out in.
+export type LiveGameResult = 'won' | 'lost' | 'unfinished';
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 

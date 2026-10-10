@@ -121,7 +121,7 @@
       "result": "Eredmény",
       "won": "Győzelem",
       "lost": "Vereség",
-      "draw": "Döntetlen",
+      "unfinished": "Befejezetlen: lejárt közben az idő",
       "scale": "A pontszám a vereségek számától függ (vereség → pont):",
       "rules": "A gyakorló játszmák nem számítanak. Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, 0 pontot kaptok.",
       "reminder": "Ne feledkezzetek meg a váltóról, ha azzal még nem játszottatok!"

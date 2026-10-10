@@ -193,6 +193,22 @@ describe("gameWrapper high-level logic", () => {
     expect(client.getState()?.G.points).toStrictEqual(6);
   });
 
+  test("records the live game the time ran out in as unfinished", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+    client.moves.lose();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+
+    client.events.endGame?.();
+
+    expect(client.getState()?.G.liveResults).toStrictEqual(["lost", "unfinished"]);
+  });
+
   test("win in test", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();

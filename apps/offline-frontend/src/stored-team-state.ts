@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, isPageState } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -21,9 +21,9 @@ function parseDate(value: unknown): Date | null {
 
 const isCount = (value: unknown): value is number => Number.isInteger(value) && (value as number) >= 0;
 
-/// The home page's relay summary as `toHome` saved it; anything malformed
-/// reads as absent, which the home page shows as no summary.
-export function parseRelayProblems(value: unknown): FinishedMatchStatus['relayProblems'] {
+/// The home page's relay summary as game-report.ts saved it; anything
+/// malformed reads as absent, which the home page shows as no summary.
+function parseRelayProblems(value: unknown): FinishedMatchStatus['relayProblems'] {
   if (!Array.isArray(value) || !value.every(it =>
     isRecord(it) && isCount(it.maxPoints) && isCount(it.points) && isCount(it.tries))) {
     return undefined;
@@ -31,15 +31,17 @@ export function parseRelayProblems(value: unknown): FinishedMatchStatus['relayPr
   return value.map(it => ({ maxPoints: it.maxPoints, points: it.points, tries: it.tries }));
 }
 
-export function parseLiveGames(value: unknown): FinishedMatchStatus['liveGames'] {
-  if (!Array.isArray(value) || !value.every(it => it === 'won' || it === 'lost' || it === 'draw')) {
+function parseLiveGames(value: unknown): FinishedMatchStatus['liveGames'] {
+  if (!Array.isArray(value) || !value.every(it => it === 'won' || it === 'lost' || it === 'unfinished')) {
     return undefined;
   }
   return [...value];
 }
 
-/// What `JSON.parse` makes of a stored value, or undefined if it is not JSON.
-export function parseStoredJson(stored: string | null): unknown {
+/// What `JSON.parse` makes of a stored value, or undefined if there is none
+/// or it is not JSON.
+function readStoredJson(key: string): unknown {
+  const stored = localStorage.getItem(key);
   if (stored === null) {
     return undefined;
   }
@@ -49,6 +51,9 @@ export function parseStoredJson(stored: string | null): unknown {
     return undefined;
   }
 }
+
+export const readStoredRelayProblems = () => parseRelayProblems(readStoredJson(relayResultsStorageKey()));
+export const readStoredLiveGames = () => parseLiveGames(readStoredJson(strategyResultsStorageKey()));
 
 function parseMatchStatus(value: unknown): MatchStatus | null {
   if (!isRecord(value)) {

@@ -126,7 +126,7 @@
       "result": "Result",
       "won": "Win",
       "lost": "Loss",
-      "draw": "Draw",
+      "unfinished": "Unfinished: the time ran out",
       "scale": "Your points depend on the number of losses (losses → points):",
       "rules": "Practice games do not count. If you do not beat the computer twice in a row within 30 minutes, you get 0 points.",
       "reminder": "Don't forget to do the relay too if you haven't done it yet!"
