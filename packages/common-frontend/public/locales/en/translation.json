@@ -102,7 +102,7 @@
     "guessNum": "Guess #{{guessnum}}:",
     "name": "Relay tasks",
     "send": "Submit",
-    "task": "Task #{{num}} ({{maxpoints}})",
+    "task": "Task #{{num}} ({{availablepoints}})",
     "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)",
     "wrongGuess": "Your guess is sadly wrong"
   },
