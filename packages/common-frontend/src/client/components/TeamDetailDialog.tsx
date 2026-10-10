@@ -11,7 +11,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
 import { Countdown } from './Countdown';
-import { RelayEndTableData } from './RelayEndTable';
+import { RelayEndTableData, relayTaskPoints } from './RelayEndTable';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -336,15 +336,10 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
       { props.isRelay && relayG && <Stack>
-      <RelayEndTableData allPoints={relayG.points} task={
-           // TODO .maxpoints
-           [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx) => ({
-            max: it,
-            got: relayG.previousPoints[idx] ?? null,
-            answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
-           })
-           )
-          }/>
+      <RelayEndTableData allPoints={relayG.points} task={relayTaskPoints(relayG).map((task, idx) => ({
+        ...task,
+        answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
+      }))}/>
       </Stack>}
     </Stack>
   </>)

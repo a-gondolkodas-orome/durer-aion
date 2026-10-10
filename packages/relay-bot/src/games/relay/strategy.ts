@@ -1,5 +1,5 @@
 import { State } from 'boardgame.io';
-import { MyGameState } from 'game';
+import { MyGameState, RelayMoveArgs } from 'game';
 
 export interface Problem {
   problemText: string;
@@ -173,22 +173,21 @@ const problems : RelayProblems = {
 }
 
 export function relayStrategy(problemList: Problem[]) {
-  return (state: State<MyGameState>, _botID: string): [(number | string | boolean)[], string] => {
+  return (state: State<MyGameState>, _botID: string): [RelayMoveArgs, string] => {
     if (state.G.numberOfTry === 0) {
       const firstProblem = problemList[state.G.currentProblem];
-      return [[firstProblem.problemText, firstProblem.points, firstProblem.url ?? ""], "firstProblem"];
+      return [[firstProblem.problemText, problemList.map(p => p.points), firstProblem.url ?? ""], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if (state.G.answer === problemList[state.G.currentProblem].answer) {
       correctnessPreviousAnswer = true;
     } else if (state.G.numberOfTry < 3) {
-      return [[state.G.currentProblemMaxPoints - 1], "nextTry"];
+      return [[state.G.currentProblemAvailablePoints - 1], "nextTry"];
     }
 
     if (state.G.currentProblem < problemList.length - 1) {
-      const url = problemList[state.G.currentProblem + 1].url ?? "";
       const nextProblem = problemList[state.G.currentProblem + 1];
-      return [[nextProblem.problemText, nextProblem.points, correctnessPreviousAnswer, url], "newProblem"];
+      return [[nextProblem.problemText, correctnessPreviousAnswer, nextProblem.url ?? ""], "newProblem"];
     }
     return [[correctnessPreviousAnswer], "endGame"];
   }
