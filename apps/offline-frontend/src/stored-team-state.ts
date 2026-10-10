@@ -23,7 +23,7 @@ const isCount = (value: unknown): value is number => Number.isInteger(value) && 
 
 /// The home page's relay summary as game-report.ts saved it; anything
 /// malformed reads as absent, which the home page shows as no summary.
-function parseRelayProblems(value: unknown): FinishedMatchStatus['relayProblems'] {
+function parseRelayResults(value: unknown): FinishedMatchStatus['relayResults'] {
   if (!Array.isArray(value) || !value.every(it =>
     isRecord(it) && isCount(it.maxPoints) && isCount(it.points) && isCount(it.tries))) {
     return undefined;
@@ -31,7 +31,7 @@ function parseRelayProblems(value: unknown): FinishedMatchStatus['relayProblems'
   return value.map(it => ({ maxPoints: it.maxPoints, points: it.points, tries: it.tries }));
 }
 
-function parseLiveGames(value: unknown): FinishedMatchStatus['liveGames'] {
+function parseStrategyResults(value: unknown): FinishedMatchStatus['strategyResults'] {
   if (!Array.isArray(value) || !value.every(it => it === 'won' || it === 'lost' || it === 'unfinished')) {
     return undefined;
   }
@@ -52,8 +52,8 @@ function readStoredJson(key: string): unknown {
   }
 }
 
-export const readStoredRelayProblems = () => parseRelayProblems(readStoredJson(relayResultsStorageKey()));
-export const readStoredLiveGames = () => parseLiveGames(readStoredJson(strategyResultsStorageKey()));
+export const readStoredRelayResults = () => parseRelayResults(readStoredJson(relayResultsStorageKey()));
+export const readStoredStrategyResults = () => parseStrategyResults(readStoredJson(strategyResultsStorageKey()));
 
 function parseMatchStatus(value: unknown): MatchStatus | null {
   if (!isRecord(value)) {
@@ -77,12 +77,12 @@ function parseMatchStatus(value: unknown): MatchStatus | null {
     return null;
   }
   const finished: FinishedMatchStatus = { state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score };
-  const relayProblems = parseRelayProblems(value.relayProblems);
-  const liveGames = parseLiveGames(value.liveGames);
+  const relayResults = parseRelayResults(value.relayResults);
+  const strategyResults = parseStrategyResults(value.strategyResults);
   return {
     ...finished,
-    ...(relayProblems && { relayProblems }),
-    ...(liveGames && { liveGames }),
+    ...(relayResults && { relayResults }),
+    ...(strategyResults && { strategyResults }),
   };
 }
 

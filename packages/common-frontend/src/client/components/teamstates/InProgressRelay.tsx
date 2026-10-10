@@ -130,7 +130,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             task={G.problemText}
             availablePoints={G.currentProblemAvailablePoints}
             serial={G.currentProblem + 1}
-            total={G.maxPointsList.length}
+            taskCount={G.maxPointsList.length}
             pictureUrl={G.url}
           />
         </Stack>

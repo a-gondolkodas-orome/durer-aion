@@ -107,7 +107,7 @@
     "guessNum": "{{guessnum}}. próba:",
     "name": "Váltófeladatok",
     "send": "Küldés",
-    "task": "{{num}}/{{total}}. feladat ({{availablePoints}})",
+    "task": "{{num}}/{{taskCount}}. feladat ({{availablePoints}})",
     "taskImage": "A feladathoz tartozó kép (ha nem töltött be, próbáld meg frissíteni az oldalt!)",
     "wrongGuess": "A válasz sajnos nem volt jó",
     "progress": "Eddig {{points}}"

@@ -337,9 +337,7 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         getServerTimer={() => undefined}
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
-      { props.isRelay && relayG && <Stack>
-      <RelayResultsTable problems={relayProblemRows(relayG)} details answers/>
-      </Stack>}
+      { props.isRelay && relayG && <RelayResultsTable problems={relayProblemRows(relayG)} details answers/>}
     </Stack>
   </>)
 }

@@ -69,13 +69,13 @@ export function ChooserItem(props: {
         <Stack sx={{ gap: '12px', marginBottom: { xs: '10px', md: '16px' } }}>
           <ScoreHeadline size="medium" points={props.status.score} max={
             props.type === 'relay'
-              ? props.status.relayProblems?.reduce((sum, it) => sum + it.maxPoints, 0)
+              ? props.status.relayResults?.reduce((sum, it) => sum + it.maxPoints, 0)
               : strategyPoints(0)
           }/>
-          {props.type === 'relay' && props.status.relayProblems &&
-            <RelayResultsTable problems={props.status.relayProblems}/>}
-          {props.type === 'strategy' && props.status.liveGames && props.status.liveGames.length > 0 &&
-            <StrategyGamesTable results={props.status.liveGames}/>}
+          {props.type === 'relay' && props.status.relayResults &&
+            <RelayResultsTable problems={props.status.relayResults}/>}
+          {props.type === 'strategy' && props.status.strategyResults && props.status.strategyResults.length > 0 &&
+            <StrategyGamesTable results={props.status.strategyResults}/>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
             {t('chooser.filledAt')}: {formatTime(props.status.startAt)} – {formatTime(props.status.endAt)}
           </Stack>

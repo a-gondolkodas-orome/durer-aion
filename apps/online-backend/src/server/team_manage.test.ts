@@ -184,7 +184,7 @@ describe("closeMatch", () => {
 
     await close();
 
-    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9, liveGames: ["lost", "won", "won"] }]]);
+    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9, strategyResults: ["lost", "won", "won"] }]]);
   });
 
   it("finishes a relay match with each problem's points and tries", async () => {
@@ -208,7 +208,7 @@ describe("closeMatch", () => {
     expect(writes).toStrictEqual([["team-1", "relayMatch", "match-1", {
       ...finished,
       score: 3,
-      relayProblems: [{ maxPoints: 3, points: 3, tries: 1 }, { maxPoints: 4, points: 0, tries: 0 }],
+      relayResults: [{ maxPoints: 3, points: 3, tries: 1 }, { maxPoints: 4, points: 0, tries: 0 }],
     }]]);
   });
 
@@ -217,7 +217,7 @@ describe("closeMatch", () => {
 
     await close();
 
-    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9, liveGames: ["lost", "won", "won"] }]]);
+    expect(writes).toStrictEqual([["team-1", "strategyMatch", "match-1", { ...finished, score: 9, strategyResults: ["lost", "won", "won"] }]]);
   });
 
   it("leaves the team's new match alone when a match replaced by a reset ends", async () => {

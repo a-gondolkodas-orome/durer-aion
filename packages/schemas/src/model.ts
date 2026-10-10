@@ -28,7 +28,7 @@ export interface InProgressMatchStatus {
 /// `G.points` in the match state is the result — `scripts/admin.py` scores
 /// from it and reports where `score` disagrees.
 ///
-/// `relayProblems` and `liveGames` are copied from the match state alongside
+/// `relayResults` and `strategyResults` are copied from the match state alongside
 /// `score`, for the home page's summary: the first on a relay match, the
 /// second on a strategy match. A record closed before they existed has neither.
 export interface FinishedMatchStatus {
@@ -37,8 +37,8 @@ export interface FinishedMatchStatus {
   endAt: Date;
   matchID: string;
   score: number;
-  relayProblems?: RelayProblemResult[];
-  liveGames?: LiveGameResult[];
+  relayResults?: RelayProblemResult[];
+  strategyResults?: LiveGameResult[];
 }
 
 /// One relay problem as the match ended: `tries` counts the answers given, so

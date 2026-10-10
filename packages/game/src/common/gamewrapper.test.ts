@@ -171,13 +171,17 @@ describe("gameWrapper high-level logic", () => {
     ]);
   });
 
+  const startGame = (client: ReturnType<typeof Client>, difficulty: "live" | "test") => {
+    client.moves.chooseNewGameType(difficulty);
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+  };
+
   test("records each live game's result in order, the match-ending win included", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
     const play = (difficulty: "live" | "test", move: "win" | "lose") => {
-      client.moves.chooseNewGameType(difficulty);
-      client.moves.setStartingPosition({ data: "startingPosition" });
-      client.moves.chooseRole("0");
+      startGame(client, difficulty);
       client.moves[move]();
     };
 
@@ -196,13 +200,9 @@ describe("gameWrapper high-level logic", () => {
   test("records the live game the time ran out in as unfinished", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
-    client.moves.chooseNewGameType("live");
-    client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole("0");
+    startGame(client, "live");
     client.moves.lose();
-    client.moves.chooseNewGameType("live");
-    client.moves.setStartingPosition({ data: "startingPosition" });
-    client.moves.chooseRole("0");
+    startGame(client, "live");
 
     client.events.endGame?.();
 

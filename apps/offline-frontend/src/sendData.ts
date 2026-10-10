@@ -70,7 +70,7 @@ export interface SendGameDataParams {
   // Only these fields are read here (relay's problem counter and the
   // wrapper's score), and the results game-report.ts saves for the home page;
   // the rest of G rides along in the JSON payload.
-  G?: { currentProblem?: number; points?: number } & Partial<RelayResultsSource> & { liveResults?: FinishedMatchStatus["liveGames"] };
+  G?: { currentProblem?: number; points?: number } & Partial<RelayResultsSource> & { liveResults?: FinishedMatchStatus["strategyResults"] };
   ctx?: Ctx;
 }
 

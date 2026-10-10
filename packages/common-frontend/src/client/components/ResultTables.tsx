@@ -171,9 +171,13 @@ const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string 
 export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   const { t } = useTranslation();
   // Spelled out key by key: the i18n check finds a key only as a literal.
-  const label = (result: LiveGameResult) => result === 'won'
-    ? t('strategy.endTable.won')
-    : result === 'lost' ? t('strategy.endTable.lost') : t('strategy.endTable.unfinished');
+  const label = (result: LiveGameResult) => {
+    switch (result) {
+      case 'won': return t('strategy.endTable.won');
+      case 'lost': return t('strategy.endTable.lost');
+      case 'unfinished': return t('strategy.endTable.unfinished');
+    }
+  };
   return <ResultTable
     centred
     header={{ label: t('strategy.endTable.game'), cells: props.results.map((_, idx) => ({ content: `${idx + 1}.` })) }}
