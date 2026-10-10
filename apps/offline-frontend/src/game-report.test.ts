@@ -7,10 +7,11 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // this app really stores under: what the helpers return is storage-keys.test.ts's
 // business, and a name of its own pins which of the two each branch reaches for.
 const {
-  BGIO_LOCALSTORAGE_PREFIX, boardWrapper, relayPointsStorageKey, strategyPointsStorageKey,
+  BGIO_LOCALSTORAGE_PREFIX, relayMatchStorageKey, boardWrapper, relayPointsStorageKey, strategyPointsStorageKey,
   sendGameData, gameWrapper, RelayWrapper, Client,
 } = vi.hoisted(() => ({
   BGIO_LOCALSTORAGE_PREFIX: "bgio_",
+  relayMatchStorageKey: (gameName: string) => "bgio_" + gameName,
   boardWrapper: vi.fn(),
   relayPointsStorageKey: () => "the relay key",
   strategyPointsStorageKey: () => "the strategy key",
@@ -20,7 +21,7 @@ const {
   Client: vi.fn(),
 }));
 
-vi.mock("common-frontend", () => ({ BGIO_LOCALSTORAGE_PREFIX, boardWrapper, relayPointsStorageKey, strategyPointsStorageKey }));
+vi.mock("common-frontend", () => ({ BGIO_LOCALSTORAGE_PREFIX, relayMatchStorageKey, boardWrapper, relayPointsStorageKey, strategyPointsStorageKey }));
 vi.mock("./sendData", () => ({ sendGameData }));
 // The wiring tests read the callback the app hands each reducer; building a real
 // boardgame.io client around it is not what is under test here.

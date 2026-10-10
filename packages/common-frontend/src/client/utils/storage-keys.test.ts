@@ -1,7 +1,7 @@
 // cspell:ignore aegnjrlearnjla Zrzcvp
 // @vitest-environment jsdom
 import { describe, test, expect } from "vitest";
-import { setLocalStorageNamespace, teamStateStorageKey, loginMarkerStorageKey, legacyGuidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey } from "./storage-keys";
+import { setLocalStorageNamespace, teamStateStorageKey, loginMarkerStorageKey, legacyGuidStorageKey, bgioStoragePrefix, relayPointsStorageKey, strategyPointsStorageKey, relayMatchStorageKey } from "./storage-keys";
 import { UserModel } from "../hooks/user-model";
 import type { ClientRepository } from "../api-repository-interface";
 
@@ -37,7 +37,7 @@ describe("storage keys", () => {
     localStorage.setItem(teamStateStorageKey(), "own team state");
     localStorage.setItem(loginMarkerStorageKey(), "own login");
     localStorage.setItem(legacyGuidStorageKey(), "own old guid");
-    localStorage.setItem(bgioStoragePrefix() + "relay_6_d_a_state", "own saved match");
+    localStorage.setItem(relayMatchStorageKey("relay_6_d_a") + "_state", "own saved match");
     localStorage.setItem(relayPointsStorageKey(), "own relay score");
     localStorage.setItem(strategyPointsStorageKey(), "own strategy score");
 
@@ -46,7 +46,7 @@ describe("storage keys", () => {
     expect(localStorage.getItem(teamStateStorageKey())).toBeNull();
     expect(localStorage.getItem(loginMarkerStorageKey())).toBeNull();
     expect(localStorage.getItem(legacyGuidStorageKey())).toBeNull();
-    expect(localStorage.getItem(bgioStoragePrefix() + "relay_6_d_a_state")).toBeNull();
+    expect(localStorage.getItem(relayMatchStorageKey("relay_6_d_a") + "_state")).toBeNull();
     expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
     expect(localStorage.getItem(strategyPointsStorageKey())).toBeNull();
     expect(localStorage.getItem("aegnjrlearnjla")).toStrictEqual("other app's team state");

@@ -9,7 +9,7 @@ import type { BotStrategy } from './botwrapper';
 import { handleGameReport } from './game-report';
 // Through the package entry, not the src path: a deep import would load a
 // second copy of the module, one the app's setLocalStorageNamespace never set.
-import { bgioStoragePrefix } from 'common-frontend';
+import { relayMatchStorageKey } from 'common-frontend';
 import type { ReactNode } from 'react';
 
 export function ClientRelayWithBot(
@@ -24,7 +24,7 @@ export function ClientRelayWithBot(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: bgioStoragePrefix() + game.name,
+        storageKey: relayMatchStorageKey(game.name),
       }
     ),
     numPlayers: 2,

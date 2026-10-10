@@ -1,7 +1,7 @@
 import { Client } from 'boardgame.io/react';
 import { Local } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameStateMixin, GameType } from 'game';
-import { boardWrapper, BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend';
+import { boardWrapper, BGIO_LOCALSTORAGE_PREFIX, relayMatchStorageKey } from 'common-frontend';
 import type { RelayBoard, StrategyBoard } from 'common-frontend';
 import type { GameRelay, MyGameState as RelayGameState } from 'game';
 import { RelayWrapper } from 'game';
@@ -47,7 +47,7 @@ export function ClientRelayWithBot(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: BGIO_LOCALSTORAGE_PREFIX + game.name,
+        storageKey: relayMatchStorageKey(game.name),
       }
     ),
     numPlayers: 2,

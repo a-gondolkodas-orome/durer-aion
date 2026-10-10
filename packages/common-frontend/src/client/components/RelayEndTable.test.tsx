@@ -9,8 +9,4 @@ describe("relayTaskPoints", () => {
       { max: 4, got: null },
     ]);
   });
-
-  test("a match saved without the list falls back to the competition relay's points", () => {
-    expect(relayTaskPoints({ previousPoints: [3, 1] }).map(task => task.max)).toStrictEqual([3, 3, 4, 4, 4, 5, 5, 6, 6]);
-  });
 });

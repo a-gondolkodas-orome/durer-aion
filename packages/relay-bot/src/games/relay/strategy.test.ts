@@ -25,14 +25,14 @@ describe("relayStrategy", () => {
     expect(args).toStrictEqual(["first", [2, 3], ""]);
   });
 
-  test("advancing carries the next problem's points", () => {
+  test("advancing serves the next problem", () => {
     const [args, move] = relayStrategy(problemList)(
       stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120, currentProblemMaxPoints: 2 }),
       "1",
     );
 
     expect(move).toStrictEqual("newProblem");
-    expect(args).toStrictEqual(["second", 3, true, ""]);
+    expect(args).toStrictEqual(["second", true, ""]);
   });
 });
 

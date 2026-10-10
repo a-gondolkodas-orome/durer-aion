@@ -31,3 +31,8 @@ export const legacyGuidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
 export const relayPointsStorageKey = () => namespace + "RelayPoints";
 export const strategyPointsStorageKey = () => namespace + "StrategyPoints";
+// Where a local client saves a relay match. The version changes with the shape
+// of the relay's game state: a match saved under an older shape scores NaN, so
+// it is left behind rather than loaded. Still under the bgio prefix, so logout
+// clears both.
+export const relayMatchStorageKey = (gameName = "") => bgioStoragePrefix() + gameName + "_v2";

@@ -16,9 +16,9 @@ export interface MyGameState {
   previousAnswers: Answer[][];
   previousPoints: number[];
   currentProblemMaxPoints: number;
-  // Every problem's max points, in order, so the end tables can show problems
-  // not reached yet. Absent from a match saved before the judge sent it.
-  maxPointsList?: number[];
+  // Every problem's max points, in order: what each problem is worth on its
+  // first try, and what the end tables show for problems not reached yet.
+  maxPointsList: number[];
   numberOfTry: number;
   millisecondsRemaining: number;
   start: string;
@@ -62,7 +62,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         correctnessPreviousAnswer: null,
         previousAnswers: [[]],
         previousPoints: [],
-        currentProblemMaxPoints: 3, // placeholder. TODO: rename to currentProblemAvailablePoints
+        currentProblemMaxPoints: 0,
+        maxPointsList: [],
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
         start: new Date().toISOString(),
@@ -87,8 +88,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
             G.url = url;
             G.problemText = problemText;
-            G.currentProblemMaxPoints = maxPointsList[G.currentProblem];
             G.maxPointsList = maxPointsList;
+            G.currentProblemMaxPoints = maxPointsList[G.currentProblem];
             G.numberOfTry = 1;
             events.endTurn();
           },
@@ -146,7 +147,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
           sendRelayFunction({ component: "relay", phase: "end", G: G, ctx: ctx });
         },
         moves: {
-          newProblem({ G, _ctx, playerID, events }, problemText: string, nextProblemMaxPoints: number, correctnessPreviousAnswer: boolean, url: string) {
+          newProblem({ G, _ctx, playerID, events }, problemText: string, correctnessPreviousAnswer: boolean, url: string) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               // He is not the bot OR G.answer is null (and it is not the first question)
               return INVALID_MOVE;
@@ -162,9 +163,9 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             } else {
               G.previousPoints[G.currentProblem] = 0;
             }
-            G.currentProblemMaxPoints = nextProblemMaxPoints;
             G.answer = null;
             G.currentProblem++;
+            G.currentProblemMaxPoints = G.maxPointsList[G.currentProblem];
             G.numberOfTry = 1;
             events.endTurn();
           },
