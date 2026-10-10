@@ -15,7 +15,8 @@ export interface MyGameState {
   correctnessPreviousAnswer: boolean | null;
   previousAnswers: Answer[][];
   previousPoints: number[];
-  currentProblemMaxPoints: number;
+  // What a correct answer earns now: the judge lowers it after each wrong try.
+  currentProblemAvailablePoints: number;
   // Every problem's max points, in order: what each problem is worth on its
   // first try, and what the end tables show for problems not reached yet.
   maxPointsList: number[];
@@ -62,7 +63,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         correctnessPreviousAnswer: null,
         previousAnswers: [[]],
         previousPoints: [],
-        currentProblemMaxPoints: 0,
+        currentProblemAvailablePoints: 0,
         maxPointsList: [],
         numberOfTry: 0,
         millisecondsRemaining: 1000 * lengthOfCompetition,
@@ -89,7 +90,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.url = url;
             G.problemText = problemText;
             G.maxPointsList = maxPointsList;
-            G.currentProblemMaxPoints = maxPointsList[G.currentProblem];
+            G.currentProblemAvailablePoints = maxPointsList[G.currentProblem];
             G.numberOfTry = 1;
             events.endTurn();
           },
@@ -158,18 +159,18 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.previousAnswers.push(Array(0));
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
             if (correctnessPreviousAnswer) {
-              G.points += G.currentProblemMaxPoints;
-              G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
+              G.points += G.currentProblemAvailablePoints;
+              G.previousPoints[G.currentProblem] = G.currentProblemAvailablePoints;
             } else {
               G.previousPoints[G.currentProblem] = 0;
             }
             G.answer = null;
             G.currentProblem++;
-            G.currentProblemMaxPoints = G.maxPointsList[G.currentProblem];
+            G.currentProblemAvailablePoints = G.maxPointsList[G.currentProblem];
             G.numberOfTry = 1;
             events.endTurn();
           },
-          nextTry({ G, _ctx, playerID, events }, maxPoints: number) {
+          nextTry({ G, _ctx, playerID, events }, availablePoints: number) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               return INVALID_MOVE;
             }
@@ -177,7 +178,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.answer = null;
             G.correctnessPreviousAnswer = false;
             G.numberOfTry++;
-            G.currentProblemMaxPoints = maxPoints;
+            G.currentProblemAvailablePoints = availablePoints;
             events.endTurn();
           },
           submitAnswer({ G, _ctx, playerID, events }, answer: number) {
@@ -194,8 +195,8 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             G.previousAnswers[G.currentProblem].push({ answer: G.answer, date: new Date().toISOString() });
             G.correctnessPreviousAnswer = correctnessPreviousAnswer;
             if (correctnessPreviousAnswer) {
-              G.points += G.currentProblemMaxPoints;
-              G.previousPoints[G.currentProblem] = G.currentProblemMaxPoints;
+              G.points += G.currentProblemAvailablePoints;
+              G.previousPoints[G.currentProblem] = G.currentProblemAvailablePoints;
             } else {
               G.previousPoints[G.currentProblem] = 0;
             }

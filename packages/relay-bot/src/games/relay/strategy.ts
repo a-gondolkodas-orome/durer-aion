@@ -184,7 +184,7 @@ export function relayStrategy(problemList: Problem[]) {
     if (state.G.answer === problemList[state.G.currentProblem].answer) {
       correctnessPreviousAnswer = true;
     } else if (state.G.numberOfTry < 3) {
-      return [[state.G.currentProblemMaxPoints - 1], "nextTry"];
+      return [[state.G.currentProblemAvailablePoints - 1], "nextTry"];
     }
 
     if (state.G.currentProblem < problemList.length - 1) {

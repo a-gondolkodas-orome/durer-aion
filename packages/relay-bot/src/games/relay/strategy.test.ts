@@ -27,7 +27,7 @@ describe("relayStrategy", () => {
 
   test("advancing serves the next problem", () => {
     const [args, move] = relayStrategy(problemList)(
-      stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120, currentProblemMaxPoints: 2 }),
+      stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120, currentProblemAvailablePoints: 2 }),
       "1",
     );
 
@@ -63,7 +63,7 @@ describe("a relay round against the bot", () => {
     const client = startRound();
 
     expect(client.getState()?.G.problemText).toStrictEqual("first");
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(2);
     expect(client.getState()?.G.numberOfTry).toStrictEqual(1);
   });
 
@@ -74,7 +74,7 @@ describe("a relay round against the bot", () => {
     letTheBotAnswer(client);
 
     expect(client.getState()?.G.numberOfTry).toStrictEqual(2);
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(1);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(1);
     expect(client.getState()?.G.correctnessPreviousAnswer).toBe(false);
     expect(client.getState()?.G.problemText).toStrictEqual("first");
   });

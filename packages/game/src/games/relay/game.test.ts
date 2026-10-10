@@ -13,7 +13,7 @@ describe("GameRelay first problem points", () => {
     client.moves.startGame();
     client.moves.firstProblem("first problem text", [2, 3], "");
 
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(2);
     expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
   });
 
@@ -28,7 +28,7 @@ describe("GameRelay first problem points", () => {
 
     expect(client.getState()?.G.points).toStrictEqual(2);
     expect(client.getState()?.G.previousPoints[0]).toStrictEqual(2);
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(3);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(3);
   });
 });
 
