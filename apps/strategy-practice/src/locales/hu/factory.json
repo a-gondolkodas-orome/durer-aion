@@ -47,9 +47,11 @@
   },
   "undo": "Visszavonás",
   "variant": {
+    "full": "Teljes",
     "legend": "Változat",
     "level": "{{number}}. szint",
     "noBotStrategy": "Nincs gépi stratégia megadva",
-    "notAlwaysOptimal": "A gép nem minden esetben tud nyerő lépést találni."
+    "notAlwaysOptimal": "A gép nem minden esetben tud nyerő lépést találni.",
+    "test": "Teszt"
   }
 }

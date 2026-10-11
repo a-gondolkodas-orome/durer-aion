@@ -1,15 +1,13 @@
 import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { LanguageSelector, translate, useLanguage } from 'language';
+import { LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
-import { gameList } from '../../games/gameList';
 
 export const GameHeader = () => {
   const { t } = useTranslation('factory');
-  const { language } = useLanguage();
   const gameId = useLocation().pathname.split('/').pop();
-  const gameEntry = gameList[gameId!];
-  const title = translate(gameEntry?.title ?? gameEntry?.name ?? '', language);
+  // The longer title where a game has one, its name otherwise.
+  const title = t([`${gameId}.title`, `${gameId}.name`], { ns: 'catalog' });
   return (
   <>
     <header className="primary-header">

@@ -251,7 +251,8 @@ strategy, keyboard and mobile usability.
 
 Hungarian is the default, English is added game by game; a game may ship in
 Hungarian only. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
-one per game folder, plus `factory` for the chrome around every game. The
+one per game folder, `factory` for the chrome around every game, `overview`, and
+`catalog` for each game's name and title, under its `gameList.ts` key. The
 recommended i18n Ally VS Code extension shows the two languages side by side.
 
 A game's rule and step description are small components calling
@@ -259,10 +260,11 @@ A game's rule and step description are small components calling
 the examples. Keys and namespaces are literals, so that i18n Ally and
 `npm run i18n:check` can follow them, and the two languages of a key carry the
 same placeholders. `{{size, numberAdjective}}` adds the Hungarian
-suffix: *6 × 6-os*.
+suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
+stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
+factory's `testVariantLabel` and `fullVariantLabel`.
 
-Games not moved over yet still write `t({ hu: '…', en: '…' })`, as do variant
-labels, role labels and `gameList.ts`
+Games not moved over yet still write `t({ hu: '…', en: '…' })`
 ([#257](https://github.com/a-gondolkodas-orome/durer-aion/issues/257)).
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for

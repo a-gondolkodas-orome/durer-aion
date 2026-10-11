@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
-import { strategyGameFactory, type Ctx } from 'strategy-game-factory';
+import { strategyGameFactory, testVariantLabel, fullVariantLabel, type Ctx } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { makeBoardClient } from '../board-client';
 import { type Board } from '../gameplay';
@@ -23,16 +23,13 @@ const StepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) => {
 export const SharkChase4 = strategyGameFactory({
   presentation: {
     rule: <Rule />,
-    roleLabels: [
-      { hu: 'Kutató', en: 'Researcher' },
-      { hu: 'Cápa', en: 'Shark' }
-    ],
+    roleLabels: [t => t('shark-chase:role.researcher'), t => t('shark-chase:role.shark')],
     getPlayerStepDescription: ({ board, ctx }) => <StepDescription board={board} ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: fullVariantLabel, isDefault: true }
   ]
 });

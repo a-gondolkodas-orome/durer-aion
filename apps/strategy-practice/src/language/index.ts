@@ -6,4 +6,4 @@
 export { LanguageProvider } from './language-context';
 export { LanguageSelector } from './language-selector';
 export { useLanguage, useTranslation, translate } from 'strategy-engine/react';
-export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from 'strategy-engine';
+export type { I18nString, I18nNode, Label, Language, Translatable, TranslatableNode } from 'strategy-engine';

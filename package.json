@@ -40,7 +40,7 @@
     "site:build": "node scripts/assemble-site.mjs",
     "site:serve": "node scripts/serve-site.mjs",
     "db:up": "docker run -it --rm -e POSTGRES_PASSWORD=postgres -p 127.0.0.1:5432:5432 postgres:17.11",
-    "i18n:check": "i18n-check --format i18next --source hu --locales packages/common-frontend/public/locales apps/strategy-practice/src/locales --unused ./**/src"
+    "i18n:check": "i18n-check --format i18next --source hu --locales packages/common-frontend/public/locales apps/strategy-practice/src/locales --exclude \"apps/strategy-practice/src/locales/*/catalog.json\" --unused ./**/src && i18n-check --format i18next --source hu --locales apps/strategy-practice/src/locales --only missingKeys invalidKeys"
   },
   "browserslist": {
     "production": [

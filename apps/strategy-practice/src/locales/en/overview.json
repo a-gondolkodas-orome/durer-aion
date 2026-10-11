@@ -1,0 +1,34 @@
+{
+  "filters": {
+    "category": "Category",
+    "clear": "Clear filters",
+    "toggle": "Filters",
+    "type": "Type"
+  },
+  "icon": {
+    "board": "Board",
+    "cards": "Cards",
+    "chess": "Chess",
+    "coins": "Coins",
+    "coloring": "Colouring",
+    "dominoes": "Dominoes",
+    "house": "House",
+    "number": "Numbers",
+    "piles": "Piles",
+    "pursuit": "Pursuit",
+    "pyramid": "Pyramid",
+    "scissor": "Rock-paper-scissors",
+    "smallGraph": "Graph"
+  },
+  "intro": "A <i>strategy game</i> is a two-player game with no luck involved: the right strategy always wins, making it essentially a maths puzzle. The games below, ranging from category A to E+ in difficulty, all featured in the <durerinfo>Dürer Competition</durerinfo>.",
+  "round": {
+    "final": "final"
+  },
+  "section": {
+    "AB": "For grades 5–8 (A–B category)",
+    "CDE": "For grades 9–12 (C-D-E category)",
+    "featured": "Featured games"
+  },
+  "siteName": "Dürer games",
+  "title": "Dürer Strategy Games"
+}

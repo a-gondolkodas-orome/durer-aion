@@ -1,6 +1,6 @@
 import type { FC, SVGProps } from 'react';
 import type { IconKey } from '../games/gameList';
-import type { I18nString } from 'language';
+import type { TFunction } from 'i18next';
 import { ScissorSvg } from '../games/shared/scissor-svg';
 
 // Small, self-contained, monochrome icons for the overview cards. Everything is
@@ -157,18 +157,18 @@ export const GameIcon = ({ iconKey, ...rest }: { iconKey: IconKey } & IconProps)
 // Human-readable names for the icon types, used as the accessible label and
 // tooltip for the overview's "filter by type" buttons (which show only the
 // glyph).
-export const iconLabels: Record<IconKey, I18nString> = {
-  chess: { hu: 'Sakk', en: 'Chess' },
-  board: { hu: 'Tábla', en: 'Board' },
-  coloring: { hu: 'Színezés', en: 'Colouring' },
-  coins: { hu: 'Érmék', en: 'Coins' },
-  number: { hu: 'Számok', en: 'Numbers' },
-  'small-graph': { hu: 'Gráf', en: 'Graph' },
-  piles: { hu: 'Kupacok', en: 'Piles' },
-  cards: { hu: 'Kártyák', en: 'Cards' },
-  pursuit: { hu: 'Üldözés', en: 'Pursuit' },
-  pyramid: { hu: 'Piramis', en: 'Pyramid' },
-  dominoes: { hu: 'Dominó', en: 'Dominoes' },
-  house: { hu: 'Ház', en: 'House' },
-  scissor: { hu: 'Kő-papír-olló', en: 'Rock-paper-scissors' }
-};
+export const iconLabels = (t: TFunction<'overview'>): Record<IconKey, string> => ({
+  chess: t('icon.chess'),
+  board: t('icon.board'),
+  coloring: t('icon.coloring'),
+  coins: t('icon.coins'),
+  number: t('icon.number'),
+  'small-graph': t('icon.smallGraph'),
+  piles: t('icon.piles'),
+  cards: t('icon.cards'),
+  pursuit: t('icon.pursuit'),
+  pyramid: t('icon.pyramid'),
+  dominoes: t('icon.dominoes'),
+  house: t('icon.house'),
+  scissor: t('icon.scissor')
+});
