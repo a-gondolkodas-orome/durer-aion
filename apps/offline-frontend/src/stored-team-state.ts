@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, RelayProblemResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -23,12 +23,11 @@ const isCount = (value: unknown): value is number => typeof value === 'number' &
 
 /// The home page's relay summary as game-report.ts saved it; anything
 /// malformed reads as absent, which the home page shows as no summary.
+const isRelayProblemResult = (value: unknown): value is RelayProblemResult =>
+  isRecord(value) && isCount(value.maxPoints) && isCount(value.points) && isCount(value.tries);
+
 function parseRelayResults(value: unknown): FinishedMatchStatus['relayResults'] {
-  if (!Array.isArray(value) || !value.every(it =>
-    isRecord(it) && isCount(it.maxPoints) && isCount(it.points) && isCount(it.tries))) {
-    return undefined;
-  }
-  return value.map(it => ({ maxPoints: it.maxPoints, points: it.points, tries: it.tries }));
+  return Array.isArray(value) && value.every(isRelayProblemResult) ? value : undefined;
 }
 
 const isLiveGameResult = (value: unknown): value is LiveGameResult =>

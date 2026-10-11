@@ -30,6 +30,7 @@
     "unexpected": "Váratlan hiba történt"
   },
   "general": {
+    "backHome": "Vissza a kezdőlapra",
     "loading": "Játék vagy feladat betöltése…",
     "points": "{{count}} pont",
     "pointsUnit": "pont",
@@ -79,10 +80,9 @@
   },
   "relay": {
     "endTable": {
-      "back": "Vissza a kezdőlapra",
       "selectOtherRound": "Fordulóválasztás",
       "point": "Pont",
-      "reminder": "Ne feledkezzetek meg a stratégiás játékról, ha azzal még nem játszottatok!",
+      "reminder": "Ne feledkezzetek meg a stratégiás játékról sem!",
       "task": "Feladat",
       "title": "A váltó eredménye",
       "time": "Eltelt idő",
@@ -121,7 +121,7 @@
       "losses": "Vereség",
       "lost": "Vereség",
       "points": "Pont",
-      "reminder": "Ne feledkezzetek meg a váltóról, ha azzal még nem játszottatok!",
+      "reminder": "Ne feledkezzetek meg a váltóról sem!",
       "result": "Eredmény",
       "rules": "A gyakorló játszmák nem számítanak. Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, 0 pontot kaptok.",
       "title": "A stratégiás játék eredménye",

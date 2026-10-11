@@ -4,7 +4,7 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState, relayProblemResults } from 'game';
 import { Dialog } from '@mui/material';
-import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
+import { useBackToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
@@ -25,17 +25,9 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
   const clientRepo = useClientRepo();
-  const refreshState = useRefreshTeamState();
-  const toHome = useToHome();
+  const backToHome = useBackToHome();
   const theme = useTheme();
   const { t } = useTranslation();
-  // Named so the handler below can stay synchronous: React ignores what an
-  // event handler returns, so an async one leaves its promise unhandled.
-  const backToHome = async () => {
-    await refreshState();
-    await toHome();
-    window.location.reload();
-  };
 
   useEffect(() => {
     if (!ctx.gameover) {
@@ -83,7 +75,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
         } }}
         open={
           finished
-        } onClose={() => void backToHome()}>
+        } onClose={backToHome}>
           <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemRows(G)}/>
         </Dialog>
       <Stack sx={{

@@ -1,34 +1,18 @@
-import { useLogout, useRefreshTeamState, useTeamState, useToHome } from '../hooks/user-hooks';
+import { useBackToHome, useLogout, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { EndCard } from './EndCard';
 import { RelayResultsTable } from './ResultTables';
 import { relayMaxPoints, type RelayProblemDetails } from './relay-results';
 
 /**
- * Component to display an end game screen with close button, and score
- * @param props selectRound: the close button leads back to the round selector
- * (by logging out) instead of reloading into the competition home page
- * @returns End screen
+ * The relay's end screen. With `selectRound`, the button logs out to the round
+ * selector, which also clears the saved match so the round can be replayed.
  */
 export function RelayEndTable(props: { allPoints: number, problems: RelayProblemDetails[], selectRound?: boolean }) {
-  const refreshState = useRefreshTeamState();
-  const toHome = useToHome();
   const logout = useLogout();
+  const backToHome = useBackToHome(props.selectRound ? logout : undefined);
   const team = useTeamState();
   const { t } = useTranslation();
-  // Named so the handlers below can stay synchronous: React ignores what an
-  // event handler returns, so an async one leaves its promise unhandled.
-  const backToHome = async () => {
-    await refreshState();
-    await toHome();
-    if (props.selectRound) {
-      // Logging out leads back to the round selector, and it also clears
-      // the saved match so the round can be replayed later
-      await logout();
-    } else {
-      window.location.reload();
-    }
-  };
 
   return (
     <EndCard
@@ -36,8 +20,8 @@ export function RelayEndTable(props: { allPoints: number, problems: RelayProblem
       points={props.allPoints}
       max={relayMaxPoints(props.problems)}
       reminder={!props.selectRound && team?.strategyMatch.state === 'NOT STARTED' ? t('relay.endTable.reminder') : undefined}
-      backLabel={props.selectRound ? t('relay.endTable.selectOtherRound') : t('relay.endTable.back')}
-      onBack={() => void backToHome()}
+      backLabel={props.selectRound ? t('relay.endTable.selectOtherRound') : t('general.backHome')}
+      onBack={backToHome}
     >
       <RelayResultsTable problems={props.problems} details transposeOnPhone/>
     </EndCard>

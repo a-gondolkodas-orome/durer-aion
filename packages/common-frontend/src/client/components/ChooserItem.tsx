@@ -24,8 +24,10 @@ export function ChooserItem(props: {
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const theme = useTheme();
   const { t } = useTranslation();
-  // A finished match saved before its summary existed is also saved under an
-  // older key, so reopening it would start a fresh match instead.
+  // Without a saved summary there may be no saved match to reopen either: a
+  // record from before the summary is under an older key, and a local relay
+  // left to run out of time never reports its end (#613). Reopening would then
+  // start a fresh match.
   const hasDetails = props.status.state === "IN PROGRESS" || (props.status.state === "FINISHED" &&
     (props.type === 'relay' ? props.status.relayResults : props.status.strategyResults) !== undefined);
 

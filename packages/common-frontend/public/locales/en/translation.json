@@ -30,6 +30,7 @@
     "unexpected": "An unexpected error occurred"
   },
   "general": {
+    "backHome": "Back to the home page",
     "loading": "Loading game or task…",
     "points_one": "1 point",
     "points_other": "{{count}} points",
@@ -82,10 +83,9 @@
   },
   "relay": {
     "endTable": {
-      "back": "Back to the home page",
       "selectOtherRound": "Select other round",
       "point": "Points",
-      "reminder": "Don't forget to play with the strategy game too if you haven't done yet!",
+      "reminder": "Don't forget to play the strategy game too!",
       "task": "Task",
       "title": "Relay results",
       "time": "Time spent",
@@ -126,7 +126,7 @@
       "losses": "Losses",
       "lost": "Loss",
       "points": "Points",
-      "reminder": "Don't forget to do the relay too if you haven't done it yet!",
+      "reminder": "Don't forget to do the relay too!",
       "result": "Result",
       "rules": "Practice games do not count. If you do not beat the computer twice in a row within 30 minutes, you get 0 points.",
       "title": "Strategy game results",

@@ -35,6 +35,7 @@ export const strategyPointsStorageKey = () => namespace + "StrategyPoints";
 // a relay's per-problem results, a strategy match's live game results.
 export const relayResultsStorageKey = () => namespace + "RelayResults";
 export const strategyResultsStorageKey = () => namespace + "StrategyResults";
-// Where a local client saves a match. Bump the version when a game's state
-// changes shape; logout clears every version under the bgio prefix.
+// Where a local client saves a match. One version for every game: bump it when
+// any game's state changes shape. Logout clears every version under the bgio
+// prefix.
 export const matchStorageKey = (gameName: string) => bgioStoragePrefix() + gameName + "_v2";

@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { STRATEGY_POINTS_BY_LOSSES } from 'game';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
 import { formatDuration, type RelayProblemDetails } from './relay-results';
 
@@ -18,7 +19,7 @@ const HEADER = '#eeeeee';
 // telling hues apart.
 const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
 const WRONG = '#f4b4ae';
-export const WON = '#c9efb8';
+const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
 // ran out in, cannot be mistaken for a header cell.
 const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
@@ -224,6 +225,30 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
       })),
     }]}
   />;
+}
+
+/**
+ * How the strategy points follow from the losses, the team's own column
+ * marked if it scored. Each column's points differ, so the points pick it out.
+ */
+export function PointsScale(props: { points: number }) {
+  const { t } = useTranslation();
+  const last = STRATEGY_POINTS_BY_LOSSES.length - 1;
+  const mark = (points: number) => points === props.points ? { backgroundColor: WON, fontWeight: 700 } : undefined;
+  return <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+    <ResultTable
+      centred
+      headerLabel={t('strategy.endTable.losses')}
+      columnLabels={STRATEGY_POINTS_BY_LOSSES.map((_, losses) => `${losses}${losses === last ? '+' : ''}`)}
+      rows={[{
+        label: t('strategy.endTable.points'),
+        cells: STRATEGY_POINTS_BY_LOSSES.map(points => ({ content: points, sx: mark(points) })),
+      }]}
+    />
+    <Box sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center' }}>
+      {t('strategy.endTable.rules')}
+    </Box>
+  </Box>;
 }
 
 /** A match's score as the headline of its results: big, out of its maximum. */
