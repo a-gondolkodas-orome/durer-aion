@@ -1,0 +1,4 @@
+{
+  "rule": "There are several piles of matchsticks on the board. Players take turns; two kinds of move are allowed: either remove a single match from one of the piles, or split a pile into two smaller piles. The player who cannot move loses.",
+  "step": "Take a match from a pile, or split a pile in two at one of the gaps."
+}

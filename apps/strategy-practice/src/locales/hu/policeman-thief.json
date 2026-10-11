@@ -1,0 +1,36 @@
+{
+  "board": {
+    "copCount": "Ebben a játékban {{copCount}} rendőr van."
+  },
+  "colour": {
+    "amber": "sárga",
+    "blue": "kék",
+    "green": "zöld"
+  },
+  "role": {
+    "police": "Rendőrök",
+    "thief": "Tolvaj"
+  },
+  "rule": {
+    "a": "Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket pöttyök jelölik. A játék kezdetén a számítógép az egyik útkereszteződésbe letesz egy tolvajt ábrázoló (piros) korongot, egy másikba pedig két rendőrt ábrázoló (kék illetve zöld) korongot. Egy körben előbb a rendőrök (a kék majd a zöld) mennek át egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd a tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet változtatnia. A rendőrök nyernek, ha a tolvaj bármikor azonos kereszteződésben van egy rendőrrel. A tolvaj nyer, ha a harmadik kör végéig nem kapták el.",
+    "b": "Az ábrán egy kisváros úthálózata látható, ahol az útkereszteződéseket pöttyök jelölik. A játék kezdetén a számítógép valamely útkereszteződésekbe leteszi a tolvajt ábrázoló (piros), valamint a két rendőrt ábrázoló (kék illetve zöld) korongokat; a két rendőr esetleg ugyanarra a mezőre is kerülhet. Egy körben előbb a rendőrök (a kék majd a zöld) mennek át egy-egy szomszédos útkereszteződésbe egy út mentén (szét is válhatnak), majd a tolvaj is hasonlóan lép. Minden körben kötelező mindenkinek helyet változtatnia. A rendőrök nyernek, ha a tolvaj bármikor azonos kereszteződésben van egy rendőrrel. A tolvaj nyer, ha a harmadik kör végéig nem kapták el.",
+    "c": "A gráfon egy tolvaj menekül néhány rendőr elől. Előbb a rendőrök foglalják el a pozíciójukat tetszőleges csúcsokon (akár többen ugyanazon), majd a tolvaj választ egy rendőrmentes kiinduló csúcsot. Ezután körökre osztva előbb az összes rendőr, végül a tolvaj lép egy-egy él mentén. Minden körben mindenkinek kötelező helyet változtatnia. A rendőrök nyernek, ha a tolvaj bármikor egy rendőrrel azonos csúcsra kerül. A tolvaj nyer, ha három lépést meg tud tenni anélkül, hogy elkapnák. A rendőrök száma a játék elején kiderül."
+  },
+  "step": {
+    "ab": {
+      "bluePoliceman": "Kattints arra az útkereszteződésre, ahová a kék rendőrrel lépni szeretnél.",
+      "greenPoliceman": "Kattints arra az útkereszteződésre, ahová a zöld rendőrrel lépni szeretnél.",
+      "thief": "Kattints arra az útkereszteződésre, ahová a tolvajjal lépni szeretnél."
+    },
+    "c": {
+      "moveCop": "Lépj a {{colour}} rendőrrel egy szomszédos csúcsra.",
+      "moveThief": "Lépj a tolvajjal egy szomszédos csúcsra. Még {{remaining}} lépés a győzelemig.",
+      "placeCop": "Helyezd el a(z) {{n}}. rendőrt ({{colour}}) egy tetszőleges csúcsra.",
+      "placeThief": "Válaszd ki a tolvaj kiinduló csúcsát (nem lehet rendőrös csúcs)."
+    }
+  },
+  "variant": {
+    "apart": "Külön (B)",
+    "together": "Együtt (A)"
+  }
+}

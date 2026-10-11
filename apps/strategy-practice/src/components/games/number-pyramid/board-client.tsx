@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { hasActivePair, type Board, type TurnState } from './gameplay';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 
@@ -31,7 +31,7 @@ const ActiveSlot = (
 );
 
 export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('number-pyramid');
   const { turnState } = ctx;
 
   const handleClick = ({ levelIdx, slotIdx }: TurnState) => {
@@ -55,7 +55,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
   return (
     <GameBoard>
       <p className="text-center text-lg font-semibold mb-4">
-        {t({ hu: 'Célszám (k)', en: 'Target (k)' })}:{' '}
+        {t('board.target')}:{' '}
         <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
           {board.target}
         </span>
@@ -84,7 +84,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
                 })}
               </div>
               <span className="text-xs">
-                {t({ hu: `${levelIdx + 1}. szint`, en: `Level ${levelIdx + 1}` })}
+                {t('board.level', { level: levelIdx + 1 })}
               </span>
             </div>
           );

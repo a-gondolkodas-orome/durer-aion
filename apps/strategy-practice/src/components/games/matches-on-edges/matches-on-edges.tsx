@@ -1,45 +1,30 @@
-import { strategyGameFactory } from 'strategy-game-factory';
+import { useTranslation } from 'react-i18next';
+import { strategyGameFactory, testVariantLabel, fullVariantLabel } from 'strategy-game-factory';
 import { BoardClient } from './board-client';
-import { currentWindowSize, generateStartBoard, moves } from './gameplay';
+import { currentWindowSize, generateStartBoard, moves, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
-const rule = {
-  hu: <>
-    Egy 1 × n-es tábla szomszédos mezőit n − 1 elválasztó él határolja el egymástól, melyeken kezdetben
-    nincs gyufa. Egy 0 &lt; k &lt; n méretű lépés során a soron lévő játékos kiválaszt egy 1 × k-as
-    résztáblát, mely a belsejében nem tartalmaz gyufát, és a résztáblát határoló gyufa nélküli elválasztó
-    élekre rárak egyet-egyet. A lépés akkor szabályos, ha a határoló elválasztó élek közül legalább az
-    egyiken még nem volt gyufa, továbbá vagy k = 1, vagy k osztható 4-gyel. A két játékos felváltva lép,
-    és a soron következő játékosnak a legnagyobb 0 &lt; k &lt; n méretű szabályos lépései közül kell
-    meglépnie az egyiket. A játéknak akkor van vége, ha valaki nem tud szabályosan lépni: ő veszít.
-  </>,
-  en: <>
-    On a 1 × n strip, adjacent cells are separated by n − 1 dividing edges, which start out with no
-    matches on them. In a move of size 0 &lt; k &lt; n the player to move picks a 1 × k subtable whose
-    interior holds no match, and places one match on each of the match-free edges bounding the subtable.
-    The move is legal if at least one of the bounding edges had no match yet, and either k = 1 or k is
-    divisible by 4. The two players alternate, and the player to move must play one of the largest legal
-    moves of size 0 &lt; k &lt; n. The game ends when a player cannot move legally: that player loses.
-  </>
+// A plain string rather than <Trans>: the text's `<` signs are not markup.
+const Rule = () => {
+  const { t } = useTranslation('matches-on-edges');
+  return t('rule');
+};
+
+const StepDescription = ({ board }: { board: Board }) => {
+  const { t } = useTranslation('matches-on-edges');
+  const k = currentWindowSize(board);
+  if (k === null) return t('step.over');
+  return t('step.move', { k });
 };
 
 export const MatchesOnEdges = strategyGameFactory({
   presentation: {
-    rule,
+    rule: <Rule />,
     roleLabels: [
-      { hu: 'Kezdő vagyok', en: 'I go first' },
-      { hu: 'Második vagyok', en: 'I go second' }
+      t => t('matches-on-edges:role.first'),
+      t => t('matches-on-edges:role.second')
     ],
-    getPlayerStepDescription: ({ board }) => {
-      const k = currentWindowSize(board);
-      if (k === null) return { hu: 'Vége a játéknak.', en: 'The game is over.' };
-      return {
-        hu: `A legnagyobb szabályos lépés mérete ${k}. Jelölj ki egy ${k} hosszú résztáblát a bal `
-          + 'szélső mezőjére kattintva, majd rakd rá a gyufákat.',
-        en: `The largest legal move has size ${k}. Mark a length-${k} subtable by clicking its `
-          + 'leftmost cell, then place the matches.'
-      };
-    }
+    getPlayerStepDescription: ({ board }) => <StepDescription board={board} />
   },
   BoardClient,
   gameplay: { moves },
@@ -47,12 +32,12 @@ export const MatchesOnEdges = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

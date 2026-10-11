@@ -1,0 +1,7 @@
+{
+  "board": {
+    "previousMove": "Previous move"
+  },
+  "rule": "The numbers <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> (<i>n ≤ 15</i>) are written on a board. Two players take turns. On the first move the first player removes any number from the board. From then on, each move must remove a number that is a divisor or multiple of the previously removed number. The player who cannot move loses.",
+  "step": "Choose one of the numbers that can be removed."
+}
