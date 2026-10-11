@@ -1,6 +1,9 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { range } from 'lodash';
 import {
   strategyGameFactory,
+  testVariantLabel,
+  fullVariantLabel,
   type BoardClientProps,
   type Ctx,
   GameBoard,
@@ -123,26 +126,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Két játékos felváltva tör egy tábla csokit a rácsvonalai mentén. Kezdetben egy téglalap alakú
-    csokoládé van, egy lépésben pontosan egy darabot törnek ketté. Az veszít, aki az első 1 × 1-est
-    kénytelen letörni.
-  </>,
-  en: <>
-    Two players take turns breaking a chocolate bar along its grid lines. Initially there is one
-    rectangular bar; in one move a player breaks exactly one piece into two. The player forced to
-    break off the first 1 × 1 piece loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('chocolate-breaking');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('chocolate-breaking');
+  return t('step');
 };
 
 export const ChocolateBreaking = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Törj ketté egy csokidarabot egy rácsvonal mentén (1 × 1-est nem törhetsz le).',
-      en: 'Break a chocolate piece in two along a grid line (you may not break off a 1 × 1).'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -150,12 +147,12 @@ export const ChocolateBreaking = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

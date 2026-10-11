@@ -1,5 +1,8 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { startBoard, moves, type Board, type Field } from './gameplay';
 import { RookSvg } from '../shared/rook-svg';
@@ -47,34 +50,25 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A játékosok felváltva lépnek egy bástyával, amely a sakktábla bal felső sarkából indul. A
-    bástya vízszintesen vagy függőlegesen bármennyit (legalább egyet) léphet, de egyszerre csak az
-    egyik irányba. Azokat a mezőket, amikre a bástya lép, illetve a lépés közben áthalad, megjelöljük,
-    ezekre a mezőkre már nem léphetünk később (át sem haladhatunk felettük). Az a játékos veszít, aki
-    nem tud lépni.
-  </>,
-  en: <>
-    Players take turns moving a rook that starts in the top-left corner of a chessboard. The rook
-    may move any number of squares (at least one) horizontally or vertically, but only in one
-    direction per move. Every square the rook lands on or passes through is marked and can no longer
-    be entered or passed through later. The player who cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('chess-rook');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('chess-rook');
+  return t('step');
 };
 
 export const ChessRook = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy szabad mezőre a bástyával egy sorban vagy oszlopban.',
-      en: 'Click on a free square in the same row or column as the rook.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: fullVariantLabel, isDefault: true }
   ]
 });

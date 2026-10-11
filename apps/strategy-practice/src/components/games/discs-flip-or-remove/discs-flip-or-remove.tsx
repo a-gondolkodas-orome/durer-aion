@@ -1,6 +1,8 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, type BoardClientProps, GameBoard, useHoverPreview
+} from 'strategy-game-factory';
 import { range, isEqual } from 'lodash';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { generateStartBoard, generateTestStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -9,7 +11,7 @@ const DisabledDisc = ({ bgColor }: { bgColor: string }) => (
 );
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('discs-flip-or-remove');
   const { value: validHovered, hoverProps } = useHoverPreview<[number, number]>(ctx.moveCount);
 
   // Clicking the i-th disc of a pile takes everything above it, i.e.
@@ -24,10 +26,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const isSelected = (pile: number, i: number) =>
     isEqual(validHovered, [pile, i]) || isEqual(validHovered, [pile, i - 1]);
 
-  const fmt = (red: number, blue: number) => t({
-    hu: ` → ${red} piros és ${blue} kék korong`,
-    en: ` → ${red} red and ${blue} blue discs`
-  });
+  const fmt = (red: number, blue: number) => ` → ${t('board.discs', { red, blue })}`;
 
   const nextBoardDescription = () => {
     if (validHovered === null) return '';
@@ -73,72 +72,27 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             )
         )}
       </div>
-      {t({
-        hu: `${board[1]} piros és ${board[0]} kék korong`,
-        en: `${board[1]} red and ${board[0]} blue discs`
-      })}
+      {t('board.discs', { red: board[1], blue: board[0] })}
       {nextBoardDescription()}
     </GameBoard>
   );
 };
 
-const getPlayerStepDescription = () => ({
-  hu: 'Kattints a jobb szélső vagy az attól eggyel balra lévő kék korongra 1 vagy 2 kék korong ' +
-    'elvételéhez, vagy tedd ugyanezt piros koronggal 1 vagy 2 piros korong kékké fordításához.',
-  en: 'Click the rightmost or second-to-last blue disc to remove 1 or 2 blue discs, ' +
-    'or do the same with red discs to flip 1 or 2 of them to blue.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('discs-flip-or-remove');
+  return t('step');
+};
 
-const rule = (maxDiscs: number) => ({
-  hu: <>
-    A játék kezdetén néhány, de legfeljebb {maxDiscs} piros vagy kék korong van az asztalon.
-    A soron következő játékos összesen négyfélét léphet:
-    <br />
-    • 1 vagy 2 kék korongot elvehet az asztalról.
-    <br />
-    • 1 vagy 2 piros korongot átfordíthat kékké.
-    <br />
-    Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    At the start there are some discs on the table, at most {maxDiscs}, each either red or blue.
-    The current player has four possible moves:
-    <br />
-    • Remove 1 or 2 blue discs from the table.
-    <br />
-    • Flip 1 or 2 red discs to blue.
-    <br />
-    The player who cannot move loses.
-  </>
-});
-
-const genericRule = {
-  hu: <>
-    A játék kezdetén néhány piros vagy kék korong van az asztalon.
-    A soron következő játékos összesen négyfélét léphet:
-    <br />
-    • 1 vagy 2 kék korongot elvehet az asztalról.
-    <br />
-    • 1 vagy 2 piros korongot átfordíthat kékké.
-    <br />
-    Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    At the start there are some red or blue discs on the table.
-    The current player has four possible moves:
-    <br />
-    • Remove 1 or 2 blue discs from the table.
-    <br />
-    • Flip 1 or 2 red discs to blue.
-    <br />
-    The player who cannot move loses.
-  </>
+const Rule = ({ maxDiscs }: { maxDiscs?: number }) => {
+  const { t } = useTranslation('discs-flip-or-remove');
+  if (maxDiscs === undefined) return <Trans t={t} i18nKey="rule.generic" />;
+  return <Trans t={t} i18nKey="rule.bounded" values={{ maxDiscs }} />;
 };
 
 export const DiscsFlipOrRemove = strategyGameFactory({
   presentation: {
-    rule: genericRule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -146,20 +100,20 @@ export const DiscsFlipOrRemove = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(6),
-      rule: rule(6),
-      label: { hu: '6 korong', en: '6 discs' },
+      rule: <Rule maxDiscs={6} />,
+      label: t => t('discs-flip-or-remove:variant.sixDiscs'),
       isDefault: true
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoard(10),
-      rule: rule(10),
-      label: { hu: '10 korong', en: '10 discs' }
+      rule: <Rule maxDiscs={10} />,
+      label: t => t('discs-flip-or-remove:variant.tenDiscs')
     }
   ]
 });
