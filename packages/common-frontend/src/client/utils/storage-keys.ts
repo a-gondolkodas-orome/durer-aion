@@ -31,6 +31,10 @@ export const legacyGuidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
 export const relayPointsStorageKey = () => namespace + "RelayPoints";
 export const strategyPointsStorageKey = () => namespace + "StrategyPoints";
-// Where a local client saves a relay match. Bump the version when the relay's
-// game state changes shape; logout clears every version under the bgio prefix.
-export const relayMatchStorageKey = (gameName: string) => bgioStoragePrefix() + gameName + "_v2";
+// The local clients' copy of what the home page summarises, beside the score:
+// a relay's per-problem results, a strategy match's live game results.
+export const relayResultsStorageKey = () => namespace + "RelayResults";
+export const strategyResultsStorageKey = () => namespace + "StrategyResults";
+// Where a local client saves a match. Bump the version when a game's state
+// changes shape; logout clears every version under the bgio prefix.
+export const matchStorageKey = (gameName: string) => bgioStoragePrefix() + gameName + "_v2";

@@ -27,13 +27,32 @@ export interface InProgressMatchStatus {
 /// overwrites the copy; a match that never reaches game over keeps it.
 /// `G.points` in the match state is the result — `scripts/admin.py` scores
 /// from it and reports where `score` disagrees.
+///
+/// `relayResults` and `strategyResults` are copied from the match state alongside
+/// `score`, for the home page's summary: the first on a relay match, the
+/// second on a strategy match. A record closed before they existed has neither.
 export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;
   endAt: Date;
   matchID: string;
   score: number;
+  relayResults?: RelayProblemResult[];
+  strategyResults?: LiveGameResult[];
 }
+
+/// One relay problem as the match ended: `tries` counts the answers given, so
+/// 0 means the team never answered it, and `points` is 0 unless one was right.
+export interface RelayProblemResult {
+  maxPoints: number;
+  points: number;
+  tries: number;
+}
+
+/// How one live (not practice) strategy game ended, from the team's side:
+/// `unfinished` is the game the time ran out in (gameWrapper's play phase
+/// says when that is recorded).
+export type LiveGameResult = 'won' | 'lost' | 'unfinished';
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 

@@ -9,9 +9,8 @@ export function Chooser(props: {
   state: TeamModelDto;
   setState: React.Dispatch<"R" | "S" | null>;
 }) {
-  const finalPoints =
-    ((props.state.relayMatch as FinishedMatchStatus).score ?? 0) +
-    ((props.state.strategyMatch as FinishedMatchStatus).score ?? 0);
+  const relayScore = (props.state.relayMatch as FinishedMatchStatus).score ?? 0;
+  const strategyScore = (props.state.strategyMatch as FinishedMatchStatus).score ?? 0;
   const finished =
     props.state.relayMatch.state === "FINISHED" &&
     props.state.strategyMatch.state === "FINISHED";
@@ -56,15 +55,19 @@ export function Chooser(props: {
           >
             {t('chooser.finish.title')}
           </p>
-          <span>{t('chooser.finish.content')}</span>
+          <span style={{ textAlign: "center" }}>{t('chooser.finish.content')}</span>
           <p
             style={{
               fontSize: "24px",
+              textAlign: "center",
             }}
           >
-            {t('chooser.finish.final')}: <b>{finalPoints}</b>
+            {t('chooser.finish.final')}: <b>{relayScore + strategyScore}</b>{' '}
+            <span style={{ fontSize: "18px" }}>
+              {t('chooser.finish.breakdown', { relay: relayScore, strategy: strategyScore })}
+            </span>
           </p>
-          { isOffline && t('chooser.pointsNotSettled')}
+          { isOffline && <span style={{ textAlign: "center" }}>{t('chooser.pointsNotSettled')}</span>}
         </Stack>
       )}
       <Stack

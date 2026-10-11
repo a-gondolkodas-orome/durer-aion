@@ -1,5 +1,6 @@
 import { Ctx, Game } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import type { RelayProblemResult } from "schemas";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 
 interface Answer {
@@ -33,6 +34,15 @@ export type RelayMoveArgs =
   | [problemText: string, correctnessPreviousAnswer: boolean, url: string] // newProblem
   | [availablePoints: number] // nextTry
   | [correctnessPreviousAnswer: boolean]; // endGame
+
+/** Every problem of the set as the match stands, the ones not reached included. */
+export function relayProblemResults(G: Pick<MyGameState, "maxPointsList" | "previousPoints" | "previousAnswers">): RelayProblemResult[] {
+  return G.maxPointsList.map((maxPoints, idx) => ({
+    maxPoints,
+    points: G.previousPoints[idx] ?? 0,
+    tries: G.previousAnswers[idx]?.length ?? 0,
+  }));
+}
 
 const lengthOfCompetition = 60 * 60; // seconds
 

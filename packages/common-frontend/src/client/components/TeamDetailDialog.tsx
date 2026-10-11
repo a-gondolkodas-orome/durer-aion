@@ -11,7 +11,8 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
 import { Countdown } from './Countdown';
-import { RelayEndTableData, relayTaskPoints } from './RelayEndTable';
+import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
+import { relayProblemRows } from './relay-results';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -325,7 +326,7 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
   <Stack>
       { props.isRelay && relayG && <Stack>Aktuális feladatszám: {relayG.currentProblem + 1}</Stack>}
       { !props.isRelay && strategyG && <Stack>próbálkozások száma: {strategyG.numberOfTries}</Stack>}
-      { !props.isRelay && strategyG && <Stack>Éles játékok eddigi eredményei: {strategyG.numberOfTries - strategyG.numberOfLoss - Number(strategyG.winner === null && strategyG.difficulty === "live")} győzelem, {strategyG.numberOfLoss} vereség</Stack>}
+      { !props.isRelay && strategyG && <StrategyGamesTable results={strategyG.liveResults}/>}
       <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
       <Stack>pontszám: { data.G.points }</Stack>
       <Stack>Hátralévő idő: <Countdown
@@ -335,12 +336,7 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         getServerTimer={() => undefined}
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
-      { props.isRelay && relayG && <Stack>
-      <RelayEndTableData allPoints={relayG.points} task={relayTaskPoints(relayG).map((task, idx) => ({
-        ...task,
-        answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
-      }))}/>
-      </Stack>}
+      { props.isRelay && relayG && <RelayResultsTable problems={relayProblemRows(relayG)} details answers/>}
     </Stack>
   </>)
 }
