@@ -1,12 +1,10 @@
 import React from 'react';
 import { Input } from '@headlessui/react';
 import { useTranslation } from 'react-i18next';
-import { useLanguage, type I18nString, type Label } from 'language';
-import { labelText } from '../common/labels';
 import { ModeSelector, DifficultySelector } from '../common/game-controls';
 import { getCtaText } from '../common/cta-text';
 import { havePlayerNameCollision, useDefaultPlayerNames } from '../common/player-names';
-import type { Ctx, Mode, Variant } from 'strategy-engine';
+import type { Ctx, Label, Mode, Variant } from 'strategy-engine';
 
 import type { Stats } from '../../hooks/use-game-stats';
 
@@ -21,7 +19,7 @@ export interface SidebarMoves {
 }
 
 interface GameSidebarProps {
-  roleLabels?: [I18nString | Label, I18nString | Label]
+  roleLabels?: [Label, Label]
   stepDescription: React.ReactNode
   ctx: Ctx
   playerNames: string[]
@@ -44,7 +42,6 @@ export const GameSidebar = ({
   onResetStats
 }: GameSidebarProps) => {
   const { t } = useTranslation('factory');
-  const { language } = useLanguage();
   const isNewGameAllowed = ctx.phase !== 'play' || ctx.isClientMoveAllowed;
   const activeVariantHasBotStrategy =
     !!variants.find(v => v.originalIndex === selectedVariantIndex)?.hasBotStrategy;
@@ -52,7 +49,7 @@ export const GameSidebar = ({
   const selectedVariant = variants.find(v => v.originalIndex === selectedVariantIndex);
   const modeSummaryLabel = ctx.isHumanVsHumanGame ? `🤝 ${t('mode.twoPlayers')}` : `🤖 ${t('mode.vsComputer')}`;
   const variantLabel = selectedVariant?.label
-    ? labelText(selectedVariant.label, t, language)
+    ? selectedVariant.label(t)
     : t('variant.level', { number: selectedVariantIndex + 1 });
   const variantSummaryLabel = variants.length > 1 ? ' · ' + variantLabel : '';
 
@@ -173,12 +170,11 @@ const ModeDifficultySelectors = ({
 );
 
 const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
-  roleLabels?: [I18nString | Label, I18nString | Label]
+  roleLabels?: [Label, Label]
   onRoleSelection: (roleIndex: number) => void
   disabled: boolean
 }) => {
   const { t } = useTranslation('factory');
-  const { language } = useLanguage();
   return <div className="flex flex-row flex-wrap sm:flex-col gap-2">
     {[t('role.first'), t('role.second')].map((defaultLabel, i) => (
       <button
@@ -188,20 +184,19 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
-        {roleLabels ? labelText(roleLabels[i], t, language) : defaultLabel}
+        {roleLabels ? roleLabels[i](t) : defaultLabel}
       </button>
     ))}
   </div>;
 };
 
 const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
-  roleLabels?: [I18nString | Label, I18nString | Label]
+  roleLabels?: [Label, Label]
   playerNames: string[]
   setPlayerNames: (names: [string, string]) => void
   onStart: () => void
 }) => {
   const { t } = useTranslation('factory');
-  const { language } = useLanguage();
   const defaultNames = useDefaultPlayerNames();
   const hasCollision = havePlayerNameCollision(playerNames, defaultNames);
   const hasEmptyName = !playerNames[0] || !playerNames[1];
@@ -234,7 +229,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
           }}
         >
           {t('player.start')}
-          {roleLabels && ` (${labelText(roleLabels[0], t, language)})`}
+          {roleLabels && ` (${roleLabels[0](t)})`}
         </button>
       </div>
     ))}

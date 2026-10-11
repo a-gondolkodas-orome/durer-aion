@@ -5,7 +5,6 @@ import { GameRule } from './game-parts/game-rule';
 import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues, isEqual } from 'lodash';
-import { useTranslation } from 'language';
 import { useLocation, useSearchParams } from 'react-router';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
@@ -49,9 +48,6 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   const variantKeys = resolvedVariants.map((variant, index) => variantKey(variant, index));
 
   const Game = () => {
-    // The `{ hu, en }` pairs a game still writes its rule and step text in; text
-    // a game keeps in its i18next namespace reaches here already rendered.
-    const { t } = useTranslation();
     const defaultPlayerNames = useDefaultPlayerNames();
     const [searchParams, setSearchParams] = useSearchParams();
     // The variant the URL asks for, or the default, which the param's absence
@@ -359,7 +355,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       <GameHeader />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
-          <GameRule ruleDescription={t(activeVariant.rule ?? rule)} />
+          <GameRule ruleDescription={activeVariant.rule ?? rule} />
           <div className="flex flex-wrap">
             <BoardClient
               key={gameUuid}
@@ -370,7 +366,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
             />
             <GameSidebar
               roleLabels={roleLabels}
-              stepDescription={t(getPlayerStepDescription({ board, ctx }))}
+              stepDescription={getPlayerStepDescription({ board, ctx })}
               ctx={ctx}
               playerNames={playerNames}
               moves={{

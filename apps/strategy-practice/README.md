@@ -264,9 +264,6 @@ suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
 stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
 factory's `testVariantLabel` and `fullVariantLabel`.
 
-Games not moved over yet still write `t({ hu: '…', en: '…' })`
-([#257](https://github.com/a-gondolkodas-orome/durer-aion/issues/257)).
-
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
 

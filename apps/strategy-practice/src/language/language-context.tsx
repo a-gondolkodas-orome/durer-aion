@@ -1,8 +1,20 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect } from 'react';
 import { useSearchParams } from 'react-router';
-import { LanguageProvider as ProvideLanguage } from 'strategy-engine/react';
-import type { Language } from 'strategy-engine';
 import i18next from './i18n';
+
+export type Language = 'hu' | 'en'
+
+interface LanguageContextValue {
+  language: Language
+  setLanguage: (lang: Language) => void
+}
+
+// Default 'hu' with a no-op setter: a tree with no provider — a spec rendering
+// one component on its own — reads the site default rather than crashing.
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const LanguageContext = createContext<LanguageContextValue>({ language: 'hu', setLanguage: () => {} });
+
+export const useLanguage = () => useContext(LanguageContext);
 
 // The browser's preference, for a visitor who has not chosen. Hungarian if the
 // browser lists it anywhere: the audience is overwhelmingly Hungarian, often with
@@ -13,11 +25,8 @@ export const browserLanguage = (languages: readonly string[]): Language | null =
   return languages.some(tag => tag.toLowerCase().split('-')[0] === 'hu') ? 'hu' : 'en';
 };
 
-// The stateful half of the language plumbing, and the reason it stays in this
-// app: the language lives in the URL (`?lang=`) and localStorage, and the URL
-// half rides this app's router. The engine's provider is deliberately
-// controlled and router-free (see packages/strategy-engine/src/react/language.tsx); this
-// wrapper owns the state and hands it down.
+// The language lives in the URL (`?lang=`) and localStorage; this owns it,
+// hands it down, and has i18next follow it.
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [language, setLanguageState] = useState<Language>(
@@ -69,8 +78,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   return (
-    <ProvideLanguage language={language} setLanguage={setLanguage}>
+    <LanguageContext.Provider value={{ language, setLanguage }}>
       {children}
-    </ProvideLanguage>
+    </LanguageContext.Provider>
   );
 };

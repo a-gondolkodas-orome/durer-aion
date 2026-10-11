@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
-import { LanguageProvider, browserLanguage } from './language-context';
-import { useLanguage } from 'strategy-engine/react';
+import { LanguageProvider, browserLanguage, useLanguage } from './language-context';
 import i18next from './i18n';
 
 // The provider reads the language from two places at once — the `?lang=` param and

@@ -1,7 +1,7 @@
 // Type-only, so it is erased: naming React's component type is what lets a
 // game's whole config be described here, and it costs a bare node nothing.
-import type { ComponentType } from 'react';
-import type { I18nString, Label, TranslatableNode } from './i18n';
+import type { ComponentType, ReactNode } from 'react';
+import type { Label } from './i18n';
 
 // The serialization contract every game's TBoard and TTurnState sign up to:
 // both must survive JSON.parse(JSON.stringify(x)) with their behaviour intact.
@@ -150,7 +150,7 @@ export type BoardClientProps<TBoard, TTurnState = unknown> =
 export interface Variant {
   originalIndex: number
   disabled?: boolean
-  label?: I18nString | Label
+  label?: Label
   hasBotStrategy: boolean
   notAlwaysOptimal?: boolean
 }
@@ -160,7 +160,7 @@ export interface VariantInput<TBoard> {
   // Optional — without one a variant is addressed by its index, which no
   // reordering survives. See src/components/AGENTS.md § Variants.
   id?: string
-  label?: I18nString | Label
+  label?: Label
   isDefault?: boolean
   generateStartBoard?: () => TBoard
   // A curated list of start boards, in place of generating one: the variant
@@ -172,13 +172,13 @@ export interface VariantInput<TBoard> {
   // Optional per-variant rule text. Falls back to `presentation.rule` when
   // omitted — used when sibling games are merged into one game whose variants
   // differ only in their rule wording (e.g. board size / coin values).
-  rule?: TranslatableNode
+  rule?: ReactNode
 }
 
 export interface Presentation<TBoard, TTurnState = unknown> {
-  rule: TranslatableNode
-  roleLabels?: [I18nString | Label, I18nString | Label]
-  getPlayerStepDescription: (args: StrategyArgs<TBoard, TTurnState>) => TranslatableNode
+  rule: ReactNode
+  roleLabels?: [Label, Label]
+  getPlayerStepDescription: (args: StrategyArgs<TBoard, TTurnState>) => ReactNode
 }
 
 // A whole game as data. This is the shape a game package exports and every
