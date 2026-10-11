@@ -14,7 +14,9 @@ const COLUMNS_PER_ROW = 10;
 
 const LINE = '#cccccc';
 const HEADER = '#eeeeee';
-const SOLVED_ON_TRY = ['#3fc523', '#9beb53', '#d5eb42'];
+// Paler with each try, so the order reads by lightness alone, without
+// telling hues apart.
+const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#e3f4e1'];
 const WRONG = '#f4b4ae';
 export const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
@@ -24,7 +26,7 @@ const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e
 interface Cell {
   content: ReactNode;
   sx?: SystemStyleObject<Theme>;
-  /// Details on hover, or on a tap on a phone; the cell gets an asterisk.
+  /// Details on hover, or on a tap on a phone; the cell's content is underlined dotted.
   details?: string;
 }
 
@@ -42,8 +44,9 @@ function CellBox(props: { cell: Cell }) {
     cell.sx ?? {},
     cell.details !== undefined && { cursor: 'help' },
   ]}>
-    {cell.content}
-    {cell.details !== undefined && <Box component="sup" sx={{ color: '#555', fontSize: '11px', marginLeft: '1px' }}>*</Box>}
+    {cell.details === undefined
+      ? cell.content
+      : <Box component="span" sx={{ textDecoration: 'underline dotted', textUnderlineOffset: '3px' }}>{cell.content}</Box>}
   </Box>;
   return cell.details === undefined ? box : <Tooltip title={cell.details} enterTouchDelay={0} arrow>{box}</Tooltip>;
 }
@@ -203,12 +206,10 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
     return null;
   }
   // Spelled out key by key: the i18n check finds a key only as a literal.
-  const label = (result: LiveGameResult) => {
-    switch (result) {
-      case 'won': return t('strategy.endTable.won');
-      case 'lost': return t('strategy.endTable.lost');
-      case 'unfinished': return t('strategy.endTable.unfinished');
-    }
+  const label: Record<LiveGameResult, string> = {
+    won: t('strategy.endTable.won'),
+    lost: t('strategy.endTable.lost'),
+    unfinished: t('strategy.endTable.unfinished'),
   };
   return <ResultTable
     centred
@@ -216,7 +217,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
     rows={[{
       label: t('strategy.endTable.result'),
       cells: props.results.map(result => ({
-        content: <Box component="span" role="img" aria-label={label(result)} title={label(result)} sx={{ display: 'flex' }}>
+        content: <Box component="span" role="img" aria-label={label[result]} title={label[result]} sx={{ display: 'flex' }}>
           {RESULT_ICON[result].icon}
         </Box>,
         sx: { background: RESULT_ICON[result].background },

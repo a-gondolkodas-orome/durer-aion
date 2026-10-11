@@ -1,6 +1,7 @@
 import { Stack, alpha } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
+import { ScoreHeadline } from "./ResultTables";
 import { useClientRepo } from "../api-repository-interface";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
@@ -56,17 +57,14 @@ export function Chooser(props: {
             {t('chooser.finish.title')}
           </p>
           <span style={{ textAlign: "center" }}>{t('chooser.finish.content')}</span>
-          <p
-            style={{
-              fontSize: "24px",
-              textAlign: "center",
-            }}
-          >
-            {t('chooser.finish.final')}: <b>{relayScore + strategyScore}</b>{' '}
+          {/* Larger than either round's score below, which it adds up. */}
+          <Stack sx={{ alignItems: "center", gap: "4px", marginY: "16px" }}>
+            <span style={{ fontSize: "20px" }}>{t('chooser.finish.final')}</span>
+            <ScoreHeadline points={relayScore + strategyScore}/>
             <span style={{ fontSize: "18px" }}>
               {t('chooser.finish.breakdown', { relay: relayScore, strategy: strategyScore })}
             </span>
-          </p>
+          </Stack>
           { isOffline && <span style={{ textAlign: "center" }}>{t('chooser.pointsNotSettled')}</span>}
         </Stack>
       )}
