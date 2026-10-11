@@ -141,8 +141,8 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           // the time after the deadline; a match the server closes on time
           // has no entry for it. A second win in a row ends the match from
           // inside the move, and boardgame.io still ends this phase first.
-          // No game ends in a draw.
           if (G.difficulty === "live") {
+            // No game ends in a draw, so one with a winner is won or lost.
             G.liveResults.push(G.winner === null ? "unfinished" : G.winner === GUESSER_PLAYER ? "won" : "lost");
           }
           sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });

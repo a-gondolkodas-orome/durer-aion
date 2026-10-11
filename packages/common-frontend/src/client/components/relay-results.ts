@@ -20,7 +20,7 @@ const secondsBetween = (from: string, to: string) =>
  * first try is timed from the previous problem's last answer — when it
  * appeared — and each later try from the answer before it.
  */
-export function relayProblemRows(G: MyGameState): RelayProblemDetails[] {
+export function relayProblemDetails(G: MyGameState): RelayProblemDetails[] {
   let shownAt = G.start;
   return relayProblemResults(G).map((result, idx) => {
     const answers = G.previousAnswers[idx] ?? [];
@@ -33,7 +33,7 @@ export function relayProblemRows(G: MyGameState): RelayProblemDetails[] {
   });
 }
 
-/** `m:ss`, the way the countdown shows time. */
+/** A duration as `m:ss`. */
 export function formatDuration(seconds: number): string {
   const whole = Math.max(0, seconds);
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;

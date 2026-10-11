@@ -69,14 +69,14 @@ const labelSx = { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' };
  * rows of as many cells. With `transposeOnPhone`, a narrow screen gets one row
  * per column instead, as wide as the labels allow.
  */
-export function ResultTable(props: {
+function ResultTable(props: {
   headerLabel: string,
   columnLabels?: ReactNode[],
   rows: Row[],
   centred?: boolean,
   transposeOnPhone?: boolean,
 }) {
-  const count = props.rows[0]?.cells.length ?? 0;
+  const count = props.rows[0].cells.length;
   const columns = Math.min(count, COLUMNS_PER_ROW);
   const header: Row = {
     label: props.headerLabel,

@@ -1,10 +1,10 @@
 import { describe, test, expect } from "vitest";
 import type { MyGameState } from "game";
-import { formatDuration, relayProblemRows } from "./relay-results";
+import { formatDuration, relayProblemDetails } from "./relay-results";
 
 const answer = (answer: number, date: string) => ({ answer, date });
 
-describe("relayProblemRows", () => {
+describe("relayProblemDetails", () => {
   test("times each problem from when it appeared, and each try from the one before", () => {
     const G = {
       start: "2026-10-10T10:00:00Z",
@@ -17,7 +17,7 @@ describe("relayProblemRows", () => {
       ],
     } as unknown as MyGameState;
 
-    expect(relayProblemRows(G)).toStrictEqual([
+    expect(relayProblemDetails(G)).toStrictEqual([
       { maxPoints: 3, points: 2, tries: 2, answers: [1, 2], trySeconds: [180, 90] },
       { maxPoints: 4, points: 0, tries: 3, answers: [7, 8, 9], trySeconds: [30, 60, 5] },
       { maxPoints: 5, points: 0, tries: 0, answers: [], trySeconds: [] },

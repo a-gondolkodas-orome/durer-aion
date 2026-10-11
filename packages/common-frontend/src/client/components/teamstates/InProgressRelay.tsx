@@ -9,7 +9,7 @@ import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
 import { RelayProgressTable } from '../ResultTables';
-import { relayProblemRows } from '../relay-results';
+import { relayProblemDetails } from '../relay-results';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
@@ -76,7 +76,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
         open={
           finished
         } onClose={backToHome}>
-          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemRows(G)}/>
+          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemDetails(G)}/>
         </Dialog>
       <Stack sx={{
         width: "100%",
