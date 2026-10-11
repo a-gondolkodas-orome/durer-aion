@@ -89,16 +89,7 @@ export function readStoredTeamState(): TeamModelDto | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
-  const stored = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-  if (stored === null) {
-    return null;
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(stored);
-  } catch {
-    return null;
-  }
+  const parsed = readStoredJson(LOCAL_STORAGE_TEAMSTATE);
   if (!isRecord(parsed)) {
     return null;
   }

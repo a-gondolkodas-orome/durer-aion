@@ -1,5 +1,4 @@
 import type { Ctx } from "boardgame.io";
-import type { GameStateMixin, MyGameState } from "game";
 import { TeamModelDto } from "common-frontend";
 import { readPersistedLog } from "./bgio-log";
 import { readStoredTeamState } from "./stored-team-state";
@@ -65,9 +64,9 @@ export interface SendGameDataParams {
   component: "relay" | "strategy";
   phase: "start" | "step" | "end";
   answer?: number | null;
-  // The fields read here and in game-report.ts; the rest of G rides along in
-  // the JSON payload.
-  G?: Partial<Pick<MyGameState, "currentProblem" | "points" | "maxPointsList" | "previousPoints" | "previousAnswers"> & Pick<GameStateMixin, "liveResults">>;
+  // Only these two fields are read here (relay's problem counter and the
+  // wrapper's score); the rest of G rides along in the JSON payload.
+  G?: { currentProblem?: number; points?: number };
   ctx?: Ctx;
 }
 

@@ -33,14 +33,6 @@ interface Row {
   cells: Cell[];
 }
 
-const chunk = <T,>(items: T[]): T[][] => {
-  const chunks: T[][] = [];
-  for (let i = 0; i < items.length; i += COLUMNS_PER_ROW) {
-    chunks.push(items.slice(i, i + COLUMNS_PER_ROW));
-  }
-  return chunks;
-};
-
 const headerSx = { backgroundColor: HEADER, fontWeight: 600 };
 
 function CellBox(props: { cell: Cell }) {
@@ -56,14 +48,21 @@ function CellBox(props: { cell: Cell }) {
   return cell.details === undefined ? box : <Tooltip title={cell.details} enterTouchDelay={0} arrow>{box}</Tooltip>;
 }
 
-/** The look the end screens' and home page's tables share: a header row, then labelled rows. */
-function ResultTable(props: { headerLabel: string, columnLabels: string[], rows: Row[], centred?: boolean }) {
-  const columns = Math.min(props.columnLabels.length, COLUMNS_PER_ROW);
-  const header: Row = { label: props.headerLabel, cells: props.columnLabels.map(content => ({ content, sx: headerSx })) };
+/**
+ * The look the end screens' and home page's tables share: a header row
+ * numbering the columns, then labelled rows of as many cells.
+ */
+function ResultTable(props: { headerLabel: string, rows: Row[], centred?: boolean }) {
+  const count = props.rows[0]?.cells.length ?? 0;
+  const columns = Math.min(count, COLUMNS_PER_ROW);
+  const header: Row = {
+    label: props.headerLabel,
+    cells: Array.from({ length: count }, (_, idx) => ({ content: `${idx + 1}.`, sx: headerSx })),
+  };
   const rows = [header, ...props.rows];
-  const chunked = rows.map(row => chunk(row.cells));
+  const starts = Array.from({ length: Math.ceil(count / COLUMNS_PER_ROW) }, (_, idx) => idx * COLUMNS_PER_ROW);
   return <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px', alignSelf: props.centred ? 'center' : 'stretch' }}>
-    {chunked[0].map((_, chunkIdx) => <Box key={chunkIdx} sx={{
+    {starts.map(start => <Box key={start} sx={{
       display: 'grid',
       gridTemplateColumns: props.centred
         ? `auto repeat(${columns}, 48px)`
@@ -79,7 +78,7 @@ function ResultTable(props: { headerLabel: string, columnLabels: string[], rows:
           content: row.label,
           sx: { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' },
         }}/>
-        {chunked[rowIdx][chunkIdx].map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
+        {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
       </Fragment>)}
     </Box>)}
   </Box>;
@@ -132,7 +131,6 @@ export function RelayResultsTable(props: { problems: RelayProblemRow[], details?
   }
   return <ResultTable
     headerLabel={t('relay.endTable.task')}
-    columnLabels={props.problems.map((_, idx) => `${idx + 1}.`)}
     rows={rows}
   />;
 }
@@ -146,8 +144,8 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
     display: 'grid',
     gridTemplateColumns: `repeat(${Math.min(props.problems.length, COLUMNS_PER_ROW)}, minmax(0, 1fr))`,
     gap: '1px',
-    border: '1px solid #d0d0d0',
-    backgroundColor: '#d0d0d0',
+    border: `1px solid ${LINE}`,
+    backgroundColor: LINE,
     fontSize: '12px',
     textAlign: 'center',
     color: '#444',
@@ -186,7 +184,6 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   return <ResultTable
     centred
     headerLabel={t('strategy.endTable.game')}
-    columnLabels={props.results.map((_, idx) => `${idx + 1}.`)}
     rows={[{
       label: t('strategy.endTable.result'),
       cells: props.results.map(result => ({

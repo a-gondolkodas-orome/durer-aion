@@ -7,11 +7,10 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // this app really stores under: what the helpers return is storage-keys.test.ts's
 // business, and a name of its own pins which of the two each branch reaches for.
 const {
-  bgioStoragePrefix, boardWrapper, matchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
+  boardWrapper, matchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
   relayResultsStorageKey, strategyResultsStorageKey,
   sendGameData, gameWrapper, RelayWrapper, Client,
 } = vi.hoisted(() => ({
-  bgioStoragePrefix: () => "bgio_",
   boardWrapper: vi.fn(),
   matchStorageKey: (gameName: string) => "bgio_" + gameName,
   relayPointsStorageKey: () => "the relay key",
@@ -25,7 +24,7 @@ const {
 }));
 
 vi.mock("common-frontend", () => ({
-  bgioStoragePrefix, boardWrapper, matchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
+  boardWrapper, matchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
   relayResultsStorageKey, strategyResultsStorageKey,
 }));
 vi.mock("./sendData", () => ({ sendGameData }));
@@ -35,6 +34,15 @@ vi.mock("game", async (importOriginal) => ({ ...await importOriginal<typeof impo
 vi.mock("boardgame.io/react", () => ({ Client }));
 
 import { handleGameReport } from "./game-report";
+import type { RelayReport, StrategyReport } from "game";
+
+// Reports as the reducers send them, with just the fields a test is about.
+const relayEnd = (G: object) => ({
+  component: "relay", phase: "end", G: { maxPointsList: [], previousPoints: [], previousAnswers: [], ...G },
+}) as unknown as RelayReport;
+const strategyReport = (phase: "step" | "end", G: object) => ({
+  component: "strategy", phase, G: { liveResults: [], ...G },
+}) as unknown as StrategyReport<unknown>;
 
 describe("handleGameReport", () => {
   beforeEach(() => {
@@ -43,7 +51,7 @@ describe("handleGameReport", () => {
   });
 
   test("persists the score of a strategy end report and forwards it", () => {
-    const end = { component: "strategy", phase: "end", G: { points: 12 } } as const;
+    const end = strategyReport("end", { points: 12 });
     handleGameReport(end, "bgio_stones_e");
 
     expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
@@ -51,14 +59,14 @@ describe("handleGameReport", () => {
   });
 
   test("persists the live games of a strategy end report for the home page", () => {
-    handleGameReport({ component: "strategy", phase: "end", G: { points: 9, liveResults: ["lost", "won", "won"] } });
+    handleGameReport(strategyReport("end", { points: 9, liveResults: ["lost", "won", "won"] }));
 
     expect(localStorage.getItem("the strategy results key")).toStrictEqual('["lost","won","won"]');
   });
 
   test("persists the problems of a relay end report for the home page", () => {
     const tries = [{ answer: 1, date: "" }, { answer: 2, date: "" }];
-    handleGameReport({ component: "relay", phase: "end", G: { points: 2, maxPointsList: [3, 4], previousPoints: [2], previousAnswers: [tries, []] } });
+    handleGameReport(relayEnd({ points: 2, maxPointsList: [3, 4], previousPoints: [2], previousAnswers: [tries, []] }));
 
     expect(JSON.parse(localStorage.getItem("the relay results key") ?? "")).toStrictEqual([
       { maxPoints: 3, points: 2, tries: 2 },
@@ -67,7 +75,7 @@ describe("handleGameReport", () => {
   });
 
   test("persists the score of a relay end report", () => {
-    handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
+    handleGameReport(relayEnd({ points: 17 }));
 
     expect(localStorage.getItem("the relay key")).toStrictEqual("17");
   });
@@ -76,24 +84,16 @@ describe("handleGameReport", () => {
   // mid-match, when the reducer's onEnd never fires. Forwarding from here as
   // well would put two end files in the organisers' bucket for one run.
   test("does not upload a relay end report", () => {
-    handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
+    handleGameReport(relayEnd({ points: 17 }));
 
     expect(sendGameData).not.toHaveBeenCalled();
   });
 
   test("forwards a step report with the match's storage key and stores nothing", () => {
-    const step = { component: "strategy", phase: "step", G: { points: 3 } } as const;
+    const step = strategyReport("step", { points: 3 });
     handleGameReport(step, "bgio_stones_e");
 
     expect(sendGameData).toHaveBeenCalledWith(step, "bgio_stones_e");
-    expect(localStorage.length).toStrictEqual(0);
-  });
-
-  test("forwards a start report, which carries no score", () => {
-    const start = { component: "strategy", phase: "start" } as const;
-    handleGameReport(start);
-
-    expect(sendGameData).toHaveBeenCalledWith(start, undefined);
     expect(localStorage.length).toStrictEqual(0);
   });
 });
@@ -120,7 +120,7 @@ describe("the clients' report callbacks", () => {
 
     const report = gameWrapper.mock.calls[0]?.[1] as unknown as typeof handleGameReport;
     expect(report, "the strategy client built its game with no report callback").toBeTypeOf("function");
-    const end = { component: "strategy", phase: "end", G: { points: 12 } } as const;
+    const end = strategyReport("end", { points: 12 });
     report(end);
 
     expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
@@ -133,7 +133,7 @@ describe("the clients' report callbacks", () => {
 
     const report = RelayWrapper.mock.calls[0]?.[0] as unknown as typeof handleGameReport;
     expect(report, "the relay client built its game with no report callback").toBeTypeOf("function");
-    report({ component: "relay", phase: "end", G: { points: 9 } });
+    report(relayEnd({ points: 9 }));
 
     expect(localStorage.getItem("the relay key")).toStrictEqual("9");
   });

@@ -35,15 +35,12 @@ export type RelayMoveArgs =
   | [availablePoints: number] // nextTry
   | [correctnessPreviousAnswer: boolean]; // endGame
 
-/**
- * Every problem of the set as the match stands, the ones not reached included.
- * Takes the fields partly so a host's loosely typed report can pass its G.
- */
-export function relayProblemResults(G: Partial<Pick<MyGameState, "maxPointsList" | "previousPoints" | "previousAnswers">>): RelayProblemResult[] {
-  return (G.maxPointsList ?? []).map((maxPoints, idx) => ({
+/** Every problem of the set as the match stands, the ones not reached included. */
+export function relayProblemResults(G: Pick<MyGameState, "maxPointsList" | "previousPoints" | "previousAnswers">): RelayProblemResult[] {
+  return G.maxPointsList.map((maxPoints, idx) => ({
     maxPoints,
-    points: G.previousPoints?.[idx] ?? 0,
-    tries: G.previousAnswers?.[idx]?.length ?? 0,
+    points: G.previousPoints[idx] ?? 0,
+    tries: G.previousAnswers[idx]?.length ?? 0,
   }));
 }
 

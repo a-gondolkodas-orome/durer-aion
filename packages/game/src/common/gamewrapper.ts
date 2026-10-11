@@ -136,9 +136,11 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({ G, ctx }) => {
-          // The phase also ends when time runs out mid-game, with no winner yet.
-          // A second win in a row ends the match from inside the move, and
-          // boardgame.io still ends this phase first. No game ends in a draw.
+          // The phase also ends when time runs out mid-game, with no winner yet
+          // — if the team's page is open to end the match then; a match the
+          // server closes on time lacks that game. A second win in a row ends
+          // the match from inside the move, and boardgame.io still ends this
+          // phase first. No game ends in a draw.
           if (G.difficulty === "live") {
             G.liveResults.push(G.winner === null ? "unfinished" : G.winner === GUESSER_PLAYER ? "won" : "lost");
           }

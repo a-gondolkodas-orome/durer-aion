@@ -20,7 +20,7 @@ describe("relayProblemRows", () => {
     expect(relayProblemRows(G)).toStrictEqual([
       { maxPoints: 3, points: 2, tries: 2, answers: [1, 2], trySeconds: [180, 90] },
       { maxPoints: 4, points: 0, tries: 3, answers: [7, 8, 9], trySeconds: [30, 60, 5] },
-      { maxPoints: 5, points: 0, tries: 0, answers: [] },
+      { maxPoints: 5, points: 0, tries: 0, answers: [], trySeconds: [] },
     ]);
   });
 });

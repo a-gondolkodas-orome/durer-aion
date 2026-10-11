@@ -29,11 +29,7 @@ function PointsScale(props: { points: number }) {
   </Box>;
 }
 
-/**
- * Component to display an end game screen with close button, and score
- * @param props the match's points, and its live games' results in order
- * @returns End screen
- */
+/** The strategy match's end screen: its score, live games and points scale. */
 export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[] }) {
   const theme = useTheme();
   const toHome = useToHome();

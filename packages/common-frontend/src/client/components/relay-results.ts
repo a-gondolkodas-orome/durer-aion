@@ -25,17 +25,12 @@ export function relayProblemRows(G: MyGameState): RelayProblemRow[] {
   let shownAt = G.start;
   return relayProblemResults(G).map((result, idx) => {
     const answers = G.previousAnswers[idx] ?? [];
-    const row: RelayProblemRow = { ...result, answers: answers.map(it => it.answer) };
-    if (answers.length > 0) {
-      let previous = shownAt;
-      row.trySeconds = answers.map(it => {
-        const seconds = secondsBetween(previous, it.date);
-        previous = it.date;
-        return seconds;
-      });
-      shownAt = previous;
-    }
-    return row;
+    const trySeconds = answers.map(it => {
+      const seconds = secondsBetween(shownAt, it.date);
+      shownAt = it.date;
+      return seconds;
+    });
+    return { ...result, answers: answers.map(it => it.answer), trySeconds };
   });
 }
 
