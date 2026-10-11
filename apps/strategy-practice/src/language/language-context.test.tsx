@@ -3,6 +3,7 @@ import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
 import { LanguageProvider, browserLanguage } from './language-context';
 import { useLanguage } from 'strategy-engine/react';
+import i18next from './i18n';
 
 // The provider reads the language from two places at once — the `?lang=` param and
 // localStorage — and writes both, so the harness exposes the URL as well.
@@ -109,6 +110,25 @@ describe('LanguageProvider', () => {
 
     expect(search()).toBe('');
     expect(language()).toBe('en');
+  });
+});
+
+describe('LanguageProvider driving i18next', () => {
+  it('starts i18next in the language it read', () => {
+    localStorage.setItem('lang', 'en');
+    renderAt();
+    expect(i18next.language).toBe('en');
+  });
+
+  it('switches i18next along with its own state', () => {
+    renderAt();
+    expect(i18next.language).toBe('hu');
+
+    fireEvent.click(screen.getByText('choose en'));
+    expect(i18next.language).toBe('en');
+
+    fireEvent.click(screen.getByText('choose hu'));
+    expect(i18next.language).toBe('hu');
   });
 });
 

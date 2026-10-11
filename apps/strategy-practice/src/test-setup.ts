@@ -8,12 +8,19 @@ across tests ("Found multiple elements" flakes). Registering cleanup here makes
 it run after every test in every file.
 */
 import { cleanup } from '@testing-library/react';
+// Initialises i18next, which the app does through `LanguageProvider`: a spec
+// rendering one component on its own never reaches that.
+import i18next from './language/i18n';
 
 import { installSeededRandom } from '../../../vitest/seed.mjs';
 
 installSeededRandom();
 
 afterEach(() => cleanup());
+
+// i18next is one instance per worker, which `isolate: false` shares across spec
+// files, so a spec that switched to English must not leave the next one in it.
+afterEach(() => void i18next.changeLanguage('hu'));
 
 /*
 Deep-freeze every start board a game module exports, so that a spec editing one

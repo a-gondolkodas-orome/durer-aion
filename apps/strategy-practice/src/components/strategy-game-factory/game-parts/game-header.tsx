@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router';
-import { useTranslation, LanguageSelector } from 'language';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector, translate, useLanguage } from 'language';
 import { ThemeSwitcher } from '../../../theme';
 import { gameList } from '../../games/gameList';
 
 export const GameHeader = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
+  const { language } = useLanguage();
   const gameId = useLocation().pathname.split('/').pop();
   const gameEntry = gameList[gameId!];
-  const title = t(gameEntry?.title ?? gameEntry?.name ?? '');
+  const title = translate(gameEntry?.title ?? gameEntry?.name ?? '', language);
   return (
   <>
     <header className="primary-header">
@@ -17,7 +19,7 @@ export const GameHeader = () => {
             to='/'
             className="primary-link text-sm font-medium whitespace-nowrap"
           >
-            ← <span className="hidden sm:inline">{t({ hu: 'Vissza a listához', en: 'Back to list' })}</span>
+            ← <span className="hidden sm:inline">{t('backToList')}</span>
           </Link>
           <h1 className="flex-1 text-center text-xl sm:text-2xl">
             {title}
@@ -29,7 +31,7 @@ export const GameHeader = () => {
               target="_blank"
               className="primary-link"
             >
-              {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
+              {t('bugReport')}
             </a>
             <ThemeSwitcher />
             <LanguageSelector />

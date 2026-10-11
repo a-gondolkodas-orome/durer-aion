@@ -16,7 +16,8 @@
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "i18n-ally.localesPaths": [
-    "packages/common-frontend/public/locales"
+    "packages/common-frontend/public/locales",
+    "apps/strategy-practice/src/locales"
   ],
   "i18n-ally.enabledFrameworks": [
     "react",

@@ -249,21 +249,22 @@ strategy, keyboard and mobile usability.
 
 ## Internationalisation (i18n)
 
-The site supports Hungarian (default) and English. See `TicTacToe`
-for a complete example. English translations are added on a game-per-game bases,
-it is fine to add new games with Hungarian only.
+Hungarian is the default, English is added game by game; a game may ship in
+Hungarian only. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
+one per game folder, plus `factory` for the chrome around every game. The
+recommended i18n Ally VS Code extension shows the two languages side by side.
 
-The `t()` helper resolves a value to the active language. The value can be a
-plain string if there are no translations available, or a `{ hu, en }` object.
-`useTranslation()` returns it; the hook lives in `packages/strategy-engine`
-(`src/react/translate.ts`) and is reached through the `language` barrel, which
-is a path alias — `import { useTranslation } from 'language';`, no `../../../`.
+A game's rule and step description are small components calling
+`useTranslation('<game>')`. Keys and namespaces are literals, so that i18n Ally
+and `npm run i18n:check` can follow them, and the two languages of a key carry
+the same placeholders.
+
+Games not moved over yet still write `t({ hu: '…', en: '…' })`, as do variant
+labels, role labels and `gameList.ts`
+([#257](https://github.com/a-gondolkodas-orome/durer-aion/issues/257)).
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
-
-For an example of internationalizing an existing game, see
-[PR #213](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213).
 
 ## Technologies used
 
