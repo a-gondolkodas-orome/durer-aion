@@ -255,9 +255,11 @@ one per game folder, plus `factory` for the chrome around every game. The
 recommended i18n Ally VS Code extension shows the two languages side by side.
 
 A game's rule and step description are small components calling
-`useTranslation('<game>')`. Keys and namespaces are literals, so that i18n Ally
-and `npm run i18n:check` can follow them, and the two languages of a key carry
-the same placeholders.
+`useTranslation('shark-chase')`; `dominoes-on-chessboard` and `shark-chase` are
+the examples. Keys and namespaces are literals, so that i18n Ally and
+`npm run i18n:check` can follow them, and the two languages of a key carry the
+same placeholders. `{{size, numberAdjective}}` adds the Hungarian
+suffix: *6 × 6-os*.
 
 Games not moved over yet still write `t({ hu: '…', en: '…' })`, as do variant
 labels, role labels and `gameList.ts`
