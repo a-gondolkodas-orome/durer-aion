@@ -16,7 +16,7 @@ const LINE = '#cccccc';
 const HEADER = '#eeeeee';
 // Paler with each try, so the order reads by lightness alone, without
 // telling hues apart.
-const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#e3f4e1'];
+const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
 const WRONG = '#f4b4ae';
 export const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
