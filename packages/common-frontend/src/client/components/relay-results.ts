@@ -1,12 +1,11 @@
 import { relayProblemResults, type MyGameState } from "game";
 import type { RelayProblemResult } from "schemas";
 
-/// One column of a relay results table. `trySeconds` exists only where the
-/// match state is at hand: the home page's copy on the team record leaves it
-/// out, as it leaves out the answers only the admin table shows.
-export interface RelayProblemRow extends RelayProblemResult {
-  trySeconds?: number[];
-  answers?: number[];
+/// A relay problem with what only the match state knows: each try's time and
+/// answer. The home page's copy on the team record has just the result.
+export interface RelayProblemDetails extends RelayProblemResult {
+  trySeconds: number[];
+  answers: number[];
 }
 
 /** What the whole problem set is worth. */
@@ -21,7 +20,7 @@ const secondsBetween = (from: string, to: string) =>
  * first try is timed from the previous problem's last answer — when it
  * appeared — and each later try from the answer before it.
  */
-export function relayProblemRows(G: MyGameState): RelayProblemRow[] {
+export function relayProblemRows(G: MyGameState): RelayProblemDetails[] {
   let shownAt = G.start;
   return relayProblemResults(G).map((result, idx) => {
     const answers = G.previousAnswers[idx] ?? [];

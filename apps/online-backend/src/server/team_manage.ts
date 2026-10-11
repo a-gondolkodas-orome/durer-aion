@@ -108,8 +108,7 @@ export async function startMatchStatus(
 
 export async function endMatchStatus(
   progressStatus: InProgressMatchStatus,
-  finalScore: number,
-  summary: Pick<FinishedMatchStatus, "relayResults" | "strategyResults">
+  finalScore: number
 ): Promise<FinishedMatchStatus> {
   return {
     state: "FINISHED",
@@ -117,7 +116,6 @@ export async function endMatchStatus(
     startAt: progressStatus.startAt,
     endAt: progressStatus.endAt,
     score: finalScore,
-    ...summary,
   };
 }
 
@@ -213,8 +211,10 @@ export async function closeMatch(
   }
   const mStat = status as InProgressMatchStatus;
   const G = currentMatch.state.G;
-  const finishState = await endMatchStatus(mStat, G.points,
-    type === "relayMatch" ? { relayResults: relayProblemResults(G) } : { strategyResults: G.liveResults });
+  const finishState = {
+    ...await endMatchStatus(mStat, G.points),
+    ...(type === "relayMatch" ? { relayResults: relayProblemResults(G) } : { strategyResults: G.liveResults }),
+  };
   console.log(
     `Closing match: ${matchId}, points: ${G.points}`
   );

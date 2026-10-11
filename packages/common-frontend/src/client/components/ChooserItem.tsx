@@ -24,6 +24,10 @@ export function ChooserItem(props: {
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const theme = useTheme();
   const { t } = useTranslation();
+  // A finished match saved before its summary existed is also saved under an
+  // older key, so reopening it would start a fresh match instead.
+  const hasDetails = props.status.state === "IN PROGRESS" || (props.status.state === "FINISHED" &&
+    (props.type === 'relay' ? props.status.relayResults : props.status.strategyResults) !== undefined);
 
   return (
     <Stack sx={{
@@ -136,22 +140,26 @@ export function ChooserItem(props: {
           />}
         </Stack>
       }
-      <Button sx={{
-        width: '100%',
-        maxWidth: "600px",
-        height: '75px',
-        fontSize: '26px',
-        alignSelf: 'center',
-        textTransform: 'none',
-      }} variant='contained' color='primary' onClick={() => {
-        if (props.type === "relay") {
-          void startRelay()
-        } else {
-          void startStrategy()
-        }
-      }} disabled={props.status.state !== "NOT STARTED"}>
-        {t('chooser.start')}
-      </Button>
+      {props.status.state === "FINISHED"
+        ? <Stack sx={{ fontSize: '18px', fontWeight: 600, color: '#2e7d32', textAlign: 'center' }}>
+          {t('chooser.finished')}
+        </Stack>
+        : <Button sx={{
+          width: '100%',
+          maxWidth: "600px",
+          height: '75px',
+          fontSize: '26px',
+          alignSelf: 'center',
+          textTransform: 'none',
+        }} variant='contained' color='primary' onClick={() => {
+          if (props.type === "relay") {
+            void startRelay()
+          } else {
+            void startStrategy()
+          }
+        }} disabled={props.status.state !== "NOT STARTED"}>
+          {t('chooser.start')}
+        </Button>}
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
@@ -166,7 +174,7 @@ export function ChooserItem(props: {
         } else {
           props.setState("S");
         }
-      }} disabled={props.status.state === "NOT STARTED"}>
+      }} disabled={!hasDetails}>
         {t('chooser.detailedResults')}
       </Button>
     </Stack>

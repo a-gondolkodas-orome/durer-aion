@@ -39,8 +39,8 @@ export interface GameStateMixin extends GameStateTimer {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
-  // Every live game in order, the one the time ran out in included;
-  // gameWrapper appends to it, the games never touch it.
+  // Every live game in order; gameWrapper's play phase appends to it and says
+  // when a game cut off by the time is included. The games never touch it.
   liveResults: LiveGameResult[];
 }
 

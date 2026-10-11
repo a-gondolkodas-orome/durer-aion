@@ -1,10 +1,8 @@
-import { Button } from '@mui/material';
-import { Stack } from '@mui/system';
-import { useLogout, useRefreshTeamState, useToHome } from '../hooks/user-hooks';
-import { useTheme } from '@mui/material/styles';
+import { useLogout, useRefreshTeamState, useTeamState, useToHome } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
-import { RelayResultsTable, ScoreHeadline } from './ResultTables';
-import { relayMaxPoints, type RelayProblemRow } from './relay-results';
+import { EndCard } from './EndCard';
+import { RelayResultsTable } from './ResultTables';
+import { relayMaxPoints, type RelayProblemDetails } from './relay-results';
 
 /**
  * Component to display an end game screen with close button, and score
@@ -12,11 +10,11 @@ import { relayMaxPoints, type RelayProblemRow } from './relay-results';
  * (by logging out) instead of reloading into the competition home page
  * @returns End screen
  */
-export function RelayEndTable(props: { allPoints: number, problems: RelayProblemRow[], selectRound?: boolean }) {
-  const theme = useTheme();
+export function RelayEndTable(props: { allPoints: number, problems: RelayProblemDetails[], selectRound?: boolean }) {
   const refreshState = useRefreshTeamState();
   const toHome = useToHome();
   const logout = useLogout();
+  const team = useTeamState();
   const { t } = useTranslation();
   // Named so the handlers below can stay synchronous: React ignores what an
   // event handler returns, so an async one leaves its promise unhandled.
@@ -33,34 +31,15 @@ export function RelayEndTable(props: { allPoints: number, problems: RelayProblem
   };
 
   return (
-    <Stack sx={{
-      width: "750px",
-      maxWidth: "100%",
-      boxSizing: 'border-box',
-      marginTop: '10px',
-      marginBottom: '10px',
-      borderRadius: '30px',
-      backgroundColor: theme.palette.background.paper,
-      padding: '25px',
-      gap: '20px',
-    }}>
-      <Stack sx={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center' }}>
-        {t('relay.endTable.title')}
-      </Stack>
-      <ScoreHeadline points={props.allPoints} max={relayMaxPoints(props.problems)}/>
-      <RelayResultsTable problems={props.problems} details/>
-      {!props.selectRound && <Stack sx={{ fontSize: '15px', textAlign: 'center' }}>
-        {t('relay.endTable.reminder')}
-      </Stack>}
-      <Button sx={{
-        minWidth: '300px',
-        height: '55px',
-        fontSize: '22px',
-        alignSelf: 'center',
-        textTransform: 'none',
-      }} variant='contained' color='primary' onClick={() => void backToHome()}>
-        {props.selectRound ? t('relay.endTable.selectOtherRound') : t('relay.endTable.back')}
-      </Button>
-    </Stack>
-  )
+    <EndCard
+      title={t('relay.endTable.title')}
+      points={props.allPoints}
+      max={relayMaxPoints(props.problems)}
+      reminder={!props.selectRound && team?.strategyMatch.state === 'NOT STARTED' ? t('relay.endTable.reminder') : undefined}
+      backLabel={props.selectRound ? t('relay.endTable.selectOtherRound') : t('relay.endTable.back')}
+      onBack={() => void backToHome()}
+    >
+      <RelayResultsTable problems={props.problems} details transposeOnPhone/>
+    </EndCard>
+  );
 }

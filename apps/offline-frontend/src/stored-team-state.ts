@@ -76,12 +76,10 @@ function parseMatchStatus(value: unknown): MatchStatus | null {
   if (typeof value.score !== 'number') {
     return null;
   }
-  const relayResults = parseRelayResults(value.relayResults);
-  const strategyResults = parseStrategyResults(value.strategyResults);
   return {
     state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score,
-    ...(relayResults && { relayResults }),
-    ...(strategyResults && { strategyResults }),
+    relayResults: parseRelayResults(value.relayResults),
+    strategyResults: parseStrategyResults(value.strategyResults),
   };
 }
 

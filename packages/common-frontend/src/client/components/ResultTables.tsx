@@ -6,7 +6,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
-import { formatDuration, type RelayProblemRow } from './relay-results';
+import { formatDuration, type RelayProblemDetails } from './relay-results';
 
 // A long problem set continues in further rows of this many columns, each row
 // as wide as the first so a column sits under the one above it.
@@ -16,7 +16,7 @@ const LINE = '#cccccc';
 const HEADER = '#eeeeee';
 const SOLVED_ON_TRY = ['#3fc523', '#9beb53', '#d5eb42'];
 const WRONG = '#f4b4ae';
-const WON = '#c9efb8';
+export const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
 // ran out in, cannot be mistaken for a header cell.
 const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
@@ -48,51 +48,87 @@ function CellBox(props: { cell: Cell }) {
   return cell.details === undefined ? box : <Tooltip title={cell.details} enterTouchDelay={0} arrow>{box}</Tooltip>;
 }
 
+// The frame every results grid shares: thin lines drawn by the gaps.
+const gridFrameSx = {
+  display: 'grid',
+  gap: '1px',
+  border: `1px solid ${LINE}`,
+  backgroundColor: LINE,
+  textAlign: 'center',
+} as const;
+
+const labelSx = { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' };
+
 /**
  * The look the end screens' and home page's tables share: a header row
- * numbering the columns, then labelled rows of as many cells.
+ * naming the columns (numbering them unless told otherwise), then labelled
+ * rows of as many cells. With `transposeOnPhone`, a narrow screen gets one row
+ * per column instead, as wide as the labels allow.
  */
-function ResultTable(props: { headerLabel: string, rows: Row[], centred?: boolean }) {
+export function ResultTable(props: {
+  headerLabel: string,
+  columnLabels?: ReactNode[],
+  rows: Row[],
+  centred?: boolean,
+  transposeOnPhone?: boolean,
+}) {
   const count = props.rows[0]?.cells.length ?? 0;
   const columns = Math.min(count, COLUMNS_PER_ROW);
   const header: Row = {
     label: props.headerLabel,
-    cells: Array.from({ length: count }, (_, idx) => ({ content: `${idx + 1}.`, sx: headerSx })),
+    cells: Array.from({ length: count }, (_, idx) => ({ content: props.columnLabels?.[idx] ?? `${idx + 1}.`, sx: headerSx })),
   };
   const rows = [header, ...props.rows];
   const starts = Array.from({ length: Math.ceil(count / COLUMNS_PER_ROW) }, (_, idx) => idx * COLUMNS_PER_ROW);
-  return <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px', alignSelf: props.centred ? 'center' : 'stretch' }}>
-    {starts.map(start => <Box key={start} sx={{
-      display: 'grid',
-      gridTemplateColumns: props.centred
-        ? `auto repeat(${columns}, 48px)`
-        : `auto repeat(${columns}, minmax(0, 1fr))`,
-      gap: '1px',
-      border: `1px solid ${LINE}`,
-      backgroundColor: LINE,
-      textAlign: 'center',
-      fontSize: { xs: '13px', md: '16px' },
+  const fontSize = { xs: '13px', md: '16px' };
+  return <>
+    <Box sx={{
+      display: props.transposeOnPhone ? { xs: 'none', sm: 'flex' } : 'flex',
+      flexDirection: 'column',
+      gap: '8px',
+      alignSelf: props.centred ? 'center' : 'stretch',
+      maxWidth: '100%',
     }}>
-      {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
-        <CellBox cell={{
-          content: row.label,
-          sx: { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' },
-        }}/>
-        {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
+      {starts.map(start => <Box key={start} sx={{
+        ...gridFrameSx,
+        gridTemplateColumns: props.centred
+          ? `auto repeat(${columns}, minmax(32px, 48px))`
+          : `auto repeat(${columns}, minmax(0, 1fr))`,
+        fontSize,
+      }}>
+        {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
+          <CellBox cell={{ content: row.label, sx: labelSx }}/>
+          {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
+        </Fragment>)}
+      </Box>)}
+    </Box>
+    {props.transposeOnPhone && <Box sx={{
+      ...gridFrameSx,
+      display: { xs: 'grid', sm: 'none' },
+      gridTemplateColumns: `auto repeat(${props.rows.length}, minmax(0, 1fr))`,
+      fontSize,
+    }}>
+      {rows.map((row, rowIdx) => <CellBox key={rowIdx} cell={{ content: row.label, sx: headerSx }}/>)}
+      {header.cells.map((cell, idx) => <Fragment key={idx}>
+        <CellBox cell={cell}/>
+        {props.rows.map((row, rowIdx) => <CellBox key={rowIdx} cell={row.cells[idx]}/>)}
       </Fragment>)}
-    </Box>)}
-  </Box>;
+    </Box>}
+  </>;
 }
 
 /**
  * A relay's points per problem, coloured by how each problem ended. Given the
- * match state's rows it also has a time row and the details on hover, and with
- * `answers` the admin's row of every answer given.
+ * match state's details it also has a time row and the details on hover, and
+ * with `answers` the admin's row of every answer given.
  */
-export function RelayResultsTable(props: { problems: RelayProblemRow[], details?: boolean, answers?: boolean }) {
+export function RelayResultsTable(props:
+  | { problems: RelayProblemResult[], details?: false, transposeOnPhone?: boolean }
+  | { problems: RelayProblemDetails[], details: true, answers?: boolean, transposeOnPhone?: boolean }
+) {
   const { t } = useTranslation();
   // A problem's points: solved on some try, every try wrong, or never answered.
-  const pointsCell = (problem: RelayProblemRow): Cell => {
+  const pointsCell = (problem: RelayProblemResult): Cell => {
     if (problem.tries === 0) {
       return {
         content: `0/${problem.maxPoints}`,
@@ -111,7 +147,7 @@ export function RelayResultsTable(props: { problems: RelayProblemRow[], details?
         : undefined,
     };
   };
-  const timeCell = (problem: RelayProblemRow, idx: number): Cell => !problem.trySeconds?.length
+  const timeCell = (problem: RelayProblemDetails, idx: number): Cell => problem.trySeconds.length === 0
     ? { content: '–', sx: { color: '#888' } }
     : {
       content: formatDuration(problem.trySeconds.reduce((sum, it) => sum + it, 0)),
@@ -122,17 +158,14 @@ export function RelayResultsTable(props: { problems: RelayProblemRow[], details?
   const rows: Row[] = [{ label: t('relay.endTable.point'), cells: props.problems.map(pointsCell) }];
   if (props.details) {
     rows.push({ label: t('relay.endTable.time'), cells: props.problems.map(timeCell) });
+    if (props.answers) {
+      rows.push({
+        label: t('relay.endTable.answers'),
+        cells: props.problems.map(problem => ({ content: problem.answers.join(', ') })),
+      });
+    }
   }
-  if (props.answers) {
-    rows.push({
-      label: t('relay.endTable.answers'),
-      cells: props.problems.map(problem => ({ content: (problem.answers ?? []).join(', ') })),
-    });
-  }
-  return <ResultTable
-    headerLabel={t('relay.endTable.task')}
-    rows={rows}
-  />;
+  return <ResultTable headerLabel={t('relay.endTable.task')} rows={rows} transposeOnPhone={props.transposeOnPhone}/>;
 }
 
 /**
@@ -141,13 +174,9 @@ export function RelayResultsTable(props: { problems: RelayProblemRow[], details?
  */
 export function RelayProgressTable(props: { problems: RelayProblemResult[], current: number }) {
   return <Box sx={{
-    display: 'grid',
+    ...gridFrameSx,
     gridTemplateColumns: `repeat(${Math.min(props.problems.length, COLUMNS_PER_ROW)}, minmax(0, 1fr))`,
-    gap: '1px',
-    border: `1px solid ${LINE}`,
-    backgroundColor: LINE,
     fontSize: '12px',
-    textAlign: 'center',
     color: '#444',
   }}>
     {props.problems.map((problem, idx) => <Box key={idx} sx={[
