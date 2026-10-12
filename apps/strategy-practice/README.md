@@ -250,7 +250,7 @@ strategy, keyboard and mobile usability.
 ## Internationalisation (i18n)
 
 Hungarian is the default, English is added game by game; a game may ship in
-Hungarian only. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
+Hungarian only, with no English file, and English readers then see Hungarian. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
 one per game folder, `factory` for the chrome around every game, `overview`, and
 `catalog` for each game's name and title, under its `gameList.ts` key. The
 recommended i18n Ally VS Code extension shows the two languages side by side.
@@ -258,11 +258,13 @@ recommended i18n Ally VS Code extension shows the two languages side by side.
 A game's rule and step description are small components calling
 `useTranslation('shark-chase')`; `dominoes-on-chessboard` and `shark-chase` are
 the examples. Keys and namespaces are literals, so that i18n Ally and
-`npm run i18n:check` can follow them, and the two languages of a key carry the
-same placeholders. `{{size, numberAdjective}}` adds the Hungarian
+`npm run i18n:check` can follow them; the root [README](../../README.md#the-checks-ci-runs)
+says what the check needs. `{{size, numberAdjective}}` adds the Hungarian
 suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
 stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
-factory's `testVariantLabel` and `fullVariantLabel`.
+factory's `testVariantLabel` and `fullVariantLabel`. A spec that needs text reads
+it in one language, `i18next.getFixedT('hu', '<namespace>')`; `test-setup.ts`
+puts i18next back to Hungarian after every test.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.

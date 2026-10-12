@@ -274,6 +274,37 @@ enforced only where the code already agrees on one — that module says which, a
 why the rest is left alone.
 </details>
 
+<details><summary>What the i18n check covers, and how to keep a key in its sight</summary>
+
+`npm run i18n:check` compares English against Hungarian in
+`packages/common-frontend/public/locales` and `apps/strategy-practice/src/locales`,
+and reads the code for keys nobody uses or nobody defines.
+
+- **Keys are literals** at `t('…')` or `i18nKey="…"`, in a
+  `useTranslation('<namespace>')` scope or written `namespace:key`.
+- **A key picked at run time** is named in a comment, which counts as a use:
+  ```tsx
+  // t('disclaimer.interfaceDescriptionOfflineMode'), t('disclaimer.interfaceDescription')
+  <Trans i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'} />
+  ```
+  The strategy practice `catalog` (game names by `gameList.ts` key) is left out of
+  the unused check instead; `gameList.test.ts` covers it.
+- **Both languages carry the same placeholders and tags.** A word that differs by
+  language is two keys: `cond ? t('times.twice') : t('times.once')`.
+- **Tags with attributes** go through `components`:
+  ```tsx
+  <Trans t={t} i18nKey="intro" components={{ durerinfo: <a href="https://durerinfo.hu" /> }} />
+  // "intro": "… a <durerinfo>Dürer Versenyen</durerinfo> szerepeltek."
+  ```
+  Bare `<br/>`, `<strong>`, `<i>`, `<p>` need none; strategy practice adds `<b>`,
+  `<em>`, `<code>`. Text with a literal `<` uses `t()`, not `<Trans>`.
+- **English plurals** are `key_one` / `key_other` with `count`; Hungarian keeps
+  the bare `key`.
+- **A new locale folder** goes in three places: `i18n:check` and `spell-check` in
+  `package.json`, `i18n-ally.localesPaths` in `.vscode/settings.json`.
+
+</details>
+
 <details><summary>What the spell check covers, and where its vocabulary lives</summary>
 
 `npm run spell-check` checks English and Hungarian alike (via
