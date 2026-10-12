@@ -124,18 +124,26 @@ function ResultTable(props: {
 /**
  * A relay's points per problem, coloured by how each problem ended. With
  * `details` it also has a time row and the details on hover, and with
- * `answers` the admin's row of every answer given.
+ * `answers` the admin's row of every answer given. A match still running
+ * names its `current` problem, which has not ended yet, nor have those after it.
  */
 export function RelayResultsTable(props: {
   problems: RelayProblemResult[],
   details?: boolean,
   answers?: number[][],
+  current?: number,
   transposeOnPhone?: boolean,
 }) {
   const { t } = useTranslation();
-  // A problem's points: solved on some try, every try wrong, or never answered.
-  const pointsCell = (problem: RelayProblemResult): Cell => {
+  // A problem's points: still in play, not reached yet, solved on some try,
+  // every try wrong, or never answered.
+  const pointsCell = (problem: RelayProblemResult, idx: number): Cell => {
     const tries = problem.trySeconds.length;
+    if (props.current !== undefined && idx >= props.current) {
+      return idx === props.current
+        ? { content: `–/${problem.maxPoints}`, sx: { fontWeight: 700 }, details: t('relay.endTable.inProgress') }
+        : { content: `–/${problem.maxPoints}`, sx: { color: '#aaa' } };
+    }
     if (tries === 0) {
       return {
         content: `0/${problem.maxPoints}`,

@@ -82,6 +82,7 @@
   "relay": {
     "endTable": {
       "selectOtherRound": "Fordulóválasztás",
+      "inProgress": "Ezen a feladaton dolgoznak most",
       "point": "Pont",
       "reminder": "Ne feledkezzetek meg a stratégiás játékról sem!",
       "task": "Feladat",

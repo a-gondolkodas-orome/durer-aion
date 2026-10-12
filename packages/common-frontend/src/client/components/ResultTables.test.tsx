@@ -46,3 +46,15 @@ test("each live game is named by its result for a screen reader", () => {
   expect(screen.getAllByRole('img', { name: 'strategy.endTable.won' })).toHaveLength(2);
   expect(screen.getAllByRole('img', { name: 'strategy.endTable.lost' })).toHaveLength(1);
 });
+
+test("a running relay shows its current problem and the ones after it as not ended, though they have no points", () => {
+  render(<RelayResultsTable current={1} problems={[
+    { maxPoints: 3, points: 3, trySeconds: [60] },
+    { maxPoints: 4, points: 0, trySeconds: [60] },
+    { maxPoints: 5, points: 0, trySeconds: [] },
+  ]}/>);
+
+  expect(screen.getByText('–/4')).toBeInTheDocument();
+  expect(screen.getByText('–/5')).toBeInTheDocument();
+  expect(screen.queryByText('0/5')).not.toBeInTheDocument();
+});

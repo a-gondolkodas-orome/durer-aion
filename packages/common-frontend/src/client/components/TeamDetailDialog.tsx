@@ -145,7 +145,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           team-state-start: {formatTime(inProgressState.startAt)}<br/>
           team-state-end: {formatTime(inProgressState.endAt)}<br/>
         </Stack>
-        <Stack><MatchStatusDataField matchId={inProgressState.matchID} isRelay={props.isRelay}/></Stack>
+        <Stack><MatchStatusDataField matchId={inProgressState.matchID} isRelay={props.isRelay} inProgress/></Stack>
         <Form
         initialValues={{ time: '' }}
         validationSchema={Yup.object().shape({
@@ -312,7 +312,7 @@ function StoredScore(props: { matchId: string, score: number }) {
   </>);
 }
 
-function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
+function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProgress?: boolean }) {
   const [msRemaining, setMsRemaining] = useState<number>(10000);
   const { data } = useMatchStateData(props.matchId);
   if (!data) {
@@ -337,7 +337,8 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
       { props.isRelay && relayG && <RelayResultsTable problems={relayProblemResults(relayG)} details
-        answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}/>}
+        answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}
+        current={props.inProgress ? relayG.currentProblem : undefined}/>}
     </Stack>
   </>)
 }

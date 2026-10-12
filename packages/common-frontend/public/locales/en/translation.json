@@ -85,6 +85,7 @@
   "relay": {
     "endTable": {
       "selectOtherRound": "Select other round",
+      "inProgress": "The problem being worked on now",
       "point": "Points",
       "reminder": "Don't forget to play the strategy game too!",
       "task": "Task",
