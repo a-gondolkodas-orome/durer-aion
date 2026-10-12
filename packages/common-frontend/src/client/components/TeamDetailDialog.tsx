@@ -11,8 +11,8 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
 import { Countdown } from './Countdown';
+import { relayProblemResults } from 'game';
 import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
-import { relayProblemDetails } from './relay-results';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -336,7 +336,8 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         getServerTimer={() => undefined}
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
-      { props.isRelay && relayG && <RelayResultsTable problems={relayProblemDetails(relayG)} details answers/>}
+      { props.isRelay && relayG && <RelayResultsTable problems={relayProblemResults(relayG)} details
+        answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}/>}
     </Stack>
   </>)
 }

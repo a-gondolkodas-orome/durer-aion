@@ -77,19 +77,19 @@ export function ChooserItem(props: {
           }
         }}/>)}</span>
       </Stack>
-      {props.status.state === "FINISHED" &&
+      {finished &&
         <Stack sx={{ gap: '12px', marginBottom: { xs: '10px', md: '16px' } }}>
-          <ScoreHeadline compact points={props.status.score} max={
-            props.type === 'relay'
-              ? props.status.relayResults && relayMaxPoints(props.status.relayResults)
-              : strategyPoints(0)
-          }/>
-          {props.type === 'relay' && props.status.relayResults &&
-            <RelayResultsTable problems={props.status.relayResults}/>}
-          {props.type === 'strategy' && props.status.strategyResults &&
-            <StrategyGamesTable results={props.status.strategyResults}/>}
+          {props.type === 'relay'
+            ? <>
+              <ScoreHeadline compact points={finished.score} max={finished.relayResults && relayMaxPoints(finished.relayResults)}/>
+              {finished.relayResults && <RelayResultsTable problems={finished.relayResults}/>}
+            </>
+            : <>
+              <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>
+              {finished.strategyResults && <StrategyGamesTable results={finished.strategyResults}/>}
+            </>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
-            {t('chooser.filledAt')}: {formatTime(props.status.startAt)} – {formatTime(props.status.endAt)}
+            {t('chooser.filledAt')}: {formatTime(finished.startAt)} – {formatTime(finished.endAt)}
           </Stack>
         </Stack>
       }

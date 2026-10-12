@@ -30,7 +30,8 @@ export interface InProgressMatchStatus {
 ///
 /// `relayResults` and `strategyResults` are copied from the match state alongside
 /// `score`, for the home page's summary: the first on a relay match, the
-/// second on a strategy match. A record closed before they existed has neither.
+/// second on a strategy match. `ChooserItem` in common-frontend says when a
+/// finished match has neither.
 export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;

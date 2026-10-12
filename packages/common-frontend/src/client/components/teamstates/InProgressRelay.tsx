@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState, relayProblemResults } from 'game';
-import { useBackToHome } from '../../hooks/user-hooks';
+import { useBackToHome, useLogout } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
@@ -24,7 +24,9 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
   const [gameover, setGameover] = useState(ctx.gameover);
   const clientRepo = useClientRepo();
-  const backToHome = useBackToHome();
+  const logout = useLogout();
+  // Closing the dialog leaves the way its button does.
+  const backToHome = useBackToHome(selectRoundOnEnd ? logout : undefined);
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -51,10 +53,11 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   if (G.numberOfTry === 0 && !finished) {
     return <div>{t('general.loading')}</div>;
   }
+  const problems = relayProblemResults(G);
   return (
     <>
       <EndDialog open={finished} onClose={backToHome}>
-        <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemResults(G)}/>
+        <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={problems}/>
       </EndDialog>
       <Stack sx={{
         width: "100%",
@@ -159,7 +162,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             borderTop: '1px solid #e6e6e6',
             gap: '8px',
           }}>
-            <RelayProgressTable problems={relayProblemResults(G)} current={G.currentProblem}/>
+            <RelayProgressTable problems={problems} current={G.currentProblem}/>
             <Stack sx={{ fontSize: '13px', color: '#666' }}>
               {t('relay.progress', { points: t('general.points', { count: G.points }) })}
             </Stack>

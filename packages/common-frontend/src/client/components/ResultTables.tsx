@@ -7,7 +7,7 @@ import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES } from 'game';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
-import { formatDuration, type RelayProblemDetails } from './relay-results';
+import { formatDuration } from './relay-results';
 
 // A long problem set continues in further rows of this many columns, each row
 // as wide as the first so a column sits under the one above it.
@@ -126,10 +126,12 @@ function ResultTable(props: {
  * `details` it also has a time row and the details on hover, and with
  * `answers` the admin's row of every answer given.
  */
-export function RelayResultsTable(props:
-  | { problems: RelayProblemResult[], details?: boolean, answers?: false, transposeOnPhone?: boolean }
-  | { problems: RelayProblemDetails[], details: true, answers: true, transposeOnPhone?: boolean }
-) {
+export function RelayResultsTable(props: {
+  problems: RelayProblemResult[],
+  details?: boolean,
+  answers?: number[][],
+  transposeOnPhone?: boolean,
+}) {
   const { t } = useTranslation();
   // A problem's points: solved on some try, every try wrong, or never answered.
   const pointsCell = (problem: RelayProblemResult): Cell => {
@@ -163,12 +165,13 @@ export function RelayResultsTable(props:
   const rows: Row[] = [{ label: t('relay.endTable.point'), cells: props.problems.map(pointsCell) }];
   if (props.details) {
     rows.push({ label: t('relay.endTable.time'), cells: props.problems.map(timeCell) });
-    if (props.answers) {
-      rows.push({
-        label: t('relay.endTable.answers'),
-        cells: props.problems.map(problem => ({ content: problem.answers.join(', ') })),
-      });
-    }
+  }
+  const answers = props.answers;
+  if (answers) {
+    rows.push({
+      label: t('relay.endTable.answers'),
+      cells: props.problems.map((_, idx) => ({ content: answers[idx]?.join(', ') ?? '' })),
+    });
   }
   return <ResultTable headerLabel={t('relay.endTable.task')} rows={rows} transposeOnPhone={props.transposeOnPhone}/>;
 }
@@ -263,7 +266,7 @@ export function ScoreHeadline(props: { points: number, max?: number, compact?: b
   }}>
     {props.max === undefined ? props.points : `${props.points} / ${props.max}`}{' '}
     <Box component="span" sx={{ fontSize: props.compact ? '18px' : '22px', fontWeight: 400 }}>
-      {t('general.pointsUnit', { count: props.points })}
+      {t('general.pointsUnit', { count: props.max ?? props.points })}
     </Box>
   </Box>;
 }
