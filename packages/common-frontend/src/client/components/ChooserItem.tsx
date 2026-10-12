@@ -142,27 +142,23 @@ export function ChooserItem(props: {
           />}
         </Stack>
       }
-      {props.status.state === "FINISHED"
-        ? <Stack sx={{ fontSize: '18px', fontWeight: 600, color: '#2e7d32', textAlign: 'center' }}>
-          {t('chooser.finished')}
-        </Stack>
-        : <Button sx={{
-          width: '100%',
-          maxWidth: "600px",
-          height: '75px',
-          fontSize: '26px',
-          alignSelf: 'center',
-          textTransform: 'none',
-        }} variant='contained' color='primary' onClick={() => {
-          if (props.type === "relay") {
-            void startRelay()
-          } else {
-            void startStrategy()
-          }
-        }} disabled={props.status.state !== "NOT STARTED"}>
-          {t('chooser.start')}
-        </Button>}
       <Button sx={{
+        width: '100%',
+        maxWidth: "600px",
+        height: '75px',
+        fontSize: '26px',
+        alignSelf: 'center',
+        textTransform: 'none',
+      }} variant='contained' color='primary' onClick={() => {
+        if (props.type === "relay") {
+          void startRelay()
+        } else {
+          void startStrategy()
+        }
+      }} disabled={props.status.state !== "NOT STARTED"}>
+        {props.status.state === "FINISHED" ? t('chooser.finished') : t('chooser.start')}
+      </Button>
+      {props.status.state !== "NOT STARTED" && <Button sx={{
         width: '70%',
         maxWidth: "400px",
         height: '50px',
@@ -178,7 +174,7 @@ export function ChooserItem(props: {
         }
       }} disabled={!hasDetails}>
         {t('chooser.detailedResults')}
-      </Button>
+      </Button>}
     </Stack>
   )
 }
