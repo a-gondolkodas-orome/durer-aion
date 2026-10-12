@@ -158,7 +158,7 @@ export function ChooserItem(props: {
       }} disabled={props.status.state !== "NOT STARTED"}>
         {props.status.state === "FINISHED" ? t('chooser.finished') : t('chooser.start')}
       </Button>
-      {props.status.state !== "NOT STARTED" && <Button sx={{
+      <Button sx={{
         width: '70%',
         maxWidth: "400px",
         height: '50px',
@@ -174,7 +174,7 @@ export function ChooserItem(props: {
         }
       }} disabled={!hasDetails}>
         {t('chooser.detailedResults')}
-      </Button>}
+      </Button>
     </Stack>
   )
 }
