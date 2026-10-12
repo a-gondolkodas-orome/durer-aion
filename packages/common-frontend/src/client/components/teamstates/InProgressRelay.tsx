@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { MyGameState, relayProblemResults } from 'game';
-import { Dialog } from '@mui/material';
 import { useBackToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
 import { RelayProgressTable } from '../ResultTables';
-import { relayProblemDetails } from '../relay-results';
+import { EndDialog } from '../EndCard';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
@@ -54,30 +53,9 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   }
   return (
     <>
-      <Dialog
-        maxWidth={false}
-        slotProps={{ paper: {
-          sx: {
-            marginLeft: {
-              xs: 0,
-              md: '32px'
-            },
-            marginRight: {
-              xs: 0,
-              md: '32px'
-            },
-            maxWidth: {
-              xs: '100%',
-              md: 'calc(100% - 64px)'
-            },
-            backgroundColor: theme.palette.background.paper,
-          }
-        } }}
-        open={
-          finished
-        } onClose={backToHome}>
-          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemDetails(G)}/>
-        </Dialog>
+      <EndDialog open={finished} onClose={backToHome}>
+        <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={relayProblemResults(G)}/>
+      </EndDialog>
       <Stack sx={{
         width: "100%",
         display: 'flex',

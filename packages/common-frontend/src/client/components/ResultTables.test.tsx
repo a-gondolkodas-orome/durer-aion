@@ -10,8 +10,8 @@ vi.mock('react-i18next', () => ({
 
 test("a relay's table shows each problem's points out of its max, and a dash for a time never spent", () => {
   render(<RelayResultsTable details problems={[
-    { maxPoints: 3, points: 2, tries: 2, trySeconds: [180, 90], answers: [5, 7] },
-    { maxPoints: 6, points: 0, tries: 0, trySeconds: [], answers: [] },
+    { maxPoints: 3, points: 2, trySeconds: [180, 90] },
+    { maxPoints: 6, points: 0, trySeconds: [] },
   ]}/>);
 
   expect(screen.getByText('2', { selector: 'b' }).parentElement).toHaveTextContent('2/3');
@@ -21,7 +21,7 @@ test("a relay's table shows each problem's points out of its max, and a dash for
 });
 
 test("a long problem set continues in a second row of the same width", () => {
-  const problems = Array.from({ length: 12 }, () => ({ maxPoints: 3, points: 3, tries: 1 }));
+  const problems = Array.from({ length: 12 }, () => ({ maxPoints: 3, points: 3, trySeconds: [60] }));
   render(<RelayResultsTable problems={problems}/>);
 
   expect(screen.getAllByText('relay.endTable.task')).toHaveLength(2);
@@ -30,9 +30,9 @@ test("a long problem set continues in a second row of the same width", () => {
 
 test("the live progress shows only what is decided, and what the rest is worth", () => {
   render(<RelayProgressTable current={1} problems={[
-    { maxPoints: 3, points: 2, tries: 2 },
-    { maxPoints: 4, points: 0, tries: 0 },
-    { maxPoints: 5, points: 0, tries: 0 },
+    { maxPoints: 3, points: 2, trySeconds: [60, 60] },
+    { maxPoints: 4, points: 0, trySeconds: [] },
+    { maxPoints: 5, points: 0, trySeconds: [] },
   ]}/>);
 
   expect(screen.getByText('2/3')).toBeInTheDocument();

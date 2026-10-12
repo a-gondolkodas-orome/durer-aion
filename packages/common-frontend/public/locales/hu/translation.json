@@ -31,6 +31,7 @@
   },
   "general": {
     "backHome": "Vissza a kezdőlapra",
+    "close": "Bezárás",
     "loading": "Játék vagy feladat betöltése…",
     "points": "{{count}} pont",
     "pointsUnit": "pont",

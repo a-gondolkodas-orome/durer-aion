@@ -197,7 +197,8 @@ describe("closeMatch", () => {
       points: 3,
       maxPointsList: [3, 4],
       previousPoints: [3],
-      previousAnswers: [[{ answer: 1, date: "" }], []],
+      start: "2026-10-10T10:00:00Z",
+      previousAnswers: [[{ answer: 1, date: "2026-10-10T10:02:00Z" }], []],
     };
     const db = {
       fetch: async () => ({ state: { G }, metadata: { gameName: "relay_e", players: { 0: { name: "team-1" } } } }),
@@ -208,7 +209,7 @@ describe("closeMatch", () => {
     expect(writes).toStrictEqual([["team-1", "relayMatch", "match-1", {
       ...finished,
       score: 3,
-      relayResults: [{ maxPoints: 3, points: 3, tries: 1 }, { maxPoints: 4, points: 0, tries: 0 }],
+      relayResults: [{ maxPoints: 3, points: 3, trySeconds: [120] }, { maxPoints: 4, points: 0, trySeconds: [] }],
     }]]);
   });
 

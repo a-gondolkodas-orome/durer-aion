@@ -24,7 +24,8 @@ const isCount = (value: unknown): value is number => typeof value === 'number' &
 /// The home page's relay summary as game-report.ts saved it; anything
 /// malformed reads as absent, which the home page shows as no summary.
 const isRelayProblemResult = (value: unknown): value is RelayProblemResult =>
-  isRecord(value) && isCount(value.maxPoints) && isCount(value.points) && isCount(value.tries);
+  isRecord(value) && isCount(value.maxPoints) && isCount(value.points) &&
+  Array.isArray(value.trySeconds) && value.trySeconds.every(isCount);
 
 function parseRelayResults(value: unknown): FinishedMatchStatus['relayResults'] {
   return Array.isArray(value) && value.every(isRelayProblemResult) ? value : undefined;

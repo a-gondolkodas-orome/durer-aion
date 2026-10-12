@@ -35,12 +35,24 @@ export type RelayMoveArgs =
   | [availablePoints: number] // nextTry
   | [correctnessPreviousAnswer: boolean]; // endGame
 
-/** Every problem of the set as the match stands, the ones not reached included. */
-export function relayProblemResults(G: Pick<MyGameState, "maxPointsList" | "previousPoints" | "previousAnswers">): RelayProblemResult[] {
+const secondsBetween = (from: string, to: string) =>
+  Math.round((new Date(to).getTime() - new Date(from).getTime()) / 1000);
+
+/**
+ * Every problem of the set as the match stands, the ones not reached included.
+ * A problem's first try is timed from the previous problem's last answer —
+ * when it appeared — and each later try from the answer before it.
+ */
+export function relayProblemResults(G: Pick<MyGameState, "start" | "maxPointsList" | "previousPoints" | "previousAnswers">): RelayProblemResult[] {
+  let shownAt = G.start;
   return G.maxPointsList.map((maxPoints, idx) => ({
     maxPoints,
     points: G.previousPoints[idx] ?? 0,
-    tries: G.previousAnswers[idx]?.length ?? 0,
+    trySeconds: (G.previousAnswers[idx] ?? []).map(it => {
+      const seconds = secondsBetween(shownAt, it.date);
+      shownAt = it.date;
+      return seconds;
+    }),
   }));
 }
 

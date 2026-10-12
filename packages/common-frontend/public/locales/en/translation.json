@@ -31,6 +31,7 @@
   },
   "general": {
     "backHome": "Back to the home page",
+    "close": "Close",
     "loading": "Loading game or task…",
     "points_one": "1 point",
     "points_other": "{{count}} points",

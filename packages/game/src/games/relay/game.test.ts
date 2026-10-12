@@ -104,10 +104,27 @@ describe("relayProblemResults", () => {
     client.moves.newProblem("third", false, "");
 
     const G = client.getState()?.G;
-    expect(G && relayProblemResults(G)).toStrictEqual([
-      { maxPoints: 4, points: 3, tries: 2 },
-      { maxPoints: 3, points: 0, tries: 3 },
-      { maxPoints: 5, points: 0, tries: 0 },
+    expect(G && relayProblemResults(G).map(({ maxPoints, points, trySeconds }) => [maxPoints, points, trySeconds.length]))
+      .toStrictEqual([[4, 3, 2], [3, 0, 3], [5, 0, 0]]);
+  });
+
+  test("times each problem from when it appeared, and each try from the one before", () => {
+    const answer = (answer: number, date: string) => ({ answer, date });
+    const G = {
+      start: "2026-10-10T10:00:00Z",
+      maxPointsList: [3, 4, 5],
+      previousPoints: [2, 0],
+      previousAnswers: [
+        [answer(1, "2026-10-10T10:03:00Z"), answer(2, "2026-10-10T10:04:30Z")],
+        [answer(7, "2026-10-10T10:05:00Z"), answer(8, "2026-10-10T10:06:00Z"), answer(9, "2026-10-10T10:06:05Z")],
+        [],
+      ],
+    };
+
+    expect(relayProblemResults(G)).toStrictEqual([
+      { maxPoints: 3, points: 2, trySeconds: [180, 90] },
+      { maxPoints: 4, points: 0, trySeconds: [30, 60, 5] },
+      { maxPoints: 5, points: 0, trySeconds: [] },
     ]);
   });
 });

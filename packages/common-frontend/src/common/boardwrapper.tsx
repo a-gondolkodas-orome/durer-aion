@@ -1,6 +1,7 @@
-import { Button, Dialog, Stack, alpha } from "@mui/material";
+import { Button, Stack, alpha } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
+import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
@@ -41,30 +42,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const finished = msRemaining < - 5000 || gameover === true
     return (
       <>
-        <Dialog
-          maxWidth={false}
-          slotProps={{ paper: {
-            sx: {
-              marginLeft: {
-                xs: 0,
-                md: '32px'
-              },
-              marginRight: {
-                xs: 0,
-                md: '32px'
-              },
-              maxWidth: {
-                xs: '100%',
-                md: 'calc(100% - 64px)'
-              },
-              backgroundColor: theme.palette.background.paper,
-            }
-          } }}
-          open={
-            finished
-          } onClose={backToHome}>
+        <EndDialog open={finished} onClose={backToHome}>
           <StrategyEndTable allPoints={G.points} liveResults={G.liveResults} />
-        </Dialog>
+        </EndDialog>
         <Stack sx={{
           padding: '20px',
           backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),

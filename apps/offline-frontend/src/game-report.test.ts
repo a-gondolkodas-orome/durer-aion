@@ -65,12 +65,14 @@ describe("handleGameReport", () => {
   });
 
   test("persists the problems of a relay end report for the home page", () => {
-    const tries = [{ answer: 1, date: "" }, { answer: 2, date: "" }];
-    handleGameReport(relayEnd({ points: 2, maxPointsList: [3, 4], previousPoints: [2], previousAnswers: [tries, []] }));
+    const tries = [{ answer: 1, date: "2026-10-10T10:01:00Z" }, { answer: 2, date: "2026-10-10T10:01:30Z" }];
+    handleGameReport(relayEnd({
+      points: 2, start: "2026-10-10T10:00:00Z", maxPointsList: [3, 4], previousPoints: [2], previousAnswers: [tries, []],
+    }));
 
     expect(JSON.parse(localStorage.getItem("the relay results key") ?? "")).toStrictEqual([
-      { maxPoints: 3, points: 2, tries: 2 },
-      { maxPoints: 4, points: 0, tries: 0 },
+      { maxPoints: 3, points: 2, trySeconds: [60, 30] },
+      { maxPoints: 4, points: 0, trySeconds: [] },
     ]);
   });
 

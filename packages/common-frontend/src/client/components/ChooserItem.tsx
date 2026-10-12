@@ -11,11 +11,13 @@ import { useTranslation, Trans } from 'react-i18next';
 import { strategyPoints } from 'game';
 import { RelayResultsTable, ScoreHeadline, StrategyGamesTable } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
+import { EndDialog } from './EndCard';
+import { RelayEndTable } from './RelayEndTable';
+import { StrategyEndTable } from './StrategyEndTable';
 
 export function ChooserItem(props: {
   status: MatchStatus,
   type: 'strategy' | 'relay',
-  setState: React.Dispatch<"R" | "S" | null>
   hideDesc?: boolean
 }) {
   const startRelay = useStartRelay();
@@ -24,12 +26,15 @@ export function ChooserItem(props: {
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
   const theme = useTheme();
   const { t } = useTranslation();
-  // Without a saved summary there may be no saved match to reopen either: a
-  // record from before the summary is under an older key, and a local relay
-  // left to run out of time never reports its end (#613). Reopening would then
-  // start a fresh match.
-  const hasDetails = props.status.state === "IN PROGRESS" || (props.status.state === "FINISHED" &&
-    (props.type === 'relay' ? props.status.relayResults : props.status.strategyResults) !== undefined);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const closeDetails = () => setDetailsOpen(false);
+  // The round's end screen, from the summary saved with the finished match. A
+  // match without one has nothing to show: a record from before the summary
+  // existed, or a local relay left to run out of time (#613).
+  const finished = props.status.state === "FINISHED" ? props.status : null;
+  const details = props.type === 'relay'
+    ? finished?.relayResults && <RelayEndTable allPoints={finished.score} problems={finished.relayResults} onClose={closeDetails}/>
+    : finished?.strategyResults && <StrategyEndTable allPoints={finished.score} liveResults={finished.strategyResults} onClose={closeDetails}/>;
 
   return (
     <Stack sx={{
@@ -166,15 +171,10 @@ export function ChooserItem(props: {
         alignSelf: 'center',
         textTransform: 'none',
         marginTop: '15px',
-      }} variant='contained' color='primary' onClick={() => {
-        if (props.type === "relay") {
-          props.setState("R");
-        } else {
-          props.setState("S");
-        }
-      }} disabled={!hasDetails}>
+      }} variant='contained' color='primary' onClick={() => setDetailsOpen(true)} disabled={!details}>
         {t('chooser.detailedResults')}
       </Button>
+      {details && <EndDialog open={detailsOpen} onClose={closeDetails}>{details}</EndDialog>}
     </Stack>
   )
 }

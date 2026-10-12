@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { Button, Dialog } from '@mui/material';
 import { Stack } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 import type { ReactNode } from 'react';
@@ -48,5 +48,19 @@ export function EndCard(props: {
         {props.backLabel}
       </Button>
     </Stack>
+  );
+}
+
+/** The dialog an end screen opens in: edge to edge on a phone. */
+export function EndDialog(props: { open: boolean, onClose: () => void, children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <Dialog maxWidth={false} open={props.open} onClose={props.onClose} slotProps={{ paper: { sx: {
+      marginX: { xs: 0, md: '32px' },
+      maxWidth: { xs: '100%', md: 'calc(100% - 64px)' },
+      backgroundColor: theme.palette.background.paper,
+    } } }}>
+      {props.children}
+    </Dialog>
   );
 }

@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 
 export function Chooser(props: {
   state: TeamModelDto;
-  setState: React.Dispatch<"R" | "S" | null>;
 }) {
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score ?? 0;
   const strategyScore = (props.state.strategyMatch as FinishedMatchStatus).score ?? 0;
@@ -81,7 +80,6 @@ export function Chooser(props: {
         <ChooserItem
           status={props.state.relayMatch}
           type="relay"
-          setState={props.setState}
           hideDesc={finished}
         />
         <Stack sx={{
@@ -91,7 +89,6 @@ export function Chooser(props: {
         <ChooserItem
           status={props.state.strategyMatch}
           type="strategy"
-          setState={props.setState}
           hideDesc={finished}
         />
       </Stack>

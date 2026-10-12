@@ -41,12 +41,13 @@ export interface FinishedMatchStatus {
   strategyResults?: LiveGameResult[];
 }
 
-/// One relay problem as the match ended: `tries` counts the answers given, so
-/// 0 means the team never answered it, and `points` is 0 unless one was right.
+/// One relay problem as the match ended: `trySeconds` has one entry per
+/// answer given, how long that try took, so an empty list means the team never
+/// answered it. `points` is 0 unless an answer was right.
 export interface RelayProblemResult {
   maxPoints: number;
   points: number;
-  tries: number;
+  trySeconds: number[];
 }
 
 /// How one live (not practice) strategy game ended, from the team's side:

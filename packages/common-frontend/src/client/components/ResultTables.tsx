@@ -122,18 +122,19 @@ function ResultTable(props: {
 }
 
 /**
- * A relay's points per problem, coloured by how each problem ended. Given the
- * match state's details it also has a time row and the details on hover, and
- * with `answers` the admin's row of every answer given.
+ * A relay's points per problem, coloured by how each problem ended. With
+ * `details` it also has a time row and the details on hover, and with
+ * `answers` the admin's row of every answer given.
  */
 export function RelayResultsTable(props:
-  | { problems: RelayProblemResult[], details?: false, transposeOnPhone?: boolean }
-  | { problems: RelayProblemDetails[], details: true, answers?: boolean, transposeOnPhone?: boolean }
+  | { problems: RelayProblemResult[], details?: boolean, answers?: false, transposeOnPhone?: boolean }
+  | { problems: RelayProblemDetails[], details: true, answers: true, transposeOnPhone?: boolean }
 ) {
   const { t } = useTranslation();
   // A problem's points: solved on some try, every try wrong, or never answered.
   const pointsCell = (problem: RelayProblemResult): Cell => {
-    if (problem.tries === 0) {
+    const tries = problem.trySeconds.length;
+    if (tries === 0) {
       return {
         content: `0/${problem.maxPoints}`,
         sx: { background: UNANSWERED, color: '#888' },
@@ -143,15 +144,15 @@ export function RelayResultsTable(props:
     const solved = problem.points > 0;
     return {
       content: <span><b>{problem.points}</b>/{problem.maxPoints}</span>,
-      sx: { backgroundColor: solved ? SOLVED_ON_TRY[problem.tries - 1] : WRONG },
+      sx: { backgroundColor: solved ? SOLVED_ON_TRY[tries - 1] : WRONG },
       details: props.details
         ? `${t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints })}: ${solved
-          ? t('relay.endTable.solvedOnTry', { try: problem.tries })
-          : t('relay.endTable.wrongTries', { count: problem.tries })}`
+          ? t('relay.endTable.solvedOnTry', { try: tries })
+          : t('relay.endTable.wrongTries', { count: tries })}`
         : undefined,
     };
   };
-  const timeCell = (problem: RelayProblemDetails, idx: number): Cell => problem.trySeconds.length === 0
+  const timeCell = (problem: RelayProblemResult, idx: number): Cell => problem.trySeconds.length === 0
     ? { content: '–', sx: { color: '#888' } }
     : {
       content: formatDuration(problem.trySeconds.reduce((sum, it) => sum + it, 0)),
