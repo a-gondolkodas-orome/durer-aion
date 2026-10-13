@@ -30,6 +30,11 @@ export default defineConfig(() => {
         { find: /^schemas$/, replacement: path.resolve(import.meta.dirname, "../../packages/schemas") },
         { find: /^relay-bot$/, replacement: path.resolve(import.meta.dirname, "../../packages/relay-bot") },
         { find: /^common-frontend$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend") },
+        // To its dist file, the way the entry above reaches dist through the package
+        // directory: resolved through node_modules instead, preserveSymlinks would key
+        // the chunk the two entries share under a second path, and the bundle would
+        // carry two copies of the storage-key namespace, one never set.
+        { find: /^common-frontend\/core$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend/dist/core.mjs") },
       ],
       dedupe: ["react", "react-dom", "boardgame.io"], // ✅ avoid duplicate instances
       preserveSymlinks: true, // this is needed to make sure that linked packages are properly resolved (like game and schemas

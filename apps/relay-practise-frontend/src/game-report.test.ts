@@ -1,20 +1,15 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-// The key helper comes from the package entry, which resolves to a `dist` the
-// CI test job never builds — the same reason sendData.test.ts mocks its way off
-// the workspace packages. A name of its own also pins that the handler reaches
-// for the namespaced key rather than writing a bare one.
-const { bgioStoragePrefix, relayPointsStorageKey, sendGameData, readStoredTeamState, RelayWrapper, Client } = vi.hoisted(() => ({
-  bgioStoragePrefix: () => "relay-practise/bgio_",
-  relayPointsStorageKey: () => "relay-practise/RelayPoints",
+import { setLocalStorageNamespace } from "common-frontend/core";
+
+const { sendGameData, readStoredTeamState, RelayWrapper, Client } = vi.hoisted(() => ({
   sendGameData: vi.fn(),
   readStoredTeamState: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
-vi.mock("common-frontend", () => ({ bgioStoragePrefix, relayPointsStorageKey }));
 vi.mock("./sendData", () => ({ sendGameData }));
 vi.mock("./stored-team-state", () => ({ readStoredTeamState }));
 // The wiring test reads the callback the app hands the reducer; building a real
@@ -24,6 +19,9 @@ vi.mock("boardgame.io/react", () => ({ Client }));
 
 import { handleGameReport } from "./game-report";
 
+// As index.tsx sets it: the namespaced key, spelled out, pins that the handler
+// reaches for it rather than writing a bare one.
+setLocalStorageNamespace("relay-practise");
 const RELAY_KEY = "relay-practise/RelayPoints";
 
 describe("handleGameReport", () => {

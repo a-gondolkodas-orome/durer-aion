@@ -1,7 +1,8 @@
 import { Client } from 'boardgame.io/react';
 import { Local } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameStateMixin, GameType } from 'game';
-import { boardWrapper, BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend';
+import { boardWrapper } from 'common-frontend';
+import { BGIO_LOCALSTORAGE_PREFIX } from 'common-frontend/core';
 import type { RelayBoard, StrategyBoard } from 'common-frontend';
 import type { GameRelay, MyGameState as RelayGameState } from 'game';
 import { RelayWrapper } from 'game';
