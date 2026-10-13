@@ -3,8 +3,9 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 
-// myclient.ts takes boardWrapper from the full package entry, which would load
-// React, MUI and the i18next setup for a board this suite never renders.
+// myclient.ts takes boardWrapper from the full package entry. Loading it for
+// real brings in MUI, the data grid and the i18next setup for a board this
+// suite never renders, and takes the wiring tests past vitest's 5 s timeout.
 const { boardWrapper, sendGameData, gameWrapper, RelayWrapper, Client } = vi.hoisted(() => ({
   boardWrapper: vi.fn(),
   sendGameData: vi.fn(),
