@@ -20,7 +20,7 @@
     "apps/strategy-practice/src/locales"
   ],
   "i18n-ally.enabledFrameworks": [
-    "react",
+    "react-i18next",
     "i18next",
     "general"
   ],
