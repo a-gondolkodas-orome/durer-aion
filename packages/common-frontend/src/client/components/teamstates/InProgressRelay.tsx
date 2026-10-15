@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { GUESSER_PLAYER, MyGameState } from 'game';
@@ -32,6 +32,19 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
   const toHome = useToHome();
   const theme = useTheme();
   const { t } = useTranslation();
+  // A guess hands the turn to the judge until it rules; any move of the team's
+  // in that gap is out of turn and boardgame.io rejects it.
+  const awaitingJudge = ctx.currentPlayer !== GUESSER_PLAYER;
+  // Read through a ref because Countdown's timer keeps the callback it started
+  // with. Near the end the clock is synced once a second, so a sync skipped
+  // while the judge has the turn is made up for by the next one.
+  const awaitingJudgeRef = useRef(awaitingJudge);
+  awaitingJudgeRef.current = awaitingJudge;
+  const syncTime = () => {
+    if (!awaitingJudgeRef.current) {
+      void clientRepo.syncRelayTime(moves);
+    }
+  };
   // Named so the handler below can stay synchronous: React ignores what an
   // event handler returns, so an async one leaves its promise unhandled.
   const backToHome = async () => {
@@ -48,7 +61,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
       if (gameNotStarted) {
         void clientRepo.startRelayGame(moves);
       } else {
-        void clientRepo.syncRelayTime(moves);
+        syncTime();
       }
     }
     setGameover(ctx.gameover)
@@ -162,7 +175,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
             onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
-            awaitingJudge={ctx.currentPlayer !== GUESSER_PLAYER}
+            awaitingJudge={awaitingJudge}
           />
           <Stack sx={{
             marginTop: "15px",
@@ -175,7 +188,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             {!finished && <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
-              getServerTimer={() => void clientRepo.syncRelayTime(moves)}
+              getServerTimer={syncTime}
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
           </Stack>
