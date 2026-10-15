@@ -37,8 +37,10 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
   // a move at once but leaves the turn change to the server, so G.answer, set
   // by the guess and cleared by the ruling, is what covers the round trip.
   const awaitingJudge = G.answer !== null || ctx.currentPlayer !== GUESSER_PLAYER;
-  // Near the end the clock is synced once a second, so a sync skipped while the
-  // judge has the turn is made up for by the next one.
+  // Near the end the clock is synced once a second, so a sync skipped there while
+  // the judge has the turn is made up for by the next one. The sync on load is
+  // not retried: loaded during the judge's turn, the clock runs on the server
+  // time it last had until that end-of-round polling.
   const syncTime = () => {
     if (!awaitingJudge) {
       void clientRepo.syncRelayTime(moves);
