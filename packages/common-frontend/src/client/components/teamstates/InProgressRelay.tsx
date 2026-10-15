@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useEffect, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
-import { MyGameState } from 'game';
+import { GUESSER_PLAYER, MyGameState } from 'game';
 import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
@@ -162,6 +162,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
             onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, moves)}
+            awaitingJudge={ctx.currentPlayer !== GUESSER_PLAYER}
           />
           <Stack sx={{
             marginTop: "15px",

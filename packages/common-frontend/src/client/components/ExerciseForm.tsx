@@ -22,6 +22,9 @@ export interface MyProps {
   previousCorrectness: boolean | null;
   onSubmit: (result: number) => Promise<void>;
   attempt: number;
+  // A guess hands the turn to the judge until it rules, and a second one in
+  // that gap is a move out of turn, which boardgame.io rejects.
+  awaitingJudge: boolean;
 }
 
 export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
@@ -67,6 +70,10 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             .required(t('relay.error.empty'))
         })}
         onSubmit={(values) => {
+          // Enter in the input submits the form even with the button disabled.
+          if (props.awaitingJudge) {
+            return;
+          }
           if (props.previousTries.includes(parseInt(values.result))) {
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
@@ -140,7 +147,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
           textTransform: 'none',
           borderRadius: '10px',
           marginTop: '40px',
-        }} variant='contained' color='primary' type="submit">
+        }} variant='contained' color='primary' type="submit" disabled={props.awaitingJudge}>
           {t('relay.send')}
         </Button>
       </Form>
