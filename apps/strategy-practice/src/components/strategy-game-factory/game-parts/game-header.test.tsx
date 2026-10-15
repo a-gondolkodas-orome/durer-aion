@@ -13,9 +13,16 @@ describe('GameHeader', () => {
     expect(headingAt('/game/ChessRook')).toBe('Barangolás bástyával');
   });
 
-  // The router matches the route with a trailing slash, or in other case; the
-  // catalog key does not, and once showed through as a raw `.name`.
-  it('shows no raw key for a path the catalog does not know', () => {
-    expect(headingAt('/game/ChessRook/')).toBe('');
+  // The router plays the game at these paths too, so the header names it.
+  it('names the game at a path with a trailing slash', () => {
+    expect(headingAt('/game/ChessRook/')).toBe('Barangolás bástyával');
+  });
+
+  it('names the game at a path in other case', () => {
+    expect(headingAt(`/game/${'ChessRook'.toLowerCase()}`)).toBe('Barangolás bástyával');
+  });
+
+  it('is empty off a game path', () => {
+    expect(headingAt('/game/NoSuchGame')).toBe('');
   });
 });

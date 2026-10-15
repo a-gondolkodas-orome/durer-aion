@@ -5,7 +5,8 @@ import { GameRule } from './game-parts/game-rule';
 import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues, isEqual } from 'lodash';
-import { useLocation, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { useGameKey } from '../games/game-key';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import {
@@ -98,7 +99,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 
-    const gameId = useLocation().pathname.split('/').pop()!;
+    // '' off a game route, as in a spec rendering the factory at '/'.
+    const gameId = useGameKey() ?? '';
     const { stats, recordResult, resetStats } = useGameStats(gameId, variantKeys[selectedVariantIndex]);
 
     useEffect(() => {
