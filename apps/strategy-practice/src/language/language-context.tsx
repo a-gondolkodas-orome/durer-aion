@@ -29,10 +29,15 @@ export const browserLanguage = (languages: readonly string[]): Language | null =
 // hands it down, and has i18next follow it.
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [language, setLanguageState] = useState<Language>(
-    () => (searchParams.get('lang') ?? localStorage.getItem('lang')
-      ?? browserLanguage(navigator.languages) ?? 'hu') as Language
-  );
+  const [language, setLanguageState] = useState<Language>(() => {
+    const initial = (searchParams.get('lang') ?? localStorage.getItem('lang')
+      ?? browserLanguage(navigator.languages) ?? 'hu') as Language;
+    // Here rather than in the effect below, which runs only after the first
+    // commit: the resources are bundled, so the switch is synchronous, and the
+    // first render already reads the right language.
+    void i18next.changeLanguage(initial);
+    return initial;
+  });
 
   // When the URL ?lang= param changes (e.g. direct link or back/forward),
   // sync it into state. Ignore navigations that drop the param entirely
@@ -56,7 +61,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
   // i18next follows this state rather than owning it. A layout effect runs
-  // before the browser paints, so no frame shows the two systems disagreeing.
+  // before the browser paints, so a switch shows no frame of the old language.
   useLayoutEffect(() => {
     if (i18next.language !== language) void i18next.changeLanguage(language);
   }, [language]);

@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
 import { LanguageProvider, browserLanguage, useLanguage } from './language-context';
@@ -117,6 +119,21 @@ describe('LanguageProvider driving i18next', () => {
     localStorage.setItem('lang', 'en');
     renderAt();
     expect(i18next.language).toBe('en');
+  });
+
+  // A regression: i18next once followed only in an effect, so the first commit
+  // showed Hungarian to a reader who had chosen English.
+  it('renders the stored language from the very first commit', () => {
+    localStorage.setItem('lang', 'en');
+    const committed: string[] = [];
+    const Probe = () => {
+      const { t } = useTranslation('factory');
+      const text = t('newGame');
+      useLayoutEffect(() => { committed.push(text); });
+      return null;
+    };
+    render(<MemoryRouter><LanguageProvider><Probe /></LanguageProvider></MemoryRouter>);
+    expect(committed[0]).toBe('New game');
   });
 
   it('switches i18next along with its own state', () => {

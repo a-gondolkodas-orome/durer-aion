@@ -299,7 +299,8 @@ and reads the code for keys nobody uses or nobody defines.
   Bare `<br/>`, `<strong>`, `<i>`, `<p>` need none; strategy practice adds `<b>`,
   `<em>`, `<code>`. Text with a literal `<` uses `t()`, not `<Trans>`.
 - **English plurals** are `key_one` / `key_other` with `count`; Hungarian keeps
-  the bare `key`.
+  the bare `key`. The check does not see these forms: a missing or misnamed
+  plural form, or a wrong placeholder in one, passes.
 - **A new locale folder** goes in three places: `i18n:check` and `spell-check` in
   `package.json`, `i18n-ally.localesPaths` in `.vscode/settings.json`.
 

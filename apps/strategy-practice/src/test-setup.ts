@@ -16,11 +16,14 @@ import { installSeededRandom } from '../../../vitest/seed.mjs';
 
 installSeededRandom();
 
-afterEach(() => cleanup());
-
 // i18next is one instance per worker, which `isolate: false` shares across spec
 // files, so a spec that switched to English must not leave the next one in it.
-afterEach(() => void i18next.changeLanguage('hu'));
+// One hook, cleanup first: i18next announces even a switch to the language it
+// is already in, and a tree still mounted would re-render outside act().
+afterEach(() => {
+  cleanup();
+  void i18next.changeLanguage('hu');
+});
 
 /*
 Deep-freeze every start board a game module exports, so that a spec editing one

@@ -111,12 +111,15 @@ repository root keeps the equivalent settings in its own `.vscode/settings.json`
 To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
-1. Add the game metadata to `src/components/games/gameList.ts`.
+1. Add the game metadata to `src/components/games/gameList.ts`, and its name
+   under the same key in `src/locales/{hu,en}/catalog.json`.
 2. Create a folder for the game under `src/components/games/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.test.ts` — see [Where it lives](#where-it-lives).
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives). Its text goes in
+   `src/locales/{hu,en}/<folder>.json`; see
+   [Internationalisation](#internationalisation-i18n).
 3. Wire it into the barrel at `src/components/games/index.ts`, keyed by the
    game's `gameList` key. The router in `src/components/app/app.tsx` picks it up
    automatically — no edit needed there.
@@ -182,10 +185,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
 };
 
+// the text is in src/locales/{hu,en}/plus-one-two.json:
+// { "rule": "0-ról +1/+2 20-ig", "step": "Válaszd ki, hogy hánnyal növelsz." }
+const Rule = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('rule');
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('step');
+};
+
 export const PlusOneTwo = strategyGameFactory({
   presentation: {
-    rule: <>0-ról +1/+2 20-ig</>,
-    getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -214,8 +229,8 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 contract](src/components/AGENTS.md#bot-contract), and [AGENTS.md §
 Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
-**`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
-values.
+**`presentation`** — the rule and the step description: components reading the
+game's namespace, see [Internationalisation](#internationalisation-i18n).
 
 ### Where it lives
 
