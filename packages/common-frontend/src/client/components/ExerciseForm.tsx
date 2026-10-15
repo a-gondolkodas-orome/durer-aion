@@ -69,11 +69,6 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             .required(t('relay.error.empty'))
         })}
         onSubmit={(values) => {
-          // Enter in the input submits the form even with the button disabled.
-          // The input is read-only meanwhile, so the reset after it loses nothing.
-          if (props.awaitingJudge) {
-            return;
-          }
           if (props.previousTries.includes(parseInt(values.result))) {
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
@@ -97,6 +92,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             form: { handleChange },
           }: FieldProps<number>) => <input
             autoFocus={sentAnswer > 0}
+            // The ruling remounts the form, which would drop anything typed
+            // while waiting for it.
             readOnly={props.awaitingJudge}
             autoComplete="off"
             {...field}
