@@ -43,8 +43,10 @@ test('sends nothing while the judge has the turn, by button or by Enter', async 
   const onSubmit = renderForm(true);
   const button = screen.getByRole('button', { name: 'relay.send' });
   expect(button).toBeDisabled();
+  expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
   fireEvent.submit(screen.getByRole('textbox'));
-  // Formik validates before it submits, so give it the chance to.
+  // Form resets the field after every submit, so an empty field shows the
+  // submit went through.
   await waitFor(() => expect(screen.getByRole('textbox')).toHaveValue(''));
   expect(onSubmit).not.toHaveBeenCalled();
 });

@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { GUESSER_PLAYER, MyGameState } from 'game';
@@ -33,15 +33,14 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
   const theme = useTheme();
   const { t } = useTranslation();
   // A guess hands the turn to the judge until it rules; any move of the team's
-  // in that gap is out of turn and boardgame.io rejects it.
-  const awaitingJudge = ctx.currentPlayer !== GUESSER_PLAYER;
-  // Read through a ref because Countdown's timer keeps the callback it started
-  // with. Near the end the clock is synced once a second, so a sync skipped
-  // while the judge has the turn is made up for by the next one.
-  const awaitingJudgeRef = useRef(awaitingJudge);
-  awaitingJudgeRef.current = awaitingJudge;
+  // in that gap is out of turn and boardgame.io rejects it. The client applies
+  // a move at once but leaves the turn change to the server, so G.answer, set
+  // by the guess and cleared by the ruling, is what covers the round trip.
+  const awaitingJudge = G.answer !== null || ctx.currentPlayer !== GUESSER_PLAYER;
+  // Near the end the clock is synced once a second, so a sync skipped while the
+  // judge has the turn is made up for by the next one.
   const syncTime = () => {
-    if (!awaitingJudgeRef.current) {
+    if (!awaitingJudge) {
       void clientRepo.syncRelayTime(moves);
     }
   };

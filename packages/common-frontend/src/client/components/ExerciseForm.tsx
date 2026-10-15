@@ -22,8 +22,7 @@ export interface MyProps {
   previousCorrectness: boolean | null;
   onSubmit: (result: number) => Promise<void>;
   attempt: number;
-  // A guess hands the turn to the judge until it rules, and a second one in
-  // that gap is a move out of turn, which boardgame.io rejects.
+  // Whether the previous guess is still waiting for the judge's ruling.
   awaitingJudge: boolean;
 }
 
@@ -71,6 +70,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
         })}
         onSubmit={(values) => {
           // Enter in the input submits the form even with the button disabled.
+          // The input is read-only meanwhile, so the reset after it loses nothing.
           if (props.awaitingJudge) {
             return;
           }
@@ -97,6 +97,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             form: { handleChange },
           }: FieldProps<number>) => <input
             autoFocus={sentAnswer > 0}
+            readOnly={props.awaitingJudge}
             autoComplete="off"
             {...field}
             onChange={(e) => {
