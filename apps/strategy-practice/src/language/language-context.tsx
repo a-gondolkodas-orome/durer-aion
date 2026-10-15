@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useSearchParams } from 'react-router';
 import { LanguageProvider as ProvideLanguage } from 'strategy-engine/react';
 import type { Language } from 'strategy-engine';
+import i18next from './i18n';
 
 // The browser's preference, for a visitor who has not chosen. Hungarian if the
 // browser lists it anywhere: the audience is overwhelmingly Hungarian, often with
@@ -44,6 +45,12 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, [searchParams]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
+
+  // i18next follows this state rather than owning it. A layout effect runs
+  // before the browser paints, so no frame shows the two systems disagreeing.
+  useLayoutEffect(() => {
+    if (i18next.language !== language) void i18next.changeLanguage(language);
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

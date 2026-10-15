@@ -1,9 +1,10 @@
 import React from 'react';
 import { Input } from '@headlessui/react';
-import { useTranslation, type I18nString } from 'language';
+import { useTranslation } from 'react-i18next';
+import { translate, useLanguage, type I18nString } from 'language';
 import { ModeSelector, DifficultySelector } from '../common/game-controls';
 import { getCtaText } from '../common/cta-text';
-import { DEFAULT_PLAYER_NAMES, havePlayerNameCollision } from '../common/player-names';
+import { havePlayerNameCollision, useDefaultPlayerNames } from '../common/player-names';
 import type { Ctx, Mode, Variant } from 'strategy-engine';
 
 import type { Stats } from '../../hooks/use-game-stats';
@@ -41,27 +42,25 @@ export const GameSidebar = ({
   stats,
   onResetStats
 }: GameSidebarProps) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
+  const { language } = useLanguage();
   const isNewGameAllowed = ctx.phase !== 'play' || ctx.isClientMoveAllowed;
   const activeVariantHasBotStrategy =
     !!variants.find(v => v.originalIndex === selectedVariantIndex)?.hasBotStrategy;
 
   const selectedVariant = variants.find(v => v.originalIndex === selectedVariantIndex);
-  const modeSummaryLabel = t(ctx.isHumanVsHumanGame
-    ? { hu: '🤝 2 játékos', en: '🤝 2 players' }
-    : { hu: '🤖 Gép ellen', en: '🤖 vs Computer' }
-  );
-  const defaultVariantLabel = { hu: `${selectedVariantIndex + 1}. szint`, en: `Level ${selectedVariantIndex + 1}` };
-  const variantSummaryLabel = variants.length > 1
-    ? ' · ' + t(selectedVariant?.label ?? defaultVariantLabel)
-    : '';
+  const modeSummaryLabel = ctx.isHumanVsHumanGame ? `🤝 ${t('mode.twoPlayers')}` : `🤖 ${t('mode.vsComputer')}`;
+  const variantLabel = selectedVariant?.label
+    ? translate(selectedVariant.label, language)
+    : t('variant.level', { number: selectedVariantIndex + 1 });
+  const variantSummaryLabel = variants.length > 1 ? ' · ' + variantLabel : '';
 
   return (
     <div className="p-2 flex flex-col grow shrink-0 basis-64 gap-3">
       <div className="rounded-lg border bg-slate-100 dark:bg-slate-800 p-2 sm:p-3 mb-2 sm:mb-8 flex flex-col gap-3">
         {ctx.isHumanVsHumanGame
           ? ctx.phase !== 'roleSelection' && <PlayerTurnPanel ctx={ctx} />
-          : <p className="text-center font-bold text-base sm:text-lg">{t(getCtaText(ctx))}</p>
+          : <p className="text-center font-bold text-base sm:text-lg">{getCtaText(ctx, t)}</p>
         }
 
         {ctx.phase === 'play' && (
@@ -82,7 +81,7 @@ export const GameSidebar = ({
               disabled={!moves.canUndo}
               onClick={() => moves.undo()}
             >
-              ↶ {t({ hu: 'Visszavonás', en: 'Undo' })}
+              ↶ {t('undo')}
             </button>
           </div>
         )}
@@ -136,7 +135,7 @@ export const GameSidebar = ({
           disabled={!isNewGameAllowed}
           onClick={() => moves.resetGameState()}
         >
-          {t({ hu: 'Új játék', en: 'New game' })}
+          {t('newGame')}
         </button>
       </div>
       {!ctx.isHumanVsHumanGame && stats && (
@@ -177,12 +176,10 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
   onRoleSelection: (roleIndex: number) => void
   disabled: boolean
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
+  const { language } = useLanguage();
   return <div className="flex flex-row flex-wrap sm:flex-col gap-2">
-    {[
-      { hu: 'Kezdő leszek', en: "I'll go first" },
-      { hu: 'Második leszek', en: "I'll go second" }
-    ].map((defaultLabel, i) => (
+    {[t('role.first'), t('role.second')].map((defaultLabel, i) => (
       <button
         key={i}
         data-testid={`role-btn-${i}`}
@@ -190,7 +187,7 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
-        {t(roleLabels ? roleLabels[i] : defaultLabel)}
+        {roleLabels ? translate(roleLabels[i], language) : defaultLabel}
       </button>
     ))}
   </div>;
@@ -202,8 +199,10 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
   setPlayerNames: (names: [string, string]) => void
   onStart: () => void
 }) => {
-  const { t } = useTranslation();
-  const hasCollision = havePlayerNameCollision(playerNames, t);
+  const { t } = useTranslation('factory');
+  const { language } = useLanguage();
+  const defaultNames = useDefaultPlayerNames();
+  const hasCollision = havePlayerNameCollision(playerNames, defaultNames);
   const hasEmptyName = !playerNames[0] || !playerNames[1];
   return (
   <div className="flex flex-col gap-2 sm:gap-3">
@@ -214,10 +213,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
           className="border rounded-md text-slate-600 dark:text-slate-200
            bg-surface-elevated
             px-2 py-1 text-sm flex-1 min-w-20 focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder={t([
-            { hu: 'Neved (Nyuszika)', en: 'Your name (Pip)' },
-            { hu: 'Neved (Teknős)', en: 'Your name (Dot)' }
-          ][i])}
+          placeholder={[t('player.placeholder.first'), t('player.placeholder.second')][i]}
           value={playerNames[i]}
           aria-invalid={hasCollision}
           onChange={e => {
@@ -236,23 +232,15 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
             onStart();
           }}
         >
-          {t({ hu: 'Kezdek', en: 'I start' })}
-          {roleLabels && ` (${t(roleLabels[0])})`}
+          {t('player.start')}
+          {roleLabels && ` (${translate(roleLabels[0], language)})`}
         </button>
       </div>
     ))}
     {hasCollision && (
       <p role="alert" className="text-sm text-red-500">
-        {t({
-          hu: 'A két játékos neve nem lehet azonos.',
-          en: 'The two players must have different names.'
-        })}
-        {hasEmptyName && ' ' + t({
-          hu: `Az üresen hagyott mező helyére „${t(DEFAULT_PLAYER_NAMES[0])}", `
-            + `illetve „${t(DEFAULT_PLAYER_NAMES[1])}" kerül.`,
-          en: `An empty field is filled in as "${t(DEFAULT_PLAYER_NAMES[0])}" `
-            + `or "${t(DEFAULT_PLAYER_NAMES[1])}".`
-        })}
+        {t('player.nameCollision')}
+        {hasEmptyName && ' ' + t('player.emptyNameFilledIn', { first: defaultNames[0], second: defaultNames[1] })}
       </p>
     )}
   </div>
@@ -299,18 +287,15 @@ const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
 };
 
 const WinLossCounter = ({ stats, onReset }: { stats: Stats; onReset: () => void }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
   return (
     <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-      <span title={t({
-        hu: `Megnyert játékok: ${stats.win}, Elvesztett játékok: ${stats.loss}`,
-        en: `Wins: ${stats.win}, Losses: ${stats.loss}`
-      })}>
+      <span title={t('stats.summary', { win: stats.win, loss: stats.loss })}>
         🏆 {stats.win} · 💀 {stats.loss}
       </span>
       <button
         onClick={onReset}
-        aria-label={t({ hu: 'Számlálók nullázása', en: 'Reset counters' })}
+        aria-label={t('stats.reset')}
         className="text-xs hocus:text-slate-600 dark:hocus:text-slate-300"
       >
         ↻

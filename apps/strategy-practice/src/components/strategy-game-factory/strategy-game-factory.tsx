@@ -16,7 +16,7 @@ import {
   type BotStrategy, type BotMove,
   type StrategyGameConfig, type Variant as DisplayVariant, type VariantInput
 } from 'strategy-engine';
-import { resolvePlayerNames } from './game-parts/common/player-names';
+import { resolvePlayerNames, useDefaultPlayerNames } from './game-parts/common/player-names';
 
 // The game component carries the headless half of its own configuration — what
 // `runMatch` needs to play it with no browser, so the catalog-wide conformance
@@ -49,7 +49,10 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   const variantKeys = resolvedVariants.map((variant, index) => variantKey(variant, index));
 
   const Game = () => {
+    // The `{ hu, en }` pairs a game still writes its rule and step text in; text
+    // a game keeps in its i18next namespace reaches here already rendered.
     const { t } = useTranslation();
+    const defaultPlayerNames = useDefaultPlayerNames();
     const [searchParams, setSearchParams] = useSearchParams();
     // The variant the URL asks for, or the default, which the param's absence
     // means. `-1` is a param naming no variant of this game.
@@ -111,7 +114,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]);
 
-    const resolvedPlayerNames = resolvePlayerNames(playerNames, t);
+    const resolvedPlayerNames = resolvePlayerNames(playerNames, defaultPlayerNames);
 
     let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {};
 

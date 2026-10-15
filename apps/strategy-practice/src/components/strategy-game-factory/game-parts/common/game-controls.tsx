@@ -1,5 +1,6 @@
 import { useId } from 'react';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
+import { translate, useLanguage } from 'language';
 import type { Variant, Mode } from 'strategy-engine';
 
 // Radios sharing a `name` form one native group, and the browser keeps exactly
@@ -14,13 +15,13 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
   onSwitchMode: (mode: Mode) => void
   disabled: boolean
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
   const groupName = useId();
 
   return (
     <fieldset>
       <legend className="text-xs text-slate-600 dark:text-slate-400 mb-1.5">
-        {t({ hu: 'Játékmód', en: 'Game mode' })}
+        {t('mode.legend')}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
         has-focus-visible:ring-2 has-focus-visible:ring-primary has-focus-visible:ring-offset-1`}>
@@ -34,7 +35,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
             onChange={() => onSwitchMode('vsComputer')}
             disabled={disabled}
           />
-          🤖 {t({ hu: 'Gép ellen', en: 'vs Computer' })}
+          🤖 {t('mode.vsComputer')}
         </label>
         <label className={labelClass(isHumanVsHumanGame, disabled)}>
           <input
@@ -46,7 +47,7 @@ export const ModeSelector = ({ isHumanVsHumanGame, onSwitchMode, disabled }: {
             onChange={() => onSwitchMode('vsHuman')}
             disabled={disabled}
           />
-          🤝 {t({ hu: '2 játékos', en: '2 players' })}
+          🤝 {t('mode.twoPlayers')}
         </label>
       </div>
     </fieldset>
@@ -59,13 +60,14 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
   onSelect: (index: number) => void
   disabled: boolean
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
+  const { language } = useLanguage();
   const groupName = useId();
 
   return (
     <fieldset>
       <legend className="text-xs text-slate-600 dark:text-slate-400 mb-1.5">
-        {t({ hu: 'Változat', en: 'Variant' })}
+        {t('variant.legend')}
       </legend>
       <div className={`flex divide-x divide-slate-300 rounded-lg overflow-hidden border text-sm
         has-focus-visible:ring-2 has-focus-visible:ring-primary has-focus-visible:ring-offset-1`}>
@@ -73,7 +75,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
           <label
             key={v.originalIndex}
             className={labelClass(v.originalIndex === selectedIndex, v.disabled || fieldsetDisabled)}
-            title={v.disabled ? t({ hu: 'Nincs gépi stratégia megadva', en: 'No bot strategy defined' }) : undefined}
+            title={v.disabled ? t('variant.noBotStrategy') : undefined}
           >
             <input
               type="radio"
@@ -83,14 +85,11 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
               onChange={() => onSelect(v.originalIndex)}
               disabled={v.disabled || fieldsetDisabled}
             />
-            {t(v.label ?? { hu: `${v.originalIndex + 1}. szint`, en: `Level ${v.originalIndex + 1}` })}
+            {v.label ? translate(v.label, language) : t('variant.level', { number: v.originalIndex + 1 })}
             {v.notAlwaysOptimal && (
               <span
                 className="ml-1 opacity-70 text-xs"
-                title={t({
-                  hu: 'A gép nem minden esetben tud nyerő lépést találni.',
-                  en: 'The bot may not always find a winning move.'
-                })}
+                title={t('variant.notAlwaysOptimal')}
               >
                 ⓘ
               </span>
