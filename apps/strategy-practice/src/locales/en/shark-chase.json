@@ -1,0 +1,22 @@
+{
+  "board": {
+    "remainingMoves": "Remaining moves",
+    "sector": "Sector {{number}}",
+    "shark": "shark",
+    "stayHere": "stay here",
+    "stayHereButton": "Stay here",
+    "submarines_one": "{{count}} submarine",
+    "submarines_other": "{{count}} submarines"
+  },
+  "rule": {
+    "4x4": "Researchers have discovered a female specimen of the endangered straight-swimming catshark in Lake Dürerencica. The animal moves in the deep water, so three submarines are used to catch it. The researchers communicate with each other and can see the shark, and the shark can also see the researchers. The lake is square and divided into 4 × 4 square sectors. Each day at noon one submarine moves to an adjacent sector. The shark wants to lay its eggs in 11 days under calm conditions, so it tries to escape — each night it may swim through an adjacent sector at most twice. The researchers move first from the starting position shown. The researchers win if a submarine ever shares a sector with the shark before day 11 ends; the shark wins if it is still free at the end of day 11.",
+    "5x5": "Researchers have discovered a female specimen of the endangered straight-swimming catshark in Lake Dürerencica. The animal moves in the deep water, so four submarines are used to catch it. The researchers communicate with each other and can see the shark, and the shark can also see the researchers. The lake is square and divided into 5 × 5 square sectors. Each day at noon one submarine moves to an adjacent sector. The shark wants to lay its eggs in 15 days under calm conditions, so it tries to escape — each night it may swim through an adjacent sector at most twice. The researchers move first from the starting position shown. The researchers win if a submarine ever shares a sector with the shark before day 15 ends; the shark wins if it is still free at the end of day 15."
+  },
+  "step": {
+    "researcher": "Choose a submarine, then choose an adjacent sector.",
+    "shark": {
+      "once": "Choose a sector adjacent to the shark. Click on the shark to stay in place.<br/>In this move you may swim through an adjacent sector at most <b>once</b> more.",
+      "twice": "Choose a sector adjacent to the shark. Click on the shark to stay in place.<br/>In this move you may swim through an adjacent sector at most <b>twice</b> more."
+    }
+  }
+}

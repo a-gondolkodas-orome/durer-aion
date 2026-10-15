@@ -1,5 +1,6 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { hungarianNumberAdjective } from './hungarian-number-adjective';
 
 // Every file under src/locales/<language>/<namespace>.json, gathered at build
 // time: a new namespace needs its two files and nothing else. The layout is the
@@ -33,5 +34,12 @@ void i18next
       transKeepBasicHtmlNodesFor: ['br', 'b', 'strong', 'i', 'em', 'p', 'code']
     }
   });
+
+// `{{size, numberAdjective}}`: "6-os" in Hungarian, plain "6" in English. Both
+// languages name the formatter, since `i18n:check` requires the two sides of a
+// key to carry the same placeholders.
+i18next.services.formatter!.add('numberAdjective', (value: number, lng) =>
+  lng === 'hu' ? hungarianNumberAdjective(value) : String(value)
+);
 
 export default i18next;
