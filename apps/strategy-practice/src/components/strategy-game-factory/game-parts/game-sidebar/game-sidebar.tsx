@@ -1,7 +1,8 @@
 import React from 'react';
 import { Input } from '@headlessui/react';
 import { useTranslation } from 'react-i18next';
-import { translate, useLanguage, type I18nString } from 'language';
+import { useLanguage, type I18nString, type Label } from 'language';
+import { labelText } from '../common/labels';
 import { ModeSelector, DifficultySelector } from '../common/game-controls';
 import { getCtaText } from '../common/cta-text';
 import { havePlayerNameCollision, useDefaultPlayerNames } from '../common/player-names';
@@ -20,7 +21,7 @@ export interface SidebarMoves {
 }
 
 interface GameSidebarProps {
-  roleLabels?: [I18nString, I18nString]
+  roleLabels?: [I18nString | Label, I18nString | Label]
   stepDescription: React.ReactNode
   ctx: Ctx
   playerNames: string[]
@@ -51,7 +52,7 @@ export const GameSidebar = ({
   const selectedVariant = variants.find(v => v.originalIndex === selectedVariantIndex);
   const modeSummaryLabel = ctx.isHumanVsHumanGame ? `🤝 ${t('mode.twoPlayers')}` : `🤖 ${t('mode.vsComputer')}`;
   const variantLabel = selectedVariant?.label
-    ? translate(selectedVariant.label, language)
+    ? labelText(selectedVariant.label, t, language)
     : t('variant.level', { number: selectedVariantIndex + 1 });
   const variantSummaryLabel = variants.length > 1 ? ' · ' + variantLabel : '';
 
@@ -172,7 +173,7 @@ const ModeDifficultySelectors = ({
 );
 
 const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
-  roleLabels?: [I18nString, I18nString]
+  roleLabels?: [I18nString | Label, I18nString | Label]
   onRoleSelection: (roleIndex: number) => void
   disabled: boolean
 }) => {
@@ -187,14 +188,14 @@ const RoleSelector = ({ roleLabels, onRoleSelection, disabled }: {
         disabled={disabled}
         onClick={() => onRoleSelection(i)}
       >
-        {roleLabels ? translate(roleLabels[i], language) : defaultLabel}
+        {roleLabels ? labelText(roleLabels[i], t, language) : defaultLabel}
       </button>
     ))}
   </div>;
 };
 
 const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
-  roleLabels?: [I18nString, I18nString]
+  roleLabels?: [I18nString | Label, I18nString | Label]
   playerNames: string[]
   setPlayerNames: (names: [string, string]) => void
   onStart: () => void
@@ -233,7 +234,7 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
           }}
         >
           {t('player.start')}
-          {roleLabels && ` (${translate(roleLabels[0], language)})`}
+          {roleLabels && ` (${labelText(roleLabels[0], t, language)})`}
         </button>
       </div>
     ))}

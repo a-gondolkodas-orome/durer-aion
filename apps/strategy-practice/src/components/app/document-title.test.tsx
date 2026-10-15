@@ -3,6 +3,8 @@ import { render, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { LanguageProvider, useLanguage } from 'language';
 import { gameList } from '../games/gameList';
+import huCatalog from '../../locales/hu/catalog.json';
+import enCatalog from '../../locales/en/catalog.json';
 import { useDocumentTitle } from './document-title';
 
 const Harness = () => {
@@ -17,7 +19,7 @@ const renderAt = (entry: string) => render(
   </MemoryRouter>
 );
 
-const [gameId, game] = Object.entries(gameList)[0];
+const gameId = Object.keys(gameList)[0] as keyof typeof huCatalog;
 
 // jsdom's browser is American English, which the provider would follow; the
 // site's audience browses in Hungarian.
@@ -41,7 +43,7 @@ describe('useDocumentTitle', () => {
 
   it('puts the game name first on a game page', () => {
     renderAt(`/game/${gameId}?lang=en`);
-    expect(document.title).toBe(`${game.name.en} – Dürer games`);
+    expect(document.title).toBe(`${enCatalog[gameId].name} – Dürer games`);
   });
 
   it('falls back to the site name for an unknown game', () => {
@@ -54,7 +56,7 @@ describe('useDocumentTitle', () => {
 
     fireEvent.click(getByText('choose hu'));
 
-    expect(document.title).toBe(`${game.name.hu} – Dürer játékok`);
+    expect(document.title).toBe(`${huCatalog[gameId].name} – Dürer játékok`);
     expect(document.documentElement.lang).toBe('hu');
   });
 });

@@ -47,9 +47,11 @@
   },
   "undo": "Undo",
   "variant": {
+    "full": "Full",
     "legend": "Variant",
     "level": "Level {{number}}",
     "noBotStrategy": "No bot strategy defined",
-    "notAlwaysOptimal": "The bot may not always find a winning move."
+    "notAlwaysOptimal": "The bot may not always find a winning move.",
+    "test": "Test"
   }
 }

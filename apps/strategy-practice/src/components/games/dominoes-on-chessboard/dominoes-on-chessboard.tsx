@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { range, isEqual } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard, useHoverPreview
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isCovered, moves, BOARDSIZE, type Board, type Field } from './gameplay';
 
@@ -145,11 +147,11 @@ export const DominoesOnChessboard = strategyGameFactory({
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [[]],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true,
       notAlwaysOptimal: true
     }

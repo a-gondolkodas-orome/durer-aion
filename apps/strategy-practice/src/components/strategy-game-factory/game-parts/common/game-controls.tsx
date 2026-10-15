@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { translate, useLanguage } from 'language';
+import { useLanguage } from 'language';
+import { labelText } from './labels';
 import type { Variant, Mode } from 'strategy-engine';
 
 // Radios sharing a `name` form one native group, and the browser keeps exactly
@@ -85,7 +86,7 @@ export const DifficultySelector = ({ variants, selectedIndex, onSelect, disabled
               onChange={() => onSelect(v.originalIndex)}
               disabled={v.disabled || fieldsetDisabled}
             />
-            {v.label ? translate(v.label, language) : t('variant.level', { number: v.originalIndex + 1 })}
+            {v.label ? labelText(v.label, t, language) : t('variant.level', { number: v.originalIndex + 1 })}
             {v.notAlwaysOptimal && (
               <span
                 className="ml-1 opacity-70 text-xs"
