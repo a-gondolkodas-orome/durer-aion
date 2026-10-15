@@ -2,12 +2,17 @@ import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
+import { gameList } from '../../games/gameList';
 
 export const GameHeader = () => {
   const { t } = useTranslation('factory');
   const gameId = useLocation().pathname.split('/').pop();
-  // The longer title where a game has one, its name otherwise.
-  const title = t([`${gameId}.title`, `${gameId}.name`], { ns: 'catalog' });
+  // The longer title where a game has one, its name otherwise. The route also
+  // matches a key in other case or with a trailing slash, which the catalog
+  // does not know, and an unknown key would show as itself.
+  const title = gameId !== undefined && gameId in gameList
+    ? t([`${gameId}.title`, `${gameId}.name`], { ns: 'catalog' })
+    : '';
   return (
   <>
     <header className="primary-header">

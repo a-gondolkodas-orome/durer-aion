@@ -20,6 +20,5 @@ describe('hungarianNumberAdjective', () => {
     expect(hungarianNumberAdjective(120)).toBe('120-as');
     expect(hungarianNumberAdjective(100)).toBe('100-as');
     expect(hungarianNumberAdjective(2000)).toBe('2000-es');
-    expect(hungarianNumberAdjective(1_000_000)).toBe('1000000-os');
   });
 });

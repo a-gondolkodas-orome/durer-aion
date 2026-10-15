@@ -20,7 +20,7 @@ const StepDescription = ({ board, ctx }: { board: Board; ctx: Ctx }) => {
   if (board.phase === 'placingThief') return t('step.c.placeThief');
   // chasing
   if (ctx.currentPlayer === POLICE) return t('step.c.moveCop', { colour: copColour[board.copCursor] });
-  return t('step.c.moveThief', { remaining: 3 - board.thiefMoveCount });
+  return t('step.c.moveThief', { count: 3 - board.thiefMoveCount });
 };
 
 export const PolicemanthiefC = strategyGameFactory({

@@ -25,13 +25,20 @@ export const browserLanguage = (languages: readonly string[]): Language | null =
   return languages.some(tag => tag.toLowerCase().split('-')[0] === 'hu') ? 'hu' : 'en';
 };
 
+// A stored or linked language the site has, `en-GB` read as `en`; null for any
+// other, which then says nothing, as an absent one does.
+export const siteLanguage = (tag: string | null): Language | null => {
+  const base = tag?.toLowerCase().split('-')[0];
+  return base === 'hu' || base === 'en' ? base : null;
+};
+
 // The language lives in the URL (`?lang=`) and localStorage; this owns it,
 // hands it down, and has i18next follow it.
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [language, setLanguageState] = useState<Language>(() => {
-    const initial = (searchParams.get('lang') ?? localStorage.getItem('lang')
-      ?? browserLanguage(navigator.languages) ?? 'hu') as Language;
+    const initial = siteLanguage(searchParams.get('lang')) ?? siteLanguage(localStorage.getItem('lang'))
+      ?? browserLanguage(navigator.languages) ?? 'hu';
     // Here rather than in the effect below, which runs only after the first
     // commit: the resources are bundled, so the switch is synchronous, and the
     // first render already reads the right language.
@@ -41,7 +48,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   // When the URL ?lang= param changes (e.g. direct link or back/forward),
   // sync it into state. Ignore navigations that drop the param entirely
-  // (those happen on Link clicks and should keep the in-memory language).
+  // (those happen on Link clicks and should keep the in-memory language), and
+  // a param naming a language the site does not have.
   //
   // Unlike the move-scoped and per-key state elsewhere, this is not derivable:
   // the URL is only *one* of two inputs (the other being setLanguage, which
@@ -52,7 +60,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   // purpose: re-running when it changes would fight the setLanguage path.
   /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
   useEffect(() => {
-    const langFromUrl = searchParams.get('lang') as Language | null;
+    const langFromUrl = siteLanguage(searchParams.get('lang'));
     if (langFromUrl !== null && langFromUrl !== language) {
       setLanguageState(langFromUrl);
       localStorage.setItem('lang', langFromUrl);
