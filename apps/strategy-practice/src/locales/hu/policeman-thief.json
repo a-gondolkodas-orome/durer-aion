@@ -24,7 +24,7 @@
     },
     "c": {
       "moveCop": "Lépj a {{colour}} rendőrrel egy szomszédos csúcsra.",
-      "moveThief": "Lépj a tolvajjal egy szomszédos csúcsra. Még {{remaining}} lépés a győzelemig.",
+      "moveThief": "Lépj a tolvajjal egy szomszédos csúcsra. Még {{count}} lépés a győzelemig.",
       "placeCop": "Helyezd el a(z) {{n}}. rendőrt ({{colour}}) egy tetszőleges csúcsra.",
       "placeThief": "Válaszd ki a tolvaj kiinduló csúcsát (nem lehet rendőrös csúcs)."
     }

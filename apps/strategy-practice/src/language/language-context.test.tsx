@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
-import { LanguageProvider, browserLanguage, useLanguage } from './language-context';
+import { LanguageProvider, browserLanguage, siteLanguage, useLanguage } from './language-context';
 import i18next from './i18n';
 
 // The provider reads the language from two places at once — the `?lang=` param and
@@ -119,6 +121,21 @@ describe('LanguageProvider driving i18next', () => {
     expect(i18next.language).toBe('en');
   });
 
+  // A regression: i18next once followed only in an effect, so the first commit
+  // showed Hungarian to a reader who had chosen English.
+  it('renders the stored language from the very first commit', () => {
+    localStorage.setItem('lang', 'en');
+    const committed: string[] = [];
+    const Probe = () => {
+      const { t } = useTranslation('factory');
+      const text = t('newGame');
+      useLayoutEffect(() => { committed.push(text); });
+      return null;
+    };
+    render(<MemoryRouter><LanguageProvider><Probe /></LanguageProvider></MemoryRouter>);
+    expect(committed[0]).toBe('New game');
+  });
+
   it('switches i18next along with its own state', () => {
     renderAt();
     expect(i18next.language).toBe('hu');
@@ -128,6 +145,27 @@ describe('LanguageProvider driving i18next', () => {
 
     fireEvent.click(screen.getByText('choose hu'));
     expect(i18next.language).toBe('hu');
+  });
+});
+
+describe('siteLanguage', () => {
+  it('reads a regional tag as its language', () => {
+    expect(siteLanguage('en-GB')).toBe('en');
+    expect(siteLanguage('HU')).toBe('hu');
+  });
+
+  it('is null for a language the site does not have, or none', () => {
+    expect(siteLanguage('fr')).toBeNull();
+    expect(siteLanguage(null)).toBeNull();
+  });
+});
+
+describe('LanguageProvider and an unknown language', () => {
+  it('keeps i18next and its own state on the same supported language', () => {
+    localStorage.setItem('lang', 'en');
+    renderAt('/?lang=fr');
+    expect(language()).toBe('en');
+    expect(i18next.language).toBe('en');
   });
 });
 

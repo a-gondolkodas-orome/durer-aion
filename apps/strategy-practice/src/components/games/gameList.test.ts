@@ -32,7 +32,8 @@ describe('gameList integrity', () => {
 
   // The catalog is read by game key, which `i18n:check` cannot follow from the
   // code, so it leaves the catalog out of its unused-key check and this stands
-  // in for it. English against Hungarian it does check.
+  // in for it. The two languages against each other are `i18n:check`'s and
+  // locales.test.ts's.
   it('names exactly the registered games in the catalog', () => {
     expect(Object.keys(huCatalog).sort()).toEqual(Object.keys(gameList).sort());
     for (const [key, entry] of Object.entries(huCatalog)) {

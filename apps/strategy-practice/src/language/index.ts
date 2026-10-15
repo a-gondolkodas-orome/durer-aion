@@ -2,5 +2,4 @@
 // owns the chosen language, its hook and the selector. Text itself is
 // i18next's, through react-i18next; see i18n.ts.
 export { LanguageProvider, useLanguage } from './language-context';
-export type { Language } from './language-context';
 export { LanguageSelector } from './language-selector';

@@ -10,8 +10,7 @@ const linkingSuffix = (n: number): string => {
   if (n % 10 !== 0) return ONES[n % 10];
   if (n % 100 !== 0) return TENS[(n % 100) / 10];
   if (n % 1000 !== 0) return 'as';
-  if (n % 1_000_000 !== 0) return 'es';
-  return 'os';
+  return 'es';
 };
 
 export const hungarianNumberAdjective = (n: number): string => `${n}-${linkingSuffix(Math.abs(n))}`;

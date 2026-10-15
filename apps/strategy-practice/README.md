@@ -111,12 +111,15 @@ repository root keeps the equivalent settings in its own `.vscode/settings.json`
 To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
-1. Add the game metadata to `src/components/games/gameList.ts`.
+1. Add the game metadata to `src/components/games/gameList.ts`, and its name
+   under the same key in `src/locales/{hu,en}/catalog.json`.
 2. Create a folder for the game under `src/components/games/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.test.ts` — see [Where it lives](#where-it-lives).
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives). Its text goes in
+   `src/locales/{hu,en}/<folder>.json`; see
+   [Internationalisation](#internationalisation-i18n).
 3. Wire it into the barrel at `src/components/games/index.ts`, keyed by the
    game's `gameList` key. The router in `src/components/app/app.tsx` picks it up
    automatically — no edit needed there.
@@ -182,10 +185,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
 };
 
+// the text is in src/locales/{hu,en}/plus-one-two.json:
+// { "rule": "0-ról +1/+2 20-ig", "step": "Válaszd ki, hogy hánnyal növelsz." }
+const Rule = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('rule');
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('step');
+};
+
 export const PlusOneTwo = strategyGameFactory({
   presentation: {
-    rule: <>0-ról +1/+2 20-ig</>,
-    getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -214,8 +229,8 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 contract](src/components/AGENTS.md#bot-contract), and [AGENTS.md §
 Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
-**`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
-values.
+**`presentation`** — the rule and the step description: components reading the
+game's namespace, see [Internationalisation](#internationalisation-i18n).
 
 ### Where it lives
 
@@ -250,7 +265,7 @@ strategy, keyboard and mobile usability.
 ## Internationalisation (i18n)
 
 Hungarian is the default, English is added game by game; a game may ship in
-Hungarian only. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
+Hungarian only, with no English file, and English readers then see Hungarian. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
 one per game folder, `factory` for the chrome around every game, `overview`, and
 `catalog` for each game's name and title, under its `gameList.ts` key. The
 recommended i18n Ally VS Code extension shows the two languages side by side.
@@ -258,11 +273,13 @@ recommended i18n Ally VS Code extension shows the two languages side by side.
 A game's rule and step description are small components calling
 `useTranslation('shark-chase')`; `dominoes-on-chessboard` and `shark-chase` are
 the examples. Keys and namespaces are literals, so that i18n Ally and
-`npm run i18n:check` can follow them, and the two languages of a key carry the
-same placeholders. `{{size, numberAdjective}}` adds the Hungarian
+`npm run i18n:check` can follow them; the root [README](../../README.md#the-checks-ci-runs)
+says what the check needs. `{{size, numberAdjective}}` adds the Hungarian
 suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
 stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
-factory's `testVariantLabel` and `fullVariantLabel`.
+factory's `testVariantLabel` and `fullVariantLabel`. A spec that needs text reads
+it in one language, `i18next.getFixedT('hu', '<namespace>')`; `test-setup.ts`
+puts i18next back to Hungarian after every test.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.

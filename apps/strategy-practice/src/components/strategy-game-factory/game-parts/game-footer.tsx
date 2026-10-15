@@ -1,8 +1,8 @@
-import { useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
 import { gameList } from '../../games/gameList';
+import { useGameKey } from '../../games/game-key';
 
 const toWesternOrder = (name: string) => {
   const [family, ...given] = name.split(' ');
@@ -11,8 +11,8 @@ const toWesternOrder = (name: string) => {
 
 export const GameFooter = () => {
   const { t, i18n } = useTranslation('factory');
-  const gameId = useLocation().pathname.split('/').pop();
-  const credit = gameList[gameId!]?.credit;
+  const gameId = useGameKey();
+  const credit = gameId === undefined ? undefined : gameList[gameId].credit;
   // The registry writes names in Hungarian order, family name first.
   const names = (list: string[]) => (i18n.language === 'hu' ? list : list.map(toWesternOrder)).join(', ');
   return (

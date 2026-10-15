@@ -1,13 +1,14 @@
-import { Link, useLocation } from 'react-router';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
+import { useGameKey } from '../../games/game-key';
 
 export const GameHeader = () => {
   const { t } = useTranslation('factory');
-  const gameId = useLocation().pathname.split('/').pop();
+  const gameId = useGameKey();
   // The longer title where a game has one, its name otherwise.
-  const title = t([`${gameId}.title`, `${gameId}.name`], { ns: 'catalog' });
+  const title = gameId === undefined ? '' : t([`${gameId}.title`, `${gameId}.name`], { ns: 'catalog' });
   return (
   <>
     <header className="primary-header">

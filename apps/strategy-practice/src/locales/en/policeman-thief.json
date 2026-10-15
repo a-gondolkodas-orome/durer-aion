@@ -24,7 +24,8 @@
     },
     "c": {
       "moveCop": "Move the {{colour}} policeman to a neighbouring vertex.",
-      "moveThief": "Move the thief to a neighbouring vertex. {{remaining}} more move(s) to win.",
+      "moveThief_one": "Move the thief to a neighbouring vertex. {{count}} more move to win.",
+      "moveThief_other": "Move the thief to a neighbouring vertex. {{count}} more moves to win.",
       "placeCop": "Place policeman {{n}} ({{colour}}) on any vertex.",
       "placeThief": "Choose the thief's starting vertex (it cannot be a vertex with a policeman)."
     }
