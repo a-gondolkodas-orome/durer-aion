@@ -38,9 +38,18 @@ describe('openInPreferredLanguage', () => {
     await open('/valto/');
     rememberChosenLanguage('en');
 
-    window.history.replaceState(null, '', '/valto/');
     const after = await open('/valto/');
     expect(after.language).toBe('en');
+  });
+
+  // The same bug through a link: the reload keeps `?lang=`, which outranks
+  // the stored choice unless picking drops it.
+  it('opens in the language chosen on a page a link opened', async () => {
+    await open('/valto/?lang=en');
+    rememberChosenLanguage('hu');
+
+    const after = await open(window.location.pathname + window.location.search);
+    expect(after.language).toBe('hu');
   });
 
   it('opens a link in the language it names', async () => {
@@ -65,10 +74,16 @@ describe('openInPreferredLanguage', () => {
 });
 
 describe('rememberChosenLanguage', () => {
-  it('stores the choice and leaves the URL alone', () => {
+  it('stores the choice and leaves the other parameters alone', () => {
     window.history.replaceState(null, '', '/valto/?x=1');
     rememberChosenLanguage('en');
     expect(localStorage.getItem('lang')).toBe('en');
+    expect(window.location.search).toBe('?x=1');
+  });
+
+  it('drops the lang parameter, keeping the rest', () => {
+    window.history.replaceState(null, '', '/valto/?lang=en&x=1');
+    rememberChosenLanguage('en');
     expect(window.location.search).toBe('?x=1');
   });
 
