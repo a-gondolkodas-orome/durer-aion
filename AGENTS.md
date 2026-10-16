@@ -171,9 +171,13 @@ here. What follows is the rest.
 - Permission to commit to someone else's branch is not permission to comment on
   their PR: ask first before posting to a thread you do not own
 - A PR's discussion is the people's, even on a PR the agent opened: comments,
-  replies, resolving threads and review requests are denied in
-  `.claude/settings.json`. Push the change, then say in the session what you
-  would have posted
+  replies and resolving threads ask the person first (`.claude/settings.json`),
+  and review requests are refused. Unless asked to post, push the change, then
+  say in the session what you would have posted
+- Watching a PR, and scheduling a check-in on it, ask the person first, and an
+  agent subscribes only when asked. Do not merge or rebase the base branch into a
+  PR, or across a stack, unless asked or the PR has a conflict; a stack is
+  rebased once, just before it lands
 - Do not `@`-mention anyone not already involved in a thread: a mention is a
   notification. Naming a person plainly, or referring to their PR by number, says
   the same thing without pulling them in

@@ -1,5 +1,8 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type Field } from './gameplay';
 import { ChessKnightSvg } from './chess-knight-svg';
@@ -47,31 +50,25 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Egy 4 × 4-es tábla egyik mezőjén kezdetben egy huszár áll. Két játékos felváltva
-    lép a huszárral. Nem szabad olyan mezőre lépni, amelyen korábban már járt a huszár,
-    így a kezdőmezőre sem. Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    A knight is placed on one square of a 4 × 4 board. Two players take turns moving the knight.
-    The knight may not move to any square it has already visited, including the starting square.
-    The player who cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('chess-knight');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('chess-knight');
+  return t('step');
 };
 
 export const ChessKnight = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Lépj egy szabad mezőre a huszárral.',
-      en: 'Move the knight to a free square.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

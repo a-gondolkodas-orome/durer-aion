@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   strategyGameFactory,
+  testVariantLabel,
+  fullVariantLabel,
   type BoardClientProps,
   GameBoard,
   useHoverPreview
@@ -100,44 +103,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Egy indiánrezervátumban 10 totemoszlopot állítottak fel az ábrán látható háromszögrács szerint.
-    Csendes Patak és Vörös Tűz a következő játékot szokták itt játszani:
-    felváltva feszítenek ki köteleket két-két oszlop
-    között, és minden kötél kifeszítésénél figyelnek arra, hogy a kifeszített kötél párhuzamos legyen a nagy háromszög
-    egyik oldalával, illetve a kötél nem haladhat el olyan oszlop mellett, amelyet már egy másik kötél érint.
-    Ezenkívül ha a jelenleg kifeszített kötél helyett annak egy egyenes vonalú meghosszabbítása is kifeszíthető
-    a fenti feltételek mellett, akkor azt kell kifeszíteniük. Az veszít, amelyikőjük már nem tud a
-    szabályoknak megfelelően több kötelet kifeszíteni.
-  </>,
-  en: <>
-    In an Indian reservation there are 10 totem poles arranged according to the left
-    figure. Silent Stream and Red Fire play the following game: In turns they stretch ropes
-    between pairs of poles in such a way that every stretched rope is parallel to a side of the big
-    triangle and no rope can go along a pole that is already touched by another rope. Furthermore,
-    if a rope&apos;s straight-line extension could be stretched instead under the above conditions,
-    that extension must be stretched. The one who cannot stretch out more ropes according to the rules
-    loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('totem-poles');
+  return <Trans t={t} i18nKey="rule" values={{ poles: 10 }} />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('totem-poles');
+  return t('step');
 };
 
 export const TriangularGridRopes = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni.',
-      en: 'Click two poles to connect them.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [[]],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

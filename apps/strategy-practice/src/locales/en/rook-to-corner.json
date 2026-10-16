@@ -1,0 +1,4 @@
+{
+  "rule": "A rook is placed on one of the squares of an 8 × 8 board. The two players move the rook alternately. In a move you may go any number of squares to the right, or any number of squares downward. The player who moves the rook onto the bottom-right square wins.",
+  "step": "Click a square to the right of or below the rook."
+}

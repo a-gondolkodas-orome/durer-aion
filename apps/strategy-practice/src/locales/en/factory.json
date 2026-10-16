@@ -1,0 +1,57 @@
+{
+  "backToList": "Back to list",
+  "bugReport": "Bug report",
+  "close": "Close",
+  "credit": {
+    "developedBy": "Developed by: {{names}}.",
+    "suggestedBy": "Suggested by: {{names}}."
+  },
+  "cta": {
+    "chooseRole": "Choose a role!",
+    "computersTurn": "Computer's turn",
+    "decideWhoStarts": "Decide who goes first.",
+    "next": "Next: {{name}}",
+    "winner": "Winner: {{name}}",
+    "youLost": "Unfortunately you didn't win this time, but don't give up.",
+    "yourTurn": "Your turn",
+    "youWon": "You won. Congratulations! :)"
+  },
+  "gameOver": "Game over",
+  "mode": {
+    "legend": "Game mode",
+    "twoPlayers": "2 players",
+    "vsComputer": "vs Computer"
+  },
+  "newGame": "New game",
+  "player": {
+    "defaultName": {
+      "first": "1st player",
+      "second": "2nd player"
+    },
+    "emptyNameFilledIn": "An empty field is filled in as \"{{first}}\" or \"{{second}}\".",
+    "nameCollision": "The two players must have different names.",
+    "placeholder": {
+      "first": "Your name (Pip)",
+      "second": "Your name (Dot)"
+    },
+    "start": "I start"
+  },
+  "role": {
+    "first": "I'll go first",
+    "second": "I'll go second"
+  },
+  "rules": "Game rules",
+  "stats": {
+    "reset": "Reset counters",
+    "summary": "Wins: {{win}}, Losses: {{loss}}"
+  },
+  "undo": "Undo",
+  "variant": {
+    "full": "Full",
+    "legend": "Variant",
+    "level": "Level {{number}}",
+    "noBotStrategy": "No bot strategy defined",
+    "notAlwaysOptimal": "The bot may not always find a winning move.",
+    "test": "Test"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "rule": "A pályán néhány kupac gyufaszál található. Felváltva lépünk, kétféle lépés megengedett: vagy egyetlen gyufát elveszünk valamelyik kupacból, vagy egy kupacot felosztunk két kisebb kupacra. Az veszít, aki nem tud lépni.",
+  "step": "Vegyél el egy gyufát egy kupacból, vagy vágj ketté egy kupacot a rések valamelyikénél."
+}
