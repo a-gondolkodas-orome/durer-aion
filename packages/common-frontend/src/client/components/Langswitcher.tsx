@@ -74,7 +74,9 @@ function useLanguages() {
     .map((code) => ({ code, label: Languages[code].label }));
 }
 
-export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
+// `onChoose` hears only the visitor's own pick, never a switch made in code:
+// an app that remembers the language stores just that.
+export function LanguageDropdown({ fontColor, onChoose } : { fontColor?: string, onChoose?: (language: string) => void }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const languages = useLanguages();
@@ -83,7 +85,10 @@ export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
     <Select<string>
       value={i18n.language}
       variant="standard"
-      onChange={(e) => { void i18n.changeLanguage(e.target.value); }}
+      onChange={(e) => {
+        void i18n.changeLanguage(e.target.value);
+        onChoose?.(e.target.value);
+      }}
       sx={selectSx(theme, fontColor)}
       renderValue={(value) => (
         <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>

@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import i18next from "i18next";
 import { useTranslation } from 'react-i18next';
 import { GameProvider, ClientRepoProvider, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
@@ -7,13 +6,13 @@ import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
 import { LoginToRelay } from './LoginToRelay';
 import { parseRelayTestCode } from './SelectRound';
+import { rememberChosenLanguage } from './language';
 
 
 // Branding, not configuration: every build of this app uses these, so they live
 // in git rather than in a gitignored `.env` that goes stale when the sample
 // changes (#443).
 const ACCENT_COLOR = '#46871B';
-const LANGUAGE = 'hu';
 
 const theme = {
   palette: {
@@ -36,10 +35,6 @@ function App() {
   // switch between the selector and the game.
   const teamState = useTeamState();
   const { t } = useTranslation();
-
-  useEffect(() => {
-    void i18next.changeLanguage(LANGUAGE);
-  }, [])
 
   // The language dropdown is open to everyone here, so the tab title follows it.
   // `t` changes identity with the language.
@@ -71,7 +66,7 @@ function App() {
           value={clientRepository}>
           <Layout>
             <LoadTeamState />
-            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeAddress='/..'/>
+            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeAddress='/..' onChooseLanguage={rememberChosenLanguage}/>
             {/* `maxWidth={false}`: see the same Container in common-frontend's `Main` */}
             <Container
               maxWidth={false}
