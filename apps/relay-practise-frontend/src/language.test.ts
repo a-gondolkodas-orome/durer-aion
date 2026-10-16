@@ -42,8 +42,7 @@ describe('openInPreferredLanguage', () => {
     expect(after.language).toBe('en');
   });
 
-  // The same bug through a link: the reload keeps `?lang=`, which outranks
-  // the stored choice unless picking drops it.
+  // The same bug through a link: the reload keeps `?lang=`.
   it('opens in the language chosen on a page a link opened', async () => {
     await open('/valto/?lang=en');
     rememberChosenLanguage('hu');
@@ -80,8 +79,7 @@ describe('rememberChosenLanguage', () => {
     expect(window.location.search).toBe('?x=1');
   });
 
-  // Stored even though it is the default: the stored choice outranks the
-  // browser, so Hungarian picked in an English browser has to stick.
+  // The default is stored too: a stored choice outranks the browser.
   it('keeps Hungarian chosen in an English browser', async () => {
     vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
     await open('/valto/');

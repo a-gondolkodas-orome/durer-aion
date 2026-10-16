@@ -23,7 +23,7 @@ if (sentryDsn) {
     tracesSampleRate: 0.1,
   });
 }
-// After Sentry, which then hears of a browser whose storage throws on read.
+// After Sentry, so a storage read that throws is reported.
 void openInPreferredLanguage(i18next);
 const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');

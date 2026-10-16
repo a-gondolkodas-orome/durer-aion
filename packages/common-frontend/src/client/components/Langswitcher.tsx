@@ -74,8 +74,7 @@ function useLanguages() {
     .map((code) => ({ code, label: Languages[code].label }));
 }
 
-// `onChoose` hears only the visitor's own pick, never a switch made in code:
-// an app that remembers the language stores just that.
+// `onChoose` hears only the visitor's pick, not switches made in code.
 export function LanguageDropdown({ fontColor, onChoose } : { fontColor?: string, onChoose?: (language: string) => void }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
