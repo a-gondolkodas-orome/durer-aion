@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 // `Main` calls `i18next.changeLanguage` while rendering, so i18next has to be
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
-import { ClientRepoProvider } from '../api-repository-interface';
+import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';

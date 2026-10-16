@@ -1,6 +1,6 @@
 // Through the package entry, not the src path: a deep import would load a
 // second copy of the module, one the app's setLocalStorageNamespace never set.
-import { relayPointsStorageKey } from "common-frontend";
+import { relayPointsStorageKey } from "common-frontend/core";
 import { sendGameData, SendGameDataParams } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
 import { trackRelayFinished } from "./tracking";

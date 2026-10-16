@@ -1,4 +1,4 @@
-export * from './api-repository-interface'
+export * from './client-repo-context';
 export * from './components/Admin';
 export * from './components/Chooser';
 export * from './components/ChooserItem';
@@ -23,9 +23,7 @@ export * from './components/teamstates/InProgressRelay';
 export * from './components/teamstates/Relay';
 export * from './components/teamstates/Strategy';
 export * from './components/teamstates/GameContext';
-export * from './dto/TeamStateDto';
 export * from './hooks/team-state-store';
 export * from './hooks/user-hooks';
 export * from './hooks/user-model';
 export * from './utils/DateFormatter';
-export * from './utils/storage-keys';

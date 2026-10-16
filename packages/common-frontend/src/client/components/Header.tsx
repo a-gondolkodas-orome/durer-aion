@@ -2,7 +2,7 @@ import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import { MoreVert } from '@mui/icons-material';
-import { useClientRepo } from '../api-repository-interface';
+import { useClientRepo } from '../client-repo-context';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
