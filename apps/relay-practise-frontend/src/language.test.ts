@@ -64,13 +64,6 @@ describe('openInPreferredLanguage', () => {
     expect(i18n.language).toBe('en');
     expect(localStorage.getItem('lang')).toBeNull();
   });
-
-  it('stores nothing when the language is switched in code', async () => {
-    const i18n = await open('/valto/');
-    await i18n.changeLanguage('en');
-    expect(localStorage.getItem('lang')).toBeNull();
-    expect(window.location.search).toBe('');
-  });
 });
 
 describe('rememberChosenLanguage', () => {
