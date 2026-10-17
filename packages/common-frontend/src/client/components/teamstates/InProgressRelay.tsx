@@ -7,7 +7,7 @@ import { Dialog } from '@mui/material';
 import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
-import { RelayEndTable } from '../RelayEndTable';
+import { RelayEndTable, relayTaskPoints } from '../RelayEndTable';
 import { useClientRepo } from '../../api-repository-interface';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
@@ -15,14 +15,9 @@ import { useTranslation } from 'react-i18next';
 
 type MyGameProps = BoardProps<MyGameState>;
 
-// Max points of the tasks in the yearly online competition's relay round
-const DEFAULT_MAX_POINTS = [3, 3, 4, 4, 4, 5, 5, 6, 6];
-
-// maxPointsList and selectRoundOnEnd are extra props for relay-practise:
-// the max points of the loaded problem set (so the end table can show all
-// of its tasks), and a logout button leading back to the round selector
-export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd }: MyGameProps & {
-  maxPointsList?: number[],
+// selectRoundOnEnd is an extra prop for relay-practise: a logout button
+// leading back to the round selector
+export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps & {
   selectRoundOnEnd?: boolean,
 }) {
   const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
@@ -58,6 +53,11 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
   }, [G.millisecondsRemaining]);
   const finished = msRemaining < - 5000 || gameover === true
   const isOffline = clientRepo.version === "OFFLINE";
+  // Until the judge's firstProblem move, the state holds no problem to show
+  // and the form has no move to submit to.
+  if (G.numberOfTry === 0 && !finished) {
+    return <div>{t('general.loading')}</div>;
+  }
   return (
     <>
       <Dialog
@@ -82,13 +82,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
         open={
           finished
         } onClose={() => void backToHome()}>
-          {<RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={
-           (maxPointsList ?? DEFAULT_MAX_POINTS).map((it, idx) => ({
-            max: it,
-            got: G.previousPoints[idx] ?? null,
-           })
-           )
-          }/>}
+          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={relayTaskPoints(G)}/>
         </Dialog>
       <Stack sx={{
         width: "100%",
@@ -132,7 +126,7 @@ export function InProgressRelay({ G, ctx, moves, maxPointsList, selectRoundOnEnd
         }}>
           <ExerciseTask
             task={G.problemText}
-            maxPoints={G.currentProblemMaxPoints}
+            availablePoints={G.currentProblemAvailablePoints}
             serial={G.currentProblem + 1}
             pictureUrl={G.url}
           />

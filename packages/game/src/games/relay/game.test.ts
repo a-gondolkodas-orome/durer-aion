@@ -6,28 +6,29 @@ import { GameRelay, RelayWrapper } from "./game";
 // firstProblem move dropped the value the strategy sent, so a problem set whose
 // first problem is worth 2 points scored 3 for it.
 describe("GameRelay first problem points", () => {
-  test("firstProblem sets the max points the judge sends", () => {
+  test("firstProblem sets the first problem's points and keeps every problem's for the end tables", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", [2, 3], "");
 
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(2);
+    expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
   });
 
-  test("a first-try correct answer scores the problem's own points", () => {
+  test("a first-try correct answer scores the problem's own points, and the next problem is worth its own", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", [2, 3], "");
     client.moves.submitAnswer(120);
-    client.moves.newProblem("second problem text", 3, true, "");
+    client.moves.newProblem("second problem text", true, "");
 
     expect(client.getState()?.G.points).toStrictEqual(2);
     expect(client.getState()?.G.previousPoints[0]).toStrictEqual(2);
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(3);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(3);
   });
 });
 
@@ -47,7 +48,7 @@ describe("RelayWrapper end report", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", [2, 3], "");
     client.moves.submitAnswer(120);
     client.moves.endGame(true);
 
@@ -71,13 +72,13 @@ describe("RelayWrapper step report", () => {
     });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", 2, "");
+    client.moves.firstProblem("first problem text", [2, 3], "");
 
     client.moves.getTime();
     client.moves.submitAnswer(120);
     client.moves.nextTry(1);
     client.moves.submitAnswer(7);
-    client.moves.newProblem("second problem text", 3, true, "");
+    client.moves.newProblem("second problem text", true, "");
     client.moves.getTime();
 
     expect(steps).toStrictEqual([120, 7]);

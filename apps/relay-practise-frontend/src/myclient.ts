@@ -1,22 +1,22 @@
 import { Client } from 'boardgame.io/react';
 import { Local } from 'boardgame.io/multiplayer';
 import type { RelayBoard } from 'common-frontend';
-import type { GameRelay, MyGameState as RelayGameState } from 'game';
+import type { MyGameState as RelayGameState, RelayMoveArgs } from 'game';
 import { RelayWrapper } from 'game';
 import botWrapper from './botwrapper';
 import type { BotStrategy } from './botwrapper';
 import { handleGameReport } from './game-report';
 // Through the package entry, not the src path: a deep import would load a
 // second copy of the module, one the app's setLocalStorageNamespace never set.
-import { bgioStoragePrefix } from 'common-frontend';
+import { relayMatchStorageKey } from 'common-frontend';
 import type { ReactNode } from 'react';
 
+// Only the name is the caller's: RelayWrapper builds the game itself, and the
+// name keys the saved match.
 export function ClientRelayWithBot(
-  game: typeof GameRelay,
+  gameName: string,
   board: RelayBoard,
-  // The relay bot answers with the next problem's text, points and image URL,
-  // so its move args are that mixed tuple rather than a position.
-  strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
+  strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   _description: ReactNode) {
   return Client({
     game: RelayWrapper(handleGameReport),
@@ -25,7 +25,7 @@ export function ClientRelayWithBot(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: bgioStoragePrefix() + game.name,
+        storageKey: relayMatchStorageKey(gameName),
       }
     ),
     numPlayers: 2,
