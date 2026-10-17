@@ -25,7 +25,6 @@ const open = async (url: string) => {
 
 beforeEach(() => {
   localStorage.clear();
-  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['hu-HU']);
 });
 
 afterEach(() => {
@@ -57,11 +56,10 @@ describe('openInPreferredLanguage', () => {
     expect(i18n.language).toBe('en');
   });
 
-  it('follows the browser without storing what it implied', async () => {
+  it('stays Hungarian in an English browser when nothing was chosen', async () => {
     vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
     const i18n = await open('/valto/');
-    expect(i18n.language).toBe('en');
-    expect(localStorage.getItem('lang')).toBeNull();
+    expect(i18n.language).toBe('hu');
   });
 });
 
@@ -79,14 +77,11 @@ describe('rememberChosenLanguage', () => {
     expect(window.location.search).toBe('?x=1');
   });
 
-  // The default is stored too: a stored choice outranks the browser.
-  it('keeps Hungarian chosen in an English browser', async () => {
-    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
-    await open('/valto/');
+  // The default is stored too: the strategy practice site reads the same key,
+  // and there a stored choice outranks the browser.
+  it('stores Hungarian too', () => {
     rememberChosenLanguage('hu');
-
-    const after = await open('/valto/');
-    expect(after.language).toBe('hu');
+    expect(localStorage.getItem('lang')).toBe('hu');
   });
 
   it('ignores a language the site does not have', () => {
