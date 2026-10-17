@@ -87,8 +87,9 @@ Read the chosen reference file in full before writing anything.
 
 ### 4. Create the game files
 Create `src/components/games/<game-name>/gameplay.ts` (board type, start boards,
-moves) and `<game-name>.tsx` (rule text, step description, variants, factory
-call). Two shapes are in use: most games export the component
+moves), `<game-name>.tsx` (rule and step description components, variants,
+factory call) and its text in `src/locales/{hu,en}/<game-name>.json`; the
+README's i18n section says how a game reads it. Two shapes are in use: most games export the component
 `strategyGameFactory(...)` returns, and `remove-divisor-multiple` and
 `stones-remove-one-not-twice-from-left` export a `StrategyGameConfig` object
 instead, leaving the factory call to the barrel. Which shape everything should
@@ -103,7 +104,7 @@ contract, `ctx`, `setTurnState`, `useDeferredMove` — is in
 API](../../../src/components/AGENTS.md#strategygamefactory-api). Read both
 rather than guessing from the reference game alone. Authoring decisions on top
 of them:
-- If the user supplied the rule text, use it verbatim in `rule.hu` by default.
+- If the user supplied the rule text, use it verbatim as the Hungarian `rule` by default.
   Don't silently rephrase, correct, or abbreviate it. **Exception:** when the
   original wording doesn't fit the online implementation — e.g. it refers to the
   competition organizers/judges instead of the opponent/computer, or to physical
@@ -117,7 +118,8 @@ of them:
   harsh, especially in Hungarian
 - `getPlayerStepDescription` should make it obvious what the current player
   should do — it is the game's instruction line, not a status label
-- Pull `name`, `title`, `credit` from `gameList` rather than hardcoding them
+- Pull `credit` from `gameList`, and the name and title from the `catalog`
+  namespace, rather than hardcoding them
 
 ### 5. Export the game, then wire it into `src/components/games/index.ts`
 Add one line to the app's barrel keyed by the game's `gameList` key, keeping
@@ -131,7 +133,8 @@ from `gameList` automatically — no edit is needed there.
 
 ### 6. Add metadata to `src/components/games/gameList.ts`
 Using the metadata collected in Step 1, add the entry in alphabetical order by
-key. Use `title` only if a longer display name is needed on the game page beyond
+key, and its name under the same key in `src/locales/{hu,en}/catalog.json`. Add a
+`title` there only if a longer display name is needed on the game page beyond
 the short name.
 
 ### 7. Run tests and verify
@@ -196,12 +199,12 @@ If the optimal AI strategy was implemented in step 2, ask the user:
    variants: [
      {
        botStrategy: randomBotStrategy,
-       label: { hu: 'Teszt 🤖', en: 'Test 🤖' }
+       label: testVariantLabel
      },
      {
        botStrategy: smartBotStrategy,
        generateStartBoard: ...,
-       label: { hu: 'Okos 🤖', en: 'Smart 🤖' },
+       label: fullVariantLabel,
        isDefault: true
      }
    ]

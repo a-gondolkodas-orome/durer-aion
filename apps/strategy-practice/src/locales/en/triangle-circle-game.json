@@ -1,0 +1,15 @@
+{
+  "board": {
+    "edge": "Edge {{number}} — shade it",
+    "triangle": "Triangle {{number}} — drop a circle"
+  },
+  "role": {
+    "circle": "I'll be the circle player",
+    "line": "I'll be the line player"
+  },
+  "rule": "Two players take part: the line player and the circle player. On each turn the line player shades one side of a small triangle, while the circle player drops a circle inside a small triangle. The line player moves first. The line player wins if they manage to create a small triangle whose three sides are all shaded and which has no circle inside it; the game ends the instant this happens. The circle player wins once every triangle has a circle inside it. The board is a 6×6 triangular grid.",
+  "step": {
+    "circle": "Drop a circle into an empty small triangle: click the triangle.",
+    "line": "Shade one side of a small triangle: click an edge."
+  }
+}

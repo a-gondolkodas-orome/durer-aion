@@ -34,9 +34,9 @@ Required params: `presentation`, `BoardClient`, `gameplay`, `variants`.
 ```typescript
 strategyGameFactory({
   presentation: {
-    rule,                      // i18n rules text shown in collapsible section
-    roleLabels?,               // optional: [{ hu, en }, { hu, en }] — defaults to "1st/2nd player"
-    getPlayerStepDescription,  // ({ board, ctx }) => { hu, en } — shown as turn instruction
+    rule,                      // rules text shown in collapsible section: <Rule /> calling useTranslation('<game>')
+    roleLabels?,               // optional: [t => t('<game>:role.a'), t => t('<game>:role.b')] — defaults to "1st/2nd player"
+    getPlayerStepDescription,  // ({ board, ctx }) => <StepDescription … /> — shown as turn instruction
   },
   BoardClient,                 // React component receiving { board, ctx, moves, setTurnState }
   gameplay: {

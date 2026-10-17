@@ -1,0 +1,7 @@
+{
+  "rule": "Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem szabad. Az nyer, aki átugorja a másik játékos bábuját.",
+  "step": {
+    "left": "Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.",
+    "right": "Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval."
+  }
+}

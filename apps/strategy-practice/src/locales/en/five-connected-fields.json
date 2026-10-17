@@ -1,0 +1,4 @@
+{
+  "rule": "The diagram shows five fields joined by lines. Every field starts empty. On a turn the current player picks a line whose two endpoints hold the same number of coins, and places one more coin on one of those endpoints. The game ends when no line has an equal number of coins at both ends. The player who placed the last coin wins.",
+  "step": "Click a field that has a neighbour with the same number of coins to place a coin on it."
+}

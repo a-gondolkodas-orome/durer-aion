@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// PreToolUse hook on update_pull_request. Requesting a review is the user's call, like the
-// commenting and thread resolution settings.json denies outright; a deny rule can only block a
+// PreToolUse hook on update_pull_request. Requesting a review is the user's call; settings.json
+// makes commenting and thread resolution ask the user first. A rule can only cover a
 // whole tool, and this one also edits a PR's description and draft state, so the hook refuses
 // only the calls that name reviewers. Exit 2 refuses the call and hands stderr to the agent.
 import process from 'node:process';

@@ -1,0 +1,9 @@
+{
+  "board": {
+    "computerNumbers": "A gép számai",
+    "playerNumbers": " számai: ",
+    "yourNumbers": "A te számaid"
+  },
+  "rule": "Adottak 1-től 9-ig a számok. A két játékos felváltva kiválaszt magának egy olyan számot, amit korábban még senki sem választott. Az a játékos nyer, akinek először megtalálható a saját számai között három darab, melyek összege 15. Ha már mind a kilenc szám megtalálható valakinél, és egyik játékosnál sem található három szám, melyek összege 15, akkor a második játékos nyert.",
+  "step": "Válassz egy még szabad számot."
+}
