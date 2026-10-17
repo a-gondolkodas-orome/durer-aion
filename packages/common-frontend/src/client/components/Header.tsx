@@ -10,7 +10,13 @@ import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
-export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string, onChooseLanguage?: (language: string) => void }) {
+export function Header(props: {
+  teamName: string | null,
+  admin: boolean,
+  titles?: string[],
+  homeAddress?: string,
+  onChooseLanguage?: (language: string) => void
+}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();

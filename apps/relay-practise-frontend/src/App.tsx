@@ -66,7 +66,13 @@ function App() {
           value={clientRepository}>
           <Layout>
             <LoadTeamState />
-            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeAddress='/..' onChooseLanguage={rememberChosenLanguage}/>
+            <Header
+              teamName={teamState?.teamName ?? null}
+              admin={true}
+              titles={titles}
+              homeAddress='/..'
+              onChooseLanguage={rememberChosenLanguage}
+            />
             {/* `maxWidth={false}`: see the same Container in common-frontend's `Main` */}
             <Container
               maxWidth={false}
