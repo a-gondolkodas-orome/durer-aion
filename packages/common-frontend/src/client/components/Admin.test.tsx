@@ -16,7 +16,7 @@ vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
 }));
 
-// A finished relay's dialog shows RelayEndTable, which is translated; without
+// A finished relay's dialog shows the result tables, which are translated; without
 // an i18next instance react-i18next warns on the console, which the setup
 // file fails the test for.
 vi.mock('react-i18next', () => ({

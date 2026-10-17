@@ -29,8 +29,8 @@ export function ChooserItem(props: {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const closeDetails = () => setDetailsOpen(false);
   // The round's end screen, from the summary saved with the finished match. A
-  // match without one has nothing to show: a record from before the summary
-  // existed, or a local relay left to run out of time (#613).
+  // match without one has nothing to show: for example a record from before the
+  // summary existed, or a local relay left to run out of time (#613).
   const finished = props.status.state === "FINISHED" ? props.status : null;
   const details = props.type === 'relay'
     ? finished?.relayResults && <RelayEndTable allPoints={finished.score} problems={finished.relayResults} onClose={closeDetails}/>
