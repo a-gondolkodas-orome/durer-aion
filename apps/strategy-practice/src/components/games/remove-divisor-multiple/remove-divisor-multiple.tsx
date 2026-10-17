@@ -1,11 +1,13 @@
 import type { BoardClientProps, StrategyGameConfig } from 'strategy-engine';
-import { GameBoard, useTranslation } from 'strategy-engine/react';
+import { GameBoard } from 'strategy-engine/react';
+import { Trans, useTranslation } from 'react-i18next';
+import { testVariantLabel, fullVariantLabel } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { generateStartBoard, generateTestStartBoard, isAllowed, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('remove-divisor-multiple');
   // Two different questions: `isLegal` marks the numbers that could be removed
   // from this position — shown in blue whoever is on turn — while `isAllowed`
   // additionally requires that it is this client's move, and gates the buttons.
@@ -33,37 +35,26 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
         )}
       </div>
       <p className="text-2xl mt-2">
-        {t({ hu: 'Az előző lépés', en: 'Previous move' })}: {board.previousMove === null ? '-' : board.previousMove}
+        {t('board.previousMove')}: {board.previousMove === null ? '-' : board.previousMove}
       </p>
     </GameBoard>
   )
 };
 
-const rule = {
-  hu: <>
-    Egy táblára az <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> számok (<i>n &#8804; 15</i>)
-    vannak felírva. Két játékos játszik, felváltva lépnek. A kezdőjátékos az első
-    lépésében kiválaszt egy tetszőleges számot a tábláról és letörli azt. Ezután
-    minden lépésben egy olyan számot kell letörölni, ami az előző (másik játékos
-    által letörölt) számnak osztója vagy többszöröse. Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    The numbers <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> (<i>n &#8804; 15</i>) are written on a
-    board. Two players take turns. On the first move the first player removes any number from the
-    board. From then on, each move must remove a number that is a divisor or multiple of the
-    previously removed number. The player who cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('remove-divisor-multiple');
+  return <Trans t={t} i18nKey="rule" />;
 };
 
-const getPlayerStepDescription = () => ({
-  hu: 'Válassz egyet a letörölhető számok közül.',
-  en: 'Choose one of the numbers that can be removed.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('remove-divisor-multiple');
+  return t('step');
+};
 
 export const removeDivisorMultipleConfig: StrategyGameConfig<Board> = {
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -71,12 +62,12 @@ export const removeDivisorMultipleConfig: StrategyGameConfig<Board> = {
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

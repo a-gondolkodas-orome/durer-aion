@@ -1,0 +1,237 @@
+{
+  "ChessBishops": {
+    "name": "Placing bishops"
+  },
+  "ChessRook": {
+    "name": "Roaming with a rook"
+  },
+  "PrimeExponentials": {
+    "name": "Subtract a prime power"
+  },
+  "AmorAndCupido": {
+    "name": "Cupid and Amor"
+  },
+  "WaningStones": {
+    "name": "Waning Stones"
+  },
+  "ThreeMore": {
+    "name": "Three More"
+  },
+  "DominoesOnChessboard": {
+    "name": "Cram (Dominoes)",
+    "title": "Cram (Dominoes on a chessboard)"
+  },
+  "PolynomialBuilding": {
+    "name": "Building a polynomial"
+  },
+  "ChocolateBreaking": {
+    "name": "Breaking chocolate"
+  },
+  "IncrementOrDouble": {
+    "name": "x+1, 2x up to 100"
+  },
+  "TriangleCircleGame": {
+    "name": "Line and circle"
+  },
+  "PlusOneTwoThree": {
+    "name": "+1, +2, +3"
+  },
+  "DigitSubtraction": {
+    "name": "Digit Subtraction"
+  },
+  "ThreePilesRebuild": {
+    "name": "Three piles"
+  },
+  "TenDigitNumber": {
+    "name": "Digit duel"
+  },
+  "TwelveSquares": {
+    "name": "Twelve squares"
+  },
+  "PrimelyToZero": {
+    "name": "Primely to Zero"
+  },
+  "DoublingReduction": {
+    "name": "Doubling reduction"
+  },
+  "HunyadiAndTheJanissaries": {
+    "name": "Hunyadi and the janissaries"
+  },
+  "RockPaperScissor": {
+    "name": "Rock-paper-scissors"
+  },
+  "FiveConnectedFields": {
+    "name": "Five connected fields"
+  },
+  "FourConnectedFields": {
+    "name": "Four connected fields"
+  },
+  "FiveFiveCard": {
+    "name": "Duel with 5 cards"
+  },
+  "TriangleColoring": {
+    "name": "Triangle colouring"
+  },
+  "FourPilesTwoGrabs": {
+    "name": "Four piles, two grabs"
+  },
+  "PileSplitter": {
+    "name": "Pile splitter"
+  },
+  "PileSplitter3": {
+    "name": "Pile splitter (3 piles)"
+  },
+  "PileUnion": {
+    "name": "Pile union"
+  },
+  "MatchstickPiles": {
+    "name": "Matchstick piles"
+  },
+  "Policemanthief": {
+    "name": "Policemen and thief",
+    "title": "Policemen and thief (category A, B)"
+  },
+  "PolicemanthiefC": {
+    "name": "Policemen and thief",
+    "title": "Policemen and thief (category C, D)"
+  },
+  "DiscsFlipOrRemove": {
+    "name": "Flip or remove"
+  },
+  "Bacteria": {
+    "name": "Spreading of bacteria"
+  },
+  "NumberCovering": {
+    "name": "Covering numbers"
+  },
+  "RemoveRowOrColumn": {
+    "name": "Remove a row or column"
+  },
+  "TicTacToeDoubleStart": {
+    "name": "Double-starting tic-tac-toe"
+  },
+  "AntiTicTacToe": {
+    "name": "3×3 anti-tic-tac-toe"
+  },
+  "Dominoes4x4": {
+    "name": "Standing and lying dominoes"
+  },
+  "TakeAndPoint": {
+    "name": "Take and point"
+  },
+  "TwoTimesTwo": {
+    "name": "4 distinct squares"
+  },
+  "FiveSquares": {
+    "name": "5 distinct squares"
+  },
+  "TicTacToe": {
+    "name": "Recolouring tic-tac-toe"
+  },
+  "SuperstitiousCounting": {
+    "name": "Superstitious counting"
+  },
+  "PileSplitter4": {
+    "name": "Pile splitting (4 piles)"
+  },
+  "RookToCorner": {
+    "name": "Rook to the corner"
+  },
+  "TriangularGridRopes": {
+    "name": "10 totem poles"
+  },
+  "TriangularGridRopes15": {
+    "name": "15 totem poles"
+  },
+  "ModifiedMill": {
+    "name": "Modified mill"
+  },
+  "SumFifteen": {
+    "name": "Sum 15"
+  },
+  "CoinsIn3Piles": {
+    "name": "Coin change"
+  },
+  "ChessDucks": {
+    "name": "Peaceful ducks"
+  },
+  "CubeColoring": {
+    "name": "Cube colouring"
+  },
+  "TakePowerOfTwo": {
+    "name": "Subtract 2^n"
+  },
+  "RecolouringDiscs": {
+    "name": "Recolouring discs"
+  },
+  "LatinSquareFilling": {
+    "name": "Filling a Latin square"
+  },
+  "TenCoins": {
+    "name": "10 coins"
+  },
+  "AddReduceDouble": {
+    "name": "Add N, take 2N"
+  },
+  "FourPilesSpreadAhead": {
+    "name": "4 piles: spread ahead"
+  },
+  "ArchitectAndBandits": {
+    "name": "Architect and Bandits (A)",
+    "title": "Architect and Bandits (8 towers)"
+  },
+  "ArchitectAndBanditsB": {
+    "name": "Architect and Bandits (B)",
+    "title": "Architect and Bandits (10 towers)"
+  },
+  "SharkChase4": {
+    "name": "Shark chase (4 × 4)"
+  },
+  "Take1OrHalve": {
+    "name": "Take one or halve"
+  },
+  "SharkChase5": {
+    "name": "Shark chase (5 × 5)"
+  },
+  "MatchesOnEdges": {
+    "name": "Matches on edges"
+  },
+  "ThiefSheriffMean": {
+    "name": "Thief's mean (1–7)"
+  },
+  "ThiefSheriffMean9": {
+    "name": "Thief's mean (1–9)"
+  },
+  "ChessKnight": {
+    "name": "Roaming with a knight"
+  },
+  "BankRobbers": {
+    "name": "Bank robbers: 7–10 banks"
+  },
+  "PairsOfNumbers": {
+    "name": "Pairs of numbers"
+  },
+  "MagicBox": {
+    "name": "Magic Box (A)",
+    "title": "Magic Box"
+  },
+  "MagicBoxB": {
+    "name": "Magic Box (B)",
+    "title": "Magic Box (with designation)"
+  },
+  "TwoOfThreeTakeaway": {
+    "name": "Take from two piles"
+  },
+  "SixFieldsCircle": {
+    "name": "Six fields on a circle"
+  },
+  "RemoveDivisorMultiple": {
+    "name": "Remove a divisor/multiple"
+  },
+  "StonesRemoveOneNotTwiceFromLeft": {
+    "name": "Collecting stones 1 by 1"
+  },
+  "NumberPyramid": {
+    "name": "Number Pyramid"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "board": {
+    "number": "The number: {{expr}}"
+  },
+  "role": {
+    "first": "Alice",
+    "second": "Bob"
+  },
+  "rule": "Alice and Bob alternately choose a digit from {1, 2, 3, 4, 5, 6} (Alice starts), writing them one after another to build a 10-digit number together. Bob wins if the resulting number is divisible by 9; otherwise Alice wins.",
+  "step": "Choose a digit between 1 and 6."
+}

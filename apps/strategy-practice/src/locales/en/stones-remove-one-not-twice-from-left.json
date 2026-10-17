@@ -1,0 +1,8 @@
+{
+  "board": {
+    "left": "Left",
+    "right": "Right"
+  },
+  "rule": "There are two piles of stones. Players alternate turns, and on each turn a player must remove one stone from either pile. However, a player may not take from the left pile on two consecutive turns. The player who cannot move loses.",
+  "step": "Click the pile you want to remove a stone from."
+}

@@ -1,12 +1,12 @@
 import { range } from 'lodash';
 import {
-  type BoardClientProps, type StrategyArgs, GameBoard, useHoverPreview
+  type BoardClientProps, type Ctx, GameBoard, useHoverPreview
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { type Board, type Orientation, type TurnState, getRectangleAt } from './gameplay';
 
 export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('remove-row-or-column');
   const { grid } = board;
   const selected = ctx.turnState;
   const { value: hoverOrientation, hoverProps, clear: clearHover } = useHoverPreview<Orientation>(ctx.moveCount);
@@ -47,10 +47,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
                 {range(grid[0].length).map(c => (
                   <td key={c} className="border border-slate-300 dark:border-slate-600 p-0">
                     <button
-                      aria-label={t({
-                        hu: `korong ${r + 1}. sor ${c + 1}. oszlop`,
-                        en: `disc row ${r + 1} column ${c + 1}`
-                      })}
+                      aria-label={t('board.disc', { row: r + 1, column: c + 1 })}
                       className="size-9 sm:size-11 flex items-center justify-center"
                       // every disc's row and its column are removable, so either
                       // orientation answers "can a move start here"; which one it is
@@ -79,12 +76,12 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
             {
               orientation: 'row' as const,
               count: rect.maxC - rect.minC + 1,
-              label: { hu: 'Sor levétele', en: 'Remove row' }
+              label: t('board.removeRow')
             },
             {
               orientation: 'col' as const,
               count: rect.maxR - rect.minR + 1,
-              label: { hu: 'Oszlop levétele', en: 'Remove column' }
+              label: t('board.removeColumn')
             }
           ].map(({ orientation, count, label }) => (
             <button
@@ -93,7 +90,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
               onClick={() => moves.removeLine(board, { ...selected, orientation })}
               {...hoverProps(orientation)}
             >
-              {t(label)} ({count})
+              {label} ({count})
             </button>
           ))}
         </div>
@@ -102,14 +99,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
   );
 };
 
-export const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
-  return ctx.turnState
-    ? {
-      hu: 'Vedd le a kijelölt korong sorát vagy oszlopát a gombokkal, vagy válassz másik korongot.',
-      en: 'Remove the selected disc’s row or column with the buttons, or pick another disc.'
-    }
-    : {
-      hu: 'Kattints egy korongra, majd válaszd a sorának vagy oszlopának levételét.',
-      en: 'Click a disc, then choose to remove its row or its column.'
-    };
+export const StepDescription = ({ ctx }: { ctx: Ctx<TurnState> }) => {
+  const { t } = useTranslation('remove-row-or-column');
+  return ctx.turnState ? t('step.lineChoice') : t('step.discChoice');
 };

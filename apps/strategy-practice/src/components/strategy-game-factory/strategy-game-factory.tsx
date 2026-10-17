@@ -5,8 +5,8 @@ import { GameRule } from './game-parts/game-rule';
 import { GameSidebar } from './game-parts/game-sidebar/game-sidebar';
 import { GameEndDialog } from './game-parts/game-end-dialog';
 import { mapValues, isEqual } from 'lodash';
-import { useTranslation } from 'language';
-import { useLocation, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { useGameKey } from '../games/game-key';
 import { useGameStats } from './hooks/use-game-stats';
 import { trackEvent } from '../../tracking';
 import {
@@ -16,7 +16,7 @@ import {
   type BotStrategy, type BotMove,
   type StrategyGameConfig, type Variant as DisplayVariant, type VariantInput
 } from 'strategy-engine';
-import { resolvePlayerNames } from './game-parts/common/player-names';
+import { resolvePlayerNames, useDefaultPlayerNames } from './game-parts/common/player-names';
 
 // The game component carries the headless half of its own configuration — what
 // `runMatch` needs to play it with no browser, so the catalog-wide conformance
@@ -49,7 +49,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
   const variantKeys = resolvedVariants.map((variant, index) => variantKey(variant, index));
 
   const Game = () => {
-    const { t } = useTranslation();
+    const defaultPlayerNames = useDefaultPlayerNames();
     const [searchParams, setSearchParams] = useSearchParams();
     // The variant the URL asks for, or the default, which the param's absence
     // means. `-1` is a param naming no variant of this game.
@@ -99,7 +99,8 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
 
     const isHumanVsHumanGame = mode === 'vsHuman';
 
-    const gameId = useLocation().pathname.split('/').pop()!;
+    // '' off a game route, as in a spec rendering the factory at '/'.
+    const gameId = useGameKey() ?? '';
     const { stats, recordResult, resetStats } = useGameStats(gameId, variantKeys[selectedVariantIndex]);
 
     useEffect(() => {
@@ -111,7 +112,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPlayer, isHumanVsHumanGame, phase, chosenRoleIndex]);
 
-    const resolvedPlayerNames = resolvePlayerNames(playerNames, t);
+    const resolvedPlayerNames = resolvePlayerNames(playerNames, defaultPlayerNames);
 
     let wrappedGameMoves: GameMoves<TBoard, TTurnState> = {};
 
@@ -356,7 +357,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
       <GameHeader />
       <div className="flex justify-center grow">
         <div className="max-w-[100ch] w-full">
-          <GameRule ruleDescription={t(activeVariant.rule ?? rule)} />
+          <GameRule ruleDescription={activeVariant.rule ?? rule} />
           <div className="flex flex-wrap">
             <BoardClient
               key={gameUuid}
@@ -367,7 +368,7 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
             />
             <GameSidebar
               roleLabels={roleLabels}
-              stepDescription={t(getPlayerStepDescription({ board, ctx }))}
+              stepDescription={getPlayerStepDescription({ board, ctx })}
               ctx={ctx}
               playerNames={playerNames}
               moves={{

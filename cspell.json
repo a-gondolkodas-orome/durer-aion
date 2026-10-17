@@ -68,7 +68,6 @@
     "letsencrypt",
     "lintable",
     "Lngs",
-    "logoutofthiswholething",
     "matchid",
     "maxpoints",
     "memoises",
@@ -150,6 +149,7 @@
     "xors",
     "yearidx"
   ],
+  "useGitignore": true,
   "ignorePaths": [
     "node_modules",
     "dist",
