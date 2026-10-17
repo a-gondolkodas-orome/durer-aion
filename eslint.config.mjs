@@ -273,7 +273,7 @@ export default defineConfig(
       // bundles, plus a copy of pages/. Gitignored, but eslint has its own ignore list
       // and would otherwise lint minified output the moment anyone previews the site.
       'site/**',
-      // The virtualenv README.md's admin script setup creates. Gitignored, so CI never
+      // The Python environment README.md's admin script setup creates. Gitignored, so CI never
       // has one, but a local run would lint the JavaScript its packages vendor.
       '.venv/**',
     ],
