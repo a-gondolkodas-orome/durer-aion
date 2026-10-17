@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Countdown } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
+import { StrategyGamesTable } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/api-repository-interface";
-import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
+import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
 import type { ReactNode } from "react";
@@ -40,6 +41,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
       setMsRemaining(G.millisecondsRemaining);
     }, [G.millisecondsRemaining]);
     const finished = msRemaining < - 5000 || gameover === true
+    const achievable = t('general.points', { count: strategyPoints(G.numberOfLoss) });
     return (
       <>
         <EndDialog open={finished} onClose={backToHome}>
@@ -155,12 +157,16 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                       },
                     }}
                   >
-                    {t("strategy.realResults", {
-                    wins: t("strategy.wins", {
-                      count: G.numberOfTries - G.numberOfLoss - Number(G.winner === null && G.difficulty === "live"),
-                    }),
-                    defeats: t("strategy.defeats", { count: G.numberOfLoss }),
-                    })}
+                    <Stack sx={{ gap: '8px' }}>
+                      {/* The cell's green, bold text is for the line below, not the table. */}
+                      <Stack sx={{ color: theme.palette.text.primary, fontWeight: 400 }}>
+                        <StrategyGamesTable results={G.liveResults}/>
+                      </Stack>
+                      {/* What winning the match is worth now: two live wins in a
+                          row score by the losses so far. */}
+                      {G.winningStreak === 0 && t('strategy.twoWinsInARow', { points: achievable })}
+                      {G.winningStreak === 1 && t('strategy.oneMoreWin', { points: achievable })}
+                    </Stack>
                   </Stack>
                   </Stack>
 

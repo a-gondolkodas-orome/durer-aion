@@ -120,8 +120,6 @@
     "wrongGuess": "Your guess is sadly wrong"
   },
   "strategy": {
-    "defeats_one": "1 defeat",
-    "defeats_other": "{{count}} defeats",
     "description": "Description",
     "endTable": {
       "game": "Game",
@@ -153,12 +151,11 @@
     "instructions": "Further instructions",
     "name": "Strategy game",
     "notSupported": "UNSUPPORTED GAME STATE",
+    "oneMoreWin": "One more win: {{points}}",
     "realGameButton": "Start a new live game",
-    "realResults": "Live game results so far: {{wins}}, {{defeats}}",
     "secondPlayer": "I will be the second",
     "testGameButton": "Start a new test game",
-    "wins_one": "1 win",
-    "wins_other": "{{count}} wins"
+    "twoWinsInARow": "Two wins in a row now: {{points}}"
   },
   "waitingRoom": {
     "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",

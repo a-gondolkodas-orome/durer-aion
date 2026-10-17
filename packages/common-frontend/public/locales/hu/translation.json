@@ -116,7 +116,6 @@
     "wrongGuess": "A válasz sajnos nem volt jó"
   },
   "strategy": {
-    "defeats": "{{count}} vereség",
     "description": "Feladat leírása",
     "endTable": {
       "game": "Játszma",
@@ -148,11 +147,11 @@
     "instructions": "Tudnivalók",
     "name": "Stratégiás játék",
     "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
+    "oneMoreWin": "Még egy győzelem: {{points}}",
     "realGameButton": "Új éles játék kezdése",
-    "realResults": "Éles játékok eddigi eredményei: {{wins}}, {{defeats}}",
     "secondPlayer": "Második leszek",
     "testGameButton": "Új próbajáték kezdése",
-    "wins": "{{count}} győzelem"
+    "twoWinsInARow": "Ha most kétszer egymás után nyertek: {{points}}"
   },
   "waitingRoom": {
     "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
