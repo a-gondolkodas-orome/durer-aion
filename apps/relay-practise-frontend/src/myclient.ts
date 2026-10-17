@@ -8,7 +8,7 @@ import type { BotStrategy } from './botwrapper';
 import { handleGameReport } from './game-report';
 // Through the package entry, not the src path: a deep import would load a
 // second copy of the module, one the app's setLocalStorageNamespace never set.
-import { relayMatchStorageKey } from 'common-frontend';
+import { matchStorageKey } from 'common-frontend';
 import type { ReactNode } from 'react';
 
 // Only the name is the caller's: RelayWrapper builds the game itself, and the
@@ -25,7 +25,7 @@ export function ClientRelayWithBot(
       {
         bots: { '1': botWrapper(strategy) },
         persist: true,
-        storageKey: relayMatchStorageKey(gameName),
+        storageKey: matchStorageKey(gameName),
       }
     ),
     numPlayers: 2,

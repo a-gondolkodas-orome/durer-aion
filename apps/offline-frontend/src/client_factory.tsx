@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 export const ClientFactory = function<
 T_SpecificGameState
 , T_SpecificPosition> (
-  game: GameType<T_SpecificGameState>,
+  game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
   description: ReactNode
