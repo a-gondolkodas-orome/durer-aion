@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { setLocalStorageNamespace } from 'common-frontend';
+import i18next from 'i18next';
+import { openInPreferredLanguage } from './language';
 
 import * as Sentry from "@sentry/react";
 
@@ -21,6 +23,8 @@ if (sentryDsn) {
     tracesSampleRate: 0.1,
   });
 }
+// After Sentry, so a storage read that throws is reported.
+void openInPreferredLanguage(i18next);
 const root = document.getElementById('root');
 if (!root) throw new Error('Root container not found');
 ReactDOM.createRoot(root).render((

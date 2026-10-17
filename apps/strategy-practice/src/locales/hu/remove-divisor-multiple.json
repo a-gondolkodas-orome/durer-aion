@@ -1,0 +1,7 @@
+{
+  "board": {
+    "previousMove": "Az előző lépés"
+  },
+  "rule": "Egy táblára az <i>1</i>, <i>2</i>, <i>...</i>, <i>n</i> számok (<i>n ≤ 15</i>) vannak felírva. Két játékos játszik, felváltva lépnek. A kezdőjátékos az első lépésében kiválaszt egy tetszőleges számot a tábláról és letörli azt. Ezután minden lépésben egy olyan számot kell letörölni, ami az előző (másik játékos által letörölt) számnak osztója vagy többszöröse. Az veszít, aki nem tud lépni.",
+  "step": "Válassz egyet a letörölhető számok közül."
+}

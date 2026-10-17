@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import {
   strategyGameFactory,
+  testVariantLabel,
+  fullVariantLabel,
   type BoardClientProps,
   GameBoard,
   useHoverPreview
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   allPrimePowers, generateSmallStartBoard, generateStartBoard, moves,
   type Board, type PrimePower
@@ -71,13 +73,13 @@ const HoverPreview = (
   { hovered, board, isEntryAllowed }:
     Pick<EntryProps, 'board' | 'isEntryAllowed'> & { hovered: PrimePower | null }
 ) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('single-pile-removal');
   return (
     <div className="min-h-6 mb-2">
       {hovered !== null && isEntryAllowed(hovered) && <p>
-        {t({ hu: 'Kivonandó prímhatvány:', en: 'Prime power to subtract:' })}{' '}
+        {t('primeExponentials.board.power')}{' '}
         <strong>{hovered.prime}<sup>{hovered.exponent}</sup> = {hovered.value}</strong>.{' '}
-        {t({ hu: 'Eredmény:', en: 'Result:' })}{' '}
+        {t('primeExponentials.board.result')}{' '}
         <strong>{board - hovered.value}</strong>.
       </p>}
     </div>
@@ -109,27 +111,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPlayerStepDescription = () => ({
-  hu: 'Válassz egy prímhatványt amit kivonsz.',
-  en: 'Choose a prime power to subtract.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('single-pile-removal');
+  return t('primeExponentials.step');
+};
 
-const rule = {
-  hu: <>
-    Egy 1000-nél kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
-    ebből a játékosok felváltva vonnak le egy tetszőleges
-    prímhatványt. Az nyer, aki a nullát mondja!
-  </>,
-  en: <>
-    The game starts from a positive integer less than 1000 (chosen by the computer). Players take
-    turns subtracting any prime power. The player who reaches zero wins!
-  </>
+const Rule = () => {
+  const { t } = useTranslation('single-pile-removal');
+  return <Trans t={t} i18nKey="primeExponentials.rule" />;
 };
 
 export const PrimeExponentials = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -137,12 +132,12 @@ export const PrimeExponentials = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateSmallStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { type CompetitionCategory, InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
+import { Loading } from "../Loading";
 import React, { Suspense } from "react";
 
 const testId = "relayRoot";
@@ -13,7 +14,7 @@ export function Relay(props: { state: TeamModelDto }) {
     case "IN PROGRESS":
       return (
         <div data-testid={testId}>
-          {RelayClient ? <Suspense fallback={<div>{t('general.loading')}</div>}>
+          {RelayClient ? <Suspense fallback={<Loading/>}>
             <RelayClient
               category={props.state.category as CompetitionCategory}
               teamName={props.state.teamName}

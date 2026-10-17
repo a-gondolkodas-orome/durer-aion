@@ -1,0 +1,12 @@
+{
+  "board": {
+    "merge": "Egyesítek",
+    "remove": "Elveszek 1-et"
+  },
+  "rule": "A játék kezdetén néhány kupac gyufa van az asztalon, mindegyikben legalább két szál. A játékosok felváltva lépnek, kétféle lépés megengedett: vagy egyetlen gyufát elveszünk valamelyik kupacból, vagy egyesítünk két kupacot. Az veszít, aki nem tud szabályosan lépni.",
+  "step": {
+    "first": "Vegyél el 1 gyufát egy kupacból, vagy egyesíts két kupacot.",
+    "secondPile": "Kattints egy másik kupacra az egyesítéshez, vagy ugyanerre a kupacra a kijelölés visszavonásához.",
+    "singlePile": "Vegyél el egy gyufát a kupacból."
+  }
+}
