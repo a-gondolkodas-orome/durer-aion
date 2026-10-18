@@ -118,7 +118,7 @@
   "strategy": {
     "description": "Feladat leírása",
     "endTable": {
-      "game": "Játszma",
+      "game": "Éles játszma",
       "losses": "Vereség",
       "lost": "Vereség",
       "points": "Pont",
@@ -147,11 +147,11 @@
     "instructions": "Tudnivalók",
     "name": "Stratégiás játék",
     "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
-    "oneMoreWin": "Még egy győzelem: {{points}}",
+    "oneMoreWin": "Még egy győzelem éles játszmában: {{points}}",
     "realGameButton": "Új éles játék kezdése",
     "secondPlayer": "Második leszek",
     "testGameButton": "Új próbajáték kezdése",
-    "twoWinsInARow": "Ha most kétszer egymás után nyertek: {{points}}"
+    "twoWinsInARow": "Ha most kétszer egymás után nyertek éles játszmában: {{points}}"
   },
   "waitingRoom": {
     "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",

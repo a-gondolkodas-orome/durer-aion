@@ -121,7 +121,7 @@
   "strategy": {
     "description": "Description",
     "endTable": {
-      "game": "Game",
+      "game": "Live game",
       "losses": "Losses",
       "lost": "Loss",
       "points": "Points",
@@ -150,11 +150,11 @@
     "instructions": "Further instructions",
     "name": "Strategy game",
     "notSupported": "UNSUPPORTED GAME STATE",
-    "oneMoreWin": "One more win: {{points}}",
+    "oneMoreWin": "One more live win: {{points}}",
     "realGameButton": "Start a new live game",
     "secondPlayer": "I will be the second",
     "testGameButton": "Start a new test game",
-    "twoWinsInARow": "Two wins in a row now: {{points}}"
+    "twoWinsInARow": "Two live wins in a row now: {{points}}"
   },
   "waitingRoom": {
     "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",
