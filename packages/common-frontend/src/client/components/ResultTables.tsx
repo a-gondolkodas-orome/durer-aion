@@ -9,8 +9,8 @@ import { STRATEGY_POINTS_BY_LOSSES } from 'game';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
 import { formatDuration } from './relay-results';
 
-// A long problem set continues in further rows of this many columns, a column
-// under the one above it.
+// A long problem set continues in further rows of this many columns, each
+// column under the one above it.
 const COLUMNS_PER_ROW = 10;
 
 // The games table shows only the latest live games, numbered as played, so it
@@ -56,7 +56,7 @@ function CellBox(props: { cell: Cell }) {
   return cell.details === undefined ? box : <Tooltip title={cell.details} enterTouchDelay={0} arrow>{box}</Tooltip>;
 }
 
-// The frame every results grid shares: thin lines drawn by the gaps.
+// The frame the result tables share: thin lines drawn by the gaps.
 const gridFrameSx = {
   display: 'grid',
   gap: '1px',
@@ -89,30 +89,37 @@ function ResultTable(props: {
   const rows = [header, ...props.rows];
   const starts = Array.from({ length: Math.ceil(count / COLUMNS_PER_ROW) }, (_, idx) => idx * COLUMNS_PER_ROW);
   const fontSize = { xs: '13px', md: '16px' };
+  const template = (cells: number) => props.centred
+    ? `auto repeat(${cells}, minmax(32px, 48px))`
+    : `auto repeat(${cells}, minmax(0, 1fr))`;
   return <>
-    {/* The outer grid owns the columns; each block of rows is a subgrid
-        spanning only its own cells, so a short last block lines up with the
-        ones above and draws nothing past its last cell. */}
+    {/* The outer grid owns the columns, so stretched columns line up across
+        blocks of rows; each block is a subgrid spanning only its own cells, so
+        a short last block draws nothing past its last cell. A browser without
+        subgrid (Chrome before 117) gives each block its own columns over the
+        same span, which line up but for the width of the label column. */}
     <Box sx={{
       display: props.transposeOnPhone ? { xs: 'none', sm: 'grid' } : 'grid',
-      gridTemplateColumns: props.centred
-        ? `auto repeat(${columns}, minmax(32px, 48px))`
-        : `auto repeat(${columns}, minmax(0, 1fr))`,
+      gridTemplateColumns: template(columns),
       rowGap: '8px',
       alignSelf: props.centred ? 'center' : 'stretch',
       maxWidth: '100%',
       fontSize,
     }}>
-      {starts.map(start => <Box key={start} sx={{
-        ...gridFrameSx,
-        gridTemplateColumns: 'subgrid',
-        gridColumn: `1 / span ${Math.min(count - start, COLUMNS_PER_ROW) + 1}`,
-      }}>
-        {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
-          <CellBox cell={{ content: row.label, sx: labelSx }}/>
-          {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
-        </Fragment>)}
-      </Box>)}
+      {starts.map(start => {
+        const cells = Math.min(count - start, COLUMNS_PER_ROW);
+        return <Box key={start} sx={{
+          ...gridFrameSx,
+          gridTemplateColumns: 'subgrid',
+          gridColumn: `1 / span ${cells + 1}`,
+          '@supports not (grid-template-columns: subgrid)': { gridTemplateColumns: template(cells) },
+        }}>
+          {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
+            <CellBox cell={{ content: row.label, sx: labelSx }}/>
+            {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
+          </Fragment>)}
+        </Box>;
+      })}
     </Box>
     {props.transposeOnPhone && <Box sx={{
       ...gridFrameSx,
@@ -197,8 +204,8 @@ export function RelayResultsTable(props: {
  * that holds the team's attention. Problems not reached show what they are worth.
  */
 export function RelayProgressTable(props: { problems: RelayProblemResult[], current: number }) {
-  // Each cell draws its own lines, half in the gap beside it, so a short last
-  // row draws nothing past its last cell.
+  // Each cell draws its own lines in the gaps around it, the margin leaving
+  // room for the outer ones, so a short last row draws nothing past its last cell.
   return <Box sx={{
     display: 'grid',
     gap: '1px',
