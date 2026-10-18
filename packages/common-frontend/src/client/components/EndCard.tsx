@@ -1,6 +1,5 @@
 import { Button, Dialog } from '@mui/material';
 import { Stack } from '@mui/system';
-import { useTheme } from '@mui/material/styles';
 import type { ReactNode } from 'react';
 import { ScoreHeadline } from './ResultTables';
 
@@ -17,7 +16,6 @@ export function EndCard(props: {
   onBack: () => void,
   children: ReactNode,
 }) {
-  const theme = useTheme();
   return (
     <Stack sx={{
       width: "750px",
@@ -25,8 +23,6 @@ export function EndCard(props: {
       boxSizing: 'border-box',
       marginTop: '10px',
       marginBottom: '10px',
-      borderRadius: '30px',
-      backgroundColor: theme.palette.background.paper,
       padding: { xs: '20px 12px', sm: '25px' },
       gap: '20px',
     }}>

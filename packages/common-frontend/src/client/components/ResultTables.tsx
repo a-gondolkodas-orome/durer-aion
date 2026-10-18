@@ -31,7 +31,7 @@ const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e
 interface Cell {
   content: ReactNode;
   sx?: SystemStyleObject<Theme>;
-  /// Details on hover, or on a tap on a phone; the cell's content is underlined dotted.
+  /** Details on hover, or on a tap on a phone; the cell's content is underlined dotted. */
   details?: string;
 }
 
@@ -96,7 +96,7 @@ function ResultTable(props: {
     {/* The outer grid owns the columns, so stretched columns line up across
         blocks of rows; each block is a subgrid spanning only its own cells, so
         a short last block draws nothing past its last cell. A browser without
-        subgrid (Chrome before 117) gives each block its own columns over the
+        subgrid (e.g. Chrome before 117) gives each block its own columns over the
         same span, which line up but for the width of the label column. */}
     <Box sx={{
       display: props.transposeOnPhone ? { xs: 'none', sm: 'grid' } : 'grid',
