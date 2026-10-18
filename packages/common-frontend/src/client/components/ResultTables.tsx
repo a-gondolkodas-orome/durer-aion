@@ -9,9 +9,13 @@ import { STRATEGY_POINTS_BY_LOSSES } from 'game';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
 import { formatDuration } from './relay-results';
 
-// A long problem set continues in further rows of this many columns, each row
-// as wide as the first so a column sits under the one above it.
+// A long problem set continues in further rows of this many columns, a column
+// under the one above it.
 const COLUMNS_PER_ROW = 10;
+
+// The games table shows only the latest live games, numbered as played, so it
+// fits the strategy board's narrow panel however many games a team plays.
+const SHOWN_GAMES = 6;
 
 const LINE = '#cccccc';
 const HEADER = '#eeeeee';
@@ -86,19 +90,23 @@ function ResultTable(props: {
   const starts = Array.from({ length: Math.ceil(count / COLUMNS_PER_ROW) }, (_, idx) => idx * COLUMNS_PER_ROW);
   const fontSize = { xs: '13px', md: '16px' };
   return <>
+    {/* The outer grid owns the columns; each block of rows is a subgrid
+        spanning only its own cells, so a short last block lines up with the
+        ones above and draws nothing past its last cell. */}
     <Box sx={{
-      display: props.transposeOnPhone ? { xs: 'none', sm: 'flex' } : 'flex',
-      flexDirection: 'column',
-      gap: '8px',
+      display: props.transposeOnPhone ? { xs: 'none', sm: 'grid' } : 'grid',
+      gridTemplateColumns: props.centred
+        ? `auto repeat(${columns}, minmax(32px, 48px))`
+        : `auto repeat(${columns}, minmax(0, 1fr))`,
+      rowGap: '8px',
       alignSelf: props.centred ? 'center' : 'stretch',
       maxWidth: '100%',
+      fontSize,
     }}>
       {starts.map(start => <Box key={start} sx={{
         ...gridFrameSx,
-        gridTemplateColumns: props.centred
-          ? `auto repeat(${columns}, minmax(32px, 48px))`
-          : `auto repeat(${columns}, minmax(0, 1fr))`,
-        fontSize,
+        gridTemplateColumns: 'subgrid',
+        gridColumn: `1 / span ${Math.min(count - start, COLUMNS_PER_ROW) + 1}`,
       }}>
         {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
           <CellBox cell={{ content: row.label, sx: labelSx }}/>
@@ -189,14 +197,19 @@ export function RelayResultsTable(props: {
  * that holds the team's attention. Problems not reached show what they are worth.
  */
 export function RelayProgressTable(props: { problems: RelayProblemResult[], current: number }) {
+  // Each cell draws its own lines, half in the gap beside it, so a short last
+  // row draws nothing past its last cell.
   return <Box sx={{
-    ...gridFrameSx,
+    display: 'grid',
+    gap: '1px',
+    margin: '1px',
+    textAlign: 'center',
     gridTemplateColumns: `repeat(${Math.min(props.problems.length, COLUMNS_PER_ROW)}, minmax(0, 1fr))`,
     fontSize: '12px',
     color: '#444',
   }}>
     {props.problems.map((problem, idx) => <Box key={idx} sx={[
-      { backgroundColor: '#fff', padding: '3px 0' },
+      { backgroundColor: '#fff', padding: '3px 0', boxShadow: `0 0 0 1px ${LINE}` },
       idx === props.current && { fontWeight: 700, color: '#1a1a1a' },
       idx > props.current && { color: '#aaa' },
     ]}>
@@ -212,12 +225,14 @@ const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string 
   unfinished: { icon: <HourglassEmptyIcon fontSize="small" sx={{ color: '#666' }}/>, background: UNANSWERED },
 };
 
-/** Each live strategy game's result, in the order played. */
+/** The latest live strategy games' results, in the order played. */
 export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   const { t } = useTranslation();
   if (props.results.length === 0) {
     return null;
   }
+  const first = Math.max(0, props.results.length - SHOWN_GAMES);
+  const shown = props.results.slice(first);
   // Spelled out key by key: the i18n check finds a key only as a literal.
   const label: Record<LiveGameResult, string> = {
     won: t('strategy.endTable.won'),
@@ -227,9 +242,10 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
   return <ResultTable
     centred
     headerLabel={t('strategy.endTable.game')}
+    columnLabels={shown.map((_, idx) => `${first + idx + 1}.`)}
     rows={[{
       label: t('strategy.endTable.result'),
-      cells: props.results.map(result => ({
+      cells: shown.map(result => ({
         content: <Box component="span" role="img" aria-label={label[result]} title={label[result]} sx={{ display: 'flex' }}>
           {RESULT_ICON[result].icon}
         </Box>,
