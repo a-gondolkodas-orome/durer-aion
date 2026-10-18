@@ -141,7 +141,7 @@ export function RelayResultsTable(props: {
     const tries = problem.trySeconds.length;
     if (props.current !== undefined && idx >= props.current) {
       return idx === props.current
-        ? { content: `–/${problem.maxPoints}`, sx: { fontWeight: 700 }, details: t('relay.endTable.inProgress') }
+        ? { content: `–/${problem.maxPoints}`, sx: { fontWeight: 700 }, details: props.details ? t('relay.endTable.inProgress') : undefined }
         : { content: `–/${problem.maxPoints}`, sx: { color: '#aaa' } };
     }
     if (tries === 0) {

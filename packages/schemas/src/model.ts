@@ -28,7 +28,7 @@ export interface InProgressMatchStatus {
 /// `G.points` in the match state is the result — `scripts/admin.py` scores
 /// from it and reports where `score` disagrees.
 ///
-/// `relayResults` and `strategyResults` are copied from the match state alongside
+/// `relayResults` and `strategyResults` are summarised from the match state beside
 /// `score`, for the home page's summary: the first on a relay match, the
 /// second on a strategy match. `ChooserItem` in common-frontend says when a
 /// finished match has neither.

@@ -21,8 +21,8 @@ function parseDate(value: unknown): Date | null {
 
 const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0;
 
-/// The home page's relay summary as game-report.ts saved it; anything
-/// malformed reads as absent, which the home page shows as no summary.
+// The home page's relay summary as game-report.ts saved it; anything
+// malformed reads as absent, which the home page shows as no summary.
 const isRelayProblemResult = (value: unknown): value is RelayProblemResult =>
   isRecord(value) && isCount(value.maxPoints) && isCount(value.points) &&
   Array.isArray(value.trySeconds) && value.trySeconds.every(isCount);
@@ -38,8 +38,8 @@ function parseStrategyResults(value: unknown): FinishedMatchStatus['strategyResu
   return Array.isArray(value) && value.every(isLiveGameResult) ? value : undefined;
 }
 
-/// What `JSON.parse` makes of a stored value, or undefined if there is none
-/// or it is not JSON.
+// What `JSON.parse` makes of a stored value, or undefined if there is none
+// or it is not JSON.
 function readStoredJson(key: string): unknown {
   const stored = localStorage.getItem(key);
   if (stored === null) {
