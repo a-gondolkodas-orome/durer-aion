@@ -5,7 +5,7 @@ import { Translation } from "react-i18next";
 // Since React 19 an error thrown while rendering unmounts the whole root, so
 // without a boundary any crash leaves a blank page. React has no hook for this.
 export class ErrorBoundary extends React.Component<
-  { children: React.ReactNode, onReset?: () => void },
+  { children: React.ReactNode },
   { hasError: boolean }
 > {
   state = { hasError: false };
@@ -28,10 +28,9 @@ export class ErrorBoundary extends React.Component<
           <Alert
             severity="error"
             action={
-              <Button color="inherit" onClick={() => {
-                this.props.onReset?.();
-                this.setState({ hasError: false });
-              }}>
+              // A reload, not a reset: the screen that crashed is chosen by the
+              // team's state, so rendering it again would crash again.
+              <Button color="inherit" onClick={() => window.location.reload()}>
                 {t('error.backHome')}
               </Button>
             }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { test, expect, vi } from 'vitest';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import '../../common/i18n';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -12,22 +12,15 @@ test('shows the error message and a way back instead of a crashed child', () => 
   // jsdom has no `reportError`.
   const reportError = vi.fn();
   vi.stubGlobal('reportError', reportError);
-  let crash = true;
   const Child = () => {
-    if (crash) throw new Error('boom');
-    return <div>recovered</div>;
+    throw new Error('boom');
   };
-  const onReset = vi.fn();
   const { getByText, getByRole } = render(
-    <ErrorBoundary onReset={onReset}><Child /></ErrorBoundary>
+    <ErrorBoundary><Child /></ErrorBoundary>
   );
   expect(getByText('Váratlan hiba történt')).toBeInTheDocument();
+  expect(getByRole('button', { name: 'Vissza a kezdőlapra' })).toBeInTheDocument();
   expect(reportError).toHaveBeenCalled();
-
-  crash = false;
-  fireEvent.click(getByRole('button', { name: 'Vissza a kezdőlapra' }));
-  expect(onReset).toHaveBeenCalled();
-  expect(getByText('recovered')).toBeInTheDocument();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
