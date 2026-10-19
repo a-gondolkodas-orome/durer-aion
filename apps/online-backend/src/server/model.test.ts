@@ -4,7 +4,8 @@ import { OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH, TeamModel, appendOtherNote, 
 
 // A postgres Sequelize that is never connected, as db.test.ts uses: `validate()`
 // runs the attribute validators in process and touches no database, which is
-// what makes the real column rules testable here at all (#131 is the rest).
+// what makes the real column rules testable here at all. The unique constraints
+// live in postgres, and db.postgres.test.ts holds them.
 const sequelize = new Sequelize('db', 'user', 'password', { dialect: 'postgres', logging: false });
 TeamModel.init(teamAttributes, { sequelize, tableName: 'Teams' });
 

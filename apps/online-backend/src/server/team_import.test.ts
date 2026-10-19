@@ -12,8 +12,8 @@ vi.mock('fs');
 // model.test.ts uses. `create` is stubbed to run the model's own validators,
 // which sequelize runs in process before any SQL, so a row refused here is one
 // the real insert refuses too. The unique constraints are the one check that
-// lives in postgres itself: `create` fakes the teamName one, and db.pglite.test.ts
-// runs an import against the real constraint.
+// lives in postgres itself: `create` fakes the teamName one, and db.postgres.test.ts
+// holds the real ones.
 const sequelize = new Sequelize('db', 'user', 'password', { dialect: 'postgres', logging: false });
 
 const TEAM_ID = '8eae8669-125c-42e5-8b49-89afbac31679';

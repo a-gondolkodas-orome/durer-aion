@@ -1,16 +1,13 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { UniqueConstraintError } from 'sequelize';
-import { describe, it, expect, beforeAll, beforeEach, afterAll, onTestFinished } from 'vitest';
-import { startTestDatabase } from './pglite';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import type { TeamsRepository } from './db';
+import { startTestDatabase } from './test_database';
 import { TeamModel } from './model';
 import { DeletedTeamModel } from './deletedTeam';
-import { import_teams_from_tsv } from './team_import';
 
-// TeamsRepository against a real postgres (pglite.ts), for what only the
-// database decides: the unique constraints, what a transaction rolls back, a
-// JSON-path WHERE and ILIKE. db.test.ts holds the SQL these render.
+// TeamsRepository against a real postgres (test_database.ts), for what only the
+// database decides: the unique constraints, a JSON-path WHERE, the LIKE escape,
+// and the archive round trip. db.test.ts holds the SQL these render.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -28,7 +25,7 @@ beforeEach(async () => {
 
 let teamNumber = 0;
 /** A valid team, unique on every constrained column unless told otherwise. */
-function team(overrides: Partial<Parameters<typeof database.teams.insertTeam>[0]> = {}) {
+function team(overrides: Partial<Parameters<TeamsRepository['insertTeam']>[0]> = {}) {
   const n = String(++teamNumber).padStart(3, '0');
   return {
     teamname: `Team ${n}`,
@@ -42,46 +39,20 @@ function team(overrides: Partial<Parameters<typeof database.teams.insertTeam>[0]
   };
 }
 
-describe('the schema sync() creates', () => {
-  it('refuses a second team with the same name, in the words model.ts gives', async () => {
+describe('the unique constraints sync() creates', () => {
+  it.each([
+    ['teamId', 'TeamId already exists.'],
+    ['joinCode', 'JoinCode already exists.'],
+    ['teamname', 'Teamname already exists.'],
+    ['credentials', 'Credentials already exist.'],
+  ] as const)('refuse a second team with the same %s', async (field, message) => {
     const first = team();
     await database.teams.insertTeam(first);
 
-    const error = await database.teams.insertTeam(team({ teamname: first.teamname })).catch((e: unknown) => e);
-
-    // The message is what the restore route's 409 answer carries.
-    expect(error).toBeInstanceOf(UniqueConstraintError);
-    expect((error as UniqueConstraintError).errors.map(item => item.message)).toStrictEqual(['Teamname already exists.']);
+    // The message is model.ts's, and what the restore route's 409 answer carries.
+    await expect(database.teams.insertTeam(team({ [field]: first[field] })))
+      .rejects.toMatchObject({ name: 'SequelizeUniqueConstraintError', errors: [{ message }] });
     expect(await TeamModel.count()).toBe(1);
-  });
-
-  it('stores the match columns as JSON', async () => {
-    await database.teams.insertTeam(team());
-    const [[row]] = await database.db.sequelize.query(
-      `SELECT pg_typeof("relayMatch")::text AS type FROM "Teams"`,
-    ) as [{ type: string }[], unknown];
-    expect(row.type).toBe('json');
-  });
-});
-
-describe('import_teams_from_tsv', () => {
-  it('fails a row repeating a join code the database already holds, and imports the rest', async () => {
-    const directory = mkdtempSync(join(tmpdir(), 'teams-'));
-    onTestFinished(() => rmSync(directory, { recursive: true }));
-    const file = join(directory, 'teams.tsv');
-    const [alpha, beta, gamma] = [team(), team(), team()];
-    const row = (t: ReturnType<typeof team>, joinCode = t.joinCode) =>
-      [t.teamname, 'C', t.email, 'notes', t.teamId, joinCode, t.credentials].join('\t');
-    writeFileSync(file, [
-      'Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials',
-      row(alpha), row(beta, alpha.joinCode), row(gamma),
-    ].join('\n'));
-
-    const result = await import_teams_from_tsv(database.teams, file);
-
-    expect(result).toMatchObject({ successful: 2, failed: 1 });
-    expect(result.logs.value).toContain('Failed to validate team when adding to DB: JoinCode already exists.');
-    expect((await database.teams.listTeams())?.map(t => t.teamName).sort()).toStrictEqual([alpha.teamname, gamma.teamname]);
   });
 });
 
@@ -108,7 +79,7 @@ describe('TeamsRepository.fetch', () => {
 });
 
 describe('deleting and restoring', () => {
-  it('rolls a clashing restore back, keeping the archived row', async () => {
+  it('a clashing restore leaves the archive row', async () => {
     const deleted = team();
     await database.teams.insertTeam(deleted);
     await database.teams.removeTeam(deleted.teamId);

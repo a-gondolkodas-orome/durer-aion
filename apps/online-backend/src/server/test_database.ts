@@ -23,14 +23,14 @@ export async function startTestDatabase() {
     pool: { max: 1, acquire: 1_000 },
   });
   const teams = new TeamsRepository(db);
+  // Syncs every model on this Sequelize, the teams' tables included.
   await db.connect();
-  await teams.connect();
   return {
     db,
     teams,
-    /** Empties every table, for a test that starts from nothing. */
+    /** Empties the teams and their archive, for a test that starts from nothing. */
     async reset() {
-      await db.sequelize.query('TRUNCATE "Teams", "DeletedTeams", "Games" RESTART IDENTITY');
+      await db.sequelize.query('TRUNCATE "Teams", "DeletedTeams"');
     },
     async stop() {
       await db.sequelize.close();
