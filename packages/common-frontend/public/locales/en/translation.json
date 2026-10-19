@@ -156,7 +156,7 @@
     "realGameButton": "Start a new live game",
     "secondPlayer": "I will be the second",
     "testGameButton": "Start a new test game",
-    "twoWinsInARow": "Two live wins in a row now: {{points}}"
+    "twoWinsInARow": "Win two live games in a row now: {{points}}"
   },
   "waitingRoom": {
     "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",

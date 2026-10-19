@@ -149,8 +149,6 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     sx={{
                       p: '12px',
                       borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                      color: theme.palette.primary.main,
-                      fontWeight: 600,
                       fontSize: {
                         xs: '14px',
                         md: '18px',
@@ -158,14 +156,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     }}
                   >
                     <Stack sx={{ gap: '8px' }}>
-                      {/* The cell's green, bold text is for the line below, not the table. */}
-                      <Stack sx={{ color: theme.palette.text.primary, fontWeight: 400 }}>
-                        <StrategyGamesTable results={G.liveResults}/>
-                      </Stack>
+                      <StrategyGamesTable results={G.liveResults}/>
                       {/* What winning the match is worth now: two live wins in a
                           row score by the losses so far. */}
-                      {G.winningStreak === 0 && t('strategy.twoWinsInARow', { points: achievable })}
-                      {G.winningStreak === 1 && t('strategy.oneMoreWin', { points: achievable })}
+                      <Stack sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
+                        {G.winningStreak === 0 && t('strategy.twoWinsInARow', { points: achievable })}
+                        {G.winningStreak === 1 && t('strategy.oneMoreWin', { points: achievable })}
+                      </Stack>
                     </Stack>
                   </Stack>
                   </Stack>
