@@ -24,3 +24,20 @@ test('shows the error message and a way back instead of a crashed child', () => 
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+
+test('clears the error when a reset key changes', () => {
+  vi.spyOn(console, 'error').mockImplementation(vi.fn());
+  vi.stubGlobal('reportError', vi.fn());
+  const Child = ({ crash }: { crash: boolean }) => {
+    if (crash) throw new Error('boom');
+    return <div>login</div>;
+  };
+  const { getByText, rerender } = render(
+    <ErrorBoundary resetKeys={['RELAY']}><Child crash /></ErrorBoundary>
+  );
+  expect(getByText('Váratlan hiba történt')).toBeInTheDocument();
+  rerender(<ErrorBoundary resetKeys={[undefined]}><Child crash={false} /></ErrorBoundary>);
+  expect(getByText('login')).toBeInTheDocument();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
