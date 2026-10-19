@@ -93,6 +93,8 @@
       "answers": "Answers",
       "pointsOf": "{{points}} of {{max}} points",
       "solvedOnTry": "correct on attempt {{try}}",
+      "tries_one": "{{count}} attempt",
+      "tries_other": "{{count}} attempts",
       "wrongTries_one": "{{count}} wrong answer",
       "wrongTries_other": "{{count}} wrong answers",
       "unanswered": "You gave no answer to this task",

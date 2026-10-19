@@ -68,3 +68,13 @@ test("a running relay shows its current problem and the ones after it as not end
   expect(screen.getByText('–/5')).toBeInTheDocument();
   expect(screen.queryByText('0/5')).not.toBeInTheDocument();
 });
+
+test("a last try worth nothing is not called wrong, since a right answer would score 0 too", () => {
+  render(<RelayResultsTable details problems={[
+    { maxPoints: 2, points: 0, trySeconds: [60, 60, 60] },
+    { maxPoints: 3, points: 0, trySeconds: [60, 60, 60] },
+  ]}/>);
+
+  expect(screen.getByLabelText('relay.endTable.pointsOf: relay.endTable.tries')).toBeInTheDocument();
+  expect(screen.getByLabelText('relay.endTable.pointsOf: relay.endTable.wrongTries')).toBeInTheDocument();
+});

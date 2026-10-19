@@ -167,13 +167,18 @@ export function RelayResultsTable(props: {
       };
     }
     const solved = problem.points > 0;
+    // A last try worth nothing scores 0 whether it was right or not (the relay
+    // practice site has 2-point problems), so the details do not say which.
+    const outcome = solved
+      ? t('relay.endTable.solvedOnTry', { try: tries })
+      : problem.maxPoints <= tries - 1
+        ? t('relay.endTable.tries', { count: tries })
+        : t('relay.endTable.wrongTries', { count: tries });
     return {
       content: <span><b>{problem.points}</b>/{problem.maxPoints}</span>,
       sx: { backgroundColor: solved ? SOLVED_ON_TRY[tries - 1] : WRONG },
       details: props.details
-        ? `${t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints })}: ${solved
-          ? t('relay.endTable.solvedOnTry', { try: tries })
-          : t('relay.endTable.wrongTries', { count: tries })}`
+        ? `${t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints })}: ${outcome}`
         : undefined,
     };
   };

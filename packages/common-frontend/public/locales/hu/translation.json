@@ -91,6 +91,7 @@
       "answers": "Válaszok",
       "pointsOf": "{{points}} pont (max. {{max}})",
       "solvedOnTry": "helyes válasz a {{try}}. próbálkozásra",
+      "tries": "{{count}} próbálkozás",
       "wrongTries": "{{count}} hibás válasz",
       "unanswered": "Erre a feladatra nem adtatok be választ",
       "taskNumber": "{{num}}. feladat",
