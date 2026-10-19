@@ -7,7 +7,7 @@ import { DeletedTeamModel } from './deletedTeam';
 
 // TeamsRepository against a real postgres (test_database.ts), for what only the
 // database decides: the unique constraints, a JSON-path WHERE, the LIKE escape,
-// and the archive round trip. db.test.ts holds the SQL these render.
+// and the archive round trip.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -57,24 +57,31 @@ describe('the unique constraints sync() creates', () => {
 });
 
 describe('TeamsRepository.finishMatch', () => {
-  it('writes only while the team still holds that match', async () => {
+  it('writes only to that team, and only while it still holds that match', async () => {
+    const inProgress = { state: 'IN PROGRESS', matchID: 'current', startAt: new Date(), endAt: new Date() } as const;
     const { teamId } = await database.teams.insertTeam(team());
-    await TeamModel.update({ strategyMatch: { state: 'IN PROGRESS', matchID: 'current', startAt: new Date(), endAt: new Date() } }, { where: { teamId } });
-    const finished = { state: 'FINISHED', matchID: 'current', startAt: new Date(), endAt: new Date(), score: 3 } as const;
+    const other = await database.teams.insertTeam(team());
+    await TeamModel.update({ strategyMatch: inProgress }, { where: {} });
+    const finished = { ...inProgress, state: 'FINISHED', score: 3 } as const;
 
     expect(await database.teams.finishMatch(teamId, 'strategyMatch', 'stale', { ...finished, matchID: 'stale' })).toBe(false);
     expect(await database.teams.finishMatch(teamId, 'strategyMatch', 'current', finished)).toBe(true);
     expect((await database.teams.getTeam({ teamId }))?.strategyMatch).toMatchObject({ state: 'FINISHED', score: 3 });
+    expect((await database.teams.getTeam({ teamId: other.teamId }))?.strategyMatch).toMatchObject({ state: 'IN PROGRESS' });
   });
 });
 
 describe('TeamsRepository.fetch', () => {
-  it('ignores case, and reads % in a fragment as a literal', async () => {
-    await database.teams.insertTeam(team({ teamname: 'Alpha', other: 'Budapest, 100% motivated' }));
-    await database.teams.insertTeam(team({ teamname: 'Beta', other: 'budapest, 100 percent' }));
+  it('finds the teams whose notes hold every fragment, whatever its case, wildcards read literally', async () => {
+    await database.teams.insertTeam(team({ teamname: 'Alpha', other: 'Budapest, 100% motivated, a_b' }));
+    await database.teams.insertTeam(team({ teamname: 'Beta', other: 'budapest, 100 percent, axb' }));
+    const names = async (filter: string[]) => (await database.teams.fetch(filter)).map(t => t.teamName).sort();
 
-    expect((await database.teams.fetch(['BUDAPEST'])).map(t => t.teamName).sort()).toStrictEqual(['Alpha', 'Beta']);
-    expect((await database.teams.fetch(['100%'])).map(t => t.teamName)).toStrictEqual(['Alpha']);
+    expect(await names([])).toStrictEqual(['Alpha', 'Beta']);
+    expect(await names(['BUDAPEST'])).toStrictEqual(['Alpha', 'Beta']);
+    expect(await names(['budapest', 'motivated'])).toStrictEqual(['Alpha']);
+    expect(await names(['100%'])).toStrictEqual(['Alpha']);
+    expect(await names(['a_b'])).toStrictEqual(['Alpha']);
   });
 });
 

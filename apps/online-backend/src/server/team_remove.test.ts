@@ -74,7 +74,7 @@ describe("DELETE /team/admin/:teamID/remove", () => {
 // The repository, over a postgres Sequelize that is never connected: the model
 // calls are stubbed, and the transaction is a sentinel handed to a callback,
 // so what is pinned is which statements run, in what order, and on which
-// transaction — db.test.ts does the same for the SQL of `fetch`.
+// transaction.
 describe("TeamsRepository.removeTeam", () => {
   const sequelize = new Sequelize("db", "user", "password", { dialect: "postgres", logging: false });
   const transaction = { id: "the transaction" } as unknown as Transaction;
