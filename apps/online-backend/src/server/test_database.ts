@@ -7,12 +7,13 @@ import { TeamsRepository } from './db';
  * A real postgres for a suite, with no docker: PGlite is the postgres engine
  * compiled to WASM, in this process, and the socket server speaks the wire
  * protocol on a loopback port, so `pg` and Sequelize connect to it the way they
- * connect to the production database. The schema is the one `connect()` syncs.
+ * connect to the production database.
  *
- * PGlite serves one session, so the pool holds one connection: a suite can test
- * what a transaction rolls back, but not a race between two connections. A
- * statement that escapes its transaction waits for that connection forever, so
- * the short `acquire` turns the hang into a `ConnectionAcquireTimeoutError`.
+ * The socket server takes one connection, and PGlite runs one session behind
+ * it, so the pool holds one connection and a suite cannot show a race between
+ * two. A statement that escapes its transaction waits for that connection
+ * forever, so the short `acquire` turns the hang into a
+ * `ConnectionAcquireTimeoutError`.
  */
 export async function startTestDatabase() {
   const pglite = await PGlite.create();
@@ -26,7 +27,6 @@ export async function startTestDatabase() {
   // Syncs every model on this Sequelize, the teams' tables included.
   await db.connect();
   return {
-    db,
     teams,
     /** Empties the teams and their archive, for a test that starts from nothing. */
     async reset() {

@@ -1,4 +1,3 @@
-import { UniqueConstraintError } from 'sequelize';
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import type { TeamsRepository } from './db';
 import { startTestDatabase } from './test_database';
@@ -6,8 +5,9 @@ import { TeamModel } from './model';
 import { DeletedTeamModel } from './deletedTeam';
 
 // TeamsRepository against a real postgres (test_database.ts), for what only the
-// database decides: the unique constraints, a JSON-path WHERE, the LIKE escape,
-// and the archive round trip.
+// database decides: the unique constraints the live table has and the archive
+// does not, a JSON-path WHERE, the LIKE escape, and restores that clash with a
+// live team.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -86,6 +86,16 @@ describe('TeamsRepository.fetch', () => {
 });
 
 describe('deleting and restoring', () => {
+  it('archives a team deleted, imported again and deleted again', async () => {
+    const twice = team();
+    await database.teams.insertTeam(twice);
+    await database.teams.removeTeam(twice.teamId);
+    await database.teams.insertTeam(twice);
+
+    expect(await database.teams.removeTeam(twice.teamId)).toBe(1);
+    expect(await DeletedTeamModel.count()).toBe(2);
+  });
+
   it('a clashing restore leaves the archive row', async () => {
     const deleted = team();
     await database.teams.insertTeam(deleted);
@@ -94,7 +104,7 @@ describe('deleting and restoring', () => {
     await database.teams.insertTeam(team({ teamname: deleted.teamname }));
     const [archived] = await database.teams.listDeletedTeams();
 
-    await expect(database.teams.restoreTeam(archived.deletionId)).rejects.toBeInstanceOf(UniqueConstraintError);
+    await expect(database.teams.restoreTeam(archived.deletionId)).rejects.toMatchObject({ name: 'SequelizeUniqueConstraintError' });
 
     expect(await DeletedTeamModel.count()).toBe(1);
     expect(await database.teams.getTeam({ teamId: deleted.teamId })).toBeNull();
