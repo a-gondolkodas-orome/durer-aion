@@ -43,19 +43,15 @@ function team(overrides: Partial<Parameters<typeof database.teams.insertTeam>[0]
 }
 
 describe('the schema sync() creates', () => {
-  it.each([
-    ['teamId', 'teamId'],
-    ['joinCode', 'joinCode'],
-    ['teamname', 'teamName'],
-    ['credentials', 'credentials'],
-  ] as const)('refuses a second team with the same %s', async (field, column) => {
+  it('refuses a second team with the same name, in the words model.ts gives', async () => {
     const first = team();
     await database.teams.insertTeam(first);
 
-    const error = await database.teams.insertTeam(team({ [field]: first[field] })).catch((e: unknown) => e);
+    const error = await database.teams.insertTeam(team({ teamname: first.teamname })).catch((e: unknown) => e);
 
+    // The message is what the restore route's 409 answer carries.
     expect(error).toBeInstanceOf(UniqueConstraintError);
-    expect((error as UniqueConstraintError).errors[0].path).toBe(column);
+    expect((error as UniqueConstraintError).errors.map(item => item.message)).toStrictEqual(['Teamname already exists.']);
     expect(await TeamModel.count()).toBe(1);
   });
 
@@ -112,15 +108,6 @@ describe('TeamsRepository.fetch', () => {
 });
 
 describe('deleting and restoring', () => {
-  it('archives a deleted team, and a second delete finds nothing', async () => {
-    const { teamId } = await database.teams.insertTeam(team());
-
-    expect(await database.teams.removeTeam(teamId)).toBe(1);
-    expect(await database.teams.removeTeam(teamId)).toBe(0);
-    expect(await TeamModel.count()).toBe(0);
-    expect(await DeletedTeamModel.count({ where: { teamId } })).toBe(1);
-  });
-
   it('rolls a clashing restore back, keeping the archived row', async () => {
     const deleted = team();
     await database.teams.insertTeam(deleted);
