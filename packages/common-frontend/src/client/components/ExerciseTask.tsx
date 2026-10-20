@@ -9,8 +9,14 @@ export interface ExerciseTaskProps {
   pictureUrl: string | null;
 }
 
+// latex.js sets Computer Modern on KaTeX 0.12's `.mathdefault`, but the KaTeX it bundles emits
+// `.mathnormal`, and Chromium ignores the KaTeX_Math @font-face declared in the shadow root, so
+// without this math letters take the OS's serif italic. latex.js links `stylesheet` into its shadow root.
+const mathFontCss = '.katex .mathnormal { font-family: "Computer Modern Serif" !important; font-style: italic; }';
+const mathFontStylesheet = `data:text/css,${encodeURIComponent(mathFontCss)}`;
+
 export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: ExerciseTaskProps) => {
-  const completestring = `<latex-js hyphenate="false">${props.task}
+  const completestring = `<latex-js hyphenate="false" stylesheet="${mathFontStylesheet}">${props.task}
 </latex-js>`;
   const { t } = useTranslation();
   return <Stack>
