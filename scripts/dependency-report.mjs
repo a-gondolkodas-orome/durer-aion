@@ -5,9 +5,10 @@
 // It is the outward-facing half of check-versions.test.mjs: that one compares the versions
 // written down in this repo against *each other* and fails the test run on a mismatch; this one compares them against *upstream* and never fails anything.
 //
-// Four sources, each read-only over the network:
+// Five sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
 //     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
+//   - CDN packages: every npm package an app's index.html loads from jsdelivr — see cdnRows.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: each .nvmrc, against the newest release sharing its major.
 //   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
@@ -131,6 +132,33 @@ const npmRows = () => {
       checkVersion(name, current, [...where, ...(ALSO_WRITTEN_IN[name] ?? [])], async () =>
         (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
     );
+};
+
+// `cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs` -> { name: 'latex.js', version: '0.12.6' }.
+// A reference without `@version` comes back with version undefined: jsdelivr serves it as whatever
+// is latest that day, so it is reported rather than skipped.
+export const cdnPins = html => [...html.matchAll(/cdn\.jsdelivr\.net\/npm\/((?:@[^/@"'\s]+\/)?[^/@"'\s]+)(?:@([^/"'\s]+))?/g)]
+  .map(([, name, version]) => ({ name, version }));
+
+// No package.json names these — the browser fetches them at runtime — so npmRows cannot see them.
+// Keyed by package and version for the same reason npmRows is.
+const cdnRows = () => {
+  const rows = new Map();
+  const pages = workspaces().filter(Boolean).map(workspace => `${workspace}/index.html`)
+    .filter(file => existsSync(`${repoRoot}${file}`));
+  for (const page of pages) {
+    for (const { name, version } of cdnPins(read(page))) {
+      const key = `${name}@${version}`;
+      if (!rows.has(key)) rows.set(key, { name, version, where: [] });
+      if (!rows.get(key).where.includes(page)) rows.get(key).where.push(page);
+    }
+  }
+
+  return [...rows.values()].map(({ name, version, where }) =>
+    checkVersion(name, version ?? 'no version', where, async () => {
+      if (!version) throw new Error('loaded from jsdelivr without a version, so it moves to every new release');
+      return (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version;
+    }));
 };
 
 const actionRows = () => {
@@ -283,7 +311,7 @@ export const formatReport = rows => {
 
 // Guarded so the spec can import formatReport without the script reaching for the network.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
+  const rows = await Promise.all([...npmRows(), ...cdnRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
   const report = formatReport(rows);
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];

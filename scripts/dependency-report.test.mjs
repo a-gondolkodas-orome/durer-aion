@@ -1,12 +1,13 @@
 // The network lookups are not tested: a spec that mocked them would assert the mock. What is left
 // is where the report could quietly mislead — the sorting into patch/minor vs major and the
 // handling of a failed lookup in formatReport, a row dropped instead of reported reading as "up to
-// date"; and newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order
-// that is not the one we want.
+// date"; cdnPins, where a missed or misread URL is a package the report never mentions; and
+// newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order that is
+// not the one we want.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { HELD_BACK, formatReport, newestTagInLine } from './dependency-report.mjs';
+import { HELD_BACK, cdnPins, formatReport, newestTagInLine } from './dependency-report.mjs';
 
 const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });
 
@@ -211,5 +212,27 @@ describe('newestTagInLine', () => {
   // about a version it could not check.
   it('throws rather than inventing a version when the line has no tag', () => {
     expect(() => newestTagInLine(['1.31.4', '1.29.0'], '1.30.4', 2)).toThrow('no 1.30.x tag found');
+  });
+});
+
+describe('cdnPins', () => {
+  it('reads the package and version from a jsdelivr URL', () => {
+    expect(cdnPins('import("https://cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs")'))
+      .toEqual([{ name: 'latex.js', version: '0.12.6' }]);
+  });
+
+  it('keeps the scope of a scoped package', () => {
+    expect(cdnPins('<script src="https://cdn.jsdelivr.net/npm/@scope/pkg@1.2.3/index.js"></script>'))
+      .toEqual([{ name: '@scope/pkg', version: '1.2.3' }]);
+  });
+
+  it('returns an unpinned reference without a version rather than dropping it', () => {
+    expect(cdnPins('import("https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs")'))
+      .toEqual([{ name: 'latex.js', version: undefined }]);
+  });
+
+  it('finds every reference in a page', () => {
+    expect(cdnPins('"https://cdn.jsdelivr.net/npm/a@1.0.0/x.js" "https://cdn.jsdelivr.net/npm/b@2.0.0"'))
+      .toEqual([{ name: 'a', version: '1.0.0' }, { name: 'b', version: '2.0.0' }]);
   });
 });

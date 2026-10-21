@@ -15,7 +15,7 @@ next. It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
 one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
-every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
+every package an app's `index.html` loads from jsdelivr, every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
 each deployment runs. `npm run report:outdated` prints the same table on demand,
 and needs no install.
 
