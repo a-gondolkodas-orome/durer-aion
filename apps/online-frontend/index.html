@@ -44,10 +44,20 @@
     // Deliberately a dynamic import: Vite bundles every module script in this file into the
     // one entry chunk, so as a static import an unreachable cdn.jsdelivr.net aborted that
     // chunk before the app mounted and left the page blank instead of merely unformatted.
-    // Pinned, since ExerciseTask.tsx overrides a KaTeX class inside it: check that override
-    // when moving the version (the monthly dependency report says when there is one).
-    import("https://cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs")
-      .then(({ LaTeXJSComponent }) => customElements.define("latex-js", LaTeXJSComponent))
+    // Pinned, so a release reaches the competition only as a visible bump; check the math
+    // rendering when moving it (the monthly dependency report says when there is one).
+    const latexJs = "https://cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs";
+    import(latexJs)
+      .then(({ LaTeXJSComponent }) => {
+        // latex.js links KaTeX's stylesheet inside each task's shadow root, where Chromium ignores
+        // its @font-face rules, so every math font would fall back to a system one (ℕ as a plain
+        // N). Linked in the document too, the fonts are registered where the shadow root sees them.
+        const katexCss = document.createElement("link");
+        katexCss.rel = "stylesheet";
+        katexCss.href = new URL("css/katex.css", latexJs).href;
+        document.head.append(katexCss);
+        customElements.define("latex-js", LaTeXJSComponent);
+      })
       .catch((error) => console.error("latex.js could not be loaded; tasks fall back to their LaTeX source", error))
   </script>
   <script type="module">
