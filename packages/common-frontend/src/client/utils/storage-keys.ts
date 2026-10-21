@@ -5,7 +5,7 @@
 // The two names the apps have always used. `LOCAL_STORAGE_TEAMSTATE` is also
 // re-exported from api-repository-interface.ts.
 export const LOCAL_STORAGE_TEAMSTATE = "aegnjrlearnjla";
-export const BGIO_LOCALSTORAGE_PREFIX = "bgio_";
+const BGIO_LOCALSTORAGE_PREFIX = "bgio_";
 
 // gyakorlo.durerinfo.hu serves more than one of these apps from a single
 // origin, so they share one localStorage: with the same keys, a login in one
@@ -31,3 +31,6 @@ export const legacyGuidStorageKey = () => namespace + "kjqAEKeFkMpOvOZrzcvp";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
 export const relayPointsStorageKey = () => namespace + "RelayPoints";
 export const strategyPointsStorageKey = () => namespace + "StrategyPoints";
+// Where a local client saves a relay match. Bump the version when the relay's
+// game state changes shape; logout clears every version under the bgio prefix.
+export const relayMatchStorageKey = (gameName: string) => bgioStoragePrefix() + gameName + "_v2";

@@ -22,17 +22,17 @@ describe("relayStrategy", () => {
     );
 
     expect(move).toStrictEqual("firstProblem");
-    expect(args).toStrictEqual(["first", 2, ""]);
+    expect(args).toStrictEqual(["first", [2, 3], ""]);
   });
 
-  test("advancing carries the next problem's points", () => {
+  test("advancing serves the next problem", () => {
     const [args, move] = relayStrategy(problemList)(
-      stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120, currentProblemMaxPoints: 2 }),
+      stateWith({ numberOfTry: 1, currentProblem: 0, answer: 120 }),
       "1",
     );
 
     expect(move).toStrictEqual("newProblem");
-    expect(args).toStrictEqual(["second", 3, true, ""]);
+    expect(args).toStrictEqual(["second", true, ""]);
   });
 });
 
@@ -63,7 +63,7 @@ describe("a relay round against the bot", () => {
     const client = startRound();
 
     expect(client.getState()?.G.problemText).toStrictEqual("first");
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(2);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(2);
     expect(client.getState()?.G.numberOfTry).toStrictEqual(1);
   });
 
@@ -74,7 +74,7 @@ describe("a relay round against the bot", () => {
     letTheBotAnswer(client);
 
     expect(client.getState()?.G.numberOfTry).toStrictEqual(2);
-    expect(client.getState()?.G.currentProblemMaxPoints).toStrictEqual(1);
+    expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(1);
     expect(client.getState()?.G.correctnessPreviousAnswer).toBe(false);
     expect(client.getState()?.G.problemText).toStrictEqual("first");
   });
@@ -125,7 +125,7 @@ describe("relay answers", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first", 2, "");
+    client.moves.firstProblem("first", [2, 3], "");
     return client;
   };
 
