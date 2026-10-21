@@ -377,14 +377,13 @@ services:
       - ./nginx-tls.conf:/etc/nginx/tls/tls.conf:ro
 ```
 
-Rebuild with the override. `npm run deps` is the install `npm run stack:prod` does for
-itself and this path does not — without it a pull that moved the lockfile builds the
-frontend against the tree the previous release installed:
+Add `COMPOSE_FILE=docker-compose.yml:docker-compose.tls.yml` to `.env.docker`, so every
+`--env-file=.env.docker` command, `stack:prod` included, picks up the override. Without it
+`up` drops port 443 and still reports success, so check before rebuilding:
 
 ```bash
-npm run deps
-npm run build
-docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
+docker compose --env-file=.env.docker config | grep 443   # must print the port
+npm run stack:prod
 ```
 
 **For the live deployment, once that certificate exists**, send plain HTTP to HTTPS by
@@ -404,8 +403,8 @@ Adding it before the first certificate exists is what breaks issuance, which is 
 comes second.
 
 Reload, not rebuild: `docker compose up` recreates a container only when its
-*configuration* changes, and editing a file that is already bind-mounted is not that — the
-three commands above would leave `web` running with the config it parsed at startup, the
+*configuration* changes, and editing a file that is already bind-mounted is not that —
+`npm run stack:prod` would leave `web` running with the config it parsed at startup, the
 redirect correct on disk and not being served:
 
 ```bash
@@ -461,17 +460,15 @@ docker compose --env-file=.env.docker exec web nginx -s reload
 During a competition, only as a last resort because the clock keeps running
 and a bot move in flight can be lost.
 
-**To deploy a new release**, the same commands as step 8:
+**To deploy a new release**, the same command as step 8:
 
 ```bash
 git pull
-npm run deps
-npm run build
-docker compose --env-file=.env.docker -f docker-compose.yml -f docker-compose.tls.yml up --build --wait
+npm run stack:prod
 ```
 
-Before step 8 has been done, `npm run stack:prod` is the whole update, after step
-8 it would drop the site off https.
+On a TLS host this needs the `COMPOSE_FILE` line from step 8 first, or it would drop the
+site off https. A change to `nginx-tls.conf` alone is the reload in step 8.
 
 There are no DB migrations, so **a release
 that changed a column needs the change applied by hand**, or the volume dropped
