@@ -62,12 +62,10 @@ export type StartingPositionFunction<G> = (_: { G: G & GameStateMixin; ctx: Ctx;
 interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
-  // A game may set its opening position here, or leave it to the bot, which
-  // sends it as the `setStartingPosition` move; the live games do the latter.
-  // Prefer this one when the position is not the bot's secret: it receives
-  // bgio's seeded `random`, so server and client agree on what was drawn,
-  // which `Math.random` in a strategy cannot give you. See README.md,
-  // *Creating a new game*.
+  // Not called: gameWrapper only tests that the key exists, and a game that
+  // defines it skips the bot's `setStartingPosition` and starts without a
+  // fresh opening position (#35). The bot sending that move is the working
+  // route; see README.md, *Creating a new game*.
   startingPosition?: StartingPositionFunction<G>;
 }
 

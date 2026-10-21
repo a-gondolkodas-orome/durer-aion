@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 // One lockfile, at the repo root, for every workspace — npm writes no others, and installing from
-// inside a workspace directory is a documented mistake rather than a supported layout (CLAUDE.md).
+// inside a workspace directory is a documented mistake rather than a supported layout (the root AGENTS.md).
 const lockfilePath = fileURLToPath(new URL('../package-lock.json', import.meta.url));
 
 // Pure half, so the lookup rules are testable without a lockfile on disk.

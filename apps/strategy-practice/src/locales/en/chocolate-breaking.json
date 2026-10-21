@@ -1,0 +1,4 @@
+{
+  "rule": "Two players take turns breaking a chocolate bar along its grid lines. Initially there is one rectangular bar; in one move a player breaks exactly one piece into two. The player forced to break off the first 1 × 1 piece loses.",
+  "step": "Break a chocolate piece in two along a grid line (you may not break off a 1 × 1)."
+}

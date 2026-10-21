@@ -37,15 +37,14 @@ export function Login() {
     <Stack sx={{
       display: 'flex',
       height: '100%',
+      // The text's width, so the code field and the button fit on one line;
+      // the gutter goes outside it.
       maxWidth: 600,
-      paddingLeft: {
-        xs: '10px',
-        lg: 0
-      },
-      paddingRight: {
-        xs: '10px',
-        md: 0
-      },
+      boxSizing: 'content-box',
+      // The page's Container has no padding, so this is the gutter at every
+      // width: the header's, so the text lines up with its title.
+      paddingLeft: { xs: '10px', sm: '24px' },
+      paddingRight: { xs: '10px', sm: '24px' },
       marginTop: {
         xs: "10px",
         md: "0px",

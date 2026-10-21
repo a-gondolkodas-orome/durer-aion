@@ -1,7 +1,7 @@
 import { Stack, alpha } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
-import { useClientRepo } from "../api-repository-interface";
+import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 

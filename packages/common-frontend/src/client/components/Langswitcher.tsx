@@ -74,7 +74,10 @@ function useLanguages() {
     .map((code) => ({ code, label: Languages[code].label }));
 }
 
-export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
+// `onChoose` hears only the visitor's pick, not switches made in code. It is
+// the items' click, not the select's change, so a pick of the language already
+// showing counts too: a `?lang=` link can switch the page without storing it.
+export function LanguageDropdown({ fontColor, onChoose } : { fontColor?: string, onChoose?: (language: string) => void }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const languages = useLanguages();
@@ -93,7 +96,7 @@ export function LanguageDropdown({ fontColor } : { fontColor?: string }) {
       )}
     >
       {languages.map(({ code, label }) => (
-        <MenuItem key={code} value={code}>
+        <MenuItem key={code} value={code} onClick={() => onChoose?.(code)}>
           <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
             <LanguageFlag langcode={code} />
             {label}

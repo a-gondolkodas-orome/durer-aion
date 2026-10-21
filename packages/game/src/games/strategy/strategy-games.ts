@@ -5,6 +5,7 @@
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
 // live client again. entries.test.ts walks the three graphs to pin this.
+import type { CompetitionCategory } from "schemas";
 import {
   MyGameWrapper as StonesGameWrapper,
   MyGameState as StonesGameState
@@ -34,4 +35,4 @@ export const strategyNames = {
   C: "19oc",
   D: "19od",
   E: "stones_e",
-}
+} satisfies Record<CompetitionCategory, string>;

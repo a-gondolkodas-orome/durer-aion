@@ -1,4 +1,4 @@
-import { Dispatch, PropsWithoutRef, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, PropsWithoutRef, SetStateAction, useEffect, useLayoutEffect, useRef, useState } from "react";
 import ReportIcon from '@mui/icons-material/Report';
 import { Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,12 @@ export function Countdown(
     const [countdown, setCountdown] = useState("??:??:??");
     const [offset, setOffset] = useState(0); // to show warning icon
     const { t } = useTranslation();
+    // The timer below outlives the render it started in, so it reads the
+    // caller's latest callback through this ref rather than the one it closed over.
+    const getServerTimerRef = useRef(getServerTimer);
+    useLayoutEffect(() => {
+        getServerTimerRef.current = getServerTimer;
+    });
     // initializes a timer. Note that it does not need updates, even though it "uses" secondsRemaining
     useEffect(() => {
         let handle: NodeJS.Timeout | null = null;
@@ -35,7 +41,7 @@ export function Countdown(
                   return diff;
                 }
                 // when displayed ms remaining is between 1100 and 0 sync with server timer
-                getServerTimer();
+                getServerTimerRef.current();
                 return displayedMsRemaining;
             });
         }, 1000);

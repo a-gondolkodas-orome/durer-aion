@@ -35,6 +35,13 @@ export type RoundType = 'local' | 'final' | 'online';
 export const relayTestCode = (yearIdx: number, round: RoundType, category: Category | string) =>
   `${yearIdx + 1}_${round === 'final' ? 'D' : (round === 'online' ? 'O' : 'H')}_${category}`;
 
+// The inverse of relayTestCode; `year` is the competition's number, i.e. yearIdx + 1.
+export const parseRelayTestCode = (code: string) => {
+  const [year, round, category] = code.split('_');
+  const roundType: RoundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
+  return { year: Number(year), round: roundType, category };
+};
+
 export const availableRelayTests: TestListElement[] = [
     { final: [Category.B, Category.C, Category.D] },
     { final: [Category.B, Category.C, Category.D] },

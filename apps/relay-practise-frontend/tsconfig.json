@@ -25,7 +25,8 @@
       "game": ["../../packages/game"],
       "relay-bot": ["../../packages/relay-bot"],
       "schemas": ["../../packages/schemas"],
-      "common-frontend": ["../../packages/common-frontend"]
+      "common-frontend": ["../../packages/common-frontend"],
+      "common-frontend/core": ["../../packages/common-frontend/dist/core.d.mts"]
     }
   },
   // Its own src, the way apps/online-frontend's does. The packages come in through

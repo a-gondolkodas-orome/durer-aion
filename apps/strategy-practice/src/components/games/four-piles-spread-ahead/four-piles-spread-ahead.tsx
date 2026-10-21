@@ -1,11 +1,13 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard, useHoverPreview
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useLanguage } from 'language';
 import { generateStartBoard, generateTestStartBoard, moves, type Board, type Piece } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { language } = useLanguage();
+  const { t } = useTranslation('four-piles-spread-ahead');
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
 
   const nonExistent = ({ pileId, pieceId }: Piece) => {
@@ -38,19 +40,19 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const currentChoiceDescription = (pileId: number) => {
     const pieceCountInPile = board[pileId];
-    const pileName = language === 'en' ? 'pile' : 'kupac';
+    const pileName = t('board.pile', { number: pileId + 1 });
 
     if (!ctx.isClientMoveAllowed || !validHoveredPiece) {
-      return `${pileId + 1}. ${pileName}: ${pieceCountInPile}`;
+      return `${pileName}: ${pieceCountInPile}`;
     }
 
     if (pileId === validHoveredPiece.pileId) {
-      return `${pileId + 1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile - removedCount()}`;
+      return `${pileName}: ${pieceCountInPile} → ${pieceCountInPile - removedCount()}`;
     }
     if ((pileId < validHoveredPiece.pileId) && (pileId > validHoveredPiece.pileId - removedCount() - 1)) {
-      return `${pileId + 1}. ${pileName}: ${pieceCountInPile} → ${pieceCountInPile + 1}`;
+      return `${pileName}: ${pieceCountInPile} → ${pieceCountInPile + 1}`;
     }
-    return `${pileId + 1}. ${pileName}: ${pieceCountInPile} `;
+    return `${pileName}: ${pieceCountInPile} `;
   };
 
   const pieceVisibility = ({ pileId, pieceId }: Piece) => {
@@ -118,31 +120,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a
-    soron következő játékos választ m és n egész számokat,
-    melyekre <code className="whitespace-nowrap">1 ≤ m &lt; n ≤ 4</code>,
-    majd az n sorszámú kupacból elvesz m korongot, és
-    az <code className="whitespace-nowrap">n − 1, n − 2, . . . , n − m</code> sorszámú
-    kupacokba egyesével szétosztja az elvett korongokat. Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    There are four piles of discs given, numbered from 1 to 4. Every turn the current
-    player chooses integers m and n that satisfy <code className="whitespace-nowrap">1 ≤ m &lt; n ≤ 4</code> and
-    takes m discs from pile number n and distributes them into the
-    piles <code className="whitespace-nowrap">n − 1, n − 2, . . . , n − m</code> by
-    adding one disc to every pile. The player that has no available moves loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('four-piles-spread-ahead');
+  return <Trans t={t} i18nKey="rule" components={{ formula: <code className="whitespace-nowrap" /> }} />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('four-piles-spread-ahead');
+  return t('step');
 };
 
 export const FourPilesSpreadAhead = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-      en: 'Click on a disc to indicate the number of discs you want to remove.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -150,8 +141,8 @@ export const FourPilesSpreadAhead = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

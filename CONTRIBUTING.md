@@ -20,10 +20,10 @@ No `.env` to fill in, no database, no credentials to ask anyone for.
 
 Two shapes of first change fit in there:
 
-- **A word or a screen.** The games site carries its own text as
-  `{ hu: '…', en: '…' }` objects next to the code that shows it, so changing what
-  a player reads is one edit in one file. The English is British: colour,
-  neighbour, disc.
+- **A word or a screen.** The games site keeps its text in
+  `apps/strategy-practice/src/locales/<language>/<game>.json`, one file per game
+  and language, so changing what a player reads is one edit there. The English
+  is British: colour, neighbour, disc.
 - **A new game.** One self-contained folder, and
   [`apps/strategy-practice/README.md` § *Adding a new
   game*](apps/strategy-practice/README.md#adding-a-new-game) is the recipe — it
@@ -84,7 +84,7 @@ of you while writing the description and they leave no trace in the body.
 
 ## The rest
 
-- [`CLAUDE.md` § *Key Conventions*](CLAUDE.md#key-conventions) — the house rules
+- [`AGENTS.md` § *Key Conventions*](AGENTS.md#key-conventions) — the house rules
   this page does not carry: formatting through ESLint rather than prettier, what
   to comment, which language user-facing text is in.
 - [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the

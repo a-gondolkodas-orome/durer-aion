@@ -18,7 +18,7 @@ order by key. `gameList.test.ts` guards that this set of keys and
 Two games export a `StrategyGameConfig` object rather than a component, and this
 file is where each becomes a page: one `strategyGameFactory(config)` call, in the
 game's abc slot like any other entry. Which shape a game should take is open —
-see the issue linked from `src/components/CLAUDE.md` § Two game shapes.
+see the issue linked from `src/components/AGENTS.md` § Two game shapes.
 */
 import { strategyGameFactory } from 'strategy-game-factory';
 import { removeDivisorMultipleConfig } from './remove-divisor-multiple/remove-divisor-multiple';

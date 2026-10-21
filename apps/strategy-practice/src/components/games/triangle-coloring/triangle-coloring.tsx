@@ -1,4 +1,7 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { range } from 'lodash';
 import { ALLOWED, COLORED, FORBIDDEN, moves, triangles, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
@@ -86,35 +89,29 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Két játékos felváltva satíroz be az ábrán egy-egy kis háromszöget.
-    Nem szabad olyan háromszöget satírozni, amelynek valamelyik oldalszomszédja
-    már be van satírozva. Az veszít, aki nem tud satírozni.
-  </>,
-  en: <>
-    Two players take turns colouring one small triangle.
-    A triangle may only be coloured if none of its side-adjacent triangles have been coloured yet.
-    The player who cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('triangle-coloring');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('triangle-coloring');
+  return t('step');
 };
 
 export const TriangleColoring = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy kis háromszögre.',
-      en: 'Click on a small triangle.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [Array(16).fill(ALLOWED)],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

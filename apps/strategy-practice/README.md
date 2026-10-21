@@ -111,12 +111,15 @@ repository root keeps the equivalent settings in its own `.vscode/settings.json`
 To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
-1. Add the game metadata to `src/components/games/gameList.ts`.
+1. Add the game metadata to `src/components/games/gameList.ts`, and its name
+   under the same key in `src/locales/{hu,en}/catalog.json`.
 2. Create a folder for the game under `src/components/games/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.test.ts` — see [Where it lives](#where-it-lives).
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives). Its text goes in
+   `src/locales/{hu,en}/<folder>.json`; see
+   [Internationalisation](#internationalisation-i18n).
 3. Wire it into the barrel at `src/components/games/index.ts`, keyed by the
    game's `gameList` key. The router in `src/components/app/app.tsx` picks it up
    automatically — no edit needed there.
@@ -131,7 +134,7 @@ table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_I
    whichever of the two your reference game uses.
 
 Every field, edge case and enforcement rule of the engine API lives in
-[src/components/CLAUDE.md](src/components/CLAUDE.md). *It is recommended to copy
+[src/components/AGENTS.md](src/components/AGENTS.md). *It is recommended to copy
 and modify an existing, similar game.*
 
 ## Anatomy of a game
@@ -182,10 +185,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
 };
 
+// the text is in src/locales/{hu,en}/plus-one-two.json:
+// { "rule": "0-ról +1/+2 20-ig", "step": "Válaszd ki, hogy hánnyal növelsz." }
+const Rule = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('rule');
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('step');
+};
+
 export const PlusOneTwo = strategyGameFactory({
   presentation: {
-    rule: <>0-ról +1/+2 20-ig</>,
-    getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -210,12 +225,12 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 
 **`variants[]`** — each supplies `generateStartBoard()` or `startBoards`, and a
 `botStrategy`: a pure function of the position that *names* the move it wants,
-`({ board, ctx }) => ({ move, args })`. See [src/components/CLAUDE.md § Bot
-contract](src/components/CLAUDE.md#bot-contract), and [AGENTS.md §
+`({ board, ctx }) => ({ move, args })`. See [src/components/AGENTS.md § Bot
+contract](src/components/AGENTS.md#bot-contract), and [AGENTS.md §
 Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
-**`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
-values.
+**`presentation`** — the rule and the step description: components reading the
+game's namespace, see [Internationalisation](#internationalisation-i18n).
 
 ### Where it lives
 
@@ -234,36 +249,40 @@ player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
 `turnState` for multi-stage turns. Never modify either in place.
 
 A multi-stage game pins what its `turnState` holds ([§ Pinning the turn
-state](src/components/CLAUDE.md#pinning-the-turn-state)), and every move takes
+state](src/components/AGENTS.md#pinning-the-turn-state)), and every move takes
 the current `board` as its first argument, including subsequent moves within one
 turn ([§ Game state
-architecture](src/components/CLAUDE.md#game-state-architecture-synchronous-store-outside-react)
+architecture](src/components/AGENTS.md#game-state-architecture-synchronous-store-outside-react)
 for why, given that the store is authoritative either way).
 
 ## Before opening a PR
 
 Walk the [new game
-checklist](src/components/CLAUDE.md#new-game-checklist) — both game modes,
+checklist](src/components/AGENTS.md#new-game-checklist) — both game modes,
 balanced starting positions, an AI the player cannot beat with a losing
 strategy, keyboard and mobile usability.
 
 ## Internationalisation (i18n)
 
-The site supports Hungarian (default) and English. See `TicTacToe`
-for a complete example. English translations are added on a game-per-game bases,
-it is fine to add new games with Hungarian only.
+Hungarian is the default, English is added game by game; a game may ship in
+Hungarian only, with no English file, and English readers then see Hungarian. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
+one per game folder, `factory` for the chrome around every game, `overview`, and
+`catalog` for each game's name and title, under its `gameList.ts` key. The
+recommended i18n Ally VS Code extension shows the two languages side by side.
 
-The `t()` helper resolves a value to the active language. The value can be a
-plain string if there are no translations available, or a `{ hu, en }` object.
-`useTranslation()` returns it; the hook lives in `packages/strategy-engine`
-(`src/react/translate.ts`) and is reached through the `language` barrel, which
-is a path alias — `import { useTranslation } from 'language';`, no `../../../`.
+A game's rule and step description are small components calling
+`useTranslation('shark-chase')`; `dominoes-on-chessboard` and `shark-chase` are
+the examples. Keys and namespaces are literals, so that i18n Ally and
+`npm run i18n:check` can follow them; the root [README](../../README.md#the-checks-ci-runs)
+says what the check needs. `{{size, numberAdjective}}` adds the Hungarian
+suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
+stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
+factory's `testVariantLabel` and `fullVariantLabel`. A spec that needs text reads
+it in one language, `i18next.getFixedT('hu', '<namespace>')`; `test-setup.ts`
+puts i18next back to Hungarian after every test.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
-
-For an example of internationalizing an existing game, see
-[PR #213](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213).
 
 ## Technologies used
 
