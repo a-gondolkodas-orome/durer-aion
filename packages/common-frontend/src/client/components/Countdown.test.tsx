@@ -65,3 +65,15 @@ test('near zero, holds the count and asks the server', () => {
   expect(getServerTimer).toHaveBeenCalled();
   expect(screen.getByText('00:00:01')).toBeInTheDocument();
 });
+
+// InProgressRelay passes a fresh getServerTimer each render, and only the
+// latest knows whether the judge has the turn (#628).
+test('near zero, asks the server through the latest callback', () => {
+  const first = vi.fn();
+  const latest = vi.fn();
+  const { rerender } = render(<Board end={START.getTime() + 3000} serverMs={3000} getServerTimer={first} />);
+  rerender(<Board end={START.getTime() + 3000} serverMs={3000} getServerTimer={latest} />);
+  act(() => { vi.advanceTimersByTime(4000); });
+  expect(first).not.toHaveBeenCalled();
+  expect(latest).toHaveBeenCalled();
+});

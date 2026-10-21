@@ -1,4 +1,4 @@
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, ARCHITECT } from './gameplay';
 
@@ -21,7 +21,7 @@ export const makeBoardClient = (kmPerDay: number) =>
   const vertexCount = board.towers.length;
   const VERTEX_COORDS = ringCoords(vertexCount, 38);
   const LABEL_COORDS = ringCoords(vertexCount, 47);
-  const { t } = useTranslation();
+  const { t } = useTranslation('architect-and-bandits');
   // Hide towers during role selection (before the game actually begins)
   const gameStarted = ctx.isHumanVsHumanGame || ctx.chosenRoleIndex !== null;
 
@@ -119,11 +119,8 @@ export const makeBoardClient = (kmPerDay: number) =>
       {ctx.phase === 'play' && (
         <p>
           {ctx.currentPlayer === ARCHITECT
-            ? t({
-              hu: `${board.day}. nap · ${board.kmUsedToday}/${kmPerDay} km`,
-              en: `Day ${board.day} · ${board.kmUsedToday}/${kmPerDay} km`
-            })
-            : t({ hu: `${board.day}. éjszaka`, en: `Night ${board.day}` })
+            ? t('board.day', { day: board.day, kmUsed: board.kmUsedToday, kmPerDay })
+            : t('board.night', { day: board.day })
           }
         </p>
       )}
@@ -134,7 +131,7 @@ export const makeBoardClient = (kmPerDay: number) =>
           onClick={() => moves.endDay(board)}
           className="primary-button w-auto mt-1"
         >
-          {t({ hu: 'Befejezem a napot', en: 'End Day' })}
+          {t('board.endDay')}
         </button>
       )}
     </GameBoard>

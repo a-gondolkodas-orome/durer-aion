@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Countdown, useMsRemaining } from "../client/components/Countdown";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
-import { useClientRepo } from "../client/api-repository-interface";
+import { useClientRepo } from "../client/client-repo-context";
 import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";

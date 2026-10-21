@@ -1,0 +1,9 @@
+{
+  "board": {
+    "decrease": "−1 from pile {{number}}",
+    "increase": "+1 from pile {{number}}",
+    "submit": "Remove the stones"
+  },
+  "rule": "There are stones in four piles. The two players move alternately: on their turn, the current player picks two non-empty piles and removes some stones from each (at least one from each; the amounts removed from the two piles may differ). The player who cannot move loses — that is, the player who leaves at most one non-empty pile wins.",
+  "step": "Choose two non-empty piles and set how many stones you take from each."
+}

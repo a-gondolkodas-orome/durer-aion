@@ -1,4 +1,4 @@
-import { relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
+import { relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { sendGameData, SendGameDataParams } from "./sendData";
 
 // The reducer's report callback for the local (offline) clients: persists the

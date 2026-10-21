@@ -1,0 +1,15 @@
+{
+  "board": {
+    "buildThree": "{{n}} kavicsból építs három kupacot:",
+    "caption": {
+      "keep": "✓ megtartod",
+      "pieces": "kavics",
+      "tooFew": "túl kevés"
+    },
+    "pile": "{{number}}. kupac",
+    "split": "Újraosztom",
+    "tooMany": "Túl sok kavicsot osztottál ki — mindhárom kupacba legalább 1 kell."
+  },
+  "rule": "A játék kezdetén az asztalon van három kupac, mindegyikben néhány kaviccsal. A soron következő játékos egy lépésében eldob két kupacot, és a megmaradt kupacban lévő kavicsokból újra három kupacot csinál. Az veszít, aki már nem tud három kupacot építeni a megmaradt kavicsokból (vagyis a kiválasztott kupacban kevesebb mint három kavics maradt).",
+  "step": "Válaszd ki, melyik kupacot tartod meg (a másik kettőt eldobod), majd oszd három új kupacra."
+}

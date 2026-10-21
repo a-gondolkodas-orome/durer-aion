@@ -17,14 +17,15 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "noEmit": true,
-    // The same sources the bundle reads (tsdown.config.mts), so this typecheck
-    // needs no package build either. `game/client` is mapped like the rest, and
-    // is what keeps the boards out of the server: this compile has no `jsx`, so
-    // an import of it here fails with `--jsx is not set` errors naming the game
-    // package. Left unmapped it would resolve through the exports map to the
-    // declarations in `dist` instead and pass, and tsdown — which aliases only
-    // what is listed below — would leave a bare `require("game/client")` in a
-    // bundle whose image never builds that `dist`.
+    // The sources the bundle reads: tsdown takes this map as its alias list
+    // (tsdown.config.mts), so this typecheck needs no package build either.
+    // `game/client` is mapped like the rest, and is what keeps the boards out of
+    // the server: this compile has no `jsx`, so an import of it here fails with
+    // `--jsx is not set` errors naming the game package. Left unmapped it would
+    // resolve through the exports map to the declarations in `dist` instead and
+    // pass, and the bundle — which inlines only what its `alwaysBundle` lists —
+    // would keep a bare `require("game/client")` an image without that `dist`
+    // cannot load.
     // The flip side of reading source: those packages are compiled under this
     // file's `lib` and `target` as well as their own, so an error in them shows
     // up in both typechecks, and the game package must stay DOM-free.

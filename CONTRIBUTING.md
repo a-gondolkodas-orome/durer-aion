@@ -20,10 +20,10 @@ No `.env` to fill in, no database, no credentials to ask anyone for.
 
 Two shapes of first change fit in there:
 
-- **A word or a screen.** The games site carries its own text as
-  `{ hu: '…', en: '…' }` objects next to the code that shows it, so changing what
-  a player reads is one edit in one file. The English is British: colour,
-  neighbour, disc.
+- **A word or a screen.** The games site keeps its text in
+  `apps/strategy-practice/src/locales/<language>/<game>.json`, one file per game
+  and language, so changing what a player reads is one edit there. The English
+  is British: colour, neighbour, disc.
 - **A new game.** One self-contained folder, and
   [`apps/strategy-practice/README.md` § *Adding a new
   game*](apps/strategy-practice/README.md#adding-a-new-game) is the recipe — it
@@ -61,9 +61,9 @@ picks it up follows from where it is, not from what it is called.
 
 Both halves matter, because a suite no glob reaches does not fail: it is simply
 never run, and the green tick says nothing was wrong. `npm test` refuses either
-mistake by name (`scripts/test-file-naming.test.mjs`).
+mistake by name (`test-file-naming.test.mjs`).
 
-One more: **a test that writes to the console fails.** `vitest.setup.mts` says
+One more: **a test that writes to the console fails.** `vitest/setup.mts` says
 why and how to opt out when a test means to exercise a logging path. If a
 `console.log` you left in from debugging fails an unrelated assertion, that is
 this.
@@ -82,13 +82,9 @@ PR; two unrelated one-line fixes are two.
 Fill the template in. Its prompts are HTML comments, so you have them in front
 of you while writing the description and they leave no trace in the body.
 
-`.github/CODEOWNERS` requests a reviewer automatically for the strategy practice
-paths. It does not cover the rest of the repository yet, so for anything else,
-request one by hand — otherwise nobody is notified.
-
 ## The rest
 
-- [`CLAUDE.md` § *Key Conventions*](CLAUDE.md#key-conventions) — the house rules
+- [`AGENTS.md` § *Key Conventions*](AGENTS.md#key-conventions) — the house rules
   this page does not carry: formatting through ESLint rather than prettier, what
   to comment, which language user-facing text is in.
 - [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the

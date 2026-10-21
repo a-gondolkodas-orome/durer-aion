@@ -6,7 +6,7 @@ import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useClientRepo } from '../api-repository-interface';
+import { useClientRepo } from '../client-repo-context';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 

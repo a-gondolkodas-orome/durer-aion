@@ -176,7 +176,8 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
-      if (err.code === "501") {
+      // The server's 501: the match is finished, or no longer the team's current one.
+      if (err.response?.status === 501) {
         throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
       }
       throw new Error('Váratlan hiba történt', { cause: e });

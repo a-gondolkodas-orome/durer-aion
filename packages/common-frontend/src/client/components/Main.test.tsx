@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 // `Main` calls `i18next.changeLanguage` while rendering, so i18next has to be
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
-import { ClientRepoProvider } from '../api-repository-interface';
+import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
@@ -72,4 +72,12 @@ test('main renders Strategy if team is in STRATEGY state', () => {
   MockTeamState.mockStrategy();
   const { getByTestId } = renderMain();
   expect(getByTestId("strategyRoot")).toBeInTheDocument();
+});
+
+// MUI's default `maxWidth="lg"` caps a Container at the theme's lg breakpoint,
+// 1280px, overriding the 1200px in its sx: at 1280px the page then had no side
+// margin at all (#112).
+test('no Container takes MUI\'s lg max width over its own', () => {
+  const { container } = renderMain();
+  expect(container.querySelector('.MuiContainer-maxWidthLg')).toBeNull();
 });

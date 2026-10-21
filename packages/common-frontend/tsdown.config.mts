@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ['index.ts'],
+  entry: ['index.ts', 'core.ts'],
   // ESM only: the frontends import it and the backend bundles the source; a
   // CommonJS half would have no consumer.
   format: ['esm'],
