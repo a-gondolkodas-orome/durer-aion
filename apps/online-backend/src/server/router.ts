@@ -40,18 +40,9 @@ export function configureTeamsRouter(
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
 
-  /**
-   * boardgame.io's own lobby API (`/games/...`) is closed, every route of it.
-   *
-   * Nothing here uses it: a team's match is created by `/team/me/.../play`
-   * and played over the socket, and the admin pages read `/game/admin`. One
-   * prefix rather than a list of routes, so a route a later boardgame.io adds
-   * is closed too.
-   *
-   * This runs ahead of boardgame.io's handlers because `server.run()` adds
-   * them to the same router after this function has returned, and the router
-   * runs matching layers in the order they were added.
-   */
+  // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
+  // a route a later version adds is closed too. It runs first only because
+  // `server.run()` adds boardgame.io's routes to this router after ours.
   router.use("/games", (ctx) => {
     ctx.throw(404);
   });
