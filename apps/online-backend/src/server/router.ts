@@ -43,8 +43,10 @@ export function configureTeamsRouter(
   // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
   // a route a later version adds is closed too. It runs first only because
   // `server.run()` adds boardgame.io's routes to this router after ours.
+  // A status rather than a throw: koa reports every thrown error, a 404
+  // included, to server.ts's Sentry hook, and this prefix is anyone's to scan.
   router.use("/games", (ctx) => {
-    ctx.throw(404);
+    ctx.status = 404;
   });
 
   /**
