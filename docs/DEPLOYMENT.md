@@ -16,7 +16,7 @@ all — see *Deploying the dry run for testers in the year's private repo* at th
 
 | service | what it is |
 | --- | --- |
-| `web` | nginx on port 80. Serves the built frontend, proxies `/socket.io/`, `/games`, `/team` and `/game` to the backend. |
+| `web` | nginx on port 80. Serves the built frontend, proxies `/socket.io/`, `/team` and `/game` to the backend. |
 | `backend` | the node server on port 8000, not published — only `web` reaches it. |
 | `postgres` | the database, in a named volume. |
 

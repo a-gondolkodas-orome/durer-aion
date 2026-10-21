@@ -40,6 +40,15 @@ export function configureTeamsRouter(
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
 
+  // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
+  // a route a later version adds is closed too. It runs first only because
+  // `server.run()` adds boardgame.io's routes to this router after ours.
+  // A status rather than a throw: koa reports every thrown error, a 404
+  // included, to server.ts's Sentry hook, and this prefix is anyone's to scan.
+  router.use("/games", (ctx) => {
+    ctx.status = 404;
+  });
+
   /**
    * Get the log data about a specific match.
    *
@@ -471,18 +480,5 @@ export function configureTeamsRouter(
       pageState: "HOME",
     });
     ctx.body = publicTeamView(team);
-  });
-
-  /**
-   * Create a new BGio game
-   *
-   * @param {string} nameid - game ID to create
-   *
-   * This should be in line with boardgame.io/src/server/api.ts
-   */
-  router.post("/games/:nameid/create", async (ctx, next) => {
-    await next();
-    console.log(`Injecting bot in :${ctx.response.body.matchID}`);
-    await injectBot(ctx.db, ctx.response.body.matchID);
   });
 }

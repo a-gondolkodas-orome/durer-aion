@@ -16,7 +16,7 @@
 // gap `workflow-safety.test.mjs` and `socketio-single-copy.test.mjs` cover: a tracked file that
 // decides production behaviour and that no running test loads.
 //
-// The questions are asked of *every* proxied location rather than of the four that exist today, so
+// The questions are asked of *every* proxied location rather than of the three that exist today, so
 // a location added later is covered the day it lands.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

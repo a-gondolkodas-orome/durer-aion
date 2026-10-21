@@ -141,9 +141,10 @@ describe("getNewGame", () => {
   });
 });
 
-// boardgame.io serves listed matches, metadata and all, from an
-// unauthenticated `GET /games/:name`, and that metadata names the playing
-// team by its GUID — which is what the session cookie carries.
+// boardgame.io's lobby listing serves listed matches, metadata and all, and
+// that metadata names the playing team by its GUID — which is what the session
+// cookie carries. The listing is closed (server/router.ts); this is the second
+// line of defence.
 describe("createGame", () => {
   it("creates the match unlisted", async () => {
     const created: Server.MatchData[] = [];

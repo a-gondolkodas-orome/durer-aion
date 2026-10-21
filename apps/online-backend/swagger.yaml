@@ -521,25 +521,6 @@ paths:
         "403":
           description: Not allowed, match in progress
 
-  /games/{nameid}/create:
-    post:
-      summary: Create a new BGio game
-      parameters:
-        - name: nameid
-          in: path
-          required: true
-          schema:
-            type: string
-      tags:
-      - internal
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreatedMatch"
-
 components:
   securitySchemes:
    basicAdminAuth:
