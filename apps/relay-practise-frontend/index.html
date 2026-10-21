@@ -52,7 +52,9 @@
     // Deliberately a dynamic import: Vite bundles every module script in this file into the
     // one entry chunk, so as a static import an unreachable cdn.jsdelivr.net aborted that
     // chunk before the app mounted and left the page blank instead of merely unformatted.
-    import("https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs")
+    // Pinned, since ExerciseTask.tsx overrides a KaTeX class inside it: check that override
+    // when moving the version (the monthly dependency report says when there is one).
+    import("https://cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs")
       .then(({ LaTeXJSComponent }) => customElements.define("latex-js", LaTeXJSComponent))
       .catch((error) => console.error("latex.js could not be loaded; tasks fall back to their LaTeX source", error))
   </script>
