@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { HELD_BACK, cdnPins, formatReport, newestTagInLine } from './dependency-report.mjs';
+import { HELD_BACK, cdnPins, formatReport, isExactVersion, newestTagInLine } from './dependency-report.mjs';
 
 const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });
 
@@ -235,8 +235,20 @@ describe('cdnPins', () => {
     expect(cdnPins('url(https://cdn.jsdelivr.net/npm/a@1.0.0)')).toEqual([{ name: 'a', version: '1.0.0' }]);
   });
 
+  it('stops at the delimiter around the URL', () => {
+    expect(cdnPins('import(`https://cdn.jsdelivr.net/npm/a@1.0.0`); "https://cdn.jsdelivr.net/npm/b@2.0.0?v=1"'))
+      .toEqual([{ name: 'a', version: '1.0.0' }, { name: 'b', version: '2.0.0' }]);
+  });
+
   it('finds every reference in a page', () => {
     expect(cdnPins('"https://cdn.jsdelivr.net/npm/a@1.0.0/x.js" "https://cdn.jsdelivr.net/npm/b@2.0.0"'))
       .toEqual([{ name: 'a', version: '1.0.0' }, { name: 'b', version: '2.0.0' }]);
+  });
+});
+
+describe('isExactVersion', () => {
+  it('accepts only a full version, not a tag, a partial version or a range', () => {
+    expect(isExactVersion('0.12.6')).toBe(true);
+    expect(['latest', '0.12', '^0.12.6', undefined].filter(isExactVersion)).toEqual([]);
   });
 });

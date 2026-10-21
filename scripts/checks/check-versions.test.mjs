@@ -1,13 +1,14 @@
-// Playwright, Node and each package an app loads from jsdelivr are written down in several places — the tests below are the list
-// of where, and what everything else pointing at "the files the version is repeated in" means — and
-// a mismatch stays invisible until something fails far from the cause. Fail the test run instead.
+// Playwright, Node and each package an app loads from jsdelivr are written down in several
+// places — the tests below are the list of where, and what everything else pointing at "the files
+// the version is repeated in" means — and a mismatch stays invisible until something fails far
+// from the cause. Fail the test run instead.
 //
 // Files are compared against each other only — never against the running process.version, so a
 // contributor on a slightly different local patch is not blocked.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { cdnPins, workspaces } from '../dependency-report.mjs';
+import { cdnPinsByPage, isExactVersion } from '../dependency-report.mjs';
 import { resolvedVersion } from '../resolved-versions.mjs';
 
 // Every path here is repository-relative: Node is the whole repository's pin, and GitHub only
@@ -88,13 +89,15 @@ describe('a version written down in more than one file', () => {
     ]);
   });
 
-  // Pages, not a list, as with the workflows above: an app that starts loading a package from the CDN
-  // is covered the day it lands. A reference without a version shows up as "could not find".
-  it('jsdelivr: every index.html that loads a package from the CDN pins the same version of it', () => {
-    const pins = workspaces().filter(Boolean).map(workspace => `${workspace}/index.html`)
-      .filter(page => existsSync(`${repoRoot}${page}`))
-      .flatMap(page => cdnPins(read(page)).map(({ name, version }) => ({ name, page, version })));
+  // Pages, not a list, as with the workflows above: an index.html that starts loading a package from
+  // the CDN is covered the day it lands.
+  it('jsdelivr: every index.html that loads a package from the CDN pins the same exact version', () => {
+    const pins = cdnPinsByPage();
     expect(pins.length, 'no jsdelivr package found in any index.html — is the pattern stale?').toBeGreaterThan(0);
+    // A tag or a range agrees with itself across pages and still moves with every release.
+    const loose = pins.filter(({ version }) => !isExactVersion(version))
+      .map(({ name, version, page }) => `${page}: ${name}@${version ?? '(no version)'}`);
+    expect(loose, `Pin each to an exact version:\n  ${loose.join('\n  ')}`).toEqual([]);
     for (const name of new Set(pins.map(pin => pin.name))) {
       expectAgreement(name, pins.filter(pin => pin.name === name).map(({ page, version }) => [page, version]), '');
     }
