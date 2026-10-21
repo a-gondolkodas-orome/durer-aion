@@ -231,6 +231,10 @@ describe('cdnPins', () => {
       .toEqual([{ name: 'latex.js', version: undefined }]);
   });
 
+  it('stops the version at the parenthesis closing a CSS url()', () => {
+    expect(cdnPins('url(https://cdn.jsdelivr.net/npm/a@1.0.0)')).toEqual([{ name: 'a', version: '1.0.0' }]);
+  });
+
   it('finds every reference in a page', () => {
     expect(cdnPins('"https://cdn.jsdelivr.net/npm/a@1.0.0/x.js" "https://cdn.jsdelivr.net/npm/b@2.0.0"'))
       .toEqual([{ name: 'a', version: '1.0.0' }, { name: 'b', version: '2.0.0' }]);

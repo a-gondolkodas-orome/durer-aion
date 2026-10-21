@@ -31,9 +31,10 @@ is a report rather than dependabot or renovate. `package-lock.json` is still wha
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in
-[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Two
-versions are written down in files no `package.json` names: Node and Playwright.
-`npm test` fails until every copy agrees, and
+[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Three
+kinds of version are written down in files no `package.json` names: Node,
+Playwright, and each package an app's `index.html` loads from jsdelivr
+(latex.js). `npm test` fails until every copy agrees, and
 `check-versions.test.mjs` is the list
 of where they are — the `.nvmrc` row's count comes from it.
 </details>

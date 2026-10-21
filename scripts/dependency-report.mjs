@@ -137,7 +137,7 @@ const npmRows = () => {
 // `cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs` -> { name: 'latex.js', version: '0.12.6' }.
 // A reference without `@version` comes back with version undefined: jsdelivr serves it as whatever
 // is latest that day, so it is reported rather than skipped.
-export const cdnPins = html => [...html.matchAll(/cdn\.jsdelivr\.net\/npm\/((?:@[^/@"'\s]+\/)?[^/@"'\s]+)(?:@([^/"'\s]+))?/g)]
+export const cdnPins = html => [...html.matchAll(/cdn\.jsdelivr\.net\/npm\/((?:@[^/@"'\s]+\/)?[^/@"'\s]+)(?:@([^/"'\s)]+))?/g)]
   .map(([, name, version]) => ({ name, version }));
 
 // No package.json names these — the browser fetches them at runtime — so npmRows cannot see them.
@@ -282,7 +282,7 @@ export const formatReport = rows => {
     ...table(
       `Patch and minor (${minor.length})`,
       minor,
-      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` or docker tag row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate.'
+      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc`, docker tag or `index.html` row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate.'
     ),
     ...table(
       `Major (${major.length})`,
