@@ -1,0 +1,19 @@
+{
+  "role": {
+    "attacker": "Attacker",
+    "defender": "Defender"
+  },
+  "rule": {
+    "any": "Squares with green dots (in the bottom row) contain bacteria; the marked squares in the top row are GOAL squares. An Attacker and a Defender take turns. On each turn the Defender removes exactly 1 bacterium from any square of their choice. The Attacker chooses one of the following three moves:<br/>1. Move all bacteria on one square one step left or right.<br/>2. Move a single bacterium forward by two rows (a jump).<br/>3. Select a square where cell division occurs: every bacterium on that square divides, and one copy moves diagonally forward-left and one copy moves diagonally forward-right.<br/>The Attacker wins if at least one bacterium reaches a GOAL square; the Defender wins if all bacteria are removed from the board.",
+    "adjacent": "Squares with green dots (in the bottom row) contain bacteria; the marked squares in the top row — which are adjacent — are GOAL squares. An Attacker and a Defender take turns. On each turn the Defender removes exactly 1 bacterium from any square of their choice. The Attacker chooses one of the following three moves:<br/>1. Move all bacteria on one square one step left or right.<br/>2. Move a single bacterium forward by two rows (a jump).<br/>3. Select a square where cell division occurs: every bacterium on that square divides, and one copy moves diagonally forward-left and one copy moves diagonally forward-right.<br/>The Attacker wins if at least one bacterium reaches a GOAL square; the Defender wins if all bacteria are removed from the board.",
+    "scattered": "Squares with green dots (in the bottom row) contain bacteria; the marked squares in the top row — not necessarily adjacent — are GOAL squares. An Attacker and a Defender take turns. On each turn the Defender removes exactly 1 bacterium from any square of their choice. The Attacker chooses one of the following three moves:<br/>1. Move all bacteria on one square one step left or right.<br/>2. Move a single bacterium forward by two rows (a jump).<br/>3. Select a square where cell division occurs: every bacterium on that square divides, and one copy moves diagonally forward-left and one copy moves diagonally forward-right.<br/>The Attacker wins if at least one bacterium reaches a GOAL square; the Defender wins if all bacteria are removed from the board."
+  },
+  "step": {
+    "attacker": "Click on a square with bacteria and perform one of the three possible attacks with a second valid click.",
+    "defender": "Click on a square with bacteria to remove one bacterium from it."
+  },
+  "variant": {
+    "adjacent": "Adjacent GOALs",
+    "scattered": "Scattered GOALs"
+  }
+}

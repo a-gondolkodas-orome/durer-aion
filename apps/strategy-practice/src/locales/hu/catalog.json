@@ -1,0 +1,237 @@
+{
+  "ChessBishops": {
+    "name": "Futók lerakása"
+  },
+  "ChessRook": {
+    "name": "Barangolás bástyával"
+  },
+  "PrimeExponentials": {
+    "name": "Prímhatványok kivonása"
+  },
+  "AmorAndCupido": {
+    "name": "Ámor és Kupidó"
+  },
+  "WaningStones": {
+    "name": "Apadó kupac"
+  },
+  "ThreeMore": {
+    "name": "Hárommal többet"
+  },
+  "DominoesOnChessboard": {
+    "name": "Sakktáblára dominók",
+    "title": "Sakktáblára dominók"
+  },
+  "PolynomialBuilding": {
+    "name": "Polinomépítés"
+  },
+  "ChocolateBreaking": {
+    "name": "Csoki törögetés"
+  },
+  "IncrementOrDouble": {
+    "name": "x+1, 2x 100-ig"
+  },
+  "TriangleCircleGame": {
+    "name": "Vonal és kör"
+  },
+  "PlusOneTwoThree": {
+    "name": "+1, +2, +3"
+  },
+  "DigitSubtraction": {
+    "name": "Számjegy kivonás"
+  },
+  "ThreePilesRebuild": {
+    "name": "Három kupac"
+  },
+  "TenDigitNumber": {
+    "name": "Párbaj számjegyekkel"
+  },
+  "TwelveSquares": {
+    "name": "Tizenkét mező"
+  },
+  "PrimelyToZero": {
+    "name": "Prímesen nullára"
+  },
+  "DoublingReduction": {
+    "name": "Duplázva csökkentés"
+  },
+  "HunyadiAndTheJanissaries": {
+    "name": "Hunyadi és a janicsárok"
+  },
+  "RockPaperScissor": {
+    "name": "Kő-papír-olló"
+  },
+  "FiveConnectedFields": {
+    "name": "Öt összekötött mező"
+  },
+  "FourConnectedFields": {
+    "name": "Négy összekötött mező"
+  },
+  "FiveFiveCard": {
+    "name": "Párbaj 5 lappal"
+  },
+  "TriangleColoring": {
+    "name": "Háromszög színezés"
+  },
+  "FourPilesTwoGrabs": {
+    "name": "Négy kupac, két marok"
+  },
+  "PileSplitter": {
+    "name": "Kupac kettéosztó"
+  },
+  "PileSplitter3": {
+    "name": "Kupac kettéosztó 3 kupaccal"
+  },
+  "PileUnion": {
+    "name": "Kupac egyesítés"
+  },
+  "MatchstickPiles": {
+    "name": "Gyufakupacok"
+  },
+  "Policemanthief": {
+    "name": "Rendőrök, tolvaj",
+    "title": "Rendőrök, tolvaj (A, B kategória)"
+  },
+  "PolicemanthiefC": {
+    "name": "Rendőrök, tolvaj",
+    "title": "Rendőrök, tolvaj (C, D kategória)"
+  },
+  "DiscsFlipOrRemove": {
+    "name": "Átfordítás, elvétel"
+  },
+  "Bacteria": {
+    "name": "Baktériumok terjedése"
+  },
+  "NumberCovering": {
+    "name": "Számok lefedése"
+  },
+  "RemoveRowOrColumn": {
+    "name": "Sor vagy oszlop levétele"
+  },
+  "TicTacToeDoubleStart": {
+    "name": "Duplánkezdő 3x3 amőba"
+  },
+  "AntiTicTacToe": {
+    "name": "3x3-as antiamőba"
+  },
+  "Dominoes4x4": {
+    "name": "Álló és fekvő dominók"
+  },
+  "TakeAndPoint": {
+    "name": "Vegyél és mutass"
+  },
+  "TwoTimesTwo": {
+    "name": "4 mezőbe különbözőt"
+  },
+  "FiveSquares": {
+    "name": "5 mezőbe különbözőt"
+  },
+  "TicTacToe": {
+    "name": "Átszínezős tic-tac-toe"
+  },
+  "SuperstitiousCounting": {
+    "name": "Babonás lépkedés"
+  },
+  "PileSplitter4": {
+    "name": "Kupac kettéosztó 4 kupaccal"
+  },
+  "RookToCorner": {
+    "name": "Bástya a sarokba"
+  },
+  "TriangularGridRopes": {
+    "name": "10 totemoszlop"
+  },
+  "TriangularGridRopes15": {
+    "name": "15 totemoszlop"
+  },
+  "ModifiedMill": {
+    "name": "Módosított malom"
+  },
+  "SumFifteen": {
+    "name": "Összeg 15"
+  },
+  "CoinsIn3Piles": {
+    "name": "Érmék beváltása"
+  },
+  "ChessDucks": {
+    "name": "Békés kacsák"
+  },
+  "CubeColoring": {
+    "name": "Kockaszínezés"
+  },
+  "TakePowerOfTwo": {
+    "name": "Kettőhatványok kivonása"
+  },
+  "RecolouringDiscs": {
+    "name": "Átszínező korongok"
+  },
+  "LatinSquareFilling": {
+    "name": "Latin-négyzet kitöltés"
+  },
+  "TenCoins": {
+    "name": "10 érme"
+  },
+  "AddReduceDouble": {
+    "name": "Kettőt vesz, egyet kap"
+  },
+  "FourPilesSpreadAhead": {
+    "name": "4 kupacban előrepakolás"
+  },
+  "ArchitectAndBandits": {
+    "name": "Építész és banditák (A)",
+    "title": "Építész és banditák (8 torony)"
+  },
+  "ArchitectAndBanditsB": {
+    "name": "Építész és banditák (B)",
+    "title": "Építész és banditák (10 torony)"
+  },
+  "SharkChase4": {
+    "name": "Cápa üldözés (4 x 4)"
+  },
+  "Take1OrHalve": {
+    "name": "Egyet vegyél vagy felezz"
+  },
+  "SharkChase5": {
+    "name": "Cápa üldözés (5 x 5)"
+  },
+  "MatchesOnEdges": {
+    "name": "Gyufák az éleken"
+  },
+  "ThiefSheriffMean": {
+    "name": "Tolvajnál átlag (1-7)"
+  },
+  "ThiefSheriffMean9": {
+    "name": "Tolvajnál átlag (1-9)"
+  },
+  "ChessKnight": {
+    "name": "Barangolás huszárral"
+  },
+  "BankRobbers": {
+    "name": "Bankrablók: 7-10 bank"
+  },
+  "PairsOfNumbers": {
+    "name": "Számpár módosítás"
+  },
+  "MagicBox": {
+    "name": "Mágikus láda (A)",
+    "title": "Mágikus láda"
+  },
+  "MagicBoxB": {
+    "name": "Mágikus láda (B)",
+    "title": "Mágikus láda (kijelöléssel)"
+  },
+  "TwoOfThreeTakeaway": {
+    "name": "Két kupacból elvétel"
+  },
+  "SixFieldsCircle": {
+    "name": "6 mező körben"
+  },
+  "RemoveDivisorMultiple": {
+    "name": "Osztó/többszörös törlés"
+  },
+  "StonesRemoveOneNotTwiceFromLeft": {
+    "name": "Kavicsgyűjtés egyesével"
+  },
+  "NumberPyramid": {
+    "name": "Számpiramis"
+  }
+}

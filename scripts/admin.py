@@ -4,6 +4,9 @@ import requests
 from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
+from datetime import date
+from pathlib import Path
+import unicodedata
 from tqdm import tqdm
 
 def read_admin_password():
@@ -27,7 +30,10 @@ def read_admin_password():
 
 ADMIN_PASSWORD = read_admin_password()
 BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
-FORCE_DOWNLOAD = False
+# Beside the script, wherever it is run from; .gitignore and .dockerignore keep
+# this folder out.
+OUTPUT_DIR = Path(__file__).resolve().parent / 'admin-output'
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 # %%
 def get_request(username:str, password:str, baseurl:str, endpoint:str):
@@ -59,18 +65,12 @@ for team in team_states:
 MATCH_TYPES = ['relay', 'strategy']
 MATCH_DATA_TYPES = ['state', 'logs']
 
-def get_match_data(team_states, match_type:str, match_data_type:str, force_download:bool = False):
+def get_match_data(team_states, match_type:str, match_data_type:str):
   if match_type not in MATCH_TYPES:
       raise ValueError(f'Wrong match_type: {match_type}, only {MATCH_TYPES} allowed')
   if match_data_type not in MATCH_DATA_TYPES:
       raise ValueError(f'Wrong match_data_type: {match_data_type}, only {MATCH_DATA_TYPES} allowed')
-  file_name = f'match_data_{match_type}_{match_data_type}.json'
-  if not force_download:
-    try:
-      with open(file_name, 'r') as f:
-        return json.load(f)
-    except FileNotFoundError:
-      pass
+  file_name = OUTPUT_DIR / f'match_data_{match_type}_{match_data_type}.json'
   match_data = {}
   match_type_id = 'relayMatch' if match_type == 'relay' else 'strategyMatch'
   for team_state in tqdm(team_states, f"Downloading {match_type} {match_data_type}"):
@@ -84,10 +84,21 @@ def get_match_data(team_states, match_type:str, match_data_type:str, force_downl
 # %%
 relay_states = get_match_data(team_states, 'relay', 'state')
 strategy_states = get_match_data(team_states, 'strategy', 'state')
+# Nothing below reads the logs: they are downloaded to keep a record of every
+# move beside the results, for settling a disputed score after the round.
 relay_logs = get_match_data(team_states, 'relay', 'logs')
 strategy_logs = get_match_data(team_states, 'strategy', 'logs')
 
 # %%
+def name_sort_key(name:str):
+  """
+    Python compares code points, which puts every accented capital after Z:
+    "Ábel" after "Zoli". Accents dropped and case folded, the name sorts beside
+    its plain spelling; the name itself breaks the ties.
+  """
+  plain = ''.join(c for c in unicodedata.normalize('NFD', name) if not unicodedata.combining(c))
+  return (plain.casefold(), name)
+
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
   # Init: if a game is not started, a "-" will be written
   login_codes = set(relay_states.keys()).union(set(strategy_states.keys()))
@@ -106,7 +117,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
       if "score" in team_states_dict[code]["strategyMatch"]:
         team_state_points = team_states_dict[code]["strategyMatch"]["score"]
       if strategy_states[code]["G"]["points"] != team_state_points:
-        print(f"ERROR strategy {code}: team_states says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
+        print(f"ERROR strategy {code}: team_states says {team_state_points}, while gamestate {strategy_states[code]['G']['points']}")
 
   # Get results
   for code in login_codes:
@@ -116,16 +127,24 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
     if code in strategy_states:
       results[code]["strategy"] = strategy_states[code]["G"]["points"]
 
-  # Export
-  with open('durer-results-2024.tsv', 'w') as f:
-    f.write("login\tstrategy\trelay\trelay_detailed\n")
-    for code in results.keys():
-      f.write("{}\t{}\t{}\t{}\n".format(
+  # Export: one column per relay problem, as many as the longest relay, and
+  # padded, so every row has the header's cells.
+  relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
+  results_path = OUTPUT_DIR / f'durer-results-{date.today().year}.tsv'
+  with open(results_path, 'w', encoding='utf-8') as f:
+    f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
+                      + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
+    for code in sorted(results, key=lambda code: (team_states_dict[code]["category"],
+                                                  name_sort_key(team_states_dict[code]["teamName"]), code)):
+      detailed = list(map(str, results[code]["relay_detailed"]))
+      f.write('\t'.join([
         code,
-        results[code]["strategy"],
-        results[code]["relay"],
-        '\t'.join(map(str,results[code]["relay_detailed"]))
-      ))
+        team_states_dict[code]["teamName"],
+        team_states_dict[code]["category"],
+        str(results[code]["strategy"]),
+        str(results[code]["relay"]),
+      ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")
+  print(f"Results of {len(results)} teams written to {results_path}")
 export_results_tsv(team_states_dict, relay_states, strategy_states)
 
 # %%

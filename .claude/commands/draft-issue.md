@@ -46,7 +46,7 @@ If you find a likely match, confirm with the user before linking ("Should this b
 
 Check if these exist; if they do, factor them into your draft and type/priority decisions:
 
-- `CLAUDE.md` (root or `.claude/CLAUDE.md`) — overall project guidance
+- `AGENTS.md` / `CLAUDE.md` (root or `.claude/CLAUDE.md`) — overall project guidance
 - `PRIORITIES.md` / `.github/PRIORITIES.md` — priority rubric (if present)
 - `CONTRIBUTING.md` — issue conventions if any
 - Existing closed issues for body-structure precedent

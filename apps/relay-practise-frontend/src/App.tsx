@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
-import i18next from "i18next";
 import { useTranslation } from 'react-i18next';
-import { GameProvider, ClientRepoProvider, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
+import { GameProvider, ClientRepoProvider, ErrorBoundary, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
 import { LoginToRelay } from './LoginToRelay';
+import { parseRelayTestCode } from './SelectRound';
+import { rememberChosenLanguage } from './language';
 
 
 // Branding, not configuration: every build of this app uses these, so they live
 // in git rather than in a gitignored `.env` that goes stale when the sample
 // changes (#443).
 const ACCENT_COLOR = '#46871B';
-const LANGUAGE = 'hu';
 
 const theme = {
   palette: {
@@ -36,17 +36,18 @@ function App() {
   const teamState = useTeamState();
   const { t } = useTranslation();
 
+  // The language dropdown is open to everyone here, so the tab title follows it.
+  // `t` changes identity with the language.
   useEffect(() => {
-    void i18next.changeLanguage(LANGUAGE);
-  }, [])
+    document.title = `${t('header.relayPractise')} – ${t('header.titlePlain')}`;
+  }, [t]);
 
   // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),
   // shown in the header as a translated round name instead of the raw code
   const testTitle = (code: string) => {
-    const [num, round, category] = code.split('_');
-    const roundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
+    const { year, round, category } = parseRelayTestCode(code);
     // t('login.competitionType.local'), t('login.competitionType.final'), t('login.competitionType.online');
-    return t(`login.competitionType.${roundType}`, { num, category });
+    return t(`login.competitionType.${round}`, { num: year, category });
   };
 
   // t('header.titlePlain'), t('header.relayPractise');
@@ -65,8 +66,16 @@ function App() {
           value={clientRepository}>
           <Layout>
             <LoadTeamState />
-            <Header teamName={teamState?.teamName ?? null} admin={true} titles={titles} homeAddress='/..'/>
+            <Header
+              teamName={teamState?.teamName ?? null}
+              admin={true}
+              titles={titles}
+              homeAddress='/..'
+              onChooseLanguage={rememberChosenLanguage}
+            />
+            {/* `maxWidth={false}`: see the same Container in common-frontend's `Main` */}
             <Container
+              maxWidth={false}
               sx={{
                 paddingLeft: {
                   xs: "0px",
@@ -85,8 +94,10 @@ function App() {
               }}
               data-testid="mainRoot"
             >
-              {!teamState && <LoginToRelay />}
-              {teamState && <Relay state={teamState}/>}
+              <ErrorBoundary>
+                {!teamState && <LoginToRelay />}
+                {teamState && <Relay state={teamState}/>}
+              </ErrorBoundary>
             </Container>
             <footer style={{
               textAlign: "center",

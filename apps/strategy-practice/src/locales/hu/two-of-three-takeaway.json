@@ -1,0 +1,9 @@
+{
+  "board": {
+    "pickFirst": "Válaszd ki az első kupacot.",
+    "pickOther": "Válaszd ki a másik kupacot.",
+    "pile": "{{number}}. kupac, {{chips}} korong"
+  },
+  "rule": "Három kupacban összesen legfeljebb 20, de páros számú korong van. A két játékos felváltva lép: a soron következő játékos kiválaszt két nem üres kupacot, és mindkettőből elvesz egy-egy korongot. Az a játékos veszít, aki nem tud lépni.",
+  "step": "Válassz két nem üres kupacot – mindkettőből elveszel egy-egy korongot."
+}

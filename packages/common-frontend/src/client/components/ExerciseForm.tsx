@@ -22,6 +22,8 @@ export interface MyProps {
   previousCorrectness: boolean | null;
   onSubmit: (result: number) => Promise<void>;
   attempt: number;
+  // Whether the previous guess is still waiting for the judge's ruling.
+  awaitingJudge: boolean;
 }
 
 export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
@@ -102,6 +104,9 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             form: { handleChange },
           }: FieldProps<number>) => <input
             autoFocus={focusAttempt === props.attempt}
+            // The ruling remounts the form, which would drop anything typed
+            // while waiting for it.
+            readOnly={props.awaitingJudge}
             autoComplete="off"
             {...field}
             onChange={(e) => {
@@ -152,7 +157,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
           textTransform: 'none',
           borderRadius: '10px',
           marginTop: '40px',
-        }} variant='contained' color='primary' type="submit">
+        }} variant='contained' color='primary' type="submit" disabled={props.awaitingJudge}>
           {t('relay.send')}
         </Button>
       </Form>

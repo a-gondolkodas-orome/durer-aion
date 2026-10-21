@@ -1,5 +1,5 @@
 import type { Ctx } from "boardgame.io";
-import { TeamModelDto } from "common-frontend";
+import { TeamModelDto } from "common-frontend/core";
 import { readPersistedLog } from "./bgio-log";
 import { readStoredTeamState } from "./stored-team-state";
 

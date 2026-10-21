@@ -1,26 +1,20 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-// The key helpers come from the package entry, which resolves to a `dist` the
-// CI test job never builds — the same reason sendData.test.ts mocks its way off
-// the workspace packages. The names here are deliberately not the bare keys
-// this app really stores under: what the helpers return is storage-keys.test.ts's
-// business, and a name of its own pins which of the two each branch reaches for.
-const {
-  BGIO_LOCALSTORAGE_PREFIX, boardWrapper, relayPointsStorageKey, strategyPointsStorageKey,
-  sendGameData, gameWrapper, RelayWrapper, Client,
-} = vi.hoisted(() => ({
-  BGIO_LOCALSTORAGE_PREFIX: "bgio_",
+import { relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
+
+// myclient.ts takes boardWrapper from the full package entry. Loading it for
+// real brings in MUI, the data grid and the i18next setup for a board this
+// suite never renders, and takes the wiring tests past vitest's 5 s timeout.
+const { boardWrapper, sendGameData, gameWrapper, RelayWrapper, Client } = vi.hoisted(() => ({
   boardWrapper: vi.fn(),
-  relayPointsStorageKey: () => "the relay key",
-  strategyPointsStorageKey: () => "the strategy key",
   sendGameData: vi.fn(),
   gameWrapper: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
-vi.mock("common-frontend", () => ({ BGIO_LOCALSTORAGE_PREFIX, boardWrapper, relayPointsStorageKey, strategyPointsStorageKey }));
+vi.mock("common-frontend", () => ({ boardWrapper }));
 vi.mock("./sendData", () => ({ sendGameData }));
 // The wiring tests read the callback the app hands each reducer; building a real
 // boardgame.io client around it is not what is under test here.
@@ -39,14 +33,14 @@ describe("handleGameReport", () => {
     const end = { component: "strategy", phase: "end", G: { points: 12 } } as const;
     handleGameReport(end, "bgio_stones_e");
 
-    expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
+    expect(localStorage.getItem(strategyPointsStorageKey())).toStrictEqual("12");
     expect(sendGameData).toHaveBeenCalledWith(end, "bgio_stones_e");
   });
 
   test("persists the score of a relay end report", () => {
     handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
 
-    expect(localStorage.getItem("the relay key")).toStrictEqual("17");
+    expect(localStorage.getItem(relayPointsStorageKey())).toStrictEqual("17");
   });
 
   // toHome() is the relay-end uploader, because it also covers giving up
@@ -100,18 +94,18 @@ describe("the clients' report callbacks", () => {
     const end = { component: "strategy", phase: "end", G: { points: 12 } } as const;
     report(end);
 
-    expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
+    expect(localStorage.getItem(strategyPointsStorageKey())).toStrictEqual("12");
     expect(sendGameData).toHaveBeenCalledWith(end, "bgio_stones_e");
   });
 
   test("the relay client persists the score", async () => {
     const { ClientRelayWithBot } = await import("./myclient");
-    ClientRelayWithBot(...(stubArgs("relay_e") as unknown as Parameters<typeof ClientRelayWithBot>));
+    ClientRelayWithBot(...(["relay_e", ...stubArgs("relay_e").slice(1)] as unknown as Parameters<typeof ClientRelayWithBot>));
 
     const report = RelayWrapper.mock.calls[0]?.[0] as unknown as typeof handleGameReport;
     expect(report, "the relay client built its game with no report callback").toBeTypeOf("function");
     report({ component: "relay", phase: "end", G: { points: 9 } });
 
-    expect(localStorage.getItem("the relay key")).toStrictEqual("9");
+    expect(localStorage.getItem(relayPointsStorageKey())).toStrictEqual("9");
   });
 });
