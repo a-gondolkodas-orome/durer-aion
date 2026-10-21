@@ -1,10 +1,12 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { availableDigits, moves, totalDigits, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('ten-digit-number');
   const slots = Array.from({ length: totalDigits }, (_, i) =>
     i < board.digits.length ? board.digits[i] : null
   );
@@ -18,7 +20,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     const expr = remainder === 0
       ? `${fmt(num)} = ${fmt(quotient)} · 9`
       : `${fmt(num)} = ${fmt(quotient)} · 9 + ${remainder}`;
-    numberSummary = t({ hu: `A szám: ${expr}`, en: `The number: ${expr}` });
+    numberSummary = t('board.number', { expr });
   }
 
   return (
@@ -58,42 +60,33 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Jenő és Béla felváltva választanak egy-egy számjegyet az &#123;1, 2, 3, 4, 5, 6&#125; halmazból
-    (Jenő kezd), és egymás mellé írják őket – így közösen felépítenek egy 10 jegyű számot.
-    Béla nyer, ha a kapott szám osztható 9-cel, egyébként Jenő nyer.
-  </>,
-  en: <>
-    Alice and Bob alternately choose a digit from &#123;1, 2, 3, 4, 5, 6&#125; (Alice starts),
-    writing them one after another to build a 10-digit number together.
-    Bob wins if the resulting number is divisible by 9; otherwise Alice wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('ten-digit-number');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('ten-digit-number');
+  return t('step');
 };
 
 export const TenDigitNumber = strategyGameFactory({
   presentation: {
-    rule,
-    roleLabels: [
-      { hu: 'Jenő', en: 'Alice' },
-      { hu: 'Béla', en: 'Bob' }
-    ],
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz egy számjegyet 1 és 6 között.',
-      en: 'Choose a digit between 1 and 6.'
-    })
+    rule: <Rule />,
+    roleLabels: [t => t('ten-digit-number:role.first'), t => t('ten-digit-number:role.second')],
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: [{ digits: [], sumMod9: 0 }],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

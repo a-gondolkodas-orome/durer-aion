@@ -1,11 +1,13 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import {
+  strategyGameFactory, type BoardClientProps, GameBoard, testVariantLabel
+} from 'strategy-game-factory';
 import { range, sum } from 'lodash';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { generateTestStartBoard, getRemaining, moves, type Board, COVERED } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('number-covering');
 
 
   return (
@@ -23,48 +25,30 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
       ))}
       </div>
       <p className="mt-2">
-        {t({ hu: 'Megmaradt számok összege', en: 'Sum of remaining numbers' })}
+        {t('board.remainingSum')}
         : {sum(getRemaining(board))}
       </p>
     </GameBoard>
   );
 };
 
-const makeRule = (maxNumber: number) => ({
-  hu: <>
-    Egy táblázatban 1-től {maxNumber}-ig szerepelnek a számok. Két játékos felváltva takar le egy-egy
-    számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
-    nyer, ha pedig páratlan, akkor a második.
-  </>,
-  en: <>
-    A table contains the numbers 1 to {maxNumber}. Two players take turns covering one number at a time
-    until only two numbers remain. If the sum of the two remaining numbers is even, the first
-    player wins; if it is odd, the second player wins.
-  </>
-});
-
-const genericRule = {
-  hu: <>
-    Egy táblázatban 1-től kezdődően néhány szám szerepel. Két játékos felváltva takar le egy-egy
-    számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő
-    nyer, ha pedig páratlan, akkor a második.
-  </>,
-  en: <>
-    A table contains the numbers starting from 1. Two players take turns covering one number at a time
-    until only two numbers remain. If the sum of the two remaining numbers is even, the first
-    player wins; if it is odd, the second player wins.
-  </>
+// Without `maxNumber`, the rule for a table of any length.
+const Rule = ({ maxNumber }: { maxNumber?: number }) => {
+  const { t } = useTranslation('number-covering');
+  return maxNumber === undefined
+    ? <Trans t={t} i18nKey="rule.generic" />
+    : <Trans t={t} i18nKey="rule.upTo" values={{ maxNumber }} />;
 };
 
-const getPlayerStepDescription = () => ({
-  hu: 'Kattints egy számra, hogy lefedd.',
-  en: 'Click a number to cover it.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('number-covering');
+  return t('step');
+};
 
 export const NumberCovering = strategyGameFactory({
   presentation: {
-    rule: genericRule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -72,20 +56,20 @@ export const NumberCovering = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: [range(1, 9)],
-      rule: makeRule(8),
-      label: { hu: '8 szám', en: '8 numbers' },
+      rule: <Rule maxNumber={8} />,
+      label: t => t('number-covering:variant.eight'),
       isDefault: true
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: [range(1, 11)],
-      rule: makeRule(10),
-      label: { hu: '10 szám', en: '10 numbers' }
+      rule: <Rule maxNumber={10} />,
+      label: t => t('number-covering:variant.ten')
     }
   ]
 });

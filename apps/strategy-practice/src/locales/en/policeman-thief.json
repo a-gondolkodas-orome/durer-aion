@@ -1,0 +1,37 @@
+{
+  "board": {
+    "copCount": "This game has {{copCount}} policemen."
+  },
+  "colour": {
+    "amber": "amber",
+    "blue": "blue",
+    "green": "green"
+  },
+  "role": {
+    "police": "Policemen",
+    "thief": "Thief"
+  },
+  "rule": {
+    "a": "The diagram shows a small town's road network, with intersections marked by dots. At the start, the computer places a thief (red) piece at one intersection and two policemen (blue and green) at another. Each round the policemen move first (blue then green), each stepping to an adjacent intersection along a road (they may split up), then the thief moves the same way. Everyone must move every round. The policemen win if the thief is ever at the same intersection as a policeman. The thief wins if they are not caught by the end of the third round.",
+    "b": "The diagram shows a small town's road network, with intersections marked by dots. At the start, the computer places the thief (red) and the two policemen (blue and green) at intersections of their choosing; the two policemen may start on the same intersection. Each round the policemen move first (blue then green), each stepping to an adjacent intersection along a road (they may split up), then the thief moves the same way. Everyone must move every round. The policemen win if the thief is ever at the same intersection as a policeman. The thief wins if they are not caught by the end of the third round.",
+    "c": "On this graph a thief flees from a group of policemen. First the policemen take up their positions on any vertices (several may share one), then the thief picks a starting vertex not occupied by a policeman. After that, in each round all the policemen move first, then the thief moves, each along a single edge. Everyone must change position every round. The policemen win if the thief is ever on the same vertex as a policeman. The thief wins if they can make three moves without being caught. The number of policemen is revealed at the start."
+  },
+  "step": {
+    "ab": {
+      "bluePoliceman": "Click the intersection you want to move the blue policeman to.",
+      "greenPoliceman": "Click the intersection you want to move the green policeman to.",
+      "thief": "Click the intersection you want to move the thief to."
+    },
+    "c": {
+      "moveCop": "Move the {{colour}} policeman to a neighbouring vertex.",
+      "moveThief_one": "Move the thief to a neighbouring vertex. {{count}} more move to win.",
+      "moveThief_other": "Move the thief to a neighbouring vertex. {{count}} more moves to win.",
+      "placeCop": "Place policeman {{n}} ({{colour}}) on any vertex.",
+      "placeThief": "Choose the thief's starting vertex (it cannot be a vertex with a policeman)."
+    }
+  },
+  "variant": {
+    "apart": "Apart (B)",
+    "together": "Together (A)"
+  }
+}

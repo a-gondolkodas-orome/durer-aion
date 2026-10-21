@@ -9,6 +9,7 @@ import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
+import { ErrorBoundary } from "./ErrorBoundary";
 import i18next from "i18next";
 
 export function Main(props: { language: string, gitCommitHash: string }) {
@@ -24,7 +25,10 @@ export function Main(props: { language: string, gitCommitHash: string }) {
     <Layout>
       <LoadTeamState />
       <Header teamName={teamState?.teamName ?? null} admin={admin}/>
+      {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
+          breakpoint, 1280px, at that width and up, overriding the sx below */}
       <Container
+        maxWidth={false}
         sx={{
           paddingLeft: {
             xs: "0px",
@@ -43,26 +47,28 @@ export function Main(props: { language: string, gitCommitHash: string }) {
         }}
         data-testid="mainRoot"
       >
-        {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-        {!teamState && <Login />}
-        {teamState && teamState.pageState === "DISCLAIMER" && (
-          <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
-        )}
-        {teamState && teamState.pageState === "HOME" && frontendState === null && (
-          <Chooser state={teamState} setState={setFrontEndState}/>
-        )}
-        {teamState && (
-          teamState.pageState === "RELAY" ||
-          (teamState.pageState === "HOME" && frontendState === "R")
-        ) && (
-          <Relay state={teamState} />
-        )}
-        {teamState && (
-          teamState.pageState === "STRATEGY" ||
-          (teamState.pageState === "HOME" && frontendState === "S")
-        ) && (
-          <Strategy state={teamState} />
-        )}
+        <ErrorBoundary resetKeys={[teamState?.teamName, teamState?.pageState, frontendState]}>
+          {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
+          {!teamState && <Login />}
+          {teamState && teamState.pageState === "DISCLAIMER" && (
+            <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
+          )}
+          {teamState && teamState.pageState === "HOME" && frontendState === null && (
+            <Chooser state={teamState} setState={setFrontEndState}/>
+          )}
+          {teamState && (
+            teamState.pageState === "RELAY" ||
+            (teamState.pageState === "HOME" && frontendState === "R")
+          ) && (
+            <Relay state={teamState} />
+          )}
+          {teamState && (
+            teamState.pageState === "STRATEGY" ||
+            (teamState.pageState === "HOME" && frontendState === "S")
+          ) && (
+            <Strategy state={teamState} />
+          )}
+        </ErrorBoundary>
       </Container>
       <footer style={{
         textAlign: "center",

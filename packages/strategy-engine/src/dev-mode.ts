@@ -1,5 +1,5 @@
 // Whether to fail loudly. The engine and the games throw on a bug in dev and
-// warn in prod (src/components/CLAUDE.md § moves); this is the one place that
+// warn in prod (src/components/AGENTS.md § moves); this is the one place that
 // decides which of the two a given host is.
 //
 // `import.meta.env` is Vite's, and it is undefined anywhere Vite did not build

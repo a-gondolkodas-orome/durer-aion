@@ -2,7 +2,7 @@ import { UserModel } from "./user-model";
 import { setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
-import { useClientRepo } from "../api-repository-interface";
+import { useClientRepo } from "../client-repo-context";
 
 export const useTeamState = (): TeamModelDto | null => {
   return useTeamStateValue();

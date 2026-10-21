@@ -9,9 +9,9 @@ import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface } from './ConfirmDialog';
+import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
 import { Countdown } from './Countdown';
-import { RelayEndTableData } from './RelayEndTable';
+import { RelayEndTableData, relayTaskPoints } from './RelayEndTable';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -60,20 +60,6 @@ export function TeamDetailDialog(props: {
         fontSize: 14,
       }}>
       <Stack sx={{ fontSize: 24, paddingBottom: "24px" }}>{teamState.teamName}</Stack>
-      <Button
-        sx={{ maxWidth: "200px", marginBottom: "16px" }}
-        color="error"
-        variant="contained"
-        disabled={removing}
-        onClick={() => {
-          props.setConfirmDialog({
-            text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot?`,
-            confirm: async () => removeTeam(adminTeamId(teamState)),
-          });
-        }}
-      >
-        Csapat törlése
-      </Button>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
       <MatchStatusField name={teamState.teamName} data={teamState.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
       {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
@@ -119,6 +105,24 @@ export function TeamDetailDialog(props: {
           >reset
       </Button>}
       <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? "?"} pont</Stack>
+      <Stack sx={{ marginTop: "24px", padding: "12px", border: "1px solid", borderColor: "error.main", borderRadius: "4px", maxWidth: 400 }}>
+        <Stack sx={{ fontSize: 16, fontWeight: "bold", color: "error.main" }}>Veszélyzóna</Stack>
+        <Button
+          sx={{ maxWidth: "200px", margin: "10px 0" }}
+          color="error"
+          variant="contained"
+          disabled={removing}
+          onClick={() => {
+            props.setConfirmDialog({
+              text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot? A verseny közben semmiképpen se törölj csapatokat.`,
+              requiredWords: DELETE_WORDS,
+              confirm: async () => removeTeam(adminTeamId(teamState)),
+            });
+          }}
+        >
+          Csapat törlése
+        </Button>
+      </Stack>
     </Stack>
   )
 }
@@ -332,15 +336,10 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean }) {
         serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
       /></Stack>
       { props.isRelay && relayG && <Stack>
-      <RelayEndTableData allPoints={relayG.points} task={
-           // TODO .maxpoints
-           [3, 3, 4, 4, 4, 5, 5, 6, 6].map((it, idx) => ({
-            max: it,
-            got: relayG.previousPoints[idx] ?? null,
-            answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
-           })
-           )
-          }/>
+      <RelayEndTableData allPoints={relayG.points} task={relayTaskPoints(relayG).map((task, idx) => ({
+        ...task,
+        answers: relayG.previousAnswers[idx]?.map((a) => a.answer) ?? [],
+      }))}/>
       </Stack>}
     </Stack>
   </>)

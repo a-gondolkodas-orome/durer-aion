@@ -1,5 +1,7 @@
 import type { BoardClientProps, StrategyGameConfig } from 'strategy-engine';
-import { GameBoard, useHoverPreview, useTranslation } from 'strategy-engine/react';
+import { Trans, useTranslation } from 'react-i18next';
+import { GameBoard, useHoverPreview } from 'strategy-engine/react';
+import { testVariantLabel, fullVariantLabel } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { fullStartBoards, testStartBoards, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
@@ -36,7 +38,7 @@ const StonePile = ({ count, onClick, disabled, restricted, hovered, hoverProps }
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('stones-remove-one-not-twice-from-left');
   const { value: hoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
   const isMoveAllowed = (pileId: number) => moves.removeStone.isAllowed(board, pileId);
@@ -47,7 +49,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         {[0, 1].map(pileId => (
           <div key={pileId} className="grow px-2 flex flex-col">
             <h2 className="text-center">
-              {t(pileId === 0 ? { hu: 'Bal', en: 'Left' } : { hu: 'Jobb', en: 'Right' })}
+              {pileId === 0 ? t('board.left') : t('board.right')}
               {': ' + board.piles[pileId]}
             </h2>
             <StonePile
@@ -65,29 +67,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Két kupacban kavicsok vannak elhelyezve. A két játékos felváltva
-    lép, és minden lépés során egy kavicsot kell elvenniük valamelyik kupacból.
-    Egy játékos azonban nem vehet el két egymást követő lépésben a bal oldali
-    kupacból. Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    There are two piles of stones. Players alternate turns, and on each turn a player must
-    remove one stone from either pile. However, a player may not take from the
-    left pile on two consecutive turns. The player who cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('stones-remove-one-not-twice-from-left');
+  return <Trans t={t} i18nKey="rule" />;
 };
 
-const getPlayerStepDescription = () => ({
-  hu: 'Kattints a kupacra ahonnan el szeretnél venni egy kavicsot.',
-  en: 'Click the pile you want to remove a stone from.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('stones-remove-one-not-twice-from-left');
+  return t('step');
+};
 
 export const stonesRemoveOneNotTwiceFromLeftConfig: StrategyGameConfig<Board> = {
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -95,12 +88,12 @@ export const stonesRemoveOneNotTwiceFromLeftConfig: StrategyGameConfig<Board> = 
     {
       botStrategy: randomBotStrategy,
       startBoards: testStartBoards,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: fullStartBoards,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]
