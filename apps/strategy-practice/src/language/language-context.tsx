@@ -33,7 +33,8 @@ export const siteLanguage = (tag: string | null): Language | null => {
 };
 
 // The language lives in the URL (`?lang=`) and localStorage; this owns it,
-// hands it down, and has i18next follow it.
+// hands it down, and has i18next follow it. The relay practice site's
+// language.ts reads the same key and parameter by hand.
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [language, setLanguageState] = useState<Language>(() => {
