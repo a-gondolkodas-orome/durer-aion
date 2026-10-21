@@ -1,4 +1,4 @@
-import type { CompetitionCategory } from "common-frontend";
+import type { CompetitionCategory } from "common-frontend/core";
 
 export const teamData:{
   teamname: string,

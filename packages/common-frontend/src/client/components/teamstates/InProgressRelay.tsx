@@ -8,7 +8,7 @@ import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable, relayTaskPoints } from '../RelayEndTable';
-import { useClientRepo } from '../../api-repository-interface';
+import { useClientRepo } from '../../client-repo-context';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
 import { useTranslation } from 'react-i18next';
