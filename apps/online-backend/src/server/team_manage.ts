@@ -5,6 +5,7 @@ import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
+  CompetitionCategory,
   FinishedMatchStatus,
   GameType,
   InProgressMatchStatus,
@@ -33,7 +34,6 @@ export const injectPlayer = async (
 }
 ) => {
   const match = await fetch(db, matchId, { metadata: true });
-  console.log(`Match is indeed empty, and thus in need for a bot!`);
   match.metadata.players[playerID].name = name;
   match.metadata.players[playerID].credentials = credentials;
   match.metadata.players[playerID].isConnected = true;
@@ -75,11 +75,10 @@ export async function createGame(
     game,
     numPlayers: 2,
     setupData: undefined,
-    // A listed match is served by boardgame.io's unauthenticated
-    // `GET /games/:name`, metadata included — and the team's GUID, which is
-    // what the session cookie carries (server/team_session.ts), is that
-    // metadata's player name. Nothing in this codebase reads the lobby
-    // listing.
+    // Kept out of boardgame.io's lobby listing as well as behind the closed
+    // `/games` prefix (server/router.ts): the listing carries the metadata,
+    // and the team's GUID, which the session cookie carries
+    // (server/team_session.ts), is that metadata's player name.
     unlisted: true,
   });
 
@@ -175,9 +174,12 @@ function inferenceGameType(gameName: string) {
   throw new Error(`Unregistered gamename: ${gameName} `);
 }
 
+/** What closing a match needs of the repository. */
+export type MatchStore = Pick<TeamsRepository, "getTeam" | "finishMatch">;
+
 export async function closeMatch(
   matchId: string,
-  teams: TeamsRepository,
+  teams: MatchStore,
   db: StorageAPI.Async | StorageAPI.Sync
 ) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
@@ -215,9 +217,14 @@ export async function closeMatch(
     console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
 
+const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
+  RELAY: relayNames,
+  STRATEGY: strategyNames,
+};
+
 export async function getNewGame(
   ctx: Server.AppCtx,
-  teams: TeamsRepository,
+  teams: MatchStore,
   games: AnyBgioGame[],
   gameType: GameType,
   team: TeamModel
@@ -235,10 +242,8 @@ export async function getNewGame(
   if (!(await allowedToStart(team, gameType))) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  const gameName =
-    gameType === "RELAY"
-      ? relayNames[team.category as keyof typeof relayNames]
-      : strategyNames[team.category as keyof typeof strategyNames];
+  // The import admits only the competition's categories.
+  const gameName = gameNames[gameType][team.category as CompetitionCategory];
 
   const game: AnyBgioGame = games.find(
     (g) => g.name === gameName

@@ -3,6 +3,7 @@ import { randomInt, randomUUID } from 'crypto';
 import { ValidationError } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
+import { isCompetitionCategory } from 'schemas';
 
 function arraysEqual(a: string[], b: string[]) {
   if (a === b) return true;
@@ -88,8 +89,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       ok = false;
     }
 
-    // TODO: remove hard-coded values
-    if (!['C', 'D', 'E'].includes(category)) {
+    if (!isCompetitionCategory(category)) {
       onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
     }

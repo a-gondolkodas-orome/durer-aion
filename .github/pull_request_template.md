@@ -15,3 +15,8 @@ more is two bullets, the *Details* section, or the diff saying it itself. --->
 <!--- Only what the diff cannot say for itself: logic that is not obvious from
 it, open questions, edge cases left unsolved, anything else the reviewer should
 know — but never that the checks pass, which they report themselves. --->
+
+## Screenshots
+
+<!--- For UI-heavy changes, before and after screenshots. Delete this section
+otherwise. --->

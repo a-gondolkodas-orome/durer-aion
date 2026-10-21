@@ -1,45 +1,24 @@
-import { strategyGameFactory } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import { strategyGameFactory, testVariantLabel, fullVariantLabel, type Ctx } from 'strategy-game-factory';
 import { BoardClient } from './board-client';
 import { LINE, startBoard, moves } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './strategy/bot-strategy';
 
-const rule = {
-  hu: <>
-    Ebben a játékban ketten játszanak, a vonal-, illetve a körjátékos. A vonaljátékos a táblán minden
-    lépésében besatírozza egy kis háromszög egyik oldalát, a körjátékos pedig kört tesz egy kis háromszög
-    belsejébe. A játékot a vonaljátékos kezdi. A vonaljátékos akkor nyer, ha sikerül egy olyan kis
-    háromszöget létrehoznia, aminek mindhárom oldala satírozott, és nincs a belsejében kör. Ha ez a helyzet
-    előáll, akkor a játék véget is ér. A körjátékos akkor nyer, ha minden háromszög belsejébe került már
-    kör. A tábla egy 6×6-os háromszögrács.
-  </>,
-  en: <>
-    Two players take part: the line player and the circle player. On each turn the line player shades one
-    side of a small triangle, while the circle player drops a circle inside a small triangle. The line
-    player moves first. The line player wins if they manage to create a small triangle whose three sides
-    are all shaded and which has no circle inside it; the game ends the instant this happens. The circle
-    player wins once every triangle has a circle inside it. The board is a 6×6 triangular grid.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('triangle-circle-game');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('triangle-circle-game');
+  return ctx.currentPlayer === LINE ? t('step.line') : t('step.circle');
 };
 
 export const TriangleCircleGame = strategyGameFactory({
   presentation: {
-    rule,
-    roleLabels: [
-      { hu: 'Vonaljátékos leszek', en: "I'll be the line player" },
-      { hu: 'Körjátékos leszek', en: "I'll be the circle player" }
-    ],
-    getPlayerStepDescription: ({ ctx }) => {
-      if (ctx.currentPlayer === LINE) {
-        return {
-          hu: 'Satírozd be egy kis háromszög egyik oldalát: kattints egy élre.',
-          en: 'Shade one side of a small triangle: click an edge.'
-        };
-      }
-      return {
-        hu: 'Tegyél kört egy üres kis háromszög belsejébe: kattints a háromszögre.',
-        en: 'Drop a circle into an empty small triangle: click the triangle.'
-      };
-    }
+    rule: <Rule />,
+    roleLabels: [t => t('triangle-circle-game:role.line'), t => t('triangle-circle-game:role.circle')],
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
@@ -47,7 +26,7 @@ export const TriangleCircleGame = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     // Smart bot. As the line player it executes a proven forced win (see
     // forced-win.ts and the certificate in forced-win.test.ts) — the line
@@ -57,7 +36,7 @@ export const TriangleCircleGame = strategyGameFactory({
     {
       botStrategy: smartBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       notAlwaysOptimal: true,
       isDefault: true
     }

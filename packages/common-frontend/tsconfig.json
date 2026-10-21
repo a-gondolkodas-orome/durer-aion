@@ -24,6 +24,13 @@
     "skipLibCheck": true,
     "strict": true,
     "jsx": "react-jsx",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    // The paths entry below pulls schemas' source into the program.
+    "rootDir": "..",
+    // Source, not dist: lint runs before any package is built, and a type that
+    // resolves to nothing makes a cast to it look unnecessary.
+    "paths": {
+      "schemas": ["../schemas/index.ts"]
+    }
   }
 }

@@ -206,8 +206,6 @@ export class SocketIOButBotMoves extends SocketIO {
             // anyway. The push the player already got stays too: without it
             // the player's move and the bot's reply land as one update.
             // See #346.
-            console.log("Bot moves");
-
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,
              } as const);

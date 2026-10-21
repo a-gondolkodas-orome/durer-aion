@@ -1,5 +1,8 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, type BoardClientProps, GameBoard, testVariantLabel, fullVariantLabel
+} from 'strategy-game-factory';
 import { generateEmptyBoard, moves, type Board } from './gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 
@@ -22,36 +25,29 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => (
   </GameBoard>
 );
 
-const rule = {
-  hu: <>
-    A mágikus ládában kilenc rekesz van 3×3-as elrendezésben. Két játékos felváltva pakol köveket a
-    láda rekeszeibe, minden rekeszbe legfeljebb egy kő rakható. Ha egy sorban vagy oszlopban
-    mindhárom rekeszben van kő, a láda alja kiszakad. Az a játékos veszít, akinek a lépése után a
-    láda kiszakad.
-  </>,
-  en: <>
-    The magic box has nine compartments in a 3×3 grid. Two players alternately place stones into
-    the compartments, at most one stone per compartment. If all three compartments of some row or
-    column contain a stone, the bottom of the box breaks. The player whose move causes this loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('magic-box');
+  return <Trans t={t} i18nKey="rule.a" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('magic-box');
+  return t('step.a');
 };
 
 export const MagicBox = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Helyezz le egy kavicsot egy üres rekeszbe kattintással.',
-      en: 'Click on an empty compartment to place a stone.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [generateEmptyBoard()],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

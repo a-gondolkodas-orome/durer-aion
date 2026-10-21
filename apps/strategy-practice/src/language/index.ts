@@ -1,9 +1,5 @@
-// The language barrel, reached as `language` (a path alias). The resolution
-// half — the context, `translate` and `useTranslation` — lives in the engine's
-// React client (`engine/react`), where a competition frontend gets it too; the
-// stateful URL/localStorage provider and the selector are this app's, since
-// both ride its router and its chrome.
-export { LanguageProvider } from './language-context';
+// The language barrel, reached as `language` (a path alias): the provider that
+// owns the chosen language, its hook and the selector. Text itself is
+// i18next's, through react-i18next; see i18n.ts.
+export { LanguageProvider, useLanguage } from './language-context';
 export { LanguageSelector } from './language-selector';
-export { useLanguage, useTranslation, translate } from 'strategy-engine/react';
-export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from 'strategy-engine';

@@ -5,10 +5,9 @@ import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io"
 // which is not an API and can be rearranged by a patch release.
 export type RandomAPI = DefaultPluginAPIs['random'];
 
-// boardgame.io's own Game interface defaults its generics to `any` (quoted
-// below); a caller that spells that out trips no-explicit-any on bgio's
-// defaults rather than on a choice of ours. One caged alias keeps the ban
-// meaningful everywhere else.
+// boardgame.io's own Game interface defaults its generics to `any`; a caller
+// that spells that out trips no-explicit-any on bgio's defaults rather than on
+// a choice of ours. One caged alias keeps the ban meaningful everywhere else.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyBgioGame = Game<any, Record<string, unknown>, any>;
 
@@ -63,12 +62,10 @@ export type StartingPositionFunction<G> = (_: { G: G & GameStateMixin; ctx: Ctx;
 interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
-  // A game may set its opening position here, or leave it to the bot, which
-  // sends it as the `setStartingPosition` move; the live games do the latter.
-  // Prefer this one when the position is not the bot's secret: it receives
-  // bgio's seeded `random`, so server and client agree on what was drawn,
-  // which `Math.random` in a strategy cannot give you. See README.md,
-  // *Creating a new game*.
+  // Not called: gameWrapper only tests that the key exists, and a game that
+  // defines it skips the bot's `setStartingPosition` and starts without a
+  // fresh opening position (#35). The bot sending that move is the working
+  // route; see README.md, *Creating a new game*.
   startingPosition?: StartingPositionFunction<G>;
 }
 
@@ -80,24 +77,6 @@ interface WrappableGame<G = unknown, PluginAPIs extends Record<string, unknown> 
   moves?: MoveMap<G, PluginAPIs>;
   turn?: TurnConfig<G, PluginAPIs>;
 }
-
-/* Game Interface fragment for reference (bitch.)
-export interface Game<
-  G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
-  SetupData extends any = any
-> {
-  name?: string;
-  minPlayers?: number;
-  maxPlayers?: number;
-  setup?: (
-    context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
-    setupData?: SetupData
-  ) => G;
-  moves?: MoveMap<G, PluginAPIs>;
-  turn?: TurnConfig<G, PluginAPIs>;
-}
-*/
 
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 

@@ -3,7 +3,7 @@
     "achievedPoint": "Points achieved",
     "filledAt": "Filled at",
     "finish": {
-      "content": "Thank you for participating, we hope you enjoyed the competition. We are curious about your feedback on this round, so please <a>fill out this form</a>. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
+      "content": "Thank you for participating, we hope you enjoyed the competition. We will publish the results and the list of advancing teams by Thursday, and we will also send you a notification about it by email.",
       "final": "Final score",
       "title": "Competition ended!"
     },
@@ -25,7 +25,8 @@
     "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!"
   },
   "error": {
-    "unexpected": "An unexpected error occurred"
+    "unexpected": "An unexpected error occurred",
+    "backHome": "Back to the home page"
   },
   "general": {
     "loading": "Loading game or task…",
@@ -39,7 +40,6 @@
   },
   "header": {
     "logout": "logout",
-    "logoutofthiswholething": "",
     "subtitle": "Online round",
     "title": "XIX. Dürer Competition",
     "titlePlain": "Dürer Competition",
@@ -102,7 +102,7 @@
     "guessNum": "Guess #{{guessnum}}:",
     "name": "Relay tasks",
     "send": "Submit",
-    "task": "Task #{{num}} ({{maxpoints}})",
+    "task": "Task #{{num}} ({{availablePoints}})",
     "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)",
     "wrongGuess": "Your guess is sadly wrong"
   },

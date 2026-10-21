@@ -5,12 +5,12 @@ import { CastleSvg } from './assets/castle-svg';
 import { SoldierSvg } from './assets/soldier-svg';
 import { smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, SULTAN, type Board, type SoldierColor } from './gameplay';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface Piece { rowIndex: number, pieceIndex: number }
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('hunyadi-and-the-janissaries');
   const { value: validHoveredPiece, hoverProps } = useHoverPreview<Piece>(ctx.moveCount);
 
   const isPlayerSultan = ctx.currentPlayer === SULTAN;
@@ -99,50 +99,30 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         disabled={!moves.finalizeSeparation.isAllowed(board)}
         onClick={() => moves.finalizeSeparation(board)}
       >
-        {t({ hu: 'Befejezem a kettéosztást', en: 'Finish the split' })}
+        {t('board.finishSplit')}
       </button>
     </GameBoard>
   );
 };
 
-const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
-  return ctx.currentPlayer === SULTAN
-    ? {
-      hu: 'Kattints a katonákra és válaszd két részre a seregedet.',
-      en: 'Click soldiers to split your army in two.'
-    }
-    : {
-      hu: 'Kattints egy katonára, hogy megsemmisítsd a vele azonos színű sereget.',
-      en: 'Click a soldier to destroy all troops of that colour.'
-    };
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('hunyadi-and-the-janissaries');
+  return ctx.currentPlayer === SULTAN ? t('step.sultan') : t('step.hunyadi');
 };
 
-const rule = {
-  hu: <>
-    A török szultán serege megtámadta Hunyadi várát. A várlépcső egyes fokain néhány janicsár áll.
-    Minden reggel a szultán kettéosztja a hadseregét egy piros és egy kék hadtestre.
-    Hunyadi a nap folyamán vagy a piros, vagy a kék sereget megsemmisíti, választása szerint. Éjszaka minden megmaradt
-    janicsár egy lépcsőfokot fellép.
-    Hunyadi nyer, ha a szultán egész seregét megsemmisítette.
-    A szultán nyer, ha lesz olyan janicsár, aki felér a várhoz.
-  </>,
-  en: <>
-    The Turkish sultan's army is attacking Hunyadi's castle. Some janissaries stand on various
-    steps of the castle staircase. Each morning the sultan splits his army into a red and a blue
-    force. Hunyadi then destroys either the red or the blue force, as he chooses. At night every
-    surviving janissary moves up one step. Hunyadi wins if he destroys the sultan's entire army.
-    The sultan wins if any janissary reaches the castle.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('hunyadi-and-the-janissaries');
+  return <Trans t={t} i18nKey="rule" />;
 };
 
 export const HunyadiAndTheJanissaries = strategyGameFactory({
   presentation: {
-    rule,
+    rule: <Rule />,
     roleLabels: [
-      { hu: 'Szultán', en: 'Sultan' },
-      { hu: 'Hunyadi', en: 'Hunyadi' }
+      t => t('hunyadi-and-the-janissaries:role.sultan'),
+      t => t('hunyadi-and-the-janissaries:role.hunyadi')
     ],
-    getPlayerStepDescription
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves, endOfTurnMove: 'stepUp' },

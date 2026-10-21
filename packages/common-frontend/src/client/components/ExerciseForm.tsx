@@ -22,6 +22,8 @@ export interface MyProps {
   previousCorrectness: boolean | null;
   onSubmit: (result: number) => Promise<void>;
   attempt: number;
+  // Whether the previous guess is still waiting for the judge's ruling.
+  awaitingJudge: boolean;
 }
 
 export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
@@ -90,6 +92,9 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             form: { handleChange },
           }: FieldProps<number>) => <input
             autoFocus={sentAnswer > 0}
+            // The ruling remounts the form, which would drop anything typed
+            // while waiting for it.
+            readOnly={props.awaitingJudge}
             autoComplete="off"
             {...field}
             onChange={(e) => {
@@ -117,7 +122,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
         </Stack>
         <Stack sx={{ marginTop: '20px' }}>
           {props.previousTries.map((data, idx) => {
-            return <Stack sx={{
+            return <Stack key={idx} sx={{
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
@@ -128,7 +133,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
                 fontSize: '18px',
                 marginLeft: '10px',
               }}>{data}</Stack>
-              {props.previousCorrectness === false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18ox' }} />}
+              {props.previousCorrectness === false && <CloseIcon sx={{ color: '#FF0000', fontSize: '18px' }} />}
             </Stack>
           })}
         </Stack>
@@ -140,7 +145,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
           textTransform: 'none',
           borderRadius: '10px',
           marginTop: '40px',
-        }} variant='contained' color='primary' type="submit">
+        }} variant='contained' color='primary' type="submit" disabled={props.awaitingJudge}>
           {t('relay.send')}
         </Button>
       </Form>

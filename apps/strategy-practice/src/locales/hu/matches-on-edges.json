@@ -1,0 +1,16 @@
+{
+  "board": {
+    "cell": "{{number}}. mező",
+    "cellStart": "{{number}}. mező, {{k}} hosszú résztábla kezdete",
+    "submit": "Rárakom a gyufákat"
+  },
+  "role": {
+    "first": "Kezdő vagyok",
+    "second": "Második vagyok"
+  },
+  "rule": "Egy 1 × n-es tábla szomszédos mezőit n − 1 elválasztó él határolja el egymástól, melyeken kezdetben nincs gyufa. Egy 0 < k < n méretű lépés során a soron lévő játékos kiválaszt egy 1 × k-as résztáblát, mely a belsejében nem tartalmaz gyufát, és a résztáblát határoló gyufa nélküli elválasztó élekre rárak egyet-egyet. A lépés akkor szabályos, ha a határoló elválasztó élek közül legalább az egyiken még nem volt gyufa, továbbá vagy k = 1, vagy k osztható 4-gyel. A két játékos felváltva lép, és a soron következő játékosnak a legnagyobb 0 < k < n méretű szabályos lépései közül kell meglépnie az egyiket. A játéknak akkor van vége, ha valaki nem tud szabályosan lépni: ő veszít.",
+  "step": {
+    "move": "A legnagyobb szabályos lépés mérete {{k}}. Jelölj ki egy {{k}} hosszú résztáblát a bal szélső mezőjére kattintva, majd rakd rá a gyufákat.",
+    "over": "Vége a játéknak."
+  }
+}

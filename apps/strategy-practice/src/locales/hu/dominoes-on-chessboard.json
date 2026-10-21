@@ -1,0 +1,4 @@
+{
+  "rule": "Két játékos felváltva tesz egy-egy dominót egy {{size}} × {{size, numberAdjective}} sakktáblára úgy, hogy két élszomszédos üres mezőt fedjen le. Az veszít, aki nem tud tenni.",
+  "step": "Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót."
+}

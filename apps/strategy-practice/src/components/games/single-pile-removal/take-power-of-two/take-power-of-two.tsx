@@ -1,10 +1,12 @@
 import {
   strategyGameFactory,
+  testVariantLabel,
+  fullVariantLabel,
   type BoardClientProps,
   GameBoard,
   useHoverPreview
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { generateStartBoard, generateTestStartBoard, getAvailableExponents, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -17,13 +19,13 @@ const ExponentsTable = (
     hoverProps: ReturnType<typeof useHoverPreview<number>>['hoverProps'];
   }
 ) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('single-pile-removal');
   const availableExponents = getAvailableExponents(board);
 
   if (availableExponents.length === 0) return <></>;
 
   return <>
-    <p>{t({ hu: 'Lehetséges hatványok:', en: 'Available powers:' })}</p>
+    <p>{t('takePowerOfTwo.board.availablePowers')}</p>
     <div className="flex flex-wrap gap-2">
       {availableExponents.map(e =>
         <button
@@ -36,9 +38,8 @@ const ExponentsTable = (
       )}
     </div>
     {hovered !== null && isPowerAllowed(hovered) && <p className="mt-2">
-      {t({
-        hu: `Kivonandó 2-hatvány: 2^${hovered} = ${2 ** hovered}. Eredmény: ${board - 2 ** hovered}.`,
-        en: `Power to subtract: 2^${hovered} = ${2 ** hovered}. Result: ${board - 2 ** hovered}.`
+      {t('takePowerOfTwo.board.preview', {
+        exponent: hovered, power: 2 ** hovered, result: board - 2 ** hovered
       })}
     </p>}
   </>;
@@ -61,28 +62,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 }
 
-const getPlayerStepDescription = () => ({
-  hu: 'Válaszd ki a 2 hatványát amit ki szeretnél vonni.',
-  en: 'Choose a power of 2 to subtract.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('single-pile-removal');
+  return t('takePowerOfTwo.step');
+};
 
-const rule = {
-  hu: <>
-    Egy 300-nál kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék,
-    ebből a játékosok felváltva vonnak le egy tetszőleges
-    2-hatványt. Az nyer, aki a nullát mondja!
-  </>,
-  en: <>
-    The game starts from a positive integer below 300 chosen by the computer.
-    Players alternate subtracting any power of 2.
-    The player who reaches zero wins!
-  </>
+const Rule = () => {
+  const { t } = useTranslation('single-pile-removal');
+  return <Trans t={t} i18nKey="takePowerOfTwo.rule" />;
 };
 
 export const TakePowerOfTwo = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -90,8 +83,8 @@ export const TakePowerOfTwo = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

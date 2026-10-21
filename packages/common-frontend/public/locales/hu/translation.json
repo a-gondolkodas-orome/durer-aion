@@ -3,7 +3,7 @@
     "achievedPoint": "Elért pontszám",
     "filledAt": "Kitöltve ekkor",
     "finish": {
-      "content": "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Kíváncsiak vagyunk a fordulóval kapcsolatos véleményetekre, így kérjük, <a>töltsétek ki ezt az űrlapot</a>. Várhatóan csütörtökig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
+      "content": "Köszönjük a részvételeteket, reméljük, hogy tetszett nektek a verseny. Várhatóan csütörtökig közzétesszük az eredményeket és a továbbjutó csapatok listáját, és erről emailben is fogunk nektek értesítést küldeni.",
       "final": "Végső pontszám",
       "title": "Vége a versenynek!"
     },
@@ -25,7 +25,8 @@
     "welcome": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!"
   },
   "error": {
-    "unexpected": "Váratlan hiba történt"
+    "unexpected": "Váratlan hiba történt",
+    "backHome": "Vissza a kezdőlapra"
   },
   "general": {
     "loading": "Játék vagy feladat betöltése…",
@@ -99,7 +100,7 @@
     "guessNum": "{{guessnum}}. próba:",
     "name": "Váltófeladatok",
     "send": "Küldés",
-    "task": "{{num}}. feladat ({{maxpoints}})",
+    "task": "{{num}}. feladat ({{availablePoints}})",
     "taskImage": "A feladathoz tartozó kép (ha nem töltött be, próbáld meg frissíteni az oldalt!)",
     "wrongGuess": "A válasz sajnos nem volt jó"
   },

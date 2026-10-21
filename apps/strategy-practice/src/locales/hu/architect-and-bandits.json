@@ -1,0 +1,20 @@
+{
+  "board": {
+    "day": "{{day}}. nap · {{kmUsed}}/{{kmPerDay}} km",
+    "endDay": "Befejezem a napot",
+    "night": "{{day}}. éjszaka"
+  },
+  "role": {
+    "architect": "Építész",
+    "bandits": "Banditák"
+  },
+  "rule": {
+    "a": "Óxisz városa egy szabályos nyolcszög alakú fallal van körülvéve, melynek szomszédos csúcsai 10 km-re vannak egymástól. A város építésze szeretne négy nap alatt mind a nyolc csúcsba egy-egy őrtornyot építeni, ám ezt a banditák szeretnék megakadályozni. Az építész úgy építi a tornyokat, hogy ha napközben az útja során (akár az elején vagy a végén) érint egy csúcsot, ahol még nincs torony, akkor elhelyez oda egyet. Az építész az A-val jelölt csúcsból indul, csak a várfalakon mozoghat, minden nap legfeljebb 40 km-t tud megtenni és az éjszakát a várfal egyik csúcsánál kell töltenie. Ezután éjszaka a banditák kiválaszthatnak egy csúcsot, és az ott lévő tornyot lerombolhatják. Az építész akkor nyer, ha a negyedik napon napnyugtakor mind a nyolc csúcsban áll egy-egy torony, ellenkező esetben a banditák győznek.",
+    "b": "Óxisz városa egy szabályos tízszög alakú fallal van körülvéve, melynek szomszédos csúcsai 10 km-re vannak egymástól. A város építésze szeretne négy nap alatt mind a tíz csúcsba egy-egy őrtornyot építeni, ám ezt a banditák szeretnék megakadályozni. Az építész úgy építi a tornyokat, hogy ha napközben az útja során (akár az elején vagy a végén) érint egy csúcsot, ahol még nincs torony, akkor elhelyez oda egyet. Az építész az A-val jelölt csúcsból indul, csak a várfalakon mozoghat, minden nap legfeljebb 50 km-t tud megtenni és az éjszakát a várfal egyik csúcsánál kell töltenie. Ezután éjszaka a banditák kiválaszthatnak egy csúcsot, és az ott lévő tornyot lerombolhatják. Az építész akkor nyer, ha a negyedik napon napnyugtakor mind a tíz csúcsban áll egy-egy torony, ellenkező esetben a banditák győznek."
+  },
+  "step": {
+    "architect": "{{day}}. nap: Lépj egy szomszédos csúcsra ({{movesLeft}} lépés maradt), vagy fejezd be a napot.",
+    "bandits": "{{day}}. éjszaka: Kattints egy toronyra, hogy lerombold.",
+    "endDay": "{{day}}. nap: Fejezd be a napot!"
+  }
+}
