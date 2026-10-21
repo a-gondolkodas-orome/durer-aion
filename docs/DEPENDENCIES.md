@@ -36,9 +36,6 @@ versions are written down in files no `package.json` names: Node and Playwright.
 `npm test` fails until every copy agrees, and
 `check-versions.test.mjs` is the list
 of where they are — the `.nvmrc` row's count comes from it.
-latex.js, which each frontend's `index.html` loads from jsdelivr at a pinned
-version, is a third that nothing compares: the report ends with a reminder to
-check it by hand.
 </details>
 
 ## Held back deliberately
