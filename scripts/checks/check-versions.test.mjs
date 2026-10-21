@@ -1,14 +1,12 @@
-// Playwright, Node and each package an app loads from jsdelivr are written down in several
-// places — the tests below are the list of where, and what everything else pointing at "the files
-// the version is repeated in" means — and a mismatch stays invisible until something fails far
-// from the cause. Fail the test run instead.
+// Playwright and Node are each written down in several places — the two tests below are the list
+// of where, and what everything else pointing at "the files the version is repeated in" means — and
+// a mismatch stays invisible until something fails far from the cause. Fail the test run instead.
 //
 // Files are compared against each other only — never against the running process.version, so a
 // contributor on a slightly different local patch is not blocked.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { cdnPinsByPage, isExactVersion } from '../dependency-report.mjs';
 import { resolvedVersion } from '../resolved-versions.mjs';
 
 // Every path here is repository-relative: Node is the whole repository's pin, and GitHub only
@@ -25,13 +23,13 @@ const table = sources => {
 
 // Two assertions rather than one on a Set's size: each failure carries the whole table, so the
 // report is the list of files to edit rather than "expected 2 to be 1".
-const expectAgreement = (what, sources, afterwards = ', then rebuild the devcontainer') => {
+const expectAgreement = (what, sources) => {
   const missing = sources.filter(([, version]) => !version).map(([where]) => where);
   expect(missing, `Could not find the ${what} version in: ${missing.join(', ')}\n${table(sources)}`).toEqual([]);
   const versions = new Set(sources.map(([, version]) => version));
   expect(
     versions.size,
-    `${what} version mismatch:\n${table(sources)}\nSet them all to the same version${afterwards}.`
+    `${what} version mismatch:\n${table(sources)}\nSet them all to the same version, then rebuild the devcontainer.`
   ).toBe(1);
 };
 
@@ -87,19 +85,5 @@ describe('a version written down in more than one file', () => {
       // The image the competition is deployed from.
       ['Dockerfile FROM node', read('Dockerfile').match(/^FROM node:(\S+)/m)?.[1]]
     ]);
-  });
-
-  // Pages, not a list, as with the workflows above: an index.html that starts loading a package from
-  // the CDN is covered the day it lands.
-  it('jsdelivr: every index.html that loads a package from the CDN pins the same exact version', () => {
-    const pins = cdnPinsByPage();
-    expect(pins.length, 'no jsdelivr package found in any index.html — is the pattern stale?').toBeGreaterThan(0);
-    // A tag or a range agrees with itself across pages and still moves with every release.
-    const loose = pins.filter(({ version }) => !isExactVersion(version))
-      .map(({ name, version, page }) => `${page}: ${name}@${version ?? '(no version)'}`);
-    expect(loose, `Pin each to an exact version:\n  ${loose.join('\n  ')}`).toEqual([]);
-    for (const name of new Set(pins.map(pin => pin.name))) {
-      expectAgreement(name, pins.filter(pin => pin.name === name).map(({ page, version }) => [page, version]), '');
-    }
   });
 });

@@ -15,8 +15,8 @@ next. It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
 one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
-every package an app's `index.html` loads from jsdelivr, every action pinned in
-`.github/workflows/`, each `.nvmrc`, and the docker image each deployment runs. `npm run report:outdated` prints the same table on demand,
+every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
+each deployment runs. `npm run report:outdated` prints the same table on demand,
 and needs no install.
 
 <details><summary>Why a report rather than dependabot, and what a row means</summary>
@@ -31,12 +31,14 @@ is a report rather than dependabot or renovate. `package-lock.json` is still wha
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
 time as in
-[#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168). Three
-kinds of version are written down in files no `package.json` names: Node,
-Playwright, and each package an app's `index.html` loads from jsdelivr
-(latex.js). `npm test` fails until every copy agrees, and
+[#253](https://github.com/a-gondolkodas-orome/durer-aion/pull/253). Two
+versions are written down in files no `package.json` names: Node and Playwright.
+`npm test` fails until every copy agrees, and
 `check-versions.test.mjs` is the list
 of where they are — the `.nvmrc` row's count comes from it.
+latex.js, which each frontend's `index.html` loads from jsdelivr at a pinned
+version, is a third that nothing compares: the report ends with a reminder to
+check it by hand.
 </details>
 
 ## Held back deliberately

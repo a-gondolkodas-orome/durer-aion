@@ -53,7 +53,7 @@
     // one entry chunk, so as a static import an unreachable cdn.jsdelivr.net aborted that
     // chunk before the app mounted and left the page blank instead of merely unformatted.
     // Pinned, so a release reaches the competition only as a visible bump; check the math
-    // rendering when moving it (the monthly dependency report says when there is one).
+    // rendering when moving it (the monthly dependency report reminds you to look for one).
     const latexJs = "https://cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs";
     // latex.js links KaTeX's stylesheet inside each task's shadow root, where Chromium ignores its
     // @font-face rules, so every math font would fall back to a system one (ℕ as a plain N).

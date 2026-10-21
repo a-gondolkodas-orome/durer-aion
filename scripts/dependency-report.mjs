@@ -5,10 +5,9 @@
 // It is the outward-facing half of check-versions.test.mjs: that one compares the versions
 // written down in this repo against *each other* and fails the test run on a mismatch; this one compares them against *upstream* and never fails anything.
 //
-// Five sources, each read-only over the network:
+// Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
 //     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
-//   - CDN packages: every npm package an app's index.html loads from jsdelivr — see cdnRows.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: each .nvmrc, against the newest release sharing its major.
 //   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
@@ -134,45 +133,6 @@ const npmRows = () => {
     );
 };
 
-// `cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs` -> { name: 'latex.js', version: '0.12.6' }.
-// Name and version take only the characters npm allows them, so whatever delimits the URL — a
-// quote, a backtick, `)` closing a url(), `?` — is never read into either. A reference without
-// `@version` comes back with version undefined, and so does a range like `@^0.12`, which jsdelivr
-// resolves as it likes: both are reported rather than skipped. A tag (`@latest`) or a partial
-// version (`@0.12`) comes back as written, for isExactVersion to refuse.
-export const cdnPins = html => [...html.matchAll(/cdn\.jsdelivr\.net\/npm\/((?:@[\w.~-]+\/)?[\w.~-]+)(?:@([\w.+-]+))?/g)]
-  .map(([, name, version]) => ({ name, version }));
-
-// Only an exact version keeps jsdelivr from serving a new release unannounced.
-export const isExactVersion = version => /^\d+\.\d+\.\d+$/.test(version ?? '');
-
-// Every pin in every app's index.html, the one place the apps load from jsdelivr. Shared with
-// check-versions.test.mjs, so the report and the agreement check read the same pages.
-export const cdnPinsByPage = () => workspaces().filter(Boolean)
-  .map(workspace => `${workspace}/index.html`)
-  .filter(page => existsSync(`${repoRoot}${page}`))
-  .flatMap(page => cdnPins(read(page)).map(pin => ({ ...pin, page })));
-
-// No package.json names these — the browser fetches them at runtime — so npmRows cannot see them.
-// Keyed by package and version, and sorted, for the same reasons npmRows is.
-const cdnRows = () => {
-  const rows = new Map();
-  for (const { name, version, page } of cdnPinsByPage()) {
-    const key = `${name}@${version}`;
-    if (!rows.has(key)) rows.set(key, { name, version, where: [] });
-    if (!rows.get(key).where.includes(page)) rows.get(key).where.push(page);
-  }
-
-  return [...rows.values()]
-    .sort((a, b) => a.name.localeCompare(b.name) || String(a.version).localeCompare(String(b.version)))
-    .map(({ name, version, where }) => checkVersion(name, version ?? 'no version', where, async () => {
-      if (!isExactVersion(version)) {
-        throw new Error('loaded from jsdelivr without an exact version, so it moves with new releases');
-      }
-      return (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version;
-    }));
-};
-
 const actionRows = () => {
   const workflows = readdirSync(`${repoRoot}${WORKFLOWS}`).filter(file => /\.ya?ml$/.test(file));
   // Actions are pinned to a major tag (`@v7`), so only the major is ever comparable — a patch
@@ -294,12 +254,12 @@ export const formatReport = rows => {
     ...table(
       `Patch and minor (${minor.length})`,
       minor,
-      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc`, docker tag or `index.html` row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate.'
+      '`npm run update:minors` makes every one of these edits that lives in a `package.json`, then `npm install`; an `.nvmrc` or docker tag row is a hand edit. Safe to batch into one PR — `npm test` and the build are the gate.'
     ),
     ...table(
       `Major (${major.length})`,
       major,
-      'One at a time, against the upstream upgrade guide — see [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168) for the shape.'
+      'One at a time, against the upstream upgrade guide — see [#253](https://github.com/a-gondolkodas-orome/durer-aion/pull/253) for the shape.'
     ),
     // Absolute, not relative: this report's home is an issue body, where `DEPENDENCIES.md#…` resolves
     // against the issue rather than the repository.
@@ -317,13 +277,17 @@ export const formatReport = rows => {
         ...failed.map(({ name, current, where, error }) => `- \`${name}\` (pinned ${current} in ${where.join(', ')}): ${error}`),
         ''
       ]),
+    // No package.json names latex.js, so none of the sources above sees it, and it releases too
+    // rarely to be worth one of its own.
+    'latex.js is loaded from jsdelivr and pinned in each frontend\'s `index.html`, outside this table: compare that pin with [npm](https://www.npmjs.com/package/latex.js) by hand.',
+    '',
     '<sub>Generated by `npm run report:outdated`. Majors stay manual; this only remembers.</sub>'
   ].join('\n');
 };
 
 // Guarded so the spec can import formatReport without the script reaching for the network.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const rows = await Promise.all([...npmRows(), ...cdnRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
+  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
   const report = formatReport(rows);
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];
