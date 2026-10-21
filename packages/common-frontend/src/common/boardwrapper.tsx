@@ -5,7 +5,7 @@ import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { StrategyGamesTable } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
-import { useClientRepo } from "../client/api-repository-interface";
+import { useClientRepo } from "../client/client-repo-context";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";

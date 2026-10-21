@@ -26,6 +26,11 @@ export default defineConfig(() => {
         { find: /^schemas$/, replacement: path.resolve(import.meta.dirname, "../../packages/schemas") },
         { find: /^relay-bot$/, replacement: path.resolve(import.meta.dirname, "../../packages/relay-bot") },
         { find: /^common-frontend$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend") },
+        // To its dist file, the path index.mjs imports it by. Resolved through
+        // node_modules instead, preserveSymlinks keeps the symlink's path, and the
+        // dev server loads core.mjs a second time under it: two copies of the
+        // storage-key namespace, one never set. The production build dedupes them.
+        { find: /^common-frontend\/core$/, replacement: path.resolve(import.meta.dirname, "../../packages/common-frontend/dist/core.mjs") },
       ],
       dedupe: ["react", "react-dom", "boardgame.io"], // ✅ avoid duplicate instances
       preserveSymlinks: true, // this is needed to make sure that linked packages are properly resolved (like game and schemas

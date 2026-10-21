@@ -27,7 +27,8 @@
     "welcome": "Dear Team <i>{{tname}}</i>, welcome to the online round!"
   },
   "error": {
-    "unexpected": "An unexpected error occurred"
+    "unexpected": "An unexpected error occurred",
+    "backHome": "Back to the home page"
   },
   "general": {
     "backHome": "Back to the home page",

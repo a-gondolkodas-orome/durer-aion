@@ -1,32 +1,20 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-// The key helpers come from the package entry, which resolves to a `dist` the
-// CI test job never builds — the same reason sendData.test.ts mocks its way off
-// the workspace packages. The names here are deliberately not the bare keys
-// this app really stores under: what the helpers return is storage-keys.test.ts's
-// business, and a name of its own pins which of the two each branch reaches for.
-const {
-  boardWrapper, matchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
-  relayResultsStorageKey, strategyResultsStorageKey,
-  sendGameData, gameWrapper, RelayWrapper, Client,
-} = vi.hoisted(() => ({
+import { matchStorageKey, relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey } from "common-frontend/core";
+
+// myclient.ts takes boardWrapper from the full package entry. Loading it for
+// real brings in MUI, the data grid and the i18next setup for a board this
+// suite never renders, and takes the wiring tests past vitest's 5 s timeout.
+const { boardWrapper, sendGameData, gameWrapper, RelayWrapper, Client } = vi.hoisted(() => ({
   boardWrapper: vi.fn(),
-  matchStorageKey: (gameName: string) => "bgio_" + gameName,
-  relayPointsStorageKey: () => "the relay key",
-  strategyPointsStorageKey: () => "the strategy key",
-  relayResultsStorageKey: () => "the relay results key",
-  strategyResultsStorageKey: () => "the strategy results key",
   sendGameData: vi.fn(),
   gameWrapper: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
-vi.mock("common-frontend", () => ({
-  boardWrapper, matchStorageKey, relayPointsStorageKey, strategyPointsStorageKey,
-  relayResultsStorageKey, strategyResultsStorageKey,
-}));
+vi.mock("common-frontend", () => ({ boardWrapper }));
 vi.mock("./sendData", () => ({ sendGameData }));
 // The wiring tests read the callback the app hands each reducer; building a real
 // boardgame.io client around it is not what is under test here.
@@ -54,14 +42,14 @@ describe("handleGameReport", () => {
     const end = strategyReport("end", { points: 12 });
     handleGameReport(end, "bgio_stones_e");
 
-    expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
+    expect(localStorage.getItem(strategyPointsStorageKey())).toStrictEqual("12");
     expect(sendGameData).toHaveBeenCalledWith(end, "bgio_stones_e");
   });
 
   test("persists the live games of a strategy end report for the home page", () => {
     handleGameReport(strategyReport("end", { points: 9, liveResults: ["lost", "won", "won"] }));
 
-    expect(localStorage.getItem("the strategy results key")).toStrictEqual('["lost","won","won"]');
+    expect(localStorage.getItem(strategyResultsStorageKey())).toStrictEqual('["lost","won","won"]');
   });
 
   test("persists the problems of a relay end report for the home page", () => {
@@ -70,7 +58,7 @@ describe("handleGameReport", () => {
       points: 2, start: "2026-10-10T10:00:00Z", maxPointsList: [3, 4], previousPoints: [2], previousAnswers: [tries, []],
     }));
 
-    expect(JSON.parse(localStorage.getItem("the relay results key") ?? "")).toStrictEqual([
+    expect(JSON.parse(localStorage.getItem(relayResultsStorageKey()) ?? "")).toStrictEqual([
       { maxPoints: 3, points: 2, trySeconds: [60, 30] },
       { maxPoints: 4, points: 0, trySeconds: [] },
     ]);
@@ -79,7 +67,7 @@ describe("handleGameReport", () => {
   test("persists the score of a relay end report", () => {
     handleGameReport(relayEnd({ points: 17 }));
 
-    expect(localStorage.getItem("the relay key")).toStrictEqual("17");
+    expect(localStorage.getItem(relayPointsStorageKey())).toStrictEqual("17");
   });
 
   // toHome() is the relay-end uploader, because it also covers giving up
@@ -125,8 +113,8 @@ describe("the clients' report callbacks", () => {
     const end = strategyReport("end", { points: 12 });
     report(end);
 
-    expect(localStorage.getItem("the strategy key")).toStrictEqual("12");
-    expect(sendGameData).toHaveBeenCalledWith(end, "bgio_stones_e");
+    expect(localStorage.getItem(strategyPointsStorageKey())).toStrictEqual("12");
+    expect(sendGameData).toHaveBeenCalledWith(end, matchStorageKey("stones_e"));
   });
 
   test("the relay client persists the score", async () => {
@@ -137,6 +125,6 @@ describe("the clients' report callbacks", () => {
     expect(report, "the relay client built its game with no report callback").toBeTypeOf("function");
     report(relayEnd({ points: 9 }));
 
-    expect(localStorage.getItem("the relay key")).toStrictEqual("9");
+    expect(localStorage.getItem(relayPointsStorageKey())).toStrictEqual("9");
   });
 });

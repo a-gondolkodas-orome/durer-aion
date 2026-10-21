@@ -1,4 +1,4 @@
-import { relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey } from "common-frontend";
+import { relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey } from "common-frontend/core";
 import { relayProblemResults } from "game";
 import type { RelayReport, StrategyReport } from "game";
 import { sendGameData } from "./sendData";

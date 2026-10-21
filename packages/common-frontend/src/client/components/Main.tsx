@@ -9,6 +9,7 @@ import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
+import { ErrorBoundary } from "./ErrorBoundary";
 import i18next from "i18next";
 
 export function Main(props: { language: string, gitCommitHash: string }) {
@@ -53,20 +54,22 @@ export function Main(props: { language: string, gitCommitHash: string }) {
         }}
         data-testid="mainRoot"
       >
-        {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-        {!teamState && <Login />}
-        {teamState && teamState.pageState === "DISCLAIMER" && (
-          <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
-        )}
-        {teamState && teamState.pageState === "HOME" && (
-          <Chooser state={teamState}/>
-        )}
-        {teamState && teamState.pageState === "RELAY" && (
-          <Relay state={teamState} />
-        )}
-        {teamState && teamState.pageState === "STRATEGY" && (
-          <Strategy state={teamState} />
-        )}
+        <ErrorBoundary resetKeys={[teamState?.teamName, teamState?.pageState]}>
+          {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
+          {!teamState && <Login />}
+          {teamState && teamState.pageState === "DISCLAIMER" && (
+            <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
+          )}
+          {teamState && teamState.pageState === "HOME" && (
+            <Chooser state={teamState}/>
+          )}
+          {teamState && teamState.pageState === "RELAY" && (
+            <Relay state={teamState} />
+          )}
+          {teamState && teamState.pageState === "STRATEGY" && (
+            <Strategy state={teamState} />
+          )}
+        </ErrorBoundary>
       </Container>
       <footer style={{
         textAlign: "center",

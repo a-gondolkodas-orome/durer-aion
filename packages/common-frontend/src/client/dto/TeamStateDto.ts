@@ -1,5 +1,5 @@
-import { Ctx } from "boardgame.io";
-import { GameStateMixin, MyGameState as RelayGameState } from "game";
+import type { Ctx } from "boardgame.io";
+import type { GameStateMixin, MyGameState as RelayGameState } from "game";
 import type { MatchStatus, PageState } from "schemas";
 
 export { isPageState, type CompetitionCategory, type PageState } from "schemas";

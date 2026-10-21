@@ -6,7 +6,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
-import { ClientRepoProvider } from '../api-repository-interface';
+import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';

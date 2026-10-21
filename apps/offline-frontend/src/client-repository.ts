@@ -1,4 +1,4 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
