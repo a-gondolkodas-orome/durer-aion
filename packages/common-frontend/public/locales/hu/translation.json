@@ -25,7 +25,8 @@
     "welcome": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!"
   },
   "error": {
-    "unexpected": "Váratlan hiba történt"
+    "unexpected": "Váratlan hiba történt",
+    "backHome": "Vissza a kezdőlapra"
   },
   "general": {
     "loading": "Játék vagy feladat betöltése…",

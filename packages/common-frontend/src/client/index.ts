@@ -5,6 +5,7 @@ export * from './components/ChooserItem';
 export * from './components/ConfirmDialog';
 export * from './components/Countdown';
 export * from './components/Disclaimer';
+export * from './components/ErrorBoundary';
 export * from './components/ExerciseForm';
 export * from './components/ExerciseTask';
 export * from './components/Header';
