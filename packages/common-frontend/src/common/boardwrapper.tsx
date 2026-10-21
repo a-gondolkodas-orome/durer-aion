@@ -153,16 +153,15 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                         xs: '14px',
                         md: '18px',
                       },
+                      gap: '8px',
                     }}
                   >
-                    <Stack sx={{ gap: '8px' }}>
-                      <StrategyGamesTable results={G.liveResults}/>
-                      {/* What winning the match is worth now: two live wins in a
-                          row score by the losses so far. */}
-                      <Stack sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
-                        {G.winningStreak === 0 && t('strategy.twoWinsInARow', { points: achievable })}
-                        {G.winningStreak === 1 && t('strategy.oneMoreWin', { points: achievable })}
-                      </Stack>
+                    <StrategyGamesTable results={G.liveResults}/>
+                    {/* What winning the match is worth now: two live wins in a
+                        row earn the points the losses so far leave. */}
+                    <Stack sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
+                      {G.winningStreak === 0 && t('strategy.twoWinsInARow', { points: achievable })}
+                      {G.winningStreak === 1 && t('strategy.oneMoreWin', { points: achievable })}
                     </Stack>
                   </Stack>
                   </Stack>

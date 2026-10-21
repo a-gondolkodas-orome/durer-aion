@@ -69,8 +69,9 @@ const labelSx = { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' };
 
 /**
  * The look the result tables share: a header row naming the columns
- * (numbering them unless told otherwise), then labelled rows of as many cells. With `transposeOnPhone`, a narrow screen gets one row
- * per column instead, as wide as the labels allow.
+ * (numbering them unless told otherwise), then labelled rows of as many cells.
+ * With `transposeOnPhone`, a narrow screen gets one row per column instead, as
+ * wide as the labels allow.
  */
 function ResultTable(props: {
   headerLabel: string,
