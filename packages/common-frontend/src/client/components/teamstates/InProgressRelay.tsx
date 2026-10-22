@@ -4,6 +4,7 @@ import { Countdown } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { GUESSER_PLAYER, MyGameState, relayProblemResults } from 'game';
 import { useBackToHome, useLogout } from '../../hooks/user-hooks';
+import { useEndOnTime } from '../../hooks/end-on-time';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
 import { RelayEndTable } from '../RelayEndTable';
@@ -15,6 +16,12 @@ import { alpha } from "@mui/system/colorManipulator"
 import { useTranslation } from 'react-i18next';
 
 type MyGameProps = BoardProps<MyGameState>;
+
+/** How long past the end the dialog waits for the game to report its end
+ *  before opening anyway: the game ends a second after its grace for late
+ *  answers, and this is for one that never does, such as a judge that never
+ *  rules. */
+const END_DIALOG_FALLBACK_MS = 30 * 1000;
 
 // selectRoundOnEnd is an extra prop for relay-practise: a logout button
 // leading back to the round selector
@@ -60,7 +67,10 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   useEffect(() => {
     setMsRemaining(G.millisecondsRemaining);
   }, [G.millisecondsRemaining]);
-  const finished = msRemaining < - 5000 || gameover === true
+  useEndOnTime(G.end, ctx.gameover, syncTime);
+  // The game's own end, not the clock's: closing the dialog takes the team home,
+  // and the offline apps read the score there from the game's end report.
+  const finished = gameover === true || msRemaining < -END_DIALOG_FALLBACK_MS
   const isOffline = clientRepo.version === "OFFLINE";
   // Until the judge's firstProblem move, the state holds no problem to show
   // and the form has no move to submit to.
