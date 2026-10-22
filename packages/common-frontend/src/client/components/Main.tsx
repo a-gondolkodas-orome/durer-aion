@@ -1,5 +1,5 @@
 import { Container } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header } from "./Header";
 import { Layout } from "./Layout";
@@ -14,19 +14,11 @@ import i18next from "i18next";
 
 export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
-  const [admin, setAdmin] = useState<boolean>(false);
+  const admin = window.location.pathname.includes('/admin');
 
   useEffect(() => {
     void i18next.changeLanguage(props.language);
   }, [props.language])
-
-  useEffect(() => {
-    if (window.location.pathname.includes('/admin')) {
-      setAdmin(true);
-    } else {
-      setAdmin(false);
-    }
-  }, [])
 
   return (
     <Layout>

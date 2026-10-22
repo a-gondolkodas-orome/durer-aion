@@ -117,27 +117,28 @@ export class UserModel {
     }
   }
 
-  private static wasListenerAddedYet = false;
-
-  addListener(setTeamState: (teamState: TeamModelDto | null) => void) {
-    if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
-      UserModel.wasListenerAddedYet = true;
-      let previousValue: TeamModelDto | null = null;
-      const onLoginChanged = async (event: StorageEvent) => {
-        if (event.key !== loginMarkerStorageKey()) {
-          return;
-        }
-
-        const value = await this.getTeamState();
-
-        if (previousValue !== value) {
-          setTeamState(value);
-          previousValue = value;
-        }
-      };
-      window.addEventListener("storage", (event) => {
-        void onLoginChanged(event);
-      });
+  // Returns the function that removes the listener again.
+  addListener(setTeamState: (teamState: TeamModelDto | null) => void): () => void {
+    if (typeof window === "undefined") {
+      return () => undefined;
     }
+    let previousValue: TeamModelDto | null = null;
+    const onLoginChanged = async (event: StorageEvent) => {
+      if (event.key !== loginMarkerStorageKey()) {
+        return;
+      }
+
+      const value = await this.getTeamState();
+
+      if (previousValue !== value) {
+        setTeamState(value);
+        previousValue = value;
+      }
+    };
+    const listener = (event: StorageEvent) => {
+      void onLoginChanged(event);
+    };
+    window.addEventListener("storage", listener);
+    return () => window.removeEventListener("storage", listener);
   }
 }
