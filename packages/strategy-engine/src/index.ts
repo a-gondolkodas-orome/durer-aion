@@ -11,7 +11,7 @@ export type {
   StrategyArgs, BotStrategy, BotMove, NamedBotMove, BoardClientProps,
   Variant, VariantInput, Presentation, StrategyGameConfig
 } from './types';
-export type { I18nString, I18nNode, Language, Translatable, TranslatableNode } from './i18n';
+export type { Label } from './i18n';
 
 export { resolveVariants, variantKey } from './resolve-variants';
 export { runMatch } from './run-match';

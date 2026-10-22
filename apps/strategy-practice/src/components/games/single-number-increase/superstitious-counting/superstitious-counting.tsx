@@ -1,11 +1,13 @@
 import { range } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useTranslation } from 'language';
 import { generateStartBoard, generateTestStartBoard, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('single-number-increase');
   const fields = range(board.target + 14);
 
 
@@ -29,18 +31,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       )}
     </div>
     <p className="text-xl mt-2">
-      {t({
-        hu: `m értéke: ${board.target}`,
-        en: `Value of m: ${board.target}`
-      })}
+      {t('superstitiousCounting.board.target', { target: board.target })}
     </p>
     {ctx.isClientMoveAllowed && (
       <p className="text-xl mt-2">
-        {t({
-          hu: `Előző lépés: ${board.restricted ? (13 - board.restricted) : '-'}. ` +
-            `Tiltott: ${ board.restricted || '-' }.`,
-          en: `Previous step: ${board.restricted ? (13 - board.restricted) : '-'}. ` +
-            `Forbidden: ${board.restricted || '-'}.`
+        {t('superstitiousCounting.board.restriction', {
+          previous: board.restricted ? (13 - board.restricted) : '-',
+          forbidden: board.restricted || '-'
         })}
       </p>
     )}
@@ -48,29 +45,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák:
-    0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál (szigorúan) kisebb pozitív egészet a korábbi
-    számhoz, azonban a babonájuk miatt ha egyikük <code>x</code>-et adott hozzá, akkor másikuk a következő
-    lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.
-  </>,
-  en: <>
-    Károly and Dezső wish to count up to <code>m</code> and play the following game in the
-    meantime: they start from 0 and the two players can add a positive number less than 13 to the
-    previous number, taking turns. However because of their superstition, if one of them added <code>x</code>,
-    then the other one in the next step cannot add <code>13-x</code>. The first player to reach
-    or exceed <code>m</code> loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('single-number-increase');
+  return <Trans t={t} i18nKey="superstitiousCounting.rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('single-number-increase');
+  return t('superstitiousCounting.step');
 };
 
 export const SuperstitiousCounting = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints a számra ahova lépni szeretnél.',
-      en: 'Click on a number to step onto it.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -78,8 +66,8 @@ export const SuperstitiousCounting = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

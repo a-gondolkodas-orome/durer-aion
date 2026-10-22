@@ -1,6 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { GameStateMixin, GameType, GUESSER_PLAYER, JUDGE_PLAYER, PlayerIDType } from './types';
+import { GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -14,8 +14,8 @@ function chooseRole({ G }: MoveContext, firstPlayer: PlayerIDType): void {
   G.firstPlayer = firstPlayer;
 }
 
-function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: string) {
-  if (playerID !== GUESSER_PLAYER) {
+function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: unknown) {
+  if (playerID !== GUESSER_PLAYER || !isDifficulty(difficulty)) {
     return INVALID_MOVE;
   };
   G.difficulty = difficulty;
@@ -83,6 +83,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       numberOfLoss: 0,
       winningStreak: 0,
       points: 0,
+      liveResults: [],
     }),
     turn: {
       minMoves: 1,
@@ -135,6 +136,15 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({ G, ctx }) => {
+          // A game with no winner yet is one the time ran out in. That is
+          // recorded only when the team's page ends the match, by asking for
+          // the time after the deadline; a match the server closes on time
+          // has no entry for it. A second win in a row ends the match from
+          // inside the move, and boardgame.io still ends this phase first.
+          if (G.difficulty === "live") {
+            // No game ends in a draw, so one with a winner is won or lost.
+            G.liveResults.push(G.winner === null ? "unfinished" : G.winner === GUESSER_PLAYER ? "won" : "lost");
+          }
           sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });
         }
       },

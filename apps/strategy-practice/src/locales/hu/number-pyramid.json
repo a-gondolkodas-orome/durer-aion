@@ -1,0 +1,11 @@
+{
+  "board": {
+    "level": "{{level}}. szint",
+    "target": "Célszám (k)"
+  },
+  "rule": "A játék kezdetén adott nyolc pozitív egész szám az első szinten, és egy <code>k</code> pozitív egész szám, ami nem nagyobb a nyolc szám összegénél. Egy lépésben a soron következő játékos letöröl két számot ugyanarról a szintről, és az összegüket az eggyel nagyobb sorszámú szintre írja. Az a játékos nyer, aki először ír olyan számot, ami legalább <code>k</code>.",
+  "step": {
+    "first": "Válassz két számot ugyanarról a szintről – összegük a következő szintre kerül.",
+    "second": "Válassz egy másik számot a {{level}}. szintről."
+  }
+}

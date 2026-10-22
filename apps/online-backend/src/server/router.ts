@@ -1,4 +1,5 @@
 import koaBody from 'koa-body';
+import { unlink } from 'node:fs/promises';
 import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
@@ -38,6 +39,15 @@ export function configureTeamsRouter(
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
+  // a route a later version adds is closed too. It runs first only because
+  // `server.run()` adds boardgame.io's routes to this router after ours.
+  // A status rather than a throw: koa reports every thrown error, a 404
+  // included, to server.ts's Sentry hook, and this prefix is anyone's to scan.
+  router.use("/games", (ctx) => {
+    ctx.status = 404;
+  });
 
   /**
    * Get the log data about a specific match.
@@ -261,7 +271,8 @@ export function configureTeamsRouter(
    *
    * @param {number} deletionId - The archive row.
    * @returns {TeamModel} - The team, live again. 404 for an unknown row; 409
-   *   when a live team holds its id, join code or name, saying which.
+   *   when a live team holds its id, join code, name or credentials,
+   *   saying which.
    */
   router.post("/team/admin/deleted/:deletionId/restore", adminAuth, async (ctx) => {
     const deletionId = Number(ctx.params.deletionId);
@@ -324,25 +335,28 @@ export function configureTeamsRouter(
   })
 
   /**
- * Get all teams as a full object
- * @returns {TeamModel[]} - List of the selected teams
- */
+   * Import teams from an uploaded TSV, the way `npm run teams:import` does.
+   * formidable stores the upload under a random name, so the extension is
+   * checked on the name the client sent.
+   */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    if (Array.isArray(file)) {
-      ctx.throw(400, 'Multiple files are not supported.');
-      return;
+    try {
+      if (Array.isArray(file)) {
+        ctx.throw(400, 'Multiple files are not supported.');
+        return;
+      }
+      if (!file?.originalFilename?.endsWith('.tsv')) {
+        ctx.status = 400;
+        ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
+        return;
+      }
+      ctx.body = await import_teams_from_tsv(teams, file.filepath);
+    } finally {
+      // Every field, not only `file`: formidable writes whatever is uploaded.
+      const uploaded = Object.values(ctx.request.files ?? {}).flat();
+      await Promise.all(uploaded.map(f => unlink(f.filepath).catch(() => undefined)));
     }
-
-    if (!file || !file.filepath?.endsWith('.tsv')) {
-      ctx.status = 400;
-      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
-      return;
-    }
-
-    const import_results = await import_teams_from_tsv(teams, file.filepath)
-
-    ctx.body = import_results;
   })
 
   /**
@@ -390,7 +404,6 @@ export function configureTeamsRouter(
     let team = ctx.state.team;
     const staleInfo = await checkStaleMatch(team);
     if (staleInfo.isStale) {
-      console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
       await closeMatch(
         (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
         teams,
@@ -453,18 +466,5 @@ export function configureTeamsRouter(
       pageState: "HOME",
     });
     ctx.body = publicTeamView(team);
-  });
-
-  /**
-   * Create a new BGio game
-   *
-   * @param {string} nameid - game ID to create
-   *
-   * This should be in line with boardgame.io/src/server/api.ts
-   */
-  router.post("/games/:nameid/create", async (ctx, next) => {
-    await next();
-    console.log(`Injecting bot in :${ctx.response.body.matchID}`);
-    await injectBot(ctx.db, ctx.response.body.matchID);
   });
 }

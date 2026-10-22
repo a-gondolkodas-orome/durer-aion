@@ -1,0 +1,4 @@
+{
+  "rule": "Az ábrán öt mező látható, melyeket vonalak kötnek össze. Kezdetben mind az öt mező üres. Egy lépésben a soron lévő játékos kiválaszt egy vonalat, melynek a két végpontján lévő mezőben ugyanannyi korong van, és az egyik végpontjára rak még egy korongot. A játék akkor ér véget, ha nincs olyan vonal, aminek a két végén ugyanannyi korong van. Az a játékos nyer, aki az utolsó korongot lerakta.",
+  "step": "Kattints egy mezőre, amelynek van azonos számú koronggal rendelkező szomszédja, és tegyél rá egy korongot."
+}

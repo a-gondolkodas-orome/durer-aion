@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import {
   GameBoard, type BoardClientProps, useHoverPreview, useMoveScopedState
 } from 'strategy-game-factory';
@@ -28,7 +28,7 @@ const cellClass = (inWindow: boolean, selectable: boolean) => `
 `;
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('matches-on-edges');
   const { n, edges } = board;
   const k = currentWindowSize(board);
   // A cell is a valid start exactly when the window it would open is a legal
@@ -78,10 +78,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onClick={() => selectStart(i)}
               {...(selectable ? hoverProps(i) : {})}
               aria-pressed={selectedStart === i}
-              aria-label={t({
-                hu: `${i + 1}. mező${selectable ? `, ${k} hosszú résztábla kezdete` : ''}`,
-                en: `Cell ${i + 1}${selectable ? `, start of a length-${k} subtable` : ''}`
-              })}
+              aria-label={selectable
+                ? t('board.cellStart', { number: i + 1, k })
+                : t('board.cell', { number: i + 1 })}
               className={cellClass(windowCells.has(i), selectable)}
             />
           );
@@ -107,7 +106,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={submit}
           className="primary-button w-auto mt-4 mx-auto"
         >
-          {t({ hu: 'Rárakom a gyufákat', en: 'Place the matches' })}
+          {t('board.submit')}
         </button>
       )}
     </GameBoard>

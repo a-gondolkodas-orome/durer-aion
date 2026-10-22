@@ -1,0 +1,9 @@
+{
+  "board": {
+    "pickFirst": "Pick the first pile.",
+    "pickOther": "Pick the other pile.",
+    "pile": "Pile {{number}}, {{chips}} chips"
+  },
+  "rule": "There are chips in three piles — an even number in total, at most 20. The two players move alternately: on their turn, the current player picks two non-empty piles and removes one chip from each. The player who cannot move loses.",
+  "step": "Choose two non-empty piles — you remove one chip from each."
+}

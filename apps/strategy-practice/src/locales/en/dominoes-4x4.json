@@ -1,0 +1,11 @@
+{
+  "role": {
+    "horizontal": "Harry (horizontal)",
+    "vertical": "Vera (vertical)"
+  },
+  "rule": "Vera and Harry take turns placing 1 × 2 dominoes on a 4 × 4 board. Vera always places vertical dominoes, Harry always horizontal ones. Vera goes first, and whoever cannot place a domino loses.",
+  "step": {
+    "horizontal": "Click a square, then the empty square next to it, to place a horizontal domino.",
+    "vertical": "Click a square, then the empty square above or below it, to place a vertical domino."
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "rule": {
+    "generic": "Many people know how a knight moves in chess, but very few know how a duck moves: it can step to any of its four orthogonal neighbours. Two players take turns placing ducks on the board so that the newly placed piece does not attack any duck already on the board. The player who cannot place a duck loses.",
+    "sized": "Many people know how a knight moves in chess, but very few know how a duck moves: it can step to any of its four orthogonal neighbours. Two players take turns placing ducks on the {{rows}} × {{cols, numberAdjective}} board so that the newly placed piece does not attack any duck already on the board. The player who cannot place a duck loses."
+  },
+  "step": "Click on a square that is not attacked by any duck.",
+  "variant": {
+    "4x6": "4×6",
+    "4x7": "4×7"
+  }
+}

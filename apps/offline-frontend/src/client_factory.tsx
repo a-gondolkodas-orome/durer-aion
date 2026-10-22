@@ -1,7 +1,7 @@
 import { State } from "boardgame.io";
 import { ClientRelayWithBot, ClientWithBot } from "./myclient";
 import { GameStateMixin, GameType } from "game";
-import type { GameRelay, MyGameState as RelayGameState } from "game";
+import type { MyGameState as RelayGameState, RelayMoveArgs } from "game";
 import type { RelayBoard, StrategyBoard } from "common-frontend";
 import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
 export const ClientFactory = function<
 T_SpecificGameState
 , T_SpecificPosition> (
-  game: GameType<T_SpecificGameState>,
+  game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
   description: ReactNode
@@ -25,12 +25,12 @@ T_SpecificGameState
 };
 
 export const ClientFactoryRelay = function (
-  game: typeof GameRelay,
+  gameName: string,
   board: RelayBoard,
-  strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
+  strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   description: ReactNode,
   ) {
-  const ClientWithBotComponent = ClientRelayWithBot(game, board, strategy, description);
+  const ClientWithBotComponent = ClientRelayWithBot(gameName, board, strategy, description);
   return {
     ClientWithBot: function () {
       return (<>
