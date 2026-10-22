@@ -39,6 +39,7 @@ export const MockTeamState = {
     useStartRelay: vi.fn(),
     useStartStrategy: vi.fn(),
     useToHome: vi.fn(),
+    useBackToHome: vi.fn(),
     LoadTeamState: () => null,
   },
 };

@@ -14,7 +14,6 @@ import i18next from "i18next";
 
 export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
-  const [frontendState, setFrontEndState] = useState<"R" | "S" | null>(null);
   const [admin, setAdmin] = useState<boolean>(false);
 
   useEffect(() => {
@@ -55,25 +54,19 @@ export function Main(props: { language: string, gitCommitHash: string }) {
         }}
         data-testid="mainRoot"
       >
-        <ErrorBoundary resetKeys={[teamState?.teamName, teamState?.pageState, frontendState]}>
+        <ErrorBoundary resetKeys={[teamState?.teamName, teamState?.pageState]}>
           {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
           {!teamState && <Login />}
           {teamState && teamState.pageState === "DISCLAIMER" && (
             <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
           )}
-          {teamState && teamState.pageState === "HOME" && frontendState === null && (
-            <Chooser state={teamState} setState={setFrontEndState}/>
+          {teamState && teamState.pageState === "HOME" && (
+            <Chooser state={teamState}/>
           )}
-          {teamState && (
-            teamState.pageState === "RELAY" ||
-            (teamState.pageState === "HOME" && frontendState === "R")
-          ) && (
+          {teamState && teamState.pageState === "RELAY" && (
             <Relay state={teamState} />
           )}
-          {teamState && (
-            teamState.pageState === "STRATEGY" ||
-            (teamState.pageState === "HOME" && frontendState === "S")
-          ) && (
+          {teamState && teamState.pageState === "STRATEGY" && (
             <Strategy state={teamState} />
           )}
         </ErrorBoundary>
