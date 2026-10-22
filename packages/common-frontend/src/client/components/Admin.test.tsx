@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
-import { SWRConfig } from 'swr';
+import { SWRConfig, SWRConfiguration } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
@@ -91,11 +91,11 @@ const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff'
 
 // A fresh SWR cache per render: the list's key is the same in every test, and
 // a cached list would stand in for the one the test's repository serves.
-const renderAdmin = (teamId?: string) =>
+const renderAdmin = (teamId?: string, swr: SWRConfiguration = {}) =>
   render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
-        <SWRConfig value={{ provider: () => new Map() }}>
+        <SWRConfig value={{ ...swr, provider: () => new Map() }}>
           <Layout>
             <Admin teamId={teamId}/>
           </Layout>
@@ -256,6 +256,78 @@ test('the team dialog totals the stored score when the match state cannot be fet
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
   expect(await screen.findByText('Összesen: 5 pont')).toBeInTheDocument();
+});
+
+// A failed request used to render exactly like one still loading: nothing.
+test('the team dialog says when the match state cannot be fetched', async () => {
+  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
+
+  expect(await screen.findByText('A játék állását nem sikerült betölteni.')).toBeInTheDocument();
+});
+
+// The button did nothing at all when the request was refused.
+test('a refused logs request is reported', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
+  vi.spyOn(repo, 'getMatchLogs').mockRejectedValue(new Error('Váratlan hiba történt'));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
+
+  fireEvent.click(await screen.findByText('logok Lekérése'));
+
+  expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
+});
+
+const finishedAlpha = { ...alpha, relayMatch: { state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 } } as const;
+
+// The dialog kept a copy of the row it was opened with.
+test('the team dialog follows the list when it reloads', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([finishedAlpha]).mockResolvedValue([alpha]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(5, LATER));
+  // Neither deduped into the first load nor throttled for being so soon after it.
+  renderAdmin(alpha.teamId, { dedupingInterval: 0, focusThrottleInterval: 0 });
+  expect(await screen.findByText(/Végzett/)).toBeInTheDocument();
+
+  // SWR reloads on focus.
+  fireEvent(window, new Event('focus'));
+
+  await waitFor(() => expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2));
+});
+
+test('a reset shows the team\'s new row', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([finishedAlpha, bravo]).mockResolvedValue([alpha, bravo]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(5, LATER));
+  vi.spyOn(repo, 'resetRelay').mockResolvedValue(alpha);
+  renderAdmin();
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  expect(await screen.findByText(/Végzett/)).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('reset'));
+  confirm();
+
+  expect(await screen.findByText('Sikeres művelet')).toBeInTheDocument();
+  expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2);
+  expect(screen.queryByText('reset')).not.toBeInTheDocument();
+});
+
+// The countdown waited on a server refresh in its last second, which the
+// dialog never gave it, so it froze there, and stayed frozen after minutes
+// were added.
+test('the team dialog\'s clock stops at zero, and follows minutes added after it', async () => {
+  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
+  expect(await screen.findByText('00:00:00')).toBeInTheDocument();
+
+  getMatchState.mockResolvedValue(gameState(4, inAnHour()));
+  await act(async () => {
+    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('idő hozzáadása'));
+  });
+  confirm();
+
+  expect(await screen.findByText(/^(00:59:5\d|01:00:00)$/)).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {

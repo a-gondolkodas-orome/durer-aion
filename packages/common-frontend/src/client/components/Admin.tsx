@@ -5,7 +5,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
-import { TeamModelDto } from '../dto/TeamStateDto';
+import { TeamModelDto, adminTeamId } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import { DeletedTeams } from './DeletedTeams';
 import { csvToolbar } from './CsvToolbar';
@@ -35,7 +35,7 @@ export function Admin(props: { teamId?: string }) {
   const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
-  const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
   const [tab, setTab] = useState<AdminTab>('teams');
@@ -44,13 +44,21 @@ export function Admin(props: { teamId?: string }) {
   // `/admin/<teamId>` page drops out with the list's next load and the page
   // falls back to the grid instead of showing the team it no longer has.
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
+  // The same for the dialog, so it shows the team as the list last loaded it.
+  const selectedRow = selectedTeamId ? data?.find(d => d.teamId === selectedTeamId) ?? null : null;
   const showTeams = !teamFromPath && tab === 'teams';
 
   // The server has dropped the team: the dialog closes, and the grid reloads so
   // it no longer offers a team that is gone.
   const onRemoved = () => {
-    setSelectedRow(null);
+    setSelectedTeamId(null);
     void mutate();
+  };
+
+  // A reset answers with the team's new row: the list takes it at once, then
+  // reloads.
+  const onChanged = (changed: TeamModelDto) => {
+    void mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it));
   };
 
   return (
@@ -88,9 +96,9 @@ export function Admin(props: { teamId?: string }) {
         open={
           selectedRow != null
         } onClose={() => {
-            setSelectedRow(null);
+            setSelectedTeamId(null);
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved} onChanged={onChanged}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
@@ -104,7 +112,7 @@ export function Admin(props: { teamId?: string }) {
         <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
       </Stack>
       {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
+        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved} onChanged={onChanged}/>}
         {!teamFromPath && <Tabs value={tab} onChange={(_, value: AdminTab) => setTab(value)} sx={{ marginBottom: '8px' }}>
           <Tab value="teams" label="Csapatok"/>
           <Tab value="deleted" label="Törölt csapatok"/>
@@ -170,7 +178,7 @@ export function Admin(props: { teamId?: string }) {
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={() => {setSelectedRow(renderData.row)}}>
+                    onClick={() => {setSelectedTeamId(adminTeamId(renderData.row))}}>
                       Szerkesztés
                   </Button>
                 )
