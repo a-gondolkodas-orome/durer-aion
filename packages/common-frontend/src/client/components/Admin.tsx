@@ -60,12 +60,10 @@ export function Admin(props: { teamId?: string }) {
     void mutate();
   };
 
-  // A reset answers with the team's new row: the list takes it at once, then
-  // reloads. Adding minutes answers with none, so the list only reloads.
-  const onChanged = (changed?: TeamModelDto) => {
-    void (changed
-      ? mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it))
-      : mutate());
+  // An action in the dialog answers with the team's new row: the list takes it
+  // at once, then reloads.
+  const onChanged = (changed: TeamModelDto) => {
+    void mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it));
   };
 
   return (
@@ -265,6 +263,9 @@ export function Admin(props: { teamId?: string }) {
                 } catch (e) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
                   enqueueSnackbar(message, { variant: 'error' });
+                } finally {
+                  // Each team's `endAt` moved, even when a later one failed.
+                  await mutate();
                 }
               },
             })

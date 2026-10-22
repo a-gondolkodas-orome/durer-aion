@@ -16,15 +16,14 @@ import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-/// `onRemoved` fires once the server has dropped the team, and `onChanged` once
-/// an action has changed it, with the team's new row when the answer carries
-/// one: the list this dialog was opened from is stale from that moment, and
-/// `data` is read off that list.
+/// `onRemoved` fires once the server has dropped the team, and `onChanged` with
+/// the team's new row once an action has changed it: the list this dialog was
+/// opened from is stale from that moment, and `data` is read off that list.
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
   onRemoved: () => void,
-  onChanged: (team?: TeamModelDto) => void,
+  onChanged: (team: TeamModelDto) => void,
 }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
@@ -134,7 +133,7 @@ function matchKey(status: MatchStatus) {
   return status.state === "NOT STARTED" ? "" : status.matchID;
 }
 
-function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>, onChanged: () => void }) {
+function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>, onChanged: (team: TeamModelDto) => void }) {
   const theme = useTheme();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
@@ -174,11 +173,11 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
               try {
-                await addMinutes(inProgressState.matchID, values.time);
-                // The dialog's total reads the new `G.end` from here, and
-                // team-state-end the team's new `endAt` from the list.
+                const changed = await addMinutes(inProgressState.matchID, values.time);
+                // The match's new `G.end`, which the total reads, and the
+                // team's new `endAt`, which team-state-end reads.
                 await mutate(matchStateKey(inProgressState.matchID));
-                props.onChanged();
+                props.onChanged(changed);
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -303,7 +302,7 @@ function useMatchStateData(matchId: string | null) {
 /// A match's share of the total, `undefined` until it is known, so a
 /// mid-round total never reads as final. An IN PROGRESS match past its end
 /// counts: a team that left before the end never closes it. The end is
-/// `G.end`, not the team's `endAt`, which adding minutes does not reload.
+/// `G.end`, the game's own, rather than the copy on the team.
 function useMatchPoints(status: MatchStatus): number | undefined {
   const matchId = status.state === "NOT STARTED" ? null : status.matchID;
   const { data, error } = useMatchStateData(matchId);

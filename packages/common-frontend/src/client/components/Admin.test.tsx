@@ -229,6 +229,9 @@ const gameState = (points: number, end: string | Date): MatchStateDto => ({
 
 const inAnHour = () => new Date(Date.now() + 60 * 60 * 1000);
 
+const alphaInRelayUntil = (endAt: Date): TeamModelDto =>
+  ({ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt } });
+
 test('the team dialog totals the game\'s points, not the lower score stored when the match closed', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
@@ -250,7 +253,7 @@ test('the team dialog shows no total while a match is in progress', async () => 
 // time was still totalled as over.
 test('the team dialog totals a match left in progress past its end, until time is added', async () => {
   const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(inAnHour()));
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
   expect(await screen.findByText('Összesen: 4 pont')).toBeInTheDocument();
 
@@ -267,14 +270,15 @@ test('the team dialog totals a match left in progress past its end, until time i
   expect(await screen.findByText('Összesen: ? pont')).toBeInTheDocument();
 });
 
-// Adding minutes moves the team's `endAt` too, which only the list carries.
-test('adding minutes reloads the team\'s end time', async () => {
+// Adding minutes moves the team's `endAt` too. The reload after it never
+// answers, so only the row the server answered with can show it.
+test('adding minutes shows the team\'s new end time', async () => {
   const later = inAnHour();
   vi.spyOn(repo, 'getAll')
-    .mockResolvedValueOnce([{ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) } }])
-    .mockResolvedValue([{ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: later } }]);
+    .mockResolvedValueOnce([alphaInRelayUntil(new Date(LATER))])
+    .mockReturnValue(new Promise(() => undefined));
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(later));
   renderAdmin(alpha.teamId);
   expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(new Date(LATER))}`))).toBeInTheDocument();
 
@@ -285,6 +289,31 @@ test('adding minutes reloads the team\'s end time', async () => {
     fireEvent.click(screen.getByText('idő hozzáadása'));
   });
   confirm();
+
+  expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(later)}`))).toBeInTheDocument();
+});
+
+// Adding time to everyone moves each team's `endAt`, which a dialog opened
+// afterwards reads off the list.
+test('adding time to every team reloads the list', async () => {
+  const later = inAnHour();
+  vi.spyOn(repo, 'getAll')
+    .mockResolvedValueOnce([alphaInRelayUntil(new Date(LATER))])
+    .mockResolvedValue([alphaInRelayUntil(later)]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, later));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(later));
+  renderAdmin();
+  await screen.findByText('Alpha');
+
+  await act(async () => {
+    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('hozzáadás'));
+  });
+  confirm();
+  expect(await screen.findByText('Sikeres művelet')).toBeInTheDocument();
+  fireEvent.click(screen.getByText('Szerkesztés'));
 
   expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(later)}`))).toBeInTheDocument();
 });
@@ -385,7 +414,7 @@ test('a team gone from the list closes its dialog for good', async () => {
 // were added.
 test('the team dialog\'s clock stops at zero, and follows minutes added after it', async () => {
   const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(inAnHour()));
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
   expect(await screen.findByText('00:00:00')).toBeInTheDocument();
 
