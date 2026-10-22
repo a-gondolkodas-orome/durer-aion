@@ -22,9 +22,19 @@ const row = {
   credentials: "1f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b",
   email: "team@example.com",
   pageState: "RELAY",
-  relayMatch: { state: "IN PROGRESS", matchID: "relay-match", startAt: "2026-09-07T09:00:00.000Z", endAt: "2026-09-07T10:00:00.000Z" },
-  strategyMatch: { state: "NOT STARTED" },
+  relayMatchID: "relay-match",
+  strategyMatchID: null,
   other: "",
+};
+
+/** A stand-in for a model instance: its columns, and `toJSON` to read them. */
+const model = (values: object) => ({ ...values, toJSON: () => values });
+
+// What the admin routes serve beside the row: its matches, read off storage.
+const RELAY_STATE = { G: { start: "2026-09-07T09:00:00.000Z", end: "2099-01-01T00:00:00.000Z", points: 0 }, ctx: {} };
+const matches = {
+  relayMatch: { state: "IN PROGRESS", matchID: "relay-match", startAt: RELAY_STATE.G.start, endAt: RELAY_STATE.G.end },
+  strategyMatch: { state: "NOT STARTED" },
 };
 
 // What postgres answers when a live team holds one of the unique columns: the
@@ -54,6 +64,7 @@ describe("the restore routes", () => {
     const app = new Koa<Koa.DefaultState, Server.AppCtx>();
     // The 4xx answers are under test, and koa logs every error it writes.
     app.silent = true;
+    app.context.db = { fetch: () => ({ state: RELAY_STATE }) } as unknown as Server.AppCtx["db"];
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
     configureTeamsRouter(router, teams as TeamsRepository, [], requireAdmin(PASSWORD));
     app.use(router.routes());
@@ -70,12 +81,12 @@ describe("the restore routes", () => {
   }
 
   it("serves the archive", async () => {
-    const request = await serve({ listDeletedTeams: vi.fn().mockResolvedValue([{ ...row, deletedAt: DELETED_AT, deletionId: 7 }]) });
+    const request = await serve({ listDeletedTeams: vi.fn().mockResolvedValue([model({ ...row, deletedAt: DELETED_AT, deletionId: 7 })]) });
 
     const response = await request("GET", "/team/admin/deleted");
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toStrictEqual([{ ...row, deletedAt: DELETED_AT.toISOString(), deletionId: 7 }]);
+    expect(await response.json()).toStrictEqual([{ ...row, deletedAt: DELETED_AT.toISOString(), deletionId: 7, ...matches }]);
   });
 
   // One request for all of them, so the batch is one timestamp.
@@ -91,13 +102,13 @@ describe("the restore routes", () => {
   });
 
   it("restores the archive row named in the path", async () => {
-    const teams = { restoreTeam: vi.fn().mockResolvedValue(row) };
+    const teams = { restoreTeam: vi.fn().mockResolvedValue(model(row)) };
     const request = await serve(teams);
 
     const response = await request("POST", "/team/admin/deleted/7/restore");
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toStrictEqual(row);
+    expect(await response.json()).toStrictEqual({ ...row, ...matches });
     expect(teams.restoreTeam).toHaveBeenCalledWith(7);
   });
 
@@ -164,8 +175,6 @@ describe("TeamsRepository", () => {
     );
     return new TeamsRepository({ sequelize } as unknown as PostgresStore);
   }
-
-  const model = (values: object) => ({ ...values, toJSON: () => values });
 
   describe("removeAllTeams", () => {
     it("archives every team under one timestamp before dropping them, on the one transaction", async () => {

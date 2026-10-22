@@ -105,16 +105,12 @@ export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, Bot>;
-  onFinishedMatch: (matchID: string) => Promise<void>;
-  unFinishedMatches = new Set<string>();
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, Bot>,
-    onFinishedMatch: (matchID: string) => Promise<void> = async () => undefined
   ) {
     super({ ...socketOpts });
     this.bots = bots;
-    this.onFinishedMatch = onFinishedMatch;
   }
   init(
     app: Server.App & { _io: IOTypes.Server; },
@@ -183,9 +179,6 @@ export class SocketIOButBotMoves extends SocketIO {
           // Basically we assume that a socket.on('update', ...)
           // already updated the game state, making StateID and PlayerID stale
           const [actionData, , matchID, stalePlayerID] = args;
-          //this in theory means, that the match already exist
-          //also we assume, this event can't happen, after the game is finished
-          this.unFinishedMatches.add(matchID);
           if (actionData.type !== "MAKE_MOVE") {
             return;
           }
@@ -257,17 +250,6 @@ export class SocketIOButBotMoves extends SocketIO {
               matchID,
               BOT_ID
             );
-          });
-          await matchQueue.add(async () => {
-            const {  state  } = await fetch(app.context.db, matchID, {
-               state: true,
-             } as const);
-            if (state.ctx.gameover) {
-              if (this.unFinishedMatches.has(matchID)) {
-                this.unFinishedMatches.delete(matchID);
-                await this.onFinishedMatch(matchID);
-              }
-            }
           });
         });
       });

@@ -62,6 +62,9 @@ paths:
   /game/admin/{matchId}/addminutes/{minutes}:
     post:
       summary: Add extra time to a specific match
+      description: >
+        Moves the match's end. A match whose time is already up is extended
+        from now, and reads as running again; one whose game has ended cannot be.
       parameters:
         - name: matchId
           in: path
@@ -89,7 +92,9 @@ paths:
         "500":
           description: Team not found
         "501":
-          description: Restarting finished match not supported
+          description: >
+            Not the team's current match, its game has ended, or the team is
+            playing its other match
 
   /game/admin/{matchId}/metadata:
     get:
@@ -626,6 +631,14 @@ components:
         pageState:
           type: string
           enum: ["DISCLAIMER", "HOME", "RELAY", "STRATEGY"]
+        relayMatchID:
+          type: string
+          nullable: true
+          description: The team's current relay match, the column the status below is read from.
+        strategyMatchID:
+          type: string
+          nullable: true
+          description: The team's current strategy match, the column the status below is read from.
         relayMatch:
           $ref: "#/components/schemas/MatchStatus"
         strategyMatch:

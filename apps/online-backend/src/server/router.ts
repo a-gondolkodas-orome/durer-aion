@@ -4,10 +4,10 @@ import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
-import { InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
-import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+import { getNewGame, createGame, extendedEnd, extensionRefusal, injectBot, injectPlayer } from './team_manage';
+import { adminTeamView, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
@@ -111,45 +111,18 @@ export function configureTeamsRouter(
       return;
     }
 
+    const refusal = extensionRefusal(team, matchID, state.ctx.gameover, await teamMatches(ctx.db, team));
+    if (refusal !== null) {
+      ctx.throw(501, refusal);
+    }
+
+    const newEndDate = extendedEnd(state.G.end, minutes, new Date());
     const new_state = {
       ...state,
       _stateID: state._stateID + 1
     }
-
-    const newEndDate = new Date(state.G.end)
-    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
     new_state.G.end = newEndDate.toISOString();
     new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
-
-    if (team.strategyMatch.state === "IN PROGRESS") {
-      if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        strategyMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else if (team.relayMatch.state === "IN PROGRESS") {
-      if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        relayMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else {
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
-    }
 
     await ctx.db.setState(matchID, new_state);
 
@@ -178,7 +151,7 @@ export function configureTeamsRouter(
     team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
     await team.save();
 
-    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
+    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: await adminTeamView(ctx.db, team) };
 
   });
 
@@ -216,11 +189,11 @@ export function configureTeamsRouter(
     if (team.pageState === 'STRATEGY')
       team.pageState = 'HOME'
 
-    if (team.strategyMatch.state !== 'NOT STARTED')
-      team.other = appendOtherNote(team.other, `prevstratid:${team.strategyMatch.matchID}`)
-    team.strategyMatch = { state: 'NOT STARTED' }
+    if (team.strategyMatchID !== null)
+      team.other = appendOtherNote(team.other, `prevstratid:${team.strategyMatchID}`)
+    team.strategyMatchID = null
     await team.save();
-    ctx.body = team;
+    ctx.body = await adminTeamView(ctx.db, team);
   });
 
   /**
@@ -240,11 +213,11 @@ export function configureTeamsRouter(
     if (team.pageState === 'RELAY')
       team.pageState = 'HOME'
 
-    if (team.relayMatch.state !== 'NOT STARTED')
-      team.other = appendOtherNote(team.other, `prevrelayid:${team.relayMatch.matchID}`)
-    team.relayMatch = { state: 'NOT STARTED' }
+    if (team.relayMatchID !== null)
+      team.other = appendOtherNote(team.other, `prevrelayid:${team.relayMatchID}`)
+    team.relayMatchID = null
     await team.save();
-    ctx.body = team;
+    ctx.body = await adminTeamView(ctx.db, team);
   });
 
   /**
@@ -277,7 +250,7 @@ export function configureTeamsRouter(
    * @returns {DeletedTeamModel[]}
    */
   router.get("/team/admin/deleted", adminAuth, async (ctx) => {
-    ctx.body = await teams.listDeletedTeams();
+    ctx.body = await Promise.all((await teams.listDeletedTeams()).map(team => adminTeamView(ctx.db, team)));
   });
 
   /**
@@ -299,7 +272,7 @@ export function configureTeamsRouter(
       }
       throw error;
     });
-    ctx.body = team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`);
+    ctx.body = await adminTeamView(ctx.db, team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`));
   });
 
   /**
@@ -336,8 +309,7 @@ export function configureTeamsRouter(
     } else {
       filters = filter_string;
     }
-    //TODO: fix the return type value
-    ctx.body = await teams.fetch(filters);
+    ctx.body = await Promise.all((await teams.fetch(filters)).map(team => adminTeamView(ctx.db, team)));
   });
 
   /**
@@ -345,7 +317,7 @@ export function configureTeamsRouter(
    * @returns {TeamModel[]} - List of the selected teams
    */
   router.get("/team/admin/all", adminAuth, koaBody(), async (ctx) => {
-    ctx.body = await teams.listTeams();
+    ctx.body = await Promise.all((await teams.listTeams() ?? []).map(team => adminTeamView(ctx.db, team)));
   })
 
   /**
@@ -409,44 +381,28 @@ export function configureTeamsRouter(
   });
 
   /**
-   * The logged-in team's own state. This is where a match whose time ran out
-   * while the team was away gets closed.
+   * The logged-in team's own state.
    *
    * @returns {PublicTeamView} - the team's own state, without its secrets
    */
   router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
-    let team = ctx.state.team;
-    const staleInfo = await checkStaleMatch(team);
-    if (staleInfo.isStale) {
-      await closeMatch(
-        (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
-        teams,
-        ctx.db
-      );
-      team =
-        (await teams.getTeam({ teamId: team.teamId })) ??
-        ctx.throw(404, `Team with {teamId:${team.teamId}} not found.`);
-    }
-    ctx.body = publicTeamView(team);
+    const team = ctx.state.team;
+    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team));
   });
 
   /**
    * Let the logged-in team start a RELAY match.
    */
   router.post<TeamState>("/team/me/relay/play", requireTeam(teams), async (ctx) => {
-    const { game, team } = await getNewGame(ctx, teams, games, "RELAY", ctx.state.team);
+    const { game, team } = await getNewGame(ctx, games, "RELAY", ctx.state.team);
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    const match = await startMatchStatus(body.matchID, ctx);
-    if (match.startAt === null || match.endAt === null) {
-      console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
-    }
     await team.update({
       pageState: "RELAY",
-      relayMatch: match,
+      relayMatchID: body.matchID,
     });
     ctx.body = body;
   });
@@ -455,7 +411,7 @@ export function configureTeamsRouter(
    * Let the logged-in team start a STRATEGY match.
    */
   router.post<TeamState>("/team/me/strategy/play", requireTeam(teams), async (ctx) => {
-    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY", ctx.state.team);
+    const { game, team } = await getNewGame(ctx, games, "STRATEGY", ctx.state.team);
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
@@ -463,7 +419,7 @@ export function configureTeamsRouter(
 
     await team.update({
       pageState: "STRATEGY",
-      strategyMatch: await startMatchStatus(body.matchID, ctx),
+      strategyMatchID: body.matchID,
     });
     ctx.body = body;
   });
@@ -473,12 +429,13 @@ export function configureTeamsRouter(
    */
   router.post<TeamState>("/team/me/gohome", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
+    const matches = await teamMatches(ctx.db, team);
+    if (matches.relayMatch.state === 'IN PROGRESS' || matches.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
 
     await team.update({
       pageState: "HOME",
     });
-    ctx.body = publicTeamView(team);
+    ctx.body = publicTeamView(team, matches);
   });
 }
