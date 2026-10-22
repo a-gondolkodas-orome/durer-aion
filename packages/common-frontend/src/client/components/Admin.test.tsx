@@ -11,6 +11,7 @@ import { MockClientRepository } from '../mock-client-repository';
 import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
+import { formatTime } from '../utils/DateFormatter';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -89,13 +90,28 @@ afterEach(() => {
 // snackbar provider the page reports through — same as in the apps.
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
 
+// What SWR reloads on when the window regains focus. Tests call it rather
+// than dispatch a focus event: SWR's own listener hands the event to
+// `setTimeout` as its delay, which Node warns about.
+let refocus: () => void = () => undefined;
+const focusWindow = () => act(() => {
+  refocus();
+});
+
 // A fresh SWR cache per render: the list's key is the same in every test, and
 // a cached list would stand in for the one the test's repository serves.
 const renderAdmin = (teamId?: string, swr: SWRConfiguration = {}) =>
   render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
-        <SWRConfig value={{ ...swr, provider: () => new Map() }}>
+        <SWRConfig value={{
+          ...swr,
+          provider: () => new Map(),
+          initFocus: (callback) => {
+            refocus = callback;
+            return () => undefined;
+          },
+        }}>
           <Layout>
             <Admin teamId={teamId}/>
           </Layout>
@@ -251,6 +267,28 @@ test('the team dialog totals a match left in progress past its end, until time i
   expect(await screen.findByText('Összesen: ? pont')).toBeInTheDocument();
 });
 
+// Adding minutes moves the team's `endAt` too, which only the list carries.
+test('adding minutes reloads the team\'s end time', async () => {
+  const later = inAnHour();
+  vi.spyOn(repo, 'getAll')
+    .mockResolvedValueOnce([{ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) } }])
+    .mockResolvedValue([{ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: later } }]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  renderAdmin(alpha.teamId);
+  expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(new Date(LATER))}`))).toBeInTheDocument();
+
+  await act(async () => {
+    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('idő hozzáadása'));
+  });
+  confirm();
+
+  expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(later)}`))).toBeInTheDocument();
+});
+
 test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
   vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
@@ -287,8 +325,7 @@ test('the team dialog follows the list when it reloads', async () => {
   renderAdmin(alpha.teamId, { dedupingInterval: 0, focusThrottleInterval: 0 });
   expect(await screen.findByText(/Végzett/)).toBeInTheDocument();
 
-  // SWR reloads on focus.
-  fireEvent(window, new Event('focus'));
+  await focusWindow();
 
   await waitFor(() => expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2));
 });
@@ -320,7 +357,7 @@ test('the logs fetched for one match are not shown under the next', async () => 
   fireEvent.click(await screen.findByText('logok Lekérése'));
   expect(await screen.findByText('123456')).toBeInTheDocument();
 
-  fireEvent(window, new Event('focus'));
+  await focusWindow();
 
   await waitFor(() => expect(screen.queryByText('123456')).not.toBeInTheDocument());
 });
@@ -334,11 +371,11 @@ test('a team gone from the list closes its dialog for good', async () => {
   fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
   expect(await screen.findByText('Csapat törlése')).toBeInTheDocument();
 
-  fireEvent(window, new Event('focus'));
+  await focusWindow();
   await waitFor(() => expect(screen.queryByText('Alpha')).not.toBeInTheDocument());
   expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument();
 
-  fireEvent(window, new Event('focus'));
+  await focusWindow();
   expect(await screen.findByText('Alpha')).toBeInTheDocument();
   expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument();
 });

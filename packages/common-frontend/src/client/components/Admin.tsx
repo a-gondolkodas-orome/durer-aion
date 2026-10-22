@@ -61,9 +61,11 @@ export function Admin(props: { teamId?: string }) {
   };
 
   // A reset answers with the team's new row: the list takes it at once, then
-  // reloads.
-  const onChanged = (changed: TeamModelDto) => {
-    void mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it));
+  // reloads. Adding minutes answers with none, so the list only reloads.
+  const onChanged = (changed?: TeamModelDto) => {
+    void (changed
+      ? mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it))
+      : mutate());
   };
 
   return (

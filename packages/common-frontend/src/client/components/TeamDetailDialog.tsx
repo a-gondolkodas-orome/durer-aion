@@ -16,14 +16,15 @@ import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-/// `onRemoved` fires once the server has dropped the team, and `onChanged` with
-/// the team's new row once a reset has changed it: the list this dialog was
-/// opened from is stale from that moment, and `data` is read off that list.
+/// `onRemoved` fires once the server has dropped the team, and `onChanged` once
+/// an action has changed it, with the team's new row when the answer carries
+/// one: the list this dialog was opened from is stale from that moment, and
+/// `data` is read off that list.
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
   onRemoved: () => void,
-  onChanged: (team: TeamModelDto) => void,
+  onChanged: (team?: TeamModelDto) => void,
 }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
@@ -63,7 +64,7 @@ export function TeamDetailDialog(props: {
       }}>
       <Stack sx={{ fontSize: 24, paddingBottom: "24px" }}>{team.teamName}</Stack>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
-      <MatchStatusField key={`relay ${matchKey(team.relayMatch)}`} name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
+      <MatchStatusField key={`relay ${matchKey(team.relayMatch)}`} name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
       {team.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
@@ -84,7 +85,7 @@ export function TeamDetailDialog(props: {
         >reset</Button>}
 
       <Stack sx={{ fontSize: 16, marginTop: "24px" }}>Strategy:</Stack>
-        <MatchStatusField key={`strategy ${matchKey(team.strategyMatch)}`} name={team.teamName} data={team.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog}/>
+        <MatchStatusField key={`strategy ${matchKey(team.strategyMatch)}`} name={team.teamName} data={team.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
       {team.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
@@ -133,7 +134,7 @@ function matchKey(status: MatchStatus) {
   return status.state === "NOT STARTED" ? "" : status.matchID;
 }
 
-function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>, onChanged: () => void }) {
   const theme = useTheme();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
@@ -174,8 +175,10 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             confirm: async () => {
               try {
                 await addMinutes(inProgressState.matchID, values.time);
-                // The dialog's total reads the new `G.end` from here.
+                // The dialog's total reads the new `G.end` from here, and
+                // team-state-end the team's new `endAt` from the list.
                 await mutate(matchStateKey(inProgressState.matchID));
+                props.onChanged();
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
