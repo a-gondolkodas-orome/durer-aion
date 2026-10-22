@@ -1,7 +1,7 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
 import { getBotCredentials, relayNames } from "./common";
-import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
+import { AnyBgioGame, PlayerIDType, relayProblemResults, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
@@ -209,9 +209,13 @@ export async function closeMatch(
     return;
   }
   const mStat = status as InProgressMatchStatus;
-  const finishState = await endMatchStatus(mStat, currentMatch.state.G.points);
+  const G = currentMatch.state.G;
+  const finishState = {
+    ...await endMatchStatus(mStat, G.points),
+    ...(type === "relayMatch" ? { relayResults: relayProblemResults(G) } : { strategyResults: G.liveResults }),
+  };
   console.log(
-    `Closing match: ${matchId}, points: ${currentMatch.state.G.points}`
+    `Closing match: ${matchId}, points: ${G.points}`
   );
   if (!(await teams.finishMatch(teamId, type, matchId, finishState)))
     console.log(`Not closing match: ${matchId}, it was replaced while being closed`);

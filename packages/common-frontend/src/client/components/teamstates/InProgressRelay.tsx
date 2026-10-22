@@ -2,12 +2,13 @@ import { Stack } from '@mui/system';
 import { useEffect, useEffectEvent } from 'react';
 import { Countdown, useMsRemaining } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
-import { GUESSER_PLAYER, MyGameState } from 'game';
-import { Dialog } from '@mui/material';
-import { useRefreshTeamState, useToHome } from '../../hooks/user-hooks';
+import { GUESSER_PLAYER, MyGameState, relayProblemResults } from 'game';
+import { useBackToHome, useLogout } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
-import { RelayEndTable, relayTaskPoints } from '../RelayEndTable';
+import { RelayEndTable } from '../RelayEndTable';
+import { RelayProgressTable } from '../ResultTables';
+import { EndDialog } from '../EndCard';
 import { useClientRepo } from '../../client-repo-context';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
@@ -22,8 +23,9 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
 }) {
   const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining);
   const clientRepo = useClientRepo();
-  const refreshState = useRefreshTeamState();
-  const toHome = useToHome();
+  const logout = useLogout();
+  // Closing the dialog leaves the way its button does.
+  const backToHome = useBackToHome(selectRoundOnEnd ? logout : undefined);
   const theme = useTheme();
   const { t } = useTranslation();
   // A guess hands the turn to the judge until it rules; any move of the team's
@@ -39,13 +41,6 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
     if (!awaitingJudge) {
       void clientRepo.syncRelayTime(moves);
     }
-  };
-  // Named so the handler below can stay synchronous: React ignores what an
-  // event handler returns, so an async one leaves its promise unhandled.
-  const backToHome = async () => {
-    await refreshState();
-    await toHome();
-    window.location.reload();
   };
 
   const startOrSync = useEffectEvent(() => {
@@ -70,32 +65,12 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   if (G.numberOfTry === 0 && !finished) {
     return <div>{t('general.loading')}</div>;
   }
+  const problems = relayProblemResults(G);
   return (
     <>
-      <Dialog
-        maxWidth={false}
-        slotProps={{ paper: {
-          sx: {
-            marginLeft: {
-              xs: 0,
-              md: '32px'
-            },
-            marginRight: {
-              xs: 0,
-              md: '32px'
-            },
-            maxWidth: {
-              xs: '100%',
-              md: 'calc(100% - 64px)'
-            },
-            backgroundColor: theme.palette.background.paper,
-          }
-        } }}
-        open={
-          finished
-        } onClose={() => void backToHome()}>
-          <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} task={relayTaskPoints(G)}/>
-        </Dialog>
+      <EndDialog open={finished} onClose={backToHome}>
+        <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={problems}/>
+      </EndDialog>
       <Stack sx={{
         width: "100%",
         display: 'flex',
@@ -194,6 +169,17 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             ({t('general.warning.timeNotReal')})
             </Stack>
           }
+          <Stack sx={{
+            marginTop: '12px',
+            paddingTop: '12px',
+            borderTop: '1px solid #e6e6e6',
+            gap: '8px',
+          }}>
+            <RelayProgressTable problems={problems} current={G.currentProblem}/>
+            <Stack sx={{ fontSize: '13px', color: '#666' }}>
+              {t('relay.progress', { points: t('general.points', { count: G.points }) })}
+            </Stack>
+          </Stack>
         </Stack>
       </Stack>
     </>
