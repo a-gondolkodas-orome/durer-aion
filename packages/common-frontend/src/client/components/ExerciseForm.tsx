@@ -49,6 +49,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
       }
     }
   });
+  // The attempt is a dependency so that a second wrong guess in a row, which
+  // leaves the correctness false, is announced too.
   useEffect(() => {
     announceResult(props.previousCorrectness);
   }, [props.previousCorrectness, props.attempt])
