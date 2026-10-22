@@ -5,7 +5,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
-import { TeamModelDto, adminTeamId } from '../dto/TeamStateDto';
+import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
 import { DeletedTeams } from './DeletedTeams';
 import { csvToolbar } from './CsvToolbar';
@@ -45,7 +45,12 @@ export function Admin(props: { teamId?: string }) {
   // falls back to the grid instead of showing the team it no longer has.
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
   // The same for the dialog, so it shows the team as the list last loaded it.
+  // A team gone from the list is deselected too, so restoring it later does not
+  // reopen the dialog unasked.
   const selectedRow = selectedTeamId ? data?.find(d => d.teamId === selectedTeamId) ?? null : null;
+  if (selectedTeamId !== null && data && !selectedRow) {
+    setSelectedTeamId(null);
+  }
   const showTeams = !teamFromPath && tab === 'teams';
 
   // The server has dropped the team: the dialog closes, and the grid reloads so
@@ -178,7 +183,7 @@ export function Admin(props: { teamId?: string }) {
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={() => {setSelectedTeamId(adminTeamId(renderData.row))}}>
+                    onClick={() => {setSelectedTeamId(renderData.row.teamId ?? null)}}>
                       Szerkesztés
                   </Button>
                 )

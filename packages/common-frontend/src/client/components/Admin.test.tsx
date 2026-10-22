@@ -293,8 +293,10 @@ test('the team dialog follows the list when it reloads', async () => {
   await waitFor(() => expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2));
 });
 
+// The reload after the reset never answers, so only the row the reset returned
+// can show.
 test('a reset shows the team\'s new row', async () => {
-  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([finishedAlpha, bravo]).mockResolvedValue([alpha, bravo]);
+  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([finishedAlpha, bravo]).mockReturnValue(new Promise(() => undefined));
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(5, LATER));
   vi.spyOn(repo, 'resetRelay').mockResolvedValue(alpha);
   renderAdmin();
@@ -307,6 +309,38 @@ test('a reset shows the team\'s new row', async () => {
   expect(await screen.findByText('Sikeres művelet')).toBeInTheDocument();
   expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2);
   expect(screen.queryByText('reset')).not.toBeInTheDocument();
+});
+
+test('the logs fetched for one match are not shown under the next', async () => {
+  const inProgress = (matchID: string) => ({ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID, startAt: new Date(EARLIER), endAt: inAnHour() } } as const);
+  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([inProgress('first-match')]).mockResolvedValue([inProgress('second-match')]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
+  vi.spyOn(repo, 'getMatchLogs').mockResolvedValue({ G: { points: 123456 } } as unknown as MatchStateDto);
+  renderAdmin(alpha.teamId, { dedupingInterval: 0, focusThrottleInterval: 0 });
+  fireEvent.click(await screen.findByText('logok Lekérése'));
+  expect(await screen.findByText('123456')).toBeInTheDocument();
+
+  fireEvent(window, new Event('focus'));
+
+  await waitFor(() => expect(screen.queryByText('123456')).not.toBeInTheDocument());
+});
+
+test('a team gone from the list closes its dialog for good', async () => {
+  vi.spyOn(repo, 'getAll')
+    .mockResolvedValueOnce([alpha, bravo])
+    .mockResolvedValueOnce([bravo])
+    .mockResolvedValue([alpha, bravo]);
+  renderAdmin(undefined, { dedupingInterval: 0, focusThrottleInterval: 0 });
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  expect(await screen.findByText('Csapat törlése')).toBeInTheDocument();
+
+  fireEvent(window, new Event('focus'));
+  await waitFor(() => expect(screen.queryByText('Alpha')).not.toBeInTheDocument());
+  expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument();
+
+  fireEvent(window, new Event('focus'));
+  expect(await screen.findByText('Alpha')).toBeInTheDocument();
+  expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument();
 });
 
 // The countdown waited on a server refresh in its last second, which the

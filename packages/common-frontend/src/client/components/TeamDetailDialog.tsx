@@ -63,7 +63,7 @@ export function TeamDetailDialog(props: {
       }}>
       <Stack sx={{ fontSize: 24, paddingBottom: "24px" }}>{team.teamName}</Stack>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
-      <MatchStatusField name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
+      <MatchStatusField key={`relay ${matchKey(team.relayMatch)}`} name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
       {team.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
@@ -84,7 +84,7 @@ export function TeamDetailDialog(props: {
         >reset</Button>}
 
       <Stack sx={{ fontSize: 16, marginTop: "24px" }}>Strategy:</Stack>
-        <MatchStatusField name={team.teamName} data={team.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog}/>
+        <MatchStatusField key={`strategy ${matchKey(team.strategyMatch)}`} name={team.teamName} data={team.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog}/>
       {team.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
@@ -125,6 +125,12 @@ export function TeamDetailDialog(props: {
       </Stack>
     </Stack>
   )
+}
+
+/// Remounts the field for another match, so the logs fetched for one are not
+/// shown under the next.
+function matchKey(status: MatchStatus) {
+  return status.state === "NOT STARTED" ? "" : status.matchID;
 }
 
 function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
