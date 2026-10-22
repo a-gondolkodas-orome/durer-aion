@@ -37,19 +37,18 @@ export function Countdown(
     const { offset } = clock;
     const tick = useEffectEvent(() => {
         const diff = endMs - new Date().getTime() - (offset > 5000 || offset < -5000 ? offset : 0);
-        setMsRemaining(displayedMsRemaining => {
-            // displayed remaining ms is not updated below 100, only the backend sets it below 0 ms
-            if (displayedMsRemaining !== null && displayedMsRemaining > 1100) {
-                return Math.max(diff, 100)
-            }
-            // if it is set below 0 we can continue the normal operation
-            if (displayedMsRemaining !== null && displayedMsRemaining < 0) {
-              return diff;
-            }
-            // when displayed ms remaining is between 1100 and 0 sync with server timer
-            getServerTimer();
-            return displayedMsRemaining;
-        });
+        // displayed remaining ms is not updated below 100, only the backend sets it below 0 ms
+        if (msRemaining !== null && msRemaining > 1100) {
+            setMsRemaining(Math.max(diff, 100));
+            return;
+        }
+        // if it is set below 0 we can continue the normal operation
+        if (msRemaining !== null && msRemaining < 0) {
+            setMsRemaining(diff);
+            return;
+        }
+        // when displayed ms remaining is between 1100 and 0 sync with server timer
+        getServerTimer();
     });
     // A new server reading restarts the timer, so the first tick after it is a
     // full second later.

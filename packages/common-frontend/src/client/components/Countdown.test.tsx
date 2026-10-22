@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -34,6 +34,14 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+// One act per second: act holds renders back until it ends, and each tick reads
+// the count the previous one rendered, as it does in a browser.
+function advanceSeconds(seconds: number) {
+  for (let i = 0; i < seconds; i++) {
+    act(() => { vi.advanceTimersByTime(1000); });
+  }
+}
+
 test('shows the remaining time from the first render', () => {
   render(<Board end={START.getTime() + 2 * HOUR} serverMs={2 * HOUR} />);
   expect(screen.getByText('02:00:00')).toBeInTheDocument();
@@ -59,9 +67,9 @@ test('a new reading from the server replaces the local count', () => {
 test('near zero, holds the count and asks the server', () => {
   const getServerTimer = vi.fn();
   render(<Board end={START.getTime() + 3000} serverMs={3000} getServerTimer={getServerTimer} />);
-  act(() => { vi.advanceTimersByTime(2000); });
+  advanceSeconds(2);
   expect(getServerTimer).not.toHaveBeenCalled();
-  act(() => { vi.advanceTimersByTime(2000); });
+  advanceSeconds(2);
   expect(getServerTimer).toHaveBeenCalled();
   expect(screen.getByText('00:00:01')).toBeInTheDocument();
 });
@@ -73,7 +81,20 @@ test('near zero, asks the server through the latest callback', () => {
   const latest = vi.fn();
   const { rerender } = render(<Board end={START.getTime() + 3000} serverMs={3000} getServerTimer={first} />);
   rerender(<Board end={START.getTime() + 3000} serverMs={3000} getServerTimer={latest} />);
-  act(() => { vi.advanceTimersByTime(4000); });
+  advanceSeconds(4);
   expect(first).not.toHaveBeenCalled();
   expect(latest).toHaveBeenCalled();
+});
+
+// StrictMode runs a state updater twice, so a sync request made from inside one
+// went out twice per tick.
+test('near zero, asks the server once per tick under StrictMode', () => {
+  const getServerTimer = vi.fn();
+  render(<StrictMode>
+    <Board end={START.getTime() + 3000} serverMs={3000} getServerTimer={getServerTimer} />
+  </StrictMode>);
+  advanceSeconds(3);
+  expect(getServerTimer).toHaveBeenCalledOnce();
+  advanceSeconds(1);
+  expect(getServerTimer).toHaveBeenCalledTimes(2);
 });
