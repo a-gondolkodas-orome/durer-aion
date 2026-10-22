@@ -1,7 +1,6 @@
 import type { StorageAPI } from "boardgame.io";
-import type { InProgressMatchStatus } from "schemas";
 import type { TeamsRepository } from "./db";
-import { checkStaleMatch, closeMatch } from "./team_manage";
+import { closeMatch } from "./team_manage";
 
 /** How long past `endAt` a match is left alone. A move up to 10 s after
  *  `endAt` is still judged (`packages/game`, the `1000 * 10` checks), so the
@@ -17,7 +16,7 @@ export const STALE_GRACE_MS = 30 * 1000;
  *  Every other close path needs the team's browser — the socket handler needs a
  *  packet, `/team/me`'s stale check needs the page loaded again — so a team that
  *  closes the tab at the buzzer would otherwise sit on `IN PROGRESS` with no
- *  score. `checkStaleMatch` decides and `closeMatch` writes it, as elsewhere.
+ *  score. `closeMatch` writes the score, as elsewhere.
  */
 export async function closeStaleMatches(
   teams: TeamsRepository,
@@ -26,12 +25,12 @@ export async function closeStaleMatches(
 ) {
   const endedBefore = Date.now() - STALE_GRACE_MS;
   for (const team of await teams.listTeams() ?? []) {
-    const stale = await checkStaleMatch(team);
-    if (!stale.isStale) continue;
-    // `checkStaleMatch` has made `endAt` a Date by now.
-    const match = team[stale.gameState] as InProgressMatchStatus;
-    if (match.endAt.getTime() >= endedBefore) continue;
-    // One unclosable match must not cost every later team its score.
-    await closeMatch(match.matchID, teams, db).catch(onError);
+    for (const match of [team.relayMatch, team.strategyMatch]) {
+      if (match.state !== "IN PROGRESS") continue;
+      // The JSON column hands `endAt` back as a string.
+      if (new Date(match.endAt).getTime() >= endedBefore) continue;
+      // One unclosable match must not cost every later team its score.
+      await closeMatch(match.matchID, teams, db).catch(onError);
+    }
   }
 }

@@ -75,6 +75,16 @@ it("closes both kinds of stale match and leaves a running one alone", async () =
   expect(onError).not.toHaveBeenCalled();
 });
 
+// What postgres hands back: the JSON column's dates are strings.
+it("reads an end time stored as a string", async () => {
+  const alpha = team("alpha", { relayMatch: { ...running("m1", RAN_OUT), endAt: RAN_OUT.toISOString() } as unknown as MatchStatus });
+  const teams = repositoryOf([alpha]);
+
+  await closeStaleMatches(teams, storageOf({ m1: { gameName: "relay_c", teamId: "alpha", points: 23 } }), vi.fn());
+
+  expect(finishedTeams(teams)).toStrictEqual(["alpha"]);
+});
+
 // The game still takes a move for a few seconds past `endAt`, and that move
 // closes the match itself; closing it here first could leave the earlier score.
 it("leaves a match that ran out inside the grace period to the team's last move", async () => {
