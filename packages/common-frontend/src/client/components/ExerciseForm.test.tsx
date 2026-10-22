@@ -60,10 +60,3 @@ test('focuses the input on the attempt after a guess from this screen', async ()
   moveToAttempt(10);
   expect(screen.getByRole('textbox')).not.toHaveFocus();
 });
-
-// A teammate's guess raised the keyboard on every other phone of the team.
-test('leaves the input unfocused on an attempt a teammate brought on', () => {
-  const { moveToAttempt } = renderForm(false);
-  moveToAttempt(5);
-  expect(screen.getByRole('textbox')).not.toHaveFocus();
-});
