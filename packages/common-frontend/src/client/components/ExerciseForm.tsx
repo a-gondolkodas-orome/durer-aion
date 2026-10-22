@@ -30,13 +30,13 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const refreshState = useRefreshTeamState();
-  // The form below remounts on each new attempt, and focuses its input only on
-  // the first attempt after a guess of ours: one a teammate's guess brings on
-  // later must not pull the keyboard up on this screen.
-  const [sentFromAttempt, setSentFromAttempt] = useState<number | null>(null);
+  // The form below remounts on each new attempt. Its input is focused only on
+  // the attempt that follows a guess sent from this screen: a teammate's guess
+  // must not raise the keyboard on this phone.
+  const [pendingOwnGuessAt, setPendingOwnGuessAt] = useState<number | null>(null);
   const [focusAttempt, setFocusAttempt] = useState<number | null>(null);
-  if (sentFromAttempt !== null && sentFromAttempt !== props.attempt) {
-    setSentFromAttempt(null);
+  if (pendingOwnGuessAt !== null && pendingOwnGuessAt !== props.attempt) {
+    setPendingOwnGuessAt(null);
     setFocusAttempt(props.attempt);
   }
   const { t } = useTranslation();
@@ -90,10 +90,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             .catch((e: unknown) => {
               console.log(e);
               enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
-              // A guess that never reached the server brings on no attempt of ours.
-              setSentFromAttempt(null);
             });
-          setSentFromAttempt(props.attempt);
+          setPendingOwnGuessAt(props.attempt);
         }}>
         <Field
           name="result"
