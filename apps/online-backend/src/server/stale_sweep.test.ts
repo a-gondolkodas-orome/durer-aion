@@ -18,7 +18,6 @@ const team = (teamId: string, fields: Partial<TeamModel> = {}) => ({
   teamId,
   relayMatch: { state: "NOT STARTED" },
   strategyMatch: { state: "NOT STARTED" },
-  update: vi.fn().mockResolvedValue(undefined),
   ...fields,
 }) as unknown as TeamModel;
 
@@ -26,14 +25,20 @@ const repositoryOf = (rows: TeamModel[]) => ({
   listTeams: vi.fn().mockResolvedValue(rows),
   getTeam: vi.fn().mockImplementation(({ teamId }: { teamId: string }) =>
     Promise.resolve(rows.find(row => row.teamId === teamId) ?? null)),
+  finishMatch: vi.fn().mockResolvedValue(true),
 }) as unknown as TeamsRepository;
 
-/** What `closeMatch` reads off a match: its score, and the game and team it
- *  belongs to, which pick the team's column and row. */
+/** The teams the sweep wrote a finished match for, by id. */
+const finishedTeams = (teams: TeamsRepository) =>
+  vi.mocked(teams.finishMatch).mock.calls.map(([teamId]) => teamId);
+
+/** What `closeMatch` reads off a match: its score, the relay's per-problem
+ *  record (empty here), and the game and team it belongs to, which pick the
+ *  team's column and row. */
 const storageOf = (matches: Record<string, { gameName: string, teamId: string, points: number }>) => ({
   fetch: vi.fn().mockImplementation((matchID: string) => {
     const { gameName, teamId, points } = matches[matchID];
-    return Promise.resolve({ state: { G: { points } }, metadata: { gameName, players: [{ name: teamId }] } });
+    return Promise.resolve({ state: { G: { points, maxPointsList: [], previousPoints: [], previousAnswers: [] } }, metadata: { gameName, players: [{ name: teamId }] } });
   }),
 }) as unknown as StorageAPI.Async;
 
@@ -60,12 +65,13 @@ it("closes both kinds of stale match and leaves a running one alone", async () =
     m2: { gameName: "stones_e", teamId: "bravo", points: 5 },
   });
   const onError = vi.fn();
+  const teams = repositoryOf([alpha, bravo, charlie]);
 
-  await closeStaleMatches(repositoryOf([alpha, bravo, charlie]), db, onError);
+  await closeStaleMatches(teams, db, onError);
 
-  expect(alpha.update).toHaveBeenCalledWith({ relayMatch: expect.objectContaining({ state: "FINISHED", score: 23 }) });
-  expect(bravo.update).toHaveBeenCalledWith({ strategyMatch: expect.objectContaining({ state: "FINISHED", score: 5 }) });
-  expect(charlie.update).not.toHaveBeenCalled();
+  expect(teams.finishMatch).toHaveBeenCalledWith("alpha", "relayMatch", "m1", expect.objectContaining({ state: "FINISHED", score: 23 }));
+  expect(teams.finishMatch).toHaveBeenCalledWith("bravo", "strategyMatch", "m2", expect.objectContaining({ state: "FINISHED", score: 5 }));
+  expect(finishedTeams(teams)).toStrictEqual(["alpha", "bravo"]);
   expect(onError).not.toHaveBeenCalled();
 });
 
@@ -74,10 +80,11 @@ it("closes both kinds of stale match and leaves a running one alone", async () =
 it("leaves a match that ran out inside the grace period to the team's last move", async () => {
   const alpha = team("alpha", { relayMatch: running("m1", JUST_RAN_OUT) });
   const db = storageOf({});
+  const teams = repositoryOf([alpha]);
 
-  await closeStaleMatches(repositoryOf([alpha]), db, vi.fn());
+  await closeStaleMatches(teams, db, vi.fn());
 
-  expect(alpha.update).not.toHaveBeenCalled();
+  expect(teams.finishMatch).not.toHaveBeenCalled();
   expect(db.fetch).not.toHaveBeenCalled();
 });
 
@@ -89,10 +96,10 @@ it("carries on past a match it cannot close, and hands on its error", async () =
   const failure = new Error("no such match");
   vi.mocked(db.fetch).mockRejectedValueOnce(failure);
   const onError = vi.fn();
+  const teams = repositoryOf([alpha, bravo]);
 
-  await closeStaleMatches(repositoryOf([alpha, bravo]), db, onError);
+  await closeStaleMatches(teams, db, onError);
 
   expect(onError).toHaveBeenCalledExactlyOnceWith(failure);
-  expect(alpha.update).not.toHaveBeenCalled();
-  expect(bravo.update).toHaveBeenCalledWith({ relayMatch: expect.objectContaining({ state: "FINISHED" }) });
+  expect(finishedTeams(teams)).toStrictEqual(["bravo"]);
 });
