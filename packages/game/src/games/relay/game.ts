@@ -58,6 +58,10 @@ export function relayProblemResults(G: Pick<MyGameState, "start" | "maxPointsLis
 
 const lengthOfCompetition = 60 * 60; // seconds
 
+/** How long past `G.end` the team's moves are still judged. The first move past
+ *  it ends the game, and so does the judge's turn once `G.end` has passed. */
+export const LATE_ANSWER_GRACE_MS = 10 * 1000;
+
 // What the wrapper reports after each answered step and when the play phase
 // ends; hosts accept a superset of this shape (the offline frontend's
 // SendGameDataParams).
@@ -129,7 +133,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
           onMove: ({ G, _ctx, playerID, events }) => {
             if (playerID === GUESSER_PLAYER) {
               const currentTime = new Date();
-              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
+              if (currentTime.getTime() - new Date(G.end).getTime() > LATE_ANSWER_GRACE_MS) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();
               }
@@ -158,7 +162,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
               if (G.answer !== null) {
                 sendRelayFunction({ component: "relay", phase: "step", answer: G.answer, G: G, ctx: ctx });
               }
-              if (currentTime.getTime() - new Date(G.end).getTime() > 1000 * 10) {
+              if (currentTime.getTime() - new Date(G.end).getTime() > LATE_ANSWER_GRACE_MS) {
                 // Do not accept any answer if the time is over since more than 10 seconds
                 events.endGame();
               }

@@ -1,6 +1,6 @@
-import { describe, test, expect } from "vitest";
+import { afterEach, describe, test, expect, vi } from "vitest";
 import { Client } from "boardgame.io/client";
-import { GameRelay, RelayWrapper, relayProblemResults } from "./game";
+import { GameRelay, LATE_ANSWER_GRACE_MS, RelayWrapper, relayProblemResults } from "./game";
 
 // Regression: the first problem's max points came hardcoded as 3 (setup) and the
 // firstProblem move dropped the value the strategy sent, so a problem set whose
@@ -55,6 +55,54 @@ describe("RelayWrapper end report", () => {
     expect(client.getState()?.ctx.gameover).toBeDefined();
     const endReports = reports.filter((report) => report.phase === "end");
     expect(endReports).toStrictEqual([{ phase: "end", points: 2 }]);
+  });
+});
+
+// #613: a team that lets the clock run out sends no further move, so a match
+// ended only by a move never ended, and the offline apps, which keep the score
+// the end report carries, recorded 0. The board polls the clock once the grace
+// is over (common-frontend's useEndOnTime), and that poll is what ends it.
+describe("RelayWrapper end on time", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function scoredRelay() {
+    const reports: { phase: string; points: number }[] = [];
+    const client = Client({
+      game: RelayWrapper((report) => {
+        reports.push({ phase: report.phase, points: report.G.points });
+      }),
+      numPlayers: 2,
+    });
+    client.start();
+    client.moves.startGame();
+    client.moves.firstProblem("first problem text", [2, 3], "");
+    client.moves.submitAnswer(120);
+    client.moves.newProblem("second problem text", true, "");
+    const end = new Date(client.getState()?.G.end ?? "").getTime();
+    return { client, reports, end };
+  }
+
+  test("a clock poll past the grace ends the match and reports its points", () => {
+    vi.useFakeTimers();
+    const { client, reports, end } = scoredRelay();
+    vi.setSystemTime(end + LATE_ANSWER_GRACE_MS + 1000);
+
+    client.moves.getTime();
+
+    expect(client.getState()?.ctx.gameover).toBeDefined();
+    expect(reports.filter((report) => report.phase === "end")).toStrictEqual([{ phase: "end", points: 2 }]);
+  });
+
+  test("a clock poll inside the grace leaves the match open for a late answer", () => {
+    vi.useFakeTimers();
+    const { client, end } = scoredRelay();
+    vi.setSystemTime(end + LATE_ANSWER_GRACE_MS - 1000);
+
+    client.moves.getTime();
+
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
   });
 });
 
