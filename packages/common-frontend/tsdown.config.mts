@@ -8,11 +8,6 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
 
-  // The tsconfig here sets `declarationMap` and tsdown honours it. Nothing
-  // reads the map, and emitting one puts a `sourceMappingURL` into output the
-  // frontend apps go on to bundle.
-  dts: { sourcemap: false },
-
   deps: {
     // Keep external dependencies as imports so browser ESM never hits runtime
     // `require` shims. Marking external only what package.json declares is not

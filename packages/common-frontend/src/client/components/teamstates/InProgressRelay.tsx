@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
-import { useEffect, useState } from 'react';
-import { Countdown } from '../Countdown';
+import { useEffect, useEffectEvent } from 'react';
+import { Countdown, useMsRemaining } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { GUESSER_PLAYER, MyGameState, relayProblemResults } from 'game';
 import { useBackToHome, useLogout } from '../../hooks/user-hooks';
@@ -28,8 +28,7 @@ const END_DIALOG_FALLBACK_MS = 30 * 1000;
 export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps & {
   selectRoundOnEnd?: boolean,
 }) {
-  const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining);
-  const [gameover, setGameover] = useState(ctx.gameover);
+  const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining);
   const clientRepo = useClientRepo();
   const logout = useLogout();
   // Closing the dialog leaves the way its button does.
@@ -51,26 +50,25 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
     }
   };
 
-  useEffect(() => {
-    if (!ctx.gameover) {
-      // This function runs only once (on page reload) because it is inside a useEffect.
-      // Otherwise, it would run on every render.
-      const gameNotStarted = G.numberOfTry === 0;
-      if (gameNotStarted) {
-        void clientRepo.startRelayGame(moves);
-      } else {
-        syncTime();
-      }
+  const startOrSync = useEffectEvent(() => {
+    const gameNotStarted = G.numberOfTry === 0;
+    if (gameNotStarted) {
+      void clientRepo.startRelayGame(moves);
+    } else {
+      syncTime();
     }
-    setGameover(ctx.gameover)
-  }, [ctx.gameover]);
+  });
   useEffect(() => {
-    setMsRemaining(G.millisecondsRemaining);
-  }, [G.millisecondsRemaining]);
+    // Keyed on ctx.gameover alone, so this runs once on page load rather than
+    // on every render or every answer.
+    if (!ctx.gameover) {
+      startOrSync();
+    }
+  }, [ctx.gameover]);
   useEndOnTime(G.end, ctx.gameover, syncTime);
   // The game's own end, not the clock's: closing the dialog takes the team home,
   // and the offline apps read the score there from the game's end report.
-  const finished = gameover === true || msRemaining < -END_DIALOG_FALLBACK_MS
+  const finished = ctx.gameover === true || msRemaining < -END_DIALOG_FALLBACK_MS
   const isOffline = clientRepo.version === "OFFLINE";
   // Until the judge's firstProblem move, the state holds no problem to show
   // and the form has no move to submit to.
