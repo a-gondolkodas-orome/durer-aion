@@ -65,6 +65,8 @@ paths:
       description: >
         Moves the match's end. A match whose time is already up is extended
         from now, and reads as running again; one whose game has ended cannot be.
+        The team is put back on the match's page, which a team on its home page
+        sees once it reloads.
       parameters:
         - name: matchId
           in: path

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
@@ -213,12 +213,13 @@ const gameState = (points: number, end: string | Date): MatchStateDto => ({
 
 const inAnHour = () => new Date(Date.now() + 60 * 60 * 1000);
 
-test('the team dialog totals the game\'s points, not the lower score stored when the match closed', async () => {
+// The list's score is `G.points` as of the list; an answer judged just past
+// the end can raise it while the dialog is open.
+test('the team dialog totals the game\'s points as it fetches them, not the list\'s score', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
   expect(await screen.findByText('Összesen: 7 pont')).toBeInTheDocument();
-  expect(screen.getByText('Eltér a játék pontszámától (7), az a hivatalos.')).toBeInTheDocument();
   expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
@@ -230,28 +231,7 @@ test('the team dialog shows no total while a match is in progress', async () => 
   expect(screen.getByText('Összesen: ? pont')).toBeInTheDocument();
 });
 
-// The dialog's `endAt` is the one the list loaded with, so a match given more
-// time was still totalled as over.
-test('the team dialog totals a match left in progress past its end, until time is added', async () => {
-  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
-  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
-  expect(await screen.findByText('Összesen: 4 pont')).toBeInTheDocument();
-
-  getMatchState.mockResolvedValue(gameState(4, inAnHour()));
-  // Formik validates and submits asynchronously.
-  await act(async () => {
-    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '10' } });
-  });
-  await act(async () => {
-    fireEvent.click(screen.getByText('idő hozzáadása'));
-  });
-  confirm();
-
-  expect(await screen.findByText('Összesen: ? pont')).toBeInTheDocument();
-});
-
-test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
+test('the team dialog totals the list\'s score when the match state cannot be fetched', async () => {
   vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 

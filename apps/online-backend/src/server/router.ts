@@ -148,6 +148,9 @@ export function configureTeamsRouter(
       }
     )
 
+    // The team's page decides what its client shows, so a team that went home
+    // from a match whose time was up could not get back into it otherwise.
+    team.pageState = team.relayMatchID === matchID ? "RELAY" : "STRATEGY";
     team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
     await team.save();
 
