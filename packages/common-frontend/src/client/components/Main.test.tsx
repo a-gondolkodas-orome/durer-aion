@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { afterEach, test, expect, vi } from 'vitest';
+import { afterEach, beforeEach, test, expect, vi } from 'vitest';
 import { MockTeamState } from '../hooks/mock-user-hooks';
 import { render } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
@@ -8,7 +8,8 @@ import '@testing-library/jest-dom';
 // `Main` calls `i18next.changeLanguage` while rendering, so i18next has to be
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
-import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
+import { ClientRepoProvider } from '../client-repo-context';
+import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
 
@@ -46,6 +47,10 @@ const renderMain = () =>
       </ClientRepoProvider>
     </ThemeProvider>
   );
+
+beforeEach(() => {
+  MockTeamState.mockLoggedOut();
+});
 
 test('renders', () => {
   const { getByTestId } = renderMain();
@@ -112,4 +117,12 @@ test('a team away from /admin still gets its own page', () => {
 
   expect(getByTestId('relayRoot')).toBeInTheDocument();
   expect(queryByTestId('adminRoot')).not.toBeInTheDocument();
+});
+
+// MUI's default `maxWidth="lg"` caps a Container at the theme's lg breakpoint,
+// 1280px, overriding the 1200px in its sx: at 1280px the page then had no side
+// margin at all (#112).
+test('no Container takes MUI\'s lg max width over its own', () => {
+  const { container } = renderMain();
+  expect(container.querySelector('.MuiContainer-maxWidthLg')).toBeNull();
 });

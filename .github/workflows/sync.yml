@@ -29,8 +29,8 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # What this does, and why it is a script rather than the shell that used to be inline here,
-      # is in scripts/sync-mirror.mjs. No `npm ci`: it uses node builtins and git, nothing else.
+      # What this does, and why it is a script rather than inline shell, is in
+      # scripts/sync-mirror.mjs. No `npm ci`: it uses node builtins and git, nothing else.
       - name: Sync with private repository
         # Passed as environment variables rather than expanded into the command: a `${{ }}` inside
         # a `run:` body is substituted before the shell sees it, so a branch name would arrive as

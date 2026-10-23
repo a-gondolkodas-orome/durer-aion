@@ -1,10 +1,12 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import {
+  strategyGameFactory, type BoardClientProps, GameBoard, testVariantLabel, fullVariantLabel
+} from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
 import { generateStartBoard, generateTestStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pairs-of-numbers');
   return (
     <GameBoard>
       <p className='text-4xl font-bold text-center mb-2'>
@@ -16,7 +18,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!ctx.isClientMoveAllowed}
           onClick={() => moves.add1(board)}
         >
-          {t({ hu: 'Növelek', en: 'Increase' })} {ctx.isClientMoveAllowed && <>
+          {t('board.increase')} {ctx.isClientMoveAllowed && <>
             (→<code>({board[0]},{board[1] + 1})</code>)
           </>}
         </button>
@@ -25,7 +27,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!ctx.isClientMoveAllowed}
           onClick={() => moves.subtract(board)}
         >
-          {t({ hu: 'Kivonok', en: 'Subtract' })} {ctx.isClientMoveAllowed && <>
+          {t('board.subtract')} {ctx.isClientMoveAllowed && <>
             (→<code>({board[0] - board[1]},{board[1]})</code>)
           </>}
         </button>
@@ -34,32 +36,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Adott egy pozitív egészekből álló <code>(n,&nbsp;k)</code> rendezett számpár.
-    Két játékos felváltva lép, az <code>(a,&nbsp;b)</code> számpár
-    helyére egy lépésben kerülhet vagy az <code className="whitespace-nowrap">(a, b + 1)</code>,
-    vagy az <code className="whitespace-nowrap">(a − b, b)</code> számpár.
-    Az nyer, aki először ír fel olyan számpárt, amelyben nem mindkét szám pozitív.
-  </>,
-  en: <>
-    Initially, an ordered pair of positive integers <code>(n,&nbsp;k)</code> is written on a sheet of paper.
-    Two players take turns. In each turn, if the pair
-    <code>(a,&nbsp;b)</code> is on the sheet and is not crossed out, then the player
-    must cross out <code>(a,&nbsp;b)</code> and instead write
-    <code className="whitespace-nowrap">(a, b + 1)</code> or
-    <code className="whitespace-nowrap">(a − b, b)</code> on the sheet.
-    The winner is the first player to write a pair in which at least one of the numbers is not positive.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('pairs-of-numbers');
+  return <Trans t={t} i18nKey="rule" components={{ formula: <code className="whitespace-nowrap" /> }} />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('pairs-of-numbers');
+  return t('step');
 };
 
 export const PairsOfNumbers = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Növeld a második számot eggyel vagy vond ki az elsőből.',
-      en: 'Increase the second number by 1 or subtract it from the first.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -67,12 +57,12 @@ export const PairsOfNumbers = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

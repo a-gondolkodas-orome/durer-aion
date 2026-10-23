@@ -1,0 +1,4 @@
+{
+  "rule": "Egy indiánrezervátumban {{poles}} totemoszlopot állítottak fel az ábrán látható háromszögrács szerint. Csendes Patak és Vörös Tűz a következő játékot szokták itt játszani: felváltva feszítenek ki köteleket két-két oszlop között, és minden kötél kifeszítésénél figyelnek arra, hogy a kifeszített kötél párhuzamos legyen a nagy háromszög egyik oldalával, illetve a kötél nem haladhat el olyan oszlop mellett, amelyet már egy másik kötél érint. Ezenkívül ha a jelenleg kifeszített kötél helyett annak egy egyenes vonalú meghosszabbítása is kifeszíthető a fenti feltételek mellett, akkor azt kell kifeszíteniük. Az veszít, amelyikőjük már nem tud a szabályoknak megfelelően több kötelet kifeszíteni.",
+  "step": "Kattints két oszlopra, amik között kötelet szeretnél kifeszíteni."
+}

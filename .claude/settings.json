@@ -9,6 +9,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__github__update_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/no-review-requests.mjs"
+          }
+        ]
+      }
     ]
   },
   "permissions": {
@@ -24,11 +35,13 @@
       "Bash(gh search *)",
       "Bash(gh repo view*)",
       "WebSearch",
+      "Bash(npm run check)",
       "Bash(npm run build)",
       "Bash(npm run lint)",
       "Bash(npx eslint .)",
       "Bash(npm run typecheck)",
       "Bash(npm test)",
+      "Bash(npm test --workspace=strategy-practice)",
       "Bash(npm run test)",
       "Bash(npm run dev)",
       "Bash(npm run i18n:check)",
@@ -39,10 +52,43 @@
       "Bash(npx turbo run *)",
       "Bash(npm view *)"
     ],
+    "ask": [
+      "mcp__claude-code-remote__subscribe_pr_activity",
+      "mcp__claude-code-remote__send_later",
+      "mcp__claude-code-remote__create_trigger",
+      "mcp__github__add_issue_comment",
+      "mcp__github__update_issue_comment",
+      "mcp__github__add_reply_to_pull_request_comment",
+      "mcp__github__resolve_review_thread",
+      "mcp__github__unresolve_review_thread",
+      "mcp__github__pull_request_review_write",
+      "mcp__github__add_comment_to_pending_review",
+      "mcp__github__issue_write",
+      "mcp__github__sub_issue_write",
+      "Bash(gh pr comment*)",
+      "Bash(gh pr review*)",
+      "Bash(gh issue comment*)",
+      "Bash(gh issue create*)",
+      "Bash(gh issue edit*)",
+      "Bash(gh issue close*)",
+      "Bash(gh issue reopen*)",
+      "Bash(gh issue delete*)",
+      "Bash(gh issue transfer*)",
+      "Bash(gh issue lock*)",
+      "Bash(gh issue unlock*)",
+      "Bash(gh issue pin*)",
+      "Bash(gh issue unpin*)",
+      "Bash(gh issue develop*)",
+      "Bash(gh label *)",
+      "Bash(gh project *)",
+      "Bash(gh api *)"
+    ],
     "deny": [
       "Bash(gh pr merge*)",
       "Bash(gh repo delete*)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "mcp__github__request_copilot_review",
+      "Bash(gh pr edit*--add-reviewer*)"
     ]
   }
 }

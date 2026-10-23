@@ -1,5 +1,5 @@
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from '../../../common/types';
+import { GameType, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType, strategyPoints } from '../../../common/types';
 
 export interface MyGameState {
   stonesLeft: number;
@@ -8,7 +8,6 @@ export interface MyGameState {
 }
 
 export const MyGameWrapper = (_category: "E") => {
-  // Set initial stones based on category
   const initialConfig = { left: 0, right: 0 };
 
   const MyGame: GameType<MyGameState> = {
@@ -48,23 +47,14 @@ export const MyGameWrapper = (_category: "E") => {
         };
 
         if (!nextPlayerCanMove()) {
-          // Current player wins (opponent cannot move)
           G.winner = ctx.currentPlayer as PlayerIDType;
         }
 
-        // Handle winning streak for live difficulty
         if (G.difficulty === "live" && G.winner) {
           if (G.winner === GUESSER_PLAYER) {
             G.winningStreak = G.winningStreak + 1;
             if (G.winningStreak >= 2) {
-              switch (G.numberOfLoss) {
-                case 0: G.points = 12; break;
-                case 1: G.points = 9; break;
-                case 2: G.points = 6; break;
-                case 3: G.points = 4; break;
-                case 4: G.points = 3; break;
-                default: G.points = 2; break;
-              }
+              G.points = strategyPoints(G.numberOfLoss);
               events.endGame();
             }
           } else if (G.winner === JUDGE_PLAYER) {

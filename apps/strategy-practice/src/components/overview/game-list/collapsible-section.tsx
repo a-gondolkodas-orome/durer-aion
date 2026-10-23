@@ -1,5 +1,4 @@
 import { useId, useState, type ReactNode } from 'react';
-import { useTranslation, type I18nNode } from 'language';
 
 // Persist each section's open/closed state for the tab session, so it survives
 // navigating to a game page and back (which unmounts the overview). sessionStorage
@@ -27,7 +26,7 @@ const writeStoredOpen = (key: string, value: boolean): void => {
 export const CollapsibleSection = ({
   title, trailing, defaultOpen, forceOpen = false, storageKey, dataTestid, children
 }: {
-  title: I18nNode
+  title: string
   trailing?: ReactNode
   defaultOpen: boolean
   forceOpen?: boolean
@@ -35,7 +34,6 @@ export const CollapsibleSection = ({
   dataTestid?: string
   children: ReactNode
 }) => {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(() => {
     const stored = storageKey === undefined ? undefined : readStoredOpen(storageKey);
     return stored ?? defaultOpen;
@@ -65,7 +63,7 @@ export const CollapsibleSection = ({
           className="inline-block transition-transform"
           style={{ transform: isOpen ? 'rotate(90deg)' : undefined }}
         >▸</span>
-        <h2>{t(title)}</h2>
+        <h2>{title}</h2>
         {trailing}
       </button>
       {isOpen && <div id={panelId}>{children}</div>}

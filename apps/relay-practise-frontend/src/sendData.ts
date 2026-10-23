@@ -1,5 +1,5 @@
 import type { Ctx } from "boardgame.io";
-import { TeamModelDto } from "common-frontend";
+import { TeamModelDto } from "common-frontend/core";
 import { readStoredTeamState } from "./stored-team-state";
 
 
@@ -18,7 +18,6 @@ function sendData(fileName: string, data: string) {
   const fd = new FormData();
   fd.append('key', folder + '/' + fileName);
   fd.append('file', data);
-  // utf8 charset
   fd.append('Content-Type', 'text/plain; charset=utf-8');
   fetch(
     bucketName,

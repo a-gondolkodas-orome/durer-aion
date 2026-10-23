@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
-import { MockClientRepository } from "../api-repository-interface";
+import { MockClientRepository } from "../mock-client-repository";
 import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
 import { UserModel } from "./user-model";
 

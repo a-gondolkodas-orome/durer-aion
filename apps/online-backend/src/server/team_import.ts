@@ -3,16 +3,12 @@ import { randomInt, randomUUID } from 'crypto';
 import { ValidationError } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
+import { isCompetitionCategory } from 'schemas';
 
 function arraysEqual(a: string[], b: string[]) {
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (a.length !== b.length) return false;
-
-  // If you don't care about the order of the elements inside
-  // the array, you should sort both arrays here.
-  // Please note that calling sort on an array will modify that array.
-  // you might want to clone your array first.
 
   for (let i = 0; i < a.length; ++i) {
     if (a[i] !== b[i]) return false;
@@ -32,7 +28,6 @@ function generateLoginCode() {
 export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
   const { successful, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
-  //wrap out logs
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
@@ -86,7 +81,6 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
 
     if (category === undefined) {
       onwarn('Skipping empty row...');
-      // Do not print more error messages lol
       continue;
     }
 
@@ -95,8 +89,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       ok = false;
     }
 
-    // TODO: remove hard-coded values
-    if (!['C', 'D', 'E'].includes(category)) {
+    if (!isCompetitionCategory(category)) {
       onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
     }

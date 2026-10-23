@@ -12,7 +12,12 @@ const renderSelector = (entry = '/') => render(
 
 const isActive = (label: string) => screen.getByLabelText(label).className.includes('font-bold');
 
-beforeEach(() => localStorage.clear());
+// jsdom's browser is American English, which the provider would follow; the
+// site's audience browses in Hungarian.
+beforeEach(() => {
+  localStorage.clear();
+  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['hu-HU']);
+});
 
 describe('LanguageSelector', () => {
   it('marks Hungarian, the language until one is chosen', () => {
@@ -38,12 +43,12 @@ describe('LanguageSelector', () => {
     expect(localStorage.getItem('lang')).toBe('en');
   });
 
-  it('switches back to Hungarian, storing nothing since it is the default', () => {
+  it('switches back to Hungarian, storing it so the browser language does not win', () => {
     renderSelector('/?lang=en');
 
     fireEvent.click(screen.getByLabelText('Magyar'));
 
     expect(isActive('Magyar')).toBe(true);
-    expect(localStorage.getItem('lang')).toBeNull();
+    expect(localStorage.getItem('lang')).toBe('hu');
   });
 });

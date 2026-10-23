@@ -62,7 +62,13 @@ const socketio = new SocketIOButBotMoves(
   { https: undefined },
   botSetup,
   async function onFinishedMatch(matchID) {
-    await closeMatch(matchID, teams, db);
+    // This runs inside a socket listener nothing awaits, so an error escaping
+    // it is an unhandled rejection, which ends the process and the round with it.
+    try {
+      await closeMatch(matchID, teams, db);
+    } catch (error) {
+      console.error(`Could not close match: ${matchID}`, error);
+    }
   },
 );
 const server = Server({
@@ -73,7 +79,6 @@ const server = Server({
 
 const PORT = parseInt(env.PORT || "8000");
 
-// Set up transport layer for updates
 server.app.context.durer_transport = socketio;
 
 // Behind nginx every request arrives over plain HTTP; `X-Forwarded-Proto` is
@@ -83,8 +88,6 @@ server.app.context.durer_transport = socketio;
 // with it the host and ip koa reports — so the docker stack does not
 // publish it: only nginx, which sets them, can.
 server.app.proxy = true;
-
-//TODO regex mount protection for Boardgame.io endpoints
 
 // The organisers' login travels with the admin routes rather than being
 // mounted on the prefix they share — server/admin_session.ts says why.

@@ -24,15 +24,16 @@
     "@headlessui/react": "2.2.10",
     "@mui/icons-material": "9.4.0",
     "@mui/material": "9.4.0",
+    "i18next": "26.4.0",
     "lodash": "4.18.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-i18next": "17.0.12",
     "react-router": "8.3.1",
-    "strategy-engine": "*",
-    "strategy-games": "*"
+    "strategy-engine": "*"
   },
   "//": [
-    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `scripts/check-versions.test.mjs` does in the root `npm test`.",
+    "playwright is imported by no code here. It is a dependency so that its version is written down where the devcontainer's ARG PLAYWRIGHT_VERSION can be checked against it, which `check-versions.test.mjs` does in the root `npm test`.",
     "typescript is held to the root's version, not the newest, so that npm dedupes it to a single install. With a newer version nested here, the type-aware lint rules crash: npm hoists their helper ts-api-utils to the root, where it binds the root's typescript, and the flags it then reads off this app's parser's types are another version's (issue #355). Lift the pin when the root moves majors."
   ],
   "devDependencies": {
@@ -45,7 +46,6 @@
     "@types/react-dom": "19.2.5",
     "@typescript-eslint/eslint-plugin": "8.68.0",
     "@typescript-eslint/parser": "8.68.0",
-    "typescript-eslint": "8.68.0",
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/coverage-v8": "4.1.11",
     "eslint": "10.9.1",
@@ -54,6 +54,7 @@
     "playwright": "1.62.1",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
+    "typescript-eslint": "8.68.0",
     "vite": "8.2.2",
     "vitest": "4.1.11"
   },

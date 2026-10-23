@@ -1,18 +1,26 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
-import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
-import { DeletedTeamDto, TeamModelDto } from '../dto/TeamStateDto';
+import { ClientRepoProvider } from '../client-repo-context';
+import { MockClientRepository } from '../mock-client-repository';
+import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
+}));
+
+// A finished relay's dialog shows the result tables, which are translated; without
+// an i18next instance react-i18next warns on the console, which the setup
+// file fails the test for.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 // The grid measures its container and jsdom lays nothing out, so the real one
@@ -96,7 +104,37 @@ const renderAdmin = (teamId?: string) =>
     </ThemeProvider>
   );
 
+const typeDelete = (word = 'törlés') => fireEvent.change(screen.getByLabelText(/Írd be/), { target: { value: word } });
 const confirm = () => fireEvent.click(screen.getByText('Megerősítés'));
+const confirmDelete = () => {
+  typeDelete();
+  confirm();
+};
+
+test('a team delete cannot be confirmed until the word is typed', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha, bravo]);
+  vi.spyOn(repo, 'removeTeam').mockResolvedValue();
+  renderAdmin();
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  fireEvent.click(await screen.findByText('Csapat törlése'));
+
+  expect(screen.getByText('Megerősítés').closest('button')).toBeDisabled();
+  typeDelete();
+  expect(screen.getByText('Megerősítés').closest('button')).toBeEnabled();
+  expect(repo.removeTeam).not.toHaveBeenCalled();
+});
+
+test.each(['delete', 'DELETE ', 'torles', 'Törlés'])('a delete accepts %j', async (word) => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha, bravo]);
+  renderAdmin();
+  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
+  fireEvent.click(await screen.findByText('Csapat törlése'));
+
+  typeDelete('nope');
+  expect(screen.getByText('Megerősítés').closest('button')).toBeDisabled();
+  typeDelete(word);
+  expect(screen.getByText('Megerősítés').closest('button')).toBeEnabled();
+});
 
 // The list used to stay as it was after a delete, so the next click asked the
 // server to delete a team it no longer had, and got a 404 for it.
@@ -107,7 +145,7 @@ test('deleting a team from its dialog closes the dialog and drops the row', asyn
   fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
   fireEvent.click(await screen.findByText('Csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('Csapat törölve')).toBeInTheDocument();
   expect(repo.removeTeam).toHaveBeenCalledWith(alpha.teamId);
@@ -124,7 +162,7 @@ test('deleting the team a page was opened on takes the page back to the list', a
   renderAdmin(alpha.teamId);
   fireEvent.click(await screen.findByText('Csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('Csapat törölve')).toBeInTheDocument();
   await waitFor(() => expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument());
@@ -139,7 +177,7 @@ test('deleting every team is one request, and empties the list', async () => {
   renderAdmin();
   fireEvent.click(await screen.findByText('Összes csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('2 csapat törölve')).toBeInTheDocument();
   expect(repo.removeAllTeams).toHaveBeenCalledOnce();
@@ -155,11 +193,69 @@ test('a failed bulk delete is reported, and the list kept', async () => {
   renderAdmin();
   fireEvent.click(await screen.findByText('Összes csapat törlése'));
 
-  confirm();
+  confirmDelete();
 
   expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
   expect(screen.getByText('Alpha')).toBeInTheDocument();
   expect(screen.getByText('Bravo')).toBeInTheDocument();
+});
+
+const openTeamWithRelay = (relayMatch: TeamModelDto['relayMatch']) => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch }]);
+  renderAdmin(alpha.teamId);
+};
+
+const gameState = (points: number, end: string | Date): MatchStateDto => ({
+  G: { points, end: new Date(end).toISOString() } as MatchStateDto['G'],
+  ctx: {} as MatchStateDto['ctx'],
+  deltalog: [],
+});
+
+const inAnHour = () => new Date(Date.now() + 60 * 60 * 1000);
+
+test('the team dialog totals the game\'s points, not the lower score stored when the match closed', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
+
+  expect(await screen.findByText('Összesen: 7 pont')).toBeInTheDocument();
+  expect(screen.getByText('Eltér a játék pontszámától (7), az a hivatalos.')).toBeInTheDocument();
+  expect(repo.getMatchState).toHaveBeenCalledOnce();
+});
+
+test('the team dialog shows no total while a match is in progress', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
+
+  expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
+  expect(screen.getByText('Összesen: ? pont')).toBeInTheDocument();
+});
+
+// The dialog's `endAt` is the one the list loaded with, so a match given more
+// time was still totalled as over.
+test('the team dialog totals a match left in progress past its end, until time is added', async () => {
+  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
+  expect(await screen.findByText('Összesen: 4 pont')).toBeInTheDocument();
+
+  getMatchState.mockResolvedValue(gameState(4, inAnHour()));
+  // Formik validates and submits asynchronously.
+  await act(async () => {
+    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '10' } });
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByText('idő hozzáadása'));
+  });
+  confirm();
+
+  expect(await screen.findByText('Összesen: ? pont')).toBeInTheDocument();
+});
+
+test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
+  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
+
+  expect(await screen.findByText('Összesen: 5 pont')).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {

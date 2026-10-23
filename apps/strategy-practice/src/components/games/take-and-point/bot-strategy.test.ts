@@ -14,7 +14,7 @@ import { moveValidator } from 'test-utils';
 const isPointingAllowed = moveValidator(moves.pointPiles);
 const isRemovalAllowed = moveValidator(moves.takeStones);
 
-// ---- brute-force oracle (independent of the bot) ----
+// Brute-force oracle, independent of the bot.
 const cache = new Map<string, boolean>();
 const nextTakerWins = (piles: number[]): boolean => {
   const live = piles.filter(p => p > 0).sort((a, b) => a - b);
@@ -117,7 +117,7 @@ describe('choosePointing legality', () => {
   });
 });
 
-// ---- full-game simulation against a perfect adversary ----
+// Full-game simulation against a perfect adversary.
 const perfectRemoval = (piles: number[], pointed: number[]) => {
   const wins = pointed.flatMap(index =>
     Array.from({ length: piles[index] }, (_, k) => ({ index, amount: k + 1 }))

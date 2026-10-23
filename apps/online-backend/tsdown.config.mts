@@ -1,18 +1,16 @@
-import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'tsdown'
 
-// The three workspace packages are bundled in from their TypeScript source —
-// the same entries vitest.config.mts and tsconfig.json's `paths` name — so this
-// build needs no `packages/*/dist` and cannot go stale against one. The server
-// imports `game` and `game/bot`, never `game/client`, so the bundle carries no
-// board and requires neither React nor MUI.
-const source = (file: string) =>
-  fileURLToPath(new URL(`../../packages/${file}`, import.meta.url))
+// The workspace packages are bundled in from their TypeScript source, so this
+// build needs no `packages/*/dist` and cannot go stale against one. Where that
+// source is comes from tsconfig.json's `paths`, which tsdown reads as its alias
+// map — the one list the bundle and the typecheck share. The server imports
+// `game` and `game/bot`, never `game/client`, so the bundle carries no board
+// and requires neither React nor MUI.
 
 export default defineConfig({
-  // Two entries: the server, and the team import, which used to be a mode of
-  // it (#190). rolldown puts what they share — the database and the team
-  // repository — in a chunk beside them, which each `require`s by name.
+  // Two entries: the server and the team import. rolldown puts what they share
+  // — the database and the team repository — in a chunk beside them, which each
+  // `require`s by name.
   entry: ['src/server.ts', 'src/import_teams.ts'],
   // CommonJS, not ESM: every dependency stays a bare `require()` below, and
   // boardgame.io ships no `exports` map — its subpaths are directories, which
@@ -30,22 +28,16 @@ export default defineConfig({
   // `start`, `dev` and `import-teams` run node with --enable-source-maps.
   sourcemap: true,
 
-  alias: {
-    game: source('game/index.ts'),
-    'game/bot': source('game/bot.ts'),
-    schemas: source('schemas/index.ts'),
-    strategy: source('strategy/index.ts'),
-  },
-
   deps: {
     // Everything installed stays external — the backend's own dependencies
     // and the ones the game package reaches (MUI, React, lodash, boardgame.io),
     // which npm installs alongside the workspace. Marking external only what
     // this package.json declares would inline those.
     neverBundle: true,
-    // The alias resolves each of these to a source path, but the external
-    // check runs on the bare specifier first, and they all belong to declared
-    // dependencies; this is what makes the alias win.
+    // `paths` resolves each of these to a source path, but the external check
+    // runs on the bare specifier first, and they all belong to declared
+    // dependencies; this is what makes `paths` win. Without it they stay
+    // `require()`s of a `dist` the image never builds.
     alwaysBundle: ['game', 'game/bot', 'schemas', 'relay-bot'],
     // Keep `boardgame.io/server` and the like as written, so the bundle
     // requires what the source imports rather than a `dist/cjs/...` path.

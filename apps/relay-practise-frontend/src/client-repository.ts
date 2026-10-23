@@ -1,7 +1,8 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend/core";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
+import { trackRelayStarted } from "./tracking";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -24,6 +25,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     sendGameData({ component: "relay", phase: "start" });
+    trackRelayStarted(teamState.teamName);
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
@@ -118,8 +120,6 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   joinWithCode(joinCode: string): Promise<void> {
-    // return the joincode if it is in the teamData.ts file
-
     const i = teamData.findIndex(e => e.join_code === joinCode);
 
     if (i > -1) {

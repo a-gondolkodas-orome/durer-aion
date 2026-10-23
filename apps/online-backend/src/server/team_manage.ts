@@ -1,11 +1,13 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
 import { getBotCredentials, relayNames } from "./common";
-import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
+import { AnyBgioGame, PlayerIDType, relayProblemResults, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import {
+  CompetitionCategory,
   FinishedMatchStatus,
+  GameType,
   InProgressMatchStatus,
 } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
@@ -32,7 +34,6 @@ export const injectPlayer = async (
 }
 ) => {
   const match = await fetch(db, matchId, { metadata: true });
-  console.log(`Match is indeed empty, and thus in need for a bot!`);
   match.metadata.players[playerID].name = name;
   match.metadata.players[playerID].credentials = credentials;
   match.metadata.players[playerID].isConnected = true;
@@ -74,11 +75,10 @@ export async function createGame(
     game,
     numPlayers: 2,
     setupData: undefined,
-    // A listed match is served by boardgame.io's unauthenticated
-    // `GET /games/:name`, metadata included — and the team's GUID, which is
-    // what the session cookie carries (server/team_session.ts), is that
-    // metadata's player name. Nothing in this codebase reads the lobby
-    // listing.
+    // Kept out of boardgame.io's lobby listing as well as behind the closed
+    // `/games` prefix (server/router.ts): the listing carries the metadata,
+    // and the team's GUID, which the session cookie carries
+    // (server/team_session.ts), is that metadata's player name.
     unlisted: true,
   });
 
@@ -120,27 +120,22 @@ export async function endMatchStatus(
 
 export async function allowedToStart(
   team: TeamModel,
-  gameType: "RELAY" | "STRATEGY"
+  gameType: GameType
 ) {
   if (team.pageState === "DISCLAIMER")
-    //no start from this point
     return false;
   if (team.pageState === gameType)
-    //restart attempt
     return false;
   if (
     team.relayMatch.state === "IN PROGRESS" ||
     team.strategyMatch.state === "IN PROGRESS"
   )
-    // they are already playing one game
     return false;
   if (gameType === "STRATEGY" && team.strategyMatch.state === "FINISHED")
-    // they are already finished the strategy
     return false;
-  if (gameType === 'RELAY' && team.relayMatch.state === 'FINISHED') // they are already finished the relay
+  if (gameType === 'RELAY' && team.relayMatch.state === 'FINISHED')
     return false;
 
-  //default
   return true;
 }
 
@@ -150,7 +145,6 @@ export async function checkStaleMatch(
   | { isStale: false }
   | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
 > {
-  // Find if boardgame match is already timed out, but not registered
   const now = new Date(Date());
   if (team.relayMatch.state === "IN PROGRESS") {
     if (typeof team.relayMatch.endAt === "string")
@@ -180,9 +174,12 @@ function inferenceGameType(gameName: string) {
   throw new Error(`Unregistered gamename: ${gameName} `);
 }
 
+/** What closing a match needs of the repository. */
+export type MatchStore = Pick<TeamsRepository, "getTeam" | "finishMatch">;
+
 export async function closeMatch(
   matchId: string,
-  teams: TeamsRepository,
+  teams: MatchStore,
   db: StorageAPI.Async | StorageAPI.Sync
 ) {
   const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
@@ -198,25 +195,42 @@ export async function closeMatch(
     );
 
   const type = inferenceGameType(currentMatch.metadata.gameName);
-  //check if the match is already started. We are allowing to close the gamestate even if teamstate id FINISHED, because it may happen,
-  //that the game is closed before the BGIO backend closes the game. (Even though it should not happen, and we made some progress to prevent it)
-  if (team[type].state === "NOT STARTED")
-    throw new Error(
-      `The match{${matchId}} is not started yet, you can't close it`
+  // A FINISHED match is closed again on purpose: the stale check can close it
+  // before boardgame.io's game over, the game still scores some late moves, and
+  // this overwrites the score copied then.
+  const status = team[type];
+  // After an admin reset the old match still runs, and reaches game over while
+  // the team is NOT STARTED again or already playing its new match. Neither
+  // may be closed with the old match's points.
+  if (status.state === "NOT STARTED" || status.matchID !== matchId) {
+    console.log(
+      `Not closing match: ${matchId}, the team's current match is ${status.state === "NOT STARTED" ? "none" : status.matchID}`
     );
-  const mStat = team[type] as InProgressMatchStatus;
-  const finishState = await endMatchStatus(mStat, currentMatch.state.G.points);
+    return;
+  }
+  const mStat = status as InProgressMatchStatus;
+  const G = currentMatch.state.G;
+  const finishState = {
+    ...await endMatchStatus(mStat, G.points),
+    ...(type === "relayMatch" ? { relayResults: relayProblemResults(G) } : { strategyResults: G.liveResults }),
+  };
   console.log(
-    `Closing match: ${matchId}, points: ${currentMatch.state.G.points}`
+    `Closing match: ${matchId}, points: ${G.points}`
   );
-  await team.update({ [type]: finishState });
+  if (!(await teams.finishMatch(teamId, type, matchId, finishState)))
+    console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
 }
+
+const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
+  RELAY: relayNames,
+  STRATEGY: strategyNames,
+};
 
 export async function getNewGame(
   ctx: Server.AppCtx,
-  teams: TeamsRepository,
+  teams: MatchStore,
   games: AnyBgioGame[],
-  gameType: "RELAY" | "STRATEGY",
+  gameType: GameType,
   team: TeamModel
 ) {
   //if middleware setup was better understood, this should be in a separate middleware
@@ -232,11 +246,8 @@ export async function getNewGame(
   if (!(await allowedToStart(team, gameType))) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  //find gameName based on team category
-  const gameName =
-    gameType === "RELAY"
-      ? relayNames[team.category as keyof typeof relayNames]
-      : strategyNames[team.category as keyof typeof strategyNames];
+  // The import admits only the competition's categories.
+  const gameName = gameNames[gameType][team.category as CompetitionCategory];
 
   const game: AnyBgioGame = games.find(
     (g) => g.name === gameName

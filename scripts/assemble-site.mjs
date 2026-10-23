@@ -12,10 +12,9 @@ import { cpSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The one line that moves the whole site. `/` now that gyakorlo.durerinfo.hu resolves and the
-// site is served from it; it was `/durer-aion/` while it lived on the default Pages domain,
-// where a project site sits under its repo name. Every subpath below is composed from it, so
-// the switch stays one edit rather than one per app.
+// The one line that moves the whole site: `/`, because gyakorlo.durerinfo.hu serves it from
+// the root rather than from a repo-name subpath. Every subpath below is composed from it, so
+// moving the site stays one edit rather than one per app.
 const SITE_ROOT = '/';
 
 // The custom domain, declared by pages/home/CNAME and asserted at the end.

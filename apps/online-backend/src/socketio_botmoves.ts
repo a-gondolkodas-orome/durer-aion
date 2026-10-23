@@ -1,10 +1,7 @@
-// Demultiplexes to real transport or bots
-
-// The types below describe the socket.io this workspace declares. That used to
-// be a different copy from the one boardgame.io actually serves matches with,
-// which reaches it through `koa-socket-2`; the root package.json's `overrides`
-// block is what makes them one install, and socketio_transport.test.ts fails if
-// they split again (#461).
+// The types below describe the socket.io this workspace declares. It must stay
+// the same copy boardgame.io serves matches with through `koa-socket-2`: the
+// root package.json's `overrides` block is what makes them one install, and
+// socketio_transport.test.ts fails if they split (#461).
 import type IOTypes from 'socket.io';
 import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
 import type { Bot } from "boardgame.io/ai";
@@ -13,7 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
-import { CorsOptionsDelegate } from "cors";
+import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.
 // Naming them off what it does export keeps this file out of the package's
@@ -190,15 +187,12 @@ export class SocketIOButBotMoves extends SocketIO {
           //also we assume, this event can't happen, after the game is finished
           this.unFinishedMatches.add(matchID);
           if (actionData.type !== "MAKE_MOVE") {
-            // skip if alma type is not 'MAKE_MOVE'
             return;
           }
           if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
-            // also skip if payload type is getTime
             return;
           }
           if (stalePlayerID === BOT_ID) {
-            // Do not react to bot's turn
             return;
           }
           const matchQueue = this.getMatchQueue(matchID);
@@ -206,10 +200,12 @@ export class SocketIOButBotMoves extends SocketIO {
             // These happen after the player stepped.
             // The state is written to storage, and the server now returned
             // the authoritative state to the player.
-            // TODO: do not load the result from storage, reuse from the redux?
-            // TODO: try do not send an authoritative state to the player...?
-            console.log("Bot moves");
-
+            // Re-reading it is deliberate: this listener gets only the
+            // player's action, not the state boardgame.io's own listener
+            // produced, and `master.onUpdate` below reads storage again
+            // anyway. The push the player already got stays too: without it
+            // the player's move and the bot's reply land as one update.
+            // See #346.
             const {  state  } = await fetch(app.context.db, matchID, {
                state: true,
              } as const);
@@ -218,7 +214,6 @@ export class SocketIOButBotMoves extends SocketIO {
               return;
             }
             if (state.ctx.gameover) {
-              // Game is over, no need to react
               return;
             }
             const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });

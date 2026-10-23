@@ -26,6 +26,7 @@ describe('usePageviewTracking', () => {
   afterEach(() => {
     delete window.umami;
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
   it('tracks the current page on initial mount, incl. a direct game visit', () => {
@@ -53,6 +54,26 @@ describe('usePageviewTracking', () => {
     act(() => { getByText('go').click(); });
     expect(track).toHaveBeenCalledTimes(2);
     expect(urlOf(track)).toBe('/game/TicTacToe');
+  });
+
+  it('prefixes the url with the base path the site is deployed under', () => {
+    vi.stubEnv('BASE_URL', '/jatekok/');
+    render(
+      <MemoryRouter initialEntries={['/game/ChessRook']}>
+        <TrackingProbe />
+      </MemoryRouter>
+    );
+    expect(urlOf(track)).toBe('/jatekok/game/ChessRook');
+  });
+
+  it('reports the game list under the base path itself', () => {
+    vi.stubEnv('BASE_URL', '/jatekok/');
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <TrackingProbe />
+      </MemoryRouter>
+    );
+    expect(urlOf(track)).toBe('/jatekok/');
   });
 
   it('retries while the deferred umami script is not ready yet', () => {

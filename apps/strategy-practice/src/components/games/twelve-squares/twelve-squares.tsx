@@ -1,4 +1,7 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, type Ctx, GameBoard
+} from 'strategy-game-factory';
 import { range } from 'lodash';
 import { ChessBishopSvg } from '../chess-bishops/chess-bishop-svg';
 import { startBoard, moves, type Board } from './gameplay';
@@ -45,41 +48,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Van 12 mező egymás mellett. A két szélsőbe lerakunk egy-egy bábut. Ezután a játékosok
-    felváltva lépnek egyet vagy kettőt a saját bábujukkal a másik irányába. A másik bábujára rálépni nem
-    szabad. Az nyer, aki átugorja a másik játékos bábuját.
-  </>,
-  en: <>
-    A 1 × 12 board is given with one piece placed on each end.
-    Players take turns moving their piece toward the other, advancing one or two squares at a time.
-    A player may not move to a square already occupied by the other player's piece.
-    The player who jumps over the other player's piece wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('twelve-squares');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('twelve-squares');
+  return ctx.currentPlayer === 0 ? t('step.left') : t('step.right');
 };
 
 export const TwelveSquares = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: ({ ctx: { currentPlayer } }) => currentPlayer === 0
-      ? {
-        hu: 'Kattints a mezőre ahova lépni szeretnél a bal oldali bábuval.',
-        en: 'Click the square you want to move to with the left piece.'
-      }
-      : {
-        hu: 'Kattints a mezőre ahova lépni szeretnél a jobb oldali bábuval.',
-        en: 'Click the square you want to move to with the right piece.'
-      }
+    rule: <Rule />,
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: optimalBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

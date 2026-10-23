@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { TeamModelDto } from "../dto/TeamStateDto";
+import { PageState, TeamModelDto } from "../dto/TeamStateDto";
 
 export const mockTeamState: TeamModelDto = {
   teamId: "Long Id",
@@ -19,14 +19,13 @@ export const mockTeamState: TeamModelDto = {
 
 let teamState: TeamModelDto | null = null;
 
-const setPageState = (pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY') => {
+const setPageState = (pageState: PageState) => {
   teamState = { ...mockTeamState, pageState };
 };
 
 export const MockTeamState = {
   get teamState() { return teamState; },
-  /** No session at all, which is where the file starts — named so a test can
-   *  ask for it rather than relying on running before the ones that log in. */
+  // Module state outlives a test, so a suite resets it before each one.
   mockLoggedOut: () => { teamState = null; },
   mockHome: () => setPageState("HOME"),
   mockDisclaimer: () => setPageState("DISCLAIMER"),
@@ -40,6 +39,7 @@ export const MockTeamState = {
     useStartRelay: vi.fn(),
     useStartStrategy: vi.fn(),
     useToHome: vi.fn(),
+    useBackToHome: vi.fn(),
     LoadTeamState: () => null,
   },
 };

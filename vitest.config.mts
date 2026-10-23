@@ -5,21 +5,19 @@ import { fileURLToPath } from 'node:url';
 import { configDefaults, defineConfig } from 'vitest/config';
 
 // The suites run against the packages' TypeScript sources, with no build in
-// front of them — the CI test job installs and runs vitest, nothing more. That
-// used to happen by accident: resolution fell through each package's unbuilt
-// `main` to the source barrel next to it. Their exports maps close that path
-// now, so say it outright, which also stops a stale `dist` on a developer's
-// machine from being what the suites test.
+// front of them — the CI test job installs and runs vitest, nothing more. The
+// packages' exports maps do not resolve to their sources, so name them here
+// outright, which also stops a stale `dist` on a developer's machine from being
+// what the suites test.
 const source = (file: string) =>
   fileURLToPath(new URL(`packages/${file}`, import.meta.url));
 
 // The directories apps/strategy-practice's own vite config lists in its
-// `test.include` — this app's source, and the two packages its code moved out
-// to. Kept out of the root project so each file has exactly one project.
+// `test.include` — this app's source, and the package its engine moved out to.
+// Kept out of the root project so each file has exactly one project.
 const strategyPracticeProject = [
   'apps/strategy-practice/**',
   'packages/strategy-engine/**',
-  'packages/strategy-games/**',
 ];
 
 export default defineConfig({
@@ -32,6 +30,10 @@ export default defineConfig({
       { find: /^game\/client$/, replacement: source('game/client.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },
       { find: /^relay-bot$/, replacement: source('relay-bot/index.ts') },
+      // The full entry loads React, MUI and the i18next setup; a node suite that
+      // needs none of it imports `common-frontend/core` instead.
+      { find: /^common-frontend$/, replacement: source('common-frontend/index.ts') },
+      { find: /^common-frontend\/core$/, replacement: source('common-frontend/core.ts') },
     ],
   },
   test: {
@@ -44,17 +46,18 @@ export default defineConfig({
     environment: 'node',
     include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
     // What decides which project owns a file is its path, not its name. The glob
-    // above reaches into apps/strategy-practice and the two packages whose code
-    // moved out of it, and those belong to the project below — which reads them
+    // above reaches into apps/strategy-practice and the package whose code moved
+    // out of it, and those belong to the project below — which reads them
     // through its own aliases and setup file, and where the root project's node
     // environment would fail them on the first unresolved import.
     exclude: [...configDefaults.exclude, ...strategyPracticeProject],
     // Keeps the run's output to the report itself — see the file for how a test
     // that means to log opts out.
-    setupFiles: ['./vitest.setup.mts'],
+    setupFiles: ['./vitest/setup.mts'],
     // apps/strategy-practice runs as a second project, under its own vite
     // config: its aliases, setup file and `isolate: false` are its own, and
-    // CLAUDE.md § Project Structure says why the two configs stay separate.
+    // apps/strategy-practice/AGENTS.md § How this app sits in the monorepo says
+    // why the two configs stay separate.
     // `extends: true` keeps the options above for the root project only. That
     // config is also the root config when vitest runs from that directory,
     // which is what its `npm run coverage` relies on.

@@ -12,8 +12,6 @@ export interface FormProps {
     // is submitted.
     validateOnBlur?: boolean;
 
-    // `ReactNode` has included arrays since React 18's types; `ReactNodeArray`
-    // was the deprecated alias for that half and is gone in React 19's.
     children: React.ReactNode;
 
     className?: string;
