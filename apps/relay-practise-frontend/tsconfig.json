@@ -1,42 +1,5 @@
 {
-  "ts-node": {
-    "compilerOptions": {
-        "module": "CommonJS"
-    }
-  },
-  "compilerOptions": {
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ESNext",
-    "types": ["vite/client"],
-    "paths": {
-      "game": ["../../packages/game"],
-      "relay-bot": ["../../packages/relay-bot"],
-      "schemas": ["../../packages/schemas"],
-      "common-frontend": ["../../packages/common-frontend"],
-      "common-frontend/core": ["../../packages/common-frontend/dist/core.d.mts"]
-    }
-  },
-  // Its own src, the way apps/online-frontend's does. The packages come in through
-  // the `paths` above and their exports maps, so naming their sources here adds
-  // nothing to resolution — it only made this program materialize every package,
-  // 2222 files where this app has under twenty, including a game table it has no
-  // use for. Each package's own tsconfig typechecks its own src, and ESLint's
-  // project service serves a file from the nearest tsconfig, so nothing loses
-  // coverage. This app's own suites under src/ are included: nothing else
-  // typechecks them.
+  "extends": "../../tsconfig.frontend.json",
   "include": [
     "src"
   ]
