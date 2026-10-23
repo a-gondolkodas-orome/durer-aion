@@ -22,11 +22,6 @@ export default defineConfig(() => {
       // than failing. `.devcontainer` sets DEV_SERVER_HOST for that case;
       // outside a container nothing changes.
       host: process.env.DEV_SERVER_HOST === "true" || undefined,
-      fs: {
-        allow: [
-          "..", // allow Vite to serve files outside project root
-        ],
-      },
     },
     build: {
       rollupOptions: {
