@@ -1,7 +1,7 @@
-import { defineConfig, mergeConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process';
-import { manualChunks, workspacePackages } from '../../vite.shared.mts';
+import { manualChunks } from '../../vite.shared.mts';
 
 export default defineConfig(() => {
   // ||=, so a caller may set it and turbo can hash what the bundle will carry
@@ -10,7 +10,7 @@ export default defineConfig(() => {
   // instead. Identical trees, so only the commit's identity is approximate.
   process.env.VITE_GIT_COMMIT_HASH ||= execSync('git rev-parse HEAD').toString().trimEnd();
 
-  return mergeConfig(workspacePackages, {
+  return {
     // SITE_BASE is the Pages deploy's prefix, composed by the workflow from one variable so the
     // subpages move together (scripts/assemble-site.mjs). This app is served from /valto/.
     base: process.env.SITE_BASE || '/',
@@ -33,5 +33,5 @@ export default defineConfig(() => {
         output: { manualChunks },
       },
     },
-  })
+  }
 })
