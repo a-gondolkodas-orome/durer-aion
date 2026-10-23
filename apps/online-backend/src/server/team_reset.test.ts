@@ -32,8 +32,8 @@ function teamRow(other: string, pageState: TeamModel["pageState"] = "STRATEGY") 
     credentials: "1f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b",
     email: "team@example.com",
     pageState,
-    relayMatch: { state: "IN PROGRESS", matchID: MATCH_ID, startAt: new Date(), endAt: new Date() },
-    strategyMatch: { state: "IN PROGRESS", matchID: MATCH_ID, startAt: new Date(), endAt: new Date() },
+    relayMatchID: MATCH_ID,
+    strategyMatchID: MATCH_ID,
     other,
   });
   vi.spyOn(row, "save").mockImplementation(async function (this: TeamModel) {
@@ -60,6 +60,9 @@ describe("POST /team/admin/:teamID/reset/:game", () => {
     // A refused reset is one of the answers under test, and koa logs every
     // error it writes.
     app.silent = true;
+    // The route answers with the team's matches, read off the one left running.
+    const running = { G: { start: new Date().toISOString(), end: "2099-01-01T00:00:00Z", points: 0 }, ctx: {} };
+    app.context.db = { fetch: () => ({ state: running }) } as unknown as Server.AppCtx["db"];
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
     configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
     app.use(router.routes());
@@ -81,7 +84,7 @@ describe("POST /team/admin/:teamID/reset/:game", () => {
     const response = await reset("strategy");
 
     expect(response.status).toBe(200);
-    expect(team.strategyMatch).toStrictEqual({ state: "NOT STARTED" });
+    expect(team.strategyMatchID).toBeNull();
     expect(team.pageState).toBe("HOME");
     expect(team.other).toBe(`Radnóti, Budapest prevstratid:${MATCH_ID}`);
     expect(team.save).toHaveBeenCalledOnce();
@@ -114,7 +117,7 @@ describe("POST /team/admin/:teamID/reset/:game", () => {
     const response = await reset("relay");
 
     expect(response.status).toBe(200);
-    expect(team.relayMatch).toStrictEqual({ state: "NOT STARTED" });
+    expect(team.relayMatchID).toBeNull();
     expect(team.other).toContain(`prevrelayid:${MATCH_ID}`);
   });
 
@@ -128,7 +131,7 @@ describe("POST /team/admin/:teamID/reset/:game", () => {
     const response = await reset("relay");
 
     expect(response.status).toBe(200);
-    expect(team.relayMatch).toStrictEqual({ state: "NOT STARTED" });
+    expect(team.relayMatchID).toBeNull();
     expect(team.other).toBe(full);
   });
 });

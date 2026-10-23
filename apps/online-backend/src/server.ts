@@ -16,8 +16,6 @@ import { getDb } from './server/db';
 import { getAdminCredentials, getBotCredentials, relayNames } from './server/common';
 import { requireAdmin } from './server/admin_session';
 
-import { closeMatch } from './server/team_manage';
-
 import * as Sentry from '@sentry/node';
 
 const games = [
@@ -61,15 +59,6 @@ const botSetup = Object.fromEntries(
 const socketio = new SocketIOButBotMoves(
   { https: undefined },
   botSetup,
-  async function onFinishedMatch(matchID) {
-    // This runs inside a socket listener nothing awaits, so an error escaping
-    // it is an unhandled rejection, which ends the process and the round with it.
-    try {
-      await closeMatch(matchID, teams, db);
-    } catch (error) {
-      console.error(`Could not close match: ${matchID}`, error);
-    }
-  },
 );
 const server = Server({
   games: games,

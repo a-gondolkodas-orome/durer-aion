@@ -6,8 +6,7 @@ import { DeletedTeamModel } from './deletedTeam';
 
 // TeamsRepository against a real postgres (test_database.ts), for what only the
 // database decides: the unique constraints the live table has and the archive
-// does not, a JSON-path WHERE, the LIKE escape, and restores that clash with a
-// live team.
+// does not, the LIKE escape, and restores that clash with a live team.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -56,18 +55,11 @@ describe('the unique constraints sync() creates', () => {
   });
 });
 
-describe('TeamsRepository.finishMatch', () => {
-  it('writes only to that team, and only while it still holds that match', async () => {
-    const inProgress = { state: 'IN PROGRESS', matchID: 'current', startAt: new Date(), endAt: new Date() } as const;
+describe('TeamsRepository.insertTeam', () => {
+  it('starts a team with no match of either kind', async () => {
     const { teamId } = await database.teams.insertTeam(team());
-    const other = await database.teams.insertTeam(team());
-    await TeamModel.update({ strategyMatch: inProgress }, { where: {} });
-    const finished = { ...inProgress, state: 'FINISHED', score: 3 } as const;
 
-    expect(await database.teams.finishMatch(teamId, 'strategyMatch', 'stale', { ...finished, matchID: 'stale' })).toBe(false);
-    expect(await database.teams.finishMatch(teamId, 'strategyMatch', 'current', finished)).toBe(true);
-    expect((await database.teams.getTeam({ teamId }))?.strategyMatch).toMatchObject({ state: 'FINISHED', score: 3 });
-    expect((await database.teams.getTeam({ teamId: other.teamId }))?.strategyMatch).toMatchObject({ state: 'IN PROGRESS' });
+    expect(await database.teams.getTeam({ teamId })).toMatchObject({ relayMatchID: null, strategyMatchID: null });
   });
 });
 

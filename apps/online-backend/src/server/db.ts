@@ -1,6 +1,5 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { FinishedMatchStatus, InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
 import { InferAttributes, InferCreationAttributes, Sequelize, Op, Transaction, UniqueConstraintError, WhereOptions } from 'sequelize';
@@ -60,20 +59,6 @@ export class TeamsRepository {
     });
   }
 
-  async deduceMatch(matchID:string):Promise<TeamModel | null> {
-    const matches =  await TeamModel.findAll({ where:
-      Sequelize.or([
-        { relayMatch: 'IN PROGRESS' },
-        { strategyMatch: 'IN PROGRESS' }
-      ])
-    });
-    console.log(matches)
-    return matches.find(team => {
-      return (team.relayMatch as InProgressMatchStatus).matchID === matchID ||
-        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
-    }) ?? null;
-  }
-
   async listTeams(): Promise<TeamModel[] | null> {
     return await TeamModel.findAll();
   }
@@ -83,24 +68,6 @@ export class TeamsRepository {
       (searchCondition)
     });
   }
-  /**
-   * Records the team's match as finished, but only while that match is still
-   * the team's: the match id is checked in the same UPDATE that writes, so an
-   * admin reset landing after the caller read the team is not overwritten.
-   * Whether a row was written.
-   */
-  async finishMatch(
-    teamId: string,
-    type: "relayMatch" | "strategyMatch",
-    matchId: string,
-    status: FinishedMatchStatus,
-  ): Promise<boolean> {
-    const [updated] = await TeamModel.update({ [type]: status }, {
-      // A JSON path on the column: ("strategyMatch"#>>'{matchID}') = matchId.
-      where: { teamId, [type]: { matchID: matchId } } as WhereOptions<TeamModel>,
-    });
-    return updated > 0;
-  }
   async insertTeam(
       { teamname, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string }) {
@@ -109,8 +76,8 @@ export class TeamsRepository {
       category,
       email,
       credentials,
-      strategyMatch: { state: "NOT STARTED" },
-      relayMatch: { state: "NOT STARTED" },
+      strategyMatchID: null,
+      relayMatchID: null,
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });
