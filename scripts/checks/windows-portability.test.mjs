@@ -67,8 +67,8 @@ describe('an npm script', () => {
 
   it('sets no environment variable the way only a POSIX shell understands', () => {
     // `FOO=bar cmd` is not syntax on cmd.exe, which reads it as the name of a program to run.
-    // Set inside the script the command runs, a variable works on every shell, and turbo
-    // passes declared vars through.
+    // Assigned to process.env inside the Node script the command runs, a variable works on every
+    // shell, and turbo passes declared vars through.
     const offenders = commands
       .filter(({ command }) =>
         command.split('&&').some(part => /^\s*[A-Za-z_][A-Za-z0-9_]*=/.test(part))
@@ -78,7 +78,7 @@ describe('an npm script', () => {
     expect(
       offenders,
       `These prefix a command with an environment variable, which cmd.exe cannot do:\n${
-        list(offenders)}\nSet it in the script the command runs instead.`
+        list(offenders)}\nAssign it to process.env in the script the command runs instead.`
     ).toStrictEqual([]);
   });
 
