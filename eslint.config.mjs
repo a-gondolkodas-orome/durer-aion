@@ -2,6 +2,7 @@
 
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
@@ -147,6 +148,18 @@ export default defineConfig(
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
       ...typeAwareRules,
+    },
+  },
+  // The same three hook rules apps/strategy-practice's config sets for its own code.
+  // Repo-wide rather than on packages/common-frontend alone: every React component
+  // this config lints ships in one of the three bundles it serves.
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/set-state-in-effect': 'error',
     },
   },
   // packages/strategy-engine is apps/strategy-practice code moved out of it, still
