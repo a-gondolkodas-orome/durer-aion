@@ -175,6 +175,9 @@ here. What follows is the rest.
   replies and resolving threads ask the person first (`.claude/settings.json`),
   and review requests are refused. Unless asked to post, push the change, then
   say in the session what you would have posted
+- So is every issue write — a comment, an edit, closing or reopening, a label,
+  an assignee, a field such as priority, a sub-issue link — each asked for and
+  approved on its own; `.claude/settings.json` asks before each one
 - Watching a PR, and scheduling a check-in on it, ask the person first, and an
   agent subscribes only when asked. Do not merge or rebase the base branch into a
   PR, or across a stack, unless asked or the PR has a conflict; a stack is
