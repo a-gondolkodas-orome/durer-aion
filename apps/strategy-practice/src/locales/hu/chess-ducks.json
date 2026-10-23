@@ -1,0 +1,11 @@
+{
+  "rule": {
+    "generic": "Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le a táblára kacsákat úgy, hogy a lerakott bábu ne üsse a táblán levő kacsák egyikét sem. Az veszít, aki nem tud lépni.",
+    "sized": "Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le a {{rows}} × {{cols, numberAdjective}} táblára kacsákat úgy, hogy a lerakott bábu ne üsse a táblán levő kacsák egyikét sem. Az veszít, aki nem tud lépni."
+  },
+  "step": "Kattints egy mezőre, amit nem üt egyik kacsa sem.",
+  "variant": {
+    "4x6": "4×6",
+    "4x7": "4×7"
+  }
+}

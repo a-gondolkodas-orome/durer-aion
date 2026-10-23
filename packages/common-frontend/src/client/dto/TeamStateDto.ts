@@ -1,8 +1,8 @@
-import { Ctx } from "boardgame.io";
-import { GameStateMixin, MyGameState as RelayGameState } from "game";
+import type { Ctx } from "boardgame.io";
+import type { GameStateMixin, MyGameState as RelayGameState } from "game";
 import type { MatchStatus, PageState } from "schemas";
 
-export { isPageState, type PageState } from "schemas";
+export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -72,4 +72,4 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-export type { FinishedMatchStatus, InProgressMatchStatus, MatchStatus, NotStartedMatchStatus } from "schemas";
+export type { FinishedMatchStatus, InProgressMatchStatus, LiveGameResult, MatchStatus, NotStartedMatchStatus, RelayProblemResult } from "schemas";

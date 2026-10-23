@@ -1,12 +1,13 @@
 import {
-  strategyGameFactory, useMoveScopedState, type BoardClientProps, type Ctx, GameBoard
+  strategyGameFactory, useMoveScopedState, type BoardClientProps, type Ctx, GameBoard,
+  testVariantLabel, fullVariantLabel
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { startBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('latin-square-filling');
   // Move-scoped: the pending selection is gone once the board advances.
   const [selectedCell, setSelectedCell] = useMoveScopedState<number | null>(ctx.moveCount, null);
 
@@ -43,8 +44,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onClick={() => clickCell(cell)}
               aria-label={
                 isEmpty
-                  ? t({ hu: `üres mező`, en: `empty cell` })
-                  : t({ hu: `${value} számjegy`, en: `digit ${value}` })
+                  ? t('board.emptyCell')
+                  : t('board.digit', { value })
               }
               className={`
                 aspect-square flex items-center justify-center text-4xl sm:text-5xl font-bold tabular-nums
@@ -66,11 +67,8 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         <div className="mt-4 flex flex-col items-center gap-2">
           <p className="text-sm text-slate-600 dark:text-slate-400">
             {allowed.length > 0
-              ? t({ hu: 'Melyik számjegyet írod be?', en: 'Which digit do you write?' })
-              : t({
-                hu: 'Ide egyik számjegy sem írható — válassz másik mezőt.',
-                en: 'No digit fits here — pick another cell.'
-              })}
+              ? t('board.whichDigit')
+              : t('board.noDigitFits')}
           </p>
           <div className="flex gap-2">
             {[1, 2, 3].map(digit => (
@@ -92,41 +90,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPlayerStepDescription = ({ ctx }: { board: Board; ctx: Ctx }) => {
-  const goal = ctx.currentPlayer === 0
-    ? {
-      hu: ' A célod, hogy végül mind a 9 mező megteljen.',
-      en: ' Your goal is to fill all 9 cells.'
-    }
-    : {
-      hu: ' A célod, hogy a másik játékos elakadjon: legyen üres mező, de már ne tudjon szabályosan lépni.',
-      en: ' Your goal is to get the other player stuck: an empty cell remains but no legal move is left.'
-    };
-  return {
-    hu: `Kattints egy üres mezőre, majd írj bele egy 1-es, 2-es vagy 3-as számjegyet.${goal.hu}`,
-    en: `Click an empty cell, then write a 1, 2, or 3 into it.${goal.en}`
-  };
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('latin-square-filling');
+  return ctx.currentPlayer === 0 ? t('step.first') : t('step.second');
 };
 
-const rule = {
-  hu: <>
-    Adott egy 3×3-as táblázat. Egy lépésben a soron következő játékos beír egy üres mezőbe egy
-    1-es, 2-es vagy 3-as számjegyet úgy, hogy ne keletkezzen olyan sor vagy oszlop, amiben van
-    két azonos szám. A kezdő játékos akkor nyer, ha mind a 9 mezőbe kerül szám, míg a második akkor
-    nyer, ha valakinek a köre előtt még van üres mező, de már nem tud szabályosan lépni.
-  </>,
-  en: <>
-    You are given a 3×3 grid. On their turn, the current player writes a 1, 2, or 3 into an empty
-    cell, so that no row or column ends up containing two equal numbers. The first player wins if
-    all 9 cells get filled; the second player wins if, before someone's turn, there is still an
-    empty cell but no legal move is possible.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('latin-square-filling');
+  return <Trans t={t} i18nKey="rule" />;
 };
 
 export const LatinSquareFilling = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
@@ -134,12 +111,12 @@ export const LatinSquareFilling = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

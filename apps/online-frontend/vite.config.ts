@@ -26,7 +26,6 @@ export default defineConfig(() => {
       proxy: {
         '/team': backend,
         '/game': backend,
-        '/games': backend,
         '/socket.io': { target: backend, ws: true },
       },
     },

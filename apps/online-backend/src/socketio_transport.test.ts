@@ -7,7 +7,7 @@
  * understand each other (#461): they are separate installs of separate
  * packages, and a client that cannot sync is a round nobody can play, on a tree
  * that installs and typechecks perfectly. That they stay *one* install of
- * socket.io on the server side is scripts/socketio-single-copy.test.mjs.
+ * socket.io on the server side is socketio-single-copy.test.mjs.
  *
  * Still no substitute for the round against `npm run stack:up`: nginx and the
  * built frontend are not in front of this, and postgres is not behind it.
@@ -88,7 +88,7 @@ describe("the socket transport a browser talks to", () => {
   beforeEach(async () => {
     // boardgame.io announces the port it bound on, and the bot transport logs
     // each turn it takes. Both are the code under test talking, so the spy
-    // stands in for the recorder in vitest.setup.mts for this file.
+    // stands in for the recorder in vitest/setup.mts for this file.
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     // What the bot signs its moves with; the server reads it from the

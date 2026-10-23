@@ -89,8 +89,6 @@ server.app.context.durer_transport = socketio;
 // publish it: only nginx, which sets them, can.
 server.app.proxy = true;
 
-//TODO regex mount protection for Boardgame.io endpoints
-
 // The organisers' login travels with the admin routes rather than being
 // mounted on the prefix they share — server/admin_session.ts says why.
 configureTeamsRouter(server.router, teams, games, requireAdmin(getAdminCredentials()));

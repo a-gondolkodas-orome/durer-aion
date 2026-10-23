@@ -143,7 +143,7 @@ export class TeamsRepository {
    * Every team into the archive under one `deletedAt`, then all of them
    * dropped, in one transaction. The shared timestamp is what makes the rows a
    * batch: the archive has no column for one, and `sequelize.sync()` would not
-   * add it to an existing table (DEPLOYMENT.md), so the timestamp is what a
+   * add it to an existing table (docs/DEPLOYMENT.md), so the timestamp is what a
    * caller names the batch by when restoring it.
    */
   async removeAllTeams(): Promise<{ deleted: number, deletedAt: Date }> {

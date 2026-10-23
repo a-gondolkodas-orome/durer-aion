@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { range } from 'lodash';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import {
   type BoardClientProps,
   GameBoard,
@@ -17,14 +17,14 @@ import { isSplitAllowed, withPileRemoved, type Board, type Piece } from './gamep
 // `pile-splitter` does not: on two piles the pile to discard is implied, which
 // makes its turn a single click.
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pile-splitting-games');
   const [removedPileId, setRemovedPileId] = useMoveScopedState<number | null>(ctx.moveCount, null);
   const { value: validHoveredPiece, ...preview } = useHoverPreview<Piece>(ctx.moveCount);
   const { value: validHoveredPileId, hoverProps: pileHoverProps } = useHoverPreview<number>(ctx.moveCount);
   const deferMove = useDeferredMove(ctx.moveCount);
   // said by the header button of the pile picked to discard and by its pieces
   // alike: both undo the pick
-  const keepLabel = t({ hu: 'mégsem dobod el ezt a kupacot', en: 'keep this pile after all' });
+  const keepLabel = t('board.keepPile');
 
   const canSelectPile = (pileId: number) =>
     removedPileId === null && moves.removePile.isAllowed(board, pileId);
@@ -121,13 +121,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const pieceLabel = ({ pileId, pieceId }: Piece) => {
     if (removedPileId === null) {
-      return t({
-        hu: `${board[pileId]} korongos kupac eldobása`,
-        en: `discard the pile of ${board[pileId]}`
-      });
+      return t('board.discardPileOf', { size: board[pileId] });
     }
     if (pileId === removedPileId) return keepLabel;
-    return t({ hu: `vágás a(z) ${pieceId + 1}. korong után`, en: `split after piece ${pieceId + 1}` });
+    return t('board.splitAfter', { number: pieceId + 1 });
   };
 
   const pieceProps = ({ pileId, pieceId }: Piece) => {
@@ -154,7 +151,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     return (
       <button
         type="button"
-        aria-label={isChosen ? keepLabel : t({ hu: 'kupac eldobása', en: 'discard this pile' })}
+        aria-label={isChosen ? keepLabel : t('board.discardPile')}
         className="text-sm leading-none rounded p-1 hocus:bg-slate-200 dark:hocus:bg-slate-700"
         onClick={e => { e.stopPropagation(); clickPile(pileId); }}
         {...(canSelectPile(pileId) ? pileHoverProps(pileId) : {})}

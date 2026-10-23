@@ -1,8 +1,8 @@
 import { range } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
+  strategyGameFactory, testVariantLabel, type BoardClientProps, type StrategyArgs, GameBoard
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   generateStartBoardC, generateStartBoardD, generateTestStartBoard, moves,
   type Board, type TurnState
@@ -10,7 +10,7 @@ import {
 import { distinctValues, randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('ten-coins');
   const selectedValue = ctx.turnState;
   const presentValues = distinctValues(board);
 
@@ -38,10 +38,7 @@ const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board
               disabled={!moves.convert.isAllowed(board, v, 1)}
               onClick={() => selectValue(v)}
               aria-pressed={isSelected}
-              aria-label={t({
-                hu: `${count} darab ${v} értékű érme`,
-                en: `${count} coins of value ${v}`
-              })}
+              aria-label={t('board.coinGroup', { amount: count, value: v })}
               className={`
                 flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-colors
                 ${isSelected
@@ -62,7 +59,7 @@ const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board
                 ))}
               </div>
               <span className="text-sm font-semibold">
-                {t({ hu: `${count} db`, en: `×${count}` })}
+                {t('board.amount', { amount: count })}
               </span>
             </button>
           );
@@ -72,14 +69,14 @@ const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board
       {selectedValue !== null && (
         <div className="mt-6 pt-4 border-t flex flex-wrap items-center gap-3">
           <span className="text-sm font-semibold">
-            {t({ hu: 'Legyen belőlük:', en: 'Change them to:' })}
+            {t('board.changeTo')}
           </span>
           {range(1, selectedValue).map(l => (
             <button
               key={l}
               disabled={!moves.convert.isAllowed(board, selectedValue, l)}
               onClick={() => chooseTarget(l)}
-              aria-label={t({ hu: `${l} értékű érme`, en: `value ${l} coin` })}
+              aria-label={t('board.target', { value: l })}
               className="rounded-full transition-transform enabled:hocus:scale-110
                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             >
@@ -108,61 +105,25 @@ const Coin = ({ value }: { value: number }) => (
   </div>
 );
 
-const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
-  if (ctx.turnState !== null) {
-    return {
-      hu: `Válaszd ki, mi legyen a(z) ${ctx.turnState} értékű érmék új (kisebb) értéke.`,
-      en: `Choose the new (smaller) value for the coins worth ${ctx.turnState}.`
-    };
-  }
-  return {
-    hu: 'Válaszd ki, melyik értékű érméket változtatod meg (egyszerre az összeset).',
-    en: 'Choose which coin value to change (all of them at once).'
-  };
+const StepDescription = ({ ctx }: Pick<StrategyArgs<Board, TurnState>, 'ctx'>) => {
+  const { t } = useTranslation('ten-coins');
+  return ctx.turnState !== null
+    ? t('step.chooseTarget', { value: ctx.turnState })
+    : t('step.chooseValue');
 };
 
-const ruleFor = (maxValue: number) => ({
-  hu: <>
-    Kezdetben van 10 érme az asztalon, melyek értékei 1 és {maxValue} közé eső egészek lehetnek.
-    A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz,
-    hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen
-    kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti).
-    Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében
-    Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.
-  </>,
-  en: <>
-    There are 10 coins on the table to start, each with an integer value between 1 and {maxValue}.
-    The two players move alternately. On their turn the current player chooses a value K such
-    that at least one coin of value K is on the table, and turns all coins of value K into some
-    smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins
-    equal in value after their move wins. Knowing the starting position, you may decide whether
-    to play as the first or the second player.
-  </>
-});
-
-const genericRule = {
-  hu: <>
-    Kezdetben van 10 érme az asztalon, melyek értékei kis pozitív egészek (1-től 4-ig vagy 5-ig).
-    A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz,
-    hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen
-    kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti).
-    Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében
-    Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.
-  </>,
-  en: <>
-    There are 10 coins on the table to start, each a small positive integer (1 to 4, or 1 to 5).
-    The two players move alternately. On their turn the current player chooses a value K such
-    that at least one coin of value K is on the table, and turns all coins of value K into some
-    smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins
-    equal in value after their move wins. Knowing the starting position, you may decide whether
-    to play as the first or the second player.
-  </>
+// Without `maxValue`, the rule covering both value ranges.
+const Rule = ({ maxValue }: { maxValue?: number }) => {
+  const { t } = useTranslation('ten-coins');
+  return maxValue === undefined
+    ? <Trans t={t} i18nKey="rule.generic" />
+    : <Trans t={t} i18nKey="rule.withMax" values={{ maxValue }} />;
 };
 
 export const TenCoins = strategyGameFactory({
   presentation: {
-    rule: genericRule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
@@ -171,22 +132,22 @@ export const TenCoins = strategyGameFactory({
       id: 'test',
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       id: '4-values',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoardC,
-      rule: ruleFor(4),
-      label: { hu: '4 érték', en: '4 values' },
+      rule: <Rule maxValue={4} />,
+      label: t => t('ten-coins:variant.fourValues'),
       isDefault: true
     },
     {
       id: '5-values',
       botStrategy: smartBotStrategy,
       generateStartBoard: generateStartBoardD,
-      rule: ruleFor(5),
-      label: { hu: '5 érték', en: '5 values' }
+      rule: <Rule maxValue={5} />,
+      label: t => t('ten-coins:variant.fiveValues')
     }
   ]
 });

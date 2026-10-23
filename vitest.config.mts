@@ -30,6 +30,10 @@ export default defineConfig({
       { find: /^game\/client$/, replacement: source('game/client.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },
       { find: /^relay-bot$/, replacement: source('relay-bot/index.ts') },
+      // The full entry loads React, MUI and the i18next setup; a node suite that
+      // needs none of it imports `common-frontend/core` instead.
+      { find: /^common-frontend$/, replacement: source('common-frontend/index.ts') },
+      { find: /^common-frontend\/core$/, replacement: source('common-frontend/core.ts') },
     ],
   },
   test: {
@@ -49,7 +53,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, ...strategyPracticeProject],
     // Keeps the run's output to the report itself — see the file for how a test
     // that means to log opts out.
-    setupFiles: ['./vitest.setup.mts'],
+    setupFiles: ['./vitest/setup.mts'],
     // apps/strategy-practice runs as a second project, under its own vite
     // config: its aliases, setup file and `isolate: false` are its own, and
     // apps/strategy-practice/AGENTS.md § How this app sits in the monorepo says
