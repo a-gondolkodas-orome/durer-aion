@@ -6,15 +6,15 @@
   // since they resolve against the file that names them. The backend
   // (nodenext, no DOM), apps/strategy-practice and packages/strategy-engine
   // keep configs of their own.
+  //
+  // Only what differs from TypeScript 6's defaults, which already give
+  // `strict`, `esModuleInterop`, consistent casing and `bundler` resolution.
   "compilerOptions": {
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    // bundler resolution requires an ES `module`; tsdown and vite do the real
+    // Named because the default follows `target`: under the packages' ES6 it
+    // is ES2015, which rejects `import.meta`. tsdown and vite do the real
     // emit, so this only tells tsc how to read the sources.
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "skipLibCheck": true,
-    "strict": true
+    "skipLibCheck": true
   }
 }
