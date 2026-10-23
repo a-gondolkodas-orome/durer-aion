@@ -17,11 +17,15 @@ import { useTranslation } from 'react-i18next';
 
 type MyGameProps = BoardProps<MyGameState>;
 
-/** How long past the end the dialog waits for the game to report its end
- *  before opening anyway: the game ends a second after its grace for late
+/** How long past the end a local app's dialog waits for the game to report its
+ *  end before opening anyway: the game ends a second after its grace for late
  *  answers, and this is for one that never does, such as a judge that never
- *  rules. */
+ *  rules. The team then goes home with no score. */
 const END_DIALOG_FALLBACK_MS = 30 * 1000;
+
+/** How long past the end the online dialog opens: the server keeps the score
+ *  whether or not the game has ended. */
+const ONLINE_END_DIALOG_MS = 5 * 1000;
 
 // selectRoundOnEnd is an extra prop for relay-practise: a logout button
 // leading back to the round selector
@@ -65,11 +69,15 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
       startOrSync();
     }
   }, [ctx.gameover]);
-  useEndOnTime(G.end, ctx.gameover, syncTime);
-  // The game's own end, not the clock's: closing the dialog takes the team home,
-  // and the offline apps read the score there from the game's end report.
-  const finished = ctx.gameover === true || msRemaining < -END_DIALOG_FALLBACK_MS
   const isOffline = clientRepo.version === "OFFLINE";
+  // Only the local apps end the game on time. Their score comes from the game's
+  // end report, read when closing the dialog takes the team home, so their
+  // dialog waits for the game's own end. Online the server derives the score
+  // from the match state, and a game that has ended can no longer be extended
+  // by the organisers.
+  useEndOnTime(G.end, isOffline && !ctx.gameover, syncTime);
+  const finished = ctx.gameover === true
+    || msRemaining < -(isOffline ? END_DIALOG_FALLBACK_MS : ONLINE_END_DIALOG_MS)
   // Until the judge's firstProblem move, the state holds no problem to show
   // and the form has no move to submit to.
   if (G.numberOfTry === 0 && !finished) {

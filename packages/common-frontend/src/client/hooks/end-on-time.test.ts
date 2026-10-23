@@ -2,10 +2,10 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { LATE_ANSWER_GRACE_MS } from 'game';
-import { END_POLL_RETRY_MS, useEndOnTime } from './end-on-time';
+import { useEndOnTime } from './end-on-time';
 
 // #613: a relay left to run out was never ended, so its end report, and with
-// it the offline apps' score, never came. The game ends it on the first move
+// it the local apps' score, never came. The game ends it on the first move
 // past the grace for late answers; this hook is what sends that move.
 
 const NOW = new Date('2026-03-21T11:00:00Z').getTime();
@@ -21,34 +21,22 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('polls once the time and its grace are up, not before', () => {
+test('polls once the time and its grace are up, not before, and only once', () => {
   const poll = vi.fn();
-  renderHook(() => { useEndOnTime(END, undefined, poll); });
+  renderHook(() => { useEndOnTime(END, true, poll); });
 
   vi.advanceTimersByTime(PAST_GRACE - 1);
   expect(poll).not.toHaveBeenCalled();
   vi.advanceTimersByTime(1);
   expect(poll).toHaveBeenCalledOnce();
-});
-
-test('polls again until the game reports its end, then stops', () => {
-  const poll = vi.fn();
-  const { rerender } = renderHook(({ gameover }) => { useEndOnTime(END, gameover, poll); }, {
-    initialProps: { gameover: undefined as unknown },
-  });
-
-  vi.advanceTimersByTime(PAST_GRACE + END_POLL_RETRY_MS);
-  expect(poll).toHaveBeenCalledTimes(2);
-
-  rerender({ gameover: true });
-  vi.advanceTimersByTime(10 * END_POLL_RETRY_MS);
-  expect(poll).toHaveBeenCalledTimes(2);
+  vi.advanceTimersByTime(60 * 1000);
+  expect(poll).toHaveBeenCalledOnce();
 });
 
 test('polls through the latest callback, not the one it started with', () => {
   const first = vi.fn();
   const latest = vi.fn();
-  const { rerender } = renderHook(({ poll }) => { useEndOnTime(END, undefined, poll); }, {
+  const { rerender } = renderHook(({ poll }) => { useEndOnTime(END, true, poll); }, {
     initialProps: { poll: first },
   });
 
@@ -62,7 +50,7 @@ test('polls through the latest callback, not the one it started with', () => {
 test('polls at once for a match whose grace was already over when it loaded', () => {
   const poll = vi.fn();
   vi.setSystemTime(NOW + PAST_GRACE + 60 * 1000);
-  renderHook(() => { useEndOnTime(END, undefined, poll); });
+  renderHook(() => { useEndOnTime(END, true, poll); });
 
   vi.advanceTimersByTime(0);
   expect(poll).toHaveBeenCalledOnce();
@@ -72,7 +60,7 @@ test('polls at once for a match whose grace was already over when it loaded', ()
 test('waits for the new end once the match is extended', () => {
   const poll = vi.fn();
   const extended = new Date(NOW + 10 * 60 * 1000).toISOString();
-  const { rerender } = renderHook(({ end }) => { useEndOnTime(end, undefined, poll); }, {
+  const { rerender } = renderHook(({ end }) => { useEndOnTime(end, true, poll); }, {
     initialProps: { end: END },
   });
 
@@ -81,10 +69,10 @@ test('waits for the new end once the match is extended', () => {
   expect(poll).not.toHaveBeenCalled();
 });
 
-test('sends nothing for a match that has already ended', () => {
+test('sends nothing while inactive: online, or once the game has ended', () => {
   const poll = vi.fn();
-  renderHook(() => { useEndOnTime(END, true, poll); });
+  renderHook(() => { useEndOnTime(END, false, poll); });
 
-  vi.advanceTimersByTime(PAST_GRACE + 10 * END_POLL_RETRY_MS);
+  vi.advanceTimersByTime(PAST_GRACE + 60 * 1000);
   expect(poll).not.toHaveBeenCalled();
 });
