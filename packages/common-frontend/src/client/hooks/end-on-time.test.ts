@@ -45,6 +45,19 @@ test('polls again until the game reports its end, then stops', () => {
   expect(poll).toHaveBeenCalledTimes(2);
 });
 
+test('polls through the latest callback, not the one it started with', () => {
+  const first = vi.fn();
+  const latest = vi.fn();
+  const { rerender } = renderHook(({ poll }) => { useEndOnTime(END, undefined, poll); }, {
+    initialProps: { poll: first },
+  });
+
+  rerender({ poll: latest });
+  vi.advanceTimersByTime(PAST_GRACE);
+  expect(first).not.toHaveBeenCalled();
+  expect(latest).toHaveBeenCalledOnce();
+});
+
 // The board is reloaded after the buzzer as often as before it.
 test('polls at once for a match whose grace was already over when it loaded', () => {
   const poll = vi.fn();

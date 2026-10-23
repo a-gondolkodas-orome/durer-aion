@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { LATE_ANSWER_GRACE_MS } from 'game';
 
 /** How often the poll is sent again until the game reports its end. A game
@@ -16,19 +16,17 @@ export const END_POLL_RETRY_MS = 5 * 1000;
  * report carries, recorded 0 (#613).
  */
 export function useEndOnTime(end: string, gameover: unknown, poll: () => void) {
-  // The timer outlives the render it started in, so it reads the caller's
-  // latest callback through this ref rather than the one it closed over.
-  const pollRef = useRef(poll);
-  useLayoutEffect(() => {
-    pollRef.current = poll;
-  });
+  // The timer outlives the render it started in, and only the latest callback
+  // sees the board as it is now — InProgressRelay's, for one, whether the judge
+  // has the turn.
+  const pollLatest = useEffectEvent(poll);
   useEffect(() => {
     if (gameover) {
       return;
     }
     let handle: ReturnType<typeof setTimeout>;
     const tick = () => {
-      pollRef.current();
+      pollLatest();
       handle = setTimeout(tick, END_POLL_RETRY_MS);
     };
     // A second past the grace, which the game compares strictly.
