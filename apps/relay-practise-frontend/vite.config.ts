@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process';
-import { manualChunks } from '../../vite.shared.mts';
 
 export default defineConfig(() => {
   // ||=, so a caller may set it and turbo can hash what the bundle will carry
@@ -22,11 +21,6 @@ export default defineConfig(() => {
       // than failing. `.devcontainer` sets DEV_SERVER_HOST for that case;
       // outside a container nothing changes.
       host: process.env.DEV_SERVER_HOST === "true" || undefined,
-    },
-    build: {
-      rollupOptions: {
-        output: { manualChunks },
-      },
     },
   }
 })

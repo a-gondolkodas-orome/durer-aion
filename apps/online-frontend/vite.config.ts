@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process'
-import { manualChunks } from '../../vite.shared.mts'
 
 const backend = 'http://localhost:8000';
 
@@ -28,11 +27,6 @@ export default defineConfig(() => {
         '/team': backend,
         '/game': backend,
         '/socket.io': { target: backend, ws: true },
-      },
-    },
-    build: {
-      rollupOptions: {
-        output: { manualChunks },
       },
     },
   }
