@@ -78,7 +78,7 @@ describe('an npm script', () => {
     expect(
       offenders,
       `These prefix a command with an environment variable, which cmd.exe cannot do:\n${
-        list(offenders)}\nAssign it to process.env in the script the command runs instead.`
+        list(offenders)}\nAssign it to process.env in the script the command runs, or, for a tool's own binary, in a small Node script that then runs it.`
     ).toStrictEqual([]);
   });
 

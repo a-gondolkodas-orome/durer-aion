@@ -13,7 +13,7 @@
 // from it, apps/strategy-practice/vite.config.js says its own are mirrored
 // there, and it is `paths` that makes the typecheck read source in the first
 // place. A path into a package *directory* or into its `dist` is not a crossing
-// — that resolves through the exports map to built output.
+// — that resolves through the package's manifest to built output.
 import { existsSync, globSync, readFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

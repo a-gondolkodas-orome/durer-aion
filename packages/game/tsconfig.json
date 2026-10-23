@@ -3,10 +3,7 @@
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"],
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
     "target": "ES6",
-    "jsx": "react-jsx",
     "outDir": "./dist"
   }
 }
