@@ -58,8 +58,9 @@ export function Countdown(
             return;
         }
         // add some seconds: the server is the single point of truth, do not let the frontend
-        // stop the player from submitting!
-        if (msRemaining <= 0 && msRemaining > -5000) {
+        // stop the player from submitting! The relay board stays up through the
+        // game's grace for late answers, so the zero holds until that is over.
+        if (msRemaining <= 0 && msRemaining > -10000) {
           setCountdown("00:00:00");
         } else if (msRemaining <= -10000) {
             setCountdown("XX:XX:XX");
