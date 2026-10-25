@@ -27,7 +27,7 @@ export interface ClientRepository {
   getMatchLogs(matchId: string): Promise<MatchStateDto>
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
-  addMinutes(matchId: string, minutes: number): Promise<string>
+  addMinutes(matchId: string, minutes: number): Promise<TeamModelDto>
   removeTeam(teamId: string): Promise<void>;
   /** Every team at once, archived as one batch: how many, and the batch's `deletedAt`. */
   removeAllTeams(): Promise<{ deleted: number, deletedAt: string }>;
