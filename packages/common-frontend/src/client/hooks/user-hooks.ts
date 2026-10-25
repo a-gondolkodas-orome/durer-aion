@@ -27,9 +27,8 @@ export const LoadTeamState = () => {
             console.error("could not load the team state", e);
           });
 
-
-          userModel.addListener(setTeamState);
-  }, []);
+      return userModel.addListener(setTeamState);
+  }, [repo]);
 
   return null;
 };
@@ -132,6 +131,26 @@ export const useToHome = () => {
     const state = await userModel.getTeamState();
     setTeamState(state);
   };
+};
+
+/**
+ * A finished match's way back: home, then a reload, or `instead` of the reload
+ * (the relay practice site logs out to its round selector). The handler is
+ * synchronous because React ignores what an event handler returns, so an async
+ * one would leave its promise unhandled.
+ */
+export const useBackToHome = (instead?: () => Promise<void>) => {
+  const refreshState = useRefreshTeamState();
+  const toHome = useToHome();
+  return () => void (async () => {
+    await refreshState();
+    await toHome();
+    if (instead) {
+      await instead();
+    } else {
+      window.location.reload();
+    }
+  })();
 };
 
 export const useStartStrategy = () => {

@@ -1,5 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import type { RelayProblemResult } from "schemas";
 import { timestampMoves } from "../../common/timestamp";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 
@@ -34,6 +35,27 @@ export type RelayMoveArgs =
   | [problemText: string, correctnessPreviousAnswer: boolean, url: string] // newProblem
   | [availablePoints: number] // nextTry
   | [correctnessPreviousAnswer: boolean]; // endGame
+
+const secondsBetween = (from: string, to: string) =>
+  Math.round((new Date(to).getTime() - new Date(from).getTime()) / 1000);
+
+/**
+ * Every problem of the set as the match stands, the ones not reached included.
+ * A problem's first try is timed from the previous problem's last answer —
+ * when it appeared — and each later try from the answer before it.
+ */
+export function relayProblemResults(G: Pick<MyGameState, "start" | "maxPointsList" | "previousPoints" | "previousAnswers">): RelayProblemResult[] {
+  let shownAt = G.start;
+  return G.maxPointsList.map((maxPoints, idx) => ({
+    maxPoints,
+    points: G.previousPoints[idx] ?? 0,
+    trySeconds: (G.previousAnswers[idx] ?? []).map(it => {
+      const seconds = secondsBetween(shownAt, it.date);
+      shownAt = it.date;
+      return seconds;
+    }),
+  }));
+}
 
 const lengthOfCompetition = 60 * 60; // seconds
 

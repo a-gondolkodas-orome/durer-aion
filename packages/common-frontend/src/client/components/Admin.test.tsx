@@ -16,7 +16,7 @@ vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
 }));
 
-// A finished relay's dialog shows RelayEndTable, which is translated; without
+// A finished relay's dialog shows the result tables, which are translated; without
 // an i18next instance react-i18next warns on the console, which the setup
 // file fails the test for.
 vi.mock('react-i18next', () => ({
@@ -352,4 +352,21 @@ test('the archive tab says so when it is empty', async () => {
   await openDeletedTab();
 
   expect(await screen.findByText('Nincs törölt csapat.')).toBeInTheDocument();
+});
+
+test('the team dialog shows the email and the join code only on request, each on its own', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, email: 'alpha@example.com', joinCode: '123-4567-890' }]);
+  renderAdmin(alpha.teamId);
+
+  const [showEmail] = await screen.findAllByText('Mutasd');
+  expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
+
+  fireEvent.click(showEmail);
+
+  expect(screen.getByText(/alpha@example\.com/)).toBeInTheDocument();
+  expect(screen.queryByText(/123-4567-890/)).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('Elrejtés'));
+
+  expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
 });

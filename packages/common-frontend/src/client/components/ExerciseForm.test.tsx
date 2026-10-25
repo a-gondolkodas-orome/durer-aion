@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SnackbarProvider } from 'notistack';
@@ -16,22 +16,22 @@ vi.mock('../hooks/user-hooks', () => ({
 
 function renderForm(awaitingJudge: boolean) {
   const onSubmit = vi.fn(() => Promise.resolve());
-  render(
+  const form = (attempt: number) =>
     <SnackbarProvider>
       <ExerciseForm
         previousTries={[]}
         previousCorrectness={null}
-        attempt={4}
+        attempt={attempt}
         onSubmit={onSubmit}
         awaitingJudge={awaitingJudge}
       />
-    </SnackbarProvider>
-  );
-  return onSubmit;
+    </SnackbarProvider>;
+  const { rerender } = render(form(4));
+  return { onSubmit, moveToAttempt: (attempt: number) => rerender(form(attempt)) };
 }
 
 test('sends a guess on its turn', async () => {
-  const onSubmit = renderForm(false);
+  const { onSubmit } = renderForm(false);
   fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
   fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
   await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(42));
@@ -43,4 +43,20 @@ test('blocks sending and typing while the judge has the turn', () => {
   renderForm(true);
   expect(screen.getByRole('button', { name: 'relay.send' })).toBeDisabled();
   expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
+});
+
+test('focuses the input on the attempt after a guess from this screen', async () => {
+  const { onSubmit, moveToAttempt } = renderForm(false);
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
+  // Formik submits asynchronously; act waits for it to settle.
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
+  });
+  expect(onSubmit).toHaveBeenCalled();
+  // A correct guess moves on to the next problem, three attempts on.
+  moveToAttempt(7);
+  expect(screen.getByRole('textbox')).toHaveFocus();
+  // A teammate's guess after that leaves the focus alone again.
+  moveToAttempt(10);
+  expect(screen.getByRole('textbox')).not.toHaveFocus();
 });

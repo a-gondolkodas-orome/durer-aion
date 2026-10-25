@@ -43,7 +43,7 @@ export class ErrorBoundary extends React.Component<
               // A reload, not a reset: the screen that crashed is chosen by the
               // team's state, so rendering it again would crash again.
               <Button color="inherit" onClick={() => window.location.reload()}>
-                {t('error.backHome')}
+                {t('general.backHome')}
               </Button>
             }
           >

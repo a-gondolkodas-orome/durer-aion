@@ -8,11 +8,6 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
 
-  // The tsconfig here sets `declarationMap` and tsdown honours it. Nothing
-  // reads the map, and emitting one puts a `sourceMappingURL` into output the
-  // frontend apps go on to bundle.
-  dts: { sourcemap: false },
-
   deps: {
     // Leave a subpath import as written. Resolving it is tsdown's default, and
     // for a dependency with no `exports` map it lands on the package's CJS

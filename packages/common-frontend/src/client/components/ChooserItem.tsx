@@ -6,23 +6,35 @@ import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useClientRepo } from '../client-repo-context';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
+import { strategyPoints } from 'game';
+import { RelayResultsTable, ScoreHeadline, StrategyGamesTable } from './ResultTables';
+import { relayMaxPoints } from './relay-results';
+import { EndDialog } from './EndCard';
+import { RelayEndTable } from './RelayEndTable';
+import { StrategyEndTable } from './StrategyEndTable';
 
 export function ChooserItem(props: {
   status: MatchStatus,
   type: 'strategy' | 'relay',
-  setState: React.Dispatch<"R" | "S" | null>
   hideDesc?: boolean
 }) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
-  const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
   const { t } = useTranslation();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const closeDetails = () => setDetailsOpen(false);
+  // The round's end screen, from the summary saved with the finished match. A
+  // match without one has nothing to show: for example a record from before the
+  // summary existed, or a local relay left to run out of time (#613).
+  const finished = props.status.state === "FINISHED" ? props.status : null;
+  const details = props.type === 'relay'
+    ? finished?.relayResults && <RelayEndTable allPoints={finished.score} problems={finished.relayResults} onClose={closeDetails}/>
+    : finished?.strategyResults && <StrategyEndTable allPoints={finished.score} liveResults={finished.strategyResults} onClose={closeDetails}/>;
 
   return (
     <Stack sx={{
@@ -65,17 +77,20 @@ export function ChooserItem(props: {
           }
         }}/>)}</span>
       </Stack>
-      {props.status.state === "FINISHED" &&
-        <Stack sx={{
-          height: 24,
-          fontSize: 18,
-          textAlign: 'center',
-          marginBottom: {
-            xs: '10px',
-            md: 0,
-          }
-        }}>
-          {t('chooser.filledAt')}: {formatTime(props.status.startAt)} - {formatTime(props.status.endAt)} {t('chooser.achievedPoint')}: {props.status.score}
+      {finished &&
+        <Stack sx={{ gap: '12px', marginBottom: { xs: '10px', md: '16px' } }}>
+          {props.type === 'relay'
+            ? <>
+              <ScoreHeadline compact points={finished.score} max={finished.relayResults && relayMaxPoints(finished.relayResults)}/>
+              {finished.relayResults && <RelayResultsTable problems={finished.relayResults}/>}
+            </>
+            : <>
+              <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>
+              {finished.strategyResults && <StrategyGamesTable results={finished.strategyResults}/>}
+            </>}
+          <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
+            {t('chooser.filledAt')}: {formatTime(finished.startAt)} – {formatTime(finished.endAt)}
+          </Stack>
         </Stack>
       }
       {props.type === 'relay' &&
@@ -146,9 +161,8 @@ export function ChooserItem(props: {
           void startStrategy()
         }
       }} disabled={props.status.state !== "NOT STARTED"}>
-        {t('chooser.start')}
+        {props.status.state === "FINISHED" ? t('chooser.finished') : t('chooser.start')}
       </Button>
-      { !isOffline &&
       <Button sx={{
         width: '70%',
         maxWidth: "400px",
@@ -157,16 +171,10 @@ export function ChooserItem(props: {
         alignSelf: 'center',
         textTransform: 'none',
         marginTop: '15px',
-      }} variant='contained' color='primary' onClick={() => {
-        if (props.type === "relay") {
-          props.setState("R");
-        } else {
-          props.setState("S");
-        }
-      }} disabled={props.status.state === "NOT STARTED"}>
-        {t('chooser.result')}
+      }} variant='contained' color='primary' onClick={() => setDetailsOpen(true)} disabled={!details}>
+        {t('chooser.detailedResults')}
       </Button>
-      }
+      {details && <EndDialog open={detailsOpen} onClose={closeDetails}>{details}</EndDialog>}
     </Stack>
   )
 }
