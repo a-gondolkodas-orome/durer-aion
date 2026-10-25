@@ -104,20 +104,12 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
   login_codes = set(relay_states.keys()).union(set(strategy_states.keys()))
   results = {code:{"strategy":"-", "relay": "-", "relay_detailed": []} for code in login_codes}
 
-  # Sanity check
+  # A match still running has no final score yet; the server reads one as
+  # finished once its time is up.
   for code in login_codes:
-    if code in relay_states:
-      team_state_points = 0
-      if "score" in team_states_dict[code]["relayMatch"]:
-        team_state_points = team_states_dict[code]["relayMatch"]["score"]
-      if relay_states[code]["G"]["points"] != team_state_points:
-        print(f"ERROR relay {code}: team_states says {team_state_points}, while gamestate {relay_states[code]['G']['points']}")
-    if code in strategy_states:
-      team_state_points = 0
-      if "score" in team_states_dict[code]["strategyMatch"]:
-        team_state_points = team_states_dict[code]["strategyMatch"]["score"]
-      if strategy_states[code]["G"]["points"] != team_state_points:
-        print(f"ERROR strategy {code}: team_states says {team_state_points}, while gamestate {strategy_states[code]['G']['points']}")
+    for match_type, states in (("relay", relay_states), ("strategy", strategy_states)):
+      if code in states and team_states_dict[code][f"{match_type}Match"]["state"] == "IN PROGRESS":
+        print(f"WARNING {match_type} {code}: still in progress, its points may change")
 
   # Get results
   for code in login_codes:
