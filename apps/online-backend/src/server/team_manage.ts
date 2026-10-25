@@ -107,6 +107,36 @@ export function allowedToStart(
   return own.state === "NOT STARTED";
 }
 
+/** Why an organiser's extension of `matchID` is refused, or null to allow it.
+ *  A match whose time is up is extended too — it reads as running again once
+ *  its end moves past now — but not one whose game has ended, nor one the team
+ *  has left for its other match, which would leave both running. */
+export function extensionRefusal(
+  team: Pick<TeamModel, "relayMatchID" | "strategyMatchID">,
+  matchID: string,
+  gameover: unknown,
+  matches: TeamMatches,
+): string | null {
+  const other = team.relayMatchID === matchID ? matches.strategyMatch
+    : team.strategyMatchID === matchID ? matches.relayMatch : null;
+  if (other === null)
+    return `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`;
+  if (gameover !== undefined)
+    return `Match ${matchID} has ended in the game itself; it cannot be extended.`;
+  if (other.state === "IN PROGRESS")
+    return `The team is playing its other match (${other.matchID}); ${matchID} cannot be extended.`;
+  return null;
+}
+
+/** The end an extension by `minutes` moves a match to: from its end, or from
+ *  now once that has passed, since the minutes after it are not ones the team
+ *  played. */
+export function extendedEnd(end: string, minutes: number, now: Date): Date {
+  const extended = new Date(Math.max(new Date(end).getTime(), now.getTime()));
+  extended.setMinutes(extended.getMinutes() + minutes);
+  return extended;
+}
+
 const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
   RELAY: relayNames,
   STRATEGY: strategyNames,
