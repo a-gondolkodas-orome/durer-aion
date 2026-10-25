@@ -61,7 +61,11 @@ export function TeamDetailDialog(props: {
         padding: "12px",
         fontSize: 14,
       }}>
-      <Stack sx={{ fontSize: 24, paddingBottom: "24px" }}>{team.teamName}</Stack>
+      <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{team.teamName}</Stack>
+      <Stack sx={{ paddingBottom: "24px" }}>
+        <HiddenField label="E-mail" value={team.email}/>
+        <HiddenField label="Belépési kód" value={team.joinCode}/>
+      </Stack>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
       <MatchStatusField key={`relay ${matchKey(team.relayMatch)}`} name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
       {team.relayMatch.state !== "NOT STARTED" && <Button sx={{
@@ -366,4 +370,20 @@ function RemainingTime(props: { end: Date }) {
   const seconds = Math.max(0, Math.floor((props.end.getTime() - now) / 1000));
   const pad = (n: number) => n.toString().padStart(2, '0');
   return <code>{pad(Math.floor(seconds / 3600))}:{pad(Math.floor(seconds / 60) % 60)}:{pad(seconds % 60)}</code>;
+}
+
+/// A value shown only on request. The page already holds it, so this guards
+/// against a shared screen, not against the admin: an organiser helping a team
+/// over a screen share should not show every passer-by the team's contact or
+/// its login code. Each opening of the dialog starts hidden again.
+function HiddenField(props: { label: string, value: string | undefined }) {
+  const [shown, setShown] = useState(false);
+  return (
+    <Stack sx={{ flexDirection: "row", alignItems: "center", gap: "8px" }}>
+      {props.label}: {shown ? (props.value || "—") : "••••••"}
+      <Button size="small" sx={{ textTransform: "none" }} onClick={() => setShown(!shown)}>
+        {shown ? "Elrejtés" : "Mutasd"}
+      </Button>
+    </Stack>
+  );
 }

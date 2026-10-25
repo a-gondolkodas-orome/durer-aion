@@ -525,3 +525,20 @@ test('the archive tab says so when it is empty', async () => {
 
   expect(await screen.findByText('Nincs törölt csapat.')).toBeInTheDocument();
 });
+
+test('the team dialog shows the email and the join code only on request, each on its own', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, email: 'alpha@example.com', joinCode: '123-4567-890' }]);
+  renderAdmin(alpha.teamId);
+
+  const [showEmail] = await screen.findAllByText('Mutasd');
+  expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
+
+  fireEvent.click(showEmail);
+
+  expect(screen.getByText(/alpha@example\.com/)).toBeInTheDocument();
+  expect(screen.queryByText(/123-4567-890/)).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('Elrejtés'));
+
+  expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
+});
