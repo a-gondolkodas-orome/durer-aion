@@ -102,13 +102,13 @@ describe("the restore routes", () => {
   });
 
   it("restores the archive row named in the path", async () => {
-    const teams = { restoreTeam: vi.fn().mockResolvedValue(model(row)) };
+    const teams = { restoreTeam: vi.fn().mockResolvedValue(row) };
     const request = await serve(teams);
 
     const response = await request("POST", "/team/admin/deleted/7/restore");
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toStrictEqual({ ...row, ...matches });
+    expect(await response.json()).toStrictEqual(row);
     expect(teams.restoreTeam).toHaveBeenCalledWith(7);
   });
 

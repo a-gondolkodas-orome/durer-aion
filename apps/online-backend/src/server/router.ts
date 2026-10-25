@@ -275,7 +275,7 @@ export function configureTeamsRouter(
       }
       throw error;
     });
-    ctx.body = await adminTeamView(ctx.db, team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`));
+    ctx.body = team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`);
   });
 
   /**
