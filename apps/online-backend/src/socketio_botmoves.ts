@@ -10,7 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
-import { CorsOptionsDelegate } from "cors";
+import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.
 // Naming them off what it does export keeps this file out of the package's

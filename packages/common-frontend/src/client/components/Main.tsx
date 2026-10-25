@@ -47,20 +47,26 @@ export function Main(props: { language: string, gitCommitHash: string }) {
         data-testid="mainRoot"
       >
         <ErrorBoundary resetKeys={[teamState?.teamName, teamState?.pageState]}>
-          {admin && <Admin teamId={window.location.pathname.split('/').at(2)}/>}
-          {!teamState && <Login />}
-          {teamState && teamState.pageState === "DISCLAIMER" && (
-            <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
-          )}
-          {teamState && teamState.pageState === "HOME" && (
-            <Chooser state={teamState}/>
-          )}
-          {teamState && teamState.pageState === "RELAY" && (
-            <Relay state={teamState} />
-          )}
-          {teamState && teamState.pageState === "STRATEGY" && (
-            <Strategy state={teamState} />
-          )}
+          {/* One branch, not independent conditions: `/admin` is the whole page,
+              never a panel above whatever the browser's own session is entitled
+              to — the join-code login form for an organiser with no team cookie,
+              or a live, playable board for one still holding a team's session
+              from testing. */}
+          {admin ? <Admin teamId={window.location.pathname.split('/').at(2)}/> : <>
+            {!teamState && <Login />}
+            {teamState && teamState.pageState === "DISCLAIMER" && (
+              <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
+            )}
+            {teamState && teamState.pageState === "HOME" && (
+              <Chooser state={teamState}/>
+            )}
+            {teamState && teamState.pageState === "RELAY" && (
+              <Relay state={teamState} />
+            )}
+            {teamState && teamState.pageState === "STRATEGY" && (
+              <Strategy state={teamState} />
+            )}
+          </>}
         </ErrorBoundary>
       </Container>
       <footer style={{
