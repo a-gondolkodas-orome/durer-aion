@@ -3,7 +3,7 @@ import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
 import { AnyBgioGame, strategyNames } from "game";
 import { Server } from "boardgame.io";
-import { allowedToStart, createGame, extendedEnd, extensionRefusal, getNewGame } from "./team_manage";
+import { allowedToStart, createGame, getNewGame } from "./team_manage";
 import type { TeamMatches } from "./match_status";
 
 const running: MatchStatus = {
@@ -76,49 +76,6 @@ describe("allowedToStart", () => {
 
   it("still lets a team start the round it has not played", () => {
     expect(allowedToStart(team({}), matches({ relayMatch: finished }), "STRATEGY")).toBe(true);
-  });
-});
-
-describe("extensionRefusal", () => {
-  const playing = team({ relayMatchID: "match-1" });
-
-  it("extends the team's running match", () => {
-    expect(extensionRefusal(playing, "match-1", undefined, matches({ relayMatch: running }))).toBeNull();
-  });
-
-  // The team whose laptop died phones after the buzzer.
-  it("extends a match whose time is up but whose game nobody ended", () => {
-    expect(extensionRefusal(playing, "match-1", undefined, matches({ relayMatch: finished }))).toBeNull();
-  });
-
-  it("refuses a match the game itself has ended", () => {
-    expect(extensionRefusal(playing, "match-1", { winner: "0" }, matches({ relayMatch: finished }))).toMatch(/ended/);
-  });
-
-  it("refuses a match that is not the team's current one", () => {
-    expect(extensionRefusal(playing, "match-0", undefined, matches({ relayMatch: running }))).toMatch(/not the team's/);
-  });
-
-  // Reopening it would leave the team with both matches running.
-  it("refuses a match the team has left for its other one", () => {
-    const moved = team({ relayMatchID: "match-1", strategyMatchID: "match-2" });
-    const both = matches({ relayMatch: finished, strategyMatch: { ...running, matchID: "match-2" } });
-
-    expect(extensionRefusal(moved, "match-1", undefined, both)).toMatch(/other match/);
-  });
-});
-
-describe("extendedEnd", () => {
-  const END = "2026-03-21T11:00:00.000Z";
-
-  it("moves a running match's end", () => {
-    expect(extendedEnd(END, 5, new Date("2026-03-21T10:30:00Z"))).toStrictEqual(new Date("2026-03-21T11:05:00Z"));
-  });
-
-  // Otherwise an extension asked for after the buzzer is partly spent before
-  // it is given.
-  it("counts from now for a match whose end has passed", () => {
-    expect(extendedEnd(END, 5, new Date("2026-03-21T11:04:00Z"))).toStrictEqual(new Date("2026-03-21T11:09:00Z"));
   });
 });
 

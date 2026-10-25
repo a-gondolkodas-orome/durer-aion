@@ -37,12 +37,7 @@ export function deriveMatchStatus(
   const finished: FinishedMatchStatus = { state: "FINISHED", matchID, startAt, endAt, score: timer.points };
   if (kind === "relayMatchID")
     return { ...finished, relayResults: relayProblemResults(G as MyGameState) };
-  // The play phase records the game the time cut off when it ends (gameWrapper),
-  // which a match that ran out with nobody playing never does: that game is
-  // added here, and only if one was being played.
-  const cutOff = ctx.gameover === undefined && ctx.phase === "play"
-    && timer.difficulty === "live" && timer.winner === null;
-  return { ...finished, strategyResults: cutOff ? [...timer.liveResults, "unfinished"] : timer.liveResults };
+  return { ...finished, strategyResults: timer.liveResults };
 }
 
 /** {@link deriveMatchStatus} for a match in storage, or NOT STARTED for none.

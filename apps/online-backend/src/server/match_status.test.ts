@@ -60,33 +60,9 @@ describe("deriveMatchStatus", () => {
       .toBe("IN PROGRESS");
   });
 
-  describe("a strategy match's results", () => {
-    // The play phase records the game the time cut off only when the game ends.
-    it("include the live game the time cut off", () => {
-      expect(deriveMatchStatus("strategyMatchID", "m1", { G: strategyG(), ctx: ctx() }, at(1000)))
-        .toMatchObject({ state: "FINISHED", score: 0, strategyResults: ["lost", "won", "unfinished"] });
-    });
-
-    it("are the game's own once it has ended, which recorded the cut-off game itself", () => {
-      const ended = strategyG({ liveResults: ["lost", "won", "unfinished"] });
-
-      expect(deriveMatchStatus("strategyMatchID", "m1", { G: ended, ctx: ctx({ gameover: true }) }, at(1000)))
-        .toMatchObject({ strategyResults: ["lost", "won", "unfinished"] });
-    });
-
-    it("have nothing cut off when the time ran out between games", () => {
-      const between = { G: strategyG({ winner: "1" }), ctx: ctx({ phase: "startNewGame" }) };
-
-      expect(deriveMatchStatus("strategyMatchID", "m1", between, at(1000)))
-        .toMatchObject({ strategyResults: ["lost", "won"] });
-    });
-
-    it("leave out a practice game the time cut off", () => {
-      const practice = { G: strategyG({ difficulty: "test" }), ctx: ctx() };
-
-      expect(deriveMatchStatus("strategyMatchID", "m1", practice, at(1000)))
-        .toMatchObject({ strategyResults: ["lost", "won"] });
-    });
+  it("carries a strategy match's results as the game recorded them", () => {
+    expect(deriveMatchStatus("strategyMatchID", "m1", { G: strategyG(), ctx: ctx() }, at(1000)))
+      .toMatchObject({ state: "FINISHED", score: 0, strategyResults: ["lost", "won"] });
   });
 });
 

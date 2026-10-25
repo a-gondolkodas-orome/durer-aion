@@ -176,10 +176,9 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
-      // The server's 501: the match's game has ended, it is no longer the
-      // team's current one, or the team is playing its other match.
+      // The server's 501: the match is finished, or no longer the team's current one.
       if (err.response?.status === 501) {
-        throw new Error('Ezt a játékot nem lehet meghosszabbítani', { cause: e });
+        throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
