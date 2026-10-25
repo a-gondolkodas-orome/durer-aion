@@ -182,7 +182,11 @@ export class RealClientRepository implements ClientRepository {
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-    return (result.data as { team: TeamModelDto }).team;
+    const team = (result.data as { team?: TeamModelDto } | undefined)?.team;
+    if (!team) {
+      throw new Error('Váratlan hiba történt');
+    }
+    return team;
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {

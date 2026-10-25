@@ -29,13 +29,13 @@ export function TeamDetailDialog(props: {
   const resetStrategy = useResetStrategy();
   const repoRemoveTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
-  const team = props.data;
+  const teamState = props.data;
   const [removing, setRemoving] = useState(false);
 
   // The games' own points, not the scores stored on the team (see
   // FinishedMatchStatus in the `schemas` package).
-  const relayPoints = useMatchPoints(team.relayMatch);
-  const strategyPoints = useMatchPoints(team.strategyMatch);
+  const relayPoints = useMatchPoints(teamState.relayMatch);
+  const strategyPoints = useMatchPoints(teamState.strategyMatch);
   const sum = relayPoints === undefined || strategyPoints === undefined
     ? undefined
     : relayPoints + strategyPoints;
@@ -61,22 +61,23 @@ export function TeamDetailDialog(props: {
         padding: "12px",
         fontSize: 14,
       }}>
-      <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{team.teamName}</Stack>
+      <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{teamState.teamName}</Stack>
+      <Stack sx={{ color: 'text.secondary', paddingBottom: "12px" }}>Friss adatokért töltsd újra az oldalt.</Stack>
       <Stack sx={{ paddingBottom: "24px" }}>
-        <HiddenField label="E-mail" value={team.email}/>
-        <HiddenField label="Belépési kód" value={team.joinCode}/>
+        <HiddenField label="E-mail" value={teamState.email}/>
+        <HiddenField label="Belépési kód" value={teamState.joinCode}/>
       </Stack>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
-      <MatchStatusField key={`relay ${matchKey(team.relayMatch)}`} name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
-      {team.relayMatch.state !== "NOT STARTED" && <Button sx={{
+      <MatchStatusField key={`relay ${matchKey(teamState.relayMatch)}`} name={teamState.teamName} data={teamState.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
+      {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${team.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
-                  props.onChanged(await resetRelay(adminTeamId(team)));
+                  props.onChanged(await resetRelay(adminTeamId(teamState)));
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -88,16 +89,16 @@ export function TeamDetailDialog(props: {
         >reset</Button>}
 
       <Stack sx={{ fontSize: 16, marginTop: "24px" }}>Strategy:</Stack>
-        <MatchStatusField key={`strategy ${matchKey(team.strategyMatch)}`} name={team.teamName} data={team.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
-      {team.strategyMatch.state !== "NOT STARTED" && <Button sx={{
+        <MatchStatusField key={`strategy ${matchKey(teamState.strategyMatch)}`} name={teamState.teamName} data={teamState.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
+      {teamState.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${team.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
+              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
-                  props.onChanged(await resetStrategy(adminTeamId(team)));
+                  props.onChanged(await resetStrategy(adminTeamId(teamState)));
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -118,9 +119,9 @@ export function TeamDetailDialog(props: {
           disabled={removing}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Biztosan törlöd a(z) ${team.teamName} csapatot? A verseny közben semmiképpen se törölj csapatokat.`,
+              text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot? A verseny közben semmiképpen se törölj csapatokat.`,
               requiredWords: DELETE_WORDS,
-              confirm: async () => removeTeam(adminTeamId(team)),
+              confirm: async () => removeTeam(adminTeamId(teamState)),
             });
           }}
         >
@@ -177,11 +178,11 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
               try {
-                const changed = await addMinutes(inProgressState.matchID, values.time);
-                // The match's new `G.end`, which the total reads, and the
-                // team's new `endAt`, which team-state-end reads.
-                await mutate(matchStateKey(inProgressState.matchID));
-                props.onChanged(changed);
+                // The team's new `endAt`, which team-state-end reads, and the
+                // match's new `G.end`, which the total reads. The minutes are
+                // already added, so neither waits on the reload.
+                props.onChanged(await addMinutes(inProgressState.matchID, values.time));
+                void mutate(matchStateKey(inProgressState.matchID));
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
