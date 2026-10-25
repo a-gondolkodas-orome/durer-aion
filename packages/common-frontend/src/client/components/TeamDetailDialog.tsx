@@ -26,8 +26,6 @@ export function TeamDetailDialog(props: {
   const { enqueueSnackbar } = useSnackbar();
   const [teamState, setTeamState] = useState(props.data);
 
-  // The games' own points, not the scores stored on the team (see
-  // FinishedMatchStatus in the `schemas` package).
   const relayPoints = useMatchPoints(teamState.relayMatch);
   const strategyPoints = useMatchPoints(teamState.strategyMatch);
   const sum = relayPoints === undefined || strategyPoints === undefined
@@ -138,7 +136,8 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             confirm: async () => {
               try {
                 await addMinutes(inProgressState.matchID, values.time);
-                // The dialog's total reads the new `G.end` from here.
+                // The match's new `G.end`, which MatchStatusDataField's end
+                // and countdown read.
                 await mutate(matchStateKey(inProgressState.matchID));
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
@@ -214,7 +213,6 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           end: {formatTime(finishedState.endAt)}<br/>
 
           <Stack><MatchStatusDataField matchId={finishedState.matchID} isRelay={props.isRelay}/></Stack>
-          <StoredScore matchId={finishedState.matchID} score={finishedState.score}/>
           <Button
           sx={{
             width: '200px',
@@ -261,29 +259,17 @@ function useMatchStateData(matchId: string | null) {
   return useSWR(matchId === null ? null : matchStateKey(matchId), ([, id]) => matchState(id));
 }
 
-/// A match's share of the total, `undefined` until it is known, so a
-/// mid-round total never reads as final. An IN PROGRESS match past its end
-/// counts: a team that left before the end never closes it. The end is
-/// `G.end`, not the team's `endAt`, which adding minutes does not reload.
+/// A match's share of the total, `undefined` while it runs, so a mid-round
+/// total never reads as final. A finished match's `score` is its `G.points` as
+/// of the list's last load; the match state the dialog fetches is fresher, for
+/// an answer judged just past the end.
 function useMatchPoints(status: MatchStatus): number | undefined {
-  const matchId = status.state === "NOT STARTED" ? null : status.matchID;
-  const { data, error } = useMatchStateData(matchId);
+  const { data } = useMatchStateData(status.state === "FINISHED" ? status.matchID : null);
   if (status.state === "NOT STARTED")
     return 0;
-  if (data)
-    return status.state === "FINISHED" || new Date(data.G.end).getTime() < Date.now() ? data.G.points : undefined;
-  if (error && status.state === "FINISHED")
-    return status.score;
-  return undefined;
-}
-
-function StoredScore(props: { matchId: string, score: number }) {
-  const { data } = useMatchStateData(props.matchId);
-  return (<>
-    <Stack>Csapatnál tárolt pontszám: {props.score}</Stack>
-    {data && data.G.points !== props.score &&
-      <Stack sx={{ color: 'red' }}>Eltér a játék pontszámától ({data.G.points}), az a hivatalos.</Stack>}
-  </>);
+  if (status.state === "IN PROGRESS")
+    return undefined;
+  return data?.G.points ?? status.score;
 }
 
 function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProgress?: boolean }) {
