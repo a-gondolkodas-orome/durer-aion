@@ -35,7 +35,7 @@ export function Admin(props: { teamId?: string }) {
   const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
   const [tab, setTab] = useState<AdminTab>('teams');
@@ -44,26 +44,13 @@ export function Admin(props: { teamId?: string }) {
   // `/admin/<teamId>` page drops out with the list's next load and the page
   // falls back to the grid instead of showing the team it no longer has.
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
-  // The same for the dialog, so it shows the team as the list last loaded it.
-  // A team gone from the list is deselected too, so restoring it later does not
-  // reopen the dialog unasked.
-  const selectedRow = selectedTeamId ? data?.find(d => d.teamId === selectedTeamId) ?? null : null;
-  if (selectedTeamId !== null && data && !selectedRow) {
-    setSelectedTeamId(null);
-  }
   const showTeams = !teamFromPath && tab === 'teams';
 
   // The server has dropped the team: the dialog closes, and the grid reloads so
   // it no longer offers a team that is gone.
   const onRemoved = () => {
-    setSelectedTeamId(null);
+    setSelectedRow(null);
     void mutate();
-  };
-
-  // An action in the dialog answers with the team's new row: the list takes it
-  // at once, then reloads.
-  const onChanged = (changed: TeamModelDto) => {
-    void mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it));
   };
 
   return (
@@ -101,9 +88,9 @@ export function Admin(props: { teamId?: string }) {
         open={
           selectedRow != null
         } onClose={() => {
-            setSelectedTeamId(null);
+            setSelectedRow(null);
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved} onChanged={onChanged}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
@@ -117,7 +104,7 @@ export function Admin(props: { teamId?: string }) {
         <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
       </Stack>
       {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved} onChanged={onChanged}/>}
+        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
         {!teamFromPath && <Tabs value={tab} onChange={(_, value: AdminTab) => setTab(value)} sx={{ marginBottom: '8px' }}>
           <Tab value="teams" label="Csapatok"/>
           <Tab value="deleted" label="Törölt csapatok"/>
@@ -183,7 +170,7 @@ export function Admin(props: { teamId?: string }) {
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={() => {setSelectedTeamId(renderData.row.teamId ?? null)}}>
+                    onClick={() => {setSelectedRow(renderData.row)}}>
                       Szerkesztés
                   </Button>
                 )
@@ -263,9 +250,6 @@ export function Admin(props: { teamId?: string }) {
                 } catch (e) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
                   enqueueSnackbar(message, { variant: 'error' });
-                } finally {
-                  // Each team's `endAt` moved, even when a later one failed.
-                  await mutate();
                 }
               },
             })

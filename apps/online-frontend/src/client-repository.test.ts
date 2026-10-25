@@ -119,22 +119,6 @@ describe("removing a team", () => {
 });
 
 describe("adding minutes to a match", () => {
-  // The server answers with the end time and the match id beside the team.
-  test("answers with the team's new row", async () => {
-    const team = { teamName: "Alpha" };
-    fakeAxios(() => Promise.resolve({ data: { updatedEndTime: "2026-09-07T10:00:00.000Z", matchID: "match-1", team } }));
-
-    await expect(new RealClientRepository().addMinutes("match-1", 5)).resolves.toStrictEqual(team);
-  });
-
-  // An answer without the team, such as a proxy's page, would hand the list an
-  // undefined row.
-  test("an answer without the team is reported", async () => {
-    fakeAxios(() => Promise.resolve({ data: "<html></html>" }));
-
-    await expect(new RealClientRepository().addMinutes("match-1", 5)).rejects.toThrow("Váratlan hiba történt");
-  });
-
   // Regression for #101: the check read axios's `code`, which is an error name
   // such as "ERR_BAD_RESPONSE", never an HTTP status, so this never matched.
   test("a match the server will not extend is reported as expired", async () => {

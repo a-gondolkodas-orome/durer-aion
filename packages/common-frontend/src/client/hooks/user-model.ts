@@ -57,8 +57,8 @@ export class UserModel {
     return this.repo.resetStrategy(teamId);
   }
 
-  async addMinutes(matchId: string, minutes: number): Promise<TeamModelDto> {
-    return this.repo.addMinutes(matchId, minutes);
+  async addMinutes(matchId: string, minutes: number): Promise<void> {
+    await this.repo.addMinutes(matchId, minutes);
   }
 
   async startRelay(): Promise<void> {

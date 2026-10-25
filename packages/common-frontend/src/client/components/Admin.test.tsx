@@ -4,14 +4,13 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
-import { SWRConfig, SWRConfiguration } from 'swr';
+import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
-import { formatTime } from '../utils/DateFormatter';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -90,28 +89,13 @@ afterEach(() => {
 // snackbar provider the page reports through — same as in the apps.
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
 
-// What SWR reloads on when the window regains focus. Tests call it rather
-// than dispatch a focus event: SWR's own listener hands the event to
-// `setTimeout` as its delay, which Node warns about.
-let refocus: () => void = () => undefined;
-const focusWindow = () => act(() => {
-  refocus();
-});
-
 // A fresh SWR cache per render: the list's key is the same in every test, and
 // a cached list would stand in for the one the test's repository serves.
-const renderAdmin = (teamId?: string, swr: SWRConfiguration = {}) =>
+const renderAdmin = (teamId?: string) =>
   render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
-        <SWRConfig value={{
-          ...swr,
-          provider: () => new Map(),
-          initFocus: (callback) => {
-            refocus = callback;
-            return () => undefined;
-          },
-        }}>
+        <SWRConfig value={{ provider: () => new Map() }}>
           <Layout>
             <Admin teamId={teamId}/>
           </Layout>
@@ -229,9 +213,6 @@ const gameState = (points: number, end: string | Date): MatchStateDto => ({
 
 const inAnHour = () => new Date(Date.now() + 60 * 60 * 1000);
 
-const alphaInRelayUntil = (endAt: Date): TeamModelDto =>
-  ({ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt } });
-
 test('the team dialog totals the game\'s points, not the lower score stored when the match closed', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
@@ -253,7 +234,7 @@ test('the team dialog shows no total while a match is in progress', async () => 
 // time was still totalled as over.
 test('the team dialog totals a match left in progress past its end, until time is added', async () => {
   const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(inAnHour()));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
   expect(await screen.findByText('Összesen: 4 pont')).toBeInTheDocument();
 
@@ -268,54 +249,6 @@ test('the team dialog totals a match left in progress past its end, until time i
   confirm();
 
   expect(await screen.findByText('Összesen: ? pont')).toBeInTheDocument();
-});
-
-// Adding minutes moves the team's `endAt` too. The reload after it never
-// answers, so only the row the server answered with can show it.
-test('adding minutes shows the team\'s new end time', async () => {
-  const later = inAnHour();
-  vi.spyOn(repo, 'getAll')
-    .mockResolvedValueOnce([alphaInRelayUntil(new Date(LATER))])
-    .mockReturnValue(new Promise(() => undefined));
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(later));
-  renderAdmin(alpha.teamId);
-  expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(new Date(LATER))}`))).toBeInTheDocument();
-
-  await act(async () => {
-    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
-  });
-  await act(async () => {
-    fireEvent.click(screen.getByText('idő hozzáadása'));
-  });
-  confirm();
-
-  expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(later)}`))).toBeInTheDocument();
-});
-
-// Adding time to everyone moves each team's `endAt`, which a dialog opened
-// afterwards reads off the list.
-test('adding time to every team reloads the list', async () => {
-  const later = inAnHour();
-  vi.spyOn(repo, 'getAll')
-    .mockResolvedValueOnce([alphaInRelayUntil(new Date(LATER))])
-    .mockResolvedValue([alphaInRelayUntil(later)]);
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, later));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(later));
-  renderAdmin();
-  await screen.findByText('Alpha');
-
-  await act(async () => {
-    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
-  });
-  await act(async () => {
-    fireEvent.click(screen.getByText('hozzáadás'));
-  });
-  confirm();
-  expect(await screen.findByText('Sikeres művelet')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Szerkesztés'));
-
-  expect(await screen.findByText(new RegExp(`team-state-end: ${formatTime(later)}`))).toBeInTheDocument();
 });
 
 test('the team dialog totals the stored score when the match state cannot be fetched', async () => {
@@ -342,92 +275,6 @@ test('a refused logs request is reported', async () => {
   fireEvent.click(await screen.findByText('logok Lekérése'));
 
   expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
-});
-
-const finishedAlpha = { ...alpha, relayMatch: { state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 } } as const;
-
-// The dialog kept a copy of the row it was opened with.
-test('the team dialog follows the list when it reloads', async () => {
-  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([finishedAlpha]).mockResolvedValue([alpha]);
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(5, LATER));
-  // Neither deduped into the first load nor throttled for being so soon after it.
-  renderAdmin(alpha.teamId, { dedupingInterval: 0, focusThrottleInterval: 0 });
-  expect(await screen.findByText(/Végzett/)).toBeInTheDocument();
-
-  await focusWindow();
-
-  await waitFor(() => expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2));
-});
-
-// The reload after the reset never answers, so only the row the reset returned
-// can show.
-test('a reset shows the team\'s new row', async () => {
-  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([finishedAlpha, bravo]).mockReturnValue(new Promise(() => undefined));
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(5, LATER));
-  vi.spyOn(repo, 'resetRelay').mockResolvedValue(alpha);
-  renderAdmin();
-  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
-  expect(await screen.findByText(/Végzett/)).toBeInTheDocument();
-
-  fireEvent.click(screen.getByText('reset'));
-  confirm();
-
-  expect(await screen.findByText('Sikeres művelet')).toBeInTheDocument();
-  expect(screen.getAllByText('Nem kezdte el')).toHaveLength(2);
-  expect(screen.queryByText('reset')).not.toBeInTheDocument();
-});
-
-test('the logs fetched for one match are not shown under the next', async () => {
-  const inProgress = (matchID: string) => ({ ...alpha, relayMatch: { state: 'IN PROGRESS', matchID, startAt: new Date(EARLIER), endAt: inAnHour() } } as const);
-  vi.spyOn(repo, 'getAll').mockResolvedValueOnce([inProgress('first-match')]).mockResolvedValue([inProgress('second-match')]);
-  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
-  vi.spyOn(repo, 'getMatchLogs').mockResolvedValue({ G: { points: 123456 } } as unknown as MatchStateDto);
-  renderAdmin(alpha.teamId, { dedupingInterval: 0, focusThrottleInterval: 0 });
-  fireEvent.click(await screen.findByText('logok Lekérése'));
-  expect(await screen.findByText('123456')).toBeInTheDocument();
-
-  await focusWindow();
-
-  await waitFor(() => expect(screen.queryByText('123456')).not.toBeInTheDocument());
-});
-
-test('a team gone from the list closes its dialog for good', async () => {
-  vi.spyOn(repo, 'getAll')
-    .mockResolvedValueOnce([alpha, bravo])
-    .mockResolvedValueOnce([bravo])
-    .mockResolvedValue([alpha, bravo]);
-  renderAdmin(undefined, { dedupingInterval: 0, focusThrottleInterval: 0 });
-  fireEvent.click((await screen.findAllByText('Szerkesztés'))[0]);
-  expect(await screen.findByText('Csapat törlése')).toBeInTheDocument();
-
-  await focusWindow();
-  await waitFor(() => expect(screen.queryByText('Alpha')).not.toBeInTheDocument());
-  expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument();
-
-  await focusWindow();
-  expect(await screen.findByText('Alpha')).toBeInTheDocument();
-  expect(screen.queryByText('Csapat törlése')).not.toBeInTheDocument();
-});
-
-// The countdown waited on a server refresh in its last second, which the
-// dialog never gave it, so it froze there, and stayed frozen after minutes
-// were added.
-test('the team dialog\'s clock stops at zero, and follows minutes added after it', async () => {
-  const getMatchState = vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, LATER));
-  vi.spyOn(repo, 'addMinutes').mockResolvedValue(alphaInRelayUntil(inAnHour()));
-  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER) });
-  expect(await screen.findByText('00:00:00')).toBeInTheDocument();
-
-  getMatchState.mockResolvedValue(gameState(4, inAnHour()));
-  await act(async () => {
-    fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
-  });
-  await act(async () => {
-    fireEvent.click(screen.getByText('idő hozzáadása'));
-  });
-  confirm();
-
-  expect(await screen.findByText(/^(00:59:5\d|01:00:00)$/)).toBeInTheDocument();
 });
 
 const openDeletedTab = async () => {

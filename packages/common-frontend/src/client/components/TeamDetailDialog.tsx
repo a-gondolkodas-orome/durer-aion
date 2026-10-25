@@ -1,7 +1,7 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useRemoveTeam } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
-import { Dispatch, useEffect, useState } from 'react';
+import { Dispatch, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { TeamModelDto, MatchStatus, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
@@ -10,26 +10,25 @@ import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
+import { Countdown } from './Countdown';
 import { relayProblemResults } from 'game';
 import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-/// `onRemoved` fires once the server has dropped the team, and `onChanged` with
-/// the team's new row once an action has changed it: the list this dialog was
-/// opened from is stale from that moment, and `data` is read off that list.
+/// `onRemoved` fires once the server has dropped the team: the list this dialog
+/// was opened from is stale from that moment, and the dialog cannot refresh it.
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
   onRemoved: () => void,
-  onChanged: (team: TeamModelDto) => void,
 }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const repoRemoveTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
-  const teamState = props.data;
+  const [teamState, setTeamState] = useState(props.data);
   const [removing, setRemoving] = useState(false);
 
   // The games' own points, not the scores stored on the team (see
@@ -68,7 +67,7 @@ export function TeamDetailDialog(props: {
         <HiddenField label="Belépési kód" value={teamState.joinCode}/>
       </Stack>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
-      <MatchStatusField key={`relay ${matchKey(teamState.relayMatch)}`} name={teamState.teamName} data={teamState.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
+      <MatchStatusField name={teamState.teamName} data={teamState.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
       {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
@@ -77,7 +76,8 @@ export function TeamDetailDialog(props: {
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
-                  props.onChanged(await resetRelay(adminTeamId(teamState)));
+                  const changed = await resetRelay(adminTeamId(teamState));
+                  setTeamState(changed);
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -89,7 +89,7 @@ export function TeamDetailDialog(props: {
         >reset</Button>}
 
       <Stack sx={{ fontSize: 16, marginTop: "24px" }}>Strategy:</Stack>
-        <MatchStatusField key={`strategy ${matchKey(teamState.strategyMatch)}`} name={teamState.teamName} data={teamState.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
+        <MatchStatusField name={teamState.teamName} data={teamState.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog}/>
       {teamState.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
@@ -98,7 +98,8 @@ export function TeamDetailDialog(props: {
               text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
-                  props.onChanged(await resetStrategy(adminTeamId(teamState)));
+                  const changed = await resetStrategy(adminTeamId(teamState));
+                  setTeamState(changed);
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -132,13 +133,7 @@ export function TeamDetailDialog(props: {
   )
 }
 
-/// Remounts the field for another match, so the logs fetched for one are not
-/// shown under the next.
-function matchKey(status: MatchStatus) {
-  return status.state === "NOT STARTED" ? "" : status.matchID;
-}
-
-function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>, onChanged: (team: TeamModelDto) => void }) {
+function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const theme = useTheme();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
@@ -178,11 +173,9 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
               try {
-                // The team's new `endAt`, which team-state-end reads, and the
-                // match's new `G.end`, which the total reads. The minutes are
-                // already added, so neither waits on the reload.
-                props.onChanged(await addMinutes(inProgressState.matchID, values.time));
-                void mutate(matchStateKey(inProgressState.matchID));
+                await addMinutes(inProgressState.matchID, values.time);
+                // The dialog's total reads the new `G.end` from here.
+                await mutate(matchStateKey(inProgressState.matchID));
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -307,7 +300,7 @@ function useMatchStateData(matchId: string | null) {
 /// A match's share of the total, `undefined` until it is known, so a
 /// mid-round total never reads as final. An IN PROGRESS match past its end
 /// counts: a team that left before the end never closes it. The end is
-/// `G.end`, the game's own, rather than the copy on the team.
+/// `G.end`, not the team's `endAt`, which adding minutes does not reload.
 function useMatchPoints(status: MatchStatus): number | undefined {
   const matchId = status.state === "NOT STARTED" ? null : status.matchID;
   const { data, error } = useMatchStateData(matchId);
@@ -329,12 +322,11 @@ function StoredScore(props: { matchId: string, score: number }) {
   </>);
 }
 
-/// SWR keeps retrying a failed request, so an error with no data clears once
-/// one succeeds, and an error beside data means the shown state is the last
-/// one that loaded.
 function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProgress?: boolean }) {
+  const [msRemaining, setMsRemaining] = useState<number>(10000);
   const { data, error } = useMatchStateData(props.matchId);
   if (!data) {
+    // SWR keeps retrying, so an error clears once a request succeeds.
     return error
       ? <Stack sx={{ color: 'error.main' }}>A játék állását nem sikerült betölteni.</Stack>
       : <Stack>A játék állása töltődik…</Stack>;
@@ -345,32 +337,23 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProg
   const strategyG = 'numberOfTries' in data.G ? data.G : null;
   return (<>
   <Stack>
-      { error && <Stack sx={{ color: 'error.main' }}>A játék állását nem sikerült frissíteni, a lenti adatok elavultak lehetnek.</Stack>}
       { props.isRelay && relayG && <Stack>Aktuális feladatszám: {relayG.currentProblem + 1}</Stack>}
       { !props.isRelay && strategyG && <Stack>próbálkozások száma: {strategyG.numberOfTries}</Stack>}
       { !props.isRelay && strategyG && <StrategyGamesTable results={strategyG.liveResults}/>}
       <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
       <Stack>pontszám: { data.G.points }</Stack>
-      <Stack>Hátralévő idő: <RemainingTime end={new Date(data.G.end)}/></Stack>
+      <Stack>Hátralévő idő: <Countdown
+        msRemaining={msRemaining ?? null}
+        setMsRemaining={setMsRemaining}
+        endTime={new Date(data.G.end)}
+        getServerTimer={() => undefined}
+        serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
+      /></Stack>
       { props.isRelay && relayG && <RelayResultsTable problems={relayProblemResults(relayG)} details
         answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}
         current={props.inProgress ? relayG.currentProblem : undefined}/>}
     </Stack>
   </>)
-}
-
-/// Read off `G.end` each second rather than through `Countdown`, whose last
-/// second waits on a server refresh the dialog has none of. The admin needs a
-/// correct clock: it stops at zero, and follows minutes added after that.
-function RemainingTime(props: { end: Date }) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const handle = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(handle);
-  }, []);
-  const seconds = Math.max(0, Math.floor((props.end.getTime() - now) / 1000));
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return <code>{pad(Math.floor(seconds / 3600))}:{pad(Math.floor(seconds / 60) % 60)}:{pad(seconds % 60)}</code>;
 }
 
 /// A value shown only on request. The page already holds it, so this guards
