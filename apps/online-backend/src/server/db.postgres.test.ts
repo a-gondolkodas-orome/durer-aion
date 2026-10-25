@@ -2,11 +2,9 @@ import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import type { TeamsRepository } from './db';
 import { startTestDatabase } from './test_database';
 import { TeamModel } from './model';
-import { DeletedTeamModel } from './deletedTeam';
 
 // TeamsRepository against a real postgres (test_database.ts), for what only the
-// database decides: the unique constraints the live table has and the archive
-// does not, the LIKE escape, and restores that clash with a live team.
+// database decides: the unique constraints and the LIKE escape.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -48,7 +46,7 @@ describe('the unique constraints sync() creates', () => {
     const first = team();
     await database.teams.insertTeam(first);
 
-    // The message is model.ts's, and what the restore route's 409 answer carries.
+    // The message is model.ts's.
     await expect(database.teams.insertTeam(team({ [field]: first[field] })))
       .rejects.toMatchObject({ name: 'SequelizeUniqueConstraintError', errors: [{ message }] });
     expect(await TeamModel.count()).toBe(1);
@@ -74,42 +72,5 @@ describe('TeamsRepository.fetch', () => {
     expect(await names(['budapest', 'motivated'])).toStrictEqual(['Alpha']);
     expect(await names(['100%'])).toStrictEqual(['Alpha']);
     expect(await names(['a_b'])).toStrictEqual(['Alpha']);
-  });
-});
-
-describe('deleting and restoring', () => {
-  it('archives a team deleted, imported again and deleted again', async () => {
-    const twice = team();
-    await database.teams.insertTeam(twice);
-    await database.teams.removeTeam(twice.teamId);
-    await database.teams.insertTeam(twice);
-
-    expect(await database.teams.removeTeam(twice.teamId)).toBe(1);
-    expect(await DeletedTeamModel.count()).toBe(2);
-  });
-
-  it('a clashing restore leaves the archive row', async () => {
-    const deleted = team();
-    await database.teams.insertTeam(deleted);
-    await database.teams.removeTeam(deleted.teamId);
-    // A new team takes the deleted one's name while it is in the archive.
-    await database.teams.insertTeam(team({ teamname: deleted.teamname }));
-    const [archived] = await database.teams.listDeletedTeams();
-
-    await expect(database.teams.restoreTeam(archived.deletionId)).rejects.toMatchObject({ name: 'SequelizeUniqueConstraintError' });
-
-    expect(await DeletedTeamModel.count()).toBe(1);
-    expect(await database.teams.getTeam({ teamId: deleted.teamId })).toBeNull();
-  });
-
-  it('restores the rest of a batch past a clash', async () => {
-    const [alpha, beta] = [team({ teamname: 'Alpha' }), team({ teamname: 'Beta' })];
-    await database.teams.insertTeam(alpha);
-    await database.teams.insertTeam(beta);
-    const { deletedAt } = await database.teams.removeAllTeams();
-    await database.teams.insertTeam(team({ joinCode: alpha.joinCode }));
-
-    expect(await database.teams.restoreBatch(deletedAt)).toStrictEqual({ restored: ['Beta'], conflicts: ['Alpha'] });
-    expect(await DeletedTeamModel.count()).toBe(1);
   });
 });

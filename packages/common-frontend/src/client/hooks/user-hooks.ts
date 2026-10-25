@@ -162,32 +162,3 @@ export const useStartStrategy = () => {
     setTeamState(state);
   };
 };
-
-export const useRemoveTeam = () => {
-  const repo = useClientRepo();
-  return async (teamId: string) => {
-    await repo.removeTeam(teamId);
-  };
-};
-
-export const useRemoveAllTeams = () => {
-  const repo = useClientRepo();
-  return async () => await repo.removeAllTeams();
-};
-
-export const useDeleted = () => {
-  const repo = useClientRepo();
-  return async () => await repo.getDeleted();
-};
-
-export const useRestoreTeam = () => {
-  const repo = useClientRepo();
-  return async (deletionId: number) => {
-    await repo.restoreTeam(deletionId);
-  };
-};
-
-export const useRestoreBatch = () => {
-  const repo = useClientRepo();
-  return async (deletedAt: string) => await repo.restoreBatch(deletedAt);
-};
