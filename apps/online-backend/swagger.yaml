@@ -121,6 +121,58 @@ paths:
         "404":
           description: Match not found
 
+  /team/admin/{teamID}:
+    patch:
+      summary: Correct a team's name or category
+      description: >
+        Only while neither match has started. Each changed field leaves its old
+        value in `other`, as `prevname:"<name>"` or `prevcat:<category>`.
+      parameters:
+        - name: teamID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                teamName:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                category:
+                  type: string
+                  enum: ["C", "D", "E"]
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: The team as edited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "400":
+          description: teamName empty, too long or not a string, or category not C, D or E
+        "404":
+          description: Team not found
+        "409":
+          description: Refused; the body says why
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reason:
+                    type: string
+                    enum: ["started", "name-taken", "notes-full"]
+
   /team/admin/{teamID}/reset/strategy:
     post:
       summary: Reset team's strategy

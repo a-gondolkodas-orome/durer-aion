@@ -4,6 +4,7 @@ import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
+import { isCompetitionCategory } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, extendedEnd, extensionRefusal, injectBot, injectPlayer } from './team_manage';
@@ -15,6 +16,7 @@ import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './ra
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { appendOtherNote } from './model';
+import { UniqueConstraintError } from 'sequelize';
 
 /**
  *
@@ -220,6 +222,44 @@ export function configureTeamsRouter(
     team.relayMatchID = null
     await team.save();
     ctx.body = await adminTeamView(ctx.db, team);
+  });
+
+  /**
+   * Correct a team's name or category, before either of its matches has
+   * started. `TeamsRepository.editTeam` has the rules and the audit trail.
+   *
+   * @param {string} teamID - The ID of the team.
+   * @param {{ teamName?: string, category?: "C" | "D" | "E" }} body - The
+   *   fields to change; one left out stays as it is.
+   * @returns {TeamModel} - The team as edited. 409 with `{ reason }` when a
+   *   match has started (`started`), another team has the name
+   *   (`name-taken`), or the audit notes do not fit (`notes-full`).
+   */
+  router.patch("/team/admin/:teamID", adminAuth, koaBody(), async (ctx) => {
+    const body = ctx.request.body as { teamName?: unknown, category?: unknown } | undefined;
+    const sentName = body?.teamName;
+    const sentCategory = body?.category;
+    const teamName = sentName === undefined ? undefined
+      : typeof sentName === "string" ? sentName.trim()
+      : ctx.throw(400, "Expected teamName to be a string.");
+    if (teamName !== undefined && (teamName.length < 1 || teamName.length > 255)) {
+      ctx.throw(400, "Teamname must be between 1 and 255 characters.");
+    }
+    const category = sentCategory === undefined || isCompetitionCategory(sentCategory) ? sentCategory
+      : ctx.throw(400, "Expected category to be C, D or E.");
+    const edited = await teams.editTeam(ctx.params.teamID, { teamName, category }).catch((error: unknown) => {
+      if (error instanceof UniqueConstraintError) return 'name-taken' as const;
+      throw error;
+    });
+    if (edited === 'not-found') {
+      ctx.throw(404, `Team not found with teamID ${ctx.params.teamID}.`);
+    }
+    if (typeof edited === 'string') {
+      ctx.status = 409;
+      ctx.body = { reason: edited };
+      return;
+    }
+    ctx.body = await adminTeamView(ctx.db, edited);
   });
 
   /**

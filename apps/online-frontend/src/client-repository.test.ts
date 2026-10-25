@@ -14,7 +14,7 @@ function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
   const instance = {
     get: (url: string) => { calls.push({ method: "get", url }); return answer("get", url); },
     post: (url: string, body?: unknown) => { calls.push({ method: "post", url, body }); return answer("post", url); },
-    delete: (url: string) => { calls.push({ method: "delete", url }); return answer("delete", url); },
+    patch: (url: string, body?: unknown) => { calls.push({ method: "patch", url, body }); return answer("patch", url); },
   } as unknown as AxiosInstance;
   vi.spyOn(axios, "create").mockReturnValue(instance);
   return calls;
@@ -106,5 +106,29 @@ describe("adding minutes to a match", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(new RealClientRepository().addMinutes("match-1", 5)).rejects.toThrow("Váratlan hiba történt");
+  });
+});
+
+describe("editing a team", () => {
+  const teamId = "8eae8669-125c-42e5-8b49-89afbac31679";
+
+  test("is a PATCH naming the team, with the fields to change", async () => {
+    const calls = fakeAxios(ok);
+
+    await new RealClientRepository().editTeam(teamId, { category: "D" });
+
+    expect(calls).toStrictEqual([{ method: "patch", url: `/team/admin/${teamId}`, body: { category: "D" } }]);
+  });
+
+  test.each([
+    ["started", "A csapat már elkezdett egy játékot, nem módosítható"],
+    ["name-taken", "Már van ilyen nevű csapat"],
+    ["notes-full", "Az Egyéb mező megtelt, a módosítás nem fér bele"],
+    ["unknown", "Váratlan hiba történt"],
+  ])("a refusal for %s is worded for the admin", async (reason, message) => {
+    fakeAxios(() => status(409, { reason }));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().editTeam(teamId, { category: "D" })).rejects.toThrow(message);
   });
 });

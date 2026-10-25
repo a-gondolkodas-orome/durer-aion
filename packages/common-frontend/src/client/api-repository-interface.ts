@@ -8,6 +8,11 @@ import type { BoardProps } from 'boardgame.io/react';
 // knowing which move carries each action.
 export type BoardMoves = BoardProps['moves'];
 
+export interface TeamEdit {
+  teamName?: string;
+  category?: string;
+}
+
 // The session is the repository's to keep, not the caller's: online it is an
 // HttpOnly cookie the server set on `joinWithCode` (issue #89), which no script
 // can read, so nothing here takes or returns the team's id.
@@ -27,6 +32,8 @@ export interface ClientRepository {
   getMatchLogs(matchId: string): Promise<MatchStateDto>
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
+  /** The team's name or category corrected; a field left out stays as it is. */
+  editTeam(teamId: string, edit: TeamEdit): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
   // Unlike startRelay, which moves the team to the relay page, this dispatches

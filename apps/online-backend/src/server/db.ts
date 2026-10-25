@@ -1,7 +1,17 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { teamAttributes, TeamModel } from './model';
-import { Sequelize, Op, WhereOptions } from 'sequelize';
+import { CompetitionCategory } from 'schemas';
+import { appendOtherNote, teamAttributes, TeamModel } from './model';
+import { Sequelize, Op, Transaction, WhereOptions } from 'sequelize';
+
+/** The fields an organiser may correct on a team, each optional. */
+export interface TeamEdit {
+  teamName?: string;
+  category?: CompetitionCategory;
+}
+
+/** Why an edit was refused, when it was. */
+export type TeamEditRefusal = 'not-found' | 'started' | 'notes-full';
 
 // `%` and `_` are wildcards inside a LIKE or ILIKE pattern, so a fragment
 // carrying them would match more than the caller asked for — a bare `%` matches
@@ -63,6 +73,44 @@ export class TeamsRepository {
       relayMatchID: null,
       teamName: teamname,
       pageState: 'DISCLAIMER',
+    });
+  }
+
+  /**
+   * Corrects a team's name or category, while neither of its matches has
+   * started: a match is created for the team's category, so a team that has one
+   * keeps the category it was played in. A reset clears the match's id, so a
+   * team whose matches were both reset counts as not started.
+   *
+   * Every changed field leaves its old value in `other` — `prevname:` with the
+   * name JSON-quoted, since names hold spaces, and `prevcat:` — and an edit
+   * whose notes would not fit is refused rather than made without them.
+   *
+   * The row is locked while it is checked and written, so a reset or another
+   * edit cannot land in between. A name another team holds fails the write on
+   * its unique constraint, and sequelize's `UniqueConstraintError` propagates.
+   */
+  async editTeam(teamId: string, edit: TeamEdit): Promise<TeamModel | TeamEditRefusal> {
+    return await this.sequelize.transaction(async transaction => {
+      const team = await TeamModel.findOne({ where: { teamId }, transaction, lock: Transaction.LOCK.UPDATE });
+      if (!team) return 'not-found';
+      if (team.relayMatchID !== null || team.strategyMatchID !== null) return 'started';
+
+      const notes: string[] = [];
+      if (edit.teamName !== undefined && edit.teamName !== team.teamName) {
+        notes.push(`prevname:${JSON.stringify(team.teamName)}`);
+        team.teamName = edit.teamName;
+      }
+      if (edit.category !== undefined && edit.category !== team.category) {
+        notes.push(`prevcat:${team.category}`);
+        team.category = edit.category;
+      }
+      if (notes.length === 0) return team;
+
+      const other = appendOtherNote(team.other, notes.join(' '));
+      if (other === (team.other ?? '')) return 'notes-full';
+      team.other = other;
+      return await team.save({ transaction });
     });
   }
 }

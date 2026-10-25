@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
-import { Button } from '@mui/material';
+import { useAddMinutes, useEditTeam, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
+import { Button, MenuItem, TextField } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { TeamModelDto, MatchStatus, adminTeamId } from '../dto/TeamStateDto';
@@ -9,17 +9,21 @@ import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface } from './ConfirmDialog';
+import { ConfirmDialogInterface, EDIT_WORDS } from './ConfirmDialog';
 import { Countdown } from './Countdown';
 import { relayProblemResults } from 'game';
 import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
 import * as Yup from 'yup';
+import { COMPETITION_CATEGORIES } from 'schemas';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+/// `onEdited` fires once the server has taken an edit: the list this dialog was
+/// opened from is stale from that moment, and the dialog cannot refresh it.
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
+  onEdited: () => void,
 }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
@@ -86,8 +90,75 @@ export function TeamDetailDialog(props: {
           >reset
       </Button>}
       <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? "?"} pont</Stack>
+      <TeamDataEditor team={teamState} setConfirmDialog={props.setConfirmDialog} onEdited={(changed) => {
+        setTeamState(changed);
+        props.onEdited();
+      }}/>
     </Stack>
   )
+}
+
+/// The team's name and category, editable until a match starts: a match is
+/// created for the team's category. The server holds the same rule and keeps
+/// the old values in `other`.
+function TeamDataEditor(props: {
+  team: TeamModelDto,
+  setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
+  onEdited: (team: TeamModelDto) => void,
+}) {
+  const { team } = props;
+  const editTeam = useEditTeam();
+  const { enqueueSnackbar } = useSnackbar();
+  const [teamName, setTeamName] = useState(team.teamName);
+  const [category, setCategory] = useState(team.category);
+  const started = team.relayMatch.state !== 'NOT STARTED' || team.strategyMatch.state !== 'NOT STARTED';
+  const name = teamName.trim();
+  const nameChanged = name !== team.teamName;
+  const categoryChanged = category !== team.category;
+
+  const save = () => {
+    const changes = [
+      ...(nameChanged ? [`név: ${team.teamName} → ${name}`] : []),
+      ...(categoryChanged ? [`kategória: ${team.category} → ${category}`] : []),
+    ];
+    props.setConfirmDialog({
+      text: `Biztosan módosítod a(z) ${team.teamName} csapatot? ${changes.join(', ')}. A csapat azonnal látja a változást${categoryChanged ? ', és a játékai az új kategóriáéi lesznek' : ''}. A régi adatok az Egyéb mezőbe kerülnek.`,
+      requiredWords: EDIT_WORDS,
+      confirm: async () => {
+        try {
+          const changed = await editTeam(adminTeamId(team), {
+            ...(nameChanged ? { teamName: name } : {}),
+            ...(categoryChanged ? { category } : {}),
+          });
+          props.onEdited(changed);
+          enqueueSnackbar("Sikeres művelet", { variant: 'success' });
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+          enqueueSnackbar(message, { variant: 'error' });
+        }
+      },
+    });
+  };
+
+  return (
+    <Stack sx={{ marginTop: "24px", gap: "12px", maxWidth: 400 }}>
+      <Stack sx={{ fontSize: 16 }}>Adatok:</Stack>
+      <TextField size="small" label="Csapatnév" value={teamName} disabled={started}
+        onChange={e => setTeamName(e.target.value)}/>
+      <TextField select size="small" label="Kategória" value={category} disabled={started}
+        onChange={e => setCategory(e.target.value)}>
+        {COMPETITION_CATEGORIES.map(it => <MenuItem key={it} value={it}>{it}</MenuItem>)}
+      </TextField>
+      {started && <Stack sx={{ color: 'text.secondary' }}>
+        A csapat már elkezdett egy játékot, ezért nem módosítható. Mindkét játék resetelése után újra az.
+      </Stack>}
+      <Button sx={{ maxWidth: "125px" }} variant="contained"
+        disabled={started || name === '' || (!nameChanged && !categoryChanged)}
+        onClick={save}>
+        Mentés
+      </Button>
+    </Stack>
+  );
 }
 
 function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {

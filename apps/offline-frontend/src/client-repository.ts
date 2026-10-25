@@ -1,4 +1,4 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
+import { ClientRepository, TeamEdit, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
@@ -98,6 +98,10 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   async resetStrategy(_teamId: string): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+
+  async editTeam(_teamId: string, _edit: TeamEdit): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
 

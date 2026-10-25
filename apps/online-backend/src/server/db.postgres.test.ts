@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import type { TeamsRepository } from './db';
 import { startTestDatabase } from './test_database';
-import { TeamModel } from './model';
+import { OTHER_MAX_LENGTH, TeamModel } from './model';
 
 // TeamsRepository against a real postgres (test_database.ts), for what only the
-// database decides: the unique constraints and the LIKE escape.
+// database decides: the unique constraints, the LIKE escape, and the edits
+// those refuse.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -72,5 +73,70 @@ describe('TeamsRepository.fetch', () => {
     expect(await names(['budapest', 'motivated'])).toStrictEqual(['Alpha']);
     expect(await names(['100%'])).toStrictEqual(['Alpha']);
     expect(await names(['a_b'])).toStrictEqual(['Alpha']);
+  });
+});
+
+describe('TeamsRepository.editTeam', () => {
+  it('changes the name and the category, leaving the old ones in other', async () => {
+    const { teamId } = await database.teams.insertTeam(team({ teamname: 'Pitagorasz Csapat', other: 'Budapest' }));
+
+    await database.teams.editTeam(teamId, { teamName: 'Pitagorasz', category: 'D' });
+
+    expect(await database.teams.getTeam({ teamId })).toMatchObject({
+      teamName: 'Pitagorasz',
+      category: 'D',
+      other: 'Budapest prevname:"Pitagorasz Csapat" prevcat:C',
+    });
+  });
+
+  it('leaves a note only for what changed, and none when nothing did', async () => {
+    const { teamId } = await database.teams.insertTeam(team({ teamname: 'Alpha' }));
+
+    await database.teams.editTeam(teamId, { teamName: 'Alpha', category: 'C' });
+    expect((await database.teams.getTeam({ teamId }))?.other).toBe('');
+
+    await database.teams.editTeam(teamId, { teamName: 'Alpha', category: 'E' });
+    expect((await database.teams.getTeam({ teamId }))?.other).toBe('prevcat:C');
+  });
+
+  it.each(['relayMatchID', 'strategyMatchID'] as const)('refuses a team with a %s, and changes nothing', async (match) => {
+    const { teamId } = await database.teams.insertTeam(team({ teamname: 'Alpha' }));
+    await TeamModel.update({ [match]: 'played' }, { where: { teamId } });
+
+    expect(await database.teams.editTeam(teamId, { teamName: 'Beta' })).toBe('started');
+    expect((await database.teams.getTeam({ teamId }))?.teamName).toBe('Alpha');
+  });
+
+  // A reset puts the match back to NOT STARTED, so a team that played in the
+  // wrong category can be moved and play again.
+  it('edits a team again once its matches are reset', async () => {
+    const { teamId } = await database.teams.insertTeam(team());
+    await TeamModel.update({ relayMatchID: 'played' }, { where: { teamId } });
+    expect(await database.teams.editTeam(teamId, { category: 'D' })).toBe('started');
+
+    await TeamModel.update({ relayMatchID: null }, { where: { teamId } });
+    expect(await database.teams.editTeam(teamId, { category: 'D' })).toMatchObject({ category: 'D' });
+  });
+
+  it('refuses a name another team has, and changes nothing', async () => {
+    await database.teams.insertTeam(team({ teamname: 'Beta' }));
+    const { teamId } = await database.teams.insertTeam(team({ teamname: 'Alpha' }));
+
+    await expect(database.teams.editTeam(teamId, { teamName: 'Beta', category: 'D' }))
+      .rejects.toMatchObject({ name: 'SequelizeUniqueConstraintError' });
+    expect(await database.teams.getTeam({ teamId })).toMatchObject({ teamName: 'Alpha', category: 'C', other: '' });
+  });
+
+  it('refuses an edit whose notes would not fit in other', async () => {
+    const full = 'x'.repeat(OTHER_MAX_LENGTH - 5);
+    const { teamId } = await database.teams.insertTeam(team({ teamname: 'Alpha' }));
+    await TeamModel.update({ other: full }, { where: { teamId } });
+
+    expect(await database.teams.editTeam(teamId, { category: 'D' })).toBe('notes-full');
+    expect(await database.teams.getTeam({ teamId })).toMatchObject({ category: 'C', other: full });
+  });
+
+  it('answers not-found for a team it does not have', async () => {
+    expect(await database.teams.editTeam('8eae8669-125c-42e5-8b49-000000000000', { category: 'D' })).toBe('not-found');
   });
 });

@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamEdit, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -25,6 +25,13 @@ function makeAxiosError(any_error: unknown): AxiosError {
 
 /** The team routes: the session cookie says which team, so nothing here
  * carries the team's id (issue #89). */
+// The reasons the server gives for refusing a team edit, as the admin reads them.
+const EDIT_REFUSALS = {
+  'started': 'A csapat már elkezdett egy játékot, nem módosítható',
+  'name-taken': 'Már van ilyen nevű csapat',
+  'notes-full': 'Az Egyéb mező megtelt, a módosítás nem fér bele',
+};
+
 export class RealClientRepository implements ClientRepository {
 
   version = "ONLINE" as const;
@@ -160,6 +167,23 @@ export class RealClientRepository implements ClientRepository {
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+    return result.data as TeamModelDto;
+  }
+
+  async editTeam(teamId: string, edit: TeamEdit): Promise<TeamModelDto> {
+    const url = urlcat('/team/admin/:teamId', { teamId });
+    let result;
+    try {
+      result = await apiAxiosInstance().patch(url, edit);
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      const reason = (err.response?.data as { reason?: unknown } | undefined)?.reason;
+      if (err.response?.status === 409 && typeof reason === 'string' && Object.hasOwn(EDIT_REFUSALS, reason)) {
+        throw new Error(EDIT_REFUSALS[reason as keyof typeof EDIT_REFUSALS], { cause: e });
+      }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as TeamModelDto;

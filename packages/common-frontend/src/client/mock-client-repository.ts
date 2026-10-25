@@ -1,4 +1,4 @@
-import type { BoardMoves, ClientRepository } from "./api-repository-interface";
+import type { BoardMoves, ClientRepository, TeamEdit } from "./api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
@@ -77,6 +77,9 @@ export class MockClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
   resetStrategy(_teamId: string): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+  editTeam(_teamId: string, _edit: TeamEdit): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {

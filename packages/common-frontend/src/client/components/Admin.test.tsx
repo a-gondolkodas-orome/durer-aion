@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
@@ -129,4 +129,44 @@ test('the team dialog totals the list\'s score when the match state cannot be fe
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
   expect(await screen.findByText('Összesen: 5 pont')).toBeInTheDocument();
+});
+
+const confirm = () => fireEvent.click(screen.getByText('Megerősítés'));
+const typeWord = (word: string) => fireEvent.change(screen.getByLabelText(/Írd be/), { target: { value: word } });
+
+test('an edit sends only what changed, once the word is typed, and reloads the list', async () => {
+  const getAll = vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  const editTeam = vi.spyOn(repo, 'editTeam').mockResolvedValue({ ...alpha, teamName: 'Omega' });
+  renderAdmin(alpha.teamId);
+  fireEvent.change(await screen.findByLabelText('Csapatnév'), { target: { value: ' Omega ' } });
+  fireEvent.click(screen.getByText('Mentés'));
+
+  expect(screen.getByText(/név: Alpha → Omega/)).toBeInTheDocument();
+  expect(screen.getByText('Megerősítés').closest('button')).toBeDisabled();
+  typeWord('modositas');
+  confirm();
+
+  expect(await screen.findByText('Sikeres művelet')).toBeInTheDocument();
+  expect(editTeam).toHaveBeenCalledWith(alpha.teamId, { teamName: 'Omega' });
+  await waitFor(() => expect(getAll).toHaveBeenCalledTimes(2));
+});
+
+test('a team that has started a match cannot be edited', async () => {
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
+
+  expect(await screen.findByLabelText('Csapatnév')).toBeDisabled();
+  expect(screen.getByText('Mentés').closest('button')).toBeDisabled();
+});
+
+test('a refused edit is reported as the repository words it', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  vi.spyOn(repo, 'editTeam').mockRejectedValue(new Error('Már van ilyen nevű csapat'));
+  renderAdmin(alpha.teamId);
+  fireEvent.change(await screen.findByLabelText('Csapatnév'), { target: { value: 'Bravo' } });
+  fireEvent.click(screen.getByText('Mentés'));
+  typeWord('edit');
+  confirm();
+
+  expect(await screen.findByText('Már van ilyen nevű csapat')).toBeInTheDocument();
 });

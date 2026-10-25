@@ -3,6 +3,7 @@ import { setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
 import { useClientRepo } from "../client-repo-context";
+import type { TeamEdit } from "../api-repository-interface";
 
 export const useTeamState = (): TeamModelDto | null => {
   return useTeamStateValue();
@@ -161,4 +162,9 @@ export const useStartStrategy = () => {
     const state = await userModel.getTeamState();
     setTeamState(state);
   };
+};
+
+export const useEditTeam = () => {
+  const repo = useClientRepo();
+  return async (teamId: string, edit: TeamEdit) => await repo.editTeam(teamId, edit);
 };
