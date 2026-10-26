@@ -153,6 +153,25 @@ test('the team dialog totals the stored score when the match state cannot be fet
   expect(await screen.findByText('Összesen: 5 pont')).toBeInTheDocument();
 });
 
+// A failed request used to render exactly like one still loading: nothing.
+test('the team dialog says when the match state cannot be fetched', async () => {
+  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
+
+  expect(await screen.findByText('A játék állását nem sikerült betölteni.')).toBeInTheDocument();
+});
+
+// The button did nothing at all when the request was refused.
+test('a refused logs request is reported', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
+  vi.spyOn(repo, 'getMatchLogs').mockRejectedValue(new Error('Váratlan hiba történt'));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
+
+  fireEvent.click(await screen.findByText('logok Lekérése'));
+
+  expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
+});
+
 test('the team dialog shows the email and the join code only on request, each on its own', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, email: 'alpha@example.com', joinCode: '123-4567-890' }]);
   renderAdmin(alpha.teamId);

@@ -43,6 +43,7 @@ export function TeamDetailDialog(props: {
         fontSize: 14,
       }}>
       <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{teamState.teamName}</Stack>
+      <Stack sx={{ color: 'text.secondary', paddingBottom: "12px" }}>Friss adatokért töltsd újra az oldalt.</Stack>
       <Stack sx={{ paddingBottom: "24px" }}>
         <HiddenField label="E-mail" value={teamState.email}/>
         <HiddenField label="Belépési kód" value={teamState.joinCode}/>
@@ -103,6 +104,15 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   const getLogs = useGetLogs();
   const [matchLogs, setMatchLogs] = useState<unknown | null>(null);
   const { mutate } = useSWRConfig();
+
+  const showLogs = async (matchId: string) => {
+    try {
+      setMatchLogs(await getLogs(matchId));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  };
 
   switch (props.data.state) {
     case "IN PROGRESS": {
@@ -177,9 +187,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
       variant='contained'
       color='primary'
       onClick={() => {
-        void getLogs(inProgressState.matchID).then(logs => {
-          setMatchLogs(logs);
-        });
+        void showLogs(inProgressState.matchID);
       }}>logok Lekérése</Button>
       <Button
       sx={{
@@ -215,9 +223,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           variant='contained'
           color='primary'
           onClick={() => {
-            void getLogs(finishedState.matchID).then(logs => {
-              setMatchLogs(logs);
-            });
+            void showLogs(finishedState.matchID);
           }}>logok Lekérése</Button>
           <Button
           sx={{
@@ -282,9 +288,12 @@ function StoredScore(props: { matchId: string, score: number }) {
 
 function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProgress?: boolean }) {
   const [msRemaining, setMsRemaining] = useState<number>(10000);
-  const { data } = useMatchStateData(props.matchId);
+  const { data, error } = useMatchStateData(props.matchId);
   if (!data) {
-    return null;
+    // SWR keeps retrying, so an error clears once a request succeeds.
+    return error
+      ? <Stack sx={{ color: 'error.main' }}>A játék állását nem sikerült betölteni.</Stack>
+      : <Stack>A játék állása töltődik…</Stack>;
   }
   // Which match this is, read off the payload rather than taken on trust from
   // isRelay — see MatchStateDto.
