@@ -7,7 +7,7 @@ import { TeamsRepository } from './db';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
-import { adminTeamView, adminTeamViews, teamMatches } from './match_status';
+import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
@@ -111,12 +111,12 @@ export function configureTeamsRouter(
       return;
     }
 
-    const kind = team.relayMatchID === matchID ? 'relayMatch' : team.strategyMatchID === matchID ? 'strategyMatch' : null;
+    const kind = team.relayMatchID === matchID ? 'relayMatchID' : team.strategyMatchID === matchID ? 'strategyMatchID' : null;
     if (kind === null) {
       ctx.throw(501, `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
       return;
     }
-    if ((await teamMatches(ctx.db, team))[kind].state !== 'IN PROGRESS') {
+    if (deriveMatchStatus(kind, matchID, state, new Date()).state !== 'IN PROGRESS') {
       ctx.throw(501, 'Restarting an already finished match is not supported right now.');
     }
 

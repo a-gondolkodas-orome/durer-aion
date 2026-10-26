@@ -544,17 +544,6 @@ components:
         - $ref: "#/components/schemas/NotStartedMatchStatus"
         - $ref: "#/components/schemas/InProgressMatchStatus"
         - $ref: "#/components/schemas/FinishedMatchStatus"
-        - $ref: "#/components/schemas/MissingMatchStatus"
-
-    MissingMatchStatus:
-      description: A match the team names but storage does not have. Only the admin routes serve it.
-      type: object
-      properties:
-        state:
-          type: string
-          enum: ["MISSING"]
-        matchID:
-          type: string
 
     NotStartedMatchStatus:
       type: object
