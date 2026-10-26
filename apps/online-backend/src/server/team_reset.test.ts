@@ -16,7 +16,7 @@ const PASSWORD = "organiser-password";
 const CREDENTIALS = `Basic ${Buffer.from(`${ADMIN_USER}:${PASSWORD}`).toString("base64")}`;
 
 // A real model over a postgres Sequelize that is never connected, as
-// model.test.ts and team_remove.test.ts use. `save` is the only call that would
+// model.test.ts uses. `save` is the only call that would
 // reach a database, and it is replaced by the validation it runs first — which
 // is the whole point here: the route's write used to be refused by the `other`
 // column's own validator, and a stub row would not have noticed.

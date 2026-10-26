@@ -81,10 +81,6 @@ export class UserModel {
     }
   }
 
-  async removeTeam(teamId: string): Promise<void> {
-    await this.repo.removeTeam(teamId);
-  }
-
   // The saved match goes first, synchronously: it must not survive a logout
   // request that fails, and another team may be next at this computer. The
   // marker goes last, once the session is really over: removing it is what
