@@ -6,8 +6,9 @@ import { useTranslation } from "react-i18next";
 export const CONNECTION_LOST_DELAY_MS = 2000;
 
 /// While the socket is down, the board is inert and dimmed and a snackbar says
-/// why. A move sent just before the drop is noticed is lost; the re-sync on
-/// reconnect takes it back off the board.
+/// why. A move sent just before the drop is noticed is lost, and the re-sync on
+/// reconnect takes it back off the board; one sent during the delay is queued
+/// and replayed on reconnect.
 ///
 /// Shorter drops than CONNECTION_LOST_DELAY_MS show nothing. engine.io closes
 /// the socket on the browser's `offline` event itself (not for localhost); a

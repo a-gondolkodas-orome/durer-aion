@@ -38,4 +38,7 @@ test('a longer drop disables the board and says why until the socket is back', a
   rerender(board(true));
   expect(isInert()).toBe(false);
   await waitForElementToBeRemoved(() => screen.queryByText(/Megszakadt a kapcsolat/));
+
+  rerender(board(false));
+  expect(isInert()).toBe(false);
 });
