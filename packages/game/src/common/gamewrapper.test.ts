@@ -346,6 +346,47 @@ describe("gameWrapper move guards", () => {
   });
 });
 
+describe("gameWrapper move log", () => {
+  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "asd" })));
+  const timeOfMoves = new Date("2026-11-14T09:30:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(timeOfMoves);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("every step of a match is logged with the time it was made", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+    client.moves.win();
+
+    const moves = client.getState()?.log.filter(entry => entry.action.type === "MAKE_MOVE");
+    expect(moves?.map(entry => [entry.action.payload.type, entry.metadata])).toStrictEqual([
+      ["chooseNewGameType", { time: timeOfMoves.toISOString() }],
+      ["setStartingPosition", { time: timeOfMoves.toISOString() }],
+      ["chooseRole", { time: timeOfMoves.toISOString() }],
+      ["win", { time: timeOfMoves.toISOString() }],
+    ]);
+  });
+
+  test("a clock poll is logged without a time", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.getTime();
+
+    const [poll] = client.getState()?.log ?? [];
+    expect(poll?.action.payload.type).toStrictEqual("getTime");
+    expect(poll?.metadata).toBeUndefined();
+  });
+});
+
 describe("strategyPoints", () => {
   test("drops with each loss and stays at its floor after five", () => {
     expect([0, 1, 2, 3, 4, 5, 9].map(strategyPoints)).toStrictEqual([12, 9, 6, 4, 3, 2, 2]);
