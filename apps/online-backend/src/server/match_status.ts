@@ -97,9 +97,9 @@ export async function teamMatches(
 export async function adminTeamViews(
   db: Storage,
   teams: TeamModel[],
-  now: Date = new Date(),
 ): Promise<(ReturnType<TeamModel["toJSON"]> & TeamMatches)[]> {
   const states = await fetchMatchStates(db, teams.flatMap(matchIDs));
+  const now = new Date();
   return teams.map(team => ({ ...team.toJSON(), ...matchesOf(team, states, now) }));
 }
 
