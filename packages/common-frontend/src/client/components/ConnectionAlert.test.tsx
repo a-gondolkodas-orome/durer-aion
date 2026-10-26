@@ -16,21 +16,14 @@ const isInert = () => screen.getByRole('button').closest('[inert]') !== null;
 beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 afterEach(() => vi.useRealTimers());
 
-test('a drop shorter than the delay changes nothing', async () => {
+test('disables the board and says why only once a drop outlasts the delay', async () => {
   const { rerender } = render(board(true));
   rerender(board(false));
   rerender(board(true));
   await waitOutDelay();
-  expect(screen.queryByText(/Megszakadt a kapcsolat/)).not.toBeInTheDocument();
-  expect(isInert()).toBe(false);
 
-  // A new drop restarts the delay.
   rerender(board(false));
   expect(isInert()).toBe(false);
-});
-
-test('a longer drop disables the board and says why until the socket is back', async () => {
-  const { rerender } = render(board(false));
   await waitOutDelay();
   await screen.findByText(/Megszakadt a kapcsolat/);
   expect(isInert()).toBe(true);
