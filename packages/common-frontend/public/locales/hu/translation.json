@@ -38,7 +38,8 @@
     "remainingTime": "Hátralevő idő",
     "warning": {
       "connectionLost": "Megszakadt a kapcsolat a szerverrel, próbálunk újra csatlakozni…",
-      "connectionLostHint": "Utána nézzétek meg, hogy átment-e az utolsó lépésetek vagy válaszotok.",
+      "connectionRestored": "Újra kapcsolódtunk a szerverhez.",
+      "connectionRestoredHint": "Nézzétek meg, hogy átment-e az utolsó lépésetek vagy válaszotok.",
       "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
       "timeNotReal": "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni."
     }

@@ -40,7 +40,8 @@
     "remainingTime": "Remaining time",
     "warning": {
       "connectionLost": "Connection to the server lost, reconnecting…",
-      "connectionLostHint": "Afterwards, check that your last move or answer went through.",
+      "connectionRestored": "Reconnected to the server.",
+      "connectionRestoredHint": "Check that your last move or answer went through.",
       "timeNotMatch": "Your computer's clock is not synchronised with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
       "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."
     }
