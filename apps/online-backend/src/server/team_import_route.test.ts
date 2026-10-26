@@ -8,7 +8,7 @@ import { TeamsRepository } from "./db";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 
-// Over HTTP, as team_restore.test.ts serves its routes: koa-body needs a real
+// Over HTTP, as admin_session.test.ts serves its routes: koa-body needs a real
 // multipart request.
 it.each([
   ["teams.tsv", 200, 1],

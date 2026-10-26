@@ -29,9 +29,9 @@ export async function startTestDatabase() {
   return {
     db,
     teams,
-    /** Empties the teams, their archive and the matches, for a test that starts from nothing. */
+    /** Empties the teams and the matches, for a test that starts from nothing. */
     async reset() {
-      await db.sequelize.query('TRUNCATE "Teams", "DeletedTeams", "Games"');
+      await db.sequelize.query('TRUNCATE "Teams", "Games"');
     },
     async stop() {
       await db.sequelize.close();

@@ -281,6 +281,11 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
 
+Teams cannot be deleted. A bad import is undone by dropping the volume
+(`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
+out, import the `.export` rather than the original TSV: it carries the codes, where
+the original would generate new ones.
+
 You can also run the importer as a one-off container without the stack:
 
 ```bash
