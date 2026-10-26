@@ -232,4 +232,8 @@ export class RealClientRepository implements ClientRepository {
     moves.getTime();
     return Promise.resolve();
   }
+
+  keepRelayEnd(): void {
+    // The server keeps the score from the match state.
+  }
 }

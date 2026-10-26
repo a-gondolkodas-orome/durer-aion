@@ -1,6 +1,8 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
+import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
+import { handleGameReport } from "./game-report";
 import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
@@ -128,6 +130,11 @@ export class OfflineClientRepository implements ClientRepository {
   syncRelayTime(moves: BoardMoves): Promise<void> {
     moves.getTime();
     return Promise.resolve();
+  }
+
+  // Persisted as if the game had reported it, for toHome() to read.
+  keepRelayEnd(report: RelayEndReport): void {
+    handleGameReport(report);
   }
 
   joinWithCode(joinCode: string): Promise<void> {

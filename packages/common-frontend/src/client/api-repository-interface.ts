@@ -1,5 +1,6 @@
 import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { BoardProps } from 'boardgame.io/react';
+import type { RelayEndReport } from 'game';
 
 // The relay match is judged and timed where it runs — on the server online,
 // by the local bot offline — so the board's actions stay boardgame.io moves
@@ -33,5 +34,11 @@ export interface ClientRepository {
   // the opening move of the match once the board is up.
   startRelayGame(moves: BoardMoves): Promise<void>;
   syncRelayTime(moves: BoardMoves): Promise<void>;
+  // The end report of a relay whose time ran out with no move to end it: the
+  // game ends a match past its time only on a move arriving after the grace
+  // for late answers, and a team waiting at the buzzer sends none. Locally the
+  // score toHome() records comes from the end report, so the board hands it
+  // over itself; online the server keeps the score from the match state.
+  keepRelayEnd(report: RelayEndReport): void;
 
 }

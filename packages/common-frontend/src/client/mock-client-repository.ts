@@ -94,4 +94,8 @@ export class MockClientRepository implements ClientRepository {
     moves.getTime();
     return Promise.resolve();
   }
+
+  keepRelayEnd(): void {
+    // No score is kept here.
+  }
 }
