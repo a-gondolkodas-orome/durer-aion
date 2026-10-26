@@ -1,20 +1,19 @@
-import CloseIcon from "@mui/icons-material/Close";
-import { IconButton } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useEffect, useRef } from "react";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 
 /// A persistent snackbar while the game's socket is down, then one asking the
-/// team to check their last move or answer, until they close it. boardgame.io
-/// reconnects and re-syncs on its own, but a move sent before socket.io notices
-/// the drop is lost, and one sent after it is replayed on reconnect and rejected
-/// if the match has moved on meanwhile.
+/// team to check their last move or answer. boardgame.io reconnects and
+/// re-syncs on its own, but a move sent before socket.io notices the drop is
+/// lost, and one sent after it is replayed on reconnect and rejected if the
+/// match has moved on meanwhile.
 ///
 /// The browser going offline needs no listener here: engine.io closes the
 /// socket on the `offline` event itself, except for a server on localhost. A
 /// network that stays up but carries nothing shows only at the ping timeout.
 export const CONNECTION_LOST_DELAY_MS = 2000;
+export const RECONNECTED_NOTICE_MS = 30_000;
 
 function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
   const { t } = useTranslation();
@@ -26,7 +25,6 @@ function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
       // A drop shorter than this, e.g. a Wi-Fi handover, shows nothing.
       const timer = setTimeout(() => {
         wasDown.current = true;
-        closeSnackbar('connection-check');
         enqueueSnackbar(t('general.warning.connectionLost'), { key: 'connection-lost', variant: 'error', persist: true });
       }, CONNECTION_LOST_DELAY_MS);
       return () => clearTimeout(timer);
@@ -34,20 +32,12 @@ function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
     if (wasDown.current) {
       wasDown.current = false;
       closeSnackbar('connection-lost');
-      enqueueSnackbar(t('general.warning.connectionRestored'), {
-        key: 'connection-check', variant: 'warning', persist: true,
-        action: <IconButton color="inherit" aria-label={t('general.close')} onClick={() => closeSnackbar('connection-check')}>
-          <CloseIcon/>
-        </IconButton>,
-      });
+      enqueueSnackbar(t('general.warning.connectionRestored'), { variant: 'warning', autoHideDuration: RECONNECTED_NOTICE_MS });
     }
   }, [isConnected, enqueueSnackbar, closeSnackbar, t]);
 
   // A persistent snackbar outlives the board otherwise, e.g. on the result page.
-  useEffect(() => () => {
-    closeSnackbar('connection-lost');
-    closeSnackbar('connection-check');
-  }, [closeSnackbar]);
+  useEffect(() => () => closeSnackbar('connection-lost'), [closeSnackbar]);
 
   return null;
 }
