@@ -30,6 +30,10 @@ export default defineConfig({
       { find: /^game\/client$/, replacement: source('game/client.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },
       { find: /^relay-bot$/, replacement: source('relay-bot/index.ts') },
+      // The full entry loads React, MUI and the i18next setup; a node suite that
+      // needs none of it imports `common-frontend/core` instead.
+      { find: /^common-frontend$/, replacement: source('common-frontend/index.ts') },
+      { find: /^common-frontend\/core$/, replacement: source('common-frontend/core.ts') },
     ],
   },
   test: {

@@ -2,7 +2,7 @@ import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import { MoreVert } from '@mui/icons-material';
-import { useClientRepo } from '../api-repository-interface';
+import { useClientRepo } from '../client-repo-context';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
@@ -10,7 +10,13 @@ import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
-export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string }) {
+export function Header(props: {
+  teamName: string | null,
+  admin: boolean,
+  titles?: string[],
+  homeAddress?: string,
+  onChooseLanguage?: (language: string) => void
+}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
@@ -107,7 +113,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
             }}>
             </Stack>
             {props.admin &&
-              <LanguageDropdown fontColor={theme.palette.primary.contrastText} />
+              <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
             }
           </Stack>
         }
@@ -165,7 +171,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
               }}
             >{t('header.logout')}</Button>
           </>}
-          {props.admin && <LanguageDropdown />}
+          {props.admin && <LanguageDropdown onChoose={props.onChooseLanguage} />}
         </Dialog>
       </Container>
     </Stack>

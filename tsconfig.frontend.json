@@ -1,0 +1,21 @@
+{
+  // The three boardgame.io frontends: vite builds them, so tsc only checks.
+  // Each adds its own `include`, and `paths` where it needs them, which resolve
+  // against the file that names them.
+  //
+  // That `include` is the app's own src. The packages come in through their
+  // exports maps, so naming their sources adds nothing to resolution and makes
+  // a program materialize every package: 2222 files where an app has under
+  // twenty, including a game table it has no use for. Each package's own
+  // tsconfig typechecks its own src, and ESLint's project service serves a file
+  // from the nearest tsconfig, so nothing loses coverage. An app's own suites
+  // under src/ are included: nothing else typechecks them.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "esnext"],
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "target": "ESNext",
+    "types": ["vite/client"]
+  }
+}

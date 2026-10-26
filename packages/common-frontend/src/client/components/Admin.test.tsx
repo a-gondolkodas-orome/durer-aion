@@ -6,7 +6,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
-import { ClientRepoProvider } from '../api-repository-interface';
+import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { DeletedTeamDto, MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
@@ -16,7 +16,7 @@ vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
 }));
 
-// A finished relay's dialog shows RelayEndTable, which is translated; without
+// A finished relay's dialog shows the result tables, which are translated; without
 // an i18next instance react-i18next warns on the console, which the setup
 // file fails the test for.
 vi.mock('react-i18next', () => ({

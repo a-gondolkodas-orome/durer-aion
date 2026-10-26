@@ -1,0 +1,4 @@
+{
+  "rule": "Players take turns moving a rook that starts in the top-left corner of a chessboard. The rook may move any number of squares (at least one) horizontally or vertically, but only in one direction per move. Every square the rook lands on or passes through is marked and can no longer be entered or passed through later. The player who cannot move loses.",
+  "step": "Click on a free square in the same row or column as the rook."
+}

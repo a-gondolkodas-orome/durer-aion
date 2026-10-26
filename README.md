@@ -152,25 +152,15 @@ touches the `Dockerfile`, nginx or the routes.
 The admin pages are at `http://localhost/admin`, user `admin`, password from
 `.env.docker`; `/admin/<teamId>` opens one team directly.
 
-Team import has two paths: `npm run teams:import`, which
-runs `scripts/import_teams.sh` inside the container, and the TSV upload on the
-admin page. The first is its own process — `dist/import_teams.js`, which reads
-`DATABASE_URL` and nothing else, so no credential has to be set for a TSV to
-load (#190). It reaches that process with `docker compose exec`, so the backend
-container still has to be up; `teams:import:local` runs the same code with
-nothing in front of it, and imports against a server that will not boot. Two
-fixtures feed those by hand, which is why no code names either:
-`scripts/test.tsv` is the happy path — the file `teams:import` loads — and
-`scripts/unit_test.tsv` is the one shaped for the rejections, its team names
-saying what each row is for: the cells to blank so the importer generates them,
-the empty row to leave in, the duplicated login code and duplicated credentials
-only a real database refuses. `team_import.test.ts` mocks the filesystem, so the
-upload is the only thing that exercises those.
+Team import has two paths: `npm run teams:import`, which runs
+`scripts/import_teams.sh` inside the container, and `PUT /team/admin/import`,
+which takes the TSV as an upload; the admin page has no form for it (yet).
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
-server: it needs Python packages the server has no reason to carry, and what it
-writes is keyed by join code, the teams' login secret. On macOS or Linux:
+server: it needs Python packages the server has no reason to carry.
+
+On macOS or Linux:
 
 ```bash
 python3 -m venv .venv
@@ -188,8 +178,7 @@ $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scrip
 
 It writes the match data (`match_data_*.json`) and the results
 (`durer-results-<year>.tsv`) to `scripts/admin-output/`, wherever it is run
-from, and prints the results file's full path when it is done; `.gitignore`
-and `.dockerignore` both keep that folder out.
+from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
   no credential of its own. Unset it prompts, and with no terminal to prompt on
@@ -285,6 +274,38 @@ enforced only where the code already agrees on one — that module says which, a
 why the rest is left alone.
 </details>
 
+<details><summary>What the i18n check covers, and how to keep a key in its sight</summary>
+
+`npm run i18n:check` compares English against Hungarian in
+`packages/common-frontend/public/locales` and `apps/strategy-practice/src/locales`,
+and reads the code for keys nobody uses or nobody defines.
+
+- **Keys are literals** at `t('…')` or `i18nKey="…"`, in a
+  `useTranslation('<namespace>')` scope or written `namespace:key`.
+- **A key picked at run time** is named in a comment, which counts as a use:
+  ```tsx
+  // t('disclaimer.interfaceDescriptionOfflineMode'), t('disclaimer.interfaceDescription')
+  <Trans i18nKey={isOffline ? 'disclaimer.interfaceDescriptionOfflineMode' : 'disclaimer.interfaceDescription'} />
+  ```
+  The strategy practice `catalog` (game names by `gameList.ts` key) is left out of
+  the unused check instead; `gameList.test.ts` covers it.
+- **Both languages carry the same placeholders and tags.** A word that differs by
+  language is two keys: `cond ? t('times.twice') : t('times.once')`.
+- **Tags with attributes** go through `components`:
+  ```tsx
+  <Trans t={t} i18nKey="intro" components={{ durerinfo: <a href="https://durerinfo.hu" /> }} />
+  // "intro": "… a <durerinfo>Dürer Versenyen</durerinfo> szerepeltek."
+  ```
+  Bare `<br/>`, `<strong>`, `<i>`, `<p>` need none; strategy practice adds `<b>`,
+  `<em>`, `<code>`. Text with a literal `<` uses `t()`, not `<Trans>`.
+- **English plurals** are `key_one` / `key_other` with `count`; Hungarian keeps
+  the bare `key`. The check does not see these forms: a missing or misnamed
+  plural form, or a wrong placeholder in one, passes.
+- **A new locale folder** goes in three places: `i18n:check` and `spell-check` in
+  `package.json`, `i18n-ally.localesPaths` in `.vscode/settings.json`.
+
+</details>
+
 <details><summary>What the spell check covers, and where its vocabulary lives</summary>
 
 `npm run spell-check` checks English and Hungarian alike (via
@@ -367,6 +388,12 @@ sites got that failed POST in the console on load, and no report ever arrived.
 Issuing a DSN that works is a change on the Sentry server rather than in this
 repository; set it here once there is one.
 </details>
+
+## Usage tracking
+
+The home page, `/jatekok/` and `/valto/` report visits to one website on the
+self-hosted [umami](https://umami.durerinfo.hu), told apart by path. Each page
+carries its own copy of the tracker tag.
 
 # Competition secrecy
 

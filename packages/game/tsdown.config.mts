@@ -9,20 +9,7 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
 
-  // The tsconfig here sets `declarationMap` and tsdown honours it. Nothing
-  // reads the map, and emitting one puts a `sourceMappingURL` into output the
-  // frontend apps go on to bundle.
-  dts: { sourcemap: false },
-
   deps: {
-    // The one dependency that ends up inlined is lodash, which this package
-    // imports without declaring. Saying so is what silences tsdown's per-build
-    // hint. `onlyBundle: ['lodash']` would be the tighter answer — it fails the
-    // build if anything else starts getting inlined — but its own check runs
-    // over the declaration pass too, where lodash is absent, so it reports the
-    // entry as unused on every build.
-    onlyBundle: false,
-
     // Leave a subpath import as written. Resolving it is tsdown's default, and
     // for a dependency with no `exports` map it lands on the package's CJS
     // entry — `boardgame.io/core` becomes `boardgame.io/dist/cjs/core.js` — so

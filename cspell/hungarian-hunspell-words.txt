@@ -41,6 +41,7 @@ beérkezett
 Befejezem
 befejezi
 befejezni
+Befejezve
 befestett
 befestve
 befogásához

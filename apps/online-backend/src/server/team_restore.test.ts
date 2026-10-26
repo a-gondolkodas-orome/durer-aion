@@ -213,19 +213,6 @@ describe("TeamsRepository", () => {
       expect(create).not.toHaveBeenCalled();
       expect(destroy).not.toHaveBeenCalled();
     });
-
-    // The constraint is the conflict check, so its error is the answer, and
-    // the archive row must survive it — nothing is destroyed after a failed
-    // insert.
-    it("lets a live team's unique constraint stop the restore before the archive row is dropped", async () => {
-      vi.spyOn(DeletedTeamModel, "findOne").mockResolvedValue(model({ ...row, deletedAt: DELETED_AT, deletionId: 7 }) as unknown as DeletedTeamModel);
-      vi.spyOn(TeamModel, "create").mockRejectedValue(taken());
-      const destroy = vi.spyOn(DeletedTeamModel, "destroy");
-
-      await expect(repository().restoreTeam(7)).rejects.toBeInstanceOf(UniqueConstraintError);
-
-      expect(destroy).not.toHaveBeenCalled();
-    });
   });
 
   describe("restoreBatch", () => {

@@ -4,6 +4,7 @@ import { SocketIO } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
 import { withConnectionAlert } from '../client/components/ConnectionAlert';
+import { Loading } from '../client/components/Loading';
 import type { StrategyBoard } from './boardwrapper';
 import type { ComponentType, ReactNode } from 'react';
 import type { GameRelay, MyGameState as RelayGameState } from 'game';
@@ -36,6 +37,8 @@ export function MyClientRelay(
   });
 }
 
+// Until the socket syncs with the server, boardgame.io shows its own
+// placeholder, an English "connecting...", so the online clients name ours.
 export function MyOnlineClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
@@ -47,6 +50,7 @@ export function MyOnlineClient<T_SpecificGameState>(
     board: withConnectionAlert(boardWrapper(board, description)),
     multiplayer: serverUrl === undefined ? SocketIO() :
       SocketIO({ server: serverUrl }),
+    loading: Loading,
   });
 }
 
@@ -61,5 +65,6 @@ export function MyOnlineRelayClient(
     board: withConnectionAlert(board),
     multiplayer: serverUrl === undefined ? SocketIO() :
       SocketIO({ server: serverUrl }),
+    loading: Loading,
   });
 }

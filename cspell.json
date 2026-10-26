@@ -68,7 +68,6 @@
     "letsencrypt",
     "lintable",
     "Lngs",
-    "logoutofthiswholething",
     "matchid",
     "maxpoints",
     "memoises",
@@ -89,6 +88,7 @@
     "packument",
     "passwordauthentication",
     "permitrootlogin",
+    "pglite",
     "PGPASSWORD",
     "playout",
     "playouts",
@@ -150,6 +150,7 @@
     "xors",
     "yearidx"
   ],
+  "useGitignore": true,
   "ignorePaths": [
     "node_modules",
     "dist",

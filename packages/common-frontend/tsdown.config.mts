@@ -1,17 +1,12 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ['index.ts'],
+  entry: ['index.ts', 'core.ts'],
   // ESM only: the frontends import it and the backend bundles the source; a
   // CommonJS half would have no consumer.
   format: ['esm'],
   outDir: 'dist',
   clean: true,
-
-  // The tsconfig here sets `declarationMap` and tsdown honours it. Nothing
-  // reads the map, and emitting one puts a `sourceMappingURL` into output the
-  // frontend apps go on to bundle.
-  dts: { sourcemap: false },
 
   deps: {
     // Keep external dependencies as imports so browser ESM never hits runtime

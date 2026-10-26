@@ -1,6 +1,6 @@
 import type { ClientRepository } from "../api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
-import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
 function removeGameStateLocalStorage() {
   // Collect first, remove after: removeItem inside a key(idx) loop shifts the
@@ -95,6 +95,8 @@ export class UserModel {
     localStorage.removeItem(teamStateStorageKey());
     localStorage.removeItem(relayPointsStorageKey());
     localStorage.removeItem(strategyPointsStorageKey());
+    localStorage.removeItem(relayResultsStorageKey());
+    localStorage.removeItem(strategyResultsStorageKey());
     removeGameStateLocalStorage();
     await this.repo.logout();
     localStorage.removeItem(loginMarkerStorageKey());
@@ -115,27 +117,28 @@ export class UserModel {
     }
   }
 
-  private static wasListenerAddedYet = false;
-
-  addListener(setTeamState: (teamState: TeamModelDto | null) => void) {
-    if (typeof window !== "undefined" && !UserModel.wasListenerAddedYet) {
-      UserModel.wasListenerAddedYet = true;
-      let previousValue: TeamModelDto | null = null;
-      const onLoginChanged = async (event: StorageEvent) => {
-        if (event.key !== loginMarkerStorageKey()) {
-          return;
-        }
-
-        const value = await this.getTeamState();
-
-        if (previousValue !== value) {
-          setTeamState(value);
-          previousValue = value;
-        }
-      };
-      window.addEventListener("storage", (event) => {
-        void onLoginChanged(event);
-      });
+  // Returns the function that removes the listener again.
+  addListener(setTeamState: (teamState: TeamModelDto | null) => void): () => void {
+    if (typeof window === "undefined") {
+      return () => undefined;
     }
+    let previousValue: TeamModelDto | null = null;
+    const onLoginChanged = async (event: StorageEvent) => {
+      if (event.key !== loginMarkerStorageKey()) {
+        return;
+      }
+
+      const value = await this.getTeamState();
+
+      if (previousValue !== value) {
+        setTeamState(value);
+        previousValue = value;
+      }
+    };
+    const listener = (event: StorageEvent) => {
+      void onLoginChanged(event);
+    };
+    window.addEventListener("storage", listener);
+    return () => window.removeEventListener("storage", listener);
   }
 }

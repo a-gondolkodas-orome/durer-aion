@@ -1,0 +1,16 @@
+{
+  "board": {
+    "cell": "Cell {{number}}",
+    "cellStart": "Cell {{number}}, start of a length-{{k}} subtable",
+    "submit": "Place the matches"
+  },
+  "role": {
+    "first": "I go first",
+    "second": "I go second"
+  },
+  "rule": "On a 1 × n strip, adjacent cells are separated by n − 1 dividing edges, which start out with no matches on them. In a move of size 0 < k < n the player to move picks a 1 × k subtable whose interior holds no match, and places one match on each of the match-free edges bounding the subtable. The move is legal if at least one of the bounding edges had no match yet, and either k = 1 or k is divisible by 4. The two players alternate, and the player to move must play one of the largest legal moves of size 0 < k < n. The game ends when a player cannot move legally: that player loses.",
+  "step": {
+    "move": "The largest legal move has size {{k}}. Mark a length-{{k}} subtable by clicking its leftmost cell, then place the matches.",
+    "over": "The game is over."
+  }
+}

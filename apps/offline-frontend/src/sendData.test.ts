@@ -3,8 +3,7 @@ import type { LogEntry } from "boardgame.io";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // The join code names every uploaded file; where it is stored is
-// stored-team-state's business, and mocking it keeps this suite off the
-// workspace packages' unbuilt `dist`.
+// stored-team-state's business.
 vi.mock("./stored-team-state", () => ({
   readStoredTeamState: () => ({ joinCode: "ABC123" }),
 }));

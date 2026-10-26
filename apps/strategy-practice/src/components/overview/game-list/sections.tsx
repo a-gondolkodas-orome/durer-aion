@@ -1,6 +1,6 @@
 import { orderBy } from 'lodash';
 import { gameList, type Category, type GameList } from '../../games/gameList';
-import type { I18nNode } from 'language';
+import { useTranslation } from 'react-i18next';
 import { CollapsibleSection } from './collapsible-section';
 import { GameCard } from './game-card';
 
@@ -49,11 +49,12 @@ export const orderByCategoryThenYear = (ids: string[], list: GameList): string[]
 // landing. `gameIds` are already filtered/ordered by the caller; when empty
 // (e.g. an active category filter excludes them all) the strip is hidden.
 export const FeaturedStrip = ({ gameIds }: { gameIds: string[] }) => {
+  const { t } = useTranslation('overview');
   if (gameIds.length === 0) return null;
 
   return (
     <CollapsibleSection
-      title={{ hu: 'Kiemelt játékok', en: 'Featured games' }}
+      title={t('section.featured')}
       defaultOpen={true}
       storageKey="featured"
       dataTestid="featured-strip"
@@ -66,7 +67,7 @@ export const FeaturedStrip = ({ gameIds }: { gameIds: string[] }) => {
 };
 
 export const CategorySection = ({ title, gameIds, defaultOpen, forceOpen, storageKey }: {
-  title: I18nNode
+  title: string
   gameIds: string[]
   defaultOpen: boolean
   forceOpen: boolean

@@ -1,0 +1,14 @@
+{
+  "board": {
+    "remainingSum": "Megmaradt számok összege"
+  },
+  "rule": {
+    "generic": "Egy táblázatban 1-től kezdődően néhány szám szerepel. Két játékos felváltva takar le egy-egy számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő nyer, ha pedig páratlan, akkor a második.",
+    "upTo": "Egy táblázatban 1-től {{maxNumber}}-ig szerepelnek a számok. Két játékos felváltva takar le egy-egy számot addig, amíg csak két szám marad. Ha a megmaradt két szám összege páros, akkor a kezdő nyer, ha pedig páratlan, akkor a második."
+  },
+  "step": "Kattints egy számra, hogy lefedd.",
+  "variant": {
+    "eight": "8 szám",
+    "ten": "10 szám"
+  }
+}

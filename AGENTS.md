@@ -131,7 +131,8 @@ here. What follows is the rest.
   and the winner is tracked in `G.winner`
 - Use Hungarian for user-facing text (the competition is in Hungarian). The
   strategy practice site is the exception: it has an HU/EN switcher (and a
-  `?lang=` param). User-facing English uses British spelling
+  `?lang=` param), and the relay practice site opens in the same `?lang=` or
+  stored choice. User-facing English uses British spelling
 - **Formatting is ESLint's, through `@stylistic`, not prettier's.**
   `eslint.stylistic.mjs`, which both configs import, holds the character-level
   rules and says why a rule joins that set only if it fixes characters, never
@@ -162,12 +163,25 @@ here. What follows is the rest.
 - An agent opening a PR assigns the person it is working for, and names its
   session for what the work is about, not for the ticket alone — `#461 duplicate
   socket.io copy in the lockfile`, not `Issue 461 investigation`
+- An agent pushes its work to `claude/<topic>`, a few kebab-case words saying
+  what the change is about — `claude/snackbar-above-keyboard`, not the random
+  name its session was assigned. Rename before the first push; a branch already
+  on the remote, or one a PR already tracks, keeps its name. This is the
+  explicit permission a session's "push only to the assigned branch" rule asks
+  for
 - Permission to commit to someone else's branch is not permission to comment on
   their PR: ask first before posting to a thread you do not own
 - A PR's discussion is the people's, even on a PR the agent opened: comments,
-  replies, resolving threads and review requests are denied in
-  `.claude/settings.json`. Push the change, then say in the session what you
-  would have posted
+  replies and resolving threads ask the person first (`.claude/settings.json`),
+  and review requests are refused. Unless asked to post, push the change, then
+  say in the session what you would have posted
+- So is every issue write — a comment, an edit, closing or reopening, a label,
+  an assignee, a field such as priority, a sub-issue link — each asked for and
+  approved on its own; `.claude/settings.json` asks before each one
+- Watching a PR, and scheduling a check-in on it, ask the person first, and an
+  agent subscribes only when asked. Do not merge or rebase the base branch into a
+  PR, or across a stack, unless asked or the PR has a conflict; a stack is
+  rebased once, just before it lands
 - Do not `@`-mention anyone not already involved in a thread: a mention is a
   notification. Naming a person plainly, or referring to their PR by number, says
   the same thing without pulling them in

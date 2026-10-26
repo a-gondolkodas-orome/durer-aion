@@ -1,0 +1,57 @@
+{
+  "backToList": "Vissza a listához",
+  "bugReport": "Hibabejelentő",
+  "close": "Bezárás",
+  "credit": {
+    "developedBy": "A játékot programozta: {{names}}.",
+    "suggestedBy": "A játékot javasolta: {{names}}."
+  },
+  "cta": {
+    "chooseRole": "Válassz szerepet!",
+    "computersTurn": "Mi jövünk",
+    "decideWhoStarts": "Döntsétek el, hogy ki kezd.",
+    "next": "Következik: {{name}}",
+    "winner": "A játékot nyerte: {{name}}",
+    "youLost": "Sajnos, most nem nyertél, de ne add fel.",
+    "yourTurn": "Te jössz",
+    "youWon": "Nyertél. Gratulálunk! :)"
+  },
+  "gameOver": "A játék véget ért",
+  "mode": {
+    "legend": "Játékmód",
+    "twoPlayers": "2 játékos",
+    "vsComputer": "Gép ellen"
+  },
+  "newGame": "Új játék",
+  "player": {
+    "defaultName": {
+      "first": "1. játékos",
+      "second": "2. játékos"
+    },
+    "emptyNameFilledIn": "Az üresen hagyott mező helyére „{{first}}\", illetve „{{second}}\" kerül.",
+    "nameCollision": "A két játékos neve nem lehet azonos.",
+    "placeholder": {
+      "first": "Neved (Nyuszika)",
+      "second": "Neved (Teknős)"
+    },
+    "start": "Kezdek"
+  },
+  "role": {
+    "first": "Kezdő leszek",
+    "second": "Második leszek"
+  },
+  "rules": "Játékszabályok",
+  "stats": {
+    "reset": "Számlálók nullázása",
+    "summary": "Megnyert játékok: {{win}}, Elvesztett játékok: {{loss}}"
+  },
+  "undo": "Visszavonás",
+  "variant": {
+    "full": "Teljes",
+    "legend": "Változat",
+    "level": "{{number}}. szint",
+    "noBotStrategy": "Nincs gépi stratégia megadva",
+    "notAlwaysOptimal": "A gép nem minden esetben tud nyerő lépést találni.",
+    "test": "Teszt"
+  }
+}
