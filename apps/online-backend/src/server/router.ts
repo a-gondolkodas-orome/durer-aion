@@ -7,7 +7,7 @@ import { TeamsRepository } from './db';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
-import { adminTeamView, teamMatches } from './match_status';
+import { adminTeamView, adminTeamViews, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
@@ -256,7 +256,7 @@ export function configureTeamsRouter(
    * @returns {DeletedTeamModel[]}
    */
   router.get("/team/admin/deleted", adminAuth, async (ctx) => {
-    ctx.body = await Promise.all((await teams.listDeletedTeams()).map(team => adminTeamView(ctx.db, team)));
+    ctx.body = await adminTeamViews(ctx.db, await teams.listDeletedTeams());
   });
 
   /**
@@ -315,7 +315,7 @@ export function configureTeamsRouter(
     } else {
       filters = filter_string;
     }
-    ctx.body = await Promise.all((await teams.fetch(filters)).map(team => adminTeamView(ctx.db, team)));
+    ctx.body = await adminTeamViews(ctx.db, await teams.fetch(filters));
   });
 
   /**
@@ -323,7 +323,7 @@ export function configureTeamsRouter(
    * @returns {TeamModel[]} - List of the selected teams
    */
   router.get("/team/admin/all", adminAuth, koaBody(), async (ctx) => {
-    ctx.body = await Promise.all((await teams.listTeams() ?? []).map(team => adminTeamView(ctx.db, team)));
+    ctx.body = await adminTeamViews(ctx.db, await teams.listTeams() ?? []);
   })
 
   /**

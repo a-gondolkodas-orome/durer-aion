@@ -74,7 +74,9 @@ def get_match_data(team_states, match_type:str, match_data_type:str):
   match_data = {}
   match_type_id = 'relayMatch' if match_type == 'relay' else 'strategyMatch'
   for team_state in tqdm(team_states, f"Downloading {match_type} {match_data_type}"):
-    if team_state[match_type_id]["state"] != "NOT STARTED":
+    if team_state[match_type_id]["state"] == "MISSING":
+      print(f'ERROR {match_type} {team_state["joinCode"]}: match {team_state[match_type_id]["matchID"]} is not in storage, exported as not started')
+    elif team_state[match_type_id]["state"] != "NOT STARTED":
       matchID = team_state[match_type_id]["matchID"]
       match_data[team_state["joinCode"]] = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/game/admin/{matchID}/{match_data_type}')
   with open(file_name, 'w') as f:

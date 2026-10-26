@@ -27,10 +27,11 @@ export async function startTestDatabase() {
   // Syncs every model on this Sequelize, the teams' tables included.
   await db.connect();
   return {
+    db,
     teams,
-    /** Empties the teams and their archive, for a test that starts from nothing. */
+    /** Empties the teams, their archive and the matches, for a test that starts from nothing. */
     async reset() {
-      await db.sequelize.query('TRUNCATE "Teams", "DeletedTeams"');
+      await db.sequelize.query('TRUNCATE "Teams", "DeletedTeams", "Games"');
     },
     async stop() {
       await db.sequelize.close();

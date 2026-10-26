@@ -26,7 +26,7 @@ const TeamsToolbar = csvToolbar('durer-csapatok');
 type AdminTab = 'teams' | 'deleted';
 
 // What the states mean is on MatchStatus in the `schemas` package.
-const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet. MISSING: a meccs nincs meg az adatbázisban, a csapatot alaphelyzetbe kell állítani.';
 
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();

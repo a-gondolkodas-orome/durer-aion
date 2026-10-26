@@ -52,7 +52,15 @@ export interface RelayProblemResult {
 /// says when that is recorded).
 export type LiveGameResult = 'won' | 'lost' | 'unfinished';
 
-export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
+/// A match the team's row names but storage does not have. Only the admin
+/// routes serve it, so that an organiser can find the team and reset it; a
+/// team's own routes refuse the request instead.
+export interface MissingMatchStatus {
+  state: 'MISSING';
+  matchID: string;
+}
+
+export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus | MissingMatchStatus;
 
 /// Every screen a team can be on. The list is here, not just the type, because
 /// the frontends validate stored team state against it.
