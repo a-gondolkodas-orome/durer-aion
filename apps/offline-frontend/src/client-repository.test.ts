@@ -24,11 +24,12 @@ beforeEach(() => {
 // score, and the team went home with 0 and no results table, and the organisers
 // got an end file with 0 points.
 test("a relay whose time ran out goes home with the score its board kept", async () => {
-  const repo = new OfflineClientRepository();
-  repo.keepRelayEnd({
+  const report = {
     component: "relay", phase: "end",
     G: { points: 5, start: "2026-10-10T10:00:00Z", maxPointsList: [3, 4], previousPoints: [3, 2], previousAnswers: [[], []] },
-  } as unknown as RelayEndReport);
+  } as unknown as RelayEndReport;
+  const repo = new OfflineClientRepository();
+  repo.keepRelayEnd(report);
   await repo.toHome();
 
   const relay = readStoredTeamState()?.relayMatch;
