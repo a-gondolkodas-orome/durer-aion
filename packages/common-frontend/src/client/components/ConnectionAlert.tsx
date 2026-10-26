@@ -14,6 +14,8 @@ import { useTranslation } from "react-i18next";
 /// The browser going offline needs no listener here: engine.io closes the
 /// socket on the `offline` event itself, except for a server on localhost. A
 /// network that stays up but carries nothing shows only at the ping timeout.
+export const CONNECTION_LOST_DELAY_MS = 2000;
+
 function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
   const { t } = useTranslation();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -21,10 +23,15 @@ function ConnectionAlert({ isConnected }: { isConnected: boolean }) {
 
   useEffect(() => {
     if (!isConnected) {
-      wasDown.current = true;
-      closeSnackbar('connection-check');
-      enqueueSnackbar(t('general.warning.connectionLost'), { key: 'connection-lost', variant: 'error', persist: true });
-    } else if (wasDown.current) {
+      // A drop shorter than this, e.g. a Wi-Fi handover, shows nothing.
+      const timer = setTimeout(() => {
+        wasDown.current = true;
+        closeSnackbar('connection-check');
+        enqueueSnackbar(t('general.warning.connectionLost'), { key: 'connection-lost', variant: 'error', persist: true });
+      }, CONNECTION_LOST_DELAY_MS);
+      return () => clearTimeout(timer);
+    }
+    if (wasDown.current) {
       wasDown.current = false;
       closeSnackbar('connection-lost');
       enqueueSnackbar(t('general.warning.connectionRestored'), {
