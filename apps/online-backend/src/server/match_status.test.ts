@@ -1,7 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { Ctx, StorageAPI } from "boardgame.io";
-import { adminTeamViews, deriveMatchStatus, teamMatches } from "./match_status";
-import type { TeamModel } from "./model";
+import { deriveMatchStatus, teamMatches } from "./match_status";
 
 const START = "2026-03-21T10:00:00.000Z";
 const END = "2026-03-21T11:00:00.000Z";
@@ -84,25 +83,5 @@ describe("teamMatches", () => {
   it("reads the match out of storage", async () => {
     expect((await teamMatches(storage({ m1: { G: relayG, ctx: ctx() } }), { relayMatchID: "m1", strategyMatchID: null }, at(-1000))).relayMatch)
       .toMatchObject({ state: "IN PROGRESS", matchID: "m1" });
-  });
-});
-
-describe("adminTeamViews", () => {
-  const row = (fields: object) => ({ ...fields, toJSON: () => fields }) as unknown as TeamModel;
-
-  // The admin list is where an organiser finds the broken team, so one such
-  // row must not take the list down with it.
-  it("serves a match storage does not have as MISSING, and the other teams as they are", async () => {
-    const storage = { fetch: (id: string) => ({ state: id === "m1" ? { G: relayG, ctx: ctx() } : undefined }) } as unknown as StorageAPI.Sync;
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    const views = await adminTeamViews(storage, [
-      row({ teamId: "a", relayMatchID: "m1", strategyMatchID: null }),
-      row({ teamId: "b", relayMatchID: "gone", strategyMatchID: null }),
-    ], at(-1000));
-
-    expect(views.map(view => view.relayMatch.state)).toStrictEqual(["IN PROGRESS", "MISSING"]);
-    expect(views[1].relayMatch).toStrictEqual({ state: "MISSING", matchID: "gone" });
-    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("gone"));
   });
 });

@@ -72,15 +72,10 @@ export async function fetchMatchStates(db: Storage, matchIDs: string[]): Promise
 const matchIDs = (team: Pick<TeamModel, MatchKind>) =>
   [team.relayMatchID, team.strategyMatchID].filter((id): id is string => id !== null);
 
-/** Both of a team's matches, as of `now`, for the team's own routes.
- *  A row naming a match storage does not have is a broken row, and fails
- *  loudly rather than reading as a state the team could act on. */
-export async function teamMatches(
-  db: Storage,
-  team: Pick<TeamModel, MatchKind>,
-  now: Date = new Date(),
-): Promise<TeamMatches> {
-  const states = await fetchMatchStates(db, matchIDs(team));
+/** A team's two matches, from states already read. A row naming a match
+ *  storage does not have is a broken row, and fails loudly rather than reading
+ *  as a state the team could act on. */
+function matchesOf(team: Pick<TeamModel, MatchKind>, states: Map<string, MatchState>, now: Date): TeamMatches {
   const status = (kind: MatchKind): MatchStatus => {
     const matchID = team[kind];
     if (matchID === null) return { state: "NOT STARTED" };
@@ -91,33 +86,24 @@ export async function teamMatches(
   return { relayMatch: status("relayMatchID"), strategyMatch: status("strategyMatchID") };
 }
 
-/**
- * The admin routes' teams: each row, and both its matches as they stand, from
- * one read of storage for the whole list.
- *
- * A match storage does not have reads as MISSING here rather than failing the
- * request, since the admin list is where an organiser finds such a team and
- * resets it. Each one is logged, so the server's log names it too.
- */
+/** Both of a team's matches, as of `now`. */
+export async function teamMatches(
+  db: Storage,
+  team: Pick<TeamModel, MatchKind>,
+  now: Date = new Date(),
+): Promise<TeamMatches> {
+  return matchesOf(team, await fetchMatchStates(db, matchIDs(team)), now);
+}
+
+/** The admin routes' teams: each row, and both its matches as they stand, from
+ *  one read of storage for the whole list. */
 export async function adminTeamViews<T extends TeamModel>(
   db: Storage,
   teams: T[],
   now: Date = new Date(),
 ): Promise<(ReturnType<T["toJSON"]> & TeamMatches)[]> {
   const states = await fetchMatchStates(db, teams.flatMap(matchIDs));
-  const status = (team: T, kind: MatchKind): MatchStatus => {
-    const matchID = team[kind];
-    if (matchID === null) return { state: "NOT STARTED" };
-    const state = states.get(matchID);
-    if (state) return deriveMatchStatus(kind, matchID, state, now);
-    console.error(`Match ${matchID} in team ${team.teamId}'s ${kind} column is not in storage.`);
-    return { state: "MISSING", matchID };
-  };
-  return teams.map(team => ({
-    ...team.toJSON() as ReturnType<T["toJSON"]>,
-    relayMatch: status(team, "relayMatchID"),
-    strategyMatch: status(team, "strategyMatchID"),
-  }));
+  return teams.map(team => ({ ...team.toJSON() as ReturnType<T["toJSON"]>, ...matchesOf(team, states, now) }));
 }
 
 /** {@link adminTeamViews} for one team. */

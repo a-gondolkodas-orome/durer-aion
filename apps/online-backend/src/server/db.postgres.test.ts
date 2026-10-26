@@ -82,24 +82,22 @@ describe('TeamsRepository.fetch', () => {
 // registers, which no API of the library promises: this is what notices a
 // release that renames either.
 describe('the admin list of teams', () => {
-  it('reads every team\'s matches in one query, and serves a match storage does not have as MISSING', async () => {
+  it('reads every team\'s matches in one query', async () => {
     const G = { start: '2026-03-21T10:00:00.000Z', end: '2999-01-01T00:00:00.000Z', points: 2 };
     await database.db.createMatch('m1', {
       initialState: { G, ctx: { phase: 'play' } } as never,
       metadata: { gameName: 'relay', players: {} } as never,
     });
     const first = await database.teams.insertTeam(team());
-    const second = await database.teams.insertTeam(team());
+    await database.teams.insertTeam(team());
     await TeamModel.update({ relayMatchID: 'm1' }, { where: { teamId: first.teamId } });
-    await TeamModel.update({ strategyMatchID: 'gone' }, { where: { teamId: second.teamId } });
     const fetch = vi.spyOn(database.db, 'fetch');
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     const views = await adminTeamViews(database.db, await TeamModel.findAll({ order: [['teamName', 'ASC']] }));
 
     expect(views.map(view => [view.relayMatch, view.strategyMatch])).toStrictEqual([
       [expect.objectContaining({ state: 'IN PROGRESS', matchID: 'm1' }), { state: 'NOT STARTED' }],
-      [{ state: 'NOT STARTED' }, { state: 'MISSING', matchID: 'gone' }],
+      [{ state: 'NOT STARTED' }, { state: 'NOT STARTED' }],
     ]);
     expect(fetch).not.toHaveBeenCalled();
   });
