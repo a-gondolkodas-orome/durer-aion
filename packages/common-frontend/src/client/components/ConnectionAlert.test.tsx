@@ -9,10 +9,10 @@ import { CONNECTION_LOST_DELAY_MS, withConnectionAlert } from './ConnectionAlert
 const Board = withConnectionAlert((_: { isConnected: boolean }) => <button>Lépés</button>);
 const board = (isConnected: boolean) => <SnackbarProvider><Board isConnected={isConnected}/></SnackbarProvider>;
 const waitOutDelay = () => act(async () => { vi.advanceTimersByTime(CONNECTION_LOST_DELAY_MS); });
-// jsdom does not implement inert, so this reads the attribute rather than clicking.
+// jsdom ignores inert, so read the attribute.
 const isInert = () => screen.getByRole('button').closest('[inert]') !== null;
 
-// Advancing with real time too keeps notistack's transitions and findBy's polling going.
+// Real time keeps advancing too, for notistack's transitions and findBy's polling.
 beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 afterEach(() => vi.useRealTimers());
 
@@ -24,7 +24,7 @@ test('a drop shorter than the delay changes nothing', async () => {
   expect(screen.queryByText(/Megszakadt a kapcsolat/)).not.toBeInTheDocument();
   expect(isInert()).toBe(false);
 
-  // The next drop waits out the delay afresh.
+  // A new drop restarts the delay.
   rerender(board(false));
   expect(isInert()).toBe(false);
 });

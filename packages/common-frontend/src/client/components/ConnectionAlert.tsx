@@ -5,19 +5,15 @@ import { useTranslation } from "react-i18next";
 
 export const CONNECTION_LOST_DELAY_MS = 2000;
 
-/// While the game's socket is down, the board is inert and dimmed, and a
-/// persistent snackbar says why. A move sent while disconnected would be
-/// replayed on reconnect and rejected if the match has moved on meanwhile. One
-/// sent before socket.io notices the drop is lost, but the re-sync on reconnect
-/// replaces the board's state with the server's, which takes the move back.
+/// While the socket is down, the board is inert and dimmed and a snackbar says
+/// why. A move sent just before the drop is noticed is lost; the re-sync on
+/// reconnect takes it back off the board.
 ///
-/// A drop shorter than CONNECTION_LOST_DELAY_MS, e.g. a Wi-Fi handover, shows
-/// nothing. The browser going offline needs no listener here: engine.io closes
-/// the socket on the `offline` event itself, except for a server on localhost.
-/// A network that stays up but carries nothing shows only at the ping timeout.
+/// Shorter drops than CONNECTION_LOST_DELAY_MS show nothing. engine.io closes
+/// the socket on the browser's `offline` event itself (not for localhost); a
+/// silent network shows only at the ping timeout.
 ///
-/// For the socket.io clients only: a client without a multiplayer transport
-/// reports `isConnected: false` for good, which would keep the board disabled.
+/// Socket.io clients only: without a transport `isConnected` stays false for good.
 export function withConnectionAlert<P extends { isConnected: boolean }>(Board: ComponentType<P>) {
   return (props: P) => {
     const down = useLongDisconnect(props.isConnected);
@@ -28,8 +24,8 @@ export function withConnectionAlert<P extends { isConnected: boolean }>(Board: C
       if (!down) {
         return;
       }
-      // No fixed key: a language switch re-runs this, and notistack drops every
-      // snackbar with a key when the closing one finishes leaving.
+      // No fixed key: on a language switch notistack would drop the new
+      // snackbar along with the old one.
       const key = enqueueSnackbar(t('general.warning.connectionLost'), { variant: 'error', persist: true });
       return () => closeSnackbar(key);
     }, [down, enqueueSnackbar, closeSnackbar, t]);
@@ -52,6 +48,6 @@ function useLongDisconnect(isConnected: boolean) {
       setExpired(false);
     };
   }, [isConnected]);
-  // The reset above lands a render after the reconnect.
+  // The reset lands a render after the reconnect.
   return !isConnected && expired;
 }
