@@ -39,8 +39,7 @@
     "pointsUnit_other": "points",
     "remainingTime": "Remaining time",
     "warning": {
-      "connectionLost": "Connection to the server lost, reconnecting…",
-      "connectionRestored": "Reconnected to the server. Check that your last move or answer went through.",
+      "connectionLost": "Connection to the server lost. You can't make a move until it's back.",
       "timeNotMatch": "Your computer's clock is not synchronised with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
       "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."
     }

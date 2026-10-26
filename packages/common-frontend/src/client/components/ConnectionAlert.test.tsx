@@ -4,12 +4,13 @@ import { act, render, screen, waitForElementToBeRemoved } from '@testing-library
 import '@testing-library/jest-dom';
 import { SnackbarProvider } from 'notistack';
 import '../../common/i18n';
-import { CONNECTION_LOST_DELAY_MS, RECONNECTED_NOTICE_MS, withConnectionAlert } from './ConnectionAlert';
+import { CONNECTION_LOST_DELAY_MS, withConnectionAlert } from './ConnectionAlert';
 
-const Board = withConnectionAlert(() => null);
+const Board = withConnectionAlert((_: { isConnected: boolean }) => <button>Lépés</button>);
 const withProvider = (isConnected: boolean) => <SnackbarProvider><Board isConnected={isConnected}/></SnackbarProvider>;
-const advance = (ms: number) => act(async () => { vi.advanceTimersByTime(ms); });
-const waitOutDelay = () => advance(CONNECTION_LOST_DELAY_MS);
+const waitOutDelay = () => act(async () => { vi.advanceTimersByTime(CONNECTION_LOST_DELAY_MS); });
+// jsdom does not implement inert, so the tests read the attribute rather than click.
+const isInert = () => screen.getByRole('button', { name: 'Lépés' }).closest('[inert]') !== null;
 
 // Advancing with real time too keeps notistack's transitions and findBy's polling going.
 beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
@@ -20,22 +21,22 @@ test('shows nothing for a drop shorter than the delay', async () => {
   rerender(withProvider(true));
   await waitOutDelay();
   expect(screen.queryByText(/kapcsolat/)).not.toBeInTheDocument();
+  expect(isInert()).toBe(false);
 });
 
-test('asks the team to check their last move once the socket is back, for a while', async () => {
+test('disables the board and says why until the socket is back', async () => {
   const { rerender } = render(withProvider(false));
+  expect(isInert()).toBe(false);
   await waitOutDelay();
   await screen.findByText(/Megszakadt a kapcsolat/);
+  expect(isInert()).toBe(true);
 
   rerender(withProvider(true));
-  await screen.findByText(/átment-e az utolsó lépésetek/);
+  expect(isInert()).toBe(false);
   await waitForElementToBeRemoved(() => screen.queryByText(/Megszakadt a kapcsolat/));
-
-  await advance(RECONNECTED_NOTICE_MS);
-  await waitForElementToBeRemoved(() => screen.queryByText(/átment-e/));
 });
 
-test('closes what it showed when the board goes away', async () => {
+test('closes the snackbar when the board goes away', async () => {
   const { rerender } = render(withProvider(false));
   await waitOutDelay();
   await screen.findByText(/Megszakadt a kapcsolat/);
