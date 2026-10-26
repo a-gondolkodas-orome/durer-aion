@@ -30,14 +30,14 @@ const ctx = (fields: Partial<Ctx> = {}) => ({ phase: "play", ...fields }) as Ctx
 
 describe("deriveMatchStatus", () => {
   it("is running before its end", () => {
-    expect(deriveMatchStatus("relayMatchID", "m1", { G: relayG, ctx: ctx() }, at(-1000))).toStrictEqual({
+    expect(deriveMatchStatus("RELAY", "m1", { G: relayG, ctx: ctx() }, at(-1000))).toStrictEqual({
       state: "IN PROGRESS", matchID: "m1", startAt: new Date(START), endAt: new Date(END),
     });
   });
 
   // #639: the team closed the tab at the buzzer, so no move ever ended the game.
   it("is finished, with the game's points, once its time is up and nobody ended it", () => {
-    expect(deriveMatchStatus("relayMatchID", "m1", { G: relayG, ctx: ctx() }, at(1000))).toStrictEqual({
+    expect(deriveMatchStatus("RELAY", "m1", { G: relayG, ctx: ctx() }, at(1000))).toStrictEqual({
       state: "FINISHED",
       matchID: "m1",
       startAt: new Date(START),
@@ -48,7 +48,7 @@ describe("deriveMatchStatus", () => {
   });
 
   it("is finished as soon as the game ends, however much time is left", () => {
-    expect(deriveMatchStatus("relayMatchID", "m1", { G: relayG, ctx: ctx({ gameover: true }) }, at(-60 * 1000)).state)
+    expect(deriveMatchStatus("RELAY", "m1", { G: relayG, ctx: ctx({ gameover: true }) }, at(-60 * 1000)).state)
       .toBe("FINISHED");
   });
 
@@ -56,12 +56,12 @@ describe("deriveMatchStatus", () => {
   it("is running again once its end is moved past now", () => {
     const extended = { ...relayG, end: at(5 * 60 * 1000).toISOString() };
 
-    expect(deriveMatchStatus("relayMatchID", "m1", { G: extended, ctx: ctx() }, at(1000)).state)
+    expect(deriveMatchStatus("RELAY", "m1", { G: extended, ctx: ctx() }, at(1000)).state)
       .toBe("IN PROGRESS");
   });
 
   it("carries a strategy match's results as the game recorded them", () => {
-    expect(deriveMatchStatus("strategyMatchID", "m1", { G: strategyG(), ctx: ctx() }, at(1000)))
+    expect(deriveMatchStatus("STRATEGY", "m1", { G: strategyG(), ctx: ctx() }, at(1000)))
       .toMatchObject({ state: "FINISHED", score: 0, strategyResults: ["lost", "won"] });
   });
 });

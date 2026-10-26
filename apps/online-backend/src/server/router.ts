@@ -110,12 +110,12 @@ export function configureTeamsRouter(
       return;
     }
 
-    const kind = team.relayMatchID === matchID ? 'relayMatchID' : team.strategyMatchID === matchID ? 'strategyMatchID' : null;
-    if (kind === null) {
+    const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
+    if (gameType === null) {
       ctx.throw(501, `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
       return;
     }
-    if (deriveMatchStatus(kind, matchID, state, new Date()).state !== 'IN PROGRESS') {
+    if (deriveMatchStatus(gameType, matchID, state, new Date()).state !== 'IN PROGRESS') {
       ctx.throw(501, 'Restarting an already finished match is not supported right now.');
     }
 

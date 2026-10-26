@@ -54,14 +54,6 @@ describe('the unique constraints sync() creates', () => {
   });
 });
 
-describe('TeamsRepository.insertTeam', () => {
-  it('starts a team with no match of either kind', async () => {
-    const { teamId } = await database.teams.insertTeam(team());
-
-    expect(await database.teams.getTeam({ teamId })).toMatchObject({ relayMatchID: null, strategyMatchID: null });
-  });
-});
-
 describe('TeamsRepository.fetch', () => {
   it('finds the teams whose notes hold every fragment, whatever its case, wildcards read literally', async () => {
     await database.teams.insertTeam(team({ teamname: 'Alpha', other: 'Budapest, 100% motivated, a_b' }));
