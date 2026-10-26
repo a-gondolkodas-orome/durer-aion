@@ -28,8 +28,10 @@ export function withConnectionAlert<P extends { isConnected: boolean }>(Board: C
       if (!down) {
         return;
       }
-      enqueueSnackbar(t('general.warning.connectionLost'), { key: 'connection-lost', variant: 'error', persist: true });
-      return () => closeSnackbar('connection-lost');
+      // No fixed key: a language switch re-runs this, and notistack drops every
+      // snackbar with a key when the closing one finishes leaving.
+      const key = enqueueSnackbar(t('general.warning.connectionLost'), { variant: 'error', persist: true });
+      return () => closeSnackbar(key);
     }, [down, enqueueSnackbar, closeSnackbar, t]);
 
     return <div inert={down} style={down ? { opacity: 0.5 } : undefined}>
