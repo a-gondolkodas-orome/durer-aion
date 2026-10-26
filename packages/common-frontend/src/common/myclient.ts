@@ -37,6 +37,10 @@ export function MyClientRelay(
   });
 }
 
+// socket.io makes one reconnect attempt at a time, and one started while the
+// network was down hangs until this timeout (default 20 s) before the next.
+const socketOpts = { timeout: 5000 };
+
 // Until the socket syncs with the server, boardgame.io shows its own
 // placeholder, an English "connecting...", so the online clients name ours.
 export function MyOnlineClient<T_SpecificGameState>(
@@ -48,8 +52,7 @@ export function MyOnlineClient<T_SpecificGameState>(
   return Client({
     game: gameWrapper(game),
     board: withConnectionAlert(boardWrapper(board, description)),
-    multiplayer: serverUrl === undefined ? SocketIO() :
-      SocketIO({ server: serverUrl }),
+    multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
 }
@@ -63,8 +66,7 @@ export function MyOnlineRelayClient(
   return Client({
     game: game,
     board: withConnectionAlert(board),
-    multiplayer: serverUrl === undefined ? SocketIO() :
-      SocketIO({ server: serverUrl }),
+    multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
 }
