@@ -2,6 +2,7 @@
 
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
@@ -10,7 +11,7 @@ const noBotMessage = 'The live client must not ship the bot: import `game` or `g
 // The `game/bot` entry and every relative spelling of it, of the package's source
 // and of its build: `../../packages/game/...` from an app, `../../game/...` from a
 // sibling package, with or without an extension (`../../game/bot.js` resolves to
-// bot.ts and used to slip through). See the block that uses it, below.
+// bot.ts). See the block that uses it, below.
 const noBotInTheClient = {
   group: [
     'game/bot',
@@ -102,7 +103,6 @@ const typeAwareRulesOff = Object.fromEntries(
 );
 
 export default defineConfig(
-  // Apply recommended rules to all files
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
     extends: [
@@ -124,10 +124,10 @@ export default defineConfig(
   // `projectService`, not `project: true`: one TypeScript project service shared
   // across the run, rather than a program held open per tsconfig — and there are
   // eleven tsconfigs here. It is what typescript-eslint 8 recommends for this
-  // shape, and it was one 512 MB step less heap. What actually brought the run
-  // inside a small machine's default heap was giving each workspace its own
-  // process, so that a run holds one project rather than eleven — turbo.json says
-  // how, and .devcontainer/README.md has the measurements.
+  // shape. What brings the run inside a small machine's default heap is giving
+  // each workspace its own process, so that a run holds one project rather than
+  // eleven — turbo.json says how, and .devcontainer/README.md has the
+  // measurements.
   {
     files: ['**/*.{ts,tsx}'],
     ignores: ['**/*.config.{ts,mts}', '**/dist/**', '**/build/**'],
@@ -139,9 +139,8 @@ export default defineConfig(
     },
     // 'error', not 'warn': the lint script fails on any warning anyway
     // (--max-warnings=0), so 'warn' only made the editor and a bare `npx eslint`
-    // disagree with CI. These were warnings while the repo had violations to
-    // surface without blocking; it no longer does. The cap stays as a backstop,
-    // so a rule added at 'warn' severity later cannot quietly accumulate either.
+    // disagree with CI. The cap stays as a backstop, so a rule added at 'warn'
+    // severity later cannot quietly accumulate either.
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
@@ -149,6 +148,18 @@ export default defineConfig(
       '@typescript-eslint/no-empty-object-type': 'error',
       'prefer-const': 'error',
       ...typeAwareRules,
+    },
+  },
+  // The same three hook rules apps/strategy-practice's config sets for its own code.
+  // Repo-wide rather than on packages/common-frontend alone: every React component
+  // this config lints ships in one of the three bundles it serves.
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/set-state-in-effect': 'error',
     },
   },
   // packages/strategy-engine is apps/strategy-practice code moved out of it, still
@@ -206,7 +217,7 @@ export default defineConfig(
   // lives in src/react/ and is exempt — that is the whole point of the split. What this
   // rule cannot see is a relative import resolving into src/react/; the walk in
   // packages/strategy-engine/src/react-free.test.ts pins that. `import type` is allowed because
-  // it is erased: i18n.ts has to name React's node type to say what a game's rule text
+  // it is erased: types.ts has to name React's node type to say what a game's rule text
   // may be, and naming it costs a bare node nothing.
   {
     files: ['packages/strategy-engine/**/*.ts'],
@@ -264,7 +275,6 @@ export default defineConfig(
       globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' },
     },
   },
-  // Global ignores
   {
     ignores: [
       '**/dist/**',
@@ -276,6 +286,9 @@ export default defineConfig(
       // bundles, plus a copy of pages/. Gitignored, but eslint has its own ignore list
       // and would otherwise lint minified output the moment anyone previews the site.
       'site/**',
+      // The Python environment README.md's admin script setup creates. Gitignored, so CI never
+      // has one, but a local run would lint the JavaScript its packages vendor.
+      '.venv/**',
     ],
   }
 );

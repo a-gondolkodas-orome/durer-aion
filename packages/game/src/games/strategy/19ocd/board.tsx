@@ -21,7 +21,6 @@ export function MyBoard({ G, moves }: MyGameProps) {
               x={(n % 5) * 40 + 5} y={Math.floor(n / 5) * 40 + 5 + 20 + 20} width={30} height={30} fill="white"
               stroke= {G.numbersOnTable[n] ?
                               (G.previousMove % (n + 1) === 0 || (n + 1) % G.previousMove === 0) ? "green" : "lightgreen" : "red"}
-                              //: G.previousMove === n+1 ? "red" : "#ff9999"}
               opacity={ G.numbersOnTable[n] ? 1 : 0.1}
               strokeWidth="1%"
               onClick={() => onClick(n + 1)}

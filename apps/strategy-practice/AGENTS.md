@@ -23,6 +23,16 @@ GitHub Pages.
 lodash is already used extensively; feel free to reach for it where it helps
 readability.
 
+## How this app sits in the monorepo
+
+It is a workspace of the `durer-aion` monorepo with its own `eslint.config.js`
+and vitest config, which root `npm run lint` and `npm test` run next to the
+root's, each under its own setup. The ESLint difference is the rule set
+(`@eslint-react`, react-hooks, no trailing comma, `max-len` 120), not the
+toolchain: eslint, typescript, vitest and vite are the root's pins, hoisted. It
+came in as a subtree merge from `durer-jatekok` with that dialect already set,
+and reconciling the two would be a rewrite, so both configs stay.
+
 ## Architecture
 
 Every game lives under `src/components/games/`, one folder per game, registered
@@ -46,7 +56,7 @@ sibling of `games/`:
   is in `packages/strategy-engine`, imported as `strategy-engine`, and `index.ts` here re-exports
   it. Games import through that barrel — no deep imports. The barrel is a path
   alias, so no `../../` either, which is what makes the rule self-enforcing.
-  [src/components/CLAUDE.md](src/components/CLAUDE.md) has the detail.
+  [src/components/AGENTS.md](src/components/AGENTS.md) has the detail.
 
 Each game folder implements the optimal strategy (computer AI) and its own UI
 against that API. Strategy is implemented however is simplest: calculated on the
@@ -91,8 +101,8 @@ Two rules keep the boundary meaningful rather than nominal:
 A variant states its start position either as `generateStartBoard` or as
 `startBoards`, a curated list. Prefer the list whenever the positions are
 enumerable, and verify each entry with `forcedWinnerIndex` — the contract and
-the reasoning are in [src/components/CLAUDE.md § Curated start
-boards](src/components/CLAUDE.md#curated-start-boards).
+the reasoning are in [src/components/AGENTS.md § Curated start
+boards](src/components/AGENTS.md#curated-start-boards).
 
 ### Where a test lives
 
@@ -174,7 +184,7 @@ the reasons above have not changed.
 drafted — this app and the live competition round are the same repository, and
 `packages/strategy-engine` was pulled out of here partly with that in mind — and then
 deprioritized, because upstream boardgame.io is under active development again
-(issue #277). The root [`CLAUDE.md`](../../CLAUDE.md) is the authority: don't
+(issue #277). The root [`AGENTS.md`](../../AGENTS.md) is the authority: don't
 build toward that replacement. What survives it is the engine work that pays
 for itself either way — a game's rules and its bot each importable with no
 React, which is why `gameplay.ts` and `bot-strategy.ts` are separate files.
@@ -190,7 +200,7 @@ the rest in-repo.
 The steps are in [README.md § Adding a new
 game](README.md#adding-a-new-game). The `strategyGameFactory` API, the move and
 bot contracts, the store architecture and the new-game checklist are in
-`src/components/CLAUDE.md`, which loads automatically when working under
+`src/components/AGENTS.md`, which loads automatically when working under
 `src/components/`; read it directly when discussing that design without opening
 a file there.
 

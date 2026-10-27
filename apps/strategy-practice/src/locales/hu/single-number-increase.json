@@ -1,0 +1,21 @@
+{
+  "incrementOrDouble": {
+    "rule": "A két játékos pozitív egész számokat mond felváltva úgy, hogy ha az előző által mondott szám x, akkor a következő x + 1-et vagy 2x-et mondhat. A kezdő játékosnak 1-et kell mondania. Az veszít, aki először mond {{target}}-nél nagyobb számot.",
+    "step": {
+      "first": "Mondd az első számot: 1.",
+      "next": "Mondj eggyel nagyobb (x+1) vagy kétszer akkora (2x) számot."
+    }
+  },
+  "plusOneTwoThree": {
+    "rule": "A játék a nullával indul. A játékosok felváltva lépnek a pozitív egész számokon: a soron következő játékos mindig 1-gyel, 2-vel vagy 3-mal léphet előre. Az veszít, aki először lép {{target}}-nél nagyobb számra.",
+    "step": "Válaszd ki, hogy melyik számra lépsz."
+  },
+  "superstitiousCounting": {
+    "board": {
+      "restriction": "Előző lépés: {{previous}}. Tiltott: {{forbidden}}.",
+      "target": "m értéke: {{target}}"
+    },
+    "rule": "Károly és Dezső <code>m</code>-ig szeretnének elszámolni, és közben a következő játékot játsszák: 0-ról kezdenek, a két játékos felváltva adhat hozzá egy 13-nál (szigorúan) kisebb pozitív egészet a korábbi számhoz, azonban a babonájuk miatt ha egyikük <code>x</code>-et adott hozzá, akkor másikuk a következő lépésben nem adhat hozzá <code>13-x</code>-et. Az veszít, aki eléri (vagy átlépi) <code>m</code>-et.",
+    "step": "Kattints a számra ahova lépni szeretnél."
+  }
+}

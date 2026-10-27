@@ -1,7 +1,6 @@
 import { State } from 'boardgame.io';
 import { Bot } from 'boardgame.io/ai';
 
-// Determine the next move for the bot and which move function to use.
 type BotStrategy<T_SpecificGameState, T_Move> = (state: State<T_SpecificGameState>, botID: string) => [T_Move | undefined, string];
 
 /// wraps a convenient strategy to a full Boardgame.io Bot class

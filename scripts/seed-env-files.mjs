@@ -50,18 +50,16 @@ export const missingKeys = (sampleText, targetText) => {
 
 // The env files the deployed stack reads, and the only ones `--check` blocks a
 // deployment on. `.env.docker` is what `docker compose --env-file` opens; the
-// other two are inlined into the one bundle `stack:prod` builds, `.env.local` by
-// common-frontend and the third by online-frontend itself. The three left out
+// other is inlined into the one bundle `stack:prod` builds. The three left out
 // are read by builds a deployment never runs — the dry run's and the relay
 // practice site's — and by `npm run dev:server`, which a deployed host does not
 // use either: the docker stack has no `apps/online-backend/.env` on purpose,
 // because compose passes the backend its environment and dotenv leaves it alone
 // (`apps/online-backend/src/env.ts`, and `.dockerignore` keeps the file out of
 // the image). Stopping a deployment for one of those would be demanding a file
-// nothing on that path opens. `npm run setup` still seeds all six.
+// nothing on that path opens. `npm run setup` still seeds all five.
 export const DEPLOYED_STACK_READS = [
   '.env.docker',
-  '.env.local',
   join('apps', 'online-frontend', '.env'),
 ];
 

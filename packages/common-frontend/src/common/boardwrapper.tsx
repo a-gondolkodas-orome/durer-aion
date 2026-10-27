@@ -1,10 +1,12 @@
-import { Button, Dialog, Stack, alpha } from "@mui/material";
-import { useEffect, useState } from "react";
-import { Countdown } from "../client/components/Countdown";
+import { Button, Stack, alpha } from "@mui/material";
+import { useEffect } from "react";
+import { Countdown, useMsRemaining } from "../client/components/Countdown";
+import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
-import { useRefreshTeamState, useToHome } from "../client/hooks/user-hooks";
-import { useClientRepo } from "../client/api-repository-interface";
-import { GUESSER_PLAYER, JUDGE_PLAYER } from "game";
+import { StrategyGamesTable } from "../client/components/ResultTables";
+import { useBackToHome } from "../client/hooks/user-hooks";
+import { useClientRepo } from "../client/client-repo-context";
+import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
 import type { ReactNode } from "react";
@@ -20,59 +22,26 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
   return (props: StrategyBoardProps<G>) => {
     const { G, ctx, moves } = props;
-    const [msRemaining, setMsRemaining] = useState(G.millisecondsRemaining); // asked from the server
-    // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
-    // only ever asks whether it is `true`.
-    const [gameover, setGameover] = useState<unknown>(ctx.gameover);
-    const toHome = useToHome();
-    const refreshState = useRefreshTeamState();
+    const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining); // asked from the server
+    const backToHome = useBackToHome();
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
-    // Named so the handler below can stay synchronous: React ignores what an
-    // event handler returns, so an async one leaves its promise unhandled.
-    const backToHome = async () => {
-      await refreshState();
-      await toHome();
-      window.location.reload();
-    };
 
     useEffect(() => {
       if (!ctx.gameover) {
         moves.getTime();
       }
-      setGameover(ctx.gameover)
     }, [ctx.gameover, moves]);
-    useEffect(() => {
-      setMsRemaining(G.millisecondsRemaining);
-    }, [G.millisecondsRemaining]);
-    const finished = msRemaining < - 5000 || gameover === true
+    // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
+    // only ever asks whether it is `true`.
+    const finished = msRemaining < - 5000 || ctx.gameover === true
+    const achievable = t('general.points', { count: strategyPoints(G.numberOfLoss) });
     return (
       <>
-        <Dialog
-          maxWidth={false}
-          slotProps={{ paper: {
-            sx: {
-              marginLeft: {
-                xs: 0,
-                md: '32px'
-              },
-              marginRight: {
-                xs: 0,
-                md: '32px'
-              },
-              maxWidth: {
-                xs: '100%',
-                md: 'calc(100% - 64px)'
-              },
-              backgroundColor: theme.palette.background.paper,
-            }
-          } }}
-          open={
-            finished
-          } onClose={() => void backToHome()}>
-          <StrategyEndTable allPoints={G.points} numOfTries={G.numberOfTries} />
-        </Dialog>
+        <EndDialog open={finished} onClose={backToHome}>
+          <StrategyEndTable allPoints={G.points} liveResults={G.liveResults} />
+        </EndDialog>
         <Stack sx={{
           padding: '20px',
           backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
@@ -175,20 +144,20 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     sx={{
                       p: '12px',
                       borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                      color: theme.palette.primary.main,
-                      fontWeight: 600,
                       fontSize: {
                         xs: '14px',
                         md: '18px',
                       },
+                      gap: '8px',
                     }}
                   >
-                    {t("strategy.realResults", {
-                    wins: t("strategy.wins", {
-                      count: G.numberOfTries - G.numberOfLoss - Number(G.winner === null && G.difficulty === "live"),
-                    }),
-                    defeats: t("strategy.defeats", { count: G.numberOfLoss }),
-                    })}
+                    <StrategyGamesTable results={G.liveResults}/>
+                    {/* What winning the match is worth now: two live wins in a
+                        row earn the points the losses so far leave. */}
+                    <Stack sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
+                      {G.winningStreak === 0 && t('strategy.twoWinsInARow', { points: achievable })}
+                      {G.winningStreak === 1 && t('strategy.oneMoreWin', { points: achievable })}
+                    </Stack>
                   </Stack>
                   </Stack>
 

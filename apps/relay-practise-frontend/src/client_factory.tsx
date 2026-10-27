@@ -1,16 +1,16 @@
 import { ClientRelayWithBot } from "./myclient";
-import type { GameRelay, MyGameState as RelayGameState } from "game";
+import type { MyGameState as RelayGameState, RelayMoveArgs } from "game";
 import type { RelayBoard } from "common-frontend";
 import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
 
 export const ClientFactoryRelay = function (
-  game: typeof GameRelay,
+  gameName: string,
   board: RelayBoard,
-  strategy: BotStrategy<RelayGameState, (number | string | boolean)[]>,
+  strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   description: ReactNode,
   ) {
-  const ClientWithBotComponent = ClientRelayWithBot(game, board, strategy, description);
+  const ClientWithBotComponent = ClientRelayWithBot(gameName, board, strategy, description);
   return {
     ClientWithBot: function () {
       return (<>

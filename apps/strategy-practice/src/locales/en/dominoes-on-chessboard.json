@@ -1,0 +1,4 @@
+{
+  "rule": "Two players take turns placing a domino on a {{size}} × {{size, numberAdjective}} chessboard so that it covers two adjacent empty squares. The player who cannot place a domino loses.",
+  "step": "Click an empty square, then a neighbour of it, to place a domino."
+}

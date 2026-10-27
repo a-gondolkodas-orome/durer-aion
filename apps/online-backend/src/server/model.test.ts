@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { Sequelize } from 'sequelize';
 import { OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH, TeamModel, appendOtherNote, teamAttributes } from './model';
 
-// A postgres Sequelize that is never connected, as db.test.ts uses: `validate()`
-// runs the attribute validators in process and touches no database, which is
-// what makes the real column rules testable here at all (#131 is the rest).
+// A postgres Sequelize that is never connected:
+// `validate()` runs the attribute validators in process and touches no
+// database, which is what makes the real column rules testable here at all.
+// The unique constraints live in postgres, and db.postgres.test.ts holds them.
 const sequelize = new Sequelize('db', 'user', 'password', { dialect: 'postgres', logging: false });
 TeamModel.init(teamAttributes, { sequelize, tableName: 'Teams' });
 
@@ -82,5 +83,18 @@ describe('appendOtherNote', () => {
 
     expect(appended).toHaveLength(OTHER_MAX_LENGTH);
     await expect(team(appended).validate()).resolves.toBeDefined();
+  });
+});
+
+// A team's credentials sign its moves in every match it plays (`injectPlayer` in
+// router.ts), so two teams sharing them could move in each other's matches.
+// `uniqueKeys` is what `sync()` turns into constraints — on a fresh database
+// only, since it never alters an existing table — and where the message a
+// `UniqueConstraintError` carries comes from.
+describe('the Teams table', () => {
+  const uniqueKeys = (TeamModel as unknown as { uniqueKeys: Record<string, { fields: string[] }> }).uniqueKeys;
+
+  it.each(['teamId', 'joinCode', 'teamName', 'credentials'])('makes %s unique', (column) => {
+    expect(Object.values(uniqueKeys).map(key => key.fields)).toContainEqual([column]);
   });
 });

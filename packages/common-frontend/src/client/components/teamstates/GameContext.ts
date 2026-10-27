@@ -1,7 +1,8 @@
 import { createContext, useContext } from "react";
+import type { CompetitionCategory } from "schemas";
 
 interface ClientProps {
-  category?: 'C' | 'D' | 'E';
+  category: CompetitionCategory;
   teamName?: string;
   matchID?: string;
   credentials?: string;

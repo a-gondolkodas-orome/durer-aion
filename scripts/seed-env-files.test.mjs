@@ -60,7 +60,7 @@ describe('checkFailed', () => {
   });
 
   it('stops for a file that is not there', () => {
-    const absent = [{ target: '.env.local', sample: '.env.local.sample' }];
+    const absent = [{ target: '.env.docker', sample: '.env.docker.sample' }];
     expect(checkFailed({ absent, behind: [] })).toBe(true);
   });
 
@@ -80,7 +80,6 @@ describe('DEPLOYED_STACK_READS', () => {
   it('is the set the stack:prod path reads, and no more', () => {
     expect(DEPLOYED_STACK_READS).toStrictEqual([
       '.env.docker',
-      '.env.local',
       join('apps', 'online-frontend', '.env'),
     ]);
   });

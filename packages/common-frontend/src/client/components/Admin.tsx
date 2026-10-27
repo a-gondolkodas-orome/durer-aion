@@ -1,19 +1,17 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll, useRemoveAllTeams } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Tab, Tabs } from '@mui/material';
+import { useAddMinutes, useAll } from '../hooks/user-hooks';
+import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
-import { DeletedTeams } from './DeletedTeams';
 import { csvToolbar } from './CsvToolbar';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { FinishedMatchStatus } from 'schemas';
 import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
@@ -21,35 +19,21 @@ import { FieldProps } from "formik"
 
 const TeamsToolbar = csvToolbar('durer-csapatok');
 
-// The page's tabs. Component state rather than a path: `Main.tsx` reads
-// `/admin/<teamId>` off the URL, so a path for the archive would be taken for
-// a team id. Issue #135 is the rest of the page's layout.
-type AdminTab = 'teams' | 'deleted';
+// What the states mean is on MatchStatus in the `schemas` package.
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
 
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
-  const removeAllTeams = useRemoveAllTeams();
   const { enqueueSnackbar } = useSnackbar();
-  const { data, mutate } = useSWR("users/all", getAll)
+  const { data } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
-  const [tab, setTab] = useState<AdminTab>('teams');
 
-  // Read off the list rather than kept as state, so a team deleted from the
-  // `/admin/<teamId>` page drops out with the list's next load and the page
-  // falls back to the grid instead of showing the team it no longer has.
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
-  const showTeams = !teamFromPath && tab === 'teams';
-
-  // The server has dropped the team: the dialog closes, and the grid reloads so
-  // it no longer offers a team that is gone.
-  const onRemoved = () => {
-    setSelectedRow(null);
-    void mutate();
-  };
+  const showTeams = !teamFromPath;
 
   return (
     <Stack sx={{
@@ -88,7 +72,7 @@ export function Admin(props: { teamId?: string }) {
         } onClose={() => {
             setSelectedRow(null);
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
@@ -102,13 +86,7 @@ export function Admin(props: { teamId?: string }) {
         <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
       </Stack>
       {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onRemoved={onRemoved}/>}
-        {!teamFromPath && <Tabs value={tab} onChange={(_, value: AdminTab) => setTab(value)} sx={{ marginBottom: '8px' }}>
-          <Tab value="teams" label="Csapatok"/>
-          <Tab value="deleted" label="Törölt csapatok"/>
-        </Tabs>}
-        {!teamFromPath && tab === 'deleted' &&
-          <DeletedTeams setConfirmDialog={setConfirmDialog} onRestored={() => { void mutate(); }}/>}
+        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
         {showTeams && <Stack sx={{
           height: "635px",
         }}>
@@ -134,6 +112,7 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'pageState',
               headerName: 'Állapot',
+              description: 'Melyik oldalt látja a csapat: DISCLAIMER, HOME, RELAY vagy STRATEGY. A játék oldalán a vége után is ott marad, amíg vissza nem lép.',
               width: 150,
               editable: false,
             },
@@ -146,12 +125,14 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'relayMatchState',
               headerName: 'Relay',
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
             {
               field: 'strategyMatchState',
               headerName: 'Strategy',
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
@@ -280,32 +261,6 @@ export function Admin(props: { teamId?: string }) {
           )}/>
         </Form>
         </Stack>}
-        {showTeams && data &&
-          <Button
-            color="error"
-            variant="contained"
-            sx={{ margin: '10px 0', maxWidth: 300 }}
-            onClick={() => {
-              setConfirmDialog({
-                text: 'Biztosan törlöd az összes csapatot? A Törölt csapatok fülön állíthatók vissza.',
-                confirm: async () => {
-                  try {
-                    // One request, one transaction: all of them go, or none,
-                    // and they land in the archive as one batch.
-                    const { deleted } = await removeAllTeams();
-                    enqueueSnackbar(`${deleted} csapat törölve`, { variant: 'success' });
-                  } catch (e) {
-                    const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                    enqueueSnackbar(message, { variant: 'error' });
-                  } finally {
-                    await mutate();
-                  }
-                }
-              });
-            }}
-          >
-            Összes csapat törlése
-          </Button>}
       {showTeams && data && <Stats data={data}/>}
       </>}
     </Stack>
@@ -319,8 +274,8 @@ function Stats(props: { data: TeamModelDto[] }) {
     const bothNotStarted = current.filter(it => it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
     const relayInProgress = current.filter(it => it.relayMatch.state === "IN PROGRESS").length;
     const strategyInProgress = current.filter(it => it.strategyMatch.state === "IN PROGRESS").length;
-    const finishedRelayScores = current.filter(it => it.relayMatch.state === "FINISHED").map(it => (it.relayMatch as FinishedMatchStatus).score);
-    const finishedStrategyScores = current.filter(it => it.strategyMatch.state === "FINISHED").map(it => (it.strategyMatch as FinishedMatchStatus).score);
+    const finishedRelayScores = current.flatMap(it => it.relayMatch.state === "FINISHED" ? [it.relayMatch.score] : []);
+    const finishedStrategyScores = current.flatMap(it => it.strategyMatch.state === "FINISHED" ? [it.strategyMatch.score] : []);
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {

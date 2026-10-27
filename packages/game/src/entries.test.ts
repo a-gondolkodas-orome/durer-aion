@@ -129,7 +129,7 @@ const reachableFrom = (entry: string): string[] => {
 
 // A game folder's game.ts holds its rules and src/common the wrapper around them:
 // the only files a bot and a board may legitimately have in common, per the game
-// layout in CLAUDE.md. Everything else the bot entry reaches is the bot's own — a
+// layout in README.md. Everything else the bot entry reaches is the bot's own — a
 // strategy file, or a lookup table under whatever name (last checks).
 const isRules = (file: string) => file.startsWith("src/common/") || /(^|\/)game\.ts$/.test(file);
 const isBoard = (file: string) => file.endsWith(".tsx");

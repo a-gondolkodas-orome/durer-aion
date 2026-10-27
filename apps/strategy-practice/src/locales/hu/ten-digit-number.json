@@ -1,0 +1,11 @@
+{
+  "board": {
+    "number": "A szám: {{expr}}"
+  },
+  "role": {
+    "first": "Jenő",
+    "second": "Béla"
+  },
+  "rule": "Jenő és Béla felváltva választanak egy-egy számjegyet az {1, 2, 3, 4, 5, 6} halmazból (Jenő kezd), és egymás mellé írják őket – így közösen felépítenek egy 10 jegyű számot. Béla nyer, ha a kapott szám osztható 9-cel, egyébként Jenő nyer.",
+  "step": "Válassz egy számjegyet 1 és 6 között."
+}

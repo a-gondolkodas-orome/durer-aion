@@ -90,68 +90,21 @@ describe("the team routes", () => {
   });
 });
 
-describe("removing a team", () => {
-  const teamId = "8eae8669-125c-42e5-8b49-89afbac31679";
-
-  test("is a DELETE naming the team", async () => {
-    const calls = fakeAxios(ok);
-
-    await new RealClientRepository().removeTeam(teamId);
-
-    expect(calls).toStrictEqual([{ method: "delete", url: `/team/admin/${teamId}/remove` }]);
-  });
-
-  // The server's 404 means the team is already gone — the admin page acted on
-  // a stale list — and the message says that rather than quoting axios.
-  test("a team the server no longer has is reported as such", async () => {
-    fakeAxios(() => status(404));
+describe("adding minutes to a match", () => {
+  // Regression for #101: the check read axios's `code`, which is an error name
+  // such as "ERR_BAD_RESPONSE", never an HTTP status, so this never matched.
+  test("a match the server will not extend is reported as expired", async () => {
+    fakeAxios(() => status(501));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expect(new RealClientRepository().removeTeam(teamId)).rejects.toThrow("A csapat már nem létezik");
+    await expect(new RealClientRepository().addMinutes("match-1", 5))
+      .rejects.toThrow("Lejárt játékot már nem lehet módosítani");
   });
 
   test("any other failure is reported like the other admin actions", async () => {
     fakeAxios(() => status(500));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expect(new RealClientRepository().removeTeam(teamId)).rejects.toThrow("Váratlan hiba történt");
-  });
-});
-
-describe("the archive of deleted teams", () => {
-  const deletedAt = "2026-09-07T10:00:00.123Z";
-
-  test("is read, restored and refilled through the admin routes", async () => {
-    const calls = fakeAxios(ok);
-    const repo = new RealClientRepository();
-
-    await repo.getDeleted();
-    await repo.removeAllTeams();
-    await repo.restoreTeam(7);
-    await repo.restoreBatch(deletedAt);
-
-    expect(calls).toStrictEqual([
-      { method: "get", url: "/team/admin/deleted" },
-      { method: "delete", url: "/team/admin/all" },
-      { method: "post", url: "/team/admin/deleted/7/restore", body: undefined },
-      { method: "post", url: "/team/admin/deleted/restore", body: { deletedAt } },
-    ]);
-  });
-
-  // The body names the column a live team holds; the message carries it on,
-  // so the organiser knows what to rename or delete first.
-  test("a restore a live team blocks says what it clashes on", async () => {
-    fakeAxios(() => status(409, "Teamname already exists."));
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    await expect(new RealClientRepository().restoreTeam(7))
-      .rejects.toThrow("Ütközik egy élő csapattal: Teamname already exists.");
-  });
-
-  test("a restore of a row the archive no longer has is reported as such", async () => {
-    fakeAxios(() => status(404));
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    await expect(new RealClientRepository().restoreTeam(7)).rejects.toThrow("A csapat már nincs az archívumban");
+    await expect(new RealClientRepository().addMinutes("match-1", 5)).rejects.toThrow("Váratlan hiba történt");
   });
 });
