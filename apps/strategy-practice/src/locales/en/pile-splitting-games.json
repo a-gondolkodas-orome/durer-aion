@@ -1,0 +1,18 @@
+{
+  "board": {
+    "discardPile": "discard this pile",
+    "discardPileOf": "discard the pile of {{size}}",
+    "keepPile": "keep this pile after all",
+    "splitAfter": "split after piece {{number}}"
+  },
+  "rule": {
+    "four": "At the beginning of the game there are 4 piles of discs on the table. The player who is in turn takes away a pile, then divides one of the remaining piles into two nonempty piles. Whoever is unable to move, loses.",
+    "three": "There are 37 pieces on the board at the start, in three piles. The current player first removes one pile entirely from the game, then splits another pile into two smaller piles (each must contain at least 1 piece). After each move there are again three piles. The player who cannot move loses.",
+    "two": "There are always two piles of pieces on the board. The current player chooses one pile and splits it into two smaller piles (each must contain at least 1 piece); the other pile is discarded. The player who cannot move loses."
+  },
+  "step": {
+    "four": "First click the pile you wish to remove, then the disc where you want to split.",
+    "three": "First click the pile to remove, then click the piece where you want to split another pile.",
+    "two": "Click the piece where you want to split the pile."
+  }
+}

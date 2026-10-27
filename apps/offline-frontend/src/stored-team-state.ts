@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, isPageState } from "common-frontend";
+import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, RelayProblemResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend/core";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -18,6 +18,42 @@ function parseDate(value: unknown): Date | null {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }
+
+const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0;
+
+// The home page's relay summary as game-report.ts saved it; anything
+// malformed reads as absent, which the home page shows as no summary.
+const isRelayProblemResult = (value: unknown): value is RelayProblemResult =>
+  isRecord(value) && isCount(value.maxPoints) && isCount(value.points) &&
+  Array.isArray(value.trySeconds) && value.trySeconds.every(isCount);
+
+function parseRelayResults(value: unknown): FinishedMatchStatus['relayResults'] {
+  return Array.isArray(value) && value.every(isRelayProblemResult) ? value : undefined;
+}
+
+const isLiveGameResult = (value: unknown): value is LiveGameResult =>
+  value === 'won' || value === 'lost' || value === 'unfinished';
+
+function parseStrategyResults(value: unknown): FinishedMatchStatus['strategyResults'] {
+  return Array.isArray(value) && value.every(isLiveGameResult) ? value : undefined;
+}
+
+// What `JSON.parse` makes of a stored value, or undefined if there is none
+// or it is not JSON.
+function readStoredJson(key: string): unknown {
+  const stored = localStorage.getItem(key);
+  if (stored === null) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return undefined;
+  }
+}
+
+export const readStoredRelayResults = () => parseRelayResults(readStoredJson(relayResultsStorageKey()));
+export const readStoredStrategyResults = () => parseStrategyResults(readStoredJson(strategyResultsStorageKey()));
 
 function parseMatchStatus(value: unknown): MatchStatus | null {
   if (!isRecord(value)) {
@@ -40,23 +76,18 @@ function parseMatchStatus(value: unknown): MatchStatus | null {
   if (typeof value.score !== 'number') {
     return null;
   }
-  return { state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score };
+  return {
+    state: 'FINISHED', startAt, endAt, matchID: value.matchID, score: value.score,
+    relayResults: parseRelayResults(value.relayResults),
+    strategyResults: parseStrategyResults(value.strategyResults),
+  };
 }
 
 export function readStoredTeamState(): TeamModelDto | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
-  const stored = localStorage.getItem(LOCAL_STORAGE_TEAMSTATE);
-  if (stored === null) {
-    return null;
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(stored);
-  } catch {
-    return null;
-  }
+  const parsed = readStoredJson(LOCAL_STORAGE_TEAMSTATE);
   if (!isRecord(parsed)) {
     return null;
   }

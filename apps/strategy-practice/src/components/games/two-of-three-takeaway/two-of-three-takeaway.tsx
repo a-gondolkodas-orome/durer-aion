@@ -1,21 +1,21 @@
 import { range } from 'lodash';
 import {
-  strategyGameFactory, useMoveScopedState, type BoardClientProps, GameBoard
+  strategyGameFactory, testVariantLabel, fullVariantLabel, useMoveScopedState, type BoardClientProps, GameBoard
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { generateStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
 const Pile = ({ count, index, selected, selectable, onClick }: {
   count: number; index: number; selected: boolean; selectable: boolean; onClick: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('two-of-three-takeaway');
   return (
     <button
       disabled={!selectable}
       onClick={onClick}
       aria-pressed={selected}
-      aria-label={t({ hu: `${index + 1}. kupac, ${count} korong`, en: `Pile ${index + 1}, ${count} chips` })}
+      aria-label={t('board.pile', { number: index + 1, chips: count })}
       className={`
         w-24 sm:w-32 rounded-lg border-2 p-2 flex flex-col items-center gap-2
         ${selected
@@ -46,7 +46,7 @@ const Pile = ({ count, index, selected, selectable, onClick }: {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('two-of-three-takeaway');
   // Move-scoped: the in-progress selection expires when the board advances.
   const [firstSelected, setFirstSelected] = useMoveScopedState<number | null>(ctx.moveCount, null);
 
@@ -84,34 +84,28 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {ctx.isClientMoveAllowed && (
         <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 h-5">
           {firstSelected === null
-            ? t({ hu: 'Válaszd ki az első kupacot.', en: 'Pick the first pile.' })
-            : t({ hu: 'Válaszd ki a másik kupacot.', en: 'Pick the other pile.' })}
+            ? t('board.pickFirst')
+            : t('board.pickOther')}
         </p>
       )}
     </GameBoard>
   );
 };
 
-const rule = {
-  hu: <>
-    Három kupacban összesen legfeljebb 20, de páros számú korong van. A két játékos felváltva lép:
-    a soron következő játékos kiválaszt két nem üres kupacot, és mindkettőből elvesz egy-egy
-    korongot. Az a játékos veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    There are chips in three piles — an even number in total, at most 20. The two players move
-    alternately: on their turn, the current player picks two non-empty piles and removes one chip
-    from each. The player who cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('two-of-three-takeaway');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('two-of-three-takeaway');
+  return t('step');
 };
 
 export const TwoOfThreeTakeaway = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz két nem üres kupacot – mindkettőből elveszel egy-egy korongot.',
-      en: 'Choose two non-empty piles — you remove one chip from each.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -119,12 +113,12 @@ export const TwoOfThreeTakeaway = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

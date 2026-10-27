@@ -1,4 +1,5 @@
 import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io";
+import type { LiveGameResult } from "schemas";
 
 // boardgame.io does not export its plugin APIs by name. Taking them off the
 // context type it does export keeps this out of the package's build layout,
@@ -38,6 +39,18 @@ export interface GameStateMixin extends GameStateTimer {
   numberOfLoss: number;
   winningStreak: number;
   points: number;
+  // Every live game in order; gameWrapper's play phase appends to it and says
+  // when a game cut off by the time is included. The games never touch it.
+  liveResults: LiveGameResult[];
+}
+
+/// What winning twice in a row earns, by the live games lost before: the last
+/// entry stands for that many losses or more. A team that never wins twice in
+/// a row scores 0.
+export const STRATEGY_POINTS_BY_LOSSES = [12, 9, 6, 4, 3, 2] as const;
+
+export function strategyPoints(numberOfLoss: number): number {
+  return STRATEGY_POINTS_BY_LOSSES[Math.min(numberOfLoss, STRATEGY_POINTS_BY_LOSSES.length - 1)];
 }
 
 export interface GameStateTimer {
@@ -62,12 +75,10 @@ export type StartingPositionFunction<G> = (_: { G: G & GameStateMixin; ctx: Ctx;
 interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
-  // A game may set its opening position here, or leave it to the bot, which
-  // sends it as the `setStartingPosition` move; the live games do the latter.
-  // Prefer this one when the position is not the bot's secret: it receives
-  // bgio's seeded `random`, so server and client agree on what was drawn,
-  // which `Math.random` in a strategy cannot give you. See README.md,
-  // *Creating a new game*.
+  // Not called: gameWrapper only tests that the key exists, and a game that
+  // defines it skips the bot's `setStartingPosition` and starts without a
+  // fresh opening position (#35). The bot sending that move is the working
+  // route; see README.md, *Creating a new game*.
   startingPosition?: StartingPositionFunction<G>;
 }
 

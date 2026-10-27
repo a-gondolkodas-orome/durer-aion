@@ -2,6 +2,7 @@
 
 import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
 
@@ -149,6 +150,18 @@ export default defineConfig(
       ...typeAwareRules,
     },
   },
+  // The same three hook rules apps/strategy-practice's config sets for its own code.
+  // Repo-wide rather than on packages/common-frontend alone: every React component
+  // this config lints ships in one of the three bundles it serves.
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/set-state-in-effect': 'error',
+    },
+  },
   // packages/strategy-engine is apps/strategy-practice code moved out of it, still
   // written in that app's dialect: `!` stands in for a guard the game's rules already
   // make redundant, and auditing several hundred of those would turn a move into a
@@ -204,7 +217,7 @@ export default defineConfig(
   // lives in src/react/ and is exempt — that is the whole point of the split. What this
   // rule cannot see is a relative import resolving into src/react/; the walk in
   // packages/strategy-engine/src/react-free.test.ts pins that. `import type` is allowed because
-  // it is erased: i18n.ts has to name React's node type to say what a game's rule text
+  // it is erased: types.ts has to name React's node type to say what a game's rule text
   // may be, and naming it costs a bare node nothing.
   {
     files: ['packages/strategy-engine/**/*.ts'],
@@ -273,6 +286,9 @@ export default defineConfig(
       // bundles, plus a copy of pages/. Gitignored, but eslint has its own ignore list
       // and would otherwise lint minified output the moment anyone previews the site.
       'site/**',
+      // The Python environment README.md's admin script setup creates. Gitignored, so CI never
+      // has one, but a local run would lint the JavaScript its packages vendor.
+      '.venv/**',
     ],
   }
 );

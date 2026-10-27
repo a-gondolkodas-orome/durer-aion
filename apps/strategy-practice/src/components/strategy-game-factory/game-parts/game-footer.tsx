@@ -1,7 +1,8 @@
-import { useLocation } from 'react-router';
-import { useTranslation, LanguageSelector } from 'language';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
 import { gameList } from '../../games/gameList';
+import { useGameKey } from '../../games/game-key';
 
 const toWesternOrder = (name: string) => {
   const [family, ...given] = name.split(' ');
@@ -9,24 +10,20 @@ const toWesternOrder = (name: string) => {
 };
 
 export const GameFooter = () => {
-  const { t } = useTranslation();
-  const gameId = useLocation().pathname.split('/').pop();
-  const credit = gameList[gameId!]?.credit;
+  const { t, i18n } = useTranslation('factory');
+  const gameId = useGameKey();
+  const credit = gameId === undefined ? undefined : gameList[gameId].credit;
+  // The registry writes names in Hungarian order, family name first.
+  const names = (list: string[]) => (i18n.language === 'hu' ? list : list.map(toWesternOrder)).join(', ');
   return (
     <footer className="text-right">
       { credit !== undefined && (
         <p className="px-2 font-light text-sm">
           { (credit.suggestedBy || []).length
-            ? t({
-              hu: `A játékot javasolta: ${credit.suggestedBy!.join(', ')}.`,
-              en: `Suggested by: ${credit.suggestedBy!.map(toWesternOrder).join(', ')}.`
-            })
+            ? t('credit.suggestedBy', { names: names(credit.suggestedBy!) })
             : ''}
           { (credit.developedBy || []).length
-            ? ' ' + t({
-              hu: `A játékot programozta: ${credit.developedBy!.join(', ')}.`,
-              en: `Developed by: ${credit.developedBy!.map(toWesternOrder).join(', ')}.`
-            })
+            ? ' ' + t('credit.developedBy', { names: names(credit.developedBy!) })
             : ''}
         </p>
       )}
@@ -37,7 +34,7 @@ export const GameFooter = () => {
           rel="noreferrer"
           className="primary-link"
         >
-          {t({ hu: 'Hibabejelentő', en: 'Bug report' })}
+          {t('bugReport')}
         </a>
         <ThemeSwitcher />
         <LanguageSelector />

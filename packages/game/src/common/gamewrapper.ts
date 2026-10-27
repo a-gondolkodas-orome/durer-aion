@@ -1,5 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
+import { timestampMoves } from './timestamp';
 import { GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
@@ -57,9 +58,10 @@ const clockPoll = { move: getTime, noLimit: true };
 /// What the wrapper reports after each step and at the end of a match; hosts
 /// accept a superset of this shape (the offline frontend's SendGameDataParams).
 /// The match's move log is not in here: a move context carries boardgame.io's
-/// log *plugin*, not the log's entries. Those are boardgame.io's own to keep —
-/// the live round reads them with `GET /game/admin/:matchId/logs`, the dry run
-/// from the local master (apps/offline-frontend/src/bgio-log.ts).
+/// log *plugin*, not the log's entries. Those are boardgame.io's own to keep,
+/// with each move's time added by timestampMoves. The live round reads them
+/// with `GET /game/admin/:matchId/logs`, the dry run from the local master
+/// (apps/offline-frontend/src/bgio-log.ts).
 export interface StrategyReport<T_SpecificGameState> {
   component: "strategy";
   phase: "step" | "end";
@@ -83,6 +85,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       numberOfLoss: 0,
       winningStreak: 0,
       points: 0,
+      liveResults: [],
     }),
     turn: {
       minMoves: 1,
@@ -93,7 +96,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     maxPlayers: 2,
     phases: {
       startNewGame: {
-        moves: { chooseNewGameType, setStartingPosition, getTime: clockPoll },
+        moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
         endIf: ({ G }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
         turn: {
@@ -102,7 +105,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       chooseRole: {
-        moves: { chooseRole, getTime: clockPoll },
+        moves: { ...timestampMoves({ chooseRole }), getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: "play",
         turn: {
@@ -110,7 +113,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       play: {
-        moves: { ...game.moves, getTime: clockPoll },
+        moves: { ...timestampMoves(game.moves ?? {}), getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
         next: "startNewGame",
         turn: {
@@ -135,6 +138,15 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({ G, ctx }) => {
+          // A game with no winner yet is one the time ran out in. That is
+          // recorded only when the team's page ends the match, by asking for
+          // the time after the deadline; a match the server closes on time
+          // has no entry for it. A second win in a row ends the match from
+          // inside the move, and boardgame.io still ends this phase first.
+          if (G.difficulty === "live") {
+            // No game ends in a draw, so one with a winner is won or lost.
+            G.liveResults.push(G.winner === null ? "unfinished" : G.winner === GUESSER_PLAYER ? "won" : "lost");
+          }
           sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });
         }
       },

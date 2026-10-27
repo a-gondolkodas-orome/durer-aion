@@ -1,0 +1,20 @@
+{
+  "board": {
+    "disc": "korong {{row}}. sor {{column}}. oszlop",
+    "removeColumn": "Oszlop levétele",
+    "removeRow": "Sor levétele"
+  },
+  "rule": {
+    "generic": "A korongok egy vagy több (nem feltétlenül egyforma méretű) téglalapban vannak elhelyezve. A két játékos felváltva lép. Egy lépésben a soron lévő játékos kiválaszt egy korongokból álló téglalapot, és egy sorának vagy oszlopának minden korongját leveszi. (Korongokból álló téglalapnak egy olyan téglalap alakú területet nevezünk, ahol minden mezőn van korong, de közvetlenül mellette sehol.) Az nyer, aki az utolsó korongot elveszi.",
+    "multiple": "A játék kezdetén a korongok néhány (nem feltétlenül egyforma méretű) téglalapban vannak elhelyezve. A két játékos felváltva lép. Egy lépésben a soron lévő játékos kiválaszt egy korongokból álló téglalapot, és egy sorának vagy oszlopának minden korongját leveszi. (Korongokból álló téglalapnak egy olyan téglalap alakú területet nevezünk, ahol minden mezőn van korong, de közvetlenül mellette sehol.) Az nyer, aki az utolsó korongot elveszi.",
+    "single": "A játék kezdetén egy n × k-as téglalap minden mezőjére teszünk egy-egy korongot. A két játékos felváltva lép. Egy lépésben a soron lévő játékos kiválaszt egy korongokból álló téglalapot, és egy sorának vagy oszlopának minden korongját leveszi. (Korongokból álló téglalapnak egy olyan téglalap alakú területet nevezünk, ahol minden mezőn van korong, de közvetlenül mellette sehol. Kezdetben csak egy ilyen téglalap van, később már lehet, hogy több is.) Az nyer, aki az utolsó korongot elveszi."
+  },
+  "step": {
+    "discChoice": "Kattints egy korongra, majd válaszd a sorának vagy oszlopának levételét.",
+    "lineChoice": "Vedd le a kijelölt korong sorát vagy oszlopát a gombokkal, vagy válassz másik korongot."
+  },
+  "variant": {
+    "multiple": "Több blokk (E)",
+    "single": "1 blokk (C)"
+  }
+}

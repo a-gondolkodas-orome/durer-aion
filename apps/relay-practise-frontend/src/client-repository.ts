@@ -1,7 +1,8 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend/core";
 import { teamData } from "./teamData";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { readStoredTeamState } from "./stored-team-state";
+import { trackRelayStarted } from "./tracking";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -24,6 +25,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     sendGameData({ component: "relay", phase: "start" });
+    trackRelayStarted(teamState.teamName);
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
@@ -81,21 +83,6 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
   async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
-  }
-  async removeTeam(_teamId: string): Promise<void> {
-    throw Error("NOT call this");
-  }
-  async removeAllTeams(): Promise<{ deleted: number, deletedAt: string }> {
-    throw Error("NOT call this");
-  }
-  async getDeleted(): Promise<DeletedTeamDto[]> {
-    throw Error("NOT call this");
-  }
-  async restoreTeam(_deletionId: number): Promise<void> {
-    throw Error("NOT call this");
-  }
-  async restoreBatch(_deletedAt: string): Promise<RestoreResultDto> {
     throw Error("NOT call this");
   }
 

@@ -1,8 +1,5 @@
-import type { DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
-import { createContext, useContext } from 'react';
+import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { BoardProps } from 'boardgame.io/react';
-
-export { LOCAL_STORAGE_TEAMSTATE } from "./utils/storage-keys";
 
 // The relay match is judged and timed where it runs — on the server online,
 // by the local bot offline — so the board's actions stay boardgame.io moves
@@ -31,12 +28,6 @@ export interface ClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
-  removeTeam(teamId: string): Promise<void>;
-  /** Every team at once, archived as one batch: how many, and the batch's `deletedAt`. */
-  removeAllTeams(): Promise<{ deleted: number, deletedAt: string }>;
-  getDeleted(): Promise<DeletedTeamDto[]>;
-  restoreTeam(deletionId: number): Promise<void>;
-  restoreBatch(deletedAt: string): Promise<RestoreResultDto>;
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
   // Unlike startRelay, which moves the team to the relay page, this dispatches
   // the opening move of the match once the board is up.
@@ -44,12 +35,3 @@ export interface ClientRepository {
   syncRelayTime(moves: BoardMoves): Promise<void>;
 
 }
-
-export const ClientRepoContext = createContext<ClientRepository | null>(null);
-export const ClientRepoProvider = ClientRepoContext.Provider;
-export const useClientRepo = (): ClientRepository => {
-  const repo = useContext(ClientRepoContext);
-  if (!repo) throw new Error('ClientRepoContext not provided');
-  return repo;
-};
-

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="hu" translate="no">
 
 <head>
   <meta charset="utf-8" />
   <link rel="icon" href="/favicon.png" />
+  <!-- A translated page stops showing React's updates to its text (facebook/react#11538). -->
+  <meta name="google" content="notranslate" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="A Dürer Verseny korábbi váltó feladatsorainak gyakorló oldala" />
@@ -23,6 +25,13 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>Váltók gyakorlása – Dürer Verseny</title>
+  <script
+    defer
+    src="https://umami.durerinfo.hu/script.js"
+    data-website-id="a4570941-4cef-4c19-9038-19c40554b2f7"
+    data-domains="gyakorlo.durerinfo.hu"
+    data-do-not-track="true"
+  ></script>
   <style>
     latex-js {
       display: block;
@@ -45,7 +54,19 @@
     // Deliberately a dynamic import: Vite bundles every module script in this file into the
     // one entry chunk, so as a static import an unreachable cdn.jsdelivr.net aborted that
     // chunk before the app mounted and left the page blank instead of merely unformatted.
-    import("https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs")
+    // Pinned, so a release reaches the competition only as a visible bump; check the math
+    // rendering when moving it (the monthly dependency report reminds you to look for one).
+    const latexJs = "https://cdn.jsdelivr.net/npm/latex.js@0.12.6/dist/latex.mjs";
+    // latex.js links KaTeX's stylesheet inside each task's shadow root, where Chromium ignores its
+    // @font-face rules, so every math font would fall back to a system one (ℕ as a plain N).
+    // Linked in the document too, the fonts are registered where the shadow root sees them. Added
+    // by script, it does not hold up the page either, and it loads alongside latex.js rather than
+    // after it, so tasks are not first laid out in the fallback fonts.
+    const katexCss = document.createElement("link");
+    katexCss.rel = "stylesheet";
+    katexCss.href = new URL("css/katex.css", latexJs).href;
+    document.head.append(katexCss);
+    import(latexJs)
       .then(({ LaTeXJSComponent }) => customElements.define("latex-js", LaTeXJSComponent))
       .catch((error) => console.error("latex.js could not be loaded; tasks fall back to their LaTeX source", error))
   </script>

@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { range, isEqual } from 'lodash';
 import {
   strategyGameFactory,
+  testVariantLabel,
+  fullVariantLabel,
   type Ctx,
   type BoardClientProps,
   GameBoard,
@@ -134,48 +137,30 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Árgyélus és Félix felváltva pakolnak 1 × 2-es dominókat egy 4 × 4-es táblára. Árgyélus mindig
-    álló, Félix mindig fekvő dominókat rak. Árgyélus kezd, és az veszít, aki már nem tud rakni.
-  </>,
-  en: <>
-    Vera and Harry take turns placing 1 × 2 dominoes on a 4 × 4 board. Vera always places
-    vertical dominoes, Harry always horizontal ones. Vera goes first, and whoever cannot place
-    a domino loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('dominoes-4x4');
+  return t('rule');
 };
 
-const getPlayerStepDescription = ({ ctx }: { ctx: Ctx }) => {
-  if (ctx.currentPlayer === 0) {
-    return {
-      hu: 'Kattints egy mezőre, majd a fölötte vagy alatta lévő üres mezőre álló dominóért.',
-      en: 'Click a square, then the empty square above or below it, to place a vertical domino.'
-    };
-  }
-  return {
-    hu: 'Kattints egy mezőre, majd a mellette lévő üres mezőre, hogy fekvő dominót tegyél le.',
-    en: 'Click a square, then the empty square next to it, to place a horizontal domino.'
-  };
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('dominoes-4x4');
+  return ctx.currentPlayer === 0 ? t('step.vertical') : t('step.horizontal');
 };
 
 export const Dominoes4x4 = strategyGameFactory({
   presentation: {
-    rule,
-    roleLabels: [
-      { hu: 'Árgyélus (álló)', en: 'Vera (vertical)' },
-      { hu: 'Félix (fekvő)', en: 'Harry (horizontal)' }
-    ],
-    getPlayerStepDescription
+    rule: <Rule />,
+    roleLabels: [t => t('dominoes-4x4:role.vertical'), t => t('dominoes-4x4:role.horizontal')],
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [[]],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

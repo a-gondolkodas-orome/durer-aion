@@ -26,22 +26,8 @@ export default defineConfig(() => {
       proxy: {
         '/team': backend,
         '/game': backend,
-        '/games': backend,
         '/socket.io': { target: backend, ws: true },
       },
     },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            // Split game description files into a separate chunk
-            // These contain the problem text that should only load when the game starts
-            if (id.includes('/ReactClient.')) {
-              return 'react-client';
-            }
-          }
-        }
-      }
-    }
   }
 })

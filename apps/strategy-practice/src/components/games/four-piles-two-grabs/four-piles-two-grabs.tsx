@@ -1,8 +1,8 @@
 import { range } from 'lodash';
 import {
-  strategyGameFactory, useMoveScopedState, type BoardClientProps, GameBoard
+  strategyGameFactory, useMoveScopedState, type BoardClientProps, GameBoard, testVariantLabel, fullVariantLabel
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { generateStartBoard, moves, type Board, type Move } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -24,7 +24,7 @@ const Pile = ({ count, index, removeCount, canAdd, disabled, onInc, onDec }: {
   count: number; index: number; removeCount: number;
   canAdd: boolean; disabled: boolean; onInc: () => void; onDec: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('four-piles-two-grabs');
   const selected = removeCount > 0;
   return (
     <div
@@ -61,12 +61,12 @@ const Pile = ({ count, index, removeCount, canAdd, disabled, onInc, onDec }: {
       </span>
       <div className="flex items-center gap-2">
         <Stepper
-          label={t({ hu: `−1 a(z) ${index + 1}. kupacból`, en: `−1 from pile ${index + 1}` })}
+          label={t('board.decrease', { number: index + 1 })}
           disabled={disabled || removeCount === 0}
           onClick={onDec}
         />
         <Stepper
-          label={t({ hu: `+1 a(z) ${index + 1}. kupacból`, en: `+1 from pile ${index + 1}` })}
+          label={t('board.increase', { number: index + 1 })}
           disabled={disabled || removeCount >= count || (removeCount === 0 && !canAdd)}
           onClick={onInc}
         />
@@ -80,7 +80,7 @@ const Pile = ({ count, index, removeCount, canAdd, disabled, onInc, onDec }: {
 const emptyRemovals: Move = [0, 0, 0, 0];
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('four-piles-two-grabs');
   // Move-scoped: the in-progress removals are gone once the board advances.
   const [removals, setRemovals] = useMoveScopedState<Move>(ctx.moveCount, emptyRemovals);
 
@@ -115,7 +115,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             onClick={() => moves.takeStones(board, removals)}
             className="primary-button w-auto"
           >
-            {t({ hu: 'Elveszem a kavicsokat', en: 'Remove the stones' })}
+            {t('board.submit')}
           </button>
         </div>
       )}
@@ -123,28 +123,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Négy kupacban vannak kavicsok. A két játékos felváltva lép: a soron következő játékos kiválaszt
-    két nem üres kupacot, és mindegyikből elvesz néhány kavicsot (mindkettőből legalább egyet; a két
-    kupacból elvett mennyiség lehet különböző). Az a játékos veszít, aki nem tud lépni – vagyis az
-    nyer, akinek a lépése után már legfeljebb egy kupacban marad kavics.
-  </>,
-  en: <>
-    There are stones in four piles. The two players move alternately: on their turn, the current
-    player picks two non-empty piles and removes some stones from each (at least one from each; the
-    amounts removed from the two piles may differ). The player who cannot move loses — that is, the
-    player who leaves at most one non-empty pile wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('four-piles-two-grabs');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('four-piles-two-grabs');
+  return t('step');
 };
 
 export const FourPilesTwoGrabs = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz két nem üres kupacot, és állítsd be, hány kavicsot veszel el belőlük.',
-      en: 'Choose two non-empty piles and set how many stones you take from each.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -152,12 +144,12 @@ export const FourPilesTwoGrabs = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

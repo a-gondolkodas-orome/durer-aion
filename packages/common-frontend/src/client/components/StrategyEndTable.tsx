@@ -1,62 +1,29 @@
-import React from 'react';
-import { useTheme } from '@mui/material/styles';
-import { Button } from '@mui/material';
-import { Stack } from '@mui/system';
-import { useRefreshTeamState, useToHome } from '../hooks/user-hooks';
+import { strategyPoints } from 'game';
+import type { LiveGameResult } from 'schemas';
+import { useBackToHome, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
+import { EndCard } from './EndCard';
+import { PointsScale, StrategyGamesTable } from './ResultTables';
 
 /**
- * Component to display an end game screen with close button, and score
- * @param props {{setShow: React.Dispatch<boolean>, points: number}}
- * @returns End screen
+ * The strategy match's end screen: its score, live games and points scale. Its
+ * button goes home, or with `onClose` just closes it, as on the home page.
  */
-export function StrategyEndTable(props: { allPoints: number, numOfTries: number }) {
-  const theme = useTheme();
-  const toHome = useToHome();
-  const refreshState = useRefreshTeamState();
+export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[], onClose?: () => void }) {
+  const backToHome = useBackToHome();
+  const team = useTeamState();
   const { t } = useTranslation();
-  // Named so the handlers below can stay synchronous: React ignores what an
-  // event handler returns, so an async one leaves its promise unhandled.
-  const backToHome = async () => {
-    await refreshState();
-    await toHome();
-    window.location.reload();
-  };
   return (
-    <Stack sx={{
-      display: 'flex',
-      width: "750px",
-      maxWidth: '100%',
-      marginTop: '10px',
-      marginBottom: '10px',
-      borderRadius: '30px',
-      backgroundColor: theme.palette.background.paper,
-      padding: '25px',
-    }}>
-    <Stack sx={{
-        fontSize: '18px',
-        fontWeight: 'bold',
-        textAlign: 'center'
-    }}>{t('strategy.endTable.all')}</Stack>
-      <Stack sx={{
-          marginTop: '25px',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-        }}>
-        <Stack>{t('strategy.endTable.gained')}: {props.allPoints}</Stack>
-        <Stack>{t('strategy.endTable.tries')}: {props.numOfTries}</Stack>
-      </Stack>
-      <Button sx={{
-        width: '300px',
-        height: '75px',
-        fontSize: '26px',
-        alignSelf: 'center',
-        textTransform: 'none',
-        marginTop: '15px',
-      }} variant='contained' color='primary' onClick={() => void backToHome()}>
-        {t('relay.endTable.back')}
-      </Button>
-    </Stack>
-  )
+    <EndCard
+      title={t('strategy.endTable.title')}
+      points={props.allPoints}
+      max={strategyPoints(0)}
+      reminder={team?.relayMatch.state === 'NOT STARTED' ? t('strategy.endTable.reminder') : undefined}
+      backLabel={props.onClose ? t('general.close') : t('general.backHome')}
+      onBack={props.onClose ?? backToHome}
+    >
+      <StrategyGamesTable results={props.liveResults}/>
+      <PointsScale points={props.allPoints}/>
+    </EndCard>
+  );
 }

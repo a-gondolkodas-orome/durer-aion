@@ -27,13 +27,34 @@ export interface InProgressMatchStatus {
 /// overwrites the copy; a match that never reaches game over keeps it.
 /// `G.points` in the match state is the result — `scripts/admin.py` scores
 /// from it and reports where `score` disagrees.
+///
+/// `relayResults` and `strategyResults` are summarised from the match state and
+/// kept beside `score` for the home page: the first on a relay match, the
+/// second on a strategy match. `ChooserItem` in common-frontend says when a
+/// finished match has neither.
 export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;
   endAt: Date;
   matchID: string;
   score: number;
+  relayResults?: RelayProblemResult[];
+  strategyResults?: LiveGameResult[];
 }
+
+/// One relay problem as the match ended: `trySeconds` has one entry per
+/// answer given, how long that try took, so an empty list means the team never
+/// answered it. `points` is 0 unless an answer was right.
+export interface RelayProblemResult {
+  maxPoints: number;
+  points: number;
+  trySeconds: number[];
+}
+
+/// How one live (not practice) strategy game ended, from the team's side:
+/// `unfinished` is the game the time ran out in (gameWrapper's play phase
+/// says when that is recorded).
+export type LiveGameResult = 'won' | 'lost' | 'unfinished';
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 
@@ -49,6 +70,16 @@ export function isPageState(value: unknown): value is PageState {
 /// A match's page shares its name with the match's game type, which
 /// `allowedToStart` in the backend relies on when it compares the two.
 export type GameType = Extract<PageState, 'RELAY' | 'STRATEGY'>;
+
+/// The competition's team categories. Only the competition is held to these:
+/// the relay practice site shares `TeamModelDto` with its own historical set
+/// (A–E, C+…), which is why a team's `category` stays a `string`.
+export const COMPETITION_CATEGORIES = ['C', 'D', 'E'] as const;
+export type CompetitionCategory = typeof COMPETITION_CATEGORIES[number];
+
+export function isCompetitionCategory(value: unknown): value is CompetitionCategory {
+  return (COMPETITION_CATEGORIES as readonly unknown[]).includes(value);
+}
 
 export class TeamModel {
   public teamId!: string;

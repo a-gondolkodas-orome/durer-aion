@@ -35,13 +35,12 @@ import { TeamModel } from './model';
  * every request — no signing, no secret to configure.
  *
  * What this does *not* yet do is survive an XSS. The GUID is also the name
- * boardgame.io gives the match's player, and it hands that back both from the
- * unauthenticated `GET /games/:name/:matchID` and in the socket's `sync`
- * payload — so once a team has started a match, a script on the page can
- * recover the session and set a cookie of its own. Keeping the GUID out of
- * `GET /team/me` (server/team_view.ts) narrows that window to "before the
- * first match" rather than closing it. Issue #434 has the fix: give the cookie
- * a session token of its own, which nothing else discloses.
+ * boardgame.io gives the match's player, and it hands that back in the
+ * socket's `sync` payload — so once a team has started a match, a script on
+ * the page can recover the session and set a cookie of its own. Keeping the
+ * GUID out of `GET /team/me` (server/team_view.ts) narrows that window to
+ * "before the first match" rather than closing it. Issue #434 has the fix:
+ * give the cookie a session token of its own, which nothing else discloses.
  */
 export const TEAM_COOKIE = 'durer_team';
 export const TEAM_COOKIE_PATH = '/team/me';
@@ -79,7 +78,7 @@ export interface TeamState {
  * the cookie keeps the life the previous answer gave it, and the client asks
  * `/team/me` often enough that a renewal is never far away.
  *
- * A cookie naming no team — deleted, or a database re-imported since the
+ * A cookie naming no team — a database wiped and imported again since the
  * login — is expired on the way out, so the browser does not keep sending it.
  * That answer is written, not thrown: koa's default error handler strips every
  * header already set before it writes the error, `Set-Cookie` included, so a

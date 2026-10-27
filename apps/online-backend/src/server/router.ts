@@ -1,4 +1,5 @@
 import koaBody from 'koa-body';
+import { unlink } from 'node:fs/promises';
 import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
@@ -14,7 +15,6 @@ import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './ra
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { appendOtherNote } from './model';
-import { UniqueConstraintError } from 'sequelize';
 
 /**
  *
@@ -38,6 +38,15 @@ export function configureTeamsRouter(
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
+  // a route a later version adds is closed too. It runs first only because
+  // `server.run()` adds boardgame.io's routes to this router after ours.
+  // A status rather than a throw: koa reports every thrown error, a 404
+  // included, to server.ts's Sentry hook, and this prefix is anyone's to scan.
+  router.use("/games", (ctx) => {
+    ctx.status = 404;
+  });
 
   /**
    * Get the log data about a specific match.
@@ -238,78 +247,6 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Remove a team by teamId.
-   *
-   * @param {string} teamID - The ID of the team.
-   */
-  router.delete("/team/admin/:teamID/remove", adminAuth, async (ctx) => {
-    const teamId = ctx.params.teamID;
-    const deleted = await teams.removeTeam(teamId);
-    if (deleted === 0) {
-      ctx.throw(404, `team with teamId ${teamId} not found.`);
-    }
-    ctx.body = {};
-  });
-
-  /**
-   * Delete every team at once. One request rather than one per team, so the
-   * archive rows share a `deletedAt` — the batch a restore names.
-   *
-   * @returns {{ deleted: number, deletedAt: Date }}
-   */
-  router.delete("/team/admin/all", adminAuth, async (ctx) => {
-    ctx.body = await teams.removeAllTeams();
-  });
-
-  /**
-   * The archive: every deleted team, newest deletion first.
-   *
-   * @returns {DeletedTeamModel[]}
-   */
-  router.get("/team/admin/deleted", adminAuth, async (ctx) => {
-    ctx.body = await teams.listDeletedTeams();
-  });
-
-  /**
-   * Restore one archived team, page state and matches included.
-   *
-   * @param {number} deletionId - The archive row.
-   * @returns {TeamModel} - The team, live again. 404 for an unknown row; 409
-   *   when a live team holds its id, join code, name or credentials,
-   *   saying which.
-   */
-  router.post("/team/admin/deleted/:deletionId/restore", adminAuth, async (ctx) => {
-    const deletionId = Number(ctx.params.deletionId);
-    if (!Number.isInteger(deletionId)) {
-      ctx.throw(400, `Expected an integer deletionId, got ${ctx.params.deletionId}.`);
-    }
-    const team = await teams.restoreTeam(deletionId).catch((error: unknown) => {
-      if (error instanceof UniqueConstraintError) {
-        ctx.throw(409, error.errors.map(item => item.message).join(" "));
-      }
-      throw error;
-    });
-    ctx.body = team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`);
-  });
-
-  /**
-   * Restore a whole batch: the archive rows sharing a `deletedAt`.
-   *
-   * @param {string} deletedAt - The batch, as `{ "deletedAt": <ISO 8601> }`,
-   *   the value `GET /team/admin/deleted` served.
-   * @returns {RestoreResult} - Team names restored, and team names a live team
-   *   blocked.
-   */
-  router.post("/team/admin/deleted/restore", adminAuth, koaBody(), async (ctx) => {
-    const sent: unknown = (ctx.request.body as { deletedAt?: unknown } | undefined)?.deletedAt;
-    const deletedAt = new Date(typeof sent === "string" ? sent : NaN);
-    if (Number.isNaN(deletedAt.getTime())) {
-      ctx.throw(400, "Expected { deletedAt: ISO 8601 string }.");
-    }
-    ctx.body = await teams.restoreBatch(deletedAt);
-  });
-
-  /**
    * Run a user defined filter query on teams
    *
    * @param {string|string[]} filter - Get parameter to pass the filter
@@ -339,25 +276,28 @@ export function configureTeamsRouter(
   })
 
   /**
- * Get all teams as a full object
- * @returns {TeamModel[]} - List of the selected teams
- */
+   * Import teams from an uploaded TSV, the way `npm run teams:import` does.
+   * formidable stores the upload under a random name, so the extension is
+   * checked on the name the client sent.
+   */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    if (Array.isArray(file)) {
-      ctx.throw(400, 'Multiple files are not supported.');
-      return;
+    try {
+      if (Array.isArray(file)) {
+        ctx.throw(400, 'Multiple files are not supported.');
+        return;
+      }
+      if (!file?.originalFilename?.endsWith('.tsv')) {
+        ctx.status = 400;
+        ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
+        return;
+      }
+      ctx.body = await import_teams_from_tsv(teams, file.filepath);
+    } finally {
+      // Every field, not only `file`: formidable writes whatever is uploaded.
+      const uploaded = Object.values(ctx.request.files ?? {}).flat();
+      await Promise.all(uploaded.map(f => unlink(f.filepath).catch(() => undefined)));
     }
-
-    if (!file || !file.filepath?.endsWith('.tsv')) {
-      ctx.status = 400;
-      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
-      return;
-    }
-
-    const import_results = await import_teams_from_tsv(teams, file.filepath)
-
-    ctx.body = import_results;
   })
 
   /**
@@ -467,18 +407,5 @@ export function configureTeamsRouter(
       pageState: "HOME",
     });
     ctx.body = publicTeamView(team);
-  });
-
-  /**
-   * Create a new BGio game
-   *
-   * @param {string} nameid - game ID to create
-   *
-   * This should be in line with boardgame.io/src/server/api.ts
-   */
-  router.post("/games/:nameid/create", async (ctx, next) => {
-    await next();
-    console.log(`Injecting bot in :${ctx.response.body.matchID}`);
-    await injectBot(ctx.db, ctx.response.body.matchID);
   });
 }

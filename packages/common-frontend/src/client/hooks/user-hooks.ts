@@ -2,7 +2,7 @@ import { UserModel } from "./user-model";
 import { setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
-import { useClientRepo } from "../api-repository-interface";
+import { useClientRepo } from "../client-repo-context";
 
 export const useTeamState = (): TeamModelDto | null => {
   return useTeamStateValue();
@@ -27,9 +27,8 @@ export const LoadTeamState = () => {
             console.error("could not load the team state", e);
           });
 
-
-          userModel.addListener(setTeamState);
-  }, []);
+      return userModel.addListener(setTeamState);
+  }, [repo]);
 
   return null;
 };
@@ -134,6 +133,26 @@ export const useToHome = () => {
   };
 };
 
+/**
+ * A finished match's way back: home, then a reload, or `instead` of the reload
+ * (the relay practice site logs out to its round selector). The handler is
+ * synchronous because React ignores what an event handler returns, so an async
+ * one would leave its promise unhandled.
+ */
+export const useBackToHome = (instead?: () => Promise<void>) => {
+  const refreshState = useRefreshTeamState();
+  const toHome = useToHome();
+  return () => void (async () => {
+    await refreshState();
+    await toHome();
+    if (instead) {
+      await instead();
+    } else {
+      window.location.reload();
+    }
+  })();
+};
+
 export const useStartStrategy = () => {
   const repo = useClientRepo();
   return async () => {
@@ -142,33 +161,4 @@ export const useStartStrategy = () => {
     const state = await userModel.getTeamState();
     setTeamState(state);
   };
-};
-
-export const useRemoveTeam = () => {
-  const repo = useClientRepo();
-  return async (teamId: string) => {
-    await repo.removeTeam(teamId);
-  };
-};
-
-export const useRemoveAllTeams = () => {
-  const repo = useClientRepo();
-  return async () => await repo.removeAllTeams();
-};
-
-export const useDeleted = () => {
-  const repo = useClientRepo();
-  return async () => await repo.getDeleted();
-};
-
-export const useRestoreTeam = () => {
-  const repo = useClientRepo();
-  return async (deletionId: number) => {
-    await repo.restoreTeam(deletionId);
-  };
-};
-
-export const useRestoreBatch = () => {
-  const repo = useClientRepo();
-  return async (deletedAt: string) => await repo.restoreBatch(deletedAt);
 };
