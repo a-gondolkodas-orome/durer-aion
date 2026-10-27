@@ -87,7 +87,6 @@ function App() {
                   sm: "0px",
                   md: "0px",
                 },
-                zIndex: 3,
                 position: "relative",
                 paddingBottom: "50px",
                 maxWidth: "1200px",

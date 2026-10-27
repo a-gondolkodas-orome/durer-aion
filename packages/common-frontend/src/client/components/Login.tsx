@@ -35,8 +35,6 @@ export function Login() {
 
   return (
     <Stack sx={{
-      display: 'flex',
-      height: '100%',
       maxWidth: 600,
       marginTop: {
         xs: "10px",
@@ -46,7 +44,7 @@ export function Login() {
       <Stack sx={{
         marginTop: {
           xs: "25px",
-          md: "80px",
+          md: "40px",
         },
       }}>
         <Stack sx={{
@@ -71,7 +69,7 @@ export function Login() {
           {t('login.loginInstruction')}
         </Stack>
         <Stack>
-          <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
+          <Form initialValues={{ joinCode: '' }}
             onSubmit={(values) => {
               if (!values.joinCode) {
                 enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
