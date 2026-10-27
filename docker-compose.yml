@@ -10,6 +10,16 @@ services:
       - ./apps/online-frontend/dist:/usr/share/nginx/html
     depends_on:
       - backend
+    healthcheck:
+      # Without one, `up --wait` counts a running container as up — including an
+      # nginx restart-looping on a bad mounted TLS snippet (DEPLOYMENT.md § 8).
+      # A TCP connect is enough for that: nginx listens only once it has loaded its
+      # config. It reads no response, so it does not vouch for what is served.
+      # bash's /dev/tcp, because the image carries no curl or wget.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/80"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
   backend:
     build: .
     restart: unless-stopped
