@@ -44,6 +44,27 @@ provided — they are quick to answer and needed throughout implementation:
 - **credit**: `suggestedBy` and/or `developedBy` — optional, but ask explicitly
   so it isn't forgotten
 
+#### Porting a game from the live competition
+An online round's game already exists, rules and bot included, in
+`packages/game/src/games/strategy/<game>/` — or in that year's private repo
+until the competition is over, which is when it may come here and not before
+(root `AGENTS.md`, secrecy). Most of the above is then answered already:
+
+- **rule**: the description in its `main.tsx`, minus what only the competition
+  needs — "beat the computer twice in a row", choosing a role. That is the
+  allowed rewording below; show the user the before/after.
+- **metadata**: round `online`, the year in the `"XIX. (25/26)"` form, `credit`
+  `developedBy` the competition's developer, as `RemoveDivisorMultiple` and
+  `StonesRemoveOneNotTwiceFromLeft` have.
+- **categories that play different rules** — a different first mover, board or
+  count — become separate `gameList` entries sharing one folder
+  (`architect-and-bandits` A and B), each with its own card and URL. A variant's
+  `rule` override is for siblings whose differing rules still read as one game.
+- **bot**: reuse the competition's strategy rather than re-deriving it; it is the
+  one the round was decided by. Its moves are a boardgame.io call shape, so
+  adapt it to name this engine's moves, and its test-mode randomness becomes the
+  Teszt variant (step 9). Step 2 still applies to whatever table it reads.
+
 ### 2. Plan the AI strategy
 A game is useful even without an optimal AI: human vs human mode lets real
 players test and play immediately, and a placeholder random/simple bot is enough
@@ -60,8 +81,11 @@ now or later.
 - **If later:** implement a simple or random bot strategy as a placeholder and
   note clearly in a code comment that it is not optimal yet.
 
-If the strategy needs a **precomputed table** (a JSON file of optimal moves,
-because searching at play time is too slow), commit its generator in the same PR
+Whether it needs a **precomputed table** is a measurement, not a guess: time the
+strategy computed live from the hardest start board first. A ported competition
+bot may ship one only because a server answered every team — `two-xs-one-o`'s O
+solver works out the empty board in ~25 ms and memoises, so it ships none. If
+searching at play time is too slow, commit the table's generator in the same PR
 — never the table alone. What the script has to guarantee is in [AGENTS.md §
 Architecture](../../../AGENTS.md#architecture); `modified-mill-strategy.cjs` is
 the worked example, and it should also verify the table (e.g. replaying it
@@ -120,10 +144,15 @@ of them:
   should do — it is the game's instruction line, not a status label
 - Pull `credit` from `gameList`, and the name and title from the `catalog`
   namespace, rather than hardcoding them
+- A turn of several placements — two Xs, a stone then a line — is one move per
+  placement with `turnState` counting between them, not one move taking them
+  all. The engine's undo then covers the half-made turn, which the checklist
+  asks for, with no selection UI to build (`two-xs-one-o`, `coins-in-3-piles`)
 
 ### 5. Export the game, then wire it into `src/components/games/index.ts`
 Add one line to the app's barrel keyed by the game's `gameList` key, keeping
-alphabetical order. A game exporting a component is re-exported directly —
+alphabetical order — by character code, so `TwoTimesTwo` comes before
+`TwoXsOneO`. A game exporting a component is re-exported directly —
 `export { YourGame } from './path/...'`, aliasing if the export name differs;
 one
 exporting a config becomes a page here instead —
@@ -132,8 +161,10 @@ The route is the key, and the router in `src/components/app/app.tsx` derives it
 from `gameList` automatically — no edit is needed there.
 
 ### 6. Add metadata to `src/components/games/gameList.ts`
-Using the metadata collected in Step 1, add the entry in alphabetical order by
-key, and its name under the same key in `src/locales/{hu,en}/catalog.json`. Add a
+Using the metadata collected in Step 1, add the entry where the file's own
+comment says — ordered by year, then category, which for a new competition's
+game means at the end — and its name under the same key, at the same place, in
+`src/locales/{hu,en}/catalog.json`. Add a
 `title` there only if a longer display name is needed on the game page beyond
 the short name.
 
@@ -158,13 +189,27 @@ Testing](../../../AGENTS.md#testing) covers the rest — reading a single decisi
 with `botNextMoveArgs`, and how many boards to sweep given what the strategy
 costs.
 
+A match against the random bot shows the smart bot wins *some* games; it cannot
+show it never loses one it should win. Two habits close that gap:
+
+- **Where the losing side's replies can be enumerated, enumerate them.** Walk the
+  smart bot against every line the other player can play — a few thousand
+  positions is milliseconds — and assert it wins all of them (`two-xs-one-o`'s
+  `bot-strategy.test.ts`).
+- **Break each part of the strategy and watch a test fail.** Disable one branch
+  or one fallback at a time; if the suite stays green, that part is untested,
+  however many tests pass. A heuristic and the solver it backs up often agree on
+  random positions, so search for one where they disagree and pin it.
+
+Drawn boards in a test (`'XXO../O.X..'`) read to cspell as misspelt words;
+`// cspell:ignoreRegExp` at the top of the file, matching just those strings,
+keeps the rest of the file checked.
+
 ```bash
 npm run typecheck && npm test
 ```
-Then start the dev server and manually verify the game:
-```bash
-npm run dev
-```
+Then start the dev server and play the game with the `play-game-in-browser`
+skill, which drives it in a real browser and says what to look at.
 
 ### 8. Go through the checklist
 Before declaring the game done, walk [src/components/AGENTS.md § New game
