@@ -10,7 +10,7 @@
 // workspace join there is one install at the monorepo root, and npm decides
 // per version conflict whether a package hoists there or nests here — so try
 // both, nearest first.
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 
 const playwright = ['../../../node_modules/playwright/index.mjs', '../../../../../node_modules/playwright/index.mjs']
   .map(candidate => new URL(candidate, import.meta.url))
@@ -19,6 +19,19 @@ const playwright = ['../../../node_modules/playwright/index.mjs', '../../../../.
 
 export const DEV_URL = 'http://localhost:8012';
 
+// Claude Code's cloud container bakes one Chromium, sets
+// PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD, and puts a `chromium` executable at the top of
+// PLAYWRIGHT_BROWSERS_PATH. When the pinned playwright wants another revision, its
+// own path does not exist there, so launch the baked one rather than fail.
+// PLAYWRIGHT_CHROMIUM_EXECUTABLE overrides both.
+const launchOptions = chromium => {
+  const override = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+  if (override) return { executablePath: override };
+  if (existsSync(chromium.executablePath())) return {};
+  const baked = process.env.PLAYWRIGHT_BROWSERS_PATH && `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium`;
+  return baked && existsSync(baked) && statSync(baked).isFile() ? { executablePath: baked } : {};
+};
+
 const START_BUTTON = { vsComputerFirst: 'Kezdő leszek', vsComputerSecond: 'Második leszek' };
 
 // `npm run dev` (port 8012, pinned in vite.config.js) must already be running.
@@ -26,13 +39,10 @@ const START_BUTTON = { vsComputerFirst: 'Kezdő leszek', vsComputerSecond: 'Más
 // the `#`; a bare /game/<id> silently renders the overview instead.
 export const launchGame = async (gameId, { mode = 'vsComputerFirst', variant, viewport } = {}) => {
   const { chromium } = await import(playwright);
-  // Claude Code's web container bakes one Chromium and asks that it be used as-is
-  // (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set there); when playwright's pinned
-  // revision is newer than the baked one, this is the documented way through.
-  const browser = await chromium.launch(
-    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {}
-  );
-  const page = await browser.newPage({ viewport: viewport ?? { width: 900, height: 1100 } });
+  const browser = await chromium.launch(launchOptions(chromium));
+  // The labels clicked below are Hungarian, and the app picks its language from the
+  // browser's when the URL and localStorage name none — English on most machines.
+  const page = await browser.newPage({ locale: 'hu-HU', viewport: viewport ?? { width: 900, height: 1100 } });
 
   await page.goto(`${DEV_URL}/#/game/${gameId}`);
   // The role chooser is the shell's pre-game state, so its arrival is what says
