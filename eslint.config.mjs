@@ -250,7 +250,7 @@ export default defineConfig(
     rules: quotesRule,
   },
   {
-    // The relay practice site's problem bank — 8,456 lines of past years' problems,
+    // The relay practice site's problem bank — 8,639 lines of past years' problems,
     // hand-maintained rather than generated, so the formatting rules stay on for it.
     // It is a single annotated literal; see typeAwareRulesOff for why the checker
     // rules come off it. The practice site's generated tables are exempted in its

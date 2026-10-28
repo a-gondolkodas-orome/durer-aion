@@ -62,6 +62,7 @@ export const availableRelayTests: TestListElement[] = [
     {},
     {},
     { online: [Category.C, Category.D, Category.E] },
+    { online: [Category.C, Category.D, Category.E] },
 ]
 
 const roundTypes: RoundType[] = ['local', 'final', 'online'];
