@@ -72,7 +72,7 @@ function updateMatching(socket: Socket, done: (state: BgioState) => boolean): Pr
 /** Only the fields these assertions read. */
 interface BgioState {
   ctx: { phase: string; currentPlayer: string };
-  G: { difficulty: string | null };
+  G: { difficulty: string | null; cells: (string | null)[] };
   _stateID: number;
 }
 
@@ -177,6 +177,27 @@ describe("the socket transport a browser talks to", () => {
     expect(state.ctx.phase).toBe("chooseRole");
     // The bot took the judge's turn, so it is the player's again.
     expect(state.ctx.currentPlayer).not.toBe(BOT_ID);
+  });
+
+  it("carries the player's move to the game, and the bot's reply back", async () => {
+    await createStoredMatch();
+    const socket = await connectClient();
+    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
+
+    const playing = updateMatching(socket, ({ ctx }) => ctx.phase === "play");
+    socket.emit("update", makeMove("chooseRole", [HUMAN_ID], HUMAN_ID), live._stateID, MATCH_ID, HUMAN_ID);
+    const play = await playing;
+    expect(play.ctx.currentPlayer).toBe(HUMAN_ID);
+
+    // In category E the first player places one O; the bot answers with its Xs,
+    // which only its strategy, run on the server, can have chosen.
+    const botReplied = updateMatching(socket, ({ G, ctx }) =>
+      G.cells.includes("X") && ctx.currentPlayer === HUMAN_ID);
+    socket.emit("update", makeMove("placeMarks", [[12]], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
+    const state = await botReplied;
+
+    expect(state.G.cells[12]).toBe("O");
+    expect(state.G.cells.filter(cell => cell === "X")).toHaveLength(2);
   });
 
   it("gives a reconnecting player the state their last one left", async () => {
