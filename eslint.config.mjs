@@ -4,7 +4,7 @@ import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
-import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from './eslint.stylistic.mjs';
+import { quotesRule, stylisticPlugin, stylisticRules } from './eslint.stylistic.mjs';
 
 const noBotMessage = 'The live client must not ship the bot: import `game` or `game/client` only.';
 
@@ -250,21 +250,12 @@ export default defineConfig(
     rules: quotesRule,
   },
   {
-    // Written by a generator that has to reproduce it byte for byte: moveMap is what
-    // generateStrategy.py beside it prints. See eslint.stylistic.mjs. The practice
-    // site's own generated tables are exempted in its config, which lints them.
-    files: ['packages/game/src/games/strategy/stones/moveMap.ts'],
-    rules: stylisticRulesOff,
-  },
-  {
-    // The generated table above, plus the relay practice site's problem bank — 8,456
-    // lines of past years' problems, hand-maintained rather than generated, so the
-    // formatting rules stay on for it. Both are a single annotated literal; see
-    // typeAwareRulesOff for why the checker rules come off them.
-    files: [
-      'packages/game/src/games/strategy/stones/moveMap.ts',
-      'apps/relay-practise-frontend/src/problems.ts',
-    ],
+    // The relay practice site's problem bank — 8,456 lines of past years' problems,
+    // hand-maintained rather than generated, so the formatting rules stay on for it.
+    // It is a single annotated literal; see typeAwareRulesOff for why the checker
+    // rules come off it. The practice site's generated tables are exempted in its
+    // own config, which lints them.
+    files: ['apps/relay-practise-frontend/src/problems.ts'],
     rules: typeAwareRulesOff,
   },
   // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,

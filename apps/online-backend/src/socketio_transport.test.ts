@@ -72,7 +72,7 @@ function updateMatching(socket: Socket, done: (state: BgioState) => boolean): Pr
 /** Only the fields these assertions read. */
 interface BgioState {
   ctx: { phase: string; currentPlayer: string };
-  G: { stonesLeft: number; stonesRight: number; difficulty: string | null };
+  G: { difficulty: string | null };
   _stateID: number;
 }
 
@@ -145,7 +145,10 @@ describe("the socket transport a browser talks to", () => {
    *  this resolves with is a whole round trip: player packet in, state through
    *  the game, bot packet out. */
   async function startLiveGame(socket: Socket, from: BgioState): Promise<BgioState> {
-    const botAnswered = updateMatching(socket, ({ G }) => G.stonesLeft > 0);
+    const botAnswered = updateMatching(
+      socket,
+      ({ ctx }) => ctx.phase === "chooseRole" && ctx.currentPlayer === HUMAN_ID,
+    );
     socket.emit(
       "update",
       makeMove("chooseNewGameType", ["live"], HUMAN_ID),
@@ -171,7 +174,7 @@ describe("the socket transport a browser talks to", () => {
     const state = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
 
     expect(state.G.difficulty).toBe("live");
-    expect(state.G.stonesRight).toBeGreaterThan(0);
+    expect(state.ctx.phase).toBe("chooseRole");
     // The bot took the judge's turn, so it is the player's again.
     expect(state.ctx.currentPlayer).not.toBe(BOT_ID);
   });

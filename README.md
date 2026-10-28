@@ -436,7 +436,7 @@ safe: why the bot must not reach the served bundle, and the by-hand check for
 that before a competition.
 
 1. One self-contained folder in `packages/game/src/games/strategy/<game-name>/`
-   — `stones/` and `19ocd/` are the live examples:
+   — `20ocde/` is the live example:
 
    - `game.ts` — the boardgame.io game definition
    - `strategy.ts` — the server bot, plus any lookup tables it imports
@@ -445,7 +445,7 @@ that before a competition.
 
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are
-   fine — `stones/` keeps its `moveMap.ts` beside the bot — but what the bot and
+   fine — a bot can keep its lookup tables in a file beside it — but what the bot and
    the board *both* need goes in `game.ts`. A helper beside them is a file the
    bot entry and the client entry have in common, which the walk below reads as
    the bot reaching the served bundle, and fails.

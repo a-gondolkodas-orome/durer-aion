@@ -174,7 +174,7 @@ describe("closeMatch", () => {
     const db = {
       fetch: async () => ({
         state: { G: { points, liveResults: ["lost", "won", "won"] } },
-        metadata: { gameName: "stones_e", players: { 0: { name: "team-1" } } },
+        metadata: { gameName: strategyNames.E, players: { 0: { name: "team-1" } } },
       }),
     } as unknown as StorageAPI.Async;
     return { writes, close: () => closeMatch(matchId, teams, db) };
