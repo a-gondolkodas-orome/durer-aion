@@ -233,5 +233,11 @@
   },
   "NumberPyramid": {
     "name": "Számpiramis"
+  },
+  "TwoXsOneO": {
+    "name": "Két X, egy O (C)"
+  },
+  "TwoXsOneODE": {
+    "name": "Két X, egy O (D, E)"
   }
 }
