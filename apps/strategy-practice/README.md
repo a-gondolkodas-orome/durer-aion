@@ -279,7 +279,9 @@ suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
 stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
 factory's `testVariantLabel` and `fullVariantLabel`. A spec that needs text reads
 it in one language, `i18next.getFixedT('hu', '<namespace>')`; `test-setup.ts`
-puts i18next back to Hungarian after every test.
+puts i18next back to Hungarian after every test. `npm run i18n:check` does not see a
+`t()` call written inside another's options, and reports that key unused: call
+it first, into a variable.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.

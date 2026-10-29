@@ -76,13 +76,13 @@ deliberate, not a misconfiguration: the scratch path differs per session, and
 any allowlist entry broad enough to cover it would also authorise running any
 script in the repo unattended.
 
-`launchGame` opens the page in Hungarian whatever the machine's locale, since the
-labels it clicks are Hungarian; the `EN` button in the header switches it
-afterwards, which is worth doing if your assertions read better in English.
+`launchGame` opens the game with `?lang=hu`, whatever the machine's locale; the
+`EN` button in the header switches it afterwards, which is worth doing if your
+assertions read better in English.
 
-In Claude Code's cloud container it launches the Chromium baked there when the
-revision playwright pins is missing; `PLAYWRIGHT_CHROMIUM_EXECUTABLE` points it at
-any other build.
+Where the Chromium revision playwright pins is missing — Claude Code's cloud
+container — it launches the newest one baked under `PLAYWRIGHT_BROWSERS_PATH`
+and warns which; `PLAYWRIGHT_CHROMIUM_EXECUTABLE` points it at any other build.
 
 `sampleDuringBeat(page, read)` polls for 1.6 s. Mid-turn states last one
 `stepDelay()` beat — 750–1250 ms, `packages/strategy-engine/src/timing.ts` — so
