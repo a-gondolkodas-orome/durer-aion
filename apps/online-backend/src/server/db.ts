@@ -1,6 +1,6 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { FinishedMatchStatus, InProgressMatchStatus } from 'schemas';
+import { FinishedMatchStatus, GameType, InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
@@ -81,6 +81,27 @@ export class TeamsRepository {
     const [updated] = await TeamModel.update({ [type]: status }, {
       // A JSON path on the column: ("strategyMatch"#>>'{matchID}') = matchId.
       where: { teamId, [type]: { matchID: matchId } } as WhereOptions<TeamModel>,
+    });
+    return updated > 0;
+  }
+
+  /**
+   * Puts the team into its new match, but only while the team is still as
+   * `team` read it: the page and both matches' states are checked in the same
+   * UPDATE that writes, so of two starts that both passed `allowedToStart` on
+   * the same reading, only one is written. Whether a row was written.
+   */
+  async startMatch(team: TeamModel, gameType: GameType, status: InProgressMatchStatus): Promise<boolean> {
+    const [updated] = await TeamModel.update({
+      pageState: gameType,
+      [gameType === "RELAY" ? "relayMatch" : "strategyMatch"]: status,
+    }, {
+      where: {
+        teamId: team.teamId,
+        pageState: team.pageState,
+        relayMatch: { state: team.relayMatch.state },
+        strategyMatch: { state: team.strategyMatch.state },
+      } as WhereOptions<TeamModel>,
     });
     return updated > 0;
   }
