@@ -262,7 +262,7 @@ npm run stack:prod
 
 Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
 builds the frontend, builds the backend image, starts the three containers detached, and
-returns only once the backend is healthy. When it is not:
+returns only once the backend and nginx are healthy. When they are not:
 
 ```bash
 npm run stack:ps

@@ -9,6 +9,8 @@ Albrechtke
 Aromo
 Aromó
 Baldvin
+Bendi
+Cila
 Ciprián
 csodaszép
 csupaegyes
@@ -101,6 +103,7 @@ nemnagyobb
 nemnulla
 nemtompa
 nemüres
+odik
 oldalközépső
 osak
 osnak
@@ -134,6 +137,7 @@ töröttvonallal
 Vacskamati
 Viète
 Áttentő
+ésőbb
 Óxisz
 óxiszi
 összkora
