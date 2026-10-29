@@ -27,6 +27,8 @@ export async function startTestDatabase() {
   // Syncs every model on this Sequelize, the teams' tables included.
   await db.connect();
   return {
+    /** boardgame.io's match store, on the same connection as the teams. */
+    db,
     teams,
     /** Empties the teams, for a test that starts from nothing. */
     async reset() {
