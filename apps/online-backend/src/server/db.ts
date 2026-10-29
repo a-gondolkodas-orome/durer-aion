@@ -104,6 +104,19 @@ export class TeamsRepository {
     });
     return updated > 0;
   }
+  /**
+   * Takes the team home unless a match is in progress, checked in the UPDATE
+   * itself so that a start landing after the caller read the team is not
+   * overwritten. Whether a row was written.
+   */
+  async goHome(teamId: string): Promise<boolean> {
+    const notInProgress = { state: { [Op.ne]: "IN PROGRESS" } };
+    const [updated] = await TeamModel.update({ pageState: "HOME" }, {
+      where: { teamId, relayMatch: notInProgress, strategyMatch: notInProgress } as WhereOptions<TeamModel>,
+    });
+    return updated > 0;
+  }
+
   async insertTeam(
       { teamname, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string }) {

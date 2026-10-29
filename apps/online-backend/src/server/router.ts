@@ -403,12 +403,10 @@ export function configureTeamsRouter(
    */
   router.post<TeamState>("/team/me/gohome", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
+    if (!(await teams.goHome(team.teamId)))
       ctx.throw(403, "Not allowed, match in progress.")
 
-    await team.update({
-      pageState: "HOME",
-    });
+    team.set({ pageState: "HOME" });
     ctx.body = publicTeamView(team);
   });
 }
