@@ -39,9 +39,8 @@ export function configureTeamsRouter(
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
 
-  // The start routes check the team and write it several awaits apart, so two
-  // overlapping starts both pass the check. The conditional write decides
-  // which one started; the other's match, which no team points at, is wiped.
+  // Overlapping starts can both pass `allowedToStart`; the conditional write
+  // picks one, and the loser's match, which no team points at, is wiped.
   async function claimStart(ctx: Server.AppCtx, team: TeamModel, gameType: GameType, match: InProgressMatchStatus) {
     if (!(await teams.startMatch(team, gameType, match))) {
       await ctx.db.wipe(match.matchID);

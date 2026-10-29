@@ -16,9 +16,8 @@ vi.mock('../hooks/user-hooks', () => ({
   useStartStrategy: () => () => Promise.resolve(),
 }));
 
-// The button's own status is the server's, which changes only once the start
-// has answered, so a double click sent two starts.
-test('sends one start for a double click, and lets the team retry once it answered', async () => {
+// Regression: a double click sent two starts.
+test('sends one start for a double click, and enables Start again once it answered', async () => {
   let answer: () => void = () => undefined;
   startRelay.mockImplementation(() => new Promise<void>(resolve => { answer = resolve; }));
   render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} hideDesc />);

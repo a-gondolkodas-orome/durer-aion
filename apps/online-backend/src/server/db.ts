@@ -86,10 +86,9 @@ export class TeamsRepository {
   }
 
   /**
-   * Puts the team into its new match, but only while the team is still as
-   * `team` read it: the page and both matches' states are checked in the same
-   * UPDATE that writes, so of two starts that both passed `allowedToStart` on
-   * the same reading, only one is written. Whether a row was written.
+   * Puts the team into its new match, but only while its page and both match
+   * states are still the ones `team` holds, so of two starts made from the
+   * same reading only one is written. Whether a row was written.
    */
   async startMatch(team: TeamModel, gameType: GameType, status: InProgressMatchStatus): Promise<boolean> {
     const [updated] = await TeamModel.update({

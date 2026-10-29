@@ -27,8 +27,8 @@ export function ChooserItem(props: {
   const theme = useTheme();
   const { t } = useTranslation();
   const [detailsOpen, setDetailsOpen] = useState(false);
-  // The status that disables Start is the server's, and arrives only once the
-  // start request has answered: a second click before that sent a second start.
+  // The status changes only once the start has answered; until then a second
+  // click would send a second start.
   const [starting, setStarting] = useState(false);
   const closeDetails = () => setDetailsOpen(false);
   // The round's end screen, from the summary saved with the finished match. A
