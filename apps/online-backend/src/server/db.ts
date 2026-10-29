@@ -88,7 +88,7 @@ export class TeamsRepository {
   /**
    * Puts the team into its new match, but only while its page and both match
    * states are still the ones `team` holds, so of two starts made from the
-   * same reading only one is written. Whether a row was written.
+   * same reading only one is written. Returns whether the row was written.
    */
   async startMatch(team: TeamModel, gameType: GameType, status: InProgressMatchStatus): Promise<boolean> {
     const [updated] = await TeamModel.update({
@@ -107,7 +107,7 @@ export class TeamsRepository {
   /**
    * Takes the team home unless a match is in progress, checked in the UPDATE
    * itself so that a start landing after the caller read the team is not
-   * overwritten. Whether a row was written.
+   * overwritten. Returns whether the row was written.
    */
   async goHome(teamId: string): Promise<boolean> {
     const notInProgress = { state: { [Op.ne]: "IN PROGRESS" } };
