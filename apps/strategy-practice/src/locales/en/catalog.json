@@ -235,9 +235,9 @@
     "name": "Number Pyramid"
   },
   "TwoXsOneO": {
-    "name": "Two Xs, one O (C)"
+    "name": "2 Xs, then 1 O"
   },
   "TwoXsOneODE": {
-    "name": "Two Xs, one O (D, E)"
+    "name": "1 O, then 2 Xs"
   }
 }
