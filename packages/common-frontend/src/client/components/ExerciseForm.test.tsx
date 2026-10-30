@@ -14,8 +14,7 @@ vi.mock('../hooks/user-hooks', () => ({
   useRefreshTeamState: () => () => Promise.resolve(),
 }));
 
-function renderForm(awaitingJudge: boolean) {
-  const onSubmit = vi.fn(() => Promise.resolve());
+function renderForm(awaitingJudge: boolean, onSubmit = vi.fn((_result: number) => Promise.resolve())) {
   const form = (attempt: number) =>
     <SnackbarProvider>
       <ExerciseForm
@@ -59,4 +58,28 @@ test('focuses the input on the attempt after a guess from this screen', async ()
   // A teammate's guess after that leaves the focus alone again.
   moveToAttempt(10);
   expect(screen.getByRole('textbox')).not.toHaveFocus();
+});
+
+async function sendGuess() {
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
+  });
+}
+
+test('reports a rejected submission', async () => {
+  const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  renderForm(false, vi.fn(() => Promise.reject(new Error('no answer'))));
+  await sendGuess();
+  expect(await screen.findByText('no answer')).toBeInTheDocument();
+  expect(logged).toHaveBeenCalledOnce();
+});
+
+// Regression: the handler's promise had `.catch` chained onto it, so a handler
+// that threw instead of returning one escaped the form unreported.
+test('reports a handler that throws instead of rejecting', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  renderForm(false, vi.fn(() => { throw new Error('no such move'); }));
+  await sendGuess();
+  expect(await screen.findByText('no such move')).toBeInTheDocument();
 });

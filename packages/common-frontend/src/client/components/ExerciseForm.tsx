@@ -40,6 +40,19 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
     setFocusAttempt(props.attempt);
   }
   const { t } = useTranslation();
+  // Awaited inside the try, so a handler that throws instead of rejecting
+  // reaches the snackbar too rather than escaping the form. Not awaited by the
+  // form, which resets after calling its handler and would drop the promise.
+  const sendAnswer = async (result: number) => {
+    try {
+      await props.onSubmit(result);
+    } catch (e: unknown) {
+      console.error(e);
+      enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+      return;
+    }
+    void refreshState();
+  };
   const announceResult = useEffectEvent((correct: boolean | null) => {
     if (correct != null) {
       if (correct) {
@@ -84,14 +97,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             enqueueSnackbar(t('relay.error.duplicate'), { variant: 'error' });
             return;
           }
-          props.onSubmit(parseInt(values.result))
-            .then(() => {
-              void refreshState();
-            })
-            .catch((e: unknown) => {
-              console.log(e);
-              enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
-            });
+          void sendAnswer(parseInt(values.result));
           setPendingOwnGuessAt(props.attempt);
         }}>
         <Field
