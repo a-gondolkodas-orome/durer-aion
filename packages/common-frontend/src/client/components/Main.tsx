@@ -4,7 +4,7 @@ import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header } from "./Header";
 import { Layout } from "./Layout";
 import { Login } from "./Login";
-import { HomeLayout } from "./HomeLayout";
+import { LoginLayout } from "./LoginLayout";
 import { Relay } from "./teamstates/Relay";
 import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
@@ -53,7 +53,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
               or a live, playable board for one still holding a team's session
               from testing. */}
           {admin ? <Admin teamId={window.location.pathname.split('/').at(2)}/> : <>
-            {!teamState && <HomeLayout><Login /></HomeLayout>}
+            {!teamState && <LoginLayout><Login /></LoginLayout>}
             {teamState && teamState.pageState === "DISCLAIMER" && (
               <Disclaimer teamName={teamState.teamName} category={teamState.category}/>
             )}

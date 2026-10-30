@@ -10,11 +10,11 @@ import { SuperPicture } from './picture-component';
 // logo's size follows the width, as the card's does, so how much of it the card
 // covers does not depend on the window's height. Below md there is no room for
 // both, and the logo is left out.
-export function HomeLayout(props: { children: React.ReactNode }) {
+export function LoginLayout(props: { children: React.ReactNode }) {
   return (
     <Box sx={{
       display: 'grid',
-      gridTemplateAreas: '"home"',
+      gridTemplateColumns: 'minmax(0, 1fr)',
       alignItems: 'start',
       // The page's Container has no padding, so this is the gutter at every
       // width: the header's, so the card lines up with its title.
@@ -22,25 +22,24 @@ export function HomeLayout(props: { children: React.ReactNode }) {
       py: { xs: 3, md: 5 },
     }}>
       <Box sx={{
-        gridArea: 'home',
+        gridArea: '1 / 1',
         justifySelf: 'end',
         display: { xs: 'none', md: 'block' },
         width: 'clamp(280px, 35%, 420px)',
-      }} data-testid="homeLogo">
+      }} data-testid="loginLogo">
         <SuperPicture
           picture={{ webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: "" }}
           style={{ display: 'block', width: '100%', height: 'auto', opacity: .3 }}
         />
       </Box>
       <Box sx={(theme) => ({
-        gridArea: 'home',
+        gridArea: '1 / 1',
         justifySelf: 'start',
         position: 'relative',
         zIndex: 1,
         boxSizing: 'border-box',
         width: '100%',
         maxWidth: 680,
-        minWidth: 0,
         borderRadius: 5,
         px: { xs: 3, sm: 5 },
         py: { xs: 4, sm: 5 },
