@@ -1,7 +1,7 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
-import { GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
+import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -130,9 +130,13 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             maxMoves: 1
           }),
           ...game.turn,
-          onEnd: ({ G, ctx, playerID, events, random, log }) => {
+          onEnd: ({ G, ctx, events, random, log }) => {
             if (game.turn?.onEnd !== undefined) {
-              game.turn.onEnd({ G, ctx, playerID, events, log, random });
+              // boardgame.io attaches `playerID` to `turn.onMove` and to nothing
+              // else: `EndTurn` calls this hook with the state alone. The player
+              // whose turn is ending is still the current one, since bgio
+              // advances the order only after this returns.
+              game.turn.onEnd({ G, ctx, playerID: currentPlayer(ctx), events, log, random });
             }
             sendStrategyFunction({ component: "strategy", phase: "step", G: G, ctx: ctx });
           },

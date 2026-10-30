@@ -5,7 +5,7 @@ import {
   createGameWithoutStartingPosition,
   createGameWithMoveWithoutStartingPosition,
 } from "./game_for_testing";
-import { GUESSER_PLAYER, strategyPoints, type GameType } from "./types";
+import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
@@ -294,6 +294,31 @@ test("polling the clock does not spend a limited turn's move", () => {
 
   expect(client.getState()?.ctx.numMoves).toStrictEqual(0);
   expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+});
+
+// Regression: the wrapper forwarded boardgame.io's `playerID` to a game's
+// `turn.onEnd`, and bgio gives that hook none, so a game's guard on it never ran.
+test("a game's turn.onEnd is told whose turn is ending", () => {
+  const turnEnd = vi.fn();
+  // `step` ends its own turn without ending the match, so both sides get a turn end.
+  const reporting: GameType<{ data: string }> = {
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G, events }) => { G.data = "stepped"; events.endTurn(); } },
+    turn: { onEnd: ({ playerID }) => { turnEnd(playerID); } },
+  };
+  const client = Client({ game: gameWrapper(reporting), numPlayers: 2 });
+  client.start();
+  client.moves.chooseNewGameType("live");
+  client.moves.setStartingPosition({ data: "startingPosition" });
+  client.moves.chooseRole(GUESSER_PLAYER);
+  turnEnd.mockReset();
+
+  client.moves.step();
+  client.moves.step();
+
+  expect(turnEnd.mock.calls.flat()).toStrictEqual([GUESSER_PLAYER, JUDGE_PLAYER]);
 });
 
 describe("gameWrapper move guards", () => {

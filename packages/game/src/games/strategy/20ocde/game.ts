@@ -1,6 +1,6 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, strategyPoints } from '../../../common/types';
+import { GUESSER_PLAYER, JUDGE_PLAYER, LATE_MOVE_GRACE_MS, otherPlayer, strategyPoints } from '../../../common/types';
 import type { GameStateMixin, GameType, PlayerIDType } from '../../../common/types';
 
 export const BOARD_SIZE = 5;
@@ -108,10 +108,10 @@ export function MyGameWrapper(category: Category): GameType<MyGameState> {
     turn: {
       // Turns end in placeMarks, so the wrapper's getTime poll consumes no turn.
       onMove: ({ G, playerID, events }) => {
-        if (playerID === GUESSER_PLAYER && Date.now() - new Date(G.end).getTime() > 10000) events.endGame();
+        if (playerID === GUESSER_PLAYER && Date.now() - new Date(G.end).getTime() > LATE_MOVE_GRACE_MS) events.endGame();
       },
       onEnd: ({ G, playerID, events }) => {
-        if (playerID === JUDGE_PLAYER && Date.now() >= new Date(G.end).getTime()) events.endGame();
+        if (playerID === JUDGE_PLAYER && Date.now() - new Date(G.end).getTime() > LATE_MOVE_GRACE_MS) events.endGame();
       },
     },
   };
