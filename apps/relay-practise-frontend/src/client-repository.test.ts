@@ -20,8 +20,8 @@ afterEach(() => {
   delete window.umami;
 });
 
-// A score left from an earlier round read as this round's end already
-// reported, and its finish went uncounted.
+// handleGameReport counts a finish only for a round's first end report, read
+// off whether a score is stored, so a round starts with none.
 test("a round started over an earlier round's score counts its own finish", async () => {
   localStorage.setItem(relayPointsStorageKey(), "12");
   const repo = new OfflineClientRepository();

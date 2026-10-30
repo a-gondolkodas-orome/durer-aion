@@ -64,8 +64,8 @@ describe("handleGameReport", () => {
       expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: "12", round: "final", category: "C+", points: 17 });
     });
 
-    // Regression: a timed-out round's report, handed over by the board, came
-    // again after a reload, and each counted a finish.
+    // A round can report its end more than once (see
+    // ClientRepository.keepRelayEnd); the later score is the one kept.
     test("is sent once for a round that reports its end twice, which keeps the later score", () => {
       readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
       handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });

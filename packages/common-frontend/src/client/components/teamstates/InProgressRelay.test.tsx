@@ -53,8 +53,8 @@ async function renderBoard(ctx: Partial<Ctx>) {
   return keepRelayEnd;
 }
 
-// Regression: the report was handed over as the dialog closed, so its own
-// button, the usual way out, went home with 0 and no results table.
+// Regression: a relay left to run out never ended, so no end report stored its
+// score, and whichever way the team left the dialog, it went home with 0.
 test('a relay whose time ran out hands its end report over once, however the dialog is left', async () => {
   const keepRelayEnd = await renderBoard({});
 
