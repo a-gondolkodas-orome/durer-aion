@@ -6,10 +6,10 @@ import { SuperPicture } from './picture-component';
 // The login pages' layout: the content on a card, and the logo beside it. Both
 // share one grid cell, the logo pinned to the right and the card on top of it,
 // so where the two do not fit side by side the logo slides under the card
-// rather than shrinking, and the card keeps the text readable over it. Its size
-// follows the width, as the card's does, so how much of it the card covers does
-// not depend on the window's height. Below md there is no room for both, and
-// the logo is left out.
+// rather than shrinking, and the card keeps the text readable over it. The
+// logo's size follows the width, as the card's does, so how much of it the card
+// covers does not depend on the window's height. Below md there is no room for
+// both, and the logo is left out.
 export function HomeLayout(props: { children: React.ReactNode }) {
   return (
     <Box sx={{

@@ -35,41 +35,43 @@ export function Login() {
 
   return (
     <Stack data-testid="loginRoot">
-      <Stack>
-        <Stack sx={{
-          fontSize: {
-            xs: "25px",
-            md: "40px",
-          }
-        }}>
-          {t('login.greeting')}<br/>
-          {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
-        </Stack>
-        <Stack sx={{
-          marginTop: {
-            xs: "7px",
-            md: "15px",
-          },
-          fontSize: {
-            xs: "15px",
-            md: "30px",
-          }
-        }}>
-          {t('login.loginInstruction')}
-        </Stack>
-        <Stack sx={{ mt: 2 }}>
-          <Form initialValues={{ joinCode: '' }}
-            onSubmit={(values) => {
-              if (!values.joinCode) {
-                enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
-                return;
-              }
-              login(values.joinCode).catch((err: unknown) => {
-                // A rejection that is not an Error has no `message`, and the snackbar
-                // then shows an empty box where the reason should be.
-                enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
-              });
-            }}>
+      <Stack sx={{
+        fontSize: {
+          xs: "25px",
+          md: "40px",
+        }
+      }}>
+        {t('login.greeting')}<br/>
+        {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
+      </Stack>
+      <Stack sx={{
+        marginTop: {
+          xs: "7px",
+          md: "15px",
+        },
+        fontSize: {
+          xs: "15px",
+          md: "30px",
+        }
+      }}>
+        {t('login.loginInstruction')}
+      </Stack>
+      <Stack sx={{ mt: 2 }}>
+        <Form initialValues={{ joinCode: '' }}
+          onSubmit={(values) => {
+            if (!values.joinCode) {
+              enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
+              return;
+            }
+            login(values.joinCode).catch((err: unknown) => {
+              // A rejection that is not an Error has no `message`, and the snackbar
+              // then shows an empty box where the reason should be.
+              enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
+            });
+          }}>
+          {/* Wrapped, the button goes under the field at the field's width;
+              side by side, it takes what the card has left. */}
+          <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '10px' }}>
             <Field
               name="joinCode"
               type="text"
@@ -104,28 +106,17 @@ export function Login() {
               color='primary'
               variant='contained'
               sx={{
-                width: {
-                  xs: '300px',
-                  sm: '250px',
-                },
-                maxWidth: '100%',
+                flex: '1 1 250px',
+                maxWidth: '300px',
                 height: '40px',
                 borderRadius: '5px',
                 fontSize: '18px',
-                marginTop: {
-                  xs: '10px',
-                  sm: '0px'
-                },
-                marginLeft: {
-                  xs: '0px',
-                  sm: '10px'
-                }
               }}
             >
               {t('login.loginButton')}
             </Button>
-          </Form>
-        </Stack>
+          </Stack>
+        </Form>
       </Stack>
       <Stack sx={{
         fontSize: {
