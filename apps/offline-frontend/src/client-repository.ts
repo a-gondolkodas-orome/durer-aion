@@ -105,6 +105,10 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve("OK");
   }
 
+  async resumeJudgeTurn(_matchId: string): Promise<void> {
+    return Promise.resolve();
+  }
+
   async getMatchState(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
