@@ -1,13 +1,6 @@
 import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
-import type { BoardProps } from 'boardgame.io/react';
 import type { RelayEndReport } from 'game';
-
-// The relay match is judged and timed where it runs — on the server online,
-// by the local bot offline — so the board's actions stay boardgame.io moves
-// in both builds. The board hands over its whole `moves` prop, which
-// boardgame.io types as a plain string-keyed record, and the repository owns
-// knowing which move carries each action.
-export type BoardMoves = BoardProps['moves'];
+import type { MatchTimeMoves, RelayMoves } from "./match-moves";
 
 // The session is the repository's to keep, not the caller's: online it is an
 // HttpOnly cookie the server set on `joinWithCode` (issue #89), which no script
@@ -29,11 +22,10 @@ export interface ClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
-  // Unlike startRelay, which moves the team to the relay page, this dispatches
-  // the opening move of the match once the board is up.
-  startRelayGame(moves: BoardMoves): Promise<void>;
-  syncRelayTime(moves: BoardMoves): Promise<void>;
+  // What `MatchMoveDispatch` implements for every build.
+  submitRelayAnswer(answer: number, moves: RelayMoves): Promise<void>;
+  startRelayGame(moves: RelayMoves): Promise<void>;
+  syncMatchTime(moves: MatchTimeMoves): Promise<void>;
   // The end report of a relay whose time ran out with no move to end it: the
   // game ends a match past its time only on a move arriving after the grace
   // for late answers, and a team waiting at the buzzer sends none. Locally the
