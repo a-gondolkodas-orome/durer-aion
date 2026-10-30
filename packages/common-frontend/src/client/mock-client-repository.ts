@@ -82,4 +82,7 @@ export class MockClientRepository implements ClientRepository {
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
   }
+  resumeJudgeTurn(_matchId: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
