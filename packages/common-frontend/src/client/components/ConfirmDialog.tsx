@@ -11,9 +11,6 @@ export interface ConfirmDialogInterface {
   requiredWords?: string[];
 }
 
-/// Both spellings, so an admin without a Hungarian keyboard need not paste the accents.
-export const DELETE_WORDS = ['törlés', 'delete'];
-
 // Case, accents and surrounding spaces do not matter: "torles" is accepted.
 const fold = (s: string) => s.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 

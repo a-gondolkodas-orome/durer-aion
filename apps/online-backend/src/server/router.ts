@@ -4,18 +4,18 @@ import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
+import { GameType } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, extendedEnd, extensionRefusal, injectBot, injectPlayer } from './team_manage';
-import { adminTeamView, teamMatches } from './match_status';
+import { adminTeamView, adminTeamViews, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
-import { appendOtherNote } from './model';
-import { UniqueConstraintError } from 'sequelize';
+import { TeamModel, appendOtherNote } from './model';
 
 /**
  *
@@ -39,6 +39,15 @@ export function configureTeamsRouter(
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  // Overlapping starts can both pass `allowedToStart`; the conditional write
+  // picks one, and the loser's match, which no team points at, is wiped.
+  async function claimStart(ctx: Server.AppCtx, team: TeamModel, gameType: GameType, matchID: string) {
+    if (!(await teams.startMatch(team, gameType, matchID))) {
+      await ctx.db.wipe(matchID);
+      ctx.throw(403, "Team is not allowed to start game.");
+    }
+  }
 
   // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
   // a route a later version adds is closed too. It runs first only because
@@ -224,78 +233,6 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Remove a team by teamId.
-   *
-   * @param {string} teamID - The ID of the team.
-   */
-  router.delete("/team/admin/:teamID/remove", adminAuth, async (ctx) => {
-    const teamId = ctx.params.teamID;
-    const deleted = await teams.removeTeam(teamId);
-    if (deleted === 0) {
-      ctx.throw(404, `team with teamId ${teamId} not found.`);
-    }
-    ctx.body = {};
-  });
-
-  /**
-   * Delete every team at once. One request rather than one per team, so the
-   * archive rows share a `deletedAt` — the batch a restore names.
-   *
-   * @returns {{ deleted: number, deletedAt: Date }}
-   */
-  router.delete("/team/admin/all", adminAuth, async (ctx) => {
-    ctx.body = await teams.removeAllTeams();
-  });
-
-  /**
-   * The archive: every deleted team, newest deletion first.
-   *
-   * @returns {DeletedTeamModel[]}
-   */
-  router.get("/team/admin/deleted", adminAuth, async (ctx) => {
-    ctx.body = await Promise.all((await teams.listDeletedTeams()).map(team => adminTeamView(ctx.db, team)));
-  });
-
-  /**
-   * Restore one archived team, page state and matches included.
-   *
-   * @param {number} deletionId - The archive row.
-   * @returns {TeamModel} - The team, live again. 404 for an unknown row; 409
-   *   when a live team holds its id, join code, name or credentials,
-   *   saying which.
-   */
-  router.post("/team/admin/deleted/:deletionId/restore", adminAuth, async (ctx) => {
-    const deletionId = Number(ctx.params.deletionId);
-    if (!Number.isInteger(deletionId)) {
-      ctx.throw(400, `Expected an integer deletionId, got ${ctx.params.deletionId}.`);
-    }
-    const team = await teams.restoreTeam(deletionId).catch((error: unknown) => {
-      if (error instanceof UniqueConstraintError) {
-        ctx.throw(409, error.errors.map(item => item.message).join(" "));
-      }
-      throw error;
-    });
-    ctx.body = team ?? ctx.throw(404, `Deleted team ${deletionId} not found.`);
-  });
-
-  /**
-   * Restore a whole batch: the archive rows sharing a `deletedAt`.
-   *
-   * @param {string} deletedAt - The batch, as `{ "deletedAt": <ISO 8601> }`,
-   *   the value `GET /team/admin/deleted` served.
-   * @returns {RestoreResult} - Team names restored, and team names a live team
-   *   blocked.
-   */
-  router.post("/team/admin/deleted/restore", adminAuth, koaBody(), async (ctx) => {
-    const sent: unknown = (ctx.request.body as { deletedAt?: unknown } | undefined)?.deletedAt;
-    const deletedAt = new Date(typeof sent === "string" ? sent : NaN);
-    if (Number.isNaN(deletedAt.getTime())) {
-      ctx.throw(400, "Expected { deletedAt: ISO 8601 string }.");
-    }
-    ctx.body = await teams.restoreBatch(deletedAt);
-  });
-
-  /**
    * Run a user defined filter query on teams
    *
    * @param {string|string[]} filter - Get parameter to pass the filter
@@ -312,7 +249,7 @@ export function configureTeamsRouter(
     } else {
       filters = filter_string;
     }
-    ctx.body = await Promise.all((await teams.fetch(filters)).map(team => adminTeamView(ctx.db, team)));
+    ctx.body = await adminTeamViews(ctx.db, await teams.fetch(filters));
   });
 
   /**
@@ -320,7 +257,7 @@ export function configureTeamsRouter(
    * @returns {TeamModel[]} - List of the selected teams
    */
   router.get("/team/admin/all", adminAuth, koaBody(), async (ctx) => {
-    ctx.body = await Promise.all((await teams.listTeams() ?? []).map(team => adminTeamView(ctx.db, team)));
+    ctx.body = await adminTeamViews(ctx.db, await teams.listTeams() ?? []);
   })
 
   /**
@@ -403,10 +340,7 @@ export function configureTeamsRouter(
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    await team.update({
-      pageState: "RELAY",
-      relayMatchID: body.matchID,
-    });
+    await claimStart(ctx, team, "RELAY", body.matchID);
     ctx.body = body;
   });
 
@@ -420,10 +354,7 @@ export function configureTeamsRouter(
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    await team.update({
-      pageState: "STRATEGY",
-      strategyMatchID: body.matchID,
-    });
+    await claimStart(ctx, team, "STRATEGY", body.matchID);
     ctx.body = body;
   });
 
@@ -435,10 +366,11 @@ export function configureTeamsRouter(
     const matches = await teamMatches(ctx.db, team);
     if (matches.relayMatch.state === 'IN PROGRESS' || matches.strategyMatch.state === 'IN PROGRESS')
       ctx.throw(403, "Not allowed, match in progress.")
+    // A start landing after this read changes a match id, and the write refuses.
+    if (!(await teams.goHome(team)))
+      ctx.throw(403, "Not allowed, match in progress.")
 
-    await team.update({
-      pageState: "HOME",
-    });
+    team.set({ pageState: "HOME" });
     ctx.body = publicTeamView(team, matches);
   });
 }

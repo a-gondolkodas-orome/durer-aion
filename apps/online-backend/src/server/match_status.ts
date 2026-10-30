@@ -1,6 +1,7 @@
 import type { State, StorageAPI } from "boardgame.io";
+import { PostgresStore } from "bgio-postgres";
 import { relayProblemResults, type GameStateMixin, type MyGameState } from "game";
-import type { FinishedMatchStatus, InProgressMatchStatus, MatchStatus } from "schemas";
+import type { FinishedMatchStatus, GameType, InProgressMatchStatus, MatchStatus } from "schemas";
 import type { TeamModel } from "./model";
 
 /** The team row's two match columns. Each holds the id of the team's current
@@ -23,7 +24,7 @@ export interface TeamMatches {
  * whenever it lands, and the match can read as finished from the end itself.
  */
 export function deriveMatchStatus(
-  kind: MatchKind,
+  gameType: GameType,
   matchID: string,
   { G, ctx }: Pick<State, "G" | "ctx">,
   now: Date,
@@ -35,43 +36,75 @@ export function deriveMatchStatus(
     return { state: "IN PROGRESS", matchID, startAt, endAt };
 
   const finished: FinishedMatchStatus = { state: "FINISHED", matchID, startAt, endAt, score: timer.points };
-  if (kind === "relayMatchID")
+  if (gameType === "RELAY")
     return { ...finished, relayResults: relayProblemResults(G as MyGameState) };
   return { ...finished, strategyResults: timer.liveResults };
 }
 
-/** {@link deriveMatchStatus} for a match in storage, or NOT STARTED for none.
- *  A row naming a match storage does not have is a broken row, and fails
- *  loudly rather than reading as a state the team could act on. */
-export async function matchStatus(
-  db: StorageAPI.Async | StorageAPI.Sync,
-  kind: MatchKind,
-  matchID: string | null,
-  now: Date,
-): Promise<MatchStatus> {
-  if (matchID === null) return { state: "NOT STARTED" };
-  const { state } = await db.fetch(matchID, { state: true });
-  if (!state) throw new Error(`Match ${matchID} in the team's ${kind} column is not in storage.`);
-  return deriveMatchStatus(kind, matchID, state, now);
+type Storage = StorageAPI.Async | StorageAPI.Sync;
+type MatchState = Pick<State, "G" | "ctx">;
+
+/**
+ * The game state of each listed match that storage has, by id.
+ *
+ * On postgres this is one query for the whole list, and it reads only the
+ * `state` column: boardgame.io's own `fetch` loads the whole row, the move log
+ * included, which an admin list of every team would pay for twice per team.
+ * The query goes through the model bgio-postgres registers on the shared
+ * Sequelize, `Match` over its "Games" table, which db.postgres.test.ts pins.
+ * Any other storage is asked one match at a time.
+ */
+export async function fetchMatchStates(db: Storage, matchIDs: string[]): Promise<Map<string, MatchState>> {
+  if (matchIDs.length === 0) return new Map();
+  const rows = db instanceof PostgresStore
+    ? await db.sequelize.model("Match").findAll({
+      attributes: ["id", "state"],
+      where: { id: matchIDs },
+      raw: true,
+    }) as unknown as { id: string; state?: MatchState }[]
+    : await Promise.all(matchIDs.map(async id => ({ id, state: (await db.fetch(id, { state: true })).state })));
+  return new Map(rows.flatMap(({ id, state }) => state ? [[id, state] as const] : []));
+}
+
+const matchIDs = (team: Pick<TeamModel, MatchKind>) =>
+  [team.relayMatchID, team.strategyMatchID].filter((id): id is string => id !== null);
+
+/** A team's two matches, from states already read. A row naming a match
+ *  storage does not have is a broken row, and fails loudly rather than reading
+ *  as a state the team could act on. */
+function matchesOf(team: Pick<TeamModel, MatchKind>, states: Map<string, MatchState>, now: Date): TeamMatches {
+  const status = (column: MatchKind, gameType: GameType): MatchStatus => {
+    const matchID = team[column];
+    if (matchID === null) return { state: "NOT STARTED" };
+    const state = states.get(matchID);
+    if (!state) throw new Error(`Match ${matchID} in the team's ${column} column is not in storage.`);
+    return deriveMatchStatus(gameType, matchID, state, now);
+  };
+  return { relayMatch: status("relayMatchID", "RELAY"), strategyMatch: status("strategyMatchID", "STRATEGY") };
 }
 
 /** Both of a team's matches, as of `now`. */
 export async function teamMatches(
-  db: StorageAPI.Async | StorageAPI.Sync,
+  db: Storage,
   team: Pick<TeamModel, MatchKind>,
   now: Date = new Date(),
 ): Promise<TeamMatches> {
-  const [relayMatch, strategyMatch] = await Promise.all([
-    matchStatus(db, "relayMatchID", team.relayMatchID, now),
-    matchStatus(db, "strategyMatchID", team.strategyMatchID, now),
-  ]);
-  return { relayMatch, strategyMatch };
+  return matchesOf(team, await fetchMatchStates(db, matchIDs(team)), now);
 }
 
-/** An admin route's team: the row, and both matches as they stand. */
-export async function adminTeamView(
-  db: StorageAPI.Async | StorageAPI.Sync,
-  team: TeamModel,
-): Promise<ReturnType<TeamModel["toJSON"]> & TeamMatches> {
-  return { ...team.toJSON(), ...await teamMatches(db, team) };
+/** The admin routes' teams: each row, and both its matches as they stand, from
+ *  one read of storage for the whole list. */
+export async function adminTeamViews(
+  db: Storage,
+  teams: TeamModel[],
+): Promise<(ReturnType<TeamModel["toJSON"]> & TeamMatches)[]> {
+  const states = await fetchMatchStates(db, teams.flatMap(matchIDs));
+  const now = new Date();
+  return teams.map(team => ({ ...team.toJSON(), ...matchesOf(team, states, now) }));
+}
+
+/** {@link adminTeamViews} for one team. */
+export async function adminTeamView(db: Storage, team: TeamModel) {
+  const [view] = await adminTeamViews(db, [team]);
+  return view;
 }

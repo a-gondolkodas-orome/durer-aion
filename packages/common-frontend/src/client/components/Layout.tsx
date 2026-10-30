@@ -37,7 +37,7 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
                       overflow: "hidden",
                       height: 'calc(100% - 100px)'
                     }}>
-                    <SuperPicture picture={{ webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: "" }} style={{ opacity: .3, height: '100%' }}/>
+                    <SuperPicture picture={{ webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: "" }} style={{ opacity: .3, height: '80%' }}/>
                   </Stack>
                   <div>
                     {props.children}
