@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useEffect, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { Countdown, useMsRemaining } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { GUESSER_PLAYER, MyGameState, relayProblemResults } from 'game';
@@ -60,13 +60,21 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   }, [ctx.gameover]);
   const finished = msRemaining < - 5000 || ctx.gameover === true
   // A game that ended reported its end itself; one whose time ran out may not
-  // have (see ClientRepository.keepRelayEnd).
-  const closeEnd = () => {
-    if (!ctx.gameover) {
+  // have (see ClientRepository.keepRelayEnd). Handed over as the end dialog
+  // opens rather than as it closes, so every way out of it finds the score
+  // kept, and once, so the local apps record the finish once.
+  const keptEnd = useRef(false);
+  const keepEnd = useEffectEvent(() => {
+    if (!keptEnd.current) {
+      keptEnd.current = true;
       clientRepo.keepRelayEnd({ component: "relay", phase: "end", G, ctx });
     }
-    backToHome();
-  };
+  });
+  useEffect(() => {
+    if (finished && !ctx.gameover) {
+      keepEnd();
+    }
+  }, [finished, ctx.gameover]);
   const isOffline = clientRepo.version === "OFFLINE";
   // Until the judge's firstProblem move, the state holds no problem to show
   // and the form has no move to submit to.
@@ -76,7 +84,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   const problems = relayProblemResults(G);
   return (
     <>
-      <EndDialog open={finished} onClose={closeEnd}>
+      <EndDialog open={finished} onClose={backToHome}>
         <RelayEndTable allPoints={G.points} selectRound={selectRoundOnEnd} problems={problems}/>
       </EndDialog>
       <Stack sx={{
