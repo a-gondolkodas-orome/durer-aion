@@ -148,7 +148,7 @@ export default function SelectRelayRound() {
   };
 
   return (
-    <Box sx={{ minWidth: 300, marginTop: 3 }}>
+    <Box sx={{ marginTop: 3 }}>
       <Stack sx={{
         display: "flex",
         flexDirection: "row",

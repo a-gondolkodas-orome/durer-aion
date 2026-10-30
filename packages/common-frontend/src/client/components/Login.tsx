@@ -38,7 +38,7 @@ export function Login() {
       <Stack sx={{
         fontSize: {
           xs: "25px",
-          md: "40px",
+          sm: "40px",
         }
       }}>
         {t('login.greeting')}<br/>
@@ -47,11 +47,11 @@ export function Login() {
       <Stack sx={{
         marginTop: {
           xs: "7px",
-          md: "15px",
+          sm: "15px",
         },
         fontSize: {
           xs: "15px",
-          md: "30px",
+          sm: "30px",
         }
       }}>
         {t('login.loginInstruction')}
@@ -121,11 +121,11 @@ export function Login() {
       <Stack sx={{
         fontSize: {
           xs: 11,
-          md: 14,
+          sm: 14,
         },
         paddingTop: {
           xs: "20px",
-          md: "40px"
+          sm: "40px"
         } }}>
         {t('login.fallback')}
       </Stack>
