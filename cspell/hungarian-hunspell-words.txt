@@ -69,6 +69,7 @@ bélyeget
 benéznek
 berajzolása
 berajzolásával
+berajzolt
 besatírozza
 besorszámozták
 beszínezett
@@ -92,6 +93,8 @@ cserélgetésben
 csillagok
 csomagokat
 csökkenthetünk
+csúszásuk
+csúszásukra
 derékszöget
 deríthetitek
 dobása
@@ -479,6 +482,7 @@ kölcsönkérne
 könyvet
 körbejárni
 körbejárták
+körbesétálta
 körülírt
 követően
 közvetítésben
@@ -510,9 +514,11 @@ legokosabb
 legolcsóbban
 legrosszabb
 legrövidebb
+legtöbbet
 legtöbbje
 leggyorsabb
 lehelyezése
+lehelyezni
 lehelyezve
 lehelyezz
 lehetőséget
@@ -682,6 +688,7 @@ Nagykövetséget
 Napimádók
 négyjegyű
 négylábú
+négylevelű
 négyszemélyes
 négyszerese
 négyszeresét
@@ -769,6 +776,7 @@ párokban
 párokból
 párosításainak
 pontozásba
+pontszerűnek
 pozitívat
 Prímesen
 Próbálgasd
@@ -847,9 +855,12 @@ tagjait
 tagok
 tagokat
 találkozásáig
+Találkozásaik
 találkozásig
 találkozások
+találkozásokat
 tanácskozást
+tányérok
 távolságok
 távolságokra
 távolságokról
@@ -890,13 +901,13 @@ véget
 végezhetünk
 végiggondolni
 végighaladni
+végighaladva
 végigkérdezi
 végignézve
 végigpróbálni
 végigszámolni
 végigvezetni
 végrehajtása
-világoszölddel
 virágok
 virágokért
 virágom

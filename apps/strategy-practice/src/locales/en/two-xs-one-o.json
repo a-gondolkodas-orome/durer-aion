@@ -1,0 +1,15 @@
+{
+  "board": {
+    "cell": "row {{row}}, column {{column}}: {{content}}",
+    "empty": "empty"
+  },
+  "rule": {
+    "oFirst": "Given a 5×5 board. The players take turns: the first player places Os and the second places Xs on empty squares of the board. On each turn the first player may place one O, while the second player places two Xs. The second player wins by completing a row or column consisting only of Xs. The first player wins if the board fills up with Xs and Os without the second player having won.",
+    "xFirst": "Given a 5×5 board. The players take turns: the first player places Xs and the second places Os on empty squares of the board. On each turn the first player may place two Xs, while the second player places only one O. The first player wins by completing a row or column consisting only of Xs. The second player wins if the board fills up with Xs and Os without the first player having won."
+  },
+  "step": {
+    "firstX": "Place two Xs on empty squares of the board.",
+    "o": "Place an O on an empty square of the board.",
+    "secondX": "Place one more X."
+  }
+}

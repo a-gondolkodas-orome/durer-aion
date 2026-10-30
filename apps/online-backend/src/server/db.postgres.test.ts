@@ -54,6 +54,19 @@ describe('the unique constraints sync() creates', () => {
   });
 });
 
+describe('TeamsRepository.goHome', () => {
+  // The route used to check a team read before a start landed, and then
+  // overwrote the start's page.
+  it('takes the team home only while it holds the matches the caller read', async () => {
+    const read = await database.teams.insertTeam(team());
+    expect(await database.teams.goHome(read)).toBe(true);
+
+    await TeamModel.update({ pageState: 'STRATEGY', strategyMatchID: 'current' }, { where: { teamId: read.teamId } });
+    expect(await database.teams.goHome(read)).toBe(false);
+    expect((await database.teams.getTeam({ teamId: read.teamId }))?.pageState).toBe('STRATEGY');
+  });
+});
+
 describe('TeamsRepository.fetch', () => {
   it('finds the teams whose notes hold every fragment, whatever its case, wildcards read literally', async () => {
     await database.teams.insertTeam(team({ teamname: 'Alpha', other: 'Budapest, 100% motivated, a_b' }));
