@@ -7,8 +7,8 @@ import { TeamsRepository } from './db';
 import { GameType } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
-import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
-import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
+import { getNewGame, createGame, extendedEnd, extensionRefusal, injectBot, injectPlayer } from './team_manage';
+import { adminTeamView, adminTeamViews, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
@@ -120,22 +120,16 @@ export function configureTeamsRouter(
       return;
     }
 
-    const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
-    if (gameType === null) {
-      ctx.throw(501, `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
-      return;
-    }
-    if (deriveMatchStatus(gameType, matchID, state, new Date()).state !== 'IN PROGRESS') {
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    const refusal = extensionRefusal(team, matchID, state.ctx.gameover, await teamMatches(ctx.db, team));
+    if (refusal !== null) {
+      ctx.throw(501, refusal);
     }
 
+    const newEndDate = extendedEnd(state.G.end, minutes, new Date());
     const new_state = {
       ...state,
       _stateID: state._stateID + 1
     }
-
-    const newEndDate = new Date(state.G.end)
-    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
     new_state.G.end = newEndDate.toISOString();
     new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
@@ -163,6 +157,9 @@ export function configureTeamsRouter(
       }
     )
 
+    // The team's page decides what its client shows, so a team that went home
+    // from a match whose time was up could not get back into it otherwise.
+    team.pageState = team.relayMatchID === matchID ? "RELAY" : "STRATEGY";
     team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
     await team.save();
 

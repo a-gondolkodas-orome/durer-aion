@@ -93,12 +93,12 @@ describe("the team routes", () => {
 describe("adding minutes to a match", () => {
   // Regression for #101: the check read axios's `code`, which is an error name
   // such as "ERR_BAD_RESPONSE", never an HTTP status, so this never matched.
-  test("a match the server will not extend is reported as expired", async () => {
+  test("a match the server will not extend is reported as such", async () => {
     fakeAxios(() => status(501));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(new RealClientRepository().addMinutes("match-1", 5))
-      .rejects.toThrow("Lejárt játékot már nem lehet módosítani");
+      .rejects.toThrow("Ezt a játékot nem lehet meghosszabbítani");
   });
 
   test("any other failure is reported like the other admin actions", async () => {
