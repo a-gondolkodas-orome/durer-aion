@@ -28,6 +28,9 @@ export class OfflineClientRepository implements ClientRepository {
     }
     sendGameData({ component: "relay", phase: "start" });
     trackRelayStarted(teamState.teamName);
+    // An earlier round's, which handleGameReport would take for this round's
+    // finish.
+    localStorage.removeItem(relayPointsStorageKey());
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );

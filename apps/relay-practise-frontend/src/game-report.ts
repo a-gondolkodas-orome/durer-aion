@@ -14,11 +14,9 @@ import { trackRelayFinished } from "./tracking";
 export function handleGameReport(report: SendGameDataParams) {
   if (report.phase === "end" && report.component === "relay") {
     const points = report.G?.points ?? 0;
-    // A round can report its end twice: the board hands over a timed-out
-    // round's report as its end dialog opens, again after a reload, and the
-    // game's own follows if a late ruling then ends it. Each stores its score,
-    // but only the first counts as a finish; logging out to the round
-    // selector clears the score for the next round.
+    // A round can report its end more than once (see
+    // ClientRepository.keepRelayEnd): each stores its score, but only the
+    // first counts as a finish. startRelay() starts a round with none stored.
     const finishedBefore = localStorage.getItem(relayPointsStorageKey()) !== null;
     localStorage.setItem(relayPointsStorageKey(), String(points));
     // The stored state is null only when storage was cleared or corrupted
