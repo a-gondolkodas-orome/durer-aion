@@ -34,19 +34,8 @@ export function Login() {
   const { t } = useTranslation();
 
   return (
-    <Stack sx={{
-      maxWidth: 600,
-      marginTop: {
-        xs: "10px",
-        md: "0px",
-      },
-    }} data-testid="loginRoot">
-      <Stack sx={{
-        marginTop: {
-          xs: "25px",
-          md: "40px",
-        },
-      }}>
+    <Stack data-testid="loginRoot">
+      <Stack>
         <Stack sx={{
           fontSize: {
             xs: "25px",
@@ -68,7 +57,7 @@ export function Login() {
         }}>
           {t('login.loginInstruction')}
         </Stack>
-        <Stack>
+        <Stack sx={{ mt: 2 }}>
           <Form initialValues={{ joinCode: '' }}
             onSubmit={(values) => {
               if (!values.joinCode) {
@@ -98,6 +87,9 @@ export function Login() {
               placeholder="111-2222-333"
               style={{
                 width: '300px',
+                // The card is narrower than this on the smallest phones.
+                maxWidth: '100%',
+                boxSizing: 'border-box',
                 height: '40px',
                 borderWidth: '2px',
                 borderRadius: '5px',
@@ -116,6 +108,7 @@ export function Login() {
                   xs: '300px',
                   sm: '250px',
                 },
+                maxWidth: '100%',
                 height: '40px',
                 borderRadius: '5px',
                 fontSize: '18px',
@@ -139,9 +132,9 @@ export function Login() {
           xs: 11,
           md: 14,
         },
-         paddingTop: {
+        paddingTop: {
           xs: "20px",
-          md: "100px"
+          md: "40px"
         } }}>
         {t('login.fallback')}
       </Stack>

@@ -1,38 +1,54 @@
 import React from 'react';
 import { Box } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { SuperPicture } from './picture-component';
 
-// The home pages' layout: the content, and the logo in a column of its own
-// beside it, so the two cannot overlap at any width. Below md there is no room
-// for both, and the logo is left out.
+// The login pages' layout: the content on a card, and the logo beside it. Both
+// share one grid cell, the logo pinned to the right and the card on top of it,
+// so where the two do not fit side by side the logo slides under the card
+// rather than shrinking, and the card keeps the text readable over it. Its size
+// follows the width, as the card's does, so how much of it the card covers does
+// not depend on the window's height. Below md there is no room for both, and
+// the logo is left out.
 export function HomeLayout(props: { children: React.ReactNode }) {
   return (
     <Box sx={{
       display: 'grid',
-      // `fit-content`: the content column is as wide as the content asks, up
-      // to the relay practice card's 680px, and the logo takes the rest.
-      gridTemplateColumns: {
-        xs: 'minmax(0, 1fr)',
-        md: 'fit-content(680px) minmax(0, 1fr)',
-      },
-      columnGap: 6,
+      gridTemplateAreas: '"home"',
       alignItems: 'start',
       // The page's Container has no padding, so this is the gutter at every
-      // width: the header's, so the content lines up with its title.
+      // width: the header's, so the card lines up with its title.
       px: { xs: '10px', sm: '24px' },
       py: { xs: 3, md: 5 },
     }}>
-      <Box sx={{ minWidth: 0 }}>
-        {props.children}
-      </Box>
       <Box sx={{
-        display: { xs: 'none', md: 'flex' },
-        justifyContent: 'center',
+        gridArea: 'home',
+        justifySelf: 'end',
+        display: { xs: 'none', md: 'block' },
+        width: 'clamp(280px, 35%, 420px)',
       }} data-testid="homeLogo">
         <SuperPicture
           picture={{ webPUrl: "durerbackground.png", jpegOrPngUrl: "durerbackground.png", alt: "", title: "" }}
-          style={{ width: '100%', maxHeight: '70vh', objectFit: 'contain', opacity: .3 }}
+          style={{ display: 'block', width: '100%', height: 'auto', opacity: .3 }}
         />
+      </Box>
+      <Box sx={(theme) => ({
+        gridArea: 'home',
+        justifySelf: 'start',
+        position: 'relative',
+        zIndex: 1,
+        boxSizing: 'border-box',
+        width: '100%',
+        maxWidth: 680,
+        minWidth: 0,
+        borderRadius: 5,
+        px: { xs: 3, sm: 5 },
+        py: { xs: 4, sm: 5 },
+        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
+        boxShadow: '0 24px 60px rgba(36, 52, 112, 0.14)',
+        backdropFilter: 'blur(10px)',
+      })}>
+        {props.children}
       </Box>
     </Box>
   );

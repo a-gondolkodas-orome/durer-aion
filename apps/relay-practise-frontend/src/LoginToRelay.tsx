@@ -1,22 +1,12 @@
 import SelectRelayRound from './SelectRound';
 import { useTranslation } from 'react-i18next';
-import { Stack, useTheme, alpha } from '@mui/material';
+import { Stack } from '@mui/material';
 
 export function LoginToRelay() {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   return (
-    <Stack sx={{
-      width: '100%',
-      maxWidth: 680,
-      borderRadius: 5,
-      px: { xs: 3, sm: 5 },
-      py: { xs: 4, sm: 5 },
-      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
-      boxShadow: '0 24px 60px rgba(36, 52, 112, 0.14)',
-      backdropFilter: 'blur(10px)',
-    }} data-testid="loginRoot">
+    <Stack data-testid="loginRoot">
       <Stack sx={{
         fontSize: { xs: '2rem', sm: '2.75rem' },
         fontWeight: 800,
