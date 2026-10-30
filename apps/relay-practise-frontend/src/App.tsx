@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GameProvider, ClientRepoProvider, ErrorBoundary, Header, Layout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
+import { GameProvider, ClientRepoProvider, ErrorBoundary, Header, Layout, LoginLayout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
@@ -87,7 +87,6 @@ function App() {
                   sm: "0px",
                   md: "0px",
                 },
-                zIndex: 3,
                 position: "relative",
                 paddingBottom: "50px",
                 maxWidth: "1200px",
@@ -95,7 +94,7 @@ function App() {
               data-testid="mainRoot"
             >
               <ErrorBoundary>
-                {!teamState && <LoginToRelay />}
+                {!teamState && <LoginLayout><LoginToRelay /></LoginLayout>}
                 {teamState && <Relay state={teamState}/>}
               </ErrorBoundary>
             </Container>

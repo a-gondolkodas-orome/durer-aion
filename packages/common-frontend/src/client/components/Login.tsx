@@ -34,62 +34,44 @@ export function Login() {
   const { t } = useTranslation();
 
   return (
-    <Stack sx={{
-      display: 'flex',
-      height: '100%',
-      // The text's width, so the code field and the button fit on one line;
-      // the gutter goes outside it.
-      maxWidth: 600,
-      boxSizing: 'content-box',
-      // The page's Container has no padding, so this is the gutter at every
-      // width: the header's, so the text lines up with its title.
-      paddingLeft: { xs: '10px', sm: '24px' },
-      paddingRight: { xs: '10px', sm: '24px' },
-      marginTop: {
-        xs: "10px",
-        md: "0px",
-      },
-    }} data-testid="loginRoot">
+    <Stack data-testid="loginRoot">
+      <Stack sx={{
+        fontSize: {
+          xs: "25px",
+          sm: "40px",
+        }
+      }}>
+        {t('login.greeting')}<br/>
+        {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
+      </Stack>
       <Stack sx={{
         marginTop: {
-          xs: "25px",
-          md: "80px",
+          xs: "7px",
+          sm: "15px",
         },
+        fontSize: {
+          xs: "15px",
+          sm: "30px",
+        }
       }}>
-        <Stack sx={{
-          fontSize: {
-            xs: "25px",
-            md: "40px",
-          }
-        }}>
-          {t('login.greeting')}<br/>
-          {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
-        </Stack>
-        <Stack sx={{
-          marginTop: {
-            xs: "7px",
-            md: "15px",
-          },
-          fontSize: {
-            xs: "15px",
-            md: "30px",
-          }
-        }}>
-          {t('login.loginInstruction')}
-        </Stack>
-        <Stack>
-          <Form style={{ position: "relative", zIndex: 2 }} initialValues={{ joinCode: '' }}
-            onSubmit={(values) => {
-              if (!values.joinCode) {
-                enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
-                return;
-              }
-              login(values.joinCode).catch((err: unknown) => {
-                // A rejection that is not an Error has no `message`, and the snackbar
-                // then shows an empty box where the reason should be.
-                enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
-              });
-            }}>
+        {t('login.loginInstruction')}
+      </Stack>
+      <Stack sx={{ mt: 2 }}>
+        <Form initialValues={{ joinCode: '' }}
+          onSubmit={(values) => {
+            if (!values.joinCode) {
+              enqueueSnackbar(t('login.error.empty'), { variant: 'error' });
+              return;
+            }
+            login(values.joinCode).catch((err: unknown) => {
+              // A rejection that is not an Error has no `message`, and the snackbar
+              // then shows an empty box where the reason should be.
+              enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
+            });
+          }}>
+          {/* Wrapped, the button goes under the field at the field's width;
+              side by side, it takes what the card has left. */}
+          <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '10px' }}>
             <Field
               name="joinCode"
               type="text"
@@ -107,6 +89,9 @@ export function Login() {
               placeholder="111-2222-333"
               style={{
                 width: '300px',
+                // The card is narrower than this on the smallest phones.
+                maxWidth: '100%',
+                boxSizing: 'border-box',
                 height: '40px',
                 borderWidth: '2px',
                 borderRadius: '5px',
@@ -121,36 +106,26 @@ export function Login() {
               color='primary'
               variant='contained'
               sx={{
-                width: {
-                  xs: '300px',
-                  sm: '250px',
-                },
+                flex: '1 1 250px',
+                maxWidth: '300px',
                 height: '40px',
                 borderRadius: '5px',
                 fontSize: '18px',
-                marginTop: {
-                  xs: '10px',
-                  sm: '0px'
-                },
-                marginLeft: {
-                  xs: '0px',
-                  sm: '10px'
-                }
               }}
             >
               {t('login.loginButton')}
             </Button>
-          </Form>
-        </Stack>
+          </Stack>
+        </Form>
       </Stack>
       <Stack sx={{
         fontSize: {
           xs: 11,
-          md: 14,
+          sm: 14,
         },
-         paddingTop: {
+        paddingTop: {
           xs: "20px",
-          md: "100px"
+          sm: "40px"
         } }}>
         {t('login.fallback')}
       </Stack>

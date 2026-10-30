@@ -48,7 +48,6 @@ export function Header(props: {
       <Container maxWidth={false} sx={{
         paddingLeft: { xs: '10px', sm: '24px' },
         paddingRight: { xs: '10px', sm: '24px' },
-        zIndex: 3,
         position: 'relative',
         maxWidth: '1200px',
         flexDirection: 'row',

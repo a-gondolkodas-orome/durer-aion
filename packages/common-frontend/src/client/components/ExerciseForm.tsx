@@ -65,7 +65,6 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
     </Stack>
     <Stack>
       <Form
-        style={{ position: "relative", zIndex: 2 }}
         key={`result-${props.attempt}`}
         initialValues={{ result: '' }}
         // The input is focused for you when a task arrives, so clicking away to
