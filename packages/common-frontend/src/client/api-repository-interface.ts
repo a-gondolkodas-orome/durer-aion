@@ -38,7 +38,8 @@ export interface ClientRepository {
   // game ends a match past its time only on a move arriving after the grace
   // for late answers, and a team waiting at the buzzer sends none. Locally the
   // score toHome() records comes from the end report, so the board hands it
-  // over itself; online the server keeps the score from the match state.
-  keepRelayEnd(report: RelayEndReport): void;
+  // over itself. Only the local apps have one: online the server keeps the
+  // score from the match state.
+  keepRelayEnd?(report: RelayEndReport): void;
 
 }

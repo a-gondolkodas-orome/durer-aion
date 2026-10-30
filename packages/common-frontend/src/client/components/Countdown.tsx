@@ -69,8 +69,8 @@ function measureClock(endMs: number, serverRemainingMs: number) {
 
 function formatCountdown(msRemaining: number) {
     // add some seconds: the server is the single point of truth, do not let the frontend
-    // stop the player from submitting! The zero holds through the relay's grace
-    // for late answers, until the time is shown as over.
+    // stop the player from submitting! The zero holds through the games' 10 s
+    // grace for late answers, until the time is shown as over.
     if (msRemaining <= 0 && msRemaining > -10000) {
         return "00:00:00";
     }

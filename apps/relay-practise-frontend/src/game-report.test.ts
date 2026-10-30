@@ -64,6 +64,17 @@ describe("handleGameReport", () => {
       expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: "12", round: "final", category: "C+", points: 17 });
     });
 
+    // Regression: a timed-out round's report, handed over by the board, came
+    // again after a reload, and each counted a finish.
+    test("is sent once for a round that reports its end twice, which keeps the later score", () => {
+      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
+      handleGameReport({ component: "relay", phase: "end", G: { points: 20 } });
+
+      expect(track).toHaveBeenCalledOnce();
+      expect(localStorage.getItem(RELAY_KEY)).toStrictEqual("20");
+    });
+
     test("is not sent for a step report", () => {
       readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
       handleGameReport({ component: "relay", phase: "step", answer: 42, G: { currentProblem: 2 } });

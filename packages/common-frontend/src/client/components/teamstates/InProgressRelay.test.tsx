@@ -7,6 +7,7 @@ import type { Ctx } from 'boardgame.io';
 import { GUESSER_PLAYER, MyGameState } from 'game';
 import { ClientRepoProvider } from '../../client-repo-context';
 import { MockClientRepository } from '../../mock-client-repository';
+import type { ClientRepository } from '../../api-repository-interface';
 import { InProgressRelay } from './InProgressRelay';
 
 vi.mock('react-i18next', () => ({
@@ -40,10 +41,12 @@ const G: MyGameState = {
 // Relay practice's board: its way out logs out to the round selector, where
 // the dry run's reloads the page, which jsdom cannot.
 async function renderBoard(ctx: Partial<Ctx>) {
-  const repo = new MockClientRepository();
+  const repo: ClientRepository = new MockClientRepository();
   // A team in the middle of a relay match.
   await repo.joinWithCode('2');
-  const keepRelayEnd = vi.spyOn(repo, 'keepRelayEnd');
+  // Only the local apps' repositories keep an end report; the mock has none.
+  const keepRelayEnd = vi.fn();
+  repo.keepRelayEnd = keepRelayEnd;
   const moves = { getTime: vi.fn(), startGame: vi.fn() };
   const props = { G, ctx: { currentPlayer: GUESSER_PLAYER, ...ctx }, moves } as unknown as Parameters<typeof InProgressRelay>[0];
   render(<ClientRepoProvider value={repo}><InProgressRelay {...props} selectRoundOnEnd/></ClientRepoProvider>);
