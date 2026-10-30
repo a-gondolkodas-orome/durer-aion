@@ -233,5 +233,11 @@
   },
   "NumberPyramid": {
     "name": "Number Pyramid"
+  },
+  "TwoXsOneO": {
+    "name": "2 Xs, then 1 O"
+  },
+  "TwoXsOneODE": {
+    "name": "1 O, then 2 Xs"
   }
 }

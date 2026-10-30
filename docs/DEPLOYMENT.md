@@ -262,7 +262,7 @@ npm run stack:prod
 
 Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
 builds the frontend, builds the backend image, starts the three containers detached, and
-returns only once the backend is healthy. When it is not:
+returns only once the backend and nginx are healthy. When they are not:
 
 ```bash
 npm run stack:ps
@@ -280,6 +280,11 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
+
+Teams cannot be deleted. A bad import is undone by dropping the volume
+(`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
+out, import the `.export` rather than the original TSV: it carries the codes, where
+the original would generate new ones.
 
 You can also run the importer as a one-off container without the stack:
 

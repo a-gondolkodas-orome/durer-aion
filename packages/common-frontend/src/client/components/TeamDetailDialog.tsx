@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useRemoveTeam } from '../hooks/user-hooks';
+import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
 import { Dispatch, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
@@ -9,7 +9,7 @@ import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface, DELETE_WORDS } from './ConfirmDialog';
+import { ConfirmDialogInterface } from './ConfirmDialog';
 import { Countdown } from './Countdown';
 import { relayProblemResults } from 'game';
 import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
@@ -17,19 +17,14 @@ import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-/// `onRemoved` fires once the server has dropped the team: the list this dialog
-/// was opened from is stale from that moment, and the dialog cannot refresh it.
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
-  onRemoved: () => void,
 }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
-  const repoRemoveTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
   const [teamState, setTeamState] = useState(props.data);
-  const [removing, setRemoving] = useState(false);
 
   // The games' own points, not the scores stored on the team (see
   // FinishedMatchStatus in the `schemas` package).
@@ -38,19 +33,6 @@ export function TeamDetailDialog(props: {
   const sum = relayPoints === undefined || strategyPoints === undefined
     ? undefined
     : relayPoints + strategyPoints;
-
-  const removeTeam = async (teamId: string) => {
-    setRemoving(true);
-    try {
-      await repoRemoveTeam(teamId);
-      enqueueSnackbar('Csapat törölve', { variant: 'success' });
-      props.onRemoved();
-    } catch (e: unknown) {
-      enqueueSnackbar((e instanceof Error && e.message) || 'Hiba történt', { variant: 'error' });
-    } finally {
-      setRemoving(false);
-    }
-  };
 
   return (
     <Stack
@@ -61,6 +43,7 @@ export function TeamDetailDialog(props: {
         fontSize: 14,
       }}>
       <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{teamState.teamName}</Stack>
+      <Stack sx={{ color: 'text.secondary', paddingBottom: "12px" }}>Friss adatokért töltsd újra az oldalt.</Stack>
       <Stack sx={{ paddingBottom: "24px" }}>
         <HiddenField label="E-mail" value={teamState.email}/>
         <HiddenField label="Belépési kód" value={teamState.joinCode}/>
@@ -110,24 +93,6 @@ export function TeamDetailDialog(props: {
           >reset
       </Button>}
       <Stack sx={{ fontSize: 24, marginTop: "24px" }}>Összesen: {sum ?? "?"} pont</Stack>
-      <Stack sx={{ marginTop: "24px", padding: "12px", border: "1px solid", borderColor: "error.main", borderRadius: "4px", maxWidth: 400 }}>
-        <Stack sx={{ fontSize: 16, fontWeight: "bold", color: "error.main" }}>Veszélyzóna</Stack>
-        <Button
-          sx={{ maxWidth: "200px", margin: "10px 0" }}
-          color="error"
-          variant="contained"
-          disabled={removing}
-          onClick={() => {
-            props.setConfirmDialog({
-              text: `Biztosan törlöd a(z) ${teamState.teamName} csapatot? A verseny közben semmiképpen se törölj csapatokat.`,
-              requiredWords: DELETE_WORDS,
-              confirm: async () => removeTeam(adminTeamId(teamState)),
-            });
-          }}
-        >
-          Csapat törlése
-        </Button>
-      </Stack>
     </Stack>
   )
 }
@@ -139,6 +104,15 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
   const getLogs = useGetLogs();
   const [matchLogs, setMatchLogs] = useState<unknown | null>(null);
   const { mutate } = useSWRConfig();
+
+  const showLogs = async (matchId: string) => {
+    try {
+      setMatchLogs(await getLogs(matchId));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  };
 
   switch (props.data.state) {
     case "IN PROGRESS": {
@@ -213,9 +187,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
       variant='contained'
       color='primary'
       onClick={() => {
-        void getLogs(inProgressState.matchID).then(logs => {
-          setMatchLogs(logs);
-        });
+        void showLogs(inProgressState.matchID);
       }}>logok Lekérése</Button>
       <Button
       sx={{
@@ -251,9 +223,7 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           variant='contained'
           color='primary'
           onClick={() => {
-            void getLogs(finishedState.matchID).then(logs => {
-              setMatchLogs(logs);
-            });
+            void showLogs(finishedState.matchID);
           }}>logok Lekérése</Button>
           <Button
           sx={{
@@ -318,9 +288,12 @@ function StoredScore(props: { matchId: string, score: number }) {
 
 function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProgress?: boolean }) {
   const [msRemaining, setMsRemaining] = useState<number>(10000);
-  const { data } = useMatchStateData(props.matchId);
+  const { data, error } = useMatchStateData(props.matchId);
   if (!data) {
-    return null;
+    // SWR keeps retrying, so an error clears once a request succeeds.
+    return error
+      ? <Stack sx={{ color: 'error.main' }}>A játék állását nem sikerült betölteni.</Stack>
+      : <Stack>A játék állása töltődik…</Stack>;
   }
   // Which match this is, read off the payload rather than taken on trust from
   // isRelay — see MatchStateDto.

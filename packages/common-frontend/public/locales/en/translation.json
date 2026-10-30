@@ -39,6 +39,7 @@
     "pointsUnit_other": "points",
     "remainingTime": "Remaining time",
     "warning": {
+      "connectionLost": "Connection to the server lost. You can't make a move or submit an answer until it's back.",
       "timeNotMatch": "Your computer's clock is not synchronised with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
       "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."
     }
@@ -46,7 +47,7 @@
   "header": {
     "logout": "logout",
     "subtitle": "Online round",
-    "title": "XIX. Dürer Competition",
+    "title": "XX. Dürer Competition",
     "titlePlain": "Dürer Competition",
     "relayPractise": "Practising relays"
   },

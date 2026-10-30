@@ -78,7 +78,7 @@ export interface TeamState {
  * the cookie keeps the life the previous answer gave it, and the client asks
  * `/team/me` often enough that a renewal is never far away.
  *
- * A cookie naming no team — deleted, or a database re-imported since the
+ * A cookie naming no team — a database wiped and imported again since the
  * login — is expired on the way out, so the browser does not keep sending it.
  * That answer is written, not thrown: koa's default error handler strips every
  * header already set before it writes the error, `Set-Cookie` included, so a

@@ -27,6 +27,9 @@ export function ChooserItem(props: {
   const theme = useTheme();
   const { t } = useTranslation();
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // The status changes only once the start has answered; until then a second
+  // click would send a second start.
+  const [starting, setStarting] = useState(false);
   const closeDetails = () => setDetailsOpen(false);
   // The round's end screen, from the summary saved with the finished match. A
   // match without one has nothing to show: for example a record from before the
@@ -155,12 +158,9 @@ export function ChooserItem(props: {
         alignSelf: 'center',
         textTransform: 'none',
       }} variant='contained' color='primary' onClick={() => {
-        if (props.type === "relay") {
-          void startRelay()
-        } else {
-          void startStrategy()
-        }
-      }} disabled={props.status.state !== "NOT STARTED"}>
+        setStarting(true);
+        void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
+      }} disabled={starting || props.status.state !== "NOT STARTED"}>
         {props.status.state === "FINISHED" ? t('chooser.finished') : t('chooser.start')}
       </Button>
       <Button sx={{
