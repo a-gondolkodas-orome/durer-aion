@@ -79,8 +79,8 @@ it.each<[Game, Game]>([
 
   const matches = await database.db.listMatches({});
   const team = await database.teams.getTeam({ teamId: TEAM_ID });
-  const running = [team?.relayMatch, team?.strategyMatch].filter(match => match?.state === "IN PROGRESS");
+  const started = [team?.relayMatchID, team?.strategyMatchID].filter(id => id != null);
   expect(statuses.sort()).toStrictEqual([200, 403]);
   expect(matches).toHaveLength(1);
-  expect(running).toMatchObject([{ matchID: matches[0] }]);
+  expect(started).toStrictEqual([matches[0]]);
 });

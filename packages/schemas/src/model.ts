@@ -7,8 +7,11 @@ export interface NotStartedMatchStatus {
   state: 'NOT STARTED';
 }
 
-/// Set when the match is created. `endAt` mirrors the match's `G.end`, which an
-/// admin can push later with "add minutes" — only while the match is here.
+/// A match the team can still play. Online, this and FINISHED below are read
+/// off the match's own state each time a team is served (the backend's
+/// server/match_status.ts) rather than stored: `endAt` is the match's `G.end`,
+/// which an admin's "add minutes" moves. The offline apps build both from what
+/// their local match reports (their client-repository.ts).
 export interface InProgressMatchStatus {
   state: 'IN PROGRESS';
   startAt: Date;
@@ -16,22 +19,15 @@ export interface InProgressMatchStatus {
   matchID: string;
 }
 
-/// Set by `closeMatch`, either when boardgame.io reports the game over or when
-/// the team's state is read after `endAt` has passed. FINISHED only decides
-/// navigation: the team may not start this match again and may go back home.
+/// A match whose game has ended, or whose time is up. `score` is the match's
+/// `G.points` and the results are summarised from the same state, so an answer
+/// the game still judges just past the end counts when it lands. FINISHED also
+/// decides navigation: the team may not start this match again and may go back
+/// home.
 ///
-/// It does not freeze the result. `score` is a copy of `G.points` taken when
-/// the match was closed, and a game still accepts some moves shortly after
-/// `G.end` (each game's `onMove`/`onEnd` says which), so `G.points` can grow
-/// after an early close. A later game over closes the match again and
-/// overwrites the copy; a match that never reaches game over keeps it.
-/// `G.points` in the match state is the result — `scripts/admin.py` scores
-/// from it and reports where `score` disagrees.
-///
-/// `relayResults` and `strategyResults` are summarised from the match state and
-/// kept beside `score` for the home page: the first on a relay match, the
-/// second on a strategy match. `ChooserItem` in common-frontend says when a
-/// finished match has neither.
+/// `relayResults` and `strategyResults` are for the home page: the first on a
+/// relay match, the second on a strategy match. `ChooserItem` in common-frontend
+/// says when a finished match has neither.
 export interface FinishedMatchStatus {
   state: 'FINISHED';
   startAt: Date;
