@@ -69,6 +69,22 @@ describe('TeamsRepository.finishMatch', () => {
   });
 });
 
+describe('TeamsRepository.goHome', () => {
+  // The route used to check a team read before a start landed, and then
+  // overwrote the start's page.
+  it('takes the team home only while no match is in progress', async () => {
+    const { teamId } = await database.teams.insertTeam(team());
+    expect(await database.teams.goHome(teamId)).toBe(true);
+
+    await TeamModel.update({
+      pageState: 'STRATEGY',
+      strategyMatch: { state: 'IN PROGRESS', matchID: 'current', startAt: new Date(), endAt: new Date() },
+    }, { where: { teamId } });
+    expect(await database.teams.goHome(teamId)).toBe(false);
+    expect((await database.teams.getTeam({ teamId }))?.pageState).toBe('STRATEGY');
+  });
+});
+
 describe('TeamsRepository.fetch', () => {
   it('finds the teams whose notes hold every fragment, whatever its case, wildcards read literally', async () => {
     await database.teams.insertTeam(team({ teamname: 'Alpha', other: 'Budapest, 100% motivated, a_b' }));

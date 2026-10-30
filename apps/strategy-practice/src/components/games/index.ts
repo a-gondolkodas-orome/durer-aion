@@ -102,4 +102,5 @@ export { TriangularGridRopes15 } from './totem-poles/triangular-grid-ropes-15/tr
 export { TwelveSquares } from './twelve-squares/twelve-squares';
 export { TwoOfThreeTakeaway } from './two-of-three-takeaway/two-of-three-takeaway';
 export { TwoTimesTwo } from './distinct-squares/two-times-two/two-times-two';
+export { TwoXsOneO, TwoXsOneODE } from './two-xs-one-o/two-xs-one-o';
 export { WaningStones } from './single-pile-removal/waning-stones/waning-stones';

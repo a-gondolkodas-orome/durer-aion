@@ -4,7 +4,7 @@ import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
-import { InProgressMatchStatus } from 'schemas';
+import { GameType, InProgressMatchStatus } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
@@ -14,7 +14,7 @@ import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } f
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
-import { appendOtherNote } from './model';
+import { TeamModel, appendOtherNote } from './model';
 
 /**
  *
@@ -38,6 +38,15 @@ export function configureTeamsRouter(
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  // Overlapping starts can both pass `allowedToStart`; the conditional write
+  // picks one, and the loser's match, which no team points at, is wiped.
+  async function claimStart(ctx: Server.AppCtx, team: TeamModel, gameType: GameType, match: InProgressMatchStatus) {
+    if (!(await teams.startMatch(team, gameType, match))) {
+      await ctx.db.wipe(match.matchID);
+      ctx.throw(403, "Team is not allowed to start game.");
+    }
+  }
 
   // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
   // a route a later version adds is closed too. It runs first only because
@@ -371,10 +380,7 @@ export function configureTeamsRouter(
     if (match.startAt === null || match.endAt === null) {
       console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
     }
-    await team.update({
-      pageState: "RELAY",
-      relayMatch: match,
-    });
+    await claimStart(ctx, team, "RELAY", match);
     ctx.body = body;
   });
 
@@ -388,10 +394,7 @@ export function configureTeamsRouter(
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    await team.update({
-      pageState: "STRATEGY",
-      strategyMatch: await startMatchStatus(body.matchID, ctx),
-    });
+    await claimStart(ctx, team, "STRATEGY", await startMatchStatus(body.matchID, ctx));
     ctx.body = body;
   });
 
@@ -400,12 +403,10 @@ export function configureTeamsRouter(
    */
   router.post<TeamState>("/team/me/gohome", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
+    if (!(await teams.goHome(team.teamId)))
       ctx.throw(403, "Not allowed, match in progress.")
 
-    await team.update({
-      pageState: "HOME",
-    });
+    team.set({ pageState: "HOME" });
     ctx.body = publicTeamView(team);
   });
 }

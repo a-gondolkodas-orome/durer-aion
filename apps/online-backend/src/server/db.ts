@@ -1,6 +1,6 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { FinishedMatchStatus, InProgressMatchStatus } from 'schemas';
+import { FinishedMatchStatus, GameType, InProgressMatchStatus } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
@@ -84,6 +84,39 @@ export class TeamsRepository {
     });
     return updated > 0;
   }
+
+  /**
+   * Puts the team into its new match, but only while its page and both match
+   * states are still the ones `team` holds, so of two starts made from the
+   * same reading only one is written. Returns whether the row was written.
+   */
+  async startMatch(team: TeamModel, gameType: GameType, status: InProgressMatchStatus): Promise<boolean> {
+    const [updated] = await TeamModel.update({
+      pageState: gameType,
+      [gameType === "RELAY" ? "relayMatch" : "strategyMatch"]: status,
+    }, {
+      where: {
+        teamId: team.teamId,
+        pageState: team.pageState,
+        relayMatch: { state: team.relayMatch.state },
+        strategyMatch: { state: team.strategyMatch.state },
+      } as WhereOptions<TeamModel>,
+    });
+    return updated > 0;
+  }
+  /**
+   * Takes the team home unless a match is in progress, checked in the UPDATE
+   * itself so that a start landing after the caller read the team is not
+   * overwritten. Returns whether the row was written.
+   */
+  async goHome(teamId: string): Promise<boolean> {
+    const notInProgress = { state: { [Op.ne]: "IN PROGRESS" } };
+    const [updated] = await TeamModel.update({ pageState: "HOME" }, {
+      where: { teamId, relayMatch: notInProgress, strategyMatch: notInProgress } as WhereOptions<TeamModel>,
+    });
+    return updated > 0;
+  }
+
   async insertTeam(
       { teamname, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string }) {

@@ -69,17 +69,15 @@ const scenario = () => {
   commit(work, { 'shared.txt': 'public\n', 'engine.txt': 'engine\n' }, 'public base');
   git('-C', work, 'push', '--quiet', 'origin', REF);
 
+  // Under the scenario's root, so afterEach removes it with the rest.
+  const workdir = () => mkdtempSync(join(root, 'workdir-'));
+
   return {
     source,
     target,
     work,
-    sync: () => syncBranch({
-      source,
-      target,
-      ref: REF,
-      workdir: mkdtempSync(join(root, 'workdir-')),
-      stdio: 'ignore',
-    }),
+    workdir,
+    sync: () => syncBranch({ source, target, ref: REF, workdir: workdir(), stdio: 'ignore' }),
     // Everything read back out of a bare repository, which has no working tree to look at.
     filesIn: repo => git('--git-dir', repo, 'ls-tree', '-r', '--name-only', REF).trim().split('\n'),
     fileIn: (repo, name) => git('--git-dir', repo, 'show', `${REF}:${name}`),
@@ -186,10 +184,10 @@ describe('the direction of a sync', () => {
   });
 
   it('refuses a ref that is not a sync branch before touching either repository', () => {
-    const { source, target } = scenario();
+    const { source, target, workdir } = scenario();
 
     expect(() => syncBranch({
-      source, target, ref: 'main', workdir: mkdtempSync(join(tmpdir(), 'sync-mirror-test-')), stdio: 'ignore',
+      source, target, ref: 'main', workdir: workdir(), stdio: 'ignore',
     })).toThrow(/not a sync-<name> branch/);
   });
 });
