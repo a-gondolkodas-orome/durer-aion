@@ -1,4 +1,4 @@
-import type { DeletedTeamDto, MatchStateDto, RestoreResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { BoardProps } from 'boardgame.io/react';
 
 // The relay match is judged and timed where it runs — on the server online,
@@ -28,12 +28,6 @@ export interface ClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<TeamModelDto>
-  removeTeam(teamId: string): Promise<void>;
-  /** Every team at once, archived as one batch: how many, and the batch's `deletedAt`. */
-  removeAllTeams(): Promise<{ deleted: number, deletedAt: string }>;
-  getDeleted(): Promise<DeletedTeamDto[]>;
-  restoreTeam(deletionId: number): Promise<void>;
-  restoreBatch(deletedAt: string): Promise<RestoreResultDto>;
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
   // Unlike startRelay, which moves the team to the relay page, this dispatches
   // the opening move of the match once the board is up.

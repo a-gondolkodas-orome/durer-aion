@@ -572,5 +572,19 @@ export const gameList: GameList = {
     featured: true,
     icon: 'pyramid',
     credit: { suggestedBy: ['Imolay András'] }
+  },
+  TwoXsOneO: {
+    year: { k: 'XX. (26/27)', v: '26/27' },
+    round: 'online',
+    category: ['C'],
+    icon: 'board',
+    credit: { developedBy: ['Hajós Balázs'] }
+  },
+  TwoXsOneODE: {
+    year: { k: 'XX. (26/27)', v: '26/27' },
+    round: 'online',
+    category: ['D', 'E'],
+    icon: 'board',
+    credit: { developedBy: ['Hajós Balázs'] }
   }
 };

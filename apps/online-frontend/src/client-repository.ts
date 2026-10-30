@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, DeletedTeamDto, RestoreResultDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -213,75 +213,6 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
-  }
-
-  async removeTeam(teamId: string): Promise<void> {
-    const url = urlcat('/team/admin/:teamId/remove', {
-      teamId: teamId,
-    });
-    try {
-      await apiAxiosInstance().delete(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      // The server answers 404 for a team it no longer has: the list the admin
-      // acted on was stale, which is worth saying in so many words.
-      if (err.response?.status === 404) {
-        throw new Error('A csapat már nem létezik', { cause: e });
-      }
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-  }
-
-  async removeAllTeams(): Promise<{ deleted: number, deletedAt: string }> {
-    try {
-      const result = await apiAxiosInstance().delete('/team/admin/all');
-      return result.data as { deleted: number, deletedAt: string };
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-  }
-
-  async getDeleted(): Promise<DeletedTeamDto[]> {
-    try {
-      const result = await apiAxiosInstance().get('/team/admin/deleted');
-      return result.data as DeletedTeamDto[];
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-  }
-
-  async restoreTeam(deletionId: number): Promise<void> {
-    const url = urlcat('/team/admin/deleted/:deletionId/restore', { deletionId });
-    try {
-      await apiAxiosInstance().post(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      if (err.response?.status === 404) {
-        throw new Error('A csapat már nincs az archívumban', { cause: e });
-      }
-      // The server says which column a live team holds, in the body.
-      if (err.response?.status === 409) {
-        throw new Error(`Ütközik egy élő csapattal: ${String(err.response.data)}`, { cause: e });
-      }
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-  }
-
-  async restoreBatch(deletedAt: string): Promise<RestoreResultDto> {
-    try {
-      const result = await apiAxiosInstance().post('/team/admin/deleted/restore', { deletedAt });
-      return result.data as RestoreResultDto;
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
   }
 
   // Scoring and the clock are server-authoritative, so these travel as the

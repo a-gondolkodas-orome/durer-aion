@@ -264,7 +264,7 @@ multi-stage game names the shape instead, next to the moves that produce it:
 ```ts
 // gameplay.ts — the payload only; the engine adds the `| null` every turn
 // starts and ends in
-export type TurnState = { firstSelectedPile: number };
+export interface TurnState { firstSelectedPile: number }
 ```
 
 ```tsx

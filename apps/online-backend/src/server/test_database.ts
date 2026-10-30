@@ -27,10 +27,12 @@ export async function startTestDatabase() {
   // Syncs every model on this Sequelize, the teams' tables included.
   await db.connect();
   return {
+    /** boardgame.io's match store, on the same connection as the teams. */
+    db,
     teams,
-    /** Empties the teams and their archive, for a test that starts from nothing. */
+    /** Empties the teams and the matches, for a test that starts from nothing. */
     async reset() {
-      await db.sequelize.query('TRUNCATE "Teams", "DeletedTeams"');
+      await db.sequelize.truncate();
     },
     async stop() {
       await db.sequelize.close();
