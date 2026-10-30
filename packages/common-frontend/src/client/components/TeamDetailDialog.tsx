@@ -1,7 +1,7 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
 import { Button } from '@mui/material';
-import { Dispatch, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { TeamModelDto, MatchStatus, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
@@ -10,26 +10,27 @@ import Form from "./form";
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface } from './ConfirmDialog';
-import { Countdown } from './Countdown';
 import { relayProblemResults } from 'game';
 import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+/// `onChanged` fires with the team's new row once an action has changed it:
+/// the list this dialog was opened from is stale from that moment, and `data`
+/// is read off that list.
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
+  onChanged: (team: TeamModelDto) => void,
 }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const { enqueueSnackbar } = useSnackbar();
-  const [teamState, setTeamState] = useState(props.data);
+  const team = props.data;
 
-  // The games' own points, not the scores stored on the team (see
-  // FinishedMatchStatus in the `schemas` package).
-  const relayPoints = useMatchPoints(teamState.relayMatch);
-  const strategyPoints = useMatchPoints(teamState.strategyMatch);
+  const relayPoints = useMatchPoints(team.relayMatch);
+  const strategyPoints = useMatchPoints(team.strategyMatch);
   const sum = relayPoints === undefined || strategyPoints === undefined
     ? undefined
     : relayPoints + strategyPoints;
@@ -42,24 +43,23 @@ export function TeamDetailDialog(props: {
         padding: "12px",
         fontSize: 14,
       }}>
-      <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{teamState.teamName}</Stack>
+      <Stack sx={{ fontSize: 24, paddingBottom: "12px" }}>{team.teamName}</Stack>
       <Stack sx={{ color: 'text.secondary', paddingBottom: "12px" }}>Friss adatokért töltsd újra az oldalt.</Stack>
       <Stack sx={{ paddingBottom: "24px" }}>
-        <HiddenField label="E-mail" value={teamState.email}/>
-        <HiddenField label="Belépési kód" value={teamState.joinCode}/>
+        <HiddenField label="E-mail" value={team.email}/>
+        <HiddenField label="Belépési kód" value={team.joinCode}/>
       </Stack>
       <Stack sx={{ fontSize: 16 }}>Relay:</Stack>
-      <MatchStatusField name={teamState.teamName} data={teamState.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog}/>
-      {teamState.relayMatch.state !== "NOT STARTED" && <Button sx={{
+      <MatchStatusField key={`relay ${matchKey(team.relayMatch)}`} name={team.teamName} data={team.relayMatch} isRelay={true} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
+      {team.relayMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
+              text: `Erősítsd meg, hogy ${team.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
-                  const changed = await resetRelay(adminTeamId(teamState));
-                  setTeamState(changed);
+                  props.onChanged(await resetRelay(adminTeamId(team)));
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -71,17 +71,16 @@ export function TeamDetailDialog(props: {
         >reset</Button>}
 
       <Stack sx={{ fontSize: 16, marginTop: "24px" }}>Strategy:</Stack>
-        <MatchStatusField name={teamState.teamName} data={teamState.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog}/>
-      {teamState.strategyMatch.state !== "NOT STARTED" && <Button sx={{
+        <MatchStatusField key={`strategy ${matchKey(team.strategyMatch)}`} name={team.teamName} data={team.strategyMatch} isRelay={false} setConfirmDialog={props.setConfirmDialog} onChanged={props.onChanged}/>
+      {team.strategyMatch.state !== "NOT STARTED" && <Button sx={{
         maxWidth: "125px",
       }}
           onClick={() => {
             props.setConfirmDialog({
-              text: `Erősítsd meg, hogy ${teamState.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
+              text: `Erősítsd meg, hogy ${team.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
               confirm: async () => {
                 try {
-                  const changed = await resetStrategy(adminTeamId(teamState));
-                  setTeamState(changed);
+                  props.onChanged(await resetStrategy(adminTeamId(team)));
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e: unknown) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -97,7 +96,13 @@ export function TeamDetailDialog(props: {
   )
 }
 
-function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+/// Remounts the field for another match, so the logs fetched for one are not
+/// shown under the next.
+function matchKey(status: MatchStatus) {
+  return status.state === "NOT STARTED" ? "" : status.matchID;
+}
+
+function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boolean, setConfirmDialog: Dispatch<ConfirmDialogInterface | null>, onChanged: (team: TeamModelDto) => void }) {
   const theme = useTheme();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
@@ -137,9 +142,11 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
             text: `Erősítsd meg, hogy ${props.name} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
             confirm: async () => {
               try {
-                await addMinutes(inProgressState.matchID, values.time);
-                // The dialog's total reads the new `G.end` from here.
+                const changed = await addMinutes(inProgressState.matchID, values.time);
+                // The match's new `G.end`, which its end and countdown below
+                // read, and the team's new `endAt`, which team-state-end reads.
                 await mutate(matchStateKey(inProgressState.matchID));
+                props.onChanged(changed);
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
                 const message = e instanceof Error ? e.message : "Váratlan hiba történt";
@@ -214,7 +221,6 @@ function MatchStatusField(props: { name: string, data: MatchStatus, isRelay: boo
           end: {formatTime(finishedState.endAt)}<br/>
 
           <Stack><MatchStatusDataField matchId={finishedState.matchID} isRelay={props.isRelay}/></Stack>
-          <StoredScore matchId={finishedState.matchID} score={finishedState.score}/>
           <Button
           sx={{
             width: '200px',
@@ -261,36 +267,25 @@ function useMatchStateData(matchId: string | null) {
   return useSWR(matchId === null ? null : matchStateKey(matchId), ([, id]) => matchState(id));
 }
 
-/// A match's share of the total, `undefined` until it is known, so a
-/// mid-round total never reads as final. An IN PROGRESS match past its end
-/// counts: a team that left before the end never closes it. The end is
-/// `G.end`, not the team's `endAt`, which adding minutes does not reload.
+/// A match's share of the total, `undefined` while it runs, so a mid-round
+/// total never reads as final. A finished match's `score` is its `G.points` as
+/// of the list's last load; the match state the dialog fetches is fresher, for
+/// an answer judged just past the end.
 function useMatchPoints(status: MatchStatus): number | undefined {
-  const matchId = status.state === "NOT STARTED" ? null : status.matchID;
-  const { data, error } = useMatchStateData(matchId);
+  const { data } = useMatchStateData(status.state === "FINISHED" ? status.matchID : null);
   if (status.state === "NOT STARTED")
     return 0;
-  if (data)
-    return status.state === "FINISHED" || new Date(data.G.end).getTime() < Date.now() ? data.G.points : undefined;
-  if (error && status.state === "FINISHED")
-    return status.score;
-  return undefined;
+  if (status.state === "IN PROGRESS")
+    return undefined;
+  return data?.G.points ?? status.score;
 }
 
-function StoredScore(props: { matchId: string, score: number }) {
-  const { data } = useMatchStateData(props.matchId);
-  return (<>
-    <Stack>Csapatnál tárolt pontszám: {props.score}</Stack>
-    {data && data.G.points !== props.score &&
-      <Stack sx={{ color: 'red' }}>Eltér a játék pontszámától ({data.G.points}), az a hivatalos.</Stack>}
-  </>);
-}
-
+/// SWR keeps retrying a failed request, so an error with no data clears once
+/// one succeeds, and an error beside data means the shown state is the last
+/// one that loaded.
 function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProgress?: boolean }) {
-  const [msRemaining, setMsRemaining] = useState<number>(10000);
   const { data, error } = useMatchStateData(props.matchId);
   if (!data) {
-    // SWR keeps retrying, so an error clears once a request succeeds.
     return error
       ? <Stack sx={{ color: 'error.main' }}>A játék állását nem sikerült betölteni.</Stack>
       : <Stack>A játék állása töltődik…</Stack>;
@@ -301,23 +296,32 @@ function MatchStatusDataField(props: { matchId: string, isRelay: boolean, inProg
   const strategyG = 'numberOfTries' in data.G ? data.G : null;
   return (<>
   <Stack>
+      { error && <Stack sx={{ color: 'error.main' }}>A játék állását nem sikerült frissíteni, a lenti adatok elavultak lehetnek.</Stack>}
       { props.isRelay && relayG && <Stack>Aktuális feladatszám: {relayG.currentProblem + 1}</Stack>}
       { !props.isRelay && strategyG && <Stack>próbálkozások száma: {strategyG.numberOfTries}</Stack>}
       { !props.isRelay && strategyG && <StrategyGamesTable results={strategyG.liveResults}/>}
       <Stack>Befejezés dátuma: {formatTime(new Date(data.G.end))}</Stack>
       <Stack>pontszám: { data.G.points }</Stack>
-      <Stack>Hátralévő idő: <Countdown
-        msRemaining={msRemaining ?? null}
-        setMsRemaining={setMsRemaining}
-        endTime={new Date(data.G.end)}
-        getServerTimer={() => undefined}
-        serverRemainingMs={new Date(data.G.end).getTime() - new Date().getTime()}
-      /></Stack>
+      <Stack>Hátralévő idő: <RemainingTime end={new Date(data.G.end)}/></Stack>
       { props.isRelay && relayG && <RelayResultsTable problems={relayProblemResults(relayG)} details
         answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}
         current={props.inProgress ? relayG.currentProblem : undefined}/>}
     </Stack>
   </>)
+}
+
+/// Read off `G.end` each second rather than through `Countdown`, whose last
+/// second waits on a server refresh the dialog has none of. The admin needs a
+/// correct clock: it stops at zero, and follows minutes added after that.
+function RemainingTime(props: { end: Date }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const handle = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(handle);
+  }, []);
+  const seconds = Math.max(0, Math.floor((props.end.getTime() - now) / 1000));
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return <code>{pad(Math.floor(seconds / 3600))}:{pad(Math.floor(seconds / 60) % 60)}:{pad(seconds % 60)}</code>;
 }
 
 /// A value shown only on request. The page already holds it, so this guards

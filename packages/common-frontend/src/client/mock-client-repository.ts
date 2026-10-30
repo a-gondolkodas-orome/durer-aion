@@ -79,8 +79,8 @@ export class MockClientRepository implements ClientRepository {
   resetStrategy(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
-  addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
+  addMinutes(_matchId: string, _minutes: number): Promise<TeamModelDto> {
+    throw Error("NOT call this");
   }
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
     moves.submitAnswer(answer);

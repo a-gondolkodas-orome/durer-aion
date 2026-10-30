@@ -27,13 +27,22 @@ export function Admin(props: { teamId?: string }) {
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
-  const { data } = useSWR("users/all", getAll)
-  const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
+  const { data, mutate } = useSWR("users/all", getAll)
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
 
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
+  // Read off the list rather than kept as state, so the dialog shows the team
+  // as the list last loaded it.
+  const selectedRow = selectedTeamId ? data?.find(d => d.teamId === selectedTeamId) ?? null : null;
   const showTeams = !teamFromPath;
+
+  // An action in the dialog answers with the team's new row: the list takes it
+  // at once, then reloads.
+  const onChanged = (changed: TeamModelDto) => {
+    void mutate(teams => teams?.map(it => it.teamId === changed.teamId ? changed : it));
+  };
 
   return (
     <Stack sx={{
@@ -70,9 +79,9 @@ export function Admin(props: { teamId?: string }) {
         open={
           selectedRow != null
         } onClose={() => {
-            setSelectedRow(null);
+            setSelectedTeamId(null);
            }}>
-          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
+          {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog} onChanged={onChanged}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
@@ -86,7 +95,7 @@ export function Admin(props: { teamId?: string }) {
         <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
       </Stack>
       {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
+        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} onChanged={onChanged}/>}
         {showTeams && <Stack sx={{
           height: "635px",
         }}>
@@ -146,7 +155,7 @@ export function Admin(props: { teamId?: string }) {
                   <Button
                     color='primary'
                     variant='contained'
-                    onClick={() => {setSelectedRow(renderData.row)}}>
+                    onClick={() => {setSelectedTeamId(renderData.row.teamId ?? null)}}>
                       Szerkesztés
                   </Button>
                 )
@@ -226,6 +235,9 @@ export function Admin(props: { teamId?: string }) {
                 } catch (e) {
                   const message = e instanceof Error ? e.message : "Váratlan hiba történt";
                   enqueueSnackbar(message, { variant: 'error' });
+                } finally {
+                  // Each team's `endAt` moved, even when a later one failed.
+                  await mutate();
                 }
               },
             })

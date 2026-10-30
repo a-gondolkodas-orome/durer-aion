@@ -101,8 +101,8 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
 
-  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
+  async addMinutes(_matchId: string, _minutes: number): Promise<TeamModelDto> {
+    throw Error("NOT call this");
   }
 
   async getMatchState(_matchId: string): Promise<MatchStateDto> {

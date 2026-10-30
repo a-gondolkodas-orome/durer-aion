@@ -165,7 +165,7 @@ export class RealClientRepository implements ClientRepository {
     return result.data as TeamModelDto;
   }
 
-  async addMinutes(matchId: string, minutes: number): Promise<string> {
+  async addMinutes(matchId: string, minutes: number): Promise<TeamModelDto> {
     const url = urlcat('/game/admin/:matchId/addminutes/:minutes', {
       matchId,
       minutes,
@@ -182,7 +182,7 @@ export class RealClientRepository implements ClientRepository {
       }
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-    return result.data;
+    return (result.data as { team: TeamModelDto }).team;
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {

@@ -27,7 +27,7 @@ export interface ClientRepository {
   getMatchLogs(matchId: string): Promise<MatchStateDto>
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
-  addMinutes(matchId: string, minutes: number): Promise<string>
+  addMinutes(matchId: string, minutes: number): Promise<TeamModelDto>
   submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void>;
   // Unlike startRelay, which moves the team to the relay page, this dispatches
   // the opening move of the match once the board is up.
