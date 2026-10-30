@@ -1,6 +1,8 @@
 import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend/core";
 import { teamData } from "./teamData";
+import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
+import { handleGameReport } from "./game-report";
 import { readStoredTeamState } from "./stored-team-state";
 import { trackRelayStarted } from "./tracking";
 import i18n from "i18next";
@@ -26,6 +28,9 @@ export class OfflineClientRepository implements ClientRepository {
     }
     sendGameData({ component: "relay", phase: "start" });
     trackRelayStarted(teamState.teamName);
+    // An earlier round's, which handleGameReport would take for this round's
+    // finish.
+    localStorage.removeItem(relayPointsStorageKey());
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
@@ -102,6 +107,11 @@ export class OfflineClientRepository implements ClientRepository {
   syncRelayTime(moves: BoardMoves): Promise<void> {
     moves.getTime();
     return Promise.resolve();
+  }
+
+  // Persisted as if the game had reported it, for toHome() to read.
+  keepRelayEnd(report: RelayEndReport): void {
+    handleGameReport(report);
   }
 
   joinWithCode(joinCode: string): Promise<void> {

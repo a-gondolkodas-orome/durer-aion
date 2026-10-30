@@ -59,6 +59,18 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
     }
   }, [ctx.gameover]);
   const finished = msRemaining < - 5000 || ctx.gameover === true
+  // A game that ended reported its end itself; one whose time ran out may not
+  // have (see ClientRepository.keepRelayEnd). Handed over as the end dialog
+  // opens rather than as it closes, so every way out of it finds the score
+  // kept.
+  const keepEnd = useEffectEvent(() => {
+    clientRepo.keepRelayEnd?.({ component: "relay", phase: "end", G, ctx });
+  });
+  useEffect(() => {
+    if (finished && !ctx.gameover) {
+      keepEnd();
+    }
+  }, [finished, ctx.gameover]);
   const isOffline = clientRepo.version === "OFFLINE";
   // Until the judge's firstProblem move, the state holds no problem to show
   // and the form has no move to submit to.
