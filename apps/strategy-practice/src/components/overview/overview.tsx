@@ -67,7 +67,9 @@ export const Overview = () => {
     />
     <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
       {showFilters && (
-        <div className="mt-2 pt-3 flex flex-col gap-1 mb-2">
+        <div aria-label="filter" className="mt-2 pt-3 flex flex-col gap-1 mb-2 border-2 p-3"
+          style={{ borderRadius: '10px' }}
+        >
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
           <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
           <YearFilter selected={selectedYears} onChange={setSelectedYears} />
