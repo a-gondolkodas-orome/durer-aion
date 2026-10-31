@@ -14,9 +14,7 @@ comes first, not the earliest merged.
 
 ## October 2026, as of 2026-10-31
 
-- **The 20th online round's games are public**: its strategy game is in the dry
-  run and on `/jatekok/`, and its C/D/E relay problems are on `/valto/` and in
-  the dry run, replacing the 19th round's (#659, #660)
+- **The 20th online round's games are public** (#659, #660)
 - **Teams see their results in detail**: a running points table under the relay
   clock, the live games so far on the strategy board, and per-problem and
   per-game tables on both end screens and the home page (#611, #610)
