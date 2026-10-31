@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { expect, test, vi } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
@@ -14,6 +14,10 @@ vi.mock('../hooks/user-hooks', () => ({
   useRefreshTeamState: () => () => Promise.resolve(),
 }));
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 function renderForm(awaitingJudge: boolean, onSubmit = vi.fn((_result: number) => Promise.resolve())) {
   const form = (attempt: number) =>
     <SnackbarProvider>
@@ -27,6 +31,14 @@ function renderForm(awaitingJudge: boolean, onSubmit = vi.fn((_result: number) =
     </SnackbarProvider>;
   const { rerender } = render(form(4));
   return { onSubmit, moveToAttempt: (attempt: number) => rerender(form(attempt)) };
+}
+
+// Formik submits asynchronously; act waits for it to settle.
+async function sendGuess() {
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
+  });
 }
 
 test('sends a guess on its turn', async () => {
@@ -46,11 +58,7 @@ test('blocks sending and typing while the judge has the turn', () => {
 
 test('focuses the input on the attempt after a guess from this screen', async () => {
   const { onSubmit, moveToAttempt } = renderForm(false);
-  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
-  // Formik submits asynchronously; act waits for it to settle.
-  await act(async () => {
-    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
-  });
+  await sendGuess();
   expect(onSubmit).toHaveBeenCalled();
   // A correct guess moves on to the next problem, three attempts on.
   moveToAttempt(7);
@@ -60,26 +68,15 @@ test('focuses the input on the attempt after a guess from this screen', async ()
   expect(screen.getByRole('textbox')).not.toHaveFocus();
 });
 
-async function sendGuess() {
-  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
-  await act(async () => {
-    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
-  });
-}
-
-test('reports a rejected submission', async () => {
+// Regression for "throws": a `.catch` chained onto the handler's promise let
+// a handler that threw escape the form unreported.
+test.each<[string, () => Promise<void>]>([
+  ['rejects', () => Promise.reject(new Error('failed'))],
+  ['throws', () => { throw new Error('failed'); }],
+])('reports a handler that %s', async (_, handler) => {
   const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-  renderForm(false, vi.fn(() => Promise.reject(new Error('no answer'))));
+  renderForm(false, vi.fn(handler));
   await sendGuess();
-  expect(await screen.findByText('no answer')).toBeInTheDocument();
+  expect(await screen.findByText('failed')).toBeInTheDocument();
   expect(logged).toHaveBeenCalledOnce();
-});
-
-// Regression: the handler's promise had `.catch` chained onto it, so a handler
-// that threw instead of returning one escaped the form unreported.
-test('reports a handler that throws instead of rejecting', async () => {
-  vi.spyOn(console, 'error').mockImplementation(() => undefined);
-  renderForm(false, vi.fn(() => { throw new Error('no such move'); }));
-  await sendGuess();
-  expect(await screen.findByText('no such move')).toBeInTheDocument();
 });

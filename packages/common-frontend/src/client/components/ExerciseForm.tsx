@@ -40,9 +40,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
     setFocusAttempt(props.attempt);
   }
   const { t } = useTranslation();
-  // Awaited inside the try, so a handler that throws instead of rejecting
-  // reaches the snackbar too rather than escaping the form. Not awaited by the
-  // form, which resets after calling its handler and would drop the promise.
+  // Awaited inside the try, so a handler that throws is reported like one that
+  // rejects. The form does not wait for it: it resets right after the call.
   const sendAnswer = async (result: number) => {
     try {
       await props.onSubmit(result);
