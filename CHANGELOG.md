@@ -25,9 +25,6 @@ comes first, not the earliest merged.
   import accepts uploads again (#646, #648, #551, #602, #638, #511)
 - **A relay whose time ran out keeps its score** in the dry run and on
   `/valto/`, where closing the end dialog used to record 0 (#653)
-- **A refreshed look**: the general Dürer logo with round favicons, login pages
-  on a card, relay math in KaTeX's own fonts, side margins at every width, and
-  notifications above a phone keyboard (#588, #606, #592, #635, #591, #600)
 - **The practice sites and the public dry run are tracked in umami**; `/valto/`
   remembers the language choice, and browsers no longer offer to translate the
   pages (#605, #607, #629, #654, #546)
