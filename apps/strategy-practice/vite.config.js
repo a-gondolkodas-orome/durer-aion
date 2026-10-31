@@ -79,6 +79,9 @@ export default defineConfig(() => ({
     // component imports CSS, so processing it costs the suite nothing.
     css: true,
     environment: 'node',
+    // Node's own, undefined `localStorage` would shadow jsdom's — the root
+    // vitest.config.mts says why.
+    execArgv: ['--no-experimental-webstorage'],
     clearMocks: true,
     restoreMocks: true,
     // Reuse one context per worker instead of a fresh one per file (~40% faster).

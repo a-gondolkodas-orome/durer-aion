@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/javascript-node:24-bookworm
+FROM mcr.microsoft.com/devcontainers/javascript-node:26-bookworm
 
 # The image tag only pins the Node major (MCR publishes no Node patch tags), so the exact version
 # comes from the node devcontainer feature — see devcontainer.json.
