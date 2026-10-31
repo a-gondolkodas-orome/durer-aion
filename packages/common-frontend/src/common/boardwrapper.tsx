@@ -1,11 +1,12 @@
 import { Button, Stack, alpha } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Countdown, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { StrategyGamesTable } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
+import { asStrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
@@ -21,7 +22,8 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
 export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
   return (props: StrategyBoardProps<G>) => {
-    const { G, ctx, moves } = props;
+    const { G, ctx } = props;
+    const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
     const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining); // asked from the server
     const backToHome = useBackToHome();
     const isOffline = useClientRepo().version === "OFFLINE";
