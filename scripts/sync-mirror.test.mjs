@@ -36,7 +36,15 @@ describe('assertSyncBranch', () => {
 // working clone of each to put commits into them with.
 const scenarios = [];
 
-const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+// Every git command here runs without the contributor's own global and system config. A
+// `commit.gpgsign` there would send each of the suite's commits and merges through their signer,
+// which is seconds apiece behind an agent, or a prompt no one answers — and any other setting
+// (a hook path, a default merge strategy) would decide what the sync does under test.
+const HERMETIC_GIT = { GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' };
+const gitEnv = { ...process.env, ...HERMETIC_GIT };
+
+const git = (...args) =>
+  execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: gitEnv });
 
 const commit = (dir, files, message) => {
   for (const [name, content] of Object.entries(files)) writeFileSync(join(dir, name), content);
@@ -77,7 +85,7 @@ const scenario = () => {
     target,
     work,
     workdir,
-    sync: () => syncBranch({ source, target, ref: REF, workdir: workdir(), stdio: 'ignore' }),
+    sync: () => syncBranch({ source, target, ref: REF, workdir: workdir(), env: gitEnv, stdio: 'ignore' }),
     // Everything read back out of a bare repository, which has no working tree to look at.
     filesIn: repo => git('--git-dir', repo, 'ls-tree', '-r', '--name-only', REF).trim().split('\n'),
     fileIn: (repo, name) => git('--git-dir', repo, 'show', `${REF}:${name}`),
@@ -203,7 +211,7 @@ describe('the command line', () => {
   const run = overrides => execFileSync(process.execPath, [script], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { PATH: process.env.PATH, HOME: process.env.HOME, ...overrides },
+    env: { PATH: process.env.PATH, HOME: process.env.HOME, ...HERMETIC_GIT, ...overrides },
   });
 
   it('syncs between two repositories of your own, with no repo name and no token', () => {
