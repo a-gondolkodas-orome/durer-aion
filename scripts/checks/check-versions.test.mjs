@@ -70,20 +70,37 @@ describe('a version written down in more than one file', () => {
     ]);
   });
 
-  it('Node: .nvmrc, engines.node, every setup-node step, both devcontainers and the Dockerfile agree', () => {
+  it('Node: .nvmrc, both engines.node, every setup-node step, both devcontainers and the Dockerfile agree', () => {
     const workflows = workflowNodeVersions();
     // A pattern that stopped matching would otherwise pass by finding nothing to compare.
     expect(workflows.length, 'no setup-node pin found under .github/workflows — is the pattern stale?').toBeGreaterThan(0);
-    const packageJson = JSON.parse(read(`${app}package.json`));
+    // ">=26.13.0 <27" — only the lower bound names an exact version.
+    const engines = file => JSON.parse(read(file)).engines?.node?.match(/>=\s*(\d+\.\d+\.\d+)/)?.[1];
     expectAgreement('Node', [
       ['.nvmrc', read('.nvmrc').trim()],
-      // ">=24.20.0 <25" — only the lower bound names an exact version.
-      [`${app}package.json engines.node`, packageJson.engines?.node?.match(/>=\s*(\d+\.\d+\.\d+)/)?.[1]],
+      ['package.json engines.node', engines('package.json')],
+      [`${app}package.json engines.node`, engines(`${app}package.json`)],
       ...workflows,
       ['.devcontainer/devcontainer.json node feature', nodeFeature('.devcontainer/devcontainer.json')],
       [`${app}.devcontainer/devcontainer.json node feature`, nodeFeature(`${app}.devcontainer/devcontainer.json`)],
       // The image the competition is deployed from.
       ['Dockerfile FROM node', read('Dockerfile').match(/^FROM node:(\S+)/m)?.[1]]
+    ]);
+  });
+
+  it('Node: both devcontainer base images are on the .nvmrc major', () => {
+    // MCR tags these images by major alone, so the major is all they can agree on; the node
+    // feature compared above is what pins the exact version inside them.
+    expectAgreement('Node major', [
+      ['.nvmrc', read('.nvmrc').trim().split('.')[0]],
+      [
+        '.devcontainer/devcontainer.json image',
+        read('.devcontainer/devcontainer.json').match(/"image"\s*:\s*"[^"]*-node:(\d+)/)?.[1]
+      ],
+      [
+        `${app}.devcontainer/Dockerfile FROM`,
+        read(`${app}.devcontainer/Dockerfile`).match(/^FROM \S+-node:(\d+)/m)?.[1]
+      ]
     ]);
   });
 });

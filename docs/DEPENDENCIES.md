@@ -56,5 +56,6 @@ agreeing.
 - **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at `<6.1.0`,
   and 6.0 is the highest version inside the cap. That cap is the only remaining
   blocker: every tsconfig is off the `node10` resolution 7.0 removes.
-- **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
-  Node major the repo actually runs (`.nvmrc`), so they move when Node does.
+- **`@types/node` past the Node major**: not a blocker but a policy — the types
+  track the Node major the repo actually runs (`.nvmrc`), so they move when Node
+  does.
