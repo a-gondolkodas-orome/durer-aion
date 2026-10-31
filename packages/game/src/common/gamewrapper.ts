@@ -1,7 +1,7 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
-import { GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
+import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -37,6 +37,16 @@ function setStartingPosition({ G, playerID, events }: MoveContext, startingPosit
 };
 
 const lengthOfCompetition = 30 * 60; // seconds
+
+/// How long past its end a match stays open, in milliseconds, so that a team
+/// clicking as the clock hits zero does not lose the move to the round trip.
+/// The first move after that is still applied, and then ends the match. The
+/// bot's answer is held to the same allowance.
+export const LATE_MOVE_GRACE_MS = 10 * 1000;
+
+function isPastGrace(G: GameStateMixin) {
+  return Date.now() - new Date(G.end).getTime() > LATE_MOVE_GRACE_MS;
+}
 
 // This is *very important*, so as not to spam
 export function isMakeMovePayloadReadOnly(payload_type: string) {
@@ -130,18 +140,29 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             maxMoves: 1
           }),
           ...game.turn,
-          onEnd: ({ G, ctx, playerID, events, random, log }) => {
-            if (game.turn?.onEnd !== undefined) {
-              game.turn.onEnd({ G, ctx, playerID, events, log, random });
-            }
+          // The end-of-time rule for every strategy game, in this phase only.
+          // boardgame.io runs these hooks after the move. The team's clock poll
+          // is a move too, so a team still on the page ends a match it has run
+          // out of by asking for the time.
+          onMove: (context) => {
+            game.turn?.onMove?.(context);
+            if (context.playerID === GUESSER_PLAYER && isPastGrace(context.G)) context.events.endGame();
+          },
+          onEnd: ({ G, ctx, events, random, log }) => {
+            // boardgame.io attaches `playerID` to `turn.onMove` and to nothing
+            // else: `EndTurn` calls this hook with the state alone. The player
+            // whose turn is ending is still the current one, since bgio
+            // advances the order only after this returns.
+            const playerID = currentPlayer(ctx);
+            game.turn?.onEnd?.({ G, ctx, playerID, events, log, random });
+            if (playerID === JUDGE_PLAYER && isPastGrace(G)) events.endGame();
             sendStrategyFunction({ component: "strategy", phase: "step", G: G, ctx: ctx });
           },
         },
         onEnd: ({ G, ctx }) => {
-          // A game with no winner yet is one the time ran out in. That is
-          // recorded only when the team's page ends the match, by asking for
-          // the time after the deadline; a match the server closes on time
-          // has no entry for it. A second win in a row ends the match from
+          // A game with no winner yet is one the time ran out in, ended by a
+          // move past the allowance: the team's, its clock poll or the bot's.
+          // A match the server closes on time has no entry for it. A second win in a row ends the match from
           // inside the move, and boardgame.io still ends this phase first.
           if (G.difficulty === "live") {
             // No game ends in a draw, so one with a winner is won or lost.

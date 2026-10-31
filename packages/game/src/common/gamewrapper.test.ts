@@ -1,11 +1,11 @@
 import { describe, test, afterEach, beforeEach, expect, vi, type MockInstance } from "vitest";
-import { gameWrapper, isMakeMovePayloadReadOnly } from "./gamewrapper";
+import { gameWrapper, isMakeMovePayloadReadOnly, LATE_MOVE_GRACE_MS } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
   createGameWithoutStartingPosition,
   createGameWithMoveWithoutStartingPosition,
 } from "./game_for_testing";
-import { GUESSER_PLAYER, strategyPoints, type GameType } from "./types";
+import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
@@ -294,6 +294,112 @@ test("polling the clock does not spend a limited turn's move", () => {
 
   expect(client.getState()?.ctx.numMoves).toStrictEqual(0);
   expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+});
+
+/// A game whose one move ends its own turn without ending the match, so the
+/// play phase stays open and both sides get a turn.
+function steppingGame(turnEnd = vi.fn()): GameType<{ data: string }> {
+  return {
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G, events }) => { G.data = "stepped"; events.endTurn(); } },
+    turn: { onEnd: ({ playerID }) => { turnEnd(playerID); } },
+  };
+}
+
+/// A live match in the play phase with the team to move.
+function playing(game: GameType<{ data: string }>) {
+  const client = Client({ game: gameWrapper(game), numPlayers: 2 });
+  client.start();
+  client.moves.chooseNewGameType("live");
+  client.moves.setStartingPosition({ data: "startingPosition" });
+  client.moves.chooseRole(GUESSER_PLAYER);
+  return client;
+}
+
+// Regression: the wrapper forwarded boardgame.io's `playerID` to a game's
+// `turn.onEnd`, and bgio gives that hook none.
+test("a game's turn.onEnd is told whose turn is ending", () => {
+  const turnEnd = vi.fn();
+  const client = playing(steppingGame(turnEnd));
+  turnEnd.mockReset();
+
+  client.moves.step();
+  client.moves.step();
+
+  expect(turnEnd.mock.calls.flat()).toStrictEqual([GUESSER_PLAYER, JUDGE_PLAYER]);
+});
+
+describe("gameWrapper deadline", () => {
+  const START = new Date("2026-03-21T18:00:00.000Z");
+  const END = new Date(START.getTime() + 30 * 60 * 1000);
+  const at = (msPastTheEnd: number) => vi.setSystemTime(new Date(END.getTime() + msPastTheEnd));
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(START);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("a team's move within the allowance is taken", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS - 1000);
+    client.moves.step();
+
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+  });
+
+  // The one late move is played, then the match ends.
+  test("a team's move past the allowance is applied and ends the match", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.step();
+
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  test("a team's clock poll past the allowance ends the match", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.getTime();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  // A team that has left the page sends no move, so only the end of the bot's
+  // turn can close the match.
+  test("the bot answering past the allowance ends the match", () => {
+    const client = playing(steppingGame());
+    at(LATE_MOVE_GRACE_MS - 1000);
+    client.moves.step();
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.step();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  // A match must not close while a move it has just taken is still on screen.
+  test("the bot answering within the allowance leaves the match open", () => {
+    const client = playing(steppingGame());
+    at(1000);
+    client.moves.step();
+
+    at(2000);
+    client.moves.step();
+
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+  });
 });
 
 describe("gameWrapper move guards", () => {
