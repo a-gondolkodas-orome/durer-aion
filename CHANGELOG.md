@@ -35,15 +35,6 @@ comes first, not the earliest merged.
   no docker, so it runs in `npm run check` (#632, #664)
 - The strategy practice site is on i18next; the old `{ hu, en }` translation
   framework is removed (#614–#620, #622)
-- React hook rules are linted across the repo, not only in the strategy
-  practice site (#566, #563, #564, #565)
-- Production stack: every compose command keeps the TLS override, nginx has a
-  health check so `up --wait` waits for a site that answers, browsers revalidate
-  the files whose names carry no hash, and DEPLOYMENT.md covers restarting the backend mid-competition
-  (#579, #657, #590, #571)
-- Agents read `AGENTS.md` with no `CLAUDE.md` stub, push to a descriptive
-  `claude/` branch, and ask before posting to a PR, watching one or writing to an
-  issue (#584, #603, #593, #627, #644)
 
 ## September 2026, as of 2026-09-28
 
