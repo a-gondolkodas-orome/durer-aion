@@ -3,7 +3,9 @@
     "category": "Kategória",
     "clear": "Szűrés törlése",
     "toggle": "Szűrők",
-    "type": "Típus"
+    "type": "Típus",
+    "year": "Év",
+    "round": "Forduló"
   },
   "icon": {
     "board": "Tábla",
@@ -22,7 +24,8 @@
   },
   "intro": "A <i>stratégiás játék</i> egy két szereplős játék, amelyben nincs szerencsefaktor: optimális stratégiával mindig nyerni lehet, így matekfeladatként is tekinthető. Az alábbi, A-tól E+ kategóriáig nehezedő játékok a <durerinfo>Dürer Versenyen</durerinfo> szerepeltek.",
   "round": {
-    "final": "döntő"
+    "final": "döntő",
+    "online": "online"
   },
   "section": {
     "AB": "5-8. osztályosoknak (A-B kategória)",

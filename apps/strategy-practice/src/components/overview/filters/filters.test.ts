@@ -1,4 +1,6 @@
-import { getUsedIcons, filterByCategories, filterByIcons } from './filters';
+import {
+  getUsedIcons, filterByCategories, filterByIcons, getUsedYears, filterByYears, filterByRounds
+} from './filters';
 import type { GameList } from '../../games/gameList';
 
 const list: GameList = {
@@ -44,5 +46,19 @@ describe('filterByIcons', () => {
     expect(filterByIcons(ids, ['coins'], list)).toEqual(['EasyB', 'MidCD']);
     expect(filterByIcons(ids, ['chess', 'coins'], list)).toEqual(['EasyA', 'EasyB', 'MidCD']);
     expect(filterByIcons(ids, ['chess'], list)).toEqual(['EasyA']);
+  });
+});
+
+describe('year and round filters', () => {
+  const ids = Object.keys(list);
+
+  it('lists each used year once and filters by year', () => {
+    expect(getUsedYears(list)).toEqual(['11/12', '12/13', '20/21', '22/23']);
+    expect(filterByYears(ids, ['12/13', '22/23'], list)).toEqual(['EasyB', 'HardE']);
+  });
+
+  it('filters by round', () => {
+    expect(filterByRounds(ids, ['online'], list)).toEqual(['HardE']);
+    expect(filterByRounds(ids, ['döntő'], list)).toEqual(['EasyA', 'EasyB', 'MidCD']);
   });
 });

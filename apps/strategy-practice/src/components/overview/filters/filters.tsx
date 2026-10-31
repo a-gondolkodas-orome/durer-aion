@@ -1,5 +1,7 @@
-import { type ReactNode } from 'react';
-import { gameList, categories, iconKeys, type Category, type GameList, type IconKey } from '../../games/gameList';
+import { type PointerEvent as ReactPointerEvent, type ReactNode, useRef } from 'react';
+import {
+  gameList, categories, iconKeys, type Category, type GameList, type IconKey, type Round
+} from '../../games/gameList';
 import { useTranslation } from 'react-i18next';
 import { GameIcon, iconLabels } from '../game-icons';
 
@@ -31,6 +33,29 @@ export const filterByIcons = (
 ): string[] => {
   if (selected.length === 0) return ids;
   return ids.filter(id => selected.includes(list[id].icon));
+};
+
+export const getUsedYears = (list: GameList): string[] => {
+  const years = new Set(Object.values(list).map(entry => entry.year.v));
+  return [...years];
+};
+
+export const filterByYears = (
+  ids: string[],
+  selected: string[],
+  list: GameList
+): string[] => {
+  if (selected.length === 0) return ids;
+  return ids.filter(id => selected.includes(list[id].year.v));
+};
+
+export const filterByRounds = (
+  ids: string[],
+  selected: Round[],
+  list: GameList
+): string[] => {
+  if (selected.length === 0) return ids;
+  return ids.filter(id => selected.includes(list[id].round));
 };
 
 // Funnel/filter glyph for the header toggle that shows or hides the filter panel.
@@ -156,6 +181,121 @@ export const IconFilter = ({ selected, onChange }: {
         label: labels[iconKey],
         buttonClassName: 'w-7 p-1'
       }))}
+    />
+  );
+};
+
+export const YearFilter = ({ selected, onChange }: {
+  selected: string[]
+  onChange: (selected: string[]) => void
+}) => {
+  const { t } = useTranslation('overview');
+  const years = getUsedYears(gameList);
+  const dragging = useRef(false);
+  const suppressClick = useRef(false);
+  const visited = useRef(new Set<string>());
+  const timeline = useRef<HTMLDivElement>(null);
+  const toggle = (year: string) =>
+    onChange(selected.includes(year) ? selected.filter(value => value !== year) : [...selected, year]);
+  const startDragging = (year: string) => {
+    dragging.current = true;
+    suppressClick.current = true;
+    visited.current = new Set([year]);
+    toggle(year);
+  };
+  const dragOver = (year: string) => {
+    if (!dragging.current || visited.current.has(year)) return;
+    visited.current.add(year);
+    toggle(year);
+  };
+  const finishDragging = () => {
+    dragging.current = false;
+    visited.current.clear();
+  };
+  const moveDragging = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!dragging.current) return;
+    const node = document.elementsFromPoint(event.clientX, event.clientY)
+      .find(element => element instanceof HTMLElement && element.dataset.year);
+    if (node instanceof HTMLElement && node.dataset.year) dragOver(node.dataset.year);
+  };
+  const capturePointer = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (timeline.current?.setPointerCapture) timeline.current.setPointerCapture(event.pointerId);
+    const year = event.currentTarget.dataset.year;
+    if (year) startDragging(year);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 text-sm mb-2">
+      <span className="w-20 shrink-0">{t('filters.year')}</span>
+      <div
+        ref={timeline}
+        className="relative flex min-w-32 w-full shrink-0 items-center justify-between
+          overflow-clip py-3 px-3 touch-none"
+        onPointerUp={finishDragging}
+        onPointerCancel={finishDragging}
+        onPointerMove={moveDragging}
+        style={{ maxWidth: `${35 * years.length + 20}px` }}
+      >
+        <span className="absolute left-2 right-2 top-1/2 h-px bg-slate-300 dark:bg-slate-600" aria-hidden />
+        {years.map((year, index) => {
+          const isSelected = selected.includes(year);
+          return (
+            <div
+              key={year}
+              data-year={year}
+              className="relative z-10 flex h-9 shrink-0 items-center justify-center"
+              onPointerEnter={() => dragOver(year)}
+            >
+              {(index === 0 || index === years.length - 1) && (
+                <span className="absolute text-xs" style={{ bottom: '-10px' }}>{year}</span>
+              )}
+              <button
+                onClick={() => {
+                  if (suppressClick.current) suppressClick.current = false;
+                  else toggle(year);
+                }}
+                onPointerDown={capturePointer}
+                data-year={year}
+                role="checkbox"
+                aria-checked={isSelected}
+                aria-label={year}
+                title={year}
+                className="absolute flex h-6 w-6 items-center justify-center rounded-full
+                  hocus:bg-primary/10"
+                />
+              <span className={`h-3 w-3 rounded-full border-2 border-surface
+                  ${isSelected ? 'bg-primary' : 'bg-slate-400 dark:bg-slate-500'}`}
+                />
+            </div>
+          );
+        })}
+      </div>
+      <button
+        onClick={() => onChange([])}
+        disabled={selected.length === 0}
+        aria-label={t('filters.clear')}
+        className="h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
+          enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
+          disabled:invisible disabled:cursor-default"
+      >×</button>
+    </div>
+  );
+};
+
+export const RoundFilter = ({ selected, onChange }: {
+  selected: Round[]
+  onChange: (selected: Round[]) => void
+}) => {
+  const { t } = useTranslation('overview');
+  return (
+    <FilterRow
+      label={t('filters.round')}
+      selected={selected}
+      onChange={onChange}
+      options={[
+        { value: 'döntő', content: t('round.final') },
+        { value: 'online', content: t('round.online') }
+      ]}
     />
   );
 };

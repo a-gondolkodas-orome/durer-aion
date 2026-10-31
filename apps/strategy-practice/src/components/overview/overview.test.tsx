@@ -110,9 +110,54 @@ describe('Overview', () => {
     // ...until the header funnel opens the panel, which reveals both rows at once
     fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
     expect(screen.getByRole('button', { name: 'C' })).toBeTruthy();
+    expect(screen.getByRole('checkbox', { name: '11/12' }).getAttribute('title')).toBe('11/12');
     // only icons actually in use are offered (coins, piles) — chess is used too
     expect(screen.getByRole('button', { name: 'Érmék' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Kupacok' })).toBeTruthy();
+  });
+
+  it('filters by selected years using timeline checkboxes', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    const year = screen.getByRole('checkbox', { name: '14/15' });
+    expect(year.getAttribute('aria-checked')).toBe('false');
+    fireEvent.click(year);
+    expect(year.getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByText('C egy')).toBeTruthy();
+    expect(screen.queryByText('A kettő')).toBeNull();
+    expect(screen.queryByText('B egy')).toBeNull();
+  });
+
+  it('selects years while dragging across timeline checkboxes', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    const first = screen.getByRole('checkbox', { name: '11/12' });
+    const second = screen.getByRole('checkbox', { name: '12/13' });
+    fireEvent.pointerDown(first);
+    fireEvent.pointerEnter(second);
+    fireEvent.pointerUp(second);
+    expect(first.getAttribute('aria-checked')).toBe('true');
+    expect(second.getAttribute('aria-checked')).toBe('true');
+    expect(screen.queryByText('B egy')).toBeNull();
+  });
+
+  it('selects years from pointer movement on the timeline', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    const first = screen.getByRole('checkbox', { name: '11/12' });
+    const second = screen.getByRole('checkbox', { name: '12/13' });
+    const timeline = first.parentElement?.parentElement;
+    expect(timeline).toBeTruthy();
+    Object.defineProperty(timeline, 'setPointerCapture', { value: vi.fn() });
+    Object.defineProperty(document, 'elementsFromPoint', {
+      configurable: true,
+      value: vi.fn().mockReturnValue([second])
+    });
+    fireEvent.pointerDown(first, { pointerId: 1, pointerType: 'touch' });
+    fireEvent.pointerMove(timeline!, { clientX: 35, clientY: 0, pointerId: 1, pointerType: 'touch' });
+    fireEvent.pointerUp(timeline!, { pointerId: 1, pointerType: 'touch' });
+    expect(first.getAttribute('aria-checked')).toBe('true');
+    expect(second.getAttribute('aria-checked')).toBe('true');
   });
 
   it('narrows the catalog by icon type', () => {

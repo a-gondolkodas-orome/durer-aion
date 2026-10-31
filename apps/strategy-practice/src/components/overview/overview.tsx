@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { gameList, type Category, type IconKey } from '../games/gameList';
+import { gameList, type Category, type IconKey, type Round } from '../games/gameList';
 import { Trans, useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { LanguageSelector } from 'language';
@@ -7,7 +7,8 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import { IconButton } from '@mui/material';
 import { ThemeSwitcher } from '../../theme';
 import {
-  FilterToggle, CategoryFilter, IconFilter, filterByCategories, filterByIcons
+  FilterToggle, CategoryFilter, IconFilter, YearFilter, RoundFilter,
+  filterByCategories, filterByIcons, filterByYears, filterByRounds
 } from './filters/filters';
 import {
   FeaturedStrip,
@@ -29,23 +30,31 @@ export const Overview = () => {
   const { t } = useTranslation('overview');
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedIcons, setSelectedIcons] = useState<IconKey[]>([]);
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedRounds, setSelectedRounds] = useState<Round[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const isFiltering = selectedCategories.length > 0 || selectedIcons.length > 0;
+  const isFiltering = selectedCategories.length > 0 || selectedIcons.length > 0 ||
+    selectedYears.length > 0 || selectedRounds.length > 0;
 
   const allIds = Object.keys(gameList);
-  const visibleIds = filterByIcons(
-    filterByCategories(allIds, selectedCategories, gameList),
-    selectedIcons,
+  const applyFilters = (ids: string[]) => filterByRounds(
+    filterByYears(
+      filterByIcons(
+        filterByCategories(ids, selectedCategories, gameList),
+        selectedIcons,
+        gameList
+      ),
+      selectedYears,
+      gameList
+    ),
+    selectedRounds,
     gameList
   );
+  const visibleIds = applyFilters(allIds);
   const groups = groupBySection(visibleIds, gameList);
 
   const featuredIds = orderByCategoryThenYear(
-    filterByIcons(
-      filterByCategories(getFeaturedGames(gameList), selectedCategories, gameList),
-      selectedIcons,
-      gameList
-    ),
+    applyFilters(getFeaturedGames(gameList)),
     gameList
   );
 
@@ -53,13 +62,16 @@ export const Overview = () => {
     <OverviewHeader
       filtersOpen={showFilters}
       onToggleFilters={() => setShowFilters(o => !o)}
-      activeFilterCount={selectedCategories.length + selectedIcons.length}
+      activeFilterCount={selectedCategories.length + selectedIcons.length +
+        selectedYears.length + selectedRounds.length}
     />
     <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
       {showFilters && (
         <div className="mt-2 pt-3 flex flex-col gap-1 mb-2">
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
           <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
+          <YearFilter selected={selectedYears} onChange={setSelectedYears} />
+          <RoundFilter selected={selectedRounds} onChange={setSelectedRounds} />
         </div>
       )}
 
