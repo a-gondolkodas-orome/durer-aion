@@ -27,7 +27,7 @@ export const GameFooter = () => {
             : ''}
         </p>
       )}
-      <div className="primary-footer">
+      <div className="primary-footer z-40">
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"
           target="_blank"
