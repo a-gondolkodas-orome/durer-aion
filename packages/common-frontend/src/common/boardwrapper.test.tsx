@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { Ctx } from 'boardgame.io';
+import { JUDGE_PLAYER } from 'game';
 import type { GameStateMixin } from 'game';
 import { ClientRepoProvider } from '../client/client-repo-context';
 import { MockClientRepository } from '../client/mock-client-repository';
@@ -19,7 +20,7 @@ vi.mock('../client/hooks/user-hooks', () => MockTeamState.mockHook);
 const Board = boardWrapper<object>(() => <div />, null);
 
 /// Only the fields the wrapper reads; boardgame.io hands a board plenty more.
-function renderBoard(ctx: Partial<Ctx>) {
+function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
   const G: GameStateMixin = {
     millisecondsRemaining: 10 * 60 * 1000,
     start: new Date().toISOString(),
@@ -32,6 +33,7 @@ function renderBoard(ctx: Partial<Ctx>) {
     winningStreak: 0,
     points: 0,
     liveResults: [],
+    ...game,
   };
   const props = {
     G,
@@ -66,11 +68,22 @@ describe('the strategy board on the judge\'s turn', () => {
     expect(screen.queryByText('strategy.guide.yourTurn')).not.toBeInTheDocument();
   });
 
-  test('offers a new game when the turn is the team\'s', () => {
+  // `startNewGame` with the team to move is the gap between games, never a
+  // move inside one: the match opens on it, and a game that ends returns to it.
+  test('offers the first game of the match', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: '0' });
 
     expect(screen.getByText('strategy.guide.newGame')).toBeInTheDocument();
     expect(screen.getByText('strategy.testGameButton')).toBeInTheDocument();
+    expect(screen.queryByText('strategy.guide.waitingForServer')).not.toBeInTheDocument();
+  });
+
+  test('offers the next game once one has ended, under its result', () => {
+    renderBoard({ phase: 'startNewGame', currentPlayer: '0' }, { winner: JUDGE_PLAYER });
+
+    expect(screen.getByText('strategy.guide.botWins')).toBeInTheDocument();
+    expect(screen.getByText('strategy.testGameButton')).toBeInTheDocument();
+    expect(screen.queryByText('strategy.guide.newGame')).not.toBeInTheDocument();
     expect(screen.queryByText('strategy.guide.waitingForServer')).not.toBeInTheDocument();
   });
 
