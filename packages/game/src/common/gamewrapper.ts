@@ -38,10 +38,10 @@ function setStartingPosition({ G, playerID, events }: MoveContext, startingPosit
 
 const lengthOfCompetition = 30 * 60; // seconds
 
-/// How late a move may still be taken, in milliseconds, so that a team clicking
-/// as the clock hits zero does not lose the move to the round trip. The same
-/// allowance applies when the bot's turn ends: a shorter one there would end the
-/// match while a move the team had just been granted was still on screen.
+/// How long past its end a match stays open, in milliseconds, so that a team
+/// clicking as the clock hits zero does not lose the move to the round trip.
+/// The first move after that is still applied, and then ends the match. The
+/// bot's answer is held to the same allowance.
 export const LATE_MOVE_GRACE_MS = 10 * 1000;
 
 function isPastGrace(G: GameStateMixin) {
@@ -140,7 +140,8 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             maxMoves: 1
           }),
           ...game.turn,
-          // The end-of-time rule for every strategy game. The team's clock poll
+          // The end-of-time rule for every strategy game, in this phase only.
+          // boardgame.io runs these hooks after the move. The team's clock poll
           // is a move too, so a team still on the page ends a match it has run
           // out of by asking for the time.
           onMove: (context) => {
@@ -159,10 +160,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           },
         },
         onEnd: ({ G, ctx }) => {
-          // A game with no winner yet is one the time ran out in. That is
-          // recorded only when the team's page ends the match, by asking for
-          // the time after the deadline; a match the server closes on time
-          // has no entry for it. A second win in a row ends the match from
+          // A game with no winner yet is one the time ran out in, ended by a
+          // move past the allowance: the team's, its clock poll or the bot's.
+          // A match the server closes on time has no entry for it. A second win in a row ends the match from
           // inside the move, and boardgame.io still ends this phase first.
           if (G.difficulty === "live") {
             // No game ends in a draw, so one with a winner is won or lost.

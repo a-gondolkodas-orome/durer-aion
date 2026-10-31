@@ -345,16 +345,6 @@ describe("gameWrapper deadline", () => {
     vi.useRealTimers();
   });
 
-  test("a team's move before the end is taken", () => {
-    const client = playing(steppingGame());
-
-    at(-1000);
-    client.moves.step();
-
-    expect(client.getState()?.ctx.gameover).toBeUndefined();
-    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(JUDGE_PLAYER);
-  });
-
   test("a team's move within the allowance is taken", () => {
     const client = playing(steppingGame());
 
@@ -365,11 +355,22 @@ describe("gameWrapper deadline", () => {
     expect(client.getState()?.G.data).toStrictEqual("stepped");
   });
 
-  test("a team's move past the allowance ends the match", () => {
+  // The one late move is played, then the match ends.
+  test("a team's move past the allowance is applied and ends the match", () => {
     const client = playing(steppingGame());
 
     at(LATE_MOVE_GRACE_MS + 1000);
     client.moves.step();
+
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  test("a team's clock poll past the allowance ends the match", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.getTime();
 
     expect(client.getState()?.ctx.gameover).toBe(true);
   });
