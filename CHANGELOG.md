@@ -33,9 +33,10 @@ comes first, not the earliest merged.
   `/valto/`, where closing the end dialog used to record 0 (#653)
 - **A refreshed look**: the general Dürer logo with round favicons, login pages
   on a card, relay math in KaTeX's own fonts, side margins at every width, and
-  snackbars above a phone keyboard (#588, #606, #592, #635, #591, #600)
-- **The practice sites and the public dry run are tracked in umami**, `/valto/` remembers the language choice, and browsers no longer
-  offer to translate the pages (#605, #607, #629, #654, #546)
+  notifications above a phone keyboard (#588, #606, #592, #635, #591, #600)
+- **The practice sites and the public dry run are tracked in umami**; `/valto/`
+  remembers the language choice, and browsers no longer offer to translate the
+  pages (#605, #607, #629, #654, #546)
 
 ### For developers
 
@@ -46,8 +47,8 @@ comes first, not the earliest merged.
 - React hook rules are linted across the repo, not only in the strategy
   practice site (#566, #563, #564, #565)
 - Production stack: every compose command keeps the TLS override, nginx has a
-  healthcheck so `up --wait` waits for a site that answers, unhashed files are
-  revalidated, and DEPLOYMENT.md covers restarting the backend mid-competition
+  health check so `up --wait` waits for a site that answers, browsers revalidate
+  the files whose names carry no hash, and DEPLOYMENT.md covers restarting the backend mid-competition
   (#579, #657, #590, #571)
 - Agents read `AGENTS.md` with no `CLAUDE.md` stub, push to a descriptive
   `claude/` branch, and ask before posting to a PR, watching one or writing to an
