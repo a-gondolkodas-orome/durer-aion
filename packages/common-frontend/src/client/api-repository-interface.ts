@@ -1,11 +1,12 @@
 import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
-import type { MatchTimeMoves, RelayMoves } from "./match-moves";
+import type { MatchMoveDispatch } from "./match-moves";
 
 // The session is the repository's to keep, not the caller's: online it is an
 // HttpOnly cookie the server set on `joinWithCode` (issue #89), which no script
-// can read, so nothing here takes or returns the team's id.
-export interface ClientRepository {
+// can read, so nothing here takes or returns the team's id. The match's moves
+// come from `MatchMoveDispatch`, which every build extends.
+export interface ClientRepository extends MatchMoveDispatch {
   version: "MOCK" | "OFFLINE" | "ONLINE"
   /** The logged-in team, or null when there is no session. */
   getTeamState(): Promise<TeamModelDto | null>;
@@ -22,10 +23,6 @@ export interface ClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
-  // What `MatchMoveDispatch` implements for every build.
-  submitRelayAnswer(answer: number, moves: RelayMoves): Promise<void>;
-  startRelayGame(moves: RelayMoves): Promise<void>;
-  syncMatchTime(moves: MatchTimeMoves): Promise<void>;
   // The end report of a relay whose time ran out with no move to end it: the
   // game ends a match past its time only on a move arriving after the grace
   // for late answers, and a team waiting at the buzzer sends none. Locally the
