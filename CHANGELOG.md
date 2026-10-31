@@ -12,6 +12,47 @@ a new command or gate, a removed package, a new convention — or a decision the
 need to know. What was refactored is not enough. In both parts the most important
 comes first, not the earliest merged.
 
+## October 2026, as of 2026-10-31
+
+- **The 20th online round's games are public**: its strategy game is in the dry
+  run and on `/jatekok/`, and its C/D/E relay problems are on `/valto/` and in
+  the dry run, replacing the 19th round's (#659, #660)
+- **Teams see their results in detail**: a running points table under the relay
+  clock, the live games so far on the strategy board, and per-problem and
+  per-game tables on both end screens and the home page (#611, #610)
+- **The round is harder to break**: a double click on Start, or two devices,
+  start one match, not two; a board is disabled while its socket is down, and
+  relay moves while the judge has the turn; a screen that fails to render shows
+  an error, not a blank page (#664, #596, #628, #633, #608)
+- **boardgame.io's unauthenticated lobby API under `/games` is closed** (#636)
+- **Team deletion is gone**, with the archive of deleted teams: deleting a team
+  mid-round let it play on. Organisers can instead reveal a team's email and join
+  code in its dialog, the match log stamps each move with its time, and the TSV
+  import accepts uploads again (#646, #648, #551, #602, #638, #511)
+- **A relay whose time ran out keeps its score** in the dry run and on
+  `/valto/`, where closing the end dialog used to record 0 (#653)
+- **A refreshed look**: the general Dürer logo with round favicons, login pages
+  on a card, relay math in KaTeX's own fonts, side margins at every width, and
+  snackbars above a phone keyboard (#588, #606, #592, #635, #591, #600)
+- **The practice sites and the public dry run are tracked in umami**, `/valto/` remembers the language choice, and browsers no longer
+  offer to translate the pages (#605, #607, #629, #654, #546)
+
+### For developers
+
+- Database code is tested against a real postgres, in process through PGlite —
+  no docker, so it runs in `npm run check` (#632, #664)
+- The strategy practice site is on i18next; the old `{ hu, en }` translation
+  framework is removed (#614–#620, #622)
+- React hook rules are linted across the repo, not only in the strategy
+  practice site (#566, #563, #564, #565)
+- Production stack: every compose command keeps the TLS override, nginx has a
+  healthcheck so `up --wait` waits for a site that answers, unhashed files are
+  revalidated, and DEPLOYMENT.md covers restarting the backend mid-competition
+  (#579, #657, #590, #571)
+- Agents read `AGENTS.md` with no `CLAUDE.md` stub, push to a descriptive
+  `claude/` branch, and ask before posting to a PR, watching one or writing to an
+  issue (#584, #603, #593, #627, #644)
+
 ## September 2026, as of 2026-09-28
 
 - **Team sessions are safer.** A team's session lives in an HttpOnly cookie
