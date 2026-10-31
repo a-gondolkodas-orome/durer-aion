@@ -33,5 +33,9 @@ export interface ClientRepository {
   // the opening move of the match once the board is up.
   startRelayGame(moves: BoardMoves): Promise<void>;
   syncRelayTime(moves: BoardMoves): Promise<void>;
+  /** Asks the server for the judge's turn in one of the team's matches;
+   *  `withJudgeResume` says when. Online only: a local bot is the
+   *  transport's to resume. */
+  resumeJudgeTurn(matchId: string): Promise<void>;
 
 }

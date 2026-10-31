@@ -397,6 +397,26 @@ paths:
           description: No session
         "403":
           description: Not allowed, match in progress
+  /team/me/match/{matchId}/resume-judge:
+    post:
+      summary: Take the judge's turn in one of the logged-in team's matches if it is waiting on one, or publish the stored state again if not
+      security:
+      - teamSession: []
+      tags:
+      - user
+      parameters:
+      - name: matchId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: The turn was taken, or the stored state published again
+        "401":
+          description: No session
+        "404":
+          description: Not one of the team's matches
 
 components:
   securitySchemes:

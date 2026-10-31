@@ -16,6 +16,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AddressInfo } from "node:net";
 import { io as connect, Socket } from "socket.io-client";
 import { createMatch } from "boardgame.io/internal";
+import { Master } from "boardgame.io/master";
 import { Server } from "boardgame.io/server";
 import { MyGameWrappers, gameWrapper, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
@@ -81,6 +82,7 @@ const makeMove = (type: string, args: unknown[], playerID: string) =>
 
 describe("the socket transport a browser talks to", () => {
   let server: BgioServer;
+  let transport: SocketIOButBotMoves;
   let running: RunningServers;
   let url: string;
   const sockets: Socket[] = [];
@@ -95,14 +97,15 @@ describe("the socket transport a browser talks to", () => {
     // environment (server/common.ts) and refuses to start without it.
     vi.stubEnv("BOT_CREDENTIALS", "bot-credentials-for-this-test");
 
+    transport = new SocketIOButBotMoves(
+      { https: undefined },
+      { [GAME_NAME]: new (botWrapper(StrategyWrappers.E()))({ enumerate: game.ai?.enumerate }) },
+    );
     server = Server({
       games: [game],
       // No `db`, so boardgame.io hands us its in-memory store — the transport
       // is what this file is about, not what persists behind it.
-      transport: new SocketIOButBotMoves(
-        { https: undefined },
-        { [GAME_NAME]: new (botWrapper(StrategyWrappers.E()))({ enumerate: game.ai?.enumerate }) },
-      ),
+      transport,
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
     });
@@ -210,6 +213,43 @@ describe("the socket transport a browser talks to", () => {
     const afterReload = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
     expect(afterReload._stateID).toBe(beforeReload._stateID);
     expect(afterReload.G).toStrictEqual(beforeReload.G);
+  });
+
+  /** The judge's turn the server lost: the player's move is stored, and
+   *  nothing asked the bot to answer it — what a backend restart between the
+   *  two leaves. The move goes in through a master of its own, so no
+   *  transport hears of it. */
+  async function leaveOnJudgesTurn(): Promise<void> {
+    const master = new Master(game, server.db, { send: () => undefined, sendAll: () => undefined });
+    const { state } = await server.db.fetch(MATCH_ID, { state: true });
+    const move = makeMove("chooseNewGameType", ["live"], HUMAN_ID) as Parameters<Master["onUpdate"]>[0];
+    await master.onUpdate(move, state._stateID, MATCH_ID, HUMAN_ID);
+  }
+
+  it("takes a judge's turn nobody took when the board asks for it", async () => {
+    await createStoredMatch();
+    await leaveOnJudgesTurn();
+    const socket = await connectClient();
+    const stuck = await syncAs(socket, MATCH_ID, HUMAN_ID);
+    expect(stuck.ctx.currentPlayer).toBe(BOT_ID);
+
+    const botAnswered = updateMatching(socket, ({ ctx }) => ctx.currentPlayer === HUMAN_ID);
+    await transport.resumeBotTurn(server.app.context, game, MATCH_ID);
+    const state = await botAnswered;
+
+    expect(state.ctx.phase).toBe("chooseRole");
+    expect(state._stateID).toBeGreaterThan(stuck._stateID);
+  });
+
+  it("hands a board that asks after the judge has moved the stored state again", async () => {
+    await createStoredMatch();
+    const socket = await connectClient();
+    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
+
+    const resent = updateMatching(socket, () => true);
+    await transport.resumeBotTurn(server.app.context, game, MATCH_ID);
+
+    expect((await resent)._stateID).toBe(live._stateID);
   });
 
   it("refuses a sync for a match nobody created", async () => {

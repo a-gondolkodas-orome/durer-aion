@@ -5,7 +5,7 @@ import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { GameType } from 'schemas';
-import { TransportAPI } from '../socketio_botmoves';
+import { type SocketIOButBotMoves, TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
@@ -375,5 +375,24 @@ export function configureTeamsRouter(
 
     team.set({ pageState: "HOME" });
     ctx.body = publicTeamView(team, matches);
+  });
+
+  /**
+   * Ask for the judge's turn in one of the logged-in team's matches, for a
+   * board that has waited on it too long (`resumeBotTurn` says why).
+   */
+  router.post<TeamState>("/team/me/match/:matchId/resume-judge", requireTeam(teams), async (ctx) => {
+    const team = ctx.state.team;
+    const matchID = ctx.params.matchId;
+    if (matchID !== team.relayMatchID && matchID !== team.strategyMatchID)
+      ctx.throw(404, "Not one of the team's matches.");
+    const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, { metadata: true });
+    const game = games.find(g => g.name === metadata?.gameName);
+    if (!game) {
+      ctx.throw(500, `Match ${matchID} has no game this server serves.`);
+      return;
+    }
+    await (ctx.durer_transport as SocketIOButBotMoves).resumeBotTurn(ctx, game, matchID);
+    ctx.status = 204;
   });
 }
