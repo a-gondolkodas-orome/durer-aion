@@ -1,5 +1,4 @@
 import type { ClientRepository } from "./api-repository-interface";
-import { MatchMoveDispatch } from "./match-moves";
 import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
@@ -28,7 +27,7 @@ const teamsByJoinCode: Record<string, () => TeamModelDto> = {
   }),
 };
 
-export class MockClientRepository extends MatchMoveDispatch implements ClientRepository {
+export class MockClientRepository implements ClientRepository {
   version = "MOCK" as const;
   // The join code last logged in with.
   private session: string | null = null;

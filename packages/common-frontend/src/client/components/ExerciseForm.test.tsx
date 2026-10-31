@@ -10,12 +10,14 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+const refreshState = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock('../hooks/user-hooks', () => ({
-  useRefreshTeamState: () => () => Promise.resolve(),
+  useRefreshTeamState: () => refreshState,
 }));
 
 afterEach(() => {
   vi.restoreAllMocks();
+  refreshState.mockClear();
 });
 
 function renderForm(awaitingJudge: boolean, onSubmit = vi.fn((_result: number) => Promise.resolve())) {
@@ -46,6 +48,7 @@ test('sends a guess on its turn', async () => {
   fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
   fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
   await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(42));
+  await waitFor(() => expect(refreshState).toHaveBeenCalledOnce());
 });
 
 // #623: a second guess before the judge ruled on the first was a move out of
@@ -79,4 +82,5 @@ test.each<[string, () => Promise<void>]>([
   await sendGuess();
   expect(await screen.findByText('failed')).toBeInTheDocument();
   expect(logged).toHaveBeenCalledOnce();
+  expect(refreshState).not.toHaveBeenCalled();
 });

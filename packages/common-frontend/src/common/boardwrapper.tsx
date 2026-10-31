@@ -6,7 +6,7 @@ import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { StrategyGamesTable } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
-import { asMatchTimeMoves } from "../client/match-moves";
+import { asStrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
@@ -22,21 +22,19 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
 export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
   return (props: StrategyBoardProps<G>) => {
-    const { G, ctx, moves } = props;
+    const { G, ctx } = props;
+    const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
     const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining); // asked from the server
     const backToHome = useBackToHome();
-    const clientRepo = useClientRepo();
-    const isOffline = clientRepo.version === "OFFLINE";
-    const matchTimeMoves = useMemo(() => asMatchTimeMoves(moves), [moves]);
-    const syncTime = () => void clientRepo.syncMatchTime(matchTimeMoves);
+    const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
 
     useEffect(() => {
       if (!ctx.gameover) {
-        void clientRepo.syncMatchTime(matchTimeMoves);
+        moves.getTime();
       }
-    }, [ctx.gameover, clientRepo, matchTimeMoves]);
+    }, [ctx.gameover, moves]);
     // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
     // only ever asks whether it is `true`.
     const finished = msRemaining < - 5000 || ctx.gameover === true
@@ -72,7 +70,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               {!finished && <Countdown
                 msRemaining={msRemaining ?? null}
                 setMsRemaining={setMsRemaining}
-                getServerTimer={syncTime}
+                getServerTimer={moves.getTime}
                 endTime={new Date(G.end)}
                 serverRemainingMs={G.millisecondsRemaining} />}
             </Stack>

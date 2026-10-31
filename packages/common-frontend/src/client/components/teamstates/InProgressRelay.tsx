@@ -43,14 +43,16 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   // time it last had until that end-of-round polling.
   const syncTime = () => {
     if (!awaitingJudge) {
-      void clientRepo.syncMatchTime(relayMoves);
+      relayMoves.getTime();
     }
   };
 
   const startOrSync = useEffectEvent(() => {
     const gameNotStarted = G.numberOfTry === 0;
     if (gameNotStarted) {
-      void clientRepo.startRelayGame(relayMoves);
+      // The opening move of the match, once the board is up; startRelay is
+      // what moved the team to this page.
+      relayMoves.startGame();
     } else {
       syncTime();
     }
@@ -158,7 +160,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             previousTries={G.previousAnswers[G.currentProblem].map(it => it.answer)}
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
-            onSubmit={(input: number) => clientRepo.submitRelayAnswer(input, relayMoves)}
+            onSubmit={async (input: number) => relayMoves.submitAnswer(input)}
             awaitingJudge={awaitingJudge}
           />
           <Stack sx={{

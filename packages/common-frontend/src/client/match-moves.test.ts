@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { Client } from "boardgame.io/client";
 import { gameWrapper, GameRelay, MyGameWrappers } from "game";
-import { asMatchTimeMoves, asRelayMoves } from "./match-moves";
+import { asRelayMoves, asStrategyWrapperMoves } from "./match-moves";
 
 // A move renamed in the game fails here, not mid-round.
 test("the relay game's own client has the relay moves", () => {
@@ -9,9 +9,9 @@ test("the relay game's own client has the relay moves", () => {
   expect(() => asRelayMoves(client.moves)).not.toThrow();
 });
 
-test("a wrapped strategy game's client has the clock move", () => {
+test("a wrapped strategy game's client has the wrapper's moves", () => {
   const client = Client({ game: gameWrapper(MyGameWrappers.C()), numPlayers: 2 });
-  expect(() => asMatchTimeMoves(client.moves)).not.toThrow();
+  expect(() => asStrategyWrapperMoves(client.moves)).not.toThrow();
 });
 
 test("a missing move is named", () => {

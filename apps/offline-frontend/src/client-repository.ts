@@ -1,4 +1,4 @@
-import { ClientRepository, MatchMoveDispatch, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
@@ -6,7 +6,7 @@ import { handleGameReport } from "./game-report";
 import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
-export class OfflineClientRepository extends MatchMoveDispatch implements ClientRepository {
+export class OfflineClientRepository implements ClientRepository {
 
   version = "OFFLINE" as const;
 
