@@ -27,7 +27,6 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const backToHome = useBackToHome();
     const clientRepo = useClientRepo();
     const isOffline = clientRepo.version === "OFFLINE";
-    // The same clock move and repository call as the relay board's.
     const matchTimeMoves = useMemo(() => asMatchTimeMoves(moves), [moves]);
     const syncTime = () => void clientRepo.syncMatchTime(matchTimeMoves);
     const theme = useTheme();

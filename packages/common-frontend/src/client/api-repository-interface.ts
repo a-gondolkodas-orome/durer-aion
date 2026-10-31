@@ -4,8 +4,8 @@ import type { MatchMoveDispatch } from "./match-moves";
 
 // The session is the repository's to keep, not the caller's: online it is an
 // HttpOnly cookie the server set on `joinWithCode` (issue #89), which no script
-// can read, so nothing here takes or returns the team's id. The match's moves
-// come from `MatchMoveDispatch`, which every build extends.
+// can read, so nothing here takes or returns the team's id. The match moves
+// come from `MatchMoveDispatch`.
 export interface ClientRepository extends MatchMoveDispatch {
   version: "MOCK" | "OFFLINE" | "ONLINE"
   /** The logged-in team, or null when there is no session. */

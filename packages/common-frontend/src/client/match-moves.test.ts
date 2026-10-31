@@ -3,8 +3,7 @@ import { Client } from "boardgame.io/client";
 import { gameWrapper, GameRelay, MyGameWrappers } from "game";
 import { asMatchTimeMoves, asRelayMoves } from "./match-moves";
 
-// What the narrowing is for: a move renamed in the game fails here rather than
-// as a call to `undefined` in the middle of a round.
+// A move renamed in the game fails here, not mid-round.
 test("the relay game's own client has the relay moves", () => {
   const client = Client({ game: GameRelay, numPlayers: 2 });
   expect(() => asRelayMoves(client.moves)).not.toThrow();

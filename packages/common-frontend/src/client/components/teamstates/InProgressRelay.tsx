@@ -24,7 +24,8 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
 }) {
   const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining);
   const clientRepo = useClientRepo();
-  // boardgame.io rebuilds `moves` only with the client, so this runs once.
+  // boardgame.io replaces `moves` only for a new client, player, match or
+  // credentials.
   const relayMoves = useMemo(() => asRelayMoves(moves), [moves]);
   const logout = useLogout();
   // Closing the dialog leaves the way its button does.
