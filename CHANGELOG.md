@@ -18,10 +18,6 @@ comes first, not the earliest merged.
 - **Teams see their results in detail**: a running points table under the relay
   clock, the live games so far on the strategy board, and per-problem and
   per-game tables on both end screens and the home page (#611, #610)
-- **The round is harder to break**: a double click on Start, or two devices,
-  start one match, not two; a board is disabled while its socket is down, and
-  relay moves while the judge has the turn; a screen that fails to render shows
-  an error, not a blank page (#664, #596, #628, #633, #608)
 - **boardgame.io's unauthenticated lobby API under `/games` is closed** (#636)
 - **Team deletion is gone**, with the archive of deleted teams: deleting a team
   mid-round let it play on. Organisers can instead reveal a team's email and join
