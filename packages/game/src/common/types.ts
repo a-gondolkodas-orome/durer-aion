@@ -22,14 +22,6 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
-/// How late a move may still be taken, in milliseconds, so that a team clicking
-/// as the clock hits zero does not lose the move to the round trip. A game uses
-/// it both in `turn.onMove`, to decide whether to take the team's move, and in
-/// `turn.onEnd`, to decide whether the match is over once the bot has answered:
-/// a shorter allowance at the second would end the match while a move the first
-/// had just accepted was still on screen.
-export const LATE_MOVE_GRACE_MS = 10 * 1000;
-
 /// A practice ("test") game or a scored ("live") one. The team's client sends
 /// this as a move argument, so the move checks it against the list at runtime.
 export const DIFFICULTIES = ['test', 'live'] as const;

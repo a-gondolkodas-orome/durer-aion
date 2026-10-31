@@ -38,6 +38,16 @@ function setStartingPosition({ G, playerID, events }: MoveContext, startingPosit
 
 const lengthOfCompetition = 30 * 60; // seconds
 
+/// How late a move may still be taken, in milliseconds, so that a team clicking
+/// as the clock hits zero does not lose the move to the round trip. The same
+/// allowance applies when the bot's turn ends: a shorter one there would end the
+/// match while a move the team had just been granted was still on screen.
+export const LATE_MOVE_GRACE_MS = 10 * 1000;
+
+function isPastGrace(G: GameStateMixin) {
+  return Date.now() - new Date(G.end).getTime() > LATE_MOVE_GRACE_MS;
+}
+
 // This is *very important*, so as not to spam
 export function isMakeMovePayloadReadOnly(payload_type: string) {
   return payload_type === "getTime";
@@ -130,14 +140,21 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
             maxMoves: 1
           }),
           ...game.turn,
+          // The end-of-time rule for every strategy game. The team's clock poll
+          // is a move too, so a team still on the page ends a match it has run
+          // out of by asking for the time.
+          onMove: (context) => {
+            game.turn?.onMove?.(context);
+            if (context.playerID === GUESSER_PLAYER && isPastGrace(context.G)) context.events.endGame();
+          },
           onEnd: ({ G, ctx, events, random, log }) => {
-            if (game.turn?.onEnd !== undefined) {
-              // boardgame.io attaches `playerID` to `turn.onMove` and to nothing
-              // else: `EndTurn` calls this hook with the state alone. The player
-              // whose turn is ending is still the current one, since bgio
-              // advances the order only after this returns.
-              game.turn.onEnd({ G, ctx, playerID: currentPlayer(ctx), events, log, random });
-            }
+            // boardgame.io attaches `playerID` to `turn.onMove` and to nothing
+            // else: `EndTurn` calls this hook with the state alone. The player
+            // whose turn is ending is still the current one, since bgio
+            // advances the order only after this returns.
+            const playerID = currentPlayer(ctx);
+            game.turn?.onEnd?.({ G, ctx, playerID, events, log, random });
+            if (playerID === JUDGE_PLAYER && isPastGrace(G)) events.endGame();
             sendStrategyFunction({ component: "strategy", phase: "step", G: G, ctx: ctx });
           },
         },
