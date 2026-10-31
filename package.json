@@ -66,6 +66,9 @@
   "overrides": {
     "koa-socket-2": {
       "socket.io": "^4"
+    },
+    "@lingual/i18n-check": {
+      "@types/node": "26"
     }
   },
   "workspaces": [

@@ -88,11 +88,24 @@ describe('a version written down in more than one file', () => {
     ]);
   });
 
-  it('Node: both devcontainer base images are on the .nvmrc major', () => {
+  it('Node: the devcontainer base images and @types/node are on the .nvmrc major', () => {
     // MCR tags these images by major alone, so the major is all they can agree on; the node
     // feature compared above is what pins the exact version inside them.
+    const rootPackage = JSON.parse(read('package.json'));
     expectAgreement('Node major', [
       ['.nvmrc', read('.nvmrc').trim().split('.')[0]],
+      // The types track the runtime — DEPENDENCIES.md § Held back deliberately.
+      [
+        'apps/online-backend/package.json @types/node',
+        JSON.parse(read('apps/online-backend/package.json')).devDependencies?.['@types/node']?.split('.')[0]
+      ],
+      // i18n-check pulls in a CLI library that asks for `@types/node` `22 || 24`, though nothing
+      // here compiles its types; left alone, it keeps a second, older copy in the tree that
+      // every other `*` dependent dedupes onto. The override lets the one copy follow the runtime.
+      [
+        'package.json overrides @lingual/i18n-check @types/node',
+        rootPackage.overrides?.['@lingual/i18n-check']?.['@types/node']
+      ],
       [
         '.devcontainer/devcontainer.json image',
         read('.devcontainer/devcontainer.json').match(/"image"\s*:\s*"[^"]*-node:(\d+)/)?.[1]
