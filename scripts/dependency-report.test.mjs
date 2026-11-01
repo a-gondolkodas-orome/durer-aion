@@ -149,6 +149,21 @@ describe('formatReport', () => {
     expect(report).toContain('3 of 3 pinned versions are behind, 2 of them held back deliberately.');
   });
 
+  // A row whose latest is still inside .npmrc's min-release-age offers the newest version npm will
+  // install, and says why it is not the dist-tag — otherwise the report reads as out of date.
+  it('names a release too new to install beside the version it offers instead', () => {
+    const report = formatReport([{ ...row('vite', '8.1.5', '8.3.4'), cooling: '8.3.5' }], 7);
+
+    expect(report).toContain('| `vite` | 8.1.5 | 8.3.4 (8.3.5 too new) | root |');
+    expect(report).toContain('published less than 7 days ago');
+  });
+
+  it('says nothing about the cooldown when no behind row is cooling', () => {
+    const report = formatReport([row('vite', '8.1.5', '8.2.1'), { ...row('eslint', '10.8.0', '10.8.0'), cooling: '10.8.1' }], 7);
+
+    expect(report).not.toContain('too new');
+  });
+
   it('keeps the headline plain when nothing is held back', () => {
     const report = formatReport([row('vite', '8.1.5', '8.2.1'), row('eslint', '10.8.0', '10.8.0')]);
 
