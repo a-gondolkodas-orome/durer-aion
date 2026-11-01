@@ -82,7 +82,6 @@ export default defineConfig(() => ({
     // Node's own, undefined `localStorage` would shadow jsdom's — the root
     // vitest.config.mts says why.
     execArgv: ['--no-experimental-webstorage'],
-    clearMocks: true,
     restoreMocks: true,
     // Reuse one context per worker instead of a fresh one per file (~40% faster).
     // Requires the setup file below: with a shared module cache, testing-library's

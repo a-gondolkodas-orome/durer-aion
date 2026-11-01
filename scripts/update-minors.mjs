@@ -9,8 +9,9 @@
 // waiting, for the next sweep to pick up.
 //
 // Edits the package.json files and nothing else; the lockfile is npm's to write. The script
-// closes by printing the follow-up — `npm install`, the checks, and any file outside a
-// package.json that a bump also has to touch (ALSO_WRITTEN_IN).
+// closes by printing the follow-up — `npm install`, the checks, any file outside a
+// package.json that a bump also has to touch (ALSO_WRITTEN_IN), and an `npm update` for a bumped
+// package the root `overrides` block also names (overriddenPackages).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { ALSO_WRITTEN_IN, workspaces } from './dependency-report.mjs';
@@ -30,6 +31,20 @@ export const newestWithinMajor = (versions, current) => {
   if (major === undefined) return undefined;
   return versions.filter(version => version.match(STABLE)?.[1] === major).sort(compareStable).at(-1);
 };
+
+// Every package the root `overrides` block forces to a version, at any depth: a string value
+// overrides its own key, and a nested object's `.` overrides the package that holds it. A `$name`
+// reference follows the root pin by construction, so it is left out.
+//
+// An override given as a range does not follow a pin bumped here: `npm install` keeps the hoisted
+// copy the lockfile already has, since it still satisfies the range, and nests the new pin under its
+// workspace. For socket.io that is the split socketio-single-copy.test.mjs fails on (#461).
+// `npm update <name>` re-resolves the range and dedupes onto the pin.
+export const overriddenPackages = (overrides = {}) => Object.entries(overrides).flatMap(([name, value]) => {
+  if (typeof value === 'string') return name === '.' || value.startsWith('$') ? [] : [name];
+  const own = typeof value['.'] === 'string' && !value['.'].startsWith('$') ? [name] : [];
+  return [...own, ...overriddenPackages(value)];
+});
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const files = new Map(); // workspace dir -> parsed package.json
@@ -97,8 +112,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       .map(line => line.split(' ')[0]).filter(name => ALSO_WRITTEN_IN[name])
       .map(name => `  ${name} is also written down in: ${ALSO_WRITTEN_IN[name].join(', ')}`);
     if (elsewhere.length > 0) console.log(`\nThe same bump has to reach files no package.json names:\n${elsewhere.join('\n')}`);
-    console.log('\nNext: npm install, then the usual gates — npm run build, npm run lint, npm run typecheck,');
-    console.log('npm test. Majors stay with npm run report:outdated.');
+    const overridden = new Set(overriddenPackages(files.get('').overrides));
+    const toDedupe = [...new Set([...bumped.keys()].map(line => line.split(' ')[0]))].filter(name => overridden.has(name));
+    console.log('\nNext: npm install,');
+    if (toDedupe.length > 0) {
+      console.log(`then npm update ${toDedupe.join(' ')} — the root overrides block holds a range for`);
+      console.log('each, which npm install leaves on the copy the lockfile already has (npm ls shows the split),');
+    }
+    console.log('then the usual gates — npm run build, npm run lint, npm run typecheck, npm test.');
+    console.log('Majors stay with npm run report:outdated.');
   }
 
   if (waiting.size > 0) {
