@@ -503,6 +503,14 @@ components:
         pageState:
           type: string
           enum: ["DISCLAIMER", "HOME", "RELAY", "STRATEGY"]
+        relayMatchID:
+          type: string
+          nullable: true
+          description: The team's current relay match, the column the status below is read from.
+        strategyMatchID:
+          type: string
+          nullable: true
+          description: The team's current strategy match, the column the status below is read from.
         relayMatch:
           $ref: "#/components/schemas/MatchStatus"
         strategyMatch:

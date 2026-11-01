@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import type { TeamsRepository } from './db';
 import { startTestDatabase } from './test_database';
 import { TeamModel } from './model';
+import { adminTeamViews } from './match_status';
 
 // TeamsRepository against a real postgres (test_database.ts), for what only the
-// database decides: the unique constraints, a JSON-path WHERE and the LIKE
-// escape.
+// database decides: the unique constraints and the LIKE escape.
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
 
@@ -54,34 +54,16 @@ describe('the unique constraints sync() creates', () => {
   });
 });
 
-describe('TeamsRepository.finishMatch', () => {
-  it('writes only to that team, and only while it still holds that match', async () => {
-    const inProgress = { state: 'IN PROGRESS', matchID: 'current', startAt: new Date(), endAt: new Date() } as const;
-    const { teamId } = await database.teams.insertTeam(team());
-    const other = await database.teams.insertTeam(team());
-    await TeamModel.update({ strategyMatch: inProgress }, { where: {} });
-    const finished = { ...inProgress, state: 'FINISHED', score: 3 } as const;
-
-    expect(await database.teams.finishMatch(teamId, 'strategyMatch', 'stale', { ...finished, matchID: 'stale' })).toBe(false);
-    expect(await database.teams.finishMatch(teamId, 'strategyMatch', 'current', finished)).toBe(true);
-    expect((await database.teams.getTeam({ teamId }))?.strategyMatch).toMatchObject({ state: 'FINISHED', score: 3 });
-    expect((await database.teams.getTeam({ teamId: other.teamId }))?.strategyMatch).toMatchObject({ state: 'IN PROGRESS' });
-  });
-});
-
 describe('TeamsRepository.goHome', () => {
   // The route used to check a team read before a start landed, and then
   // overwrote the start's page.
-  it('takes the team home only while no match is in progress', async () => {
-    const { teamId } = await database.teams.insertTeam(team());
-    expect(await database.teams.goHome(teamId)).toBe(true);
+  it('takes the team home only while it holds the matches the caller read', async () => {
+    const read = await database.teams.insertTeam(team());
+    expect(await database.teams.goHome(read)).toBe(true);
 
-    await TeamModel.update({
-      pageState: 'STRATEGY',
-      strategyMatch: { state: 'IN PROGRESS', matchID: 'current', startAt: new Date(), endAt: new Date() },
-    }, { where: { teamId } });
-    expect(await database.teams.goHome(teamId)).toBe(false);
-    expect((await database.teams.getTeam({ teamId }))?.pageState).toBe('STRATEGY');
+    await TeamModel.update({ pageState: 'STRATEGY', strategyMatchID: 'current' }, { where: { teamId: read.teamId } });
+    expect(await database.teams.goHome(read)).toBe(false);
+    expect((await database.teams.getTeam({ teamId: read.teamId }))?.pageState).toBe('STRATEGY');
   });
 });
 
@@ -96,5 +78,30 @@ describe('TeamsRepository.fetch', () => {
     expect(await names(['budapest', 'motivated'])).toStrictEqual(['Alpha']);
     expect(await names(['100%'])).toStrictEqual(['Alpha']);
     expect(await names(['a_b'])).toStrictEqual(['Alpha']);
+  });
+});
+
+// fetchMatchStates reads bgio-postgres' own table through the model it
+// registers, which no API of the library promises: this is what notices a
+// release that renames either.
+describe('the admin list of teams', () => {
+  it('reads every team\'s matches in one query', async () => {
+    const G = { start: '2026-03-21T10:00:00.000Z', end: '2999-01-01T00:00:00.000Z', points: 2 };
+    await database.db.createMatch('m1', {
+      initialState: { G, ctx: { phase: 'play' } } as never,
+      metadata: { gameName: 'relay', players: {} } as never,
+    });
+    const first = await database.teams.insertTeam(team());
+    await database.teams.insertTeam(team());
+    await TeamModel.update({ relayMatchID: 'm1' }, { where: { teamId: first.teamId } });
+    const fetch = vi.spyOn(database.db, 'fetch');
+
+    const views = await adminTeamViews(database.db, await TeamModel.findAll({ order: [['teamName', 'ASC']] }));
+
+    expect(views.map(view => [view.relayMatch, view.strategyMatch])).toStrictEqual([
+      [expect.objectContaining({ state: 'IN PROGRESS', matchID: 'm1' }), { state: 'NOT STARTED' }],
+      [{ state: 'NOT STARTED' }, { state: 'NOT STARTED' }],
+    ]);
+    expect(fetch).not.toHaveBeenCalled();
   });
 });
