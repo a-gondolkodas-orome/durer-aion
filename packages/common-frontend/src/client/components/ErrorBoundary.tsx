@@ -26,12 +26,6 @@ export class ErrorBoundary extends React.Component<
     }
   }
 
-  componentDidCatch(error: unknown) {
-    // A caught error never reaches `window.onerror`, which is where Sentry
-    // listens; this re-dispatches it there without throwing.
-    window.reportError(error);
-  }
-
   render() {
     if (!this.state.hasError) return this.props.children;
     return (

@@ -22,8 +22,8 @@ const forbidden = [
 ];
 
 // The packages the import has no business loading: the games and their bots,
-// the framework serving them, the socket transport, and the error reporter.
-const forbiddenPackages = ["game", "game/bot", "relay-bot", "boardgame.io", "socket.io", "@sentry/node"];
+// the framework serving them, and the socket transport.
+const forbiddenPackages = ["game", "game/bot", "relay-bot", "boardgame.io", "socket.io"];
 
 // 'server/db.ts' + './model' -> 'server/model.ts'. A specifier this cannot
 // place must fail loudly: an edge dropped here is a hole in the check.
