@@ -1,51 +1,30 @@
 import SelectRelayRound from './SelectRound';
 import { useTranslation } from 'react-i18next';
-import { Stack, useTheme, alpha } from '@mui/material';
+import { Stack } from '@mui/material';
 
 export function LoginToRelay() {
   const { t } = useTranslation();
-  const theme = useTheme();
 
   return (
-    <Stack sx={{
-      display: 'flex',
-      minHeight: '100vh',
-      width: '100%',
-      alignItems: 'start',
-      justifyContent: 'center',
-      // The page's Container has no padding, so this is the gutter at every
-      // width: the header's, so the card lines up with its title.
-      px: { xs: '10px', sm: '24px' },
-    }} data-testid="loginRoot">
+    <Stack data-testid="loginRoot">
       <Stack sx={{
-        width: '100%',
-        maxWidth: 680,
-        borderRadius: 5,
-        px: { xs: 3, sm: 5 },
-        py: { xs: 4, sm: 5 },
-        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
-        boxShadow: '0 24px 60px rgba(36, 52, 112, 0.14)',
-        backdropFilter: 'blur(10px)',
+        fontSize: { xs: '2rem', sm: '2.75rem' },
+        fontWeight: 800,
+        letterSpacing: '-0.04em',
+        lineHeight: 1.08,
       }}>
-        <Stack sx={{
-          fontSize: { xs: '2rem', sm: '2.75rem' },
-          fontWeight: 800,
-          letterSpacing: '-0.04em',
-          lineHeight: 1.08,
-        }}>
-          {t('login.relayPractise')}
-        </Stack>
-        <Stack sx={{
-          mt: 1.5,
-          fontSize: { xs: '1.05rem', sm: '1.25rem' },
-          lineHeight: 1.7,
-          opacity: 0.8
-        }}>
-          <p>{t('login.relayPractiseDescription')}</p>
-        </Stack>
-        <Stack sx={{ mt: 4 }}>
-          <SelectRelayRound />
-        </Stack>
+        {t('login.relayPractise')}
+      </Stack>
+      <Stack sx={{
+        mt: 1.5,
+        fontSize: { xs: '1.05rem', sm: '1.25rem' },
+        lineHeight: 1.7,
+        opacity: 0.8
+      }}>
+        <p>{t('login.relayPractiseDescription')}</p>
+      </Stack>
+      <Stack sx={{ mt: 4 }}>
+        <SelectRelayRound />
       </Stack>
     </Stack>
   )

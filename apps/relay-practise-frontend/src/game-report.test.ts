@@ -64,6 +64,17 @@ describe("handleGameReport", () => {
       expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: "12", round: "final", category: "C+", points: 17 });
     });
 
+    // A round can report its end more than once (see
+    // ClientRepository.keepRelayEnd); the later score is the one kept.
+    test("is sent once for a round that reports its end twice, which keeps the later score", () => {
+      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
+      handleGameReport({ component: "relay", phase: "end", G: { points: 20 } });
+
+      expect(track).toHaveBeenCalledOnce();
+      expect(localStorage.getItem(RELAY_KEY)).toStrictEqual("20");
+    });
+
     test("is not sent for a step report", () => {
       readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
       handleGameReport({ component: "relay", phase: "step", answer: 42, G: { currentProblem: 2 } });

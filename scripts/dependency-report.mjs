@@ -7,17 +7,21 @@
 //
 // Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
-//     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
+//     `latest` dist-tag — or the newest version below it that `.npmrc`'s min-release-age lets npm
+//     install, see release-age.mjs. The workspaces themselves are not among them — see npmRows.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: each .nvmrc, against the newest release sharing its major.
 //   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
 //
 // Deliberately not `npm outdated`: the lockfile already names the installed version, so the
-// registry can be asked directly and this needs no install and no node_modules.
+// registry can be asked directly. The one thing it takes from node_modules is semver, to read the
+// range a hold's blocker declares — see HELD_BACK.
 // Deliberately not `npm audit` either — advisories are Dependabot alerts' job, and they arrive with
 // an urgency a monthly digest would only dilute.
 import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import semver from 'semver';
+import { minReleaseAge, newestMature, releases } from './release-age.mjs';
 import { isWorkspaceLink, resolvedVersion } from './resolved-versions.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -35,19 +39,32 @@ export const ALSO_WRITTEN_IN = {
 // among the real work made every month's issue read as five upgrades when only one was: they are
 // reported, because a hold worth keeping is worth re-reading, but in their own section.
 // DEPENDENCIES.md § Held back deliberately owns the reasoning and is where a hold is argued or
-// lifted; the value here is only the caption a table cell has room for. The spec fails when the two
+// lifted; `reason` here is only the caption a table cell has room for. The spec fails when the two
 // lists stop naming the same packages, so a hold cannot be lifted in one of them alone.
+// `blocker` is the package whose own manifest keeps the hold, and the `field` of it that names the
+// held package: each month the report reads that range off the blocker's newest installable release,
+// and says so in the row once it admits the version we are held back from. A hold without one is a
+// policy, which no manifest can lift.
 export const HELD_BACK = {
-  koa: 'boardgame.io constructs the Koa app, at koa@^2',
-  '@koa/router': 'the backend types boardgame.io\'s own @koa/router@10 instance',
-  typescript: 'typescript-eslint caps typescript at <6.1.0',
-  '@types/node': 'policy: tracks the Node major in .nvmrc'
+  koa: {
+    reason: 'boardgame.io constructs the Koa app, at koa@^2',
+    blocker: { name: 'boardgame.io', field: 'dependencies' }
+  },
+  '@koa/router': {
+    reason: 'the backend types boardgame.io\'s own @koa/router@10 instance',
+    blocker: { name: 'boardgame.io', field: 'dependencies' }
+  },
+  typescript: {
+    reason: 'typescript-eslint caps typescript at <6.1.0',
+    blocker: { name: 'typescript-eslint', field: 'peerDependencies' }
+  },
+  '@types/node': { reason: 'policy: tracks the Node major in .nvmrc' }
 };
 
 // Node is written down far more often than it is depended on, and listing all of it in a table cell
 // would crowd out the version. check-versions.test.mjs carries the list; the row carries the count.
 const NVMRC_COMPANIONS = {
-  '.nvmrc': ['4 more files — see check-versions.test.mjs']
+  '.nvmrc': ['6 more files — see check-versions.test.mjs']
 };
 
 // The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart
@@ -82,9 +99,12 @@ const fetchJson = async url => {
 // A row is { name, current, where, latest } once resolved, or { name, current, where, error } when
 // the lookup failed. A failed lookup is reported, never thrown: one unreachable registry must not
 // cost the whole report, and a row that silently vanished would read as "up to date".
+// A lookup answers the latest version, or `{ latest, cooling }` when a newer one is still inside
+// the release-age window and so not yet installable.
 const checkVersion = async (name, current, where, lookup) => {
   try {
-    return { name, current, where, latest: await lookup() };
+    const found = await lookup();
+    return { name, current, where, ...(typeof found === 'string' ? { latest: found } : found) };
   } catch (error) {
     return { name, current, where, error: error.message };
   }
@@ -129,7 +149,7 @@ const npmRows = () => {
     .sort((a, b) => a.name.localeCompare(b.name) || a.current.localeCompare(b.current))
     .map(({ name, current, where }) =>
       checkVersion(name, current, [...where, ...(ALSO_WRITTEN_IN[name] ?? [])], async () =>
-        (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
+        newestMature({ current, ...(await releases(name)) }))
     );
 };
 
@@ -162,11 +182,11 @@ const nodeRows = () => {
   return files.map(file => {
     const current = read(file).trim();
     return checkVersion('Node', current, [file, ...(NVMRC_COMPANIONS[file] ?? [])], async () => {
-      const releases = await fetchJson('https://nodejs.org/dist/index.json');
+      const feed = await fetchJson('https://nodejs.org/dist/index.json');
       const major = current.split('.')[0];
       // The feed is newest-first, and staying on the pinned major is the point — a major bump is a
       // decision, not something a monthly report should nudge.
-      const newest = releases.find(release => release.version.replace(/^v/, '').split('.')[0] === major);
+      const newest = feed.find(release => release.version.replace(/^v/, '').split('.')[0] === major);
       if (!newest) throw new Error(`no release found for Node ${major}.x`);
       // An .nvmrc names either a whole major (`24`) or an exact version (`24.11.1`), and a file
       // that pins only the major is current for the whole of it. Compare at the precision it was
@@ -216,14 +236,59 @@ const dockerRows = () => DOCKER_IMAGES.map(({ image, where, line }) => {
 const isMajorBump = ({ current, latest }) =>
   current.replace(/^v/, '').split('.')[0] !== latest.replace(/^v/, '').split('.')[0];
 
+// A hold is about the major: a patch released inside the version we are held at is still routine,
+// so only a major bump of a held package is a held row.
+const isHeld = row => !row.error && row.current !== row.latest && isMajorBump(row) && row.name in HELD_BACK;
+
+// What the blocker's newest installable release declares for the held package: `{ blocker, range }`,
+// with `range` undefined once it declares none at all, or `{ error }`. Attached to the row as `hold`.
+const checkHold = async ({ name }) => {
+  const { blocker } = HELD_BACK[name];
+  try {
+    // '0.0.0' as `current`: newestMature only uses it as a floor, and there is no pin of the blocker
+    // to keep it at — what matters is what npm would install today.
+    const { latest } = newestMature({ current: '0.0.0', ...(await releases(blocker.name)) });
+    const manifest = await fetchJson(`https://registry.npmjs.org/${blocker.name}/${latest}`);
+    return { blocker: `${blocker.name}@${latest}`, range: manifest[blocker.field]?.[name] };
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
+// Whether a held row's blocker still blocks: false only when the range it declares admits the
+// version the row is held back from, or it no longer declares one. A row the check could not settle —
+// a policy, a failed lookup, a range semver cannot read (an `npm:` alias) — counts as still held,
+// which is what the row said before there was a check; its cell says which it was.
+const stillHeld = ({ latest, hold }) =>
+  !hold || Boolean(hold.error)
+  || (hold.range !== undefined && (!semver.validRange(hold.range) || !semver.satisfies(latest, hold.range)));
+
+// A range may contain `||`, which would split a markdown table cell.
+const cellSafe = text => text.replaceAll('|', '\\|');
+
+const holdCell = row => {
+  const { reason } = HELD_BACK[row.name];
+  const { hold } = row;
+  if (!hold) return reason;
+  if (hold.error) return `${reason} (could not check: ${cellSafe(hold.error)})`;
+  if (hold.range === undefined) {
+    return `**blocker gone?** ${hold.blocker} no longer declares ${row.name} — re-read the hold`;
+  }
+  const declared = `${hold.blocker} declares \`${cellSafe(hold.range)}\``;
+  if (!semver.validRange(hold.range)) return `${reason} (could not read: ${declared})`;
+  return stillHeld(row)
+    ? `${reason} (${declared})`
+    : `**blocker gone?** ${declared}, which admits ${row.latest} — re-read the hold`;
+};
+
 // Pure: rows in, markdown out. The only branchy part of this script, and the only part worth a spec.
-export const formatReport = rows => {
+// `releaseAge` is .npmrc's min-release-age, named in the report only when some row is cooling.
+export const formatReport = (rows, releaseAge = 0) => {
   const failed = rows.filter(row => row.error);
   const behind = rows.filter(row => !row.error && row.current !== row.latest);
-  // A hold is about the major: a patch released inside the version we are held at is still routine,
-  // so only the major bumps are partitioned, and the rest of the split is untouched.
-  const held = behind.filter(row => isMajorBump(row) && row.name in HELD_BACK);
-  const major = behind.filter(row => isMajorBump(row) && !(row.name in HELD_BACK));
+  const held = behind.filter(isHeld);
+  const lifted = held.filter(row => !stillHeld(row));
+  const major = behind.filter(row => isMajorBump(row) && !isHeld(row));
   const minor = behind.filter(row => !isMajorBump(row));
 
   if (behind.length === 0 && failed.length === 0) {
@@ -242,14 +307,16 @@ export const formatReport = rows => {
         `| | pinned | latest | written down in |${extra ? ` ${extra[0]} |` : ''}`,
         `| --- | --- | --- | --- |${extra ? ' --- |' : ''}`,
         ...entries.map(row =>
-          `| \`${row.name}\` | ${row.current} | ${row.latest} | ${row.where.join(', ')} |`
+          `| \`${row.name}\` | ${row.current} | ${row.latest}${row.cooling ? ` (${row.cooling} too new)` : ''} | ${row.where.join(', ')} |`
           + (extra ? ` ${extra[1](row)} |` : '')),
         ''
       ];
 
   return [
     `${behind.length} of ${rows.length} pinned versions are behind`
-    + (held.length === 0 ? '.' : `, ${held.length} of them held back deliberately.`),
+    + (held.length === 0 ? '.' : `, ${held.length} of them held back deliberately`
+      // Said up here because the held-back section reads as "not work", and a lifted hold is.
+      + (lifted.length === 0 ? '.' : ` — ${lifted.length} of whose blockers looks gone.`)),
     '',
     ...table(
       `Patch and minor (${minor.length})`,
@@ -267,8 +334,11 @@ export const formatReport = rows => {
       `Held back deliberately (${held.length})`,
       held,
       'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#held-back-deliberately).',
-      ['held back by', ({ name }) => HELD_BACK[name]]
+      ['held back by', holdCell]
     ),
+    ...(behind.some(row => row.cooling)
+      ? [`A version marked *too new* was published less than ${releaseAge} days ago: \`.npmrc\` sets \`min-release-age\`, so npm will not install it yet — see [DEPENDENCIES.md § Release-age cooldown](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#release-age-cooldown). Its row offers the newest version that is old enough.`, '']
+      : []),
     ...(failed.length === 0
       ? []
       : [
@@ -288,7 +358,9 @@ export const formatReport = rows => {
 // Guarded so the spec can import formatReport without the script reaching for the network.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
-  const report = formatReport(rows);
+  await Promise.all(rows.filter(row => isHeld(row) && HELD_BACK[row.name].blocker)
+    .map(async row => { row.hold = await checkHold(row); }));
+  const report = formatReport(rows, minReleaseAge());
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];
   if (process.argv.includes('--out') && outFile) writeFileSync(outFile, report);

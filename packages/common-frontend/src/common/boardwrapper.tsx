@@ -1,11 +1,12 @@
 import { Button, Stack, alpha } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Countdown, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { StrategyGamesTable } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
+import { asStrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
@@ -21,7 +22,8 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
 export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
   return (props: StrategyBoardProps<G>) => {
-    const { G, ctx, moves } = props;
+    const { G, ctx } = props;
+    const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
     const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining); // asked from the server
     const backToHome = useBackToHome();
     const isOffline = useClientRepo().version === "OFFLINE";
@@ -37,6 +39,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     // only ever asks whether it is `true`.
     const finished = msRemaining < - 5000 || ctx.gameover === true
     const achievable = t('general.points', { count: strategyPoints(G.numberOfLoss) });
+    // The judge is the bot, so its turn is a wait rather than a move to offer.
+    // It takes one outside `play` too: in a game without a fixed
+    // `startingPosition`, the judge sets the opening position of each new game.
+    const judgeToMove = ctx.currentPlayer === JUDGE_PLAYER;
     return (
       <>
         <EndDialog open={finished} onClose={backToHome}>
@@ -179,7 +185,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                       borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                     }}
                   >
-                    {ctx.phase === 'startNewGame' && (
+                    {ctx.phase === 'startNewGame' && !judgeToMove && (
                     <Stack sx={{ width: '100%', flexDirection: 'row' }}>
                       <Button sx={{
                         width: '48%',
@@ -227,7 +233,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     </Stack>
                     )}
 
-                    {ctx.phase !== 'startNewGame' && ctx.phase !== 'chooseRole' &&
+                    {(judgeToMove || (ctx.phase !== 'startNewGame' && ctx.phase !== 'chooseRole')) &&
                     <Stack sx={{ width: '100%', flexDirection: 'row' }}>
                       <Button sx={{
                         width: '100%',
@@ -254,10 +260,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     fontWeight: 500,
                     }}
                   >
-                    {ctx.phase === 'startNewGame' && G.winner === null && t('strategy.guide.newGame')}
+                    {ctx.phase === 'startNewGame' && !judgeToMove && G.winner === null && t('strategy.guide.newGame')}
                     {ctx.phase === 'chooseRole' && t('strategy.guide.ifFirstPlayer')}
-                    {ctx.phase === 'play' && ctx.currentPlayer === "0" && t('strategy.guide.yourTurn')}
-                    {ctx.phase === 'play' && ctx.currentPlayer === "1" && t('strategy.guide.waitingForServer')}
+                    {ctx.phase === 'play' && !judgeToMove && t('strategy.guide.yourTurn')}
+                    {judgeToMove && t('strategy.guide.waitingForServer')}
                     {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && t('strategy.guide.realGameWin')}
                     {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && t('strategy.guide.testGameWin')}
                     {ctx.phase === 'startNewGame' && G.winner === "1" && t('strategy.guide.botWins')}
