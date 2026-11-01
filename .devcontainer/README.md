@@ -26,6 +26,9 @@ where the file does not exist yet, so your own values are never overwritten:
 | `.env.docker.sample` | `.env.docker` | `docker compose --env-file` |
 | `apps/<app>/.env.sample` | `apps/<app>/.env` | that app's dev server |
 
+Both containers share the host's `node_modules`, and `npm ci` deletes it first:
+let container creation finish before running anything on the host.
+
 ## What's in it
 
 - **Node**, the exact version in `.nvmrc` — the one every CI job and the
