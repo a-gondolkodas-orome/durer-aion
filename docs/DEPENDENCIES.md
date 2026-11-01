@@ -16,8 +16,8 @@ next. It never crosses a major.
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
 one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
 every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
-each deployment runs. `npm run report:outdated` prints the same table on demand,
-and needs no install.
+each deployment runs. `npm run report:outdated` prints the same table on demand;
+of node_modules it needs only `semver`, for the held-back check below.
 
 <details><summary>Why a report rather than dependabot, and what a row means</summary>
 
@@ -69,7 +69,11 @@ above it is the work actually waiting (#409). Each stays until its named blocker
 moves (#317). `HELD_BACK` in
 [`scripts/dependency-report.mjs`](../scripts/dependency-report.mjs) mirrors the four
 names, and `scripts/dependency-report.test.mjs` fails when the two lists stop
-agreeing.
+agreeing. Where a hold names a package whose manifest keeps it, `HELD_BACK` says
+which, and each report reads that range off the blocker's newest installable
+release: the row, and the report's headline, say *blocker gone?* once the range
+admits the version held back from. That is a prompt to re-read the hold here,
+not proof the upgrade works.
 
 - **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
   pins `koa@^2` — the backend's own `koa` entry only has to agree with the
