@@ -1,9 +1,9 @@
-// The suites import `@testing-library/jest-dom`, which registers its matchers on
-// vitest's `expect` at runtime but types them only on the global `jest.Matchers`,
-// and its `/vitest` entry augments `Assertion<T>` — neither of which vitest 5's
-// `Assertion<R, T>` reads. Adding them to `Matchers<R, T>` is the route vitest 5
-// documents for custom matchers. The first argument is the asymmetric matcher a
-// matcher also accepts, as jest-dom's own jest.d.ts passes it.
+// jest-dom adds its matchers (toBeInTheDocument, ...) to vitest's `expect` at
+// runtime, but declares their types where vitest 5 no longer looks: Jest's global
+// `jest.Matchers`. This adds them to vitest's own `Matchers`, the place vitest 5
+// documents for custom matchers. jest-dom's `/vitest` entry targets vitest 4's
+// one-parameter `Assertion<T>`, and type-checks only because skipLibCheck hides
+// the mismatch. Delete this once jest-dom ships types for vitest 5.
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 import type { expect } from 'vitest';
 
