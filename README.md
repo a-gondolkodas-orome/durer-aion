@@ -206,6 +206,7 @@ The Pages site assembles all three plus a home page:
 ```bash
 npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
 npm run site:serve   # on http://localhost:4321
+npm run site:smoke   # opens each app in Chromium and fails on what does not load
 ```
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, base
@@ -216,6 +217,15 @@ step between it and gyakorlo.durerinfo.hu. What it cannot reproduce is the
 upload itself and GitHub's serving behaviour around 404s. To match CI's clean
 tree and Node as well, run it under
 `docker run -v "$PWD":/w -w /w node:$(cat .nvmrc) npm run site:build`.
+
+`site:smoke` serves `site/` itself and checks, in a real browser, that each app
+renders, that every file it asks for resolves under its subpath, that nothing
+throws, and that the links between the apps lead somewhere. It asserts one piece
+of text per page and no more, so it breaks on a build that does not load, not on
+a reworded screen. CI runs it on every pull request, and the Pages deploy runs it
+before it uploads, so a site that fails it is not published. It needs a Chromium
+for the pinned Playwright: `npx playwright install chromium` once, outside the
+practice app's devcontainer, which bakes one in.
 
 <details><summary>The strategy practice site is a workspace, but not like the others</summary>
 
@@ -250,12 +260,14 @@ npm run build
 npm run i18n:check
 npm run spell-check
 npm run stack:build   # needs docker; the other six do not
+npm run site:build && npm run site:smoke   # needs a Chromium — see above
 ```
 
-`npm run check` runs the six that need no docker, in one command and cheapest
+`npm run check` runs the six that need no docker or browser, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
-needs docker.
+needs docker, and the site smoke test because it needs a browser and a full site
+build.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 

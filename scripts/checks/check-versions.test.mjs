@@ -10,7 +10,8 @@ import { describe, expect, it } from 'vitest';
 import { resolvedVersion } from '../resolved-versions.mjs';
 
 // Every path here is repository-relative: Node is the whole repository's pin, and GitHub only
-// reads .github/workflows at the repository root anyway. Only Playwright is the practice app's alone.
+// reads .github/workflows at the repository root anyway. Playwright is the practice app's, and the
+// root's for smoke-site.mjs.
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const read = file => readFileSync(`${repoRoot}${file}`, 'utf8');
 const app = 'apps/strategy-practice/';
@@ -60,9 +61,12 @@ const workflowNodeVersions = () =>
 describe('a version written down in more than one file', () => {
   it('Playwright: the lockfile and the practice devcontainer Dockerfile agree', () => {
     // The lockfile rather than package.json: the devcontainer bakes browsers for the Playwright
-    // that gets *installed*, and only the lockfile names that — see resolved-versions.mjs.
+    // that gets *installed*, and only the lockfile names that — see resolved-versions.mjs. Two
+    // rows, because the root and the practice app each declare it: pinned apart, npm nests the
+    // app's copy, and the site smoke test would run another browser than the devcontainer bakes.
     expectAgreement('Playwright', [
-      ['package-lock.json playwright', resolvedVersion('playwright', 'apps/strategy-practice')],
+      ['package-lock.json playwright (root)', resolvedVersion('playwright')],
+      [`package-lock.json playwright (${app})`, resolvedVersion('playwright', 'apps/strategy-practice')],
       [
         `${app}.devcontainer/Dockerfile PLAYWRIGHT_VERSION`,
         read(`${app}.devcontainer/Dockerfile`).match(/^ARG PLAYWRIGHT_VERSION=(.+)$/m)?.[1]
