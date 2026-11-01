@@ -1,7 +1,7 @@
 // The network lookups are not tested: a spec that mocked them would assert the mock. What is left
-// is where the report could quietly mislead — the sorting into patch/minor vs major and the
-// handling of a failed lookup in formatReport, a row dropped instead of reported reading as "up to
-// date"; and newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order
+// is where the report could quietly mislead — the sorting into patch/minor vs major, the handling
+// of a failed lookup in formatReport, a row dropped instead of reported reading as "up to date",
+// and the reading of a hold's blocker range; and newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order
 // that is not the one we want.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -127,7 +127,7 @@ describe('formatReport', () => {
     const report = formatReport([row('typescript', '6.0.3', '7.0.2', ['root'])]);
 
     expect(report).toContain('| | pinned | latest | written down in | held back by |');
-    expect(report).toContain(`| \`typescript\` | 6.0.3 | 7.0.2 | root | ${HELD_BACK.typescript} |`);
+    expect(report).toContain(`| \`typescript\` | 6.0.3 | 7.0.2 | root | ${HELD_BACK.typescript.reason} |`);
   });
 
   // The hold is on the major, not on the package: a release inside the version we are held at is
@@ -147,6 +147,67 @@ describe('formatReport', () => {
     ]);
 
     expect(report).toContain('3 of 3 pinned versions are behind, 2 of them held back deliberately.');
+  });
+
+  // The hold's `range` is what its blocker's newest release declares for the held package — the
+  // lookup attaches it as `hold`, and these fixtures stand in for that lookup.
+  const typescriptRow = hold => ({ ...row('typescript', '6.0.3', '7.0.2'), hold });
+
+  it('keeps a hold whose blocker still excludes the version held back from', () => {
+    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.72.0', range: '>=4.8.4 <6.1.0' })]);
+
+    expect(report).toContain(`| root | ${HELD_BACK.typescript.reason} (typescript-eslint@8.72.0 declares \`>=4.8.4 <6.1.0\`) |`);
+    expect(report).toContain('1 of them held back deliberately.');
+    expect(report).not.toContain('blocker gone');
+  });
+
+  it('says so in the row and the headline once the blocker admits the version held back from', () => {
+    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: '>=4.8.4 <7.1.0' })]);
+
+    expect(report).toContain('| root | **blocker gone?** typescript-eslint@8.80.0 declares `>=4.8.4 <7.1.0`, which admits 7.0.2 — re-read the hold |');
+    expect(report).toContain('1 of them held back deliberately — 1 of whose blockers looks gone.');
+  });
+
+  // `||` unescaped would end the table cell in the middle of the range.
+  it('reads a range of alternatives and escapes it for the table', () => {
+    const report = formatReport([{
+      ...row('koa', '2.16.4', '3.2.1', ['apps/online-backend']),
+      hold: { blocker: 'boardgame.io@0.51.0', range: '^2.13.3 || ^3.0.0' }
+    }]);
+
+    expect(report).toContain('declares `^2.13.3 \\|\\| ^3.0.0`, which admits 3.2.1');
+  });
+
+  it('calls a blocker that no longer declares the package gone', () => {
+    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@9.0.0', range: undefined })]);
+
+    expect(report).toContain('**blocker gone?** typescript-eslint@9.0.0 no longer declares typescript');
+    expect(report).toContain('looks gone.');
+  });
+
+  // Neither a failed lookup nor a range semver cannot read may pass for a lifted hold.
+  it('keeps the hold, and says why, when the check could not settle it', () => {
+    const failed = formatReport([typescriptRow({ error: 'HTTP 503' })]);
+    const unreadable = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: 'npm:typescript@^7' })]);
+
+    expect(failed).toContain(`${HELD_BACK.typescript.reason} (could not check: HTTP 503)`);
+    expect(unreadable).toContain(`${HELD_BACK.typescript.reason} (could not read: typescript-eslint@8.80.0 declares \`npm:typescript@^7\`)`);
+    expect(`${failed}${unreadable}`).not.toContain('blocker gone');
+  });
+
+  // A row whose latest is still inside .npmrc's min-release-age offers the newest version npm will
+  // install, and says why it is not the dist-tag — otherwise the report reads as out of date.
+  it('names a release too new to install beside the version it offers instead', () => {
+    const report = formatReport([{ ...row('vite', '8.1.5', '8.3.4'), cooling: '8.3.5' }], 7);
+
+    expect(report).toContain('| `vite` | 8.1.5 | 8.3.4 (8.3.5 too new) | root |');
+    expect(report).toContain('published less than 7 days ago');
+  });
+
+  it('says nothing about the cooldown when no behind row is cooling', () => {
+    const report = formatReport([row('vite', '8.1.5', '8.2.1'), { ...row('eslint', '10.8.0', '10.8.0'), cooling: '10.8.1' }], 7);
+
+    expect(report).not.toContain('too new');
   });
 
   it('keeps the headline plain when nothing is held back', () => {

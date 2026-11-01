@@ -14,11 +14,15 @@ import { trackRelayFinished } from "./tracking";
 export function handleGameReport(report: SendGameDataParams) {
   if (report.phase === "end" && report.component === "relay") {
     const points = report.G?.points ?? 0;
+    // A round can report its end more than once (see
+    // ClientRepository.keepRelayEnd): each stores its score, but only the
+    // first counts as a finish. startRelay() starts a round with none stored.
+    const finishedBefore = localStorage.getItem(relayPointsStorageKey()) !== null;
     localStorage.setItem(relayPointsStorageKey(), String(points));
     // The stored state is null only when storage was cleared or corrupted
     // mid-round; the finish then goes untracked rather than mislabelled.
     const team = readStoredTeamState();
-    if (team) {
+    if (team && !finishedBefore) {
       trackRelayFinished(team.teamName, points);
     }
     return;

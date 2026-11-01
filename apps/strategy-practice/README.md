@@ -77,17 +77,12 @@ npm test                 # unit tests; the root `npm test` runs them too
 npm run typecheck
 npm run lint:fix         # lint this app alone; `npm run lint:fix` at the root does the whole repo
 npm run build            # prod build — some problems only appear here
-
-npm run coverage         # line coverage, on demand
 ```
 
 `npm run check` is the inner loop while you work here: build, spell check,
 typecheck, this app's tests and its lint, about 70 seconds against the repository
 root's two-odd minutes. It is not a substitute for the root `npm run check` —
 that is what CI runs, and it covers this app too.
-
-What the coverage report is good for, and why nothing gates on it, is in
-[AGENTS.md § Coverage](AGENTS.md#coverage).
 
 ## IDE setup
 

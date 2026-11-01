@@ -98,3 +98,15 @@ test('near zero, asks the server once per tick under StrictMode', () => {
   advanceSeconds(1);
   expect(getServerTimer).toHaveBeenCalledTimes(2);
 });
+
+// Regression: from 5 to 10 s past the end the time was formatted as a negative
+// number, "-1:-1:-7".
+test.each([0, -1000, -7000, -9999])('shows zero at %i ms, inside the grace for late answers', (serverMs) => {
+  render(<Board end={START.getTime() + serverMs} serverMs={serverMs} />);
+  expect(screen.getByText('00:00:00')).toBeInTheDocument();
+});
+
+test('shows that the time is over once the grace is', () => {
+  render(<Board end={START.getTime() - 10000} serverMs={-10000} />);
+  expect(screen.getByText('XX:XX:XX')).toBeInTheDocument();
+});

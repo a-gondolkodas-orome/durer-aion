@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -214,23 +214,5 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
-  }
-
-  // Scoring and the clock are server-authoritative, so these travel as the
-  // moves themselves over the match's socket rather than as separate HTTP
-  // calls.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
   }
 }

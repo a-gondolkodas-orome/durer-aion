@@ -12,6 +12,7 @@ export * from './components/Header';
 export * from './components/Langswitcher';
 export * from './components/Layout';
 export * from './components/Login';
+export * from './components/LoginLayout';
 export * from './components/Main';
 export * from './components/picture-component';
 export * from './components/RelayEndTable';

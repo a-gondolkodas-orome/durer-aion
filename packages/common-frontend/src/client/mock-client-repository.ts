@@ -1,4 +1,4 @@
-import type { BoardMoves, ClientRepository } from "./api-repository-interface";
+import type { ClientRepository } from "./api-repository-interface";
 import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
@@ -81,17 +81,5 @@ export class MockClientRepository implements ClientRepository {
   }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
-  }
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
   }
 }

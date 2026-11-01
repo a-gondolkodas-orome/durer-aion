@@ -40,9 +40,6 @@ jobs:
       # same code path.
       - name: Build and publish the dry run
         env:
-          # As in pages-deploy.yml: unset — no repository variable — leaves error reporting off
-          # rather than pointing the site at a dead endpoint.
-          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
           # The vite configs read HEAD when this is unset. Setting it keeps the banner exact even
           # if a build ever comes from a turbo cache rather than from these sources.
           VITE_GIT_COMMIT_HASH: ${{ github.sha }}

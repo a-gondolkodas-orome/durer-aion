@@ -44,6 +44,11 @@ export default defineConfig({
     // Most suites are plain Node. Component tests opt into a DOM per file with
     // a `// @vitest-environment jsdom` docblock.
     environment: 'node',
+    // Node 25 and later define a `localStorage` of their own, which is undefined
+    // without `--localstorage-file`, and jsdom does not replace a global that is
+    // already there — so every suite touching storage would read `undefined`.
+    // Switching Node's off leaves jsdom's in place.
+    execArgv: ['--no-experimental-webstorage'],
     include: ['{apps,packages}/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
     // What decides which project owns a file is its path, not its name. The glob
     // above reaches into apps/strategy-practice and the package whose code moved
@@ -58,9 +63,7 @@ export default defineConfig({
     // config: its aliases, setup file and `isolate: false` are its own, and
     // apps/strategy-practice/AGENTS.md § How this app sits in the monorepo says
     // why the two configs stay separate.
-    // `extends: true` keeps the options above for the root project only. That
-    // config is also the root config when vitest runs from that directory,
-    // which is what its `npm run coverage` relies on.
+    // `extends: true` keeps the options above for the root project only.
     projects: [
       { extends: true, test: { name: 'root' } },
       './apps/strategy-practice/vite.config.js',
