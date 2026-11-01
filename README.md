@@ -452,8 +452,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
     `events.endTurn()`. Each live game also scores the sub-game in its move
     (#459)
   - `possibleMoves`, every legal move, from which the bot picks at random
-  - optionally `turn`, which the live games use for the end-of-time checks
-    (#594)
+  - optionally `turn`, boardgame.io's turn hooks. Not for the end of time:
+    in the play phase `gameWrapper` ends a match on the first move past it
 
   A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
   a "pick two values, then commit" turn.
