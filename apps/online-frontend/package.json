@@ -14,21 +14,21 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@mui/material": "9.4.0",
+    "@mui/material": "9.5.0",
     "axios": "1.20.0",
     "buffer": "6.0.3",
     "common-frontend": "*",
     "game": "*",
-    "i18next": "26.4.0",
+    "i18next": "26.5.10",
     "process": "0.11.10",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "urlcat": "3.1.0"
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "urlcat": "3.2.0"
   },
   "devDependencies": {
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.5",
-    "@vitejs/plugin-react": "6.1.1",
-    "vite": "8.2.2"
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.5"
   }
 }
