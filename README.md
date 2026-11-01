@@ -218,18 +218,6 @@ upload itself and GitHub's serving behaviour around 404s. To match CI's clean
 tree and Node as well, run it under
 `docker run -v "$PWD":/w -w /w node:$(cat .nvmrc) npm run site:build`.
 
-`site:smoke` serves `site/` itself and checks, in a real browser, that each app
-renders, that every file it asks for resolves under its subpath, that nothing
-throws, and that the links between the apps lead somewhere. It asserts one piece
-of text per page and no more, so it breaks on a build that does not load, not on
-a reworded screen. CI runs it on every pull request, and the Pages deploy runs it
-before it uploads, so a site that fails it is not published. It needs a Chromium
-for the pinned Playwright: `npx playwright install --with-deps chromium` once,
-outside the practice app's devcontainer, which bakes one in. Without `sudo` in
-front: on Linux it asks for the password itself to install the system
-libraries, while `sudo npx` runs under the system's Node rather than nvm's and
-puts the browser in root's cache.
-
 <details><summary>The strategy practice site is a workspace, but not like the others</summary>
 
 `apps/strategy-practice` was merged in from the durer-jatekok repository with
@@ -263,7 +251,7 @@ npm run build
 npm run i18n:check
 npm run spell-check
 npm run stack:build   # needs docker; the other six do not
-npm run site:build && npm run site:smoke   # needs a Chromium — see above
+npm run site:build && npm run site:smoke   # needs Playwright's Chromium
 ```
 
 `npm run check` runs the six that need no docker or browser, in one command and cheapest
