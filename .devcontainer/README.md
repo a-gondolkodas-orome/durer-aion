@@ -26,6 +26,9 @@ where the file does not exist yet, so your own values are never overwritten:
 | `.env.docker.sample` | `.env.docker` | `docker compose --env-file` |
 | `apps/<app>/.env.sample` | `apps/<app>/.env` | that app's dev server |
 
+Both containers share the host's `node_modules`, and `npm ci` deletes it first:
+let container creation finish before running anything on the host.
+
 ## What's in it
 
 - **Node**, the exact version in `.nvmrc` — the one every CI job and the
@@ -36,7 +39,7 @@ where the file does not exist yet, so your own values are never overwritten:
 - **Docker inside the container**, so every documented flow works unchanged
   from a terminal in here — `npm run db:up` for the database on its own, and
   `npm run stack:up` for the full stack. It installs Docker CE rather than Moby
-  (`"moby": false`), because the Node 24 image is Debian trixie-based and Debian
+  (`"moby": false`), because the Node 26 image is Debian trixie-based and Debian
   does not package `moby-cli` there.
 - **Labelled ports**: 5173 (the online, offline and relay practice dev
   servers, one at a time), 8012 (strategy-practice), 8000 (online-backend),

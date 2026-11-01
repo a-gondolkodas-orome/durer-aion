@@ -1,6 +1,6 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { FinishedMatchStatus, GameType, InProgressMatchStatus } from 'schemas';
+import { GameType } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { Sequelize, Op, WhereOptions } from 'sequelize';
 
@@ -43,20 +43,6 @@ export class TeamsRepository {
     });
   }
 
-  async deduceMatch(matchID:string):Promise<TeamModel | null> {
-    const matches =  await TeamModel.findAll({ where:
-      Sequelize.or([
-        { relayMatch: 'IN PROGRESS' },
-        { strategyMatch: 'IN PROGRESS' }
-      ])
-    });
-    console.log(matches)
-    return matches.find(team => {
-      return (team.relayMatch as InProgressMatchStatus).matchID === matchID ||
-        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
-    }) ?? null;
-  }
-
   async listTeams(): Promise<TeamModel[] | null> {
     return await TeamModel.findAll();
   }
@@ -67,52 +53,33 @@ export class TeamsRepository {
     });
   }
   /**
-   * Records the team's match as finished, but only while that match is still
-   * the team's: the match id is checked in the same UPDATE that writes, so an
-   * admin reset landing after the caller read the team is not overwritten.
-   * Whether a row was written.
-   */
-  async finishMatch(
-    teamId: string,
-    type: "relayMatch" | "strategyMatch",
-    matchId: string,
-    status: FinishedMatchStatus,
-  ): Promise<boolean> {
-    const [updated] = await TeamModel.update({ [type]: status }, {
-      // A JSON path on the column: ("strategyMatch"#>>'{matchID}') = matchId.
-      where: { teamId, [type]: { matchID: matchId } } as WhereOptions<TeamModel>,
-    });
-    return updated > 0;
-  }
-
-  /**
    * Puts the team into its new match, but only while its page and both match
-   * states are still the ones `team` holds, so of two starts made from the
-   * same reading only one is written. Returns whether the row was written.
+   * ids are still the ones `team` holds, so of two starts made from the same
+   * reading only one is written. Returns whether the row was written.
    */
-  async startMatch(team: TeamModel, gameType: GameType, status: InProgressMatchStatus): Promise<boolean> {
+  async startMatch(team: TeamModel, gameType: GameType, matchID: string): Promise<boolean> {
     const [updated] = await TeamModel.update({
       pageState: gameType,
-      [gameType === "RELAY" ? "relayMatch" : "strategyMatch"]: status,
+      [gameType === "RELAY" ? "relayMatchID" : "strategyMatchID"]: matchID,
     }, {
       where: {
         teamId: team.teamId,
         pageState: team.pageState,
-        relayMatch: { state: team.relayMatch.state },
-        strategyMatch: { state: team.strategyMatch.state },
-      } as WhereOptions<TeamModel>,
+        relayMatchID: team.relayMatchID,
+        strategyMatchID: team.strategyMatchID,
+      },
     });
     return updated > 0;
   }
   /**
-   * Takes the team home unless a match is in progress, checked in the UPDATE
-   * itself so that a start landing after the caller read the team is not
-   * overwritten. Returns whether the row was written.
+   * Takes the team home, but only while both match ids are still the ones
+   * `team` holds: whether a match is in progress is read off the match, not
+   * the row, so the caller checks that, and a start landing after it read the
+   * team changes an id here. Returns whether the row was written.
    */
-  async goHome(teamId: string): Promise<boolean> {
-    const notInProgress = { state: { [Op.ne]: "IN PROGRESS" } };
+  async goHome(team: TeamModel): Promise<boolean> {
     const [updated] = await TeamModel.update({ pageState: "HOME" }, {
-      where: { teamId, relayMatch: notInProgress, strategyMatch: notInProgress } as WhereOptions<TeamModel>,
+      where: { teamId: team.teamId, relayMatchID: team.relayMatchID, strategyMatchID: team.strategyMatchID },
     });
     return updated > 0;
   }
@@ -125,8 +92,8 @@ export class TeamsRepository {
       category,
       email,
       credentials,
-      strategyMatch: { state: "NOT STARTED" },
-      relayMatch: { state: "NOT STARTED" },
+      strategyMatchID: null,
+      relayMatchID: null,
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });

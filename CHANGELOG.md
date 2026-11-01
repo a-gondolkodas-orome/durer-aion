@@ -12,6 +12,30 @@ a new command or gate, a removed package, a new convention — or a decision the
 need to know. What was refactored is not enough. In both parts the most important
 comes first, not the earliest merged.
 
+## October 2026, as of 2026-10-31
+
+- **The 20th online round's games are public** (#659, #660)
+- **Teams see their results in detail**: a running points table under the relay
+  clock, the live games so far on the strategy board, and per-problem and
+  per-game tables on both end screens and the home page (#611, #610)
+- **boardgame.io's unauthenticated lobby API under `/games` is closed** (#636)
+- **Team deletion is gone**, with the archive of deleted teams: deleting a team
+  mid-round let it play on. Organisers can instead reveal a team's email and join
+  code in its dialog, the match log stamps each move with its time, and the TSV
+  import accepts uploads again (#646, #648, #551, #602, #638, #511)
+- **A relay whose time ran out keeps its score** in the dry run and on
+  `/valto/`, where closing the end dialog used to record 0 (#653)
+- **The practice sites and the public dry run are tracked in umami**; `/valto/`
+  remembers the language choice, and browsers no longer offer to translate the
+  pages (#605, #607, #629, #654, #546)
+
+### For developers
+
+- Database code is tested against a real postgres, in process through PGlite —
+  no docker, so it runs in `npm run check` (#632, #664)
+- The strategy practice site is on i18next; the old `{ hu, en }` translation
+  framework is removed (#614–#620, #622)
+
 ## September 2026, as of 2026-09-28
 
 - **Team sessions are safer.** A team's session lives in an HttpOnly cookie

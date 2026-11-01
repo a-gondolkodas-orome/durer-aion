@@ -1,4 +1,4 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend/core";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto } from "common-frontend/core";
 import { teamData } from "./teamData";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
@@ -89,24 +89,6 @@ export class OfflineClientRepository implements ClientRepository {
   }
   async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
-  }
-
-  // The local boardgame.io client judges the answer with the bundled bot, and
-  // its step report already goes out through RelayWrapper's sendGameData hook,
-  // so nothing is sent from here.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
   }
 
   // Persisted as if the game had reported it, for toHome() to read.

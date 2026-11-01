@@ -79,6 +79,9 @@ export default defineConfig(() => ({
     // component imports CSS, so processing it costs the suite nothing.
     css: true,
     environment: 'node',
+    // Node's own, undefined `localStorage` would shadow jsdom's — the root
+    // vitest.config.mts says why.
+    execArgv: ['--no-experimental-webstorage'],
     clearMocks: true,
     restoreMocks: true,
     // Reuse one context per worker instead of a fresh one per file (~40% faster).
@@ -98,33 +101,6 @@ export default defineConfig(() => ({
     include: [
       'src/**/*.test.{ts,tsx}',
       '../../packages/strategy-engine/src/**/*.test.{ts,tsx}'
-    ],
-    // On demand only, never in `npm test` or CI, and with no thresholds — see
-    // AGENTS.md § Coverage for why, and for what the report is actually good
-    // for, which is what `include` below is spelled out for.
-    coverage: {
-      provider: 'v8',
-      // Without this, only files a test imported are reported, and a module no
-      // spec touches is missing from the report rather than showing up at 0%.
-      // The engine package counts as this app's source for coverage purposes:
-      // its specs run here (allowExternal is what lets v8 keep files above the
-      // app root).
-      allowExternal: true,
-      include: [
-        'src/**/*.{ts,tsx}',
-        '../../packages/strategy-engine/src/**/*.{ts,tsx}'
-      ],
-      exclude: [
-        'src/**/*.test.{ts,tsx}',
-        'src/test-utils.ts',
-        'src/test-setup.ts',
-        'src/**/test-helpers.tsx',
-        'src/main.tsx',
-        '../../packages/strategy-engine/src/**/*.test.{ts,tsx}'
-      ],
-      reporter: ['text', 'html'],
-      // /reports is gitignored
-      reportsDirectory: 'reports/coverage'
-    }
+    ]
   }
 }));

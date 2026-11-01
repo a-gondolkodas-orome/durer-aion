@@ -4,12 +4,17 @@
 // never move here — a major is a decision, taken one at a time (#168) — which is also what keeps
 // the "Held back deliberately" list respected without this script knowing it exists.
 //
+// Only versions older than `.npmrc`'s min-release-age are candidates, since npm would refuse to
+// install a younger one (release-age.mjs); a newer release still inside that window is listed as
+// waiting, for the next sweep to pick up.
+//
 // Edits the package.json files and nothing else; the lockfile is npm's to write. The script
 // closes by printing the follow-up — `npm install`, the checks, and any file outside a
 // package.json that a bump also has to touch (ALSO_WRITTEN_IN).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { ALSO_WRITTEN_IN, workspaces } from './dependency-report.mjs';
+import { compareStable, minReleaseAge, releases } from './release-age.mjs';
 import { isWorkspaceLink } from './resolved-versions.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -18,27 +23,12 @@ const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 // a prerelease, a surviving range — is reported and left alone rather than guessed at.
 const STABLE = /^(\d+)\.(\d+)\.(\d+)$/;
 
-const byParts = (a, b) => {
-  const [aParts, bParts] = [a, b].map(version => version.split('.').map(Number));
-  return aParts[0] - bParts[0] || aParts[1] - bParts[1] || aParts[2] - bParts[2];
-};
-
 // Newest stable release sharing `current`'s major, or undefined when `current` is not an exact
 // stable version or no release qualifies — callers report that rather than swallow it.
 export const newestWithinMajor = (versions, current) => {
   const major = current.match(STABLE)?.[1];
   if (major === undefined) return undefined;
-  return versions.filter(version => version.match(STABLE)?.[1] === major).sort(byParts).at(-1);
-};
-
-// The abbreviated packument: the full one carries every version's whole manifest and runs to
-// megabytes for old packages; this variant is just the version list and dist-tags.
-const versionsOf = async name => {
-  const response = await fetch(`https://registry.npmjs.org/${name}`, {
-    headers: { accept: 'application/vnd.npm.install-v1+json' }
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return Object.keys((await response.json()).versions);
+  return versions.filter(version => version.match(STABLE)?.[1] === major).sort(compareStable).at(-1);
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -56,30 +46,36 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     }
   }
 
-  // One registry question per package, all in flight at once; a failed lookup is a report, not a
-  // crash — but it does fail the run, because a dependency silently left behind would read as
-  // "already current".
+  // One registry question per package, all in flight at once (a full packument waits its turn —
+  // release-age.mjs); a failed lookup is a report, not a crash — but it does fail the run, because
+  // a dependency silently left behind would read as "already current".
+  const releaseAge = minReleaseAge();
   const lookups = new Map(await Promise.all([...wanted.keys()].map(async name =>
-    [name, await versionsOf(name).catch(error => error)])));
+    [name, await releases(name, releaseAge).catch(error => error)])));
 
   const bumped = new Map(); // `${name} ${from} -> ${to}` -> [workspaces]
   const changed = new Set();
   const problems = [];
+  const waiting = new Set(); // `${name} ${newest}`, a release still inside the release-age window
   for (const [name, uses] of wanted) {
-    const versions = lookups.get(name);
+    const lookup = lookups.get(name);
     for (const { workspace, section } of uses) {
       const where = workspace || 'root';
       const pinned = files.get(workspace)[section][name];
-      if (versions instanceof Error) {
-        problems.push(`${name} (pinned ${pinned} in ${where}): ${versions.message}`);
+      if (lookup instanceof Error) {
+        problems.push(`${name} (pinned ${pinned} in ${where}): ${lookup.message}`);
         continue;
       }
-      const newest = newestWithinMajor(versions, pinned);
-      if (newest === undefined) {
+      const newestAtAll = newestWithinMajor(lookup.versions, pinned);
+      if (newestAtAll === undefined) {
         problems.push(`${name} in ${where}: '${pinned}' is not an exact stable version, left alone`);
         continue;
       }
-      if (newest === pinned) continue;
+      const newest = newestWithinMajor(lookup.mature, pinned);
+      if (newestAtAll !== pinned && newestAtAll !== newest) waiting.add(`${name} ${newestAtAll}`);
+      // Undefined, or below the pin, when the pin itself is younger than the window — taken on
+      // purpose (docs/DEPENDENCIES.md § Release-age cooldown), so never walked back.
+      if (newest === undefined || compareStable(newest, pinned) <= 0) continue;
       files.get(workspace)[section][name] = newest;
       changed.add(workspace);
       const line = `${name.padEnd(35)} ${pinned.padEnd(10)} -> ${newest}`;
@@ -103,6 +99,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (elsewhere.length > 0) console.log(`\nThe same bump has to reach files no package.json names:\n${elsewhere.join('\n')}`);
     console.log('\nNext: npm install, then the usual gates — npm run build, npm run lint, npm run typecheck,');
     console.log('npm test. Majors stay with npm run report:outdated.');
+  }
+
+  if (waiting.size > 0) {
+    console.log(`\nNewer, but published less than ${releaseAge} days ago (.npmrc min-release-age), so npm will not`);
+    console.log(`install them yet — the next sweep picks them up:\n${[...waiting].sort().map(entry => `  ${entry}`).join('\n')}`);
   }
 
   if (problems.length > 0) {

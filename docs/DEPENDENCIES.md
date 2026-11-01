@@ -16,8 +16,8 @@ next. It never crosses a major.
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
 one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
 every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
-each deployment runs. `npm run report:outdated` prints the same table on demand,
-and needs no install.
+each deployment runs. `npm run report:outdated` prints the same table on demand;
+of node_modules it needs only `semver`, for the held-back check below.
 
 <details><summary>Why a report rather than dependabot, and what a row means</summary>
 
@@ -38,6 +38,30 @@ versions are written down in files no `package.json` names: Node and Playwright.
 of where they are — the `.nvmrc` row's count comes from it.
 </details>
 
+## Release-age cooldown
+
+`.npmrc` sets `min-release-age=7`: whenever npm *resolves* — an `npm install`
+after `update:minors`, a new dependency — it takes only versions published at
+least 7 days earlier, transitive ones included. A hijacked release is usually
+caught and unpublished within hours or days, so a week keeps it out of the
+lockfile. `npm ci` installs the lockfile as written and is unaffected; npm
+11.10 is the first to read the setting, hence the `devEngines` floor.
+`allow-git=none` beside it refuses dependencies fetched from a git URL, which
+nothing here has.
+
+The window is per version, not per package: a package that releases daily
+still resolves to its newest week-old release. `update:minors` and the report
+read the same number from `.npmrc` and propose only what npm will install; a
+newer release still inside the window is listed as *too new* and picked up by
+the next sweep.
+
+The one cost is a security fix younger than the window. Advisories arrive
+through Dependabot alerts, not the report, and npm says so rather than staying
+quiet: `npm audit fix` warns that the fix was blocked and exits non-zero. Once
+the fix is checked by hand, take it on purpose — pin it and install with
+`--min-release-age=0` for that one command, in a commit that says why. Neither
+script walks a pin like that back.
+
 ## Held back deliberately
 
 The report still lists these, in a section of their own, so the `Major` count
@@ -45,7 +69,11 @@ above it is the work actually waiting (#409). Each stays until its named blocker
 moves (#317). `HELD_BACK` in
 [`scripts/dependency-report.mjs`](../scripts/dependency-report.mjs) mirrors the four
 names, and `scripts/dependency-report.test.mjs` fails when the two lists stop
-agreeing.
+agreeing. Where a hold names a package whose manifest keeps it, `HELD_BACK` says
+which, and each report reads that range off the blocker's newest installable
+release: the row, and the report's headline, say *blocker gone?* once the range
+admits the version held back from. That is a prompt to re-read the hold here,
+not proof the upgrade works.
 
 - **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
   pins `koa@^2` — the backend's own `koa` entry only has to agree with the
@@ -56,5 +84,6 @@ agreeing.
 - **`typescript` 6.0 → 7**: `typescript-eslint` caps `typescript` at `<6.1.0`,
   and 6.0 is the highest version inside the cap. That cap is the only remaining
   blocker: every tsconfig is off the `node10` resolution 7.0 removes.
-- **`@types/node` 24 → 26**: not a blocker but a policy — the types track the
-  Node major the repo actually runs (`.nvmrc`), so they move when Node does.
+- **`@types/node` past the Node major**: not a blocker but a policy — the types
+  track the Node major the repo actually runs (`.nvmrc`), so they move when Node
+  does.

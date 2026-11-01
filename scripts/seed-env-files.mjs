@@ -25,7 +25,7 @@ const keysOf = (text) =>
 
 // Key names only — values are never read, let alone compared or printed. Every
 // setting left in these files is one a developer's copy is meant to differ on:
-// the credentials, DATABASE_URL, a real Sentry DSN or S3 bucket where the
+// the credentials, DATABASE_URL, a real S3 bucket where the
 // sample has a placeholder. Reporting those differences would be noise on every
 // run, and a check that never reads a value cannot leak one. Extra keys are not
 // reported either: docker-compose.yml's `${WEB_PORT:-80}`

@@ -346,9 +346,7 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | --- | --- |
 | `.env.docker` | the docker stack — bot and admin credentials, the postgres password |
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` — which is all `teams:import:local` reads |
-| `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
-| `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
-| `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
+| `apps/offline-frontend/.env` | the S3 bucket the dry run's play data goes to |
 
 Because setup never overwrites, a file you already have goes stale when its
 sample gains a setting — so setup, and each `dev:*` script that runs it first,
@@ -369,25 +367,8 @@ to the sample reached only whoever happened to delete their `.env` and re-run
 
 ## Error reporting
 
-Each frontend sends errors and pageload traces to Sentry only when its `.env`
-sets `VITE_SENTRY_DSN`. Without one the SDK is never initialised, so a build with
-nowhere to report to makes no requests rather than failing them.
-`pages-deploy.yml` passes the repository variable `SENTRY_DSN` to the builds,
-which is how `/valto/` and `/proba-verseny/` would get theirs — there is no
-`.env` in CI to read.
-
-The backend reports separately, to its own project, from a DSN still written
-into `apps/online-backend/src/server.ts` — its failures reach the server log, not
-a competitor's browser.
-
-<details><summary>Why the gate exists, and why no DSN is set</summary>
-
-It replaced a DSN hardcoded in all three entry points, pointing at a project
-`sentry.durerinfo.hu` answers `400` for: every visitor of the public practice
-sites got that failed POST in the console on load, and no report ever arrived.
-Issuing a DSN that works is a change on the Sentry server rather than in this
-repository; set it here once there is one.
-</details>
+Nothing reports errors to a service. The backend's are in its log
+(`docker compose logs backend`); a frontend's stay in the visitor's console.
 
 ## Usage tracking
 
