@@ -3,7 +3,9 @@
     "category": "Category",
     "clear": "Clear filters",
     "toggle": "Filters",
-    "type": "Type"
+    "type": "Type",
+    "year": "Year",
+    "round": "Round"
   },
   "icon": {
     "board": "Board",
@@ -22,7 +24,8 @@
   },
   "intro": "A <i>strategy game</i> is a two-player game with no luck involved: the right strategy always wins, making it essentially a maths puzzle. The games below, ranging from category A to E+ in difficulty, all featured in the <durerinfo>Dürer Competition</durerinfo>.",
   "round": {
-    "final": "final"
+    "final": "final",
+    "online": "online"
   },
   "section": {
     "AB": "For grades 5–8 (A–B category)",
