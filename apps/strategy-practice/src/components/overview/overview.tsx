@@ -77,7 +77,7 @@ export const Overview = () => {
       ))}
     </div>
 
-    <div className="primary-footer z-40">
+    <div className="primary-footer">
       <ThemeSwitcher />
       <LanguageSelector />
     </div>
