@@ -2,8 +2,6 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { relayPointsStorageKey } from "common-frontend/core";
 
-vi.mock("./sendData", () => ({ sendGameData: vi.fn(), sendDataLogin: vi.fn() }));
-
 import { OfflineClientRepository } from "./client-repository";
 import { handleGameReport } from "./game-report";
 import { teamData } from "./teamData";

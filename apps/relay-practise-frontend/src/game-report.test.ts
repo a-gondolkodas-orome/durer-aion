@@ -3,14 +3,12 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { setLocalStorageNamespace } from "common-frontend/core";
 
-const { sendGameData, readStoredTeamState, RelayWrapper, Client } = vi.hoisted(() => ({
-  sendGameData: vi.fn(),
+const { readStoredTeamState, RelayWrapper, Client } = vi.hoisted(() => ({
   readStoredTeamState: vi.fn(),
   RelayWrapper: vi.fn(),
   Client: vi.fn(),
 }));
 
-vi.mock("./sendData", () => ({ sendGameData }));
 vi.mock("./stored-team-state", () => ({ readStoredTeamState }));
 // The wiring test reads the callback the app hands the reducer; building a real
 // boardgame.io client around it is not what is under test here.
@@ -34,15 +32,6 @@ describe("handleGameReport", () => {
     handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
 
     expect(localStorage.getItem(RELAY_KEY)).toStrictEqual("17");
-  });
-
-  // toHome() is the relay-end uploader, because it also covers giving up
-  // mid-match, when the reducer's onEnd never fires. Forwarding from here as
-  // well would put two end files in the organisers' bucket for one run.
-  test("does not upload an end report", () => {
-    handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
-
-    expect(sendGameData).not.toHaveBeenCalled();
   });
 
   describe("the umami finish event", () => {
@@ -77,25 +66,15 @@ describe("handleGameReport", () => {
 
     test("is not sent for a step report", () => {
       readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
-      handleGameReport({ component: "relay", phase: "step", answer: 42, G: { currentProblem: 2 } });
+      handleGameReport({ component: "relay", phase: "step", G: { points: 3 } });
 
       expect(track).not.toHaveBeenCalled();
     });
   });
 
-  test("forwards a step report and stores nothing", () => {
-    const step = { component: "relay", phase: "step", answer: 42, G: { currentProblem: 2 } } as const;
-    handleGameReport(step);
+  test("stores nothing for a step report", () => {
+    handleGameReport({ component: "relay", phase: "step", G: { points: 3 } });
 
-    expect(sendGameData).toHaveBeenCalledWith(step);
-    expect(localStorage.length).toStrictEqual(0);
-  });
-
-  test("forwards a start report, which carries no score", () => {
-    const start = { component: "relay", phase: "start" } as const;
-    handleGameReport(start);
-
-    expect(sendGameData).toHaveBeenCalledWith(start);
     expect(localStorage.length).toStrictEqual(0);
   });
 });
