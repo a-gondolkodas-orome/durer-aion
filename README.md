@@ -224,8 +224,11 @@ throws, and that the links between the apps lead somewhere. It asserts one piece
 of text per page and no more, so it breaks on a build that does not load, not on
 a reworded screen. CI runs it on every pull request, and the Pages deploy runs it
 before it uploads, so a site that fails it is not published. It needs a Chromium
-for the pinned Playwright: `npx playwright install chromium` once, outside the
-practice app's devcontainer, which bakes one in.
+for the pinned Playwright: `npx playwright install --with-deps chromium` once,
+outside the practice app's devcontainer, which bakes one in. Without `sudo` in
+front: on Linux it asks for the password itself to install the system
+libraries, while `sudo npx` runs under the system's Node rather than nvm's and
+puts the browser in root's cache.
 
 <details><summary>The strategy practice site is a workspace, but not like the others</summary>
 
