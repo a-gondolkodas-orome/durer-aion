@@ -29,5 +29,9 @@ export interface ClientRepository {
   // reload, the game's own if a late ruling ends it. Only the local apps have
   // one: online the server keeps the score from the match state.
   keepRelayEnd?(report: RelayEndReport): void;
+  /** Asks the server for the judge's turn in one of the team's matches;
+   *  `withJudgeResume` says when. Online only: a local bot is the
+   *  transport's to resume. */
+  resumeJudgeTurn(matchId: string): Promise<void>;
 
 }

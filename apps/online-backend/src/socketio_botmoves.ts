@@ -188,71 +188,96 @@ export class SocketIOButBotMoves extends SocketIO {
           if (stalePlayerID === BOT_ID) {
             return;
           }
-          const matchQueue = this.getMatchQueue(matchID);
-          await matchQueue.add(async () => {
-            // These happen after the player stepped.
-            // The state is written to storage, and the server now returned
-            // the authoritative state to the player.
-            // Re-reading it is deliberate: this listener gets only the
-            // player's action, not the state boardgame.io's own listener
-            // produced, and `master.onUpdate` below reads storage again
-            // anyway. The push the player already got stays too: without it
-            // the player's move and the bot's reply land as one update.
-            // See #346.
-            const {  state  } = await fetch(app.context.db, matchID, {
-               state: true,
-             } as const);
-            if (currentPlayer(state.ctx) !== BOT_ID) {
-              // Not a real action, possibly a failed move.
-              return;
-            }
-            if (state.ctx.gameover) {
-              return;
-            }
-            const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
-            if (botPlayer === null) {
-              // Only reachable with ctx.gameover set to something falsy, which
-              // the check above lets through and which no game here produces.
-              return;
-            }
-            let botAction;
-            if (
-              state.ctx.phase === "play" ||
-              state.ctx.phase === "startNewGame"
-            )  {
-              botAction = await bot.play(state, botPlayer);
-            } else {
-              return;
-            }
-
-            const master = new Master(
-              game,
-              app.context.db,
-              TransportAPI(
-                matchID,
-                socket,
-                getFilterPlayerView(game),
-                this.pubSub
-              ),
-              app.context.auth
-            );
-
-            const nextStateID = state._stateID;
-            await master.onUpdate(
-              {
-                type: "MAKE_MOVE",
-                payload: {
-                  ...botAction.action.payload,
-                  credentials: getBotCredentials(),
-                },
-              },
-              nextStateID,
-              matchID,
-              BOT_ID
-            );
-          });
+          // The player's move is already stored and pushed; the bot answers
+          // in a push of its own, or the move and its reply land as one
+          // update. See #346.
+          await this.getMatchQueue(matchID).add(() => this.playBotTurn(app.context, game, bot, matchID));
         });
       });
     }
+  }
+
+  /** Plays the bot's turn if the match is waiting on one. Callers run it on
+   *  the match's queue, so every move queued before it is stored by the time
+   *  it reads.
+   *
+   *  Re-reads storage rather than taking a state from the caller: the `update`
+   *  listener gets only the player's action, not the state boardgame.io's own
+   *  listener produced, and `master.onUpdate` below reads storage again anyway.
+   *
+   *  No socket: `Master.onUpdate` only ever publishes to the match's channel. */
+  private async playBotTurn(
+    { db, auth }: Pick<Server.AppCtx, "db" | "auth">,
+    game: Game,
+    bot: Bot,
+    matchID: string
+  ): Promise<void> {
+    const { state } = await fetch(db, matchID, { state: true } as const);
+    if (currentPlayer(state.ctx) !== BOT_ID) {
+      // Not a real action, possibly a failed move.
+      return;
+    }
+    if (state.ctx.gameover) {
+      return;
+    }
+    const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
+    if (botPlayer === null) {
+      // Only reachable with ctx.gameover set to something falsy, which
+      // the check above lets through and which no game here produces.
+      return;
+    }
+    if (state.ctx.phase !== "play" && state.ctx.phase !== "startNewGame") {
+      return;
+    }
+    const botAction = await bot.play(state, botPlayer);
+
+    const master = new Master(
+      game,
+      db,
+      TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub),
+      auth
+    );
+    await master.onUpdate(
+      {
+        type: "MAKE_MOVE",
+        payload: {
+          ...botAction.action.payload,
+          credentials: getBotCredentials(),
+        },
+      },
+      state._stateID,
+      matchID,
+      BOT_ID
+    );
+  }
+
+  /** The bot's turn, asked for by a team whose board has waited on it too long.
+   *
+   *  A player's move is the only other thing that asks the bot to play, so a
+   *  turn lost after the team's move was stored — a backend restart, a
+   *  database error — is one nobody would ever take, and the team cannot move
+   *  out of turn (#133). The team's board asks again instead
+   *  (`withJudgeResume`).
+   *
+   *  The stored state is published again afterwards, for a board that is
+   *  behind rather than stuck: a reload in the bot's think time can sync
+   *  before the bot's move is stored and subscribe after it is published.
+   *
+   *  A board asks only while its socket is connected, so a match with no room
+   *  has nobody to answer, and no queue is made for it. */
+  async resumeBotTurn(context: Pick<Server.AppCtx, "db" | "auth">, game: Game, matchID: string): Promise<void> {
+    const bot = game.name === undefined ? undefined : this.bots[game.name];
+    if (bot === undefined) {
+      throw new Error(`No bot plays ${game.name}.`);
+    }
+    if (!this.roomInfo.has(matchID)) {
+      return;
+    }
+    await this.getMatchQueue(matchID).add(async () => {
+      await this.playBotTurn(context, game, bot, matchID);
+      const { state } = await fetch(context.db, matchID, { state: true } as const);
+      TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub)
+        .sendAll({ type: "update", args: [matchID, state] });
+    });
   }
 }
