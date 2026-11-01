@@ -1,8 +1,10 @@
-// Only newestWithinMajor is tested, for the same reason dependency-report.test.mjs stops at
+// Only the pure helpers are tested, for the same reason dependency-report.test.mjs stops at
 // formatReport: the rest is a network lookup and file writes. Picking the wrong version is where
-// this script could quietly cross a major or drag a pin onto a prerelease.
+// this script could quietly cross a major or drag a pin onto a prerelease; missing an override is
+// where it leaves a duplicate install behind.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { newestWithinMajor } from './update-minors.mjs';
+import { newestWithinMajor, overriddenPackages } from './update-minors.mjs';
 
 describe('newestWithinMajor', () => {
   it('picks the newest release of the pinned major, comparing numerically', () => {
@@ -24,5 +26,24 @@ describe('newestWithinMajor', () => {
   it('answers undefined for a pin that is not an exact stable version', () => {
     expect(newestWithinMajor(['8.2.1'], '^8.2.1')).toBeUndefined();
     expect(newestWithinMajor(['8.2.1'], '8.2.1-rc.1')).toBeUndefined();
+  });
+});
+
+describe('overriddenPackages', () => {
+  it('names the package each override forces, however deep it is nested', () => {
+    expect(overriddenPackages({
+      'koa-socket-2': { 'socket.io': '^4' },
+      foo: '1.2.3',
+      bar: { '.': '2.0.0', baz: { qux: '^3' } }
+    })).toStrictEqual(['socket.io', 'foo', 'bar', 'qux']);
+  });
+
+  it('leaves out a $ reference, which follows the root pin already', () => {
+    expect(overriddenPackages({ foo: '$foo', bar: { '.': '$bar', baz: '$baz' } })).toStrictEqual([]);
+  });
+
+  it('finds socket.io in the root package.json, where the duplicate install comes from', () => {
+    const { overrides } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+    expect(overriddenPackages(overrides)).toContain('socket.io');
   });
 });
