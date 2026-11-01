@@ -25,8 +25,8 @@ A row is one *upgrade*, not one package. The same name pinned at two versions is
 two rows rather than one reporting a version it is not; the `written down in`
 column lists every file the bump has to touch, which is the honest measure of how
 big it is. `DOCKER_IMAGES` in `scripts/dependency-report.mjs` says how far each
-image is allowed to reach, and the header comment of the same file says why this
-is a report rather than dependabot or renovate. `package-lock.json` is still what
+image is allowed to reach, and the header comment of the same file says why it
+asks the registry directly rather than running `npm outdated` or `npm audit`. `package-lock.json` is still what
 `npm ci` installs, and everything here that compares a version reads it.
 
 The report opens no pull requests — upgrading stays deliberate, majors one at a
