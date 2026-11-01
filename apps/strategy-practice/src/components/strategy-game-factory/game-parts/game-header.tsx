@@ -11,7 +11,7 @@ export const GameHeader = () => {
   const title = gameId === undefined ? '' : t([`${gameId}.title`, `${gameId}.name`], { ns: 'catalog' });
   return (
   <>
-    <header className="primary-header z-40">
+    <header className="primary-header">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
