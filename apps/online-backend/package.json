@@ -15,7 +15,7 @@
     "@koa/router": "10.1.1",
     "bgio-postgres": "1.0.16",
     "boardgame.io": "0.50.2",
-    "dotenv": "17.4.2",
+    "dotenv": "18.0.9",
     "game": "*",
     "ip-address": "10.7.5",
     "koa": "2.16.4",
