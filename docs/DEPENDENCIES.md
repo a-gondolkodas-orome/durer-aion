@@ -38,6 +38,30 @@ versions are written down in files no `package.json` names: Node and Playwright.
 of where they are — the `.nvmrc` row's count comes from it.
 </details>
 
+## Release-age cooldown
+
+`.npmrc` sets `min-release-age=7`: whenever npm *resolves* — an `npm install`
+after `update:minors`, a new dependency — it takes only versions published at
+least 7 days earlier, transitive ones included. A hijacked release is usually
+caught and unpublished within hours or days, so a week keeps it out of the
+lockfile. `npm ci` installs the lockfile as written and is unaffected; npm
+11.10 is the first to read the setting, hence the `devEngines` floor.
+`allow-git=none` beside it refuses dependencies fetched from a git URL, which
+nothing here has.
+
+The window is per version, not per package: a package that releases daily
+still resolves to its newest week-old release. `update:minors` and the report
+read the same number from `.npmrc` and propose only what npm will install; a
+newer release still inside the window is listed as *too new* and picked up by
+the next sweep.
+
+The one cost is a security fix younger than the window. Advisories arrive
+through Dependabot alerts, not the report, and npm says so rather than staying
+quiet: `npm audit fix` warns that the fix was blocked and exits non-zero. Once
+the fix is checked by hand, take it on purpose — pin it and install with
+`--min-release-age=0` for that one command, in a commit that says why. Neither
+script walks a pin like that back.
+
 ## Held back deliberately
 
 The report still lists these, in a section of their own, so the `Major` count

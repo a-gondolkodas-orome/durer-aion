@@ -7,7 +7,8 @@
 //
 // Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
-//     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
+//     `latest` dist-tag — or the newest version below it that `.npmrc`'s min-release-age lets npm
+//     install, see release-age.mjs. The workspaces themselves are not among them — see npmRows.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
 //   - Node: each .nvmrc, against the newest release sharing its major.
 //   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
@@ -18,6 +19,7 @@
 // an urgency a monthly digest would only dilute.
 import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { minReleaseAge, newestMature, releases } from './release-age.mjs';
 import { isWorkspaceLink, resolvedVersion } from './resolved-versions.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -82,9 +84,12 @@ const fetchJson = async url => {
 // A row is { name, current, where, latest } once resolved, or { name, current, where, error } when
 // the lookup failed. A failed lookup is reported, never thrown: one unreachable registry must not
 // cost the whole report, and a row that silently vanished would read as "up to date".
+// A lookup answers the latest version, or `{ latest, cooling }` when a newer one is still inside
+// the release-age window and so not yet installable.
 const checkVersion = async (name, current, where, lookup) => {
   try {
-    return { name, current, where, latest: await lookup() };
+    const found = await lookup();
+    return { name, current, where, ...(typeof found === 'string' ? { latest: found } : found) };
   } catch (error) {
     return { name, current, where, error: error.message };
   }
@@ -129,7 +134,7 @@ const npmRows = () => {
     .sort((a, b) => a.name.localeCompare(b.name) || a.current.localeCompare(b.current))
     .map(({ name, current, where }) =>
       checkVersion(name, current, [...where, ...(ALSO_WRITTEN_IN[name] ?? [])], async () =>
-        (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
+        newestMature({ current, ...(await releases(name)) }))
     );
 };
 
@@ -162,11 +167,11 @@ const nodeRows = () => {
   return files.map(file => {
     const current = read(file).trim();
     return checkVersion('Node', current, [file, ...(NVMRC_COMPANIONS[file] ?? [])], async () => {
-      const releases = await fetchJson('https://nodejs.org/dist/index.json');
+      const feed = await fetchJson('https://nodejs.org/dist/index.json');
       const major = current.split('.')[0];
       // The feed is newest-first, and staying on the pinned major is the point — a major bump is a
       // decision, not something a monthly report should nudge.
-      const newest = releases.find(release => release.version.replace(/^v/, '').split('.')[0] === major);
+      const newest = feed.find(release => release.version.replace(/^v/, '').split('.')[0] === major);
       if (!newest) throw new Error(`no release found for Node ${major}.x`);
       // An .nvmrc names either a whole major (`24`) or an exact version (`24.11.1`), and a file
       // that pins only the major is current for the whole of it. Compare at the precision it was
@@ -217,7 +222,8 @@ const isMajorBump = ({ current, latest }) =>
   current.replace(/^v/, '').split('.')[0] !== latest.replace(/^v/, '').split('.')[0];
 
 // Pure: rows in, markdown out. The only branchy part of this script, and the only part worth a spec.
-export const formatReport = rows => {
+// `releaseAge` is .npmrc's min-release-age, named in the report only when some row is cooling.
+export const formatReport = (rows, releaseAge = 0) => {
   const failed = rows.filter(row => row.error);
   const behind = rows.filter(row => !row.error && row.current !== row.latest);
   // A hold is about the major: a patch released inside the version we are held at is still routine,
@@ -242,7 +248,7 @@ export const formatReport = rows => {
         `| | pinned | latest | written down in |${extra ? ` ${extra[0]} |` : ''}`,
         `| --- | --- | --- | --- |${extra ? ' --- |' : ''}`,
         ...entries.map(row =>
-          `| \`${row.name}\` | ${row.current} | ${row.latest} | ${row.where.join(', ')} |`
+          `| \`${row.name}\` | ${row.current} | ${row.latest}${row.cooling ? ` (${row.cooling} too new)` : ''} | ${row.where.join(', ')} |`
           + (extra ? ` ${extra[1](row)} |` : '')),
         ''
       ];
@@ -269,6 +275,9 @@ export const formatReport = rows => {
       'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#held-back-deliberately).',
       ['held back by', ({ name }) => HELD_BACK[name]]
     ),
+    ...(behind.some(row => row.cooling)
+      ? [`A version marked *too new* was published less than ${releaseAge} days ago: \`.npmrc\` sets \`min-release-age\`, so npm will not install it yet — see [DEPENDENCIES.md § Release-age cooldown](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#release-age-cooldown). Its row offers the newest version that is old enough.`, '']
+      : []),
     ...(failed.length === 0
       ? []
       : [
@@ -288,7 +297,7 @@ export const formatReport = rows => {
 // Guarded so the spec can import formatReport without the script reaching for the network.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
-  const report = formatReport(rows);
+  const report = formatReport(rows, minReleaseAge());
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];
   if (process.argv.includes('--out') && outFile) writeFileSync(outFile, report);
