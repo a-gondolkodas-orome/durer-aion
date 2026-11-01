@@ -4,18 +4,14 @@
 // calling script — a `BoardClient` is exactly the thing these helpers cannot
 // know about.
 //
-// Playwright is a dependency of this app but nothing imports it (see the "//"
-// note in package.json), so resolve it explicitly rather than from the
-// caller's directory, which is usually somewhere under /tmp. Since the
-// workspace join there is one install at the monorepo root, and npm decides
-// per version conflict whether a package hoists there or nests here — so try
-// both, nearest first.
+// Playwright is a devDependency of the monorepo root, not of this app, so
+// resolve it there explicitly rather than from the caller's directory, which
+// is usually somewhere under /tmp.
 import { existsSync, readdirSync } from 'node:fs';
 
-const playwright = ['../../../node_modules/playwright/index.mjs', '../../../../../node_modules/playwright/index.mjs']
-  .map(candidate => new URL(candidate, import.meta.url))
-  .find(url => existsSync(url))?.href
-  ?? (() => { throw new Error('playwright not found in the app or the repo root — run npm ci at the root'); })();
+const playwrightUrl = new URL('../../../../../node_modules/playwright/index.mjs', import.meta.url);
+if (!existsSync(playwrightUrl)) throw new Error('playwright not found at the repo root — run npm ci there');
+const playwright = playwrightUrl.href;
 
 export const DEV_URL = 'http://localhost:8012';
 

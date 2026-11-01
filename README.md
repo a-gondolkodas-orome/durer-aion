@@ -206,6 +206,7 @@ The Pages site assembles all three plus a home page:
 ```bash
 npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
 npm run site:serve   # on http://localhost:4321
+npm run site:smoke   # opens each app in Chromium and fails on what does not load
 ```
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, base
@@ -250,12 +251,14 @@ npm run build
 npm run i18n:check
 npm run spell-check
 npm run stack:build   # needs docker; the other six do not
+npm run site:build && npm run site:smoke   # needs Playwright's Chromium
 ```
 
-`npm run check` runs the six that need no docker, in one command and cheapest
+`npm run check` runs the six that need no docker or browser, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
-needs docker.
+needs docker, and the site smoke test because it needs a browser and a full site
+build.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 

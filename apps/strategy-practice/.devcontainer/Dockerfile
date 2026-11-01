@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:26-bookworm
 # adopted. The npm that matters here is the one bundled with the pinned Node, so keep it quiet.
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
-# Must stay in sync with the "playwright" version in package.json — a mismatch means
+# Must stay in sync with the "playwright" version in the root package.json — a mismatch means
 # node_modules/playwright looks for a browser revision that isn't in the image.
 ARG PLAYWRIGHT_VERSION=1.64.1
 

@@ -69,7 +69,7 @@ four-year downgrade of it. Don't build toward replacing boardgame.io either (#27
 
 [`README.md`](README.md) is the authority — *Getting Started* for the stack in
 four commands and the reloading setup without docker, *The checks CI runs* for
-the seven gates. `npm run check` is the six that need no docker, cheapest first,
+the eight gates. `npm run check` is the six that need no docker or browser, cheapest first,
 and is what to run before pushing. All of it covers `apps/strategy-practice`
 too; `npm test --workspace=strategy-practice` is that app's suite alone. Every
 long docker invocation lives in a root npm script rather than in prose, so it is

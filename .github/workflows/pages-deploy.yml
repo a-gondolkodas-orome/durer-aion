@@ -51,6 +51,14 @@ jobs:
           VITE_GIT_COMMIT_HASH: ${{ github.sha }}
         run: node scripts/assemble-site.mjs
 
+      # ci.yml's site-smoke job runs this too, but in parallel with this workflow on the same push,
+      # so it cannot hold a deploy back. Here it can: a site that does not load is not uploaded,
+      # and gyakorlo.durerinfo.hu keeps serving the last one that did.
+      - name: Install the browser for the pinned Playwright
+        run: npx playwright install --with-deps --only-shell chromium
+      - name: Smoke-test the assembled site
+        run: npm run site:smoke
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
