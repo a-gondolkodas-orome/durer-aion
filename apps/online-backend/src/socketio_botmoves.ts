@@ -197,9 +197,9 @@ export class SocketIOButBotMoves extends SocketIO {
     }
   }
 
-  /** Plays the bot's turn if the match is waiting on one, and says whether it
-   *  did. Callers run it on the match's queue, so every move queued before it
-   *  is stored by the time it reads.
+  /** Plays the bot's turn if the match is waiting on one. Callers run it on
+   *  the match's queue, so every move queued before it is stored by the time
+   *  it reads.
    *
    *  Re-reads storage rather than taking a state from the caller: the `update`
    *  listener gets only the player's action, not the state boardgame.io's own
@@ -211,23 +211,23 @@ export class SocketIOButBotMoves extends SocketIO {
     game: Game,
     bot: Bot,
     matchID: string
-  ): Promise<boolean> {
+  ): Promise<void> {
     const { state } = await fetch(db, matchID, { state: true } as const);
     if (currentPlayer(state.ctx) !== BOT_ID) {
       // Not a real action, possibly a failed move.
-      return false;
+      return;
     }
     if (state.ctx.gameover) {
-      return false;
+      return;
     }
     const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
     if (botPlayer === null) {
       // Only reachable with ctx.gameover set to something falsy, which
       // the check above lets through and which no game here produces.
-      return false;
+      return;
     }
     if (state.ctx.phase !== "play" && state.ctx.phase !== "startNewGame") {
-      return false;
+      return;
     }
     const botAction = await bot.play(state, botPlayer);
 
@@ -249,43 +249,35 @@ export class SocketIOButBotMoves extends SocketIO {
       matchID,
       BOT_ID
     );
-    return true;
   }
 
   /** The bot's turn, asked for by a team whose board has waited on it too long.
    *
    *  A player's move is the only other thing that asks the bot to play, so a
    *  turn lost after the team's move was stored — a backend restart, a
-   *  database error, a bot that threw — is one nobody would ever take, and the team
-   *  cannot move out of turn (#133). The team's board asks again instead
+   *  database error — is one nobody would ever take, and the team cannot move
+   *  out of turn (#133). The team's board asks again instead
    *  (`withJudgeResume`).
    *
-   *  When there is no turn to take, the board that asked is behind: a reload
-   *  in the bot's think time can sync before the bot's move is stored and
-   *  subscribe after it is published. So the stored state is published again.
+   *  The stored state is published again afterwards, for a board that is
+   *  behind rather than stuck: a reload in the bot's think time can sync
+   *  before the bot's move is stored and subscribe after it is published.
    *
-   *  A queue made here for a match nobody is connected to is dropped again
-   *  once idle, as boardgame.io drops one when the last client leaves. */
+   *  A board asks only while its socket is connected, so a match with no room
+   *  has nobody to answer, and no queue is made for it. */
   async resumeBotTurn(context: Pick<Server.AppCtx, "db" | "auth">, game: Game, matchID: string): Promise<void> {
     const bot = game.name === undefined ? undefined : this.bots[game.name];
     if (bot === undefined) {
       throw new Error(`No bot plays ${game.name}.`);
     }
-    const queue = this.getMatchQueue(matchID);
-    try {
-      await queue.add(async () => {
-        if (await this.playBotTurn(context, game, bot, matchID)) {
-          return;
-        }
-        const { state } = await fetch(context.db, matchID, { state: true } as const);
-        TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub)
-          .sendAll({ type: "update", args: [matchID, state] });
-      });
-    } finally {
-      if (!this.roomInfo.has(matchID) && this.perMatchQueue.get(matchID) === queue
-        && queue.size === 0 && queue.pending === 0) {
-        this.deleteMatchQueue(matchID);
-      }
+    if (!this.roomInfo.has(matchID)) {
+      return;
     }
+    await this.getMatchQueue(matchID).add(async () => {
+      await this.playBotTurn(context, game, bot, matchID);
+      const { state } = await fetch(context.db, matchID, { state: true } as const);
+      TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub)
+        .sendAll({ type: "update", args: [matchID, state] });
+    });
   }
 }

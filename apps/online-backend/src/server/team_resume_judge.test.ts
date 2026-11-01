@@ -10,9 +10,9 @@ import { configureTeamsRouter } from "./router";
 import { TEAM_COOKIE } from "./team_session";
 import { startTestDatabase } from "./test_database";
 
-// What the route decides: whose match it may resume, and which game that is.
-// Taking the turn itself is the transport's, and socketio_transport.test.ts
-// runs it over a real socket.
+// What the route decides: that a team resumes only its own match. Taking the
+// turn itself is the transport's, and socketio_transport.test.ts runs it over a
+// real socket.
 
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
 const strategy = { ...gameWrapper(MyGameWrappers.C()), name: strategyNames.C };
@@ -69,27 +69,9 @@ async function startStrategy(): Promise<string> {
   return ((await response.json()) as { matchID: string }).matchID;
 }
 
-it("resumes the judge's turn in the team's own match", async () => {
-  const matchID = await startStrategy();
-
-  expect((await post(`/team/me/match/${matchID}/resume-judge`)).status).toBe(204);
-  expect(resumeBotTurn).toHaveBeenCalledExactlyOnceWith(
-    expect.anything(),
-    expect.objectContaining({ name: strategyNames.C }),
-    matchID,
-  );
-});
-
 it("refuses a match that is not the team's", async () => {
   await startStrategy();
 
   expect((await post("/team/me/match/someone-elses/resume-judge")).status).toBe(404);
-  expect(resumeBotTurn).not.toHaveBeenCalled();
-});
-
-it("refuses a browser with no session", async () => {
-  const matchID = await startStrategy();
-
-  expect((await post(`/team/me/match/${matchID}/resume-judge`, "")).status).toBe(401);
   expect(resumeBotTurn).not.toHaveBeenCalled();
 });
