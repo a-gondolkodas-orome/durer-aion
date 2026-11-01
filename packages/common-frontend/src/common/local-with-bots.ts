@@ -36,17 +36,15 @@ function botOwesAMove(state: State, bots: LocalOpts['bots']): boolean {
 /// `master`, which the pinned boardgame.io version types but does not document;
 /// local-with-bots.test.ts runs against the real one.
 ///
+/// A second sync at the same state — a remount while the bot thinks — asks
+/// again, and boardgame.io rejects the second answer as stale and logs it.
+/// That costs a console line, not a move.
+///
 /// The state it hands on has been through `getFilterPlayerView` for this
 /// client. No game here defines a `playerView`, so that is the full state; a
 /// game that did would hand its bot the player's view of the board.
 export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'storageKey'>) {
   const makeTransport = Local({ bots, persist: true, storageKey });
-  // The state the bot was last asked to play from, by the kick below or by
-  // boardgame.io itself. A sync at that same state — StrictMode mounting
-  // twice, or a remount in the pause after a move — would otherwise ask again,
-  // and the second answer is rejected as stale.
-  let askedAt: { matchID: string, stateID: number } | null = null;
-
   return (transportOpts: TransportOpts) => {
     const transport = makeTransport({
       ...transportOpts,
@@ -54,28 +52,12 @@ export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'st
       // factory has returned, so `transport` is assigned by then.
       transportDataCallback: (data: TransportData) => {
         transportOpts.transportDataCallback(data);
-        if (data.type === 'update' || data.type === 'patch') {
-          // `Master.onUpdate` runs its subscribe callback before it sends
-          // this, so if the bot owes a move here, boardgame.io has already
-          // scheduled it. Only these two move the match; `matchData` and
-          // `chat` leave the turn where it was.
-          const [matchID] = data.args;
-          const stateID = data.type === 'update' ? data.args[1]._stateID : data.args[2];
-          askedAt = { matchID, stateID };
-          return;
+        if (data.type === 'sync') {
+          const [matchID, { state }] = data.args;
+          if (botOwesAMove(state, bots)) {
+            transport.master.subscribeCallback({ state, matchID });
+          }
         }
-        if (data.type !== 'sync') {
-          return;
-        }
-        const [matchID, { state }] = data.args;
-        if (!botOwesAMove(state, bots)) {
-          return;
-        }
-        if (askedAt?.matchID === matchID && askedAt.stateID === state._stateID) {
-          return;
-        }
-        askedAt = { matchID, stateID: state._stateID };
-        transport.master.subscribeCallback({ state, matchID });
       },
     });
     return transport;

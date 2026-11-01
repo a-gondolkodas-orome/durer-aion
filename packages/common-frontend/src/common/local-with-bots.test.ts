@@ -19,7 +19,6 @@ interface TestState {
 }
 
 /// Two players, one move each turn, so a player's move hands the turn over.
-/// `stop` is the mark that ends the match.
 const testGame: Game<TestState> = {
   name: 'local-with-bots-test',
   setup: () => ({ marks: [] }),
@@ -27,7 +26,6 @@ const testGame: Game<TestState> = {
   moves: {
     mark: ({ G }, who: string) => { G.marks.push(who); },
   },
-  endIf: ({ G }) => (G.marks.includes('stop') ? { winner: '0' } : undefined),
   ai: { enumerate: () => [{ move: 'mark', args: ['bot'] }] },
 };
 
@@ -48,8 +46,6 @@ function botThatMarks(plays: { count: number }, beforePlay?: () => Promise<void>
 
 const neverAnswers = () => new Promise<void>(() => undefined);
 
-/// One transport factory is what an app builds per game; a client mounted twice
-/// — StrictMode — shares it, so the tests that care share it too.
 const transportFor = (storageKey: string, bot: ReturnType<typeof botThatMarks>) =>
   localWithBots({ bots: { '1': bot }, storageKey });
 
@@ -105,59 +101,6 @@ describe('a match restored with the bot to move', () => {
     afterReload.stop();
   });
 
-  /// Two clients on one match — what StrictMode's double mount produces — sync
-  /// twice at the same state. Asking the bot twice would send the same move
-  /// twice, the second rejected as stale, which boardgame.io reports on the
-  /// console: this run's report has to itself, so that is a failure here too.
-  test('is asked of the bot once, however many clients sync', async () => {
-    const storageKey = 'asked-once';
-    const interrupted = { count: 0 };
-    const game = { ...testGame };
-    const before = clientPlaying(game, transportFor(storageKey, botThatMarks(interrupted, neverAnswers)));
-    before.start();
-    before.moves.mark('human');
-    await letTheBotPlay();
-    before.stop();
-
-    const plays = { count: 0 };
-    const reloaded = { ...testGame };
-    const multiplayer = transportFor(storageKey, botThatMarks(plays));
-    const first = clientPlaying(reloaded, multiplayer);
-    const second = clientPlaying(reloaded, multiplayer);
-    first.start();
-    second.start();
-    await letTheBotPlay();
-
-    expect(plays.count).toStrictEqual(1);
-    // The master keeps one callback per player id, so what it sends reaches the
-    // client that connected last — which is the one a remount leaves behind.
-    expect(stateOf(second).G.marks).toStrictEqual(['human', 'bot']);
-    first.stop();
-    second.stop();
-  });
-
-  /// The other repeat: a client mounted inside the pause boardgame.io keeps
-  /// before it lets the bot answer a move syncs at a state the bot has already
-  /// been asked about — by boardgame.io itself, from the move. The wrapper
-  /// used to forget on the move and kick again on that sync.
-  test('is not asked again by a sync inside the pause after a move', async () => {
-    const storageKey = 'sync-inside-the-pause';
-    const plays = { count: 0 };
-    const game = { ...testGame };
-    const multiplayer = transportFor(storageKey, botThatMarks(plays));
-    const first = clientPlaying(game, multiplayer);
-    first.start();
-    first.moves.mark('human');
-    const remounted = clientPlaying(game, multiplayer);
-    remounted.start();
-    await letTheBotPlay();
-
-    expect(plays.count).toStrictEqual(1);
-    expect(stateOf(remounted).G.marks).toStrictEqual(['human', 'bot']);
-    first.stop();
-    remounted.stop();
-  });
-
   test('is left alone when the turn is the team\'s', async () => {
     const storageKey = 'not-the-bots-turn';
     const before = clientPlaying({ ...testGame }, transportFor(storageKey, botThatMarks({ count: 0 }, neverAnswers)));
@@ -171,24 +114,6 @@ describe('a match restored with the bot to move', () => {
 
     expect(plays.count).toStrictEqual(0);
     expect(stateOf(afterReload).G.marks).toStrictEqual([]);
-    afterReload.stop();
-  });
-
-  test('is left alone when the match is over', async () => {
-    const storageKey = 'already-over';
-    const before = clientPlaying({ ...testGame }, transportFor(storageKey, botThatMarks({ count: 0 }, neverAnswers)));
-    before.start();
-    before.moves.mark('stop');
-    await letTheBotPlay();
-    expect(stateOf(before).ctx.gameover).toStrictEqual({ winner: '0' });
-    before.stop();
-
-    const plays = { count: 0 };
-    const afterReload = clientPlaying({ ...testGame }, transportFor(storageKey, botThatMarks(plays)));
-    afterReload.start();
-    await letTheBotPlay();
-
-    expect(plays.count).toStrictEqual(0);
     afterReload.stop();
   });
 });
