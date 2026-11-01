@@ -150,29 +150,6 @@ handful of playouts), leaving the exhaustive argument to cheap unit tests of the
 characterisation itself — the Grundy value, the parity invariant, the win/loss
 predicate.
 
-### Coverage
-
-```bash
-npm run coverage         # line coverage, on demand
-```
-
-It is **on demand and has no threshold**, and should stay that way. The
-all-games sweeps — `plays-to-an-end`, `renders` and `json-round-trip` —
-execute ~94% of the source — that is how much of this repo is `games/` —
-while asserting only that a match ends and a board renders, so the global
-percentage reads high whatever the tests are worth, and a CI gate on it would be
-satisfied by registering another game. What the report is good for is the
-question grep cannot answer: which modules **no test loads at all**, which is
-why `coverage.include` in `vite.config.js` names every file under `src/` rather
-than only what a test imported.
-
-A gate on the lines a PR *added*, measured with the sweeps excluded, ran on every
-PR until #431 retired it with the rest of the duplicated CI (#427): it was the suite run
-a second time, instrumented, for one number. What it asked for still holds — a
-new game or bot gets its `gameplay.test.ts` and `bot-strategy.test.ts` (§ Testing)
-— and is the reviewer's to check. Don't add a gate on the global number either;
-the reasons above have not changed.
-
 ## Planned future directions
 
 - **Add Dürer competition games** — the games of each new competition, plus the
