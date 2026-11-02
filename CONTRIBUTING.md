@@ -5,9 +5,7 @@ read it in, and the handful of rules that were only ever tacit.
 
 Contributions are welcome from people who take part in the Dürer competition
 themselves — as an organiser or as a teacher. Working with an AI assistant is
-fine; a pull request nobody stands behind is not. We do not accept ones an agent
-was sent to open on easy issues while no person read the result, or ones opened
-to raise an open source contribution count.
+fine; a pull request nobody stands behind is not.
 
 ## Your first change needs no docker
 
