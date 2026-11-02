@@ -1,7 +1,6 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
@@ -22,6 +21,26 @@ const TeamsToolbar = csvToolbar('durer-csapatok');
 // What the states mean is on MatchStatus in the `schemas` package.
 const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
 
+// The open tab is kept in `?tab=`, so a reload or a shared link opens the same
+// one. Anything else in it is read as the default.
+const TABS = ['csapatok', 'statisztika'] as const;
+type AdminTab = typeof TABS[number];
+
+function tabFromUrl(): AdminTab {
+  const tab = new URLSearchParams(window.location.search).get('tab');
+  return TABS.find(it => it === tab) ?? 'csapatok';
+}
+
+function tabToUrl(tab: AdminTab) {
+  const url = new URL(window.location.href);
+  if (tab === 'csapatok') {
+    url.searchParams.delete('tab');
+  } else {
+    url.searchParams.set('tab', tab);
+  }
+  window.history.replaceState(window.history.state, '', url);
+}
+
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
@@ -30,7 +49,7 @@ export function Admin(props: { teamId?: string }) {
   const { data } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
-  const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
+  const [tab, setTab] = useState<AdminTab>(tabFromUrl);
 
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
   const showTeams = !teamFromPath;
@@ -75,194 +94,203 @@ export function Admin(props: { teamId?: string }) {
           {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
-      <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-        <IconButton
-          onClick={() => setAdminPageOpen(!adminPageOpen)}
-          size="large"
-          sx={{ marginRight: "8px" }}
-        >
-          {adminPageOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-        </IconButton>
-        <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
-      </Stack>
-      {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
-        {showTeams && <Stack sx={{
-          height: "635px",
-        }}>
-          {data && <DataGrid columns={[
-            {
-              field: 'id',
-              headerName: 'ID',
-              width: 75,
-              editable: false,
-            },
-            {
-              field: 'teamName',
-              headerName: 'Csapatnév',
-              width: 200,
-              editable: false,
-            },
-            {
-              field: 'category',
-              headerName: 'Kategória',
-              width: 100,
-              editable: false,
-            },
-            {
-              field: 'pageState',
-              headerName: 'Állapot',
-              description: 'Melyik oldalt látja a csapat: DISCLAIMER, HOME, RELAY vagy STRATEGY. A játék oldalán a vége után is ott marad, amíg vissza nem lép.',
-              width: 150,
-              editable: false,
-            },
-            {
-              field: 'other',
-              headerName: 'Egyéb',
-              width: 250,
-              editable: false,
-            },
-            {
-              field: 'relayMatchState',
-              headerName: 'Relay',
-              description: MATCH_STATE_DESCRIPTION,
-              width: 120,
-              editable: false,
-            },
-            {
-              field: 'strategyMatchState',
-              headerName: 'Strategy',
-              description: MATCH_STATE_DESCRIPTION,
-              width: 120,
-              editable: false,
-            },
-            {
-              field: 'view',
-              width: 170,
-              headerName: '',
-              disableExport: true,
-              renderCell: (renderData) => {
-                return (
-                  <Button
-                    color='primary'
-                    variant='contained'
-                    onClick={() => {setSelectedRow(renderData.row)}}>
-                      Szerkesztés
-                  </Button>
-                )
-              }
-            },
-            {
-              field: 'view_tab',
-              width: 170,
-              headerName: '',
-              disableExport: true,
-              renderCell: (renderData) => {
-                return (
-                  <Button
-                    color='primary'
-                    variant='contained'
-                    onClick={() => {
-                      window.open("/admin/" + renderData.row.teamId, '_blank', 'noopener,noreferrer')
-                    }}>
-                      + új tab
-                  </Button>
-                )
-              }
-            }
-          ]}
-          rows={data.map((a) => {
-            return {
-              id: a.teamId,
-              relayMatchState: a.relayMatch.state,
-              strategyMatchState: a.strategyMatch.state,
-              ...a,
-            };
+      <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület</Stack>
+      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
+      {/* Above the tabs, not in one: it changes every running match, not the
+          rows the grid happens to show. */}
+      {showTeams && data && <Stack sx={{ padding: "10px" }}>
+        idő hozzáadása minden aktív játékosnak:
+        <Form
+        initialValues={{ time: '' }}
+        validationSchema={Yup.object().shape({
+          time: Yup.number()
+            .integer('Egész számot kell írni')
+            .typeError('Számot kell írni')
+            .required('Nincs megadva érték')
           })}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-            columns: {
-              columnVisibilityModel: {
-                other: false,
-              },
-            },
-          }}
-          pageSizeOptions={[10, 25, 50]}
-          showToolbar
-          slots={{ toolbar: TeamsToolbar }}
-          sx={{
-            height: "auto",
-          }}
-          />}
-        </Stack>}
-        {showTeams && data && <Stack sx={{ padding: "10px" }}>
-          idő hozzáadása minden aktív játékosnak:
-          <Form
-          initialValues={{ time: '' }}
-          validationSchema={Yup.object().shape({
-            time: Yup.number()
-              .integer('Egész számot kell írni')
-              .typeError('Számot kell írni')
-              .required('Nincs megadva érték')
-            })}
-          onSubmit={(values) => {
-            setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
-              confirm: async () => {
-                try {
-                  for (const a of data ?? []) {
-                    if (a.relayMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.relayMatch.matchID, values.time);
-                    }
-                    if (a.strategyMatch.state === "IN PROGRESS") {
-                      await addMinutes(a.strategyMatch.matchID, values.time);
-                    }
+        onSubmit={(values) => {
+          setConfirmDialog({
+            text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+            confirm: async () => {
+              try {
+                for (const a of data ?? []) {
+                  if (a.relayMatch.state === "IN PROGRESS") {
+                    await addMinutes(a.relayMatch.matchID, values.time);
                   }
-                  enqueueSnackbar("Sikeres művelet", { variant: 'success' });
-                } catch (e) {
-                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                  enqueueSnackbar(message, { variant: 'error' });
+                  if (a.strategyMatch.state === "IN PROGRESS") {
+                    await addMinutes(a.strategyMatch.matchID, values.time);
+                  }
                 }
-              },
-            })
-          }}>
-          <Stack sx={{ display: "flex", flexDirection: "row", margin: "15px" }}>
-          <Field
-            name="time"
-          >
-          {
-            ({ field }: FieldProps<string | number>) => <input
-              {...field}
-              className="text-input"
-              placeholder="perc"
-              style={{
-                width: '200px',
-                borderWidth: '2px',
-                borderColor: theme.palette.primary.main,
-              }}
-            />
-          }</Field>
-          <Button sx={{
-            width: '150px',
-            alignSelf: 'center',
-            textTransform: 'none',
-          }} variant='contained' color='primary' type="submit">
-            hozzáadás
-          </Button>
+                enqueueSnackbar("Sikeres művelet", { variant: 'success' });
+              } catch (e) {
+                const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                enqueueSnackbar(message, { variant: 'error' });
+              }
+            },
+          })
+        }}>
+        <Stack sx={{ display: "flex", flexDirection: "row", margin: "15px" }}>
+        <Field
+          name="time"
+        >
+        {
+          ({ field }: FieldProps<string | number>) => <input
+            {...field}
+            className="text-input"
+            placeholder="perc"
+            style={{
+              width: '200px',
+              borderWidth: '2px',
+              borderColor: theme.palette.primary.main,
+            }}
+          />
+        }</Field>
+        <Button sx={{
+          width: '150px',
+          alignSelf: 'center',
+          textTransform: 'none',
+        }} variant='contained' color='primary' type="submit">
+          hozzáadás
+        </Button>
+        </Stack>
+        <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (
+          <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
+            {msg}
           </Stack>
-          <ErrorMessage name="time"/><ErrorMessage name="time" render={msg => (
-            <Stack sx={{ color: 'red', fontSize: '0.875rem' }}>
-              {msg}
-            </Stack>
-          )}/>
-        </Form>
-        </Stack>}
-      {showTeams && data && <Stats data={data}/>}
-      </>}
+        )}/>
+      </Form>
+      </Stack>}
+      {showTeams && <Tabs
+        value={tab}
+        onChange={(_, value: AdminTab) => {
+          setTab(value);
+          tabToUrl(value);
+        }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
+      >
+        <Tab label="Csapatok" value="csapatok"/>
+        <Tab label="Statisztika" value="statisztika"/>
+      </Tabs>}
+      {/* Both panels stay mounted, so the grid keeps its filter, sort and
+          page while the other tab is open. */}
+      {showTeams && <Stack role="tabpanel" aria-label="Csapatok" sx={{
+        display: tab === 'csapatok' ? 'flex' : 'none',
+        height: "635px",
+      }}>
+        {data && <DataGrid columns={[
+          {
+            field: 'id',
+            headerName: 'ID',
+            width: 75,
+            editable: false,
+          },
+          {
+            field: 'teamName',
+            headerName: 'Csapatnév',
+            width: 200,
+            editable: false,
+          },
+          {
+            field: 'category',
+            headerName: 'Kategória',
+            width: 100,
+            editable: false,
+          },
+          {
+            field: 'pageState',
+            headerName: 'Állapot',
+            description: 'Melyik oldalt látja a csapat: DISCLAIMER, HOME, RELAY vagy STRATEGY. A játék oldalán a vége után is ott marad, amíg vissza nem lép.',
+            width: 150,
+            editable: false,
+          },
+          {
+            field: 'other',
+            headerName: 'Egyéb',
+            width: 250,
+            editable: false,
+          },
+          {
+            field: 'relayMatchState',
+            headerName: 'Relay',
+            description: MATCH_STATE_DESCRIPTION,
+            width: 120,
+            editable: false,
+          },
+          {
+            field: 'strategyMatchState',
+            headerName: 'Strategy',
+            description: MATCH_STATE_DESCRIPTION,
+            width: 120,
+            editable: false,
+          },
+          {
+            field: 'view',
+            width: 170,
+            headerName: '',
+            disableExport: true,
+            renderCell: (renderData) => {
+              return (
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={() => {setSelectedRow(renderData.row)}}>
+                    Szerkesztés
+                </Button>
+              )
+            }
+          },
+          {
+            field: 'view_tab',
+            width: 170,
+            headerName: '',
+            disableExport: true,
+            renderCell: (renderData) => {
+              return (
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={() => {
+                    window.open("/admin/" + renderData.row.teamId, '_blank', 'noopener,noreferrer')
+                  }}>
+                    + új tab
+                </Button>
+              )
+            }
+          }
+        ]}
+        rows={data.map((a) => {
+          return {
+            id: a.teamId,
+            relayMatchState: a.relayMatch.state,
+            strategyMatchState: a.strategyMatch.state,
+            ...a,
+          };
+        })}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 10,
+            },
+          },
+          columns: {
+            columnVisibilityModel: {
+              other: false,
+            },
+          },
+        }}
+        pageSizeOptions={[10, 25, 50]}
+        showToolbar
+        slots={{ toolbar: TeamsToolbar }}
+        sx={{
+          height: "auto",
+        }}
+        />}
+      </Stack>}
+      {showTeams && <Stack role="tabpanel" aria-label="Statisztika" sx={{
+        display: tab === 'statisztika' ? 'flex' : 'none',
+      }}>
+        {data && <Stats data={data}/>}
+      </Stack>}
     </Stack>
   )
 }

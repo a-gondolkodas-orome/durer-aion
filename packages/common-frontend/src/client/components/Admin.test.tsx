@@ -68,6 +68,8 @@ let repo: MockClientRepository;
 
 beforeEach(() => {
   repo = new MockClientRepository();
+  // The open tab is read from the URL, which jsdom keeps between tests.
+  window.history.replaceState(null, '', '/admin');
 });
 
 afterEach(() => {
@@ -165,4 +167,41 @@ test('the team dialog shows the email and the join code only on request, each on
   fireEvent.click(screen.getByText('Elrejtés'));
 
   expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
+});
+
+test('the team list and the stats are on two tabs, the list first', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+
+  expect(await screen.findByText('Alpha')).toBeVisible();
+  expect(screen.getByText('Kategória')).not.toBeVisible();
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Statisztika' }));
+
+  expect(screen.getByText('Kategória')).toBeVisible();
+  expect(screen.getByText('Alpha')).not.toBeVisible();
+  expect(window.location.search).toBe('?tab=statisztika');
+
+  fireEvent.click(screen.getByRole('tab', { name: 'Csapatok' }));
+
+  expect(screen.getByText('Alpha')).toBeVisible();
+  expect(window.location.search).toBe('');
+});
+
+test('the tab named in the URL is the one that opens', async () => {
+  window.history.replaceState(null, '', '/admin?tab=statisztika');
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+
+  expect(await screen.findByText('Kategória')).toBeVisible();
+  expect(screen.getByRole('tab', { name: 'Statisztika' })).toHaveAttribute('aria-selected', 'true');
+});
+
+test('a single team\'s page has no tabs', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, inAnHour()));
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findAllByText('Mutasd')).not.toHaveLength(0);
+  expect(screen.queryByRole('tab')).not.toBeInTheDocument();
 });
