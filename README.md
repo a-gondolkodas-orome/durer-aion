@@ -30,9 +30,9 @@ npm run teams:import  # loads scripts/test.tsv
 ```
 
 Coming back to a checkout you already have — switching to a branch to review it,
-say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
-`scripts/prepare.mjs` first, which installs and seeds only if it has to: the
-install happens when the lockfile or a workspace manifest actually moved.
+say — is `npm run stack:up` on its own, preceded by `npm ci` when that branch
+changed `package-lock.json`. No script installs for you. Every `dev:*` script and
+`stack:up` seed the env files first, which is silent when there is nothing to do.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
