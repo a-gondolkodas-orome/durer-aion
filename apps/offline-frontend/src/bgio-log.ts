@@ -7,8 +7,8 @@ const DEFAULT_MATCH_ID = "default";
 /// The match log boardgame.io keeps for itself. In the live round the
 /// organisers read these entries out of the server's storage
 /// (`GET /game/admin/:matchId/logs`); here the local master is the server, and
-/// `Local({ persist: true })` writes the same entries to localStorage under
-/// `<storageKey>_log`, as `[matchID, entries][]`.
+/// `localWithBots`, a persisted `Local`, writes the same entries to
+/// localStorage under `<storageKey>_log`, as `[matchID, entries][]`.
 ///
 /// Parsed without a guard of its own, as boardgame.io parses it: a log this
 /// cannot read is one the client itself already failed on.

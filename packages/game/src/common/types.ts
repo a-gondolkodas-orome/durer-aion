@@ -44,6 +44,30 @@ export interface GameStateMixin extends GameStateTimer {
   liveResults: LiveGameResult[];
 }
 
+// `satisfies` makes this list exhaustive and exact: a key added to the mixin
+// and missing here, or one here that the mixin lacks, fails the typecheck.
+const GAME_STATE_MIXIN_KEYS: ReadonlySet<string> = new Set(Object.keys({
+  millisecondsRemaining: true,
+  start: true,
+  end: true,
+  firstPlayer: true,
+  winner: true,
+  difficulty: true,
+  numberOfTries: true,
+  numberOfLoss: true,
+  winningStreak: true,
+  points: true,
+  liveResults: true,
+} satisfies Record<keyof GameStateMixin, true>));
+
+/// A starting position arrives as a move argument and is merged into `G`, so
+/// it must be an object naming only the game's own keys: one naming a mixin
+/// key would rewrite the score or the clock.
+export function isOwnGameState(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    && Object.keys(value).every(key => !GAME_STATE_MIXIN_KEYS.has(key));
+}
+
 /// What winning twice in a row earns, by the live games lost before: the last
 /// entry stands for that many losses or more. A team that never wins twice in
 /// a row scores 0.
@@ -68,18 +92,20 @@ export interface PossibleMove {
   move: string;
   args?: unknown[];
 }
-export type StartingPositionFunction<G> = (_: { G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: RandomAPI }) => G;
+
+/// What a bot answers in the `startNewGame` phase: the opening position of the
+/// next game, which only the game's own half of the state may make up.
+export type StartingPositionMove<G> = [[G], 'setStartingPosition'];
+
+export function startingPositionMove<G>(position: G): StartingPositionMove<G> {
+  return [[position], 'setStartingPosition'];
+}
 
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState
 interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
-  // Not called: gameWrapper only tests that the key exists, and a game that
-  // defines it skips the bot's `setStartingPosition` and starts without a
-  // fresh opening position (#35). The bot sending that move is the working
-  // route; see README.md, *Creating a new game*.
-  startingPosition?: StartingPositionFunction<G>;
 }
 
 /// Base structure, passed through directly to boardgame.io.

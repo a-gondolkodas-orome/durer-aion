@@ -1,7 +1,7 @@
-// The supply-chain cooldown, as the two dependency scripts see it. `.npmrc` sets `min-release-age`,
+// The supply-chain cooldown, as dependency-report.mjs sees it. `.npmrc` sets `min-release-age`,
 // so npm resolves nothing published more recently than that — docs/DEPENDENCIES.md says why. A
-// script proposing a younger version would only send the maintainer into an `npm install` that
-// fails, so both read the same number from the same file and propose what npm will install.
+// report or a sweep proposing a younger version would only send the maintainer into an
+// `npm install` that fails, so both read the number from that file and propose what npm will install.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -15,10 +15,21 @@ export const minReleaseAge = () => parseMinReleaseAge(readFileSync(`${repoRoot}.
 
 const STABLE = /^(\d+)\.(\d+)\.(\d+)$/;
 
+// An exact stable version, the only kind this repo pins (`.npmrc` save-exact).
+export const isStable = version => STABLE.test(version);
+
 // Numeric over the three parts; only meaningful for exact stable versions, the only kind pinned here.
 export const compareStable = (a, b) => {
   const [aParts, bParts] = [a, b].map(version => version.split('.').map(Number));
   return aParts[0] - bParts[0] || aParts[1] - bParts[1] || aParts[2] - bParts[2];
+};
+
+// Newest stable release sharing `current`'s major, or undefined when `current` is not an exact
+// stable version or no release qualifies — the caller reports that rather than swallow it.
+export const newestWithinMajor = (versions, current) => {
+  const major = current.match(STABLE)?.[1];
+  if (major === undefined) return undefined;
+  return versions.filter(version => version.match(STABLE)?.[1] === major).sort(compareStable).at(-1);
 };
 
 // The versions old enough to install, from a full packument's `time` map — which also carries
@@ -29,13 +40,11 @@ export const matureVersions = (time, days, now) => Object.entries(time)
 
 // What `latest` means under the cooldown: the dist-tag when it is old enough, otherwise the newest
 // stable version below it that is. Never below `current`, so a pin taken deliberately inside the
-// window (DEPENDENCIES.md says when) does not read as behind its own predecessor. Answers
-// `{ latest, cooling }`, where `cooling` is the dist-tag held back, if one was.
+// window (DEPENDENCIES.md says when) does not read as behind its own predecessor.
 export const newestMature = ({ current, distLatest, mature }) => {
-  if (mature.includes(distLatest)) return { latest: distLatest };
+  if (mature.includes(distLatest)) return distLatest;
   const below = mature.filter(version => compareStable(version, distLatest) < 0).sort(compareStable).at(-1);
-  const latest = below === undefined || (STABLE.test(current) && compareStable(below, current) < 0) ? current : below;
-  return { latest, cooling: distLatest };
+  return below === undefined || (STABLE.test(current) && compareStable(below, current) < 0) ? current : below;
 };
 
 const registry = async (name, abbreviated) => {
@@ -59,16 +68,15 @@ const limited = async task => {
   }
 };
 
-// Every version of `name`, the `latest` dist-tag, and the versions old enough to install. Only the
+// The `latest` dist-tag of `name`, and the versions old enough to install. Only the
 // abbreviated packument is fetched when its `modified` is outside the window — nothing in it can be
 // too new then — and the full one, the only one carrying publish times, only when it is not.
 export const releases = async (name, days = minReleaseAge(), now = Date.now()) => {
   const abbreviated = await registry(name, true);
-  const versions = Object.keys(abbreviated.versions);
   const distLatest = abbreviated['dist-tags'].latest;
   if (days === 0 || Date.parse(abbreviated.modified) <= now - days * DAY) {
-    return { versions, distLatest, mature: versions };
+    return { distLatest, mature: Object.keys(abbreviated.versions) };
   }
   const { time } = await limited(() => registry(name, false));
-  return { versions, distLatest, mature: matureVersions(time, days, now) };
+  return { distLatest, mature: matureVersions(time, days, now) };
 };

@@ -69,7 +69,7 @@ four-year downgrade of it. Don't build toward replacing boardgame.io either (#27
 
 [`README.md`](README.md) is the authority — *Getting Started* for the stack in
 four commands and the reloading setup without docker, *The checks CI runs* for
-the seven gates. `npm run check` is the six that need no docker, cheapest first,
+the eight gates. `npm run check` is the six that need no docker or browser, cheapest first,
 and is what to run before pushing. All of it covers `apps/strategy-practice`
 too; `npm test --workspace=strategy-practice` is that app's suite alone. Every
 long docker invocation lives in a root npm script rather than in prose, so it is
@@ -87,8 +87,9 @@ whether the change is safe, and both fail late if you get them wrong:
 
 - **No `index.ts` barrel, and nothing shared between the bot and the board
   outside `game.ts`.** A helper beside them is a file the `game/bot` entry and
-  the client entry have in common, which `packages/game/src/entries.test.ts`
-  reads as the bot reaching the served bundle
+  the client entry have in common. ESLint allows a game folder's `game.ts`,
+  `board.tsx` and `main.tsx` no import from beside them but `./game` and
+  `./board`, and only `strategy-bots.ts` may import a bot (`eslint.config.mjs`)
 - **The live client must not ship the bot.** ESLint forbids the `game/bot`
   specifier everywhere but the server and the offline dry run — the dry run
   imports it on purpose, since its bot runs in the browser after the game is

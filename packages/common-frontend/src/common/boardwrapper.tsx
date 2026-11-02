@@ -40,8 +40,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const finished = msRemaining < - 5000 || ctx.gameover === true
     const achievable = t('general.points', { count: strategyPoints(G.numberOfLoss) });
     // The judge is the bot, so its turn is a wait rather than a move to offer.
-    // It takes one outside `play` too: in a game without a fixed
-    // `startingPosition`, the judge sets the opening position of each new game.
+    // It takes one outside `play` too: it sets the opening position of each
+    // new game.
     const judgeToMove = ctx.currentPlayer === JUDGE_PLAYER;
     return (
       <>

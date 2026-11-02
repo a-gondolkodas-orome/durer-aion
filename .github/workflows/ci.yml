@@ -91,3 +91,24 @@ jobs:
       # one `npm run stack:prod` builds.
       - name: Build the deployed images
         run: npm run stack:build
+
+  site-smoke:
+    name: site-smoke
+    runs-on: ubuntu-latest
+    # Three app builds and a browser download; the pages themselves take seconds.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The headless shell alone: smoke-site.mjs launches headless, and the full Chromium is
+      # a second download nothing here would run.
+      - name: Install the browser for the pinned Playwright
+        run: npx playwright install --with-deps --only-shell chromium
+      # The deploy's own script, so this is the artifact a merge would publish. pages-deploy.yml
+      # runs the same smoke test before it uploads; this is the same check a merge earlier.
+      - run: npm run site:build
+      - run: npm run site:smoke

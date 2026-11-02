@@ -2,8 +2,8 @@ import { describe, test, afterEach, beforeEach, expect, vi, type MockInstance } 
 import { gameWrapper, isMakeMovePayloadReadOnly, LATE_MOVE_GRACE_MS } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
-  createGameWithoutStartingPosition,
-  createGameWithMoveWithoutStartingPosition,
+  createGameWithWinAndLose,
+  createGameWithMove,
 } from "./game_for_testing";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints, type GameType } from "./types";
 
@@ -11,16 +11,14 @@ describe("gameWrapper", () => {
   const setup = vi.fn();
 
   const move = vi.fn();
-  const startingPosition = vi.fn();
   const wrappedGame = gameWrapper(
-    createGameWithMoveWithoutStartingPosition(setup, move)
+    createGameWithMove(setup, move)
   );
 
   beforeEach(() => {
     vi.resetAllMocks();
 
     setup.mockReturnValue({ data: "setup" });
-    startingPosition.mockReturnValue({ data: "startingPosition" });
   });
 
   test("whether client calls into wrapped setup", () => {
@@ -45,6 +43,40 @@ describe("gameWrapper", () => {
 
     expect(client.getState()?.ctx.phase).toStrictEqual("chooseRole");
     expect(client.getState()?.G.data).toStrictEqual("startingPosition");
+  });
+
+  test.each([
+    ["a mixin key", { data: "startingPosition", points: 12 }],
+    ["an array", ["startingPosition"]],
+    ["no object", "startingPosition"],
+    ["null", null],
+  ])("the bot's starting position may not be %s", (_, position) => {
+    // boardgame.io reports every move it rejects on the console.
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+
+    client.moves.setStartingPosition(position);
+
+    expect(rejected).toHaveBeenCalledOnce();
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(JUDGE_PLAYER);
+    expect(client.getState()?.G.data).toStrictEqual("setup");
+    expect(client.getState()?.G.points).toStrictEqual(0);
+    rejected.mockRestore();
+  });
+
+  test("only the bot may set the starting position", () => {
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
+    expect(rejected).toHaveBeenCalledOnce();
+    expect(client.getState()?.G.data).toStrictEqual("setup");
+    rejected.mockRestore();
   });
 
   test("chooseRole", () => {
@@ -79,7 +111,7 @@ describe("gameWrapper", () => {
 
 describe("gameWrapper high-level logic", () => {
   const setup = () => ({ data: "asd" });
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(setup));
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(setup));
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -146,7 +178,7 @@ describe("gameWrapper high-level logic", () => {
   test("reports the end of each round with the current points", () => {
     const reports: { phase: string; points: number }[] = [];
     const client = Client({
-      game: gameWrapper(createGameWithoutStartingPosition(setup), (report) => {
+      game: gameWrapper(createGameWithWinAndLose(setup), (report) => {
         reports.push({ phase: report.phase, points: report.G.points });
       }),
       numPlayers: 2,
@@ -227,7 +259,7 @@ describe("gameWrapper high-level logic", () => {
 });
 
 describe("gameWrapper clock", () => {
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "asd" })));
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(() => ({ data: "asd" })));
 
   afterEach(() => {
     vi.useRealTimers();
@@ -403,7 +435,7 @@ describe("gameWrapper deadline", () => {
 });
 
 describe("gameWrapper move guards", () => {
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "setup" })));
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(() => ({ data: "setup" })));
 
   // Every test here provokes a move boardgame.io rejects, and it reports every
   // one of those on the console, so each takes the message it causes rather
@@ -453,7 +485,7 @@ describe("gameWrapper move guards", () => {
 });
 
 describe("gameWrapper move log", () => {
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "asd" })));
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(() => ({ data: "asd" })));
   const timeOfMoves = new Date("2026-11-14T09:30:00.000Z");
 
   beforeEach(() => {
