@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
@@ -106,29 +106,51 @@ const gameState = (points: number, end: string | Date): MatchStateDto => ({
 
 const inAnHour = () => new Date(Date.now() + 60 * 60 * 1000);
 
+const total = () => screen.getByTestId('teamTotal');
+
 // The list's score is `G.points` as of the list; an answer judged just past
 // the end can raise it while the dialog is open.
 test('the team dialog totals the game\'s points as it fetches them, not the list\'s score', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
-  expect(await screen.findByText('Összesen: 7 pont')).toBeInTheDocument();
+  await waitFor(() => expect(total()).toHaveTextContent('7 pont'));
   expect(repo.getMatchState).toHaveBeenCalledOnce();
 });
 
-test('the team dialog shows no total while a match is in progress', async () => {
+test('the team dialog shows the total so far as not final while a match is in progress', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
 
-  expect(await screen.findByText('pontszám: 4')).toBeInTheDocument();
-  expect(screen.getByText('Összesen: ? pont')).toBeInTheDocument();
+  await waitFor(() => expect(total()).toHaveTextContent('4 pont'));
+  expect(screen.getByText('nem végleges')).toBeInTheDocument();
+  expect(screen.getByText('váltó 4, még tart + stratégia 0 (nem kezdte el)')).toBeInTheDocument();
+});
+
+test('the team dialog calls the total final once both matches have finished', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(6, LATER));
+  const finished = (matchID: string) => ({ state: 'FINISHED' as const, matchID, startAt: new Date(EARLIER), endAt: new Date(LATER), score: 6 });
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch: finished('relay-match'), strategyMatch: finished('strategy-match') }]);
+  renderAdmin(alpha.teamId);
+
+  await waitFor(() => expect(total()).toHaveTextContent('12 pont'));
+  expect(screen.getByText('Összesen')).toBeInTheDocument();
+  expect(screen.queryByText('nem végleges')).not.toBeInTheDocument();
+});
+
+test('the team dialog says when neither match has started', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('még egyik fordulót sem kezdték el')).toBeInTheDocument();
+  expect(total()).toHaveTextContent('0 pont');
 });
 
 test('the team dialog totals the list\'s score when the match state cannot be fetched', async () => {
   vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5 });
 
-  expect(await screen.findByText('Összesen: 5 pont')).toBeInTheDocument();
+  await waitFor(() => expect(total()).toHaveTextContent('5 pont'));
 });
 
 // A failed request used to render exactly like one still loading: nothing.
@@ -145,9 +167,59 @@ test('a refused logs request is reported', async () => {
   vi.spyOn(repo, 'getMatchLogs').mockRejectedValue(new Error('Váratlan hiba történt'));
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
 
-  fireEvent.click(await screen.findByText('logok Lekérése'));
+  fireEvent.click(await screen.findByText('Logok lekérése'));
 
   expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
+});
+
+test('the team dialog names the page the team is on', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, pageState: 'DISCLAIMER' }]);
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('Tájékoztató oldalon')).toBeInTheDocument();
+  expect(screen.getByText('DISCLAIMER')).toBeInTheDocument();
+});
+
+test('a match that has not started cannot be reset', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 7 });
+
+  expect(await screen.findByRole('button', { name: 'Váltó reset' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Stratégia reset' })).toBeDisabled();
+});
+
+// A live game counts as a try when it starts and is recorded when it ends.
+test('the team dialog says which live strategy game is still being played', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue({
+    ...gameState(0, inAnHour()),
+    G: { points: 0, end: inAnHour().toISOString(), numberOfTries: 4, liveResults: ['lost', 'won', 'lost'] } as MatchStateDto['G'],
+  });
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{
+    ...alpha,
+    strategyMatch: { state: 'IN PROGRESS', matchID: 'strategy-match', startAt: new Date(EARLIER), endAt: inAnHour() },
+  }]);
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('A 4. játszma most tart, a táblázatba a végén kerül be.')).toBeInTheDocument();
+});
+
+test('a team\'s own tab is titled with its name and links back to the list', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByRole('heading', { level: 1, name: 'Alpha' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Admin felület' })).toHaveAttribute('href', '/admin');
+});
+
+test('the team dialog opened from the list keeps the page\'s own title', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+
+  fireEvent.click(await screen.findByText('Szerkesztés'));
+
+  expect(await screen.findByRole('heading', { level: 2, name: 'Alpha' })).toBeInTheDocument();
+  expect(screen.getByText('Admin felület')).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: 'Admin felület' })).not.toBeInTheDocument();
 });
 
 test('the team dialog shows the email and the join code only on request, each on its own', async () => {

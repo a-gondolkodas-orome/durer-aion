@@ -75,7 +75,8 @@ export function Admin(props: { teamId?: string }) {
           {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
-      <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+      {/* A team's own tab is titled with the team's name, by the dialog. */}
+      {!teamFromPath && <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
         <IconButton
           onClick={() => setAdminPageOpen(!adminPageOpen)}
           size="large"
@@ -84,9 +85,9 @@ export function Admin(props: { teamId?: string }) {
           {adminPageOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
         </IconButton>
         <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
-      </Stack>
+      </Stack>}
+      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} page/>}
       {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
         {showTeams && <Stack sx={{
           height: "635px",
         }}>
