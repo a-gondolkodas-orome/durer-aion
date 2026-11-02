@@ -141,6 +141,7 @@ function ResultTable(props: {
  * `details` it also has a time row and the details on hover, and with
  * `answers` the admin's row of every answer given. A match still running
  * names its `current` problem, which has not ended yet, nor have those after it.
+ * `lng` holds the table to one language whatever the page's is.
  */
 export function RelayResultsTable(props: {
   problems: RelayProblemResult[],
@@ -148,8 +149,9 @@ export function RelayResultsTable(props: {
   answers?: number[][],
   current?: number,
   transposeOnPhone?: boolean,
+  lng?: string,
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, { lng: props.lng });
   // A problem's points: still in play, not reached yet, solved on some try,
   // every try wrong, or never answered.
   const pointsCell = (problem: RelayProblemResult, idx: number): Cell => {
@@ -237,9 +239,9 @@ const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string 
   unfinished: { icon: <HourglassEmptyIcon fontSize="small" sx={{ color: '#666' }}/>, background: UNANSWERED },
 };
 
-/** The latest live strategy games' results, in the order played. */
-export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
-  const { t } = useTranslation();
+/** The latest live strategy games' results, in the order played; `lng` as for RelayResultsTable. */
+export function StrategyGamesTable(props: { results: LiveGameResult[], lng?: string }) {
+  const { t } = useTranslation(undefined, { lng: props.lng });
   if (props.results.length === 0) {
     return null;
   }
