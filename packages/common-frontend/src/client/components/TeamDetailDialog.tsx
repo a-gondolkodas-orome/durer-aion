@@ -22,10 +22,6 @@ import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 type MatchKind = 'relay' | 'strategy';
 
-// The admin pages are written in Hungarian, so the result tables they share
-// with the teams' screens stay in Hungarian when the page's language is not.
-const ADMIN_LANGUAGE = 'hu';
-
 const BORDER = '#e6e0c8';
 const DIVIDER = '#efe9d4';
 const MUTED = '#5f6368';
@@ -331,13 +327,13 @@ function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
       <Fact label="Pontszám">{data.G.points}</Fact>
     </Box>
     {relayG && <Stack sx={{ gap: '10px' }}>
-      <RelayResultsTable problems={relayProblemResults(relayG)} details transposeOnPhone lng={ADMIN_LANGUAGE}
+      <RelayResultsTable problems={relayProblemResults(relayG)} details transposeOnPhone
         answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}
         current={inProgress ? relayG.currentProblem : undefined}/>
       <RelayLegend/>
     </Stack>}
     {strategyG && (strategyG.liveResults.length > 0 || gameInPlay) && <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
-      <StrategyGamesTable results={strategyG.liveResults} lng={ADMIN_LANGUAGE}/>
+      <StrategyGamesTable results={strategyG.liveResults}/>
       {gameInPlay && <Box sx={{ fontSize: 13, color: MUTED }}>
         A {strategyG.numberOfTries}. játszma most tart, a táblázatba a végén kerül be.
       </Box>}

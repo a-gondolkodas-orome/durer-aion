@@ -119,6 +119,16 @@ test('a team away from /admin still gets its own page', () => {
   expect(queryByTestId('adminRoot')).not.toBeInTheDocument();
 });
 
+// The admin pages are written in Hungarian only; switching to English turned
+// the header and the team dialog's result tables English, and nothing else.
+test('the admin page offers no language switcher', () => {
+  window.history.replaceState({}, '', '/admin');
+
+  const { queryByText } = renderMain();
+
+  expect(queryByText('Magyar')).not.toBeInTheDocument();
+});
+
 // MUI's default `maxWidth="lg"` caps a Container at the theme's lg breakpoint,
 // 1280px, overriding the 1200px in its sx: at 1280px the page then had no side
 // margin at all (#112).
