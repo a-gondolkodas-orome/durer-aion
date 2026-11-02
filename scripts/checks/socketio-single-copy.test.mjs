@@ -32,7 +32,9 @@ describe('the socket.io that serves the round', () => {
       installs.length,
       `socket.io is installed more than once:\n${where}\n`
       + 'The nested copy is the one boardgame.io serves matches with. Point it at the declared '
-      + 'version through the `overrides` block in the root package.json.'
+      + 'version through the `overrides` block in the root package.json. If the block is there '
+      + 'already, a bumped pin left the hoisted copy on the old version: `npm update socket.io` '
+      + 're-resolves the override\'s range onto the pin.'
     ).toBe(1);
   });
 
