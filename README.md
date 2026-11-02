@@ -462,9 +462,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
   a "pick two values, then commit" turn.
 - **`strategy.ts`** exports `strategyWrapper(category)`, returning
   `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
-  with `setStartingPosition` and the opening position — the bot is the only
-  source of it in both live games. `GameType.startingPosition` is typed but
-  `gameWrapper` never calls it (#35), so do not use it. `[undefined, moveName]`
+  with `startingPositionMove(position)` — the bot is the only source of the
+  opening position, which may name the game's own keys only. `[undefined, moveName]`
   makes the bot play a random move from `possibleMoves`.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the
