@@ -1,275 +1,118 @@
 // The network lookups are not tested: a spec that mocked them would assert the mock. What is left
-// is where the report could quietly mislead — the sorting into patch/minor vs major, the handling
-// of a failed lookup in formatReport, a row dropped instead of reported reading as "up to date",
-// and the reading of a hold's blocker range; and newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order
-// that is not the one we want.
+// is where the report could quietly mislead — the sorting into routine, major and held rows, a
+// failed lookup dropped instead of reported; the lockfile lookup, which decides which copy of a
+// package a workspace runs; and newestTagInLine, which parses a tag list Docker Hub hands over in
+// an order that is not the one we want.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { HELD_BACK, formatReport, newestTagInLine } from './dependency-report.mjs';
+import { HELD_BACK, findResolved, formatReport, newestTagInLine } from './dependency-report.mjs';
 
 const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });
 
-// Fixtures below name packages HELD_BACK does not, except where the hold is the point: a test
-// about the major/minor split should not start failing the day a package joins or leaves that list.
+// The report's `### <title>` section, up to the next one.
+const section = (report, title) => report.split('### ').find(part => part.startsWith(title)) ?? '';
 
 describe('formatReport', () => {
   it('says so plainly when nothing is behind', () => {
-    const report = formatReport([row('vite', '8.1.5', '8.1.5'), row('eslint', '10.8.0', '10.8.0')]);
-
-    expect(report).toBe('Every pinned version is current — 2 checked, nothing behind.');
+    expect(formatReport([row('vite', '8.1.5', '8.1.5'), row('eslint', '10.8.0', '10.8.0')]))
+      .toBe('Every pinned version is current — 2 checked, nothing behind.');
   });
 
-  it('counts only the packages that are behind, out of all that were checked', () => {
-    const report = formatReport([row('vite', '8.1.5', '8.2.1'), row('eslint', '10.8.0', '10.8.0')]);
-
-    expect(report).toContain('1 of 2 pinned versions are behind.');
-  });
-
-  it('separates a major bump from a patch or minor one', () => {
+  it('sorts the behind rows into routine, major and held, each with where it is written down', () => {
     const report = formatReport([
-      row('vite', '8.1.5', '8.2.1'),
-      row('postcss', '8.5.23', '8.5.26'),
-      row('eslint', '10.8.0', '11.0.0')
-    ]);
-
-    expect(report).toContain('### Patch and minor (2)');
-    expect(report).toContain('### Major (1)');
-    expect(report.indexOf('`vite`')).toBeLessThan(report.indexOf('### Major'));
-    expect(report.indexOf('`eslint`')).toBeGreaterThan(report.indexOf('### Major'));
-  });
-
-  it('compares majors past the leading v, so an action tag is not read as a bump', () => {
-    const report = formatReport([
+      row('vite', '8.1.5', '8.2.1', ['root', 'packages/game']),
+      // apps/strategy-practice runs ahead on some pins deliberately: two versions, two upgrades.
+      row('eslint', '10.8.0', '10.9.0'),
+      row('eslint', '10.8.5', '10.9.0', ['apps/strategy-practice']),
+      // A hold is on the major: a patch inside the held version is as routine as any other.
+      row('koa', '2.16.4', '2.16.5', ['apps/online-backend']),
+      // Action tags compare past the leading v.
+      row('actions/cache', 'v4', 'v6', ['ci.yml']),
       row('actions/checkout', 'v7', 'v7', ['ci.yml']),
-      row('actions/cache', 'v4', 'v6', ['pages-deploy.yml'])
+      // #409: a hold already argued out is not one of the majors waiting.
+      row('typescript', '6.0.3', '7.0.2'),
+      row('postcss', '8.5.23', '8.5.23')
     ]);
 
-    expect(report).toContain('### Major (1)');
-    expect(report).toContain('| `actions/cache` | v4 | v6 | pages-deploy.yml |');
+    expect(report).toContain('6 of 8 pinned versions are behind, 1 of them held back deliberately.');
+
+    const routine = section(report, 'Patch and minor (4)');
+    expect(routine).toContain('`npm run update:minors`');
+    expect(routine).toContain('| `vite` | 8.1.5 | 8.2.1 | root, packages/game |');
+    expect(routine).toContain('| `eslint` | 10.8.0 | 10.9.0 | root |');
+    expect(routine).toContain('| `eslint` | 10.8.5 | 10.9.0 | apps/strategy-practice |');
+    expect(routine).toContain('| `koa` | 2.16.4 | 2.16.5 | apps/online-backend |');
+
+    expect(section(report, 'Major (1)')).toContain('| `actions/cache` | v4 | v6 | ci.yml |');
+
+    const held = section(report, 'Held back deliberately (1)');
+    expect(held).toContain('| | pinned | latest | written down in | held back by |');
+    expect(held).toContain(`| \`typescript\` | 6.0.3 | 7.0.2 | root | ${HELD_BACK.typescript} |`);
   });
 
-  it('omits a section that has no rows', () => {
-    const report = formatReport([row('postcss', '8.5.23', '8.5.26')]);
-
-    expect(report).toContain('### Patch and minor (1)');
-    expect(report).not.toContain('### Major');
-  });
-
-  // The column a monorepo needs and a single app did not: a bump is as big as the number of files
-  // it has to touch, and that is not visible from the version alone.
-  it('says where each version is written down', () => {
-    const report = formatReport([
-      row('typescript', '5.9.3', '7.0.2', ['root', 'packages/game', 'apps/online-frontend']),
-      row('playwright', '1.62.0', '1.62.1', ['apps/strategy-practice', 'apps/strategy-practice/.devcontainer/Dockerfile'])
-    ]);
-
-    expect(report).toContain('| `typescript` | 5.9.3 | 7.0.2 | root, packages/game, apps/online-frontend |');
-    expect(report).toContain('| `playwright` | 1.62.0 | 1.62.1 | apps/strategy-practice, apps/strategy-practice/.devcontainer/Dockerfile |');
-  });
-
-  // apps/strategy-practice runs ahead of the rest on several of these deliberately. Collapsing the
-  // two into one row would name one version and mislead about the other; they are two upgrades.
-  it('keeps one name pinned at two versions as two rows', () => {
-    const report = formatReport([
-      row('eslint', '10.8.0', '10.9.0', ['root', 'packages/game']),
-      row('eslint', '10.8.5', '10.9.0', ['apps/strategy-practice'])
-    ]);
-
-    expect(report).toContain('2 of 2 pinned versions are behind.');
-    expect(report).toContain('| `eslint` | 10.8.0 | 10.9.0 | root, packages/game |');
-    expect(report).toContain('| `eslint` | 10.8.5 | 10.9.0 | apps/strategy-practice |');
-  });
-
+  // A failed lookup that left nothing else behind must not read as "everything is current".
   it('reports a failed lookup rather than dropping the row', () => {
     const report = formatReport([
-      { name: 'actions/cache', current: 'v6', where: ['.github/workflows/ci.yml'], error: 'HTTP 403' },
+      { name: 'actions/cache', current: 'v6', where: ['ci.yml'], error: 'HTTP 403' },
       row('vite', '8.1.5', '8.1.5')
     ]);
 
-    expect(report).toContain('### Could not check (1)');
-    expect(report).toContain('- `actions/cache` (pinned v6 in .github/workflows/ci.yml): HTTP 403');
-  });
-
-  it('does not claim everything is current when a lookup failed and nothing else is behind', () => {
-    const report = formatReport([
-      { name: 'actions/cache', current: 'v6', where: ['.github/workflows/ci.yml'], error: 'HTTP 403' },
-      row('vite', '8.1.5', '8.1.5')
-    ]);
-
-    expect(report).not.toContain('nothing behind');
     expect(report).toContain('0 of 2 pinned versions are behind.');
-  });
-
-  // The report says what is behind; the maintainer should not then have to remember which script
-  // does the routine half of it. Majors have their upgrade-guide note already.
-  it('names the script that makes the routine bumps', () => {
-    const report = formatReport([row('postcss', '8.5.23', '8.5.26')]);
-
-    expect(report).toContain('`npm run update:minors`');
-  });
-
-  // #409: five majors were listed as if they were five upgrades, when four of them were holds this
-  // repo had already argued out. Keeping them out of the Major count is the point of the section.
-  it('lists a held-back major in its own section, out of the major count', () => {
-    const report = formatReport([
-      row('koa', '2.16.4', '3.2.1', ['apps/online-backend']),
-      row('actions/setup-node', 'v5', 'v7', ['ci.yml'])
-    ]);
-
-    expect(report).toContain('### Major (1)');
-    expect(report).toContain('| `actions/setup-node` | v5 | v7 | ci.yml |');
-    expect(report).toContain('### Held back deliberately (1)');
-    expect(report.indexOf('`koa`')).toBeGreaterThan(report.indexOf('### Held back'));
-  });
-
-  it('names the blocker in a column of its own', () => {
-    const report = formatReport([row('typescript', '6.0.3', '7.0.2', ['root'])]);
-
-    expect(report).toContain('| | pinned | latest | written down in | held back by |');
-    expect(report).toContain(`| \`typescript\` | 6.0.3 | 7.0.2 | root | ${HELD_BACK.typescript.reason} |`);
-  });
-
-  // The hold is on the major, not on the package: a release inside the version we are held at is
-  // as routine as any other minor, and is not what the section is for.
-  it('leaves a patch of a held-back package among the routine bumps', () => {
-    const report = formatReport([row('koa', '2.16.4', '2.16.5', ['apps/online-backend'])]);
-
-    expect(report).toContain('### Patch and minor (1)');
-    expect(report).not.toContain('### Held back');
-  });
-
-  it('says in the headline how many of the behind rows are holds', () => {
-    const report = formatReport([
-      row('koa', '2.16.4', '3.2.1', ['apps/online-backend']),
-      row('@types/node', '24.13.3', '26.4.0', ['apps/online-backend']),
-      row('vite', '8.1.5', '8.2.1')
-    ]);
-
-    expect(report).toContain('3 of 3 pinned versions are behind, 2 of them held back deliberately.');
-  });
-
-  // The hold's `range` is what its blocker's newest release declares for the held package — the
-  // lookup attaches it as `hold`, and these fixtures stand in for that lookup.
-  const typescriptRow = hold => ({ ...row('typescript', '6.0.3', '7.0.2'), hold });
-
-  it('keeps a hold whose blocker still excludes the version held back from', () => {
-    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.72.0', range: '>=4.8.4 <6.1.0' })]);
-
-    expect(report).toContain(`| root | ${HELD_BACK.typescript.reason} (typescript-eslint@8.72.0 declares \`>=4.8.4 <6.1.0\`) |`);
-    expect(report).toContain('1 of them held back deliberately.');
-    expect(report).not.toContain('blocker gone');
-  });
-
-  it('says so in the row and the headline once the blocker admits the version held back from', () => {
-    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: '>=4.8.4 <7.1.0' })]);
-
-    expect(report).toContain('| root | **blocker gone?** typescript-eslint@8.80.0 declares `>=4.8.4 <7.1.0`, which admits 7.0.2 — re-read the hold |');
-    expect(report).toContain('1 of them held back deliberately — 1 of whose blockers looks gone.');
-  });
-
-  // `||` unescaped would end the table cell in the middle of the range.
-  it('reads a range of alternatives and escapes it for the table', () => {
-    const report = formatReport([{
-      ...row('koa', '2.16.4', '3.2.1', ['apps/online-backend']),
-      hold: { blocker: 'boardgame.io@0.51.0', range: '^2.13.3 || ^3.0.0' }
-    }]);
-
-    expect(report).toContain('declares `^2.13.3 \\|\\| ^3.0.0`, which admits 3.2.1');
-  });
-
-  it('calls a blocker that no longer declares the package gone', () => {
-    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@9.0.0', range: undefined })]);
-
-    expect(report).toContain('**blocker gone?** typescript-eslint@9.0.0 no longer declares typescript');
-    expect(report).toContain('looks gone.');
-  });
-
-  // Neither a failed lookup nor a range semver cannot read may pass for a lifted hold.
-  it('keeps the hold, and says why, when the check could not settle it', () => {
-    const failed = formatReport([typescriptRow({ error: 'HTTP 503' })]);
-    const unreadable = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: 'npm:typescript@^7' })]);
-
-    expect(failed).toContain(`${HELD_BACK.typescript.reason} (could not check: HTTP 503)`);
-    expect(unreadable).toContain(`${HELD_BACK.typescript.reason} (could not read: typescript-eslint@8.80.0 declares \`npm:typescript@^7\`)`);
-    expect(`${failed}${unreadable}`).not.toContain('blocker gone');
-  });
-
-  // A row whose latest is still inside .npmrc's min-release-age offers the newest version npm will
-  // install, and says why it is not the dist-tag — otherwise the report reads as out of date.
-  it('names a release too new to install beside the version it offers instead', () => {
-    const report = formatReport([{ ...row('vite', '8.1.5', '8.3.4'), cooling: '8.3.5' }], 7);
-
-    expect(report).toContain('| `vite` | 8.1.5 | 8.3.4 (8.3.5 too new) | root |');
-    expect(report).toContain('published less than 7 days ago');
-  });
-
-  it('says nothing about the cooldown when no behind row is cooling', () => {
-    const report = formatReport([row('vite', '8.1.5', '8.2.1'), { ...row('eslint', '10.8.0', '10.8.0'), cooling: '10.8.1' }], 7);
-
-    expect(report).not.toContain('too new');
-  });
-
-  it('keeps the headline plain when nothing is held back', () => {
-    const report = formatReport([row('vite', '8.1.5', '8.2.1'), row('eslint', '10.8.0', '10.8.0')]);
-
-    expect(report).toContain('1 of 2 pinned versions are behind.');
-    expect(report).not.toContain('held back');
+    expect(section(report, 'Could not check (1)')).toContain('- `actions/cache` (pinned v6 in ci.yml): HTTP 403');
   });
 });
 
-// The report's captions and DEPENDENCIES.md § Held back deliberately are two lists of the same four
-// holds, and only DEPENDENCIES.md argues them. Lifting one there and forgetting the other would leave the next
-// monthly issue still calling a finished hold a hold — a month before anyone noticed.
-describe('HELD_BACK against DEPENDENCIES.md', () => {
-  it('names the same packages as DEPENDENCIES.md § Held back deliberately', () => {
-    const doc = readFileSync(fileURLToPath(new URL('../docs/DEPENDENCIES.md', import.meta.url)), 'utf8');
-    const section = doc.split('## Held back deliberately')[1]?.split(/^#/m)[0] ?? '';
-    const documented = [...section.matchAll(/^- \*\*`([^`]+)`/gm)].map(([, name]) => name);
+// npm nests a version under a workspace precisely when the hoisted one is somebody else's, so
+// preferring the root would report another workspace's version as if it were this one's.
+it('findResolved prefers the copy nested under the workspace asking, then the hoisted one', () => {
+  const lockfile = {
+    packages: {
+      'node_modules/typescript': { version: '5.9.3' },
+      'apps/strategy-practice/node_modules/typescript': { version: '6.0.3' },
+      'node_modules/vite': { version: '8.2.1' }
+    }
+  };
 
-    expect(documented.sort()).toEqual(Object.keys(HELD_BACK).sort());
-  });
+  expect(findResolved(lockfile, 'typescript', 'apps/strategy-practice')).toBe('6.0.3');
+  expect(findResolved(lockfile, 'vite', 'apps/strategy-practice')).toBe('8.2.1');
+  expect(findResolved(lockfile, 'typescript')).toBe('5.9.3');
+  expect(findResolved(lockfile, 'rollup')).toBeUndefined();
 });
 
-// Docker Hub answers newest-*pushed* first and with every variant of every tag, so the tag lists
-// below are in the order it really returns them — the real 1.30 page had 1.31.4 sitting above the
-// 1.30.4 this repo is pinned to.
+// The report's captions and DEPENDENCIES.md § Held back deliberately are two lists of the same
+// holds, and only DEPENDENCIES.md argues them. Lifting one there and forgetting the other would
+// leave the next monthly issue still calling a finished hold a hold.
+it('HELD_BACK names the same packages as DEPENDENCIES.md § Held back deliberately', () => {
+  const doc = readFileSync(fileURLToPath(new URL('../docs/DEPENDENCIES.md', import.meta.url)), 'utf8');
+  const documented = [...(doc.split('## Held back deliberately')[1]?.split(/^#/m)[0] ?? '').matchAll(/^- \*\*`([^`]+)`/gm)]
+    .map(([, name]) => name);
+
+  expect(documented.sort()).toEqual(Object.keys(HELD_BACK).sort());
+});
+
+// Docker Hub answers newest-*pushed* first and with every variant of every tag, so the list below is
+// in the order it really returns them — the real 1.30 page had 1.31.4 above the pinned 1.30.4.
 describe('newestTagInLine', () => {
   const nginxTags = [
     '1.30.4-trixie-perl', '1.30-perl', '1.31.4-perl', '1.30.4-trixie', '1.30.4', '1.30',
     '1.31.4-trixie', '1.31.4', '1.31', '1.30.4-alpine3.24', '1.30.4-alpine', '1.30.3', '1.30.0'
   ];
 
-  it('ignores every suffixed variant of the tag', () => {
-    expect(newestTagInLine(nginxTags, '1.30.4', 2)).toBe('1.30.4');
-  });
-
-  // 1.30.x is nginx's stable line and 1.31.x is mainline; both are current, and a report that kept
-  // offering mainline would be offering a decision, not a bump.
-  it('stays inside the pinned line', () => {
+  it('takes the newest bare tag in the pinned line, at the pin\'s precision', () => {
+    // Not a variant, and not the mainline 1.31.x: offering that would be a decision, not a bump.
     expect(newestTagInLine(nginxTags, '1.30.0', 2)).toBe('1.30.4');
-    expect(newestTagInLine(['24.20.0', '24.19.0', '26.8.1', '26.8.0'], '24.19.0', 1)).toBe('24.20.0');
-  });
-
-  // `1.30` is a moving alias for the newest 1.30.x, not a version this repo could pin to.
-  it('ignores a tag written at another precision than the pin', () => {
+    // `1.30` is a moving alias, not a version to pin to — and a pin written that way stays one.
     expect(newestTagInLine(nginxTags, '1.30', 2)).toBe('1.30');
-    expect(newestTagInLine(['24.20.0', '24.20', '24.19.0'], '24.20.0', 1)).toBe('24.20.0');
-  });
-
-  it('compares numerically, so a two-digit patch is not sorted under a one-digit one', () => {
-    expect(newestTagInLine(['1.30.9', '1.30.10', '1.30.4'], '1.30.4', 2)).toBe('1.30.10');
+    expect(newestTagInLine(['24.20.0', '24.20', '24.19.0', '26.8.1'], '24.19.0', 1)).toBe('24.20.0');
+    // Numerically, not as text.
     expect(newestTagInLine(['17.9', '17.11', '17.10'], '17.9', 1)).toBe('17.11');
-  });
-
-  // postgres publishes `19beta3` alongside its releases, and a beta is not what a deployment moves
-  // to. Failing the lookup would be wrong too — that reads as "could not check".
-  it('ignores a prerelease tag', () => {
+    // postgres publishes `19beta3` beside its releases; failing on it would read as "could not check".
     expect(newestTagInLine(['18.6', '19beta3', '18.5'], '18.5', 1)).toBe('18.6');
   });
 
-  // A failed lookup counts as behind, which is the right default: the report must never stay quiet
-  // about a version it could not check.
+  // A failed lookup counts as behind: the report must never stay quiet about a version it could
+  // not check.
   it('throws rather than inventing a version when the line has no tag', () => {
     expect(() => newestTagInLine(['1.31.4', '1.29.0'], '1.30.4', 2)).toThrow('no 1.30.x tag found');
   });

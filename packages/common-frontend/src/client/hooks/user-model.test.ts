@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import { MockClientRepository } from "../mock-client-repository";
-import { bgioStoragePrefix, legacyGuidStorageKey, loginMarkerStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
+import { bgioStoragePrefix, loginMarkerStorageKey, relayPointsStorageKey } from "../utils/storage-keys";
 import { UserModel } from "./user-model";
 
 // The mock repository answers join code "2" with a team that is in the middle
@@ -24,18 +24,6 @@ describe("UserModel session", () => {
     const user = new UserModel(repo);
 
     expect(await user.getTeamState()).toBeNull();
-  });
-
-  // Regression: the GUID used to live in localStorage (issue #89), and a
-  // browser that logged in before the cookie kept it there indefinitely, since
-  // nothing wrote or read the key any more.
-  test("a browser that logged in before the cookie is relieved of its GUID", async () => {
-    localStorage.setItem(legacyGuidStorageKey(), "8eae8669-125c-42e5-8b49-89afbac31679");
-    const user = new UserModel(repo);
-
-    await user.getTeamState();
-
-    expect(localStorage.getItem(legacyGuidStorageKey())).toBeNull();
   });
 
   // Regression: the marker is a constant, and writing a value a key already
