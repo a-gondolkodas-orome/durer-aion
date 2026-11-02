@@ -431,8 +431,8 @@ that before a competition.
    barrel re-exporting the bot next to the board would undo that. More files are
    fine — a bot can keep its lookup tables in a file beside it — but what the bot and
    the board *both* need goes in `game.ts`. A helper beside them is a file the
-   bot entry and the client entry have in common, which the walk below reads as
-   the bot reaching the served bundle, and fails.
+   bot entry and the client entry have in common, which the package's build reads
+   as the bot reaching the served bundle, and fails (`tsdown.config.mts`).
 
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:

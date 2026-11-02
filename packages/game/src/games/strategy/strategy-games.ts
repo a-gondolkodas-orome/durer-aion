@@ -4,7 +4,8 @@
 // boards and descriptions in strategy-client.ts (`game/client`), and each
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
-// live client again. entries.test.ts walks the three graphs to pin this.
+// live client again. The package's build checks the three graphs for this
+// (tsdown.config.mts).
 import type { CompetitionCategory } from "schemas";
 import { MyGameWrapper as GameWrapper20ocde } from "./20ocde/game";
 import type { MyGameState as GameState20ocde } from "./20ocde/game";
