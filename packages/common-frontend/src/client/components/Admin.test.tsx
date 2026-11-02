@@ -218,4 +218,5 @@ test('a single team\'s page has no tabs, not even while the list loads', async (
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   expect(await screen.findAllByText('Mutasd')).not.toHaveLength(0);
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Vissza' })).toHaveAttribute('href', '/admin');
 });

@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll } from '../hooks/user-hooks';
-import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Button, Dialog, Link, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
@@ -107,7 +107,10 @@ export function Admin(props: { teamId?: string }) {
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület</Stack>
-      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
+      {teamFromPath && <>
+        <Link href="/admin" sx={{ alignSelf: 'flex-start' }}>Vissza</Link>
+        <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>
+      </>}
       {teams && <>
       <Tabs
         value={tab}
