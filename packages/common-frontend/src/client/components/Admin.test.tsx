@@ -199,11 +199,23 @@ test('the tab named in the URL is the one that opens', async () => {
   expect(screen.getByRole('tab', { name: 'Statisztika' })).toHaveAttribute('aria-selected', 'true');
 });
 
-test('a single team\'s page has no tabs', async () => {
+test('each tab names the panel it controls, and the panel is labelled by its tab', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+
+  const tab = await screen.findByRole('tab', { name: 'Csapatok' });
+  const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
+  expect(panel).toHaveAttribute('role', 'tabpanel');
+  expect(panel).toHaveAttribute('aria-labelledby', tab.id);
+  expect(panel).toContainElement(screen.getByText('Alpha'));
+});
+
+test('a single team\'s page has no tabs, not even while the list loads', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, inAnHour()));
   renderAdmin(alpha.teamId);
 
+  expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   expect(await screen.findAllByText('Mutasd')).not.toHaveLength(0);
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
 });

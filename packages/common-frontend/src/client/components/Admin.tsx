@@ -41,6 +41,16 @@ function tabToUrl(tab: AdminTab) {
   window.history.replaceState(window.history.state, '', url);
 }
 
+// Both panels stay mounted, so the grid keeps its filter, sort and page while
+// the other tab is open. Not `display: none`: the DataGrid measures its parent
+// on every resize, and a zero width logs an error and lays it out for 0px.
+const panelProps = (panel: AdminTab, open: AdminTab) => ({
+  role: 'tabpanel',
+  id: `admin-panel-${panel}`,
+  'aria-labelledby': `admin-tab-${panel}`,
+  sx: panel === open ? {} : { visibility: 'hidden', height: 0, overflow: 'hidden' },
+});
+
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
@@ -52,7 +62,9 @@ export function Admin(props: { teamId?: string }) {
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
 
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
-  const showTeams = !teamFromPath;
+  // Until the list loads it is not known whether the path names a team, so
+  // neither the team nor the tabs show; an unknown team falls back to the list.
+  const teams = teamFromPath ? undefined : data;
 
   return (
     <Stack sx={{
@@ -96,7 +108,8 @@ export function Admin(props: { teamId?: string }) {
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
       <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület</Stack>
       {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
-      {showTeams && <Tabs
+      {teams && <>
+      <Tabs
         value={tab}
         onChange={(_, value: AdminTab) => {
           setTab(value);
@@ -104,16 +117,12 @@ export function Admin(props: { teamId?: string }) {
         }}
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tab label="Csapatok" value="csapatok"/>
-        <Tab label="Statisztika" value="statisztika"/>
-      </Tabs>}
-      {/* Both panels stay mounted, so the grid keeps its filter, sort and
-          page while the other tab is open. */}
-      {showTeams && <Stack role="tabpanel" aria-label="Csapatok" sx={{
-        display: tab === 'csapatok' ? 'flex' : 'none',
-      }}>
+        <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
+        <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
+      </Tabs>
+      <Stack {...panelProps('csapatok', tab)}>
         <Stack sx={{ height: "635px" }}>
-          {data && <DataGrid columns={[
+          <DataGrid columns={[
             {
               field: 'id',
               headerName: 'ID',
@@ -194,7 +203,7 @@ export function Admin(props: { teamId?: string }) {
               }
             }
           ]}
-          rows={data.map((a) => {
+          rows={teams.map((a) => {
             return {
               id: a.teamId,
               relayMatchState: a.relayMatch.state,
@@ -220,9 +229,9 @@ export function Admin(props: { teamId?: string }) {
           sx={{
             height: "auto",
           }}
-          />}
+          />
         </Stack>
-        {data && <Stack sx={{ padding: "10px" }}>
+        <Stack sx={{ padding: "10px" }}>
           idő hozzáadása minden aktív játékosnak:
           <Form
           initialValues={{ time: '' }}
@@ -237,7 +246,7 @@ export function Admin(props: { teamId?: string }) {
               text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
               confirm: async () => {
                 try {
-                  for (const a of data ?? []) {
+                  for (const a of teams) {
                     if (a.relayMatch.state === "IN PROGRESS") {
                       await addMinutes(a.relayMatch.matchID, values.time);
                     }
@@ -283,13 +292,12 @@ export function Admin(props: { teamId?: string }) {
             </Stack>
           )}/>
         </Form>
-        </Stack>}
-      </Stack>}
-      {showTeams && <Stack role="tabpanel" aria-label="Statisztika" sx={{
-        display: tab === 'statisztika' ? 'flex' : 'none',
-      }}>
-        {data && <Stats data={data}/>}
-      </Stack>}
+        </Stack>
+      </Stack>
+      <Stack {...panelProps('statisztika', tab)}>
+        <Stats data={teams}/>
+      </Stack>
+      </>}
     </Stack>
   )
 }
