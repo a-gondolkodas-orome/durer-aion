@@ -1,8 +1,8 @@
 // The registry lookups are not tested, for the reason dependency-report.test.mjs gives. What is left
-// is the part that decides which version a sweep proposes: reading the window from .npmrc, and
-// picking the newest release npm will actually install.
+// is the part that decides which version a sweep proposes: reading the window from .npmrc,
+// picking the newest release npm will actually install, and never crossing a major.
 import { describe, expect, it } from 'vitest';
-import { matureVersions, newestMature, parseMinReleaseAge } from './release-age.mjs';
+import { matureVersions, newestMature, newestWithinMajor, parseMinReleaseAge } from './release-age.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const now = Date.parse('2026-11-01T12:00:00Z');
@@ -60,5 +60,27 @@ describe('newestMature', () => {
       .toEqual({ latest: '8.3.5', cooling: '8.3.5' });
     expect(newestMature({ current: '8.3.5', distLatest: '8.3.6', mature: ['8.3.4'] }))
       .toEqual({ latest: '8.3.5', cooling: '8.3.6' });
+  });
+});
+
+// Picking the wrong version is where `update:minors` could quietly cross a major or drag a pin onto
+// a prerelease.
+describe('newestWithinMajor', () => {
+  it('picks the newest release of the pinned major, comparing numerically', () => {
+    expect(newestWithinMajor(['8.2.1', '8.2.2', '8.10.0', '8.9.9'], '8.2.1')).toBe('8.10.0');
+  });
+
+  it('never crosses the pinned major, a 0.x one included', () => {
+    expect(newestWithinMajor(['8.2.1', '9.0.0', '10.1.2'], '8.2.1')).toBe('8.2.1');
+    expect(newestWithinMajor(['0.50.2', '0.51.0', '1.0.0'], '0.50.2')).toBe('0.51.0');
+  });
+
+  it('skips prereleases even when they are newer', () => {
+    expect(newestWithinMajor(['8.2.1', '8.3.0-beta.1'], '8.2.1')).toBe('8.2.1');
+  });
+
+  it('answers undefined for a pin that is not an exact stable version', () => {
+    expect(newestWithinMajor(['8.2.1'], '^8.2.1')).toBeUndefined();
+    expect(newestWithinMajor(['8.2.1'], '8.2.1-rc.1')).toBeUndefined();
   });
 });

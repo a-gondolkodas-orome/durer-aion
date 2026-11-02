@@ -22,17 +22,13 @@ jobs:
         uses: actions/checkout@v7
         with:
           # This job's token can write issues, and a checkout would leave it in .git/config for
-          # every later step — the install below included — to read.
+          # every later step to read.
           persist-credentials: false
+      # No install: the script uses node builtins and nothing else, so no third-party code runs
+      # beside this job's token.
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-          cache: npm
-      # For semver, which reads the range a held-back package's blocker declares (HELD_BACK in
-      # dependency-report.mjs). No lifecycle scripts: nothing here needs one, and each would be
-      # third-party code running beside that token.
-      - name: Install
-        run: npm ci --ignore-scripts
       - name: Collect outdated versions
         id: report
         # stdout goes to the run summary, so a run stays readable whatever happens to the issue

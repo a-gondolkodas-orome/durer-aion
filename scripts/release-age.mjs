@@ -21,6 +21,14 @@ export const compareStable = (a, b) => {
   return aParts[0] - bParts[0] || aParts[1] - bParts[1] || aParts[2] - bParts[2];
 };
 
+// Newest stable release sharing `current`'s major, or undefined when `current` is not an exact
+// stable version or no release qualifies — the caller reports that rather than swallow it.
+export const newestWithinMajor = (versions, current) => {
+  const major = current.match(STABLE)?.[1];
+  if (major === undefined) return undefined;
+  return versions.filter(version => version.match(STABLE)?.[1] === major).sort(compareStable).at(-1);
+};
+
 // The versions old enough to install, from a full packument's `time` map — which also carries
 // `created` and `modified`, neither of them a version.
 export const matureVersions = (time, days, now) => Object.entries(time)

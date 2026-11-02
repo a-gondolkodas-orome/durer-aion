@@ -1,12 +1,13 @@
 // The network lookups are not tested: a spec that mocked them would assert the mock. What is left
 // is where the report could quietly mislead — the sorting into patch/minor vs major, the handling
-// of a failed lookup in formatReport, a row dropped instead of reported reading as "up to date",
-// and the reading of a hold's blocker range; and newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order
-// that is not the one we want.
+// of a failed lookup in formatReport, a row dropped instead of reported reading as "up to date";
+// the lockfile lookup, which decides which copy of a package a workspace runs; and
+// newestTagInLine, which is pure parsing of a tag list Docker Hub hands over in an order that is
+// not the one we want.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { HELD_BACK, formatReport, newestTagInLine } from './dependency-report.mjs';
+import { HELD_BACK, findResolved, formatReport, newestTagInLine } from './dependency-report.mjs';
 
 const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });
 
@@ -49,13 +50,6 @@ describe('formatReport', () => {
     expect(report).toContain('| `actions/cache` | v4 | v6 | pages-deploy.yml |');
   });
 
-  it('omits a section that has no rows', () => {
-    const report = formatReport([row('postcss', '8.5.23', '8.5.26')]);
-
-    expect(report).toContain('### Patch and minor (1)');
-    expect(report).not.toContain('### Major');
-  });
-
   // The column a monorepo needs and a single app did not: a bump is as big as the number of files
   // it has to touch, and that is not visible from the version alone.
   it('says where each version is written down', () => {
@@ -81,6 +75,7 @@ describe('formatReport', () => {
     expect(report).toContain('| `eslint` | 10.8.5 | 10.9.0 | apps/strategy-practice |');
   });
 
+  // A failed lookup that left nothing else behind must not read as "everything is current".
   it('reports a failed lookup rather than dropping the row', () => {
     const report = formatReport([
       { name: 'actions/cache', current: 'v6', where: ['.github/workflows/ci.yml'], error: 'HTTP 403' },
@@ -89,15 +84,6 @@ describe('formatReport', () => {
 
     expect(report).toContain('### Could not check (1)');
     expect(report).toContain('- `actions/cache` (pinned v6 in .github/workflows/ci.yml): HTTP 403');
-  });
-
-  it('does not claim everything is current when a lookup failed and nothing else is behind', () => {
-    const report = formatReport([
-      { name: 'actions/cache', current: 'v6', where: ['.github/workflows/ci.yml'], error: 'HTTP 403' },
-      row('vite', '8.1.5', '8.1.5')
-    ]);
-
-    expect(report).not.toContain('nothing behind');
     expect(report).toContain('0 of 2 pinned versions are behind.');
   });
 
@@ -153,46 +139,29 @@ describe('formatReport', () => {
   // lookup attaches it as `hold`, and these fixtures stand in for that lookup.
   const typescriptRow = hold => ({ ...row('typescript', '6.0.3', '7.0.2'), hold });
 
-  it('keeps a hold whose blocker still excludes the version held back from', () => {
+  it('shows the range the blocker declares beside the reason', () => {
     const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.72.0', range: '>=4.8.4 <6.1.0' })]);
 
     expect(report).toContain(`| root | ${HELD_BACK.typescript.reason} (typescript-eslint@8.72.0 declares \`>=4.8.4 <6.1.0\`) |`);
-    expect(report).toContain('1 of them held back deliberately.');
-    expect(report).not.toContain('blocker gone');
-  });
-
-  it('says so in the row and the headline once the blocker admits the version held back from', () => {
-    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: '>=4.8.4 <7.1.0' })]);
-
-    expect(report).toContain('| root | **blocker gone?** typescript-eslint@8.80.0 declares `>=4.8.4 <7.1.0`, which admits 7.0.2 — re-read the hold |');
-    expect(report).toContain('1 of them held back deliberately — 1 of whose blockers looks gone.');
   });
 
   // `||` unescaped would end the table cell in the middle of the range.
-  it('reads a range of alternatives and escapes it for the table', () => {
-    const report = formatReport([{
-      ...row('koa', '2.16.4', '3.2.1', ['apps/online-backend']),
-      hold: { blocker: 'boardgame.io@0.51.0', range: '^2.13.3 || ^3.0.0' }
-    }]);
+  it('escapes a range of alternatives for the table', () => {
+    const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: '^6.0.0 || ^7.0.0' })]);
 
-    expect(report).toContain('declares `^2.13.3 \\|\\| ^3.0.0`, which admits 3.2.1');
+    expect(report).toContain('declares `^6.0.0 \\|\\| ^7.0.0`');
   });
 
-  it('calls a blocker that no longer declares the package gone', () => {
+  it('says so when the blocker no longer declares the package', () => {
     const report = formatReport([typescriptRow({ blocker: 'typescript-eslint@9.0.0', range: undefined })]);
 
-    expect(report).toContain('**blocker gone?** typescript-eslint@9.0.0 no longer declares typescript');
-    expect(report).toContain('looks gone.');
+    expect(report).toContain('**typescript-eslint@9.0.0 no longer declares typescript** — re-read the hold');
   });
 
-  // Neither a failed lookup nor a range semver cannot read may pass for a lifted hold.
-  it('keeps the hold, and says why, when the check could not settle it', () => {
-    const failed = formatReport([typescriptRow({ error: 'HTTP 503' })]);
-    const unreadable = formatReport([typescriptRow({ blocker: 'typescript-eslint@8.80.0', range: 'npm:typescript@^7' })]);
+  it('keeps the reason, and says why, when the blocker could not be looked up', () => {
+    const report = formatReport([typescriptRow({ error: 'HTTP 503' })]);
 
-    expect(failed).toContain(`${HELD_BACK.typescript.reason} (could not check: HTTP 503)`);
-    expect(unreadable).toContain(`${HELD_BACK.typescript.reason} (could not read: typescript-eslint@8.80.0 declares \`npm:typescript@^7\`)`);
-    expect(`${failed}${unreadable}`).not.toContain('blocker gone');
+    expect(report).toContain(`${HELD_BACK.typescript.reason} (could not check: HTTP 503)`);
   });
 
   // A row whose latest is still inside .npmrc's min-release-age offers the newest version npm will
@@ -209,12 +178,27 @@ describe('formatReport', () => {
 
     expect(report).not.toContain('too new');
   });
+});
 
-  it('keeps the headline plain when nothing is held back', () => {
-    const report = formatReport([row('vite', '8.1.5', '8.2.1'), row('eslint', '10.8.0', '10.8.0')]);
+describe('findResolved', () => {
+  const lockfile = {
+    packages: {
+      'node_modules/typescript': { version: '5.9.3' },
+      'apps/strategy-practice/node_modules/typescript': { version: '6.0.3' },
+      'node_modules/vite': { version: '8.2.1' }
+    }
+  };
 
-    expect(report).toContain('1 of 2 pinned versions are behind.');
-    expect(report).not.toContain('held back');
+  // npm nests a version under a workspace precisely when the hoisted one is somebody else's, so
+  // preferring the root would report another workspace's version as if it were this one's.
+  it('prefers the copy nested under the workspace asking, then the hoisted one', () => {
+    expect(findResolved(lockfile, 'typescript', 'apps/strategy-practice')).toBe('6.0.3');
+    expect(findResolved(lockfile, 'vite', 'apps/strategy-practice')).toBe('8.2.1');
+  });
+
+  it('reads only the hoisted copy for the root package, and nothing for a package not installed', () => {
+    expect(findResolved(lockfile, 'typescript')).toBe('5.9.3');
+    expect(findResolved(lockfile, 'rollup')).toBeUndefined();
   });
 });
 

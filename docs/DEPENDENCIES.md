@@ -9,15 +9,16 @@ typescript note in
 `npm ls <package>` showing one deduped install is the check. Peer dependencies
 keep ranges: they state compatibility, not an install.
 
-`npm run update:minors` is the routine sweep: it bumps every pin to the newest
+`npm run update:minors` is the routine sweep — the report script run with
+`--write`: it bumps every pin to the newest
 release inside its major, across all workspaces at once, then prints what to run
 next. It never crosses a major.
 
 `.github/workflows/dependency-report.yml` runs on the 1st of each month and keeps
 one `OPS` issue in sync with whatever is behind: every workspace's dependencies,
-every action pinned in `.github/workflows/`, each `.nvmrc`, and the docker image
+every action pinned in `.github/workflows/`, the `.nvmrc`, and the docker image
 each deployment runs. `npm run report:outdated` prints the same table on demand;
-of node_modules it needs only `semver`, for the held-back check below.
+it needs nothing from node_modules, so the workflow installs nothing.
 
 <details><summary>Why a report rather than dependabot, and what a row means</summary>
 
@@ -50,7 +51,7 @@ lockfile. `npm ci` installs the lockfile as written and is unaffected; npm
 nothing here has.
 
 The window is per version, not per package: a package that releases daily
-still resolves to its newest week-old release. `update:minors` and the report
+still resolves to its newest week-old release. The report and its `--write` sweep
 read the same number from `.npmrc` and propose only what npm will install; a
 newer release still inside the window is listed as *too new* and picked up by
 the next sweep.
@@ -59,8 +60,8 @@ The one cost is a security fix younger than the window. Advisories arrive
 through Dependabot alerts, not the report, and npm says so rather than staying
 quiet: `npm audit fix` warns that the fix was blocked and exits non-zero. Once
 the fix is checked by hand, take it on purpose — pin it and install with
-`--min-release-age=0` for that one command, in a commit that says why. Neither
-script walks a pin like that back.
+`--min-release-age=0` for that one command, in a commit that says why. The
+script never walks a pin like that back.
 
 ## Held back deliberately
 
@@ -70,10 +71,9 @@ moves (#317). `HELD_BACK` in
 [`scripts/dependency-report.mjs`](../scripts/dependency-report.mjs) mirrors the four
 names, and `scripts/dependency-report.test.mjs` fails when the two lists stop
 agreeing. Where a hold names a package whose manifest keeps it, `HELD_BACK` says
-which, and each report reads that range off the blocker's newest installable
-release: the row, and the report's headline, say *blocker gone?* once the range
-admits the version held back from. That is a prompt to re-read the hold here,
-not proof the upgrade works.
+which, and each report shows the range the blocker's newest installable release
+declares for the held package. Once that range admits the version held back
+from, re-read the hold here; a range is not proof the upgrade works.
 
 - **`koa` 2 → 3**: the server's Koa app is constructed by boardgame.io, which
   pins `koa@^2` — the backend's own `koa` entry only has to agree with the
