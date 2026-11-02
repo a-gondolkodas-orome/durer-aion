@@ -260,8 +260,7 @@ rules for published ports bypass it.
 npm run stack:prod
 ```
 
-Reinstalls the dependencies if a manifest or the lockfile has moved since the last run,
-builds the frontend, builds the backend image, starts the three containers detached, and
+Builds the frontend, builds the backend image, starts the three containers detached, and
 returns only once the backend and nginx are healthy. When they are not:
 
 ```bash
@@ -465,10 +464,13 @@ docker compose --env-file=.env.docker exec web nginx -s reload
 During a competition, only as a last resort because the clock keeps running
 and a bot move in flight can be lost.
 
-**To deploy a new release**, the same command as step 8:
+**To deploy a new release**, the install from step 4 and the command from step 8.
+`npm ci` runs every time: `stack:prod` builds the frontend on the host, against
+whatever is in `node_modules`.
 
 ```bash
 git pull
+npm ci
 npm run stack:prod
 ```
 
