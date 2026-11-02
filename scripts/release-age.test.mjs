@@ -23,17 +23,17 @@ it('matureVersions keeps stable versions at least the window old, and no other k
 
 it('newestMature answers the dist-tag when old enough, else the newest old-enough version below it', () => {
   expect(newestMature({ current: '8.1.0', distLatest: '8.3.5', mature: ['8.1.0', '8.3.5'] }))
-    .toEqual({ latest: '8.3.5' });
+    .toBe('8.3.5');
   // By version, not by publish order: a backport to an older major, or a newer major, published
   // after the dist-tag is not offered above it.
   expect(newestMature({ current: '8.1.0', distLatest: '8.3.5', mature: ['8.1.0', '7.9.9', '8.3.0', '9.0.0', '8.10.0-rc.1'] }))
-    .toEqual({ latest: '8.3.0', cooling: '8.3.5' });
+    .toBe('8.3.0');
 });
 
 // A pin taken on purpose inside the window, such as a security fix, is not behind anything.
 it('newestMature never offers a version below the current pin', () => {
   expect(newestMature({ current: '8.3.5', distLatest: '8.3.6', mature: ['8.3.4'] }))
-    .toEqual({ latest: '8.3.5', cooling: '8.3.6' });
+    .toBe('8.3.5');
 });
 
 // Picking the wrong version is where `update:minors` could quietly cross a major or drag a pin onto

@@ -20,7 +20,7 @@
 // an urgency a monthly digest would only dilute.
 import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { compareStable, minReleaseAge, newestMature, newestWithinMajor, releases } from './release-age.mjs';
+import { compareStable, isStable, newestMature, newestWithinMajor, releases } from './release-age.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 const read = file => readFileSync(`${repoRoot}${file}`, 'utf8');
@@ -38,25 +38,13 @@ const ALSO_WRITTEN_IN = {
 // among the real work made every month's issue read as five upgrades when only one was: they are
 // reported, because a hold worth keeping is worth re-reading, but in their own section.
 // DEPENDENCIES.md § Held back deliberately owns the reasoning and is where a hold is argued or
-// lifted; `reason` here is only the caption a table cell has room for. The spec fails when the two
+// lifted; the line here is only the caption a table cell has room for. The spec fails when the two
 // lists stop naming the same packages, so a hold cannot be lifted in one of them alone.
-// `blocker` is the package whose own manifest keeps the hold, and the `field` of it that names the
-// held package: the row shows the range the blocker's newest installable release declares, for
-// the maintainer to read against the version held back from. A hold without one is a policy.
 export const HELD_BACK = {
-  koa: {
-    reason: 'boardgame.io constructs the Koa app, at koa@^2',
-    blocker: { name: 'boardgame.io', field: 'dependencies' }
-  },
-  '@koa/router': {
-    reason: 'the backend types boardgame.io\'s own @koa/router@10 instance',
-    blocker: { name: 'boardgame.io', field: 'dependencies' }
-  },
-  typescript: {
-    reason: 'typescript-eslint caps typescript at <6.1.0',
-    blocker: { name: 'typescript-eslint', field: 'peerDependencies' }
-  },
-  '@types/node': { reason: 'policy: tracks the Node major in .nvmrc' }
+  koa: 'boardgame.io constructs the Koa app, at koa@^2',
+  '@koa/router': 'the backend types boardgame.io\'s own @koa/router@10 instance',
+  typescript: 'typescript-eslint caps typescript at <6.1.0',
+  '@types/node': 'policy: tracks the Node major in .nvmrc'
 };
 
 // The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart
@@ -151,12 +139,9 @@ const releasesOf = name => {
 // A row is { name, current, where, latest } once resolved, or { name, current, where, error } when
 // the lookup failed. A failed lookup is reported, never thrown: one unreachable registry must not
 // cost the whole report, and a row that silently vanished would read as "up to date".
-// A lookup answers the latest version, or `{ latest, cooling }` when a newer one is still inside
-// the release-age window and so not yet installable.
 const checkVersion = async (name, current, where, lookup) => {
   try {
-    const found = await lookup();
-    return { name, current, where, ...(typeof found === 'string' ? { latest: found } : found) };
+    return { name, current, where, latest: await lookup() };
   } catch (error) {
     return { name, current, where, error: error.message };
   }
@@ -193,7 +178,7 @@ const actionRows = () => {
 // would crowd out the version. check-versions.test.mjs carries the list; the row carries the count.
 const nodeRow = () => {
   const current = read('.nvmrc').trim();
-  return checkVersion('Node', current, ['.nvmrc', '6 more files — see check-versions.test.mjs'], async () => {
+  return checkVersion('Node', current, ['.nvmrc', 'the rest in check-versions.test.mjs'], async () => {
     const feed = await fetchJson('https://nodejs.org/dist/index.json');
     const major = current.split('.')[0];
     // The feed is newest-first, and staying on the pinned major is the point — a major bump is a
@@ -251,40 +236,8 @@ const isMajorBump = ({ current, latest }) =>
 // so only a major bump of a held package is a held row.
 const isHeld = row => !row.error && row.current !== row.latest && isMajorBump(row) && row.name in HELD_BACK;
 
-// What the blocker's newest installable release declares for the held package: `{ blocker, range }`,
-// with `range` undefined once it declares none at all, or `{ error }`. Attached to the row as `hold`.
-const checkHold = async ({ name }) => {
-  const { blocker } = HELD_BACK[name];
-  try {
-    // '0.0.0' as `current`: newestMature only uses it as a floor, and there is no pin of the blocker
-    // to keep it at — what matters is what npm would install today.
-    const { latest } = newestMature({ current: '0.0.0', ...(await releasesOf(blocker.name)) });
-    const manifest = await fetchJson(`https://registry.npmjs.org/${blocker.name}/${latest}`);
-    return { blocker: `${blocker.name}@${latest}`, range: manifest[blocker.field]?.[name] };
-  } catch (error) {
-    return { error: error.message };
-  }
-};
-
-// A range may contain `||`, which would split a markdown table cell.
-const cellSafe = text => text.replaceAll('|', '\\|');
-
-// The range is shown, not judged: whether `^2.13.3` still excludes 3.2.1 takes a glance, and the
-// maintainer is the one who re-reads the hold anyway.
-const holdCell = row => {
-  const { reason } = HELD_BACK[row.name];
-  const { hold } = row;
-  if (!hold) return reason;
-  if (hold.error) return `${reason} (could not check: ${cellSafe(hold.error)})`;
-  if (hold.range === undefined) {
-    return `${reason} (**${hold.blocker} no longer declares ${row.name}** — re-read the hold)`;
-  }
-  return `${reason} (${hold.blocker} declares \`${cellSafe(hold.range)}\`)`;
-};
-
 // Pure: rows in, markdown out. The only branchy part of this script, and the only part worth a spec.
-// `releaseAge` is .npmrc's min-release-age, named in the report only when some row is cooling.
-export const formatReport = (rows, releaseAge = 0) => {
+export const formatReport = rows => {
   const failed = rows.filter(row => row.error);
   const behind = rows.filter(row => !row.error && row.current !== row.latest);
   const held = behind.filter(isHeld);
@@ -307,7 +260,7 @@ export const formatReport = (rows, releaseAge = 0) => {
         `| | pinned | latest | written down in |${extra ? ` ${extra[0]} |` : ''}`,
         `| --- | --- | --- | --- |${extra ? ' --- |' : ''}`,
         ...entries.map(row =>
-          `| \`${row.name}\` | ${row.current} | ${row.latest}${row.cooling ? ` (${row.cooling} too new)` : ''} | ${row.where.join(', ')} |`
+          `| \`${row.name}\` | ${row.current} | ${row.latest} | ${row.where.join(', ')} |`
           + (extra ? ` ${extra[1](row)} |` : '')),
         ''
       ];
@@ -332,11 +285,8 @@ export const formatReport = (rows, releaseAge = 0) => {
       `Held back deliberately (${held.length})`,
       held,
       'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#held-back-deliberately).',
-      ['held back by', holdCell]
+      ['held back by', row => HELD_BACK[row.name]]
     ),
-    ...(behind.some(row => row.cooling)
-      ? [`A version marked *too new* was published less than ${releaseAge} days ago: \`.npmrc\` sets \`min-release-age\`, so npm will not install it yet — see [DEPENDENCIES.md § Release-age cooldown](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#release-age-cooldown). Its row offers the newest version that is old enough.`, '']
-      : []),
     ...(failed.length === 0
       ? []
       : [
@@ -355,9 +305,7 @@ export const formatReport = (rows, releaseAge = 0) => {
 
 const report = async () => {
   const rows = await Promise.all([...npmRows(readManifests()), ...actionRows(), nodeRow(), ...dockerRows()]);
-  await Promise.all(rows.filter(row => isHeld(row) && HELD_BACK[row.name].blocker)
-    .map(async row => { row.hold = await checkHold(row); }));
-  const text = formatReport(rows, minReleaseAge());
+  const text = formatReport(rows);
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];
   if (process.argv.includes('--out') && outFile) writeFileSync(outFile, text);
@@ -380,7 +328,6 @@ const writeMinors = async () => {
   const manifests = readManifests();
   const pins = npmPins(manifests);
   const names = [...new Set(pins.map(({ name }) => name))];
-  const releaseAge = minReleaseAge();
   // A failed lookup is a report, not a crash — but it does fail the run, because a dependency
   // silently left behind would read as "already current".
   const found = new Map(await Promise.all(names.map(async name => [name, await releasesOf(name).catch(error => error)])));
@@ -388,7 +335,6 @@ const writeMinors = async () => {
   const bumped = new Map(); // `${name} ${from} -> ${to}` line -> [workspaces]
   const changed = new Set();
   const problems = [];
-  const waiting = new Set(); // `${name} ${newest}`, a release still inside the release-age window
   for (const { name, uses } of pins) {
     const lookup = found.get(name);
     for (const { workspace, section, pinned } of uses) {
@@ -397,13 +343,13 @@ const writeMinors = async () => {
         problems.push(`${name} (pinned ${pinned} in ${where}): ${lookup.message}`);
         continue;
       }
-      const newestAtAll = newestWithinMajor(lookup.versions, pinned);
-      if (newestAtAll === undefined) {
+      if (!isStable(pinned)) {
         problems.push(`${name} in ${where}: '${pinned}' is not an exact stable version, left alone`);
         continue;
       }
+      // Only what `.npmrc`'s min-release-age lets npm install; a release still inside the window
+      // is the next sweep's.
       const newest = newestWithinMajor(lookup.mature, pinned);
-      if (newestAtAll !== pinned && newestAtAll !== newest) waiting.add(`${name} ${newestAtAll}`);
       // Undefined, or below the pin, when the pin itself is younger than the window — taken on
       // purpose (docs/DEPENDENCIES.md § Release-age cooldown), so never walked back.
       if (newest === undefined || compareStable(newest, pinned) <= 0) continue;
@@ -424,18 +370,10 @@ const writeMinors = async () => {
   } else {
     console.log(`Bumped, within each pinned major (${bumped.size} of ${names.length} packages):\n`);
     for (const [line, where] of [...bumped].sort()) console.log(`  ${line}   (${where.join(', ')})`);
-    const elsewhere = [...bumped.keys()]
-      .map(line => line.split(' ')[0]).filter(name => ALSO_WRITTEN_IN[name])
-      .map(name => `  ${name} is also written down in: ${ALSO_WRITTEN_IN[name].join(', ')}`);
-    if (elsewhere.length > 0) console.log(`\nThe same bump has to reach files no package.json names:\n${elsewhere.join('\n')}`);
+    // npm test includes check-versions.test.mjs, which fails until a bump reaches ALSO_WRITTEN_IN too.
     console.log('\nNext: npm install,');
     console.log('then the usual gates — npm run build, npm run lint, npm run typecheck, npm test.');
     console.log('Majors stay with npm run report:outdated.');
-  }
-
-  if (waiting.size > 0) {
-    console.log(`\nNewer, but published less than ${releaseAge} days ago (.npmrc min-release-age), so npm will not`);
-    console.log(`install them yet — the next sweep picks them up:\n${[...waiting].sort().map(entry => `  ${entry}`).join('\n')}`);
   }
 
   if (problems.length > 0) {

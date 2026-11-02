@@ -48,7 +48,7 @@ describe('formatReport', () => {
 
     const held = section(report, 'Held back deliberately (1)');
     expect(held).toContain('| | pinned | latest | written down in | held back by |');
-    expect(held).toContain(`| \`typescript\` | 6.0.3 | 7.0.2 | root | ${HELD_BACK.typescript.reason} |`);
+    expect(held).toContain(`| \`typescript\` | 6.0.3 | 7.0.2 | root | ${HELD_BACK.typescript} |`);
   });
 
   // A failed lookup that left nothing else behind must not read as "everything is current".
@@ -60,32 +60,6 @@ describe('formatReport', () => {
 
     expect(report).toContain('0 of 2 pinned versions are behind.');
     expect(section(report, 'Could not check (1)')).toContain('- `actions/cache` (pinned v6 in ci.yml): HTTP 403');
-  });
-
-  // The hold's `range` is what its blocker's newest release declares for the held package — the
-  // lookup attaches it as `hold`, and these fixtures stand in for that lookup.
-  it('shows what the blocker declares, or why it cannot', () => {
-    const cell = hold => formatReport([{ ...row('typescript', '6.0.3', '7.0.2'), hold }]);
-    const { reason } = HELD_BACK.typescript;
-
-    expect(cell({ blocker: 'typescript-eslint@8.72.0', range: '>=4.8.4 <6.1.0' }))
-      .toContain(`| root | ${reason} (typescript-eslint@8.72.0 declares \`>=4.8.4 <6.1.0\`) |`);
-    // `||` unescaped would end the table cell in the middle of the range.
-    expect(cell({ blocker: 'typescript-eslint@8.80.0', range: '^6.0.0 || ^7.0.0' })).toContain('declares `^6.0.0 \\|\\| ^7.0.0`');
-    expect(cell({ blocker: 'typescript-eslint@9.0.0', range: undefined }))
-      .toContain('**typescript-eslint@9.0.0 no longer declares typescript** — re-read the hold');
-    expect(cell({ error: 'HTTP 503' })).toContain(`${reason} (could not check: HTTP 503)`);
-  });
-
-  // A row whose latest is still inside .npmrc's min-release-age offers the newest version npm will
-  // install, and says why it is not the dist-tag — otherwise the report reads as out of date.
-  it('names a release too new to install, and only when a behind row has one', () => {
-    const cooling = formatReport([{ ...row('vite', '8.1.5', '8.3.4'), cooling: '8.3.5' }], 7);
-    expect(cooling).toContain('| `vite` | 8.1.5 | 8.3.4 (8.3.5 too new) | root |');
-    expect(cooling).toContain('published less than 7 days ago');
-
-    expect(formatReport([row('vite', '8.1.5', '8.2.1'), { ...row('eslint', '10.8.0', '10.8.0'), cooling: '10.8.1' }], 7))
-      .not.toContain('too new');
   });
 });
 
