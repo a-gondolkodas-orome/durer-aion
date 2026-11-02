@@ -3,6 +3,10 @@
 Everything here is already written down somewhere. This page is the order to
 read it in, and the handful of rules that were only ever tacit.
 
+Contributions are welcome from people who take part in the Dürer competition
+themselves — as an organiser or as a teacher. We do not accept pull requests
+from bots, or ones opened to raise an open source contribution count.
+
 ## Your first change needs no docker
 
 The [`README.md`](README.md) opens with the competition stack — nginx, the
