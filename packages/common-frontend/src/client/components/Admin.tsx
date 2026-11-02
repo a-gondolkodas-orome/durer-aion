@@ -5,7 +5,7 @@ import { Fragment, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
-import { TeamDetailDialog } from './TeamDetailDialog';
+import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { csvToolbar } from './CsvToolbar';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
@@ -98,6 +98,7 @@ export function Admin(props: { teamId?: string }) {
             },
           }
         } }}
+        aria-labelledby={TEAM_DIALOG_TITLE_ID}
         open={
           selectedRow != null
         } onClose={() => {

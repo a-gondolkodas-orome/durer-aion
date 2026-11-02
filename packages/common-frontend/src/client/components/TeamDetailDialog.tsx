@@ -22,18 +22,23 @@ import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 type MatchKind = 'relay' | 'strategy';
 
+export const TEAM_DIALOG_TITLE_ID = 'team-dialog-title';
+
 const BORDER = '#e6e0c8';
 const DIVIDER = '#efe9d4';
 const MUTED = '#5f6368';
 
 /// `page` is the team's own `/admin/<teamId>` tab, where the team's name is the
-/// page's title and links back to the list.
+/// page's title and links back to the list. In the dialog the name is an h2,
+/// which names the dialog (`TEAM_DIALOG_TITLE_ID`).
 export function TeamDetailDialog(props: {
   data: TeamModelDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
   page?: boolean,
 }) {
   const [teamState, setTeamState] = useState(props.data);
+  // The cards sit one level under the team's name.
+  const heading = props.page ? 'h2' : 'h3';
 
   return (
     <Stack
@@ -45,9 +50,9 @@ export function TeamDetailDialog(props: {
       }}>
       <Header team={teamState} page={props.page}/>
       <Stack sx={{ gap: '20px', padding: { xs: '16px 12px 24px', md: '24px 32px 32px' } }}>
-        <MatchCard kind="relay" teamName={teamState.teamName} status={teamState.relayMatch} setConfirmDialog={props.setConfirmDialog}/>
-        <MatchCard kind="strategy" teamName={teamState.teamName} status={teamState.strategyMatch} setConfirmDialog={props.setConfirmDialog}/>
-        <DangerZone team={teamState} setTeamState={setTeamState} setConfirmDialog={props.setConfirmDialog}/>
+        <MatchCard kind="relay" heading={heading} teamName={teamState.teamName} status={teamState.relayMatch} setConfirmDialog={props.setConfirmDialog}/>
+        <MatchCard kind="strategy" heading={heading} teamName={teamState.teamName} status={teamState.strategyMatch} setConfirmDialog={props.setConfirmDialog}/>
+        <DangerZone heading={heading} team={teamState} setTeamState={setTeamState} setConfirmDialog={props.setConfirmDialog}/>
       </Stack>
     </Stack>
   )
@@ -71,7 +76,7 @@ function Header(props: { team: TeamModelDto, page?: boolean }) {
             <ChevronLeft fontSize="small"/>Admin felület
           </Box>
           : <Box sx={{ fontSize: 12, fontWeight: 500, color: MUTED }}>Csapat</Box>}
-        <Box component={props.page ? 'h1' : 'h2'} sx={{ margin: 0, fontSize: { xs: 22, md: props.page ? 32 : 28 }, fontWeight: 600, lineHeight: 1.2 }}>
+        <Box component={props.page ? 'h1' : 'h2'} id={props.page ? undefined : TEAM_DIALOG_TITLE_ID} sx={{ margin: 0, fontSize: { xs: 22, md: props.page ? 32 : 28 }, fontWeight: 600, lineHeight: 1.2 }}>
           {team.teamName}
         </Box>
         <PageStateLine pageState={team.pageState}/>
@@ -108,8 +113,7 @@ const PAGE_STATE_LABEL: Record<PageState, string> = {
 /// The raw value beside the label is what the list's Állapot column shows.
 function PageStateLine(props: { pageState: PageState }) {
   return (
-    <Tooltip title="Melyik oldalt látja a csapat. A játék oldalán a vége után is ott marad, amíg vissza nem lép.">
-      <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', marginTop: '4px', fontSize: 13, color: MUTED }}>
+    <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', marginTop: '4px', fontSize: 13, color: MUTED }}>
         <Box sx={{ width: 8, height: 8, borderRadius: '4px', backgroundColor: 'primary.main' }}/>
         <span>
           Most: <Box component="b" sx={{ color: 'text.primary', fontWeight: 500 }}>{PAGE_STATE_LABEL[props.pageState]}</Box>
@@ -117,8 +121,8 @@ function PageStateLine(props: { pageState: PageState }) {
           {props.pageState === 'DISCLAIMER' && ' · még nem indíthat játékot'}
         </span>
         <Box component="code" sx={{ fontSize: 11, backgroundColor: '#f5f5f5', padding: '1px 5px', borderRadius: '3px' }}>{props.pageState}</Box>
+        <HelpButton label="Most" help="Melyik oldalt látja a csapat. A játék oldalán a vége után is ott marad, amíg vissza nem lép."/>
       </Stack>
-    </Tooltip>
   );
 }
 
@@ -192,14 +196,14 @@ function StatusChip(props: { state: MatchStatus['state'] }) {
   );
 }
 
-function MatchCard(props: { kind: MatchKind, teamName: string, status: MatchStatus, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+function MatchCard(props: { kind: MatchKind, heading: 'h2' | 'h3', teamName: string, status: MatchStatus, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const title = props.kind === 'relay' ? 'Váltó' : 'Stratégia';
   const status = props.status;
   if (status.state === 'NOT STARTED') {
     return (
       <Stack component="section" aria-label={title} sx={cardSx}>
         <Stack sx={cardHeaderSx}>
-          <Box component="h3" sx={cardTitleSx}>{title}</Box>
+          <Box component={props.heading} sx={cardTitleSx}>{title}</Box>
           <StatusChip state={status.state}/>
         </Stack>
       </Stack>
@@ -208,7 +212,7 @@ function MatchCard(props: { kind: MatchKind, teamName: string, status: MatchStat
   return (
     <Stack component="section" aria-label={title} sx={cardSx}>
       <Stack sx={{ ...cardHeaderSx, borderBottom: `1px solid ${DIVIDER}` }}>
-        <Box component="h3" sx={cardTitleSx}>{title}</Box>
+        <Box component={props.heading} sx={cardTitleSx}>{title}</Box>
         <StatusChip state={status.state}/>
         <HeaderMetric kind={props.kind} status={status}/>
       </Stack>
@@ -231,14 +235,16 @@ function HeaderMetric(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
     return data ? (
       <Box sx={metricSx}>
         <Box sx={labelSx}>Hátralévő idő</Box>
-        <Box sx={valueSx}><RemainingTime end={data.G.end}/></Box>
+        <Box sx={valueSx} data-testid={`${props.kind}Remaining`}><RemainingTime end={data.G.end}/></Box>
       </Box>
     ) : null;
   }
   const points = data?.G.points ?? props.status.score;
+  // A finished relay's status carries every problem's max, so the max needs no
+  // fetch; the problem set is fixed when the match starts.
   const max = props.kind === 'strategy'
     ? STRATEGY_POINTS_BY_LOSSES[0]
-    : data && 'maxPointsList' in data.G ? data.G.maxPointsList.reduce((sum, it) => sum + it, 0) : undefined;
+    : props.status.relayResults?.reduce((sum, it) => sum + it.maxPoints, 0);
   return (
     <Box sx={metricSx}>
       <Box sx={labelSx}>Pontszám</Box>
@@ -270,16 +276,25 @@ function EndCountdown(props: { end: string }) {
   />;
 }
 
+/// `describeChild`: the help is the button's description, read after its name.
+/// Without it a string title becomes the button's name, and the button's own
+/// `aria-label` overrides it, so a screen reader never reads the help.
+function HelpButton(props: { label: string, help: string }) {
+  return (
+    <Tooltip title={props.help} describeChild enterTouchDelay={0}>
+      <IconButton size="small" aria-label={`Mit jelent: ${props.label}`} sx={{ padding: '2px', color: MUTED }}>
+        <InfoOutlined sx={{ fontSize: 15 }}/>
+      </IconButton>
+    </Tooltip>
+  );
+}
+
 function Fact(props: { label: string, help?: string, children: ReactNode }) {
   return (
     <Box>
       <Stack component="dt" sx={{ flexDirection: 'row', alignItems: 'center', gap: '2px', margin: '0 0 2px', fontSize: 12, color: MUTED }}>
         {props.label}
-        {props.help && <Tooltip title={props.help} enterTouchDelay={0}>
-          <IconButton size="small" aria-label={`Mit jelent: ${props.label}`} sx={{ padding: '2px', color: MUTED }}>
-            <InfoOutlined sx={{ fontSize: 15 }}/>
-          </IconButton>
-        </Tooltip>}
+        {props.help && <HelpButton label={props.label} help={props.help}/>}
       </Stack>
       <Box component="dd" sx={{ margin: 0, fontSize: 16, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{props.children}</Box>
     </Box>
@@ -399,10 +414,12 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
           <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '8px 10px' }}>
             <Box component="label" htmlFor={`${props.kind}-minutes`} sx={{ fontWeight: 500 }}>Idő hozzáadása</Box>
             <Field name="time">
-              {({ field }: FieldProps<string | number>) => <Box
+              {({ field, meta }: FieldProps<string | number>) => <Box
                 component="input"
                 {...field}
                 id={`${props.kind}-minutes`}
+                aria-invalid={meta.touched && meta.error !== undefined}
+                aria-describedby={meta.touched && meta.error !== undefined ? `${props.kind}-minutes-error` : undefined}
                 placeholder="perc"
                 inputMode="numeric"
                 sx={{ font: 'inherit', height: 40, boxSizing: 'border-box', width: 110, padding: '0 12px', border: '1px solid #9e9e9e', borderRadius: '8px' }}
@@ -413,7 +430,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
             </Button>
           </Stack>
           <ErrorMessage name="time" render={msg => (
-            <Box sx={{ color: 'error.main', fontSize: '0.875rem' }}>{msg}</Box>
+            <Box id={`${props.kind}-minutes-error`} sx={{ color: 'error.main', fontSize: '0.875rem' }}>{msg}</Box>
           )}/>
         </Stack>
       </Form>}
@@ -421,6 +438,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
         <Box sx={{ fontSize: 13, color: MUTED }}>{LOGS_HINT[props.kind]}</Box>
         <Button variant="outlined" color="primary" sx={{ textTransform: 'none', height: 40 }}
           aria-expanded={matchLogs !== null}
+          aria-controls={matchLogs === null ? undefined : `${props.kind}-logs`}
           onClick={() => {
             if (matchLogs === null) {
               void showLogs();
@@ -431,7 +449,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
           {matchLogs === null ? 'Logok lekérése' : 'Logok elrejtése'}
         </Button>
       </Stack>
-      {matchLogs !== null && <Box sx={{ width: '100%', maxHeight: 320, overflow: 'auto', borderRadius: '8px' }}>
+      {matchLogs !== null && <Box id={`${props.kind}-logs`} sx={{ width: '100%', maxHeight: 320, overflow: 'auto', borderRadius: '8px' }}>
         <SyntaxHighlighter language="json" style={tomorrow} customStyle={{ margin: 0 }}>
           {JSON.stringify(matchLogs, null, 2)}
         </SyntaxHighlighter>
@@ -441,7 +459,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
 }
 
 /// The resets, together: both are destructive and both ask first.
-function DangerZone(props: { team: TeamModelDto, setTeamState: (team: TeamModelDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const { enqueueSnackbar } = useSnackbar();
@@ -466,7 +484,7 @@ function DangerZone(props: { team: TeamModelDto, setTeamState: (team: TeamModelD
     <Stack component="section" aria-label="Veszélyzóna" sx={{ ...cardSx, borderColor: '#f1c4c4' }}>
       <Stack sx={{ ...cardHeaderSx, borderBottom: '1px solid #f6dada' }}>
         <WarningAmber sx={{ color: '#c62828', fontSize: 20 }}/>
-        <Box component="h3" sx={{ ...cardTitleSx, color: '#c62828' }}>Veszélyzóna</Box>
+        <Box component={props.heading} sx={{ ...cardTitleSx, color: '#c62828' }}>Veszélyzóna</Box>
         <Box sx={{ fontSize: 13, color: MUTED }}>Mindkettő megerősítést kér.</Box>
       </Stack>
       {/* The match itself is kept; the backend's reset routes note its id in

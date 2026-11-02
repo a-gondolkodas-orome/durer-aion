@@ -163,14 +163,26 @@ test('the team dialog says when the match state cannot be fetched', async () => 
   expect(await screen.findByText('A játék állását nem sikerült betölteni.')).toBeInTheDocument();
 });
 
-// The countdown started from a placeholder 10 s, and once at zero it ignored
-// the minutes an organiser added.
-test('a running match\'s remaining time starts from its end and follows added minutes', async () => {
+// The countdown started from a placeholder 10 s, and once at zero it waited
+// for a server reading the dialog never takes, ignoring the minutes an
+// organiser added.
+test('a running match\'s remaining time starts from its end', async () => {
   const end = new Date(Date.now() + 30 * 60 * 1000);
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, end));
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: end });
 
-  expect(await screen.findByText(/^00:(29:5\d|30:00)$/)).toBeInTheDocument();
+  expect(await screen.findByTestId('relayRemaining')).toHaveTextContent(/^00:(29:5\d|30:00)$/);
+});
+
+test('a countdown that has reached zero follows the minutes added to it', async () => {
+  const end = new Date(Date.now() + 1500);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, end));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: end });
+
+  const remaining = await screen.findByTestId('relayRemaining');
+  // Past its last second Countdown stops counting by itself.
+  await waitFor(() => expect(remaining).toHaveTextContent('00:00:00'), { timeout: 3000 });
+  await new Promise(resolve => setTimeout(resolve, 1200));
 
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, new Date(end.getTime() + 60 * 60 * 1000)));
   vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
@@ -178,7 +190,17 @@ test('a running match\'s remaining time starts from its end and follows added mi
   fireEvent.click(screen.getByRole('button', { name: 'Hozzáadás' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Megerősítés' }));
 
-  expect(await screen.findByText(/^01:(29:5\d|30:00)$/)).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByTestId('relayRemaining')).toHaveTextContent(/^(00:59:5\d|01:00:0\d)$/), { timeout: 3000 });
+}, 10000);
+
+test('a finished relay\'s max comes from its status, without the match state', async () => {
+  vi.spyOn(repo, 'getMatchState').mockRejectedValue(new Error('Váratlan hiba történt'));
+  openTeamWithRelay({
+    state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 5,
+    relayResults: [{ maxPoints: 3, points: 3, trySeconds: [60] }, { maxPoints: 4, points: 2, trySeconds: [30, 40] }],
+  });
+
+  expect(await screen.findByText('/ 7')).toBeInTheDocument();
 });
 
 test('a finished match shows no remaining time', async () => {
@@ -236,6 +258,7 @@ test('a team\'s own tab is titled with its name and links back to the list', asy
   renderAdmin(alpha.teamId);
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Alpha' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: 'Váltó' })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Admin felület' })).toHaveAttribute('href', '/admin');
 });
 
@@ -245,7 +268,9 @@ test('the team dialog opened from the list keeps the page\'s own title', async (
 
   fireEvent.click(await screen.findByText('Szerkesztés'));
 
-  expect(await screen.findByRole('heading', { level: 2, name: 'Alpha' })).toBeInTheDocument();
+  expect(await screen.findByRole('dialog', { name: 'Alpha' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: 'Alpha' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 3, name: 'Váltó' })).toBeInTheDocument();
   expect(screen.getByText('Admin felület')).toBeInTheDocument();
   expect(screen.queryByRole('link', { name: 'Admin felület' })).not.toBeInTheDocument();
 });
