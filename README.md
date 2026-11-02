@@ -30,9 +30,9 @@ npm run teams:import  # loads scripts/test.tsv
 ```
 
 Coming back to a checkout you already have — switching to a branch to review it,
-say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
-`scripts/prepare.mjs` first, which installs and seeds only if it has to: the
-install happens when the lockfile or a workspace manifest actually moved.
+say — is `npm run stack:up` on its own, preceded by `npm ci` when that branch
+changed `package-lock.json`. No script installs for you. Every `dev:*` script and
+`stack:up` seed the env files first, which is silent when there is nothing to do.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
@@ -206,6 +206,7 @@ The Pages site assembles all three plus a home page:
 ```bash
 npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
 npm run site:serve   # on http://localhost:4321
+npm run site:smoke   # opens each app in Chromium and fails on what does not load
 ```
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, base
@@ -250,12 +251,14 @@ npm run build
 npm run i18n:check
 npm run spell-check
 npm run stack:build   # needs docker; the other six do not
+npm run site:build && npm run site:smoke   # needs Playwright's Chromium
 ```
 
-`npm run check` runs the six that need no docker, in one command and cheapest
+`npm run check` runs the six that need no docker or browser, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
-needs docker.
+needs docker, and the site smoke test because it needs a browser and a full site
+build.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 
@@ -427,9 +430,9 @@ that before a competition.
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are
    fine — a bot can keep its lookup tables in a file beside it — but what the bot and
-   the board *both* need goes in `game.ts`. A helper beside them is a file the
-   bot entry and the client entry have in common, which the walk below reads as
-   the bot reaching the served bundle, and fails.
+   the board *both* need goes in `game.ts`. ESLint enforces it: `game.ts`,
+   `board.tsx` and `main.tsx` may import nothing from beside them but `./game`
+   and `./board`, so a helper they share with the bot fails `npm run lint`.
 
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:
@@ -459,9 +462,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
   a "pick two values, then commit" turn.
 - **`strategy.ts`** exports `strategyWrapper(category)`, returning
   `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
-  with `setStartingPosition` and the opening position — the bot is the only
-  source of it in both live games. `GameType.startingPosition` is typed but
-  `gameWrapper` never calls it (#35), so do not use it. `[undefined, moveName]`
+  with `startingPositionMove(position)` — the bot is the only source of the
+  opening position, which may name the game's own keys only. `[undefined, moveName]`
   makes the bot play a random move from `possibleMoves`.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the

@@ -1,5 +1,5 @@
-// Only missingKeys is tested, for the same reason update-minors.test.mjs stops at
-// newestWithinMajor: the rest is directory scanning and file copies. What could go
+// Only missingKeys is tested, for the same reason dependency-report.test.mjs stops at
+// its pure helpers: the rest is directory scanning and file copies. What could go
 // wrong here is reporting the wrong thing — a value difference a developer means to
 // have, or a key they added themselves — which is what would train someone to stop
 // reading the output.

@@ -43,7 +43,7 @@ The hook lives at the repository root because only the root
 - **Codespaces** supports only a restricted set of devcontainer properties and
   may ignore the `mounts` block, in which case none of the persistence below
   happens.
-- **Playwright**: bumping `playwright` in `package.json` means bumping
+- **Playwright**: bumping `playwright` in the root `package.json` means bumping
   `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and rebuilding, or
   Playwright looks for a browser revision that is not in the image.
 - **Node** is pinned by the devcontainer feature in
@@ -305,10 +305,10 @@ ahead. Its eslint, typescript and vitest pins match the root's and its vite
 matches the other frontends'.
 
 Every dependency here is pinned exactly, as everywhere else in the monorepo
-(`save-exact` in `.npmrc`). `playwright` carries an extra constraint on top of
-that: the devcontainer image bakes browser binaries for one specific version, so
-the pin has to agree with `.devcontainer/Dockerfile` as well as with the
-lockfile. The root `npm test` fails when they disagree
+(`save-exact` in `.npmrc`). `playwright` is not one of them — it is pinned in the
+root `package.json`, where the site smoke test uses it — but this app's
+devcontainer bakes browser binaries for that one version, so the pin has to
+agree with `.devcontainer/Dockerfile` as well as with the lockfile. The root `npm test` fails when they disagree
 (`check-versions.test.mjs`), and does the same for every file the Node
 version is written down in — that test lists them.
 

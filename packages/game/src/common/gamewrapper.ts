@@ -1,7 +1,7 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
-import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, JUDGE_PLAYER, PlayerIDType } from './types';
+import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -26,8 +26,10 @@ function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: unk
   events.endTurn();
 };
 
-function setStartingPosition({ G, playerID, events }: MoveContext, startingPosition: Record<string, unknown>) {
-  if (playerID !== JUDGE_PLAYER) {
+/// The only source of a game's opening position: the bot sends it, typed on
+/// its side by `startingPositionMove`.
+function setStartingPosition({ G, playerID, events }: MoveContext, startingPosition: unknown) {
+  if (playerID !== JUDGE_PLAYER || !isOwnGameState(startingPosition)) {
     return INVALID_MOVE;
   };
   events.endTurn();
@@ -107,8 +109,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     phases: {
       startNewGame: {
         moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
-        endIf: ({ G }) => { return G.difficulty !== null && G.winner === null && 'startingPosition' in game },
         next: "chooseRole",
+        // The team picks the difficulty, the bot answers with the position,
+        // and the phase ends with that one round of turns.
         turn: {
           order: TurnOrder.ONCE,
         },

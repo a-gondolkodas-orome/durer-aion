@@ -1,5 +1,5 @@
 import type { State } from 'boardgame.io';
-import type { GameStateMixin } from '../../../common/types';
+import { startingPositionMove, type GameStateMixin } from '../../../common/types';
 import { BOARD_SIZE, markForPlayer, possibleMoves, startingPosition } from './game';
 import type { Category, MyGameState } from './game';
 
@@ -1282,7 +1282,7 @@ export function winningStrategy(state: GameState): StrategyResult {
 
 export function strategyWrapper(category: Category) {
   return (state: GameState, _botID: string): StrategyResult => {
-    if (state.ctx.phase === 'startNewGame') return [[startingPosition(category)], 'setStartingPosition'];
+    if (state.ctx.phase === 'startNewGame') return startingPositionMove<MyGameState>(startingPosition(category));
     return state.G.difficulty === 'test' ? randomStrategy(state) : winningStrategy(state);
   };
 }
