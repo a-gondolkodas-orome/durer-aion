@@ -185,10 +185,6 @@ export class RealClientRepository implements ClientRepository {
     return result.data;
   }
 
-  async resumeJudgeTurn(matchId: string): Promise<void> {
-    await apiAxiosInstance().post(urlcat('/team/me/match/:matchId/resume-judge', { matchId }));
-  }
-
   async getMatchState(matchId: string): Promise<MatchStateDto> {
     const url = urlcat('/game/admin/:matchId/state', {
       matchId,

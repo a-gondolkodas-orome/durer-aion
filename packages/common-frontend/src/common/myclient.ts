@@ -4,7 +4,6 @@ import { SocketIO } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
 import { withConnectionAlert } from '../client/components/ConnectionAlert';
-import { withJudgeResume } from '../client/components/JudgeResume';
 import { Loading } from '../client/components/Loading';
 import type { StrategyBoard } from './boardwrapper';
 import type { ComponentType, ReactNode } from 'react';
@@ -52,7 +51,7 @@ export function MyOnlineClient<T_SpecificGameState>(
 ) {
   return Client({
     game: gameWrapper(game),
-    board: withConnectionAlert(withJudgeResume(boardWrapper(board, description))),
+    board: withConnectionAlert(boardWrapper(board, description)),
     multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
@@ -66,7 +65,7 @@ export function MyOnlineRelayClient(
 ) {
   return Client({
     game: game,
-    board: withConnectionAlert(withJudgeResume(board)),
+    board: withConnectionAlert(board),
     multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });

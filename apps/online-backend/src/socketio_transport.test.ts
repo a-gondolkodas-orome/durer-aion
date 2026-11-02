@@ -82,7 +82,6 @@ const makeMove = (type: string, args: unknown[], playerID: string) =>
 
 describe("the socket transport a browser talks to", () => {
   let server: BgioServer;
-  let transport: SocketIOButBotMoves;
   let running: RunningServers;
   let url: string;
   const sockets: Socket[] = [];
@@ -97,15 +96,14 @@ describe("the socket transport a browser talks to", () => {
     // environment (server/common.ts) and refuses to start without it.
     vi.stubEnv("BOT_CREDENTIALS", "bot-credentials-for-this-test");
 
-    transport = new SocketIOButBotMoves(
-      { https: undefined },
-      { [GAME_NAME]: new (botWrapper(StrategyWrappers.E()))({ enumerate: game.ai?.enumerate }) },
-    );
     server = Server({
       games: [game],
       // No `db`, so boardgame.io hands us its in-memory store — the transport
       // is what this file is about, not what persists behind it.
-      transport,
+      transport: new SocketIOButBotMoves(
+        { https: undefined },
+        { [GAME_NAME]: new (botWrapper(StrategyWrappers.E()))({ enumerate: game.ai?.enumerate }) },
+      ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
     });
@@ -226,30 +224,44 @@ describe("the socket transport a browser talks to", () => {
     await master.onUpdate(move, state._stateID, MATCH_ID, HUMAN_ID);
   }
 
-  it("takes a judge's turn nobody took when the board asks for it", async () => {
+  it("takes a judge's turn nobody took when a board syncs", async () => {
     await createStoredMatch();
     await leaveOnJudgesTurn();
     const socket = await connectClient();
+    const botAnswered = updateMatching(socket, ({ ctx }) => ctx.currentPlayer === HUMAN_ID);
+
     const stuck = await syncAs(socket, MATCH_ID, HUMAN_ID);
     expect(stuck.ctx.currentPlayer).toBe(BOT_ID);
-
-    const botAnswered = updateMatching(socket, ({ ctx }) => ctx.currentPlayer === HUMAN_ID);
-    await transport.resumeBotTurn(server.app.context, game, MATCH_ID);
     const state = await botAnswered;
 
     expect(state.ctx.phase).toBe("chooseRole");
     expect(state._stateID).toBeGreaterThan(stuck._stateID);
   });
 
-  it("hands a board that asks after the judge has moved the stored state again", async () => {
+  it("hands a syncing board the stored state once more", async () => {
     await createStoredMatch();
     const socket = await connectClient();
-    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
-
     const resent = updateMatching(socket, () => true);
-    await transport.resumeBotTurn(server.app.context, game, MATCH_ID);
 
-    expect((await resent)._stateID).toBe(live._stateID);
+    const synced = await syncAs(socket, MATCH_ID, HUMAN_ID);
+
+    expect((await resent)._stateID).toBe(synced._stateID);
+  });
+
+  it("sends a sync that fails the credential check nothing more", async () => {
+    await createStoredMatch();
+    const { metadata } = await server.db.fetch(MATCH_ID, { metadata: true });
+    metadata.players[0].credentials = "the-team's";
+    await server.db.setMetadata(MATCH_ID, metadata);
+    const socket = await connectClient();
+    const heard: string[] = [];
+    socket.onAny((event: string) => heard.push(event));
+
+    socket.emit("sync", MATCH_ID, HUMAN_ID, "someone-else's", 2);
+    // Past the bot's think time, which a resend would wait behind.
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    expect(heard).not.toContain("update");
   });
 
   it("refuses a sync for a match nobody created", async () => {
