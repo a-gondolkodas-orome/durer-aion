@@ -169,17 +169,19 @@ test('the team dialog shows the email and the join code only on request, each on
   expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
 });
 
-test('the team list and the stats are on two tabs, the list first', async () => {
+test('the team list, with the add-time form, and the stats are on two tabs, the list first', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   renderAdmin();
 
   expect(await screen.findByText('Alpha')).toBeVisible();
+  expect(screen.getByText('hozzáadás')).toBeVisible();
   expect(screen.getByText('Kategória')).not.toBeVisible();
 
   fireEvent.click(screen.getByRole('tab', { name: 'Statisztika' }));
 
   expect(screen.getByText('Kategória')).toBeVisible();
   expect(screen.getByText('Alpha')).not.toBeVisible();
+  expect(screen.getByText('hozzáadás')).not.toBeVisible();
   expect(window.location.search).toBe('?tab=statisztika');
 
   fireEvent.click(screen.getByRole('tab', { name: 'Csapatok' }));
