@@ -68,7 +68,7 @@ function App() {
             <LoadTeamState />
             <Header
               teamName={teamState?.teamName ?? null}
-              languageSwitcher
+              admin={true}
               titles={titles}
               homeAddress='/..'
               onChooseLanguage={rememberChosenLanguage}
