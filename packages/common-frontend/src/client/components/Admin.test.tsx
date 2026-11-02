@@ -163,6 +163,32 @@ test('the team dialog says when the match state cannot be fetched', async () => 
   expect(await screen.findByText('A játék állását nem sikerült betölteni.')).toBeInTheDocument();
 });
 
+// The countdown started from a placeholder 10 s, and once at zero it ignored
+// the minutes an organiser added.
+test('a running match\'s remaining time starts from its end and follows added minutes', async () => {
+  const end = new Date(Date.now() + 30 * 60 * 1000);
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, end));
+  openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: end });
+
+  expect(await screen.findByText(/^00:(29:5\d|30:00)$/)).toBeInTheDocument();
+
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(0, new Date(end.getTime() + 60 * 60 * 1000)));
+  vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
+  fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Hozzáadás' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Megerősítés' }));
+
+  expect(await screen.findByText(/^01:(29:5\d|30:00)$/)).toBeInTheDocument();
+});
+
+test('a finished match shows no remaining time', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 7 });
+
+  expect(await screen.findByText('Kezdés')).toBeInTheDocument();
+  expect(screen.queryByText('Hátralévő idő')).not.toBeInTheDocument();
+});
+
 // The button did nothing at all when the request was refused.
 test('a refused logs request is reported', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));

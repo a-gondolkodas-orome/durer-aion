@@ -15,7 +15,7 @@ import { useSnackbar } from 'notistack';
 import { ConfirmDialogInterface } from './ConfirmDialog';
 import { Countdown } from './Countdown';
 import { relayProblemResults, STRATEGY_POINTS_BY_LOSSES } from 'game';
-import { RelayResultsTable, StrategyGamesTable } from './ResultTables';
+import { RelayResultsTable, SOLVED_ON_TRY, StrategyGamesTable, UNANSWERED, WRONG } from './ResultTables';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -250,15 +250,23 @@ function HeaderMetric(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
   );
 }
 
+/// Keyed by the end, so added minutes restart the countdown: Countdown, past
+/// its last second, waits for a server reading that never comes here.
 function RemainingTime(props: { end: string }) {
-  const endTime = new Date(props.end);
-  const [msRemaining, setMsRemaining] = useState<number>(10000);
+  return <EndCountdown key={props.end} end={props.end}/>;
+}
+
+function EndCountdown(props: { end: string }) {
+  const [endTime] = useState(() => new Date(props.end));
+  // Read once: Countdown re-measures the clock whenever this changes.
+  const [serverRemainingMs] = useState(() => endTime.getTime() - Date.now());
+  const [msRemaining, setMsRemaining] = useState(serverRemainingMs);
   return <Countdown
     msRemaining={msRemaining}
     setMsRemaining={setMsRemaining}
     endTime={endTime}
     getServerTimer={() => undefined}
-    serverRemainingMs={endTime.getTime() - new Date().getTime()}
+    serverRemainingMs={serverRemainingMs}
   />;
 }
 
@@ -278,12 +286,10 @@ function Fact(props: { label: string, help?: string, children: ReactNode }) {
   );
 }
 
-const LEGEND: { label: string, background: string, border?: string }[] = [
-  { label: '1. próbára', background: '#4caf50' },
-  { label: '2. próbára', background: '#a5d6a7' },
-  { label: '3. próbára', background: '#d0ebcb' },
-  { label: 'hibás', background: '#f4b4ae' },
-  { label: 'nincs válasz', background: 'repeating-linear-gradient(135deg, #fff 0px, #fff 3px, #d6d6d6 3px, #d6d6d6 5px)' },
+const LEGEND: { label: string, background: string }[] = [
+  ...SOLVED_ON_TRY.map((background, idx) => ({ label: `${idx + 1}. próbára`, background })),
+  { label: 'hibás', background: WRONG },
+  { label: 'nincs válasz', background: UNANSWERED },
 ];
 
 /// The colours of RelayResultsTable, which teams see without a key.
@@ -319,7 +325,6 @@ function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
     <Box component="dl" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px', margin: 0 }}>
       <Fact label="Kezdés">{formatTime(status.startAt)}</Fact>
       <Fact label="Vége">{formatTime(new Date(data.G.end))}</Fact>
-      {!inProgress && <Fact label="Hátralévő idő"><RemainingTime end={data.G.end}/></Fact>}
       {relayG && <Fact label="Aktuális feladat">{relayG.currentProblem + 1}.</Fact>}
       {strategyG && <Fact label="Próbálkozások" help="Az elkezdett éles játszmák száma, a most futót is beleértve. A táblázatban csak a befejezettek vannak, ezért játszma közben eggyel több.">
         {strategyG.numberOfTries}
