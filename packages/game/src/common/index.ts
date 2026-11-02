@@ -2,7 +2,6 @@
 // re-exports this barrel wholesale, so listing it here put three stub games and
 // a scoring table into the package's published build and named all three of its
 // helpers in the public types. gamewrapper.test.ts imports it by its own path
-// instead, and the package's build fails if an entry reaches it
-// (tsdown.config.mts).
+// instead.
 export * from './gamewrapper';
 export * from './types';

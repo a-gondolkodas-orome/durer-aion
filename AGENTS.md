@@ -87,9 +87,9 @@ whether the change is safe, and both fail late if you get them wrong:
 
 - **No `index.ts` barrel, and nothing shared between the bot and the board
   outside `game.ts`.** A helper beside them is a file the `game/bot` entry and
-  the client entry have in common, which the check in `packages/game`'s
-  `tsdown.config.mts` reads as the bot reaching the served bundle, failing the
-  build
+  the client entry have in common. ESLint allows a game folder's `game.ts`,
+  `board.tsx` and `main.tsx` no import from beside them but `./game` and
+  `./board`, and only `strategy-bots.ts` may import a bot (`eslint.config.mjs`)
 - **The live client must not ship the bot.** ESLint forbids the `game/bot`
   specifier everywhere but the server and the offline dry run — the dry run
   imports it on purpose, since its bot runs in the browser after the game is

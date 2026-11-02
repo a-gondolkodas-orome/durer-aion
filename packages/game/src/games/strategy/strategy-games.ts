@@ -4,8 +4,8 @@
 // boards and descriptions in strategy-client.ts (`game/client`), and each
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
-// live client again. The package's build checks the three graphs for this
-// (tsdown.config.mts).
+// live client again. ESLint holds each registry to the files it may import
+// (eslint.config.mjs).
 import type { CompetitionCategory } from "schemas";
 import { MyGameWrapper as GameWrapper20ocde } from "./20ocde/game";
 import type { MyGameState as GameState20ocde } from "./20ocde/game";

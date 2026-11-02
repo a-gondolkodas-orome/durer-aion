@@ -181,8 +181,7 @@ export default defineConfig(
   // just the same. The path patterns cover both ways a relative import can spell the
   // package: through `packages/` from an app, and as a sibling (`../../game/...`)
   // from another package. What the rule cannot see is the package's own graph — a
-  // board importing a strategy file; packages/game's build checks that on the
-  // bundler's own graph (its tsdown.config.mts).
+  // board importing a strategy file; the packages/game blocks below pin that.
   //
   // The exemptions are written as `ignores`, never as a later block switching the
   // rules off, and the ban rides the core `no-restricted-imports` while the React
@@ -215,19 +214,59 @@ export default defineConfig(
       'no-restricted-syntax': ['error', noDynamicBotImport],
     },
   },
+  // Inside packages/game, the same boundary as import allowlists: only strategy-bots.ts
+  // names a bot, so nothing the `game` and `game/client` entries reach can be one. In a
+  // game folder the rules and the board import nothing from beside them but ./game and
+  // ./board, which covers a lookup table under any name; the shared registry imports
+  // only game.ts, which keeps the boards out of the server too. These ride the
+  // typescript-eslint rule because the block above already sets the core one for
+  // these files, and a second block would replace its options.
+  {
+    files: ['packages/game/src/games/strategy/*/{game.ts,board.tsx,main.tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^\\./(?!(game|board)(\\.jsx?)?$)',
+          message: "A game folder's rules and board import only ./game and ./board from beside them; what the bot and the board both need goes in game.ts.",
+        }],
+      }],
+    },
+  },
+  {
+    files: ['packages/game/src/games/strategy/strategy-games.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^\\./[^/]+/(?!game(\\.js)?$)',
+          message: "The `game` entry's registry imports only a game folder's game.ts.",
+        }],
+      }],
+    },
+  },
+  {
+    files: ['packages/game/src/games/strategy/strategy-client.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^\\./[^/]+/(?!(game|board|main)(\\.jsx?)?$)',
+          message: 'Only strategy-bots.ts imports a bot.',
+        }],
+      }],
+    },
+  },
   // The core of the package is what a bare node server imports; its React client half
-  // lives in src/react/ and is exempt — that is the whole point of the split. What this
-  // rule cannot see is a relative import resolving into src/react/; the walk in
-  // packages/strategy-engine/src/react-free.test.ts pins that. `import type` is allowed because
-  // it is erased: types.ts has to name React's node type to say what a game's rule text
-  // may be, and naming it costs a bare node nothing.
+  // lives in src/react/ and react.ts, and is exempt — that is the whole point of the
+  // split. The path patterns keep a relative import from reaching into either, which
+  // covers every .tsx too: they all live under src/react/. `import type` is allowed
+  // because it is erased: types.ts has to name React's node type to say what a game's
+  // rule text may be, and naming it costs a bare node nothing.
   {
     files: ['packages/strategy-engine/**/*.ts'],
     ignores: ['packages/strategy-engine/react.ts', 'packages/strategy-engine/src/react/**'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
-          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
+          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx', '**/react', '**/react/**', '**/react.*'],
           allowTypeImports: true,
           message: 'packages/strategy-engine runs with no framework attached; keep React on the app side.',
         }],

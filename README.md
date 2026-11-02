@@ -430,9 +430,9 @@ that before a competition.
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are
    fine — a bot can keep its lookup tables in a file beside it — but what the bot and
-   the board *both* need goes in `game.ts`. A helper beside them is a file the
-   bot entry and the client entry have in common, which the package's build reads
-   as the bot reaching the served bundle, and fails (`tsdown.config.mts`).
+   the board *both* need goes in `game.ts`. ESLint enforces it: `game.ts`,
+   `board.tsx` and `main.tsx` may import nothing from beside them but `./game`
+   and `./board`, so a helper they share with the bot fails `npm run lint`.
 
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:

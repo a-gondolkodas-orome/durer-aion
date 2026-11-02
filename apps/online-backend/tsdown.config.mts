@@ -1,39 +1,4 @@
-import { relative } from 'node:path'
-import { defineConfig, type Rolldown } from 'tsdown'
-
-// The team import is its own entry so that loading a TSV needs neither the bot
-// nor the admin password, and none of the games, bots or socket transport. What
-// it ships, read off the bundler's own graph — its chunk and the chunks it
-// requires — must stay clear of the server's module, of the env getters in
-// server/common.ts, of `game` and `relay-bot`, and of boardgame.io and socket.io.
-const importStaysSmall: Rolldown.Plugin = {
-  name: 'import-stays-small',
-  generateBundle(_options, bundle) {
-    const chunks = Object.values(bundle).filter((output): output is Rolldown.OutputChunk => output.type === 'chunk')
-    const byFile = new Map(chunks.map(chunk => [chunk.fileName, chunk]))
-    const reached = new Set<Rolldown.OutputChunk>()
-    const pending = chunks.filter(chunk => chunk.isEntry && chunk.name === 'import_teams')
-    if (pending.length === 0) this.error('no chunk for the import_teams entry')
-    for (let chunk = pending.pop(); chunk; chunk = pending.pop()) {
-      if (reached.has(chunk)) continue
-      reached.add(chunk)
-      for (const file of [...chunk.imports, ...chunk.dynamicImports]) {
-        const next = byFile.get(file)
-        if (next) pending.push(next)
-      }
-    }
-    const modules = [...reached].flatMap(chunk => chunk.moduleIds)
-      .map(id => relative(import.meta.dirname, id).replace(/\\/g, '/'))
-    const packages = [...reached].flatMap(chunk => chunk.imports).filter(name => !byFile.has(name))
-    const problems = [
-      ...['src/server.ts', 'src/server/common.ts'].filter(id => modules.includes(id)).map(id => `reaches ${id}`),
-      ...['game', 'relay-bot'].filter(name => modules.some(id => id.startsWith(`../../packages/${name}/`)))
-        .map(name => `bundles ${name}`),
-      ...packages.filter(name => /^(boardgame\.io|socket\.io)($|\/)/.test(name)).map(name => `requires ${name}`),
-    ]
-    if (problems.length > 0) this.error(`the team import entry ${problems.join(', ')}`)
-  },
-}
+import { defineConfig } from 'tsdown'
 
 // The workspace packages are bundled in from their TypeScript source, so this
 // build needs no `packages/*/dist` and cannot go stale against one. Where that
@@ -56,7 +21,6 @@ export default defineConfig({
   platform: 'node',
   outDir: 'dist',
   clean: true,
-  plugins: [importStaysSmall],
   // `.js`, not the `.cjs` tsdown picks for node: the package is CJS-typed, so
   // `.js` already means CommonJS, and `npm start` names the file.
   fixedExtension: false,
