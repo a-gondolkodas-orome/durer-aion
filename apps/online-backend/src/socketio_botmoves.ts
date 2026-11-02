@@ -8,7 +8,7 @@ import type { Bot } from "boardgame.io/ai";
 import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
-import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
+import { isMakeMovePayloadReadOnly, isJudgeToMove, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
 import type { CorsOptionsDelegate } from "cors";
 
@@ -205,29 +205,25 @@ export class SocketIOButBotMoves extends SocketIO {
    *  listener gets only the player's action, not the state boardgame.io's own
    *  listener produced, and `master.onUpdate` below reads storage again anyway.
    *
+   *  Returns the stored state when it was not the bot's to move, and nothing
+   *  when the bot moved: `Master.onUpdate` has published that state already.
+   *
    *  No socket: `Master.onUpdate` only ever publishes to the match's channel. */
   private async playBotTurn(
     { db, auth }: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
     bot: Bot,
     matchID: string
-  ): Promise<void> {
+  ): Promise<State | undefined> {
     const { state } = await fetch(db, matchID, { state: true } as const);
-    if (currentPlayer(state.ctx) !== BOT_ID) {
-      // Not a real action, possibly a failed move.
-      return;
-    }
-    if (state.ctx.gameover) {
-      return;
+    // A player's action that left the judge not to move is a failed move.
+    if (!isJudgeToMove(state.ctx)) {
+      return state;
     }
     const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
     if (botPlayer === null) {
-      // Only reachable with ctx.gameover set to something falsy, which
-      // the check above lets through and which no game here produces.
-      return;
-    }
-    if (state.ctx.phase !== "play" && state.ctx.phase !== "startNewGame") {
-      return;
+      // Unreachable: isJudgeToMove leaves the bot current with no gameover.
+      return state;
     }
     const botAction = await bot.play(state, botPlayer);
 
@@ -259,9 +255,10 @@ export class SocketIOButBotMoves extends SocketIO {
    *  out of turn (#133). The team's board asks again instead
    *  (`withJudgeResume`).
    *
-   *  The stored state is published again afterwards, for a board that is
-   *  behind rather than stuck: a reload in the bot's think time can sync
-   *  before the bot's move is stored and subscribe after it is published.
+   *  When the bot had nothing to play, the stored state is published again,
+   *  for a board that is behind rather than stuck: a reload in the bot's think
+   *  time can sync before the bot's move is stored and subscribe after it is
+   *  published.
    *
    *  A board asks only while its socket is connected, so a match with no room
    *  has nobody to answer, and no queue is made for it. */
@@ -274,10 +271,11 @@ export class SocketIOButBotMoves extends SocketIO {
       return;
     }
     await this.getMatchQueue(matchID).add(async () => {
-      await this.playBotTurn(context, game, bot, matchID);
-      const { state } = await fetch(context.db, matchID, { state: true } as const);
-      TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub)
-        .sendAll({ type: "update", args: [matchID, state] });
+      const unchanged = await this.playBotTurn(context, game, bot, matchID);
+      if (unchanged !== undefined) {
+        TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub)
+          .sendAll({ type: "update", args: [matchID, unchanged] });
+      }
     });
   }
 }

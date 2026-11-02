@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { ComponentType } from "react";
 import type { Ctx } from "boardgame.io";
-import { JUDGE_PLAYER } from "game";
+import { isJudgeToMove } from "game";
 import { useClientRepo } from "../client-repo-context";
 
 export const JUDGE_RESUME_DELAY_MS = 3000;
@@ -27,7 +27,7 @@ export function withJudgeResume<P extends JudgeTurnProps>(Board: ComponentType<P
   return (props: P) => {
     const repo = useClientRepo();
     const { ctx, _stateID, matchID, isConnected } = props;
-    const waiting = isConnected && ctx.gameover === undefined && ctx.currentPlayer === JUDGE_PLAYER;
+    const waiting = isConnected && repo.resumeJudgeTurn !== undefined && isJudgeToMove(ctx);
 
     // Keyed on the state as well: the judge can be to move in two states in a
     // row, and each one gets the full delay.
@@ -36,7 +36,7 @@ export function withJudgeResume<P extends JudgeTurnProps>(Board: ComponentType<P
         return;
       }
       const timer = setInterval(() => {
-        repo.resumeJudgeTurn(matchID).catch(() => undefined);
+        repo.resumeJudgeTurn?.(matchID).catch(() => undefined);
       }, JUDGE_RESUME_DELAY_MS);
       return () => clearInterval(timer);
     }, [waiting, repo, matchID, _stateID]);

@@ -387,7 +387,11 @@ export function configureTeamsRouter(
     if (matchID !== team.relayMatchID && matchID !== team.strategyMatchID)
       ctx.throw(404, "Not one of the team's matches.");
     const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, { metadata: true });
-    const game = games.find(g => g.name === metadata?.gameName);
+    if (metadata === undefined) {
+      ctx.throw(404, "Match not found.");
+      return;
+    }
+    const game = games.find(g => g.name === metadata.gameName);
     if (!game) {
       ctx.throw(500, `Match ${matchID} has no game this server serves.`);
       return;

@@ -75,3 +75,12 @@ it("refuses a match that is not the team's", async () => {
   expect((await post("/team/me/match/someone-elses/resume-judge")).status).toBe(404);
   expect(resumeBotTurn).not.toHaveBeenCalled();
 });
+
+it("answers 404 for a match of the team's that storage no longer has", async () => {
+  const team = await database.teams.getTeam({ teamId: TEAM_ID });
+  if (!team) throw new Error("the team beforeEach inserted is missing");
+  await team.update({ strategyMatchID: "gone" });
+
+  expect((await post("/team/me/match/gone/resume-judge")).status).toBe(404);
+  expect(resumeBotTurn).not.toHaveBeenCalled();
+});

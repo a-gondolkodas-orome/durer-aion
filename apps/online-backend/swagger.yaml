@@ -416,7 +416,7 @@ paths:
         "401":
           description: No session
         "404":
-          description: Not one of the team's matches
+          description: Not one of the team's matches, or no such match stored
 
 components:
   securitySchemes:

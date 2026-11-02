@@ -97,3 +97,12 @@ export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 export function currentPlayer(ctx: Ctx): PlayerIDType {
   return ctx.currentPlayer as PlayerIDType;
 }
+
+/// Whether the match waits on a move the server's bot makes. The server plays
+/// the judge only in these phases; the team's board asks for that turn while
+/// this holds, so the two read the same test.
+export function isJudgeToMove(ctx: Ctx): boolean {
+  return ctx.gameover === undefined
+    && currentPlayer(ctx) === JUDGE_PLAYER
+    && (ctx.phase === "play" || ctx.phase === "startNewGame");
+}
