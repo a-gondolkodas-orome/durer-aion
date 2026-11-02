@@ -48,8 +48,8 @@ function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
 }
 
 describe('the strategy board on the judge\'s turn', () => {
-  // A game without a fixed `startingPosition` has the judge set the opening
-  // position, so the judge moves in `startNewGame` too — and the team used to
+  // The judge sets the opening position of each new game, so it moves in
+  // `startNewGame` too — and the team used to
   // be offered the two new-game buttons there, which refuse the move.
   test('says it is waiting while the judge opens a new game', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: '1' });
