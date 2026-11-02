@@ -89,6 +89,7 @@ describe('a match restored with the bot to move', () => {
     before.moves.mark('human');
     await letTheBotPlay();
     expect(stateOf(before).ctx.currentPlayer).toStrictEqual('1');
+    expect(interrupted.count).toStrictEqual(1);
     before.stop();
 
     const plays = { count: 0 };
@@ -96,6 +97,9 @@ describe('a match restored with the bot to move', () => {
     afterReload.start();
     await letTheBotPlay();
 
+    // Asked once: a second ask is rejected as stale, so the marks alone would
+    // not show it.
+    expect(plays.count).toStrictEqual(1);
     expect(stateOf(afterReload).G.marks).toStrictEqual(['human', 'bot']);
     expect(stateOf(afterReload).ctx.currentPlayer).toStrictEqual('0');
     afterReload.stop();
