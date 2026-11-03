@@ -24,7 +24,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
   return (
     <Layout>
       <LoadTeamState />
-      <Header teamName={teamState?.teamName ?? null} admin={admin}/>
+      <Header teamName={teamState?.teamName ?? null}/>
       {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
           breakpoint, 1280px, at that width and up, overriding the sx below */}
       <Container
