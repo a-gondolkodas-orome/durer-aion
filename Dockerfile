@@ -4,7 +4,7 @@
 # the frontend here makes BuildKit fetch it, so the build does not depend on
 # how recent the daemon's built-in version happens to be.
 
-FROM node:24.20.0 AS deps
+FROM node:26.13.0 AS deps
 
 WORKDIR /usr/src/app
 
@@ -42,15 +42,6 @@ RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.ts
       echo "$leaked" >&2; \
       exit 1; \
     fi
-
-# The install above leaves no stamp, and the dev server docker-compose.dev.yml
-# runs in here begins by reading one (scripts/ensure-deps.mjs) — so it found "no
-# install recorded" and reinstalled all 900 packages before starting, on every
-# container whose writable layer was new, which `COPY . .` makes that of every
-# edit. In `dev` and not in `deps`, because .nvmrc and the script itself arrive
-# with the source above, and copying them earlier would rebuild the install
-# layer whenever either changed.
-RUN node scripts/ensure-deps.mjs --record
 
 EXPOSE 8000
 

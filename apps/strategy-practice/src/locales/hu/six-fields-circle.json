@@ -1,0 +1,7 @@
+{
+  "rule": "Egy kör mentén elhelyezett 6 mezőn összesen legfeljebb 30, de páros sok korong van elosztva. Két játékos felváltva lép. Egy lépésben a soron következő játékos kiválaszt két szomszédos vagy másodszomszédos mezőt (vagyis bármely két nem szemközti mezőt), melyek egyike sem üres, és mindkettőről elvesz 1-1 korongot. Az a játékos veszít, aki nem tud lépni.",
+  "step": {
+    "first": "Válassz ki egy nem üres mezőt, amelyről korongot szeretnél elvenni.",
+    "second": "Kattints egy másik, nem üres és a kijelölttel nem szemközti mezőre a második korong elvételéhez, vagy a kijelölt mezőre a kijelölés visszavonásához."
+  }
+}

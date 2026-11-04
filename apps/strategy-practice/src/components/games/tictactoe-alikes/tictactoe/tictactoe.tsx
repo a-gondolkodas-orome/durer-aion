@@ -1,6 +1,7 @@
 import { range } from 'lodash';
+import { Trans, useTranslation } from 'react-i18next';
 import {
-  strategyGameFactory, GameBoard, type BoardClientProps, type StrategyArgs
+  strategyGameFactory, testVariantLabel, fullVariantLabel, GameBoard, type BoardClientProps, type StrategyArgs
 } from 'strategy-game-factory';
 import { generateEmptyTicTacToeBoard } from '../gameplay';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -54,49 +55,30 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPlayerStepDescription = ({ board, ctx }: StrategyArgs<Board>) => {
-  return inPlacingPhase(board)
-    ? {
-      hu: 'Helyezz le egy korongot egy üres mezőre kattintással.',
-      en: 'Click an empty cell to place a piece.'
-    }
-    : {
-      hu: `Kattints egy ${otherPlayerColor(ctx) === 'red' ? 'piros' : 'kék'} korongra.`,
-      en: `Click a ${otherPlayerColor(ctx)} piece.`
-    };
-}
+const StepDescription = ({ board, ctx }: Pick<StrategyArgs<Board>, 'board' | 'ctx'>) => {
+  const { t } = useTranslation('tictactoe-alikes');
+  if (inPlacingPhase(board)) return t('ticTacToe.step.place');
+  return otherPlayerColor(ctx) === 'red' ? t('ticTacToe.step.whitenRed') : t('ticTacToe.step.whitenBlue');
+};
 
-const rule = {
-  hu: <>
-    Két játékos játszik egy 3 × 3-as táblán kék és piros korongokkal a szokásos amőba
-    szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban
-    összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése
-    után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron
-    következő játékos a másik játékos egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer,
-    aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.
-  </>,
-  en: <>
-    Two players play a game of ordinary tic-tac-toe on a 3 × 3 board with red and
-    blue disks. That is, if there are three disks of the same colour in a row, column or diagonal,
-    then the person placing that colour wins. In case no one wins after the placement of the first
-    9 disks, the next player colours one of the other player&apos;s already placed disks white. Now
-    whoever first creates three white disks in a row, column or diagonal, wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('tictactoe-alikes');
+  return <Trans t={t} i18nKey="ticTacToe.rule" />;
 };
 
 export const TicTacToe = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ board, ctx }) => <StepDescription board={board} ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [generateEmptyTicTacToeBoard()],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

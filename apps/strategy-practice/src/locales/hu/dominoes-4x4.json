@@ -1,0 +1,11 @@
+{
+  "role": {
+    "horizontal": "Félix (fekvő)",
+    "vertical": "Árgyélus (álló)"
+  },
+  "rule": "Árgyélus és Félix felváltva pakolnak 1 × 2-es dominókat egy 4 × 4-es táblára. Árgyélus mindig álló, Félix mindig fekvő dominókat rak. Árgyélus kezd, és az veszít, aki már nem tud rakni.",
+  "step": {
+    "horizontal": "Kattints egy mezőre, majd a mellette lévő üres mezőre, hogy fekvő dominót tegyél le.",
+    "vertical": "Kattints egy mezőre, majd a fölötte vagy alatta lévő üres mezőre álló dominóért."
+  }
+}

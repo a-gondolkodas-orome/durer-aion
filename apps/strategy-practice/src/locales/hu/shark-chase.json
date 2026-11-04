@@ -1,0 +1,25 @@
+{
+  "board": {
+    "remainingMoves": "Hátralévő lépések száma",
+    "sector": "{{number}}. szektor",
+    "shark": "cápa",
+    "stayHere": "itt maradok",
+    "stayHereButton": "Itt maradok",
+    "submarines": "{{count}} tengeralattjáró"
+  },
+  "role": {
+    "researcher": "Kutató",
+    "shark": "Cápa"
+  },
+  "rule": {
+    "4x4": "Kutatók a Dürerencicás-tóban felfedezték a kihalófélben lévő egyenesenmozgó macskacápa faj egy nőstény példányát. Az állat a víz mélyén mozog, így befogásához három tengeralattjárót használnak. A kutatók kommunikálnak egymással és látják a cápát, továbbá a cápa is látja a kutatókat. A tó négyzet alakú és fel van osztva 4 × 4 darab négyzet alakú szektorra. Minden nap délben az egyik tengeralattjáró átúszik egy oldalszomszédos szektorba. A cápa 11 nap múlva nyugodt körülmények között tenné le a tojását, így addig menekülni próbál, ehhez minden éjszaka legfeljebb kétszer átúszik egy oldalszomszédos szektorba. A kutatók az első nap az alábbi kezdőhelyzetből mozognak először. A kutatók akkor nyernek, ha a 11. napig valamikor egy tengeralattjáró egy szektorba kerül a cápával, míg a cápa akkor nyer, ha még a 11. nap végén is szabad.",
+    "5x5": "Kutatók a Dürerencicás-tóban felfedezték a kihalófélben lévő egyenesenmozgó macskacápa faj egy nőstény példányát. Az állat a víz mélyén mozog, így befogásához négy tengeralattjárót használnak. A kutatók kommunikálnak egymással és látják a cápát, továbbá a cápa is látja a kutatókat. A tó négyzet alakú és fel van osztva 5 × 5 darab négyzet alakú szektorra. Minden nap délben az egyik tengeralattjáró átúszik egy oldalszomszédos szektorba. A cápa 15 nap múlva nyugodt körülmények között tenné le a tojását, így addig menekülni próbál, ehhez minden éjszaka legfeljebb kétszer átúszik egy oldalszomszédos szektorba. A kutatók az első nap az alábbi kezdőhelyzetből mozognak először. A kutatók akkor nyernek, ha a 15. napig valamikor egy tengeralattjáró egy szektorba kerül a cápával, míg a cápa akkor nyer, ha még a 15. nap végén is szabad."
+  },
+  "step": {
+    "researcher": "Válassz ki egy tengeralattjárót, majd válassz egy szomszédos szektort.",
+    "shark": {
+      "once": "Válassz ki egy cápával oldalszomszédos szektort. Kattints a cápára, ha helyben szeretnél maradni.<br/>Ebben a lépésben még legfeljebb <b>egyszer</b> úszhatsz át egy szomszédos szektorba.",
+      "twice": "Válassz ki egy cápával oldalszomszédos szektort. Kattints a cápára, ha helyben szeretnél maradni.<br/>Ebben a lépésben még legfeljebb <b>kétszer</b> úszhatsz át egy szomszédos szektorba."
+    }
+  }
+}

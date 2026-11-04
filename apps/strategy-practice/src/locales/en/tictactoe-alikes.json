@@ -1,0 +1,21 @@
+{
+  "antiTicTacToe": {
+    "rule": "In the 3×3 anti-tic-tac-toe game the first player places red, the second places blue pieces. They alternate turns, and the first player to get three of their own colour in a row, column, or diagonal loses. If all nine squares are occupied and no such triple exists, the first player wins.",
+    "step": "Click on an empty square to place a piece."
+  },
+  "ticTacToe": {
+    "rule": "Two players play a game of ordinary tic-tac-toe on a 3 × 3 board with red and blue discs. That is, if there are three discs of the same colour in a row, column or diagonal, then the person placing that colour wins. In case no one wins after the placement of the first 9 discs, the next player colours one of the other player's already placed discs white. Now whoever first creates three white discs in a row, column or diagonal, wins.",
+    "step": {
+      "place": "Click an empty cell to place a piece.",
+      "whitenBlue": "Click a blue piece.",
+      "whitenRed": "Click a red piece."
+    }
+  },
+  "ticTacToeDoubleStart": {
+    "rule": "In double-starting tic-tac-toe, played on a 3 × 3 board, the first player begins by placing two red discs on any two cells. Players then alternate turns, each placing one disc on an empty cell — the first player using red discs and the second using blue. The game ends when the board is full. The first player wins if there are three red discs in a row, column, or diagonal, but no three blue discs form such a line. Otherwise, the second player wins.",
+    "step": {
+      "first": "Click two empty cells to place two pieces.",
+      "next": "Click an empty cell to place a piece."
+    }
+  }
+}

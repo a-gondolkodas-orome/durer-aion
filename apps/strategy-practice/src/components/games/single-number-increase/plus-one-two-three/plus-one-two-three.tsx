@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { maxStep, moves, target, type Board } from './gameplay';
@@ -27,25 +28,20 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A játék a nullával indul. A játékosok felváltva
-    lépnek a pozitív egész számokon: a soron következő játékos mindig 1-gyel, 2-vel vagy 3-mal
-    léphet előre. Az veszít, aki először lép {target}-nél nagyobb számra.
-  </>,
-  en: <>
-    The game starts at zero. Players take turns moving along the positive integers: each player
-    may advance by 1, 2, or 3. The player who first steps past {target} loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('single-number-increase');
+  return <Trans t={t} i18nKey="plusOneTwoThree.rule" values={{ target }} />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('single-number-increase');
+  return t('plusOneTwoThree.step');
 };
 
 export const PlusOneTwoThree = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válaszd ki, hogy melyik számra lépsz.',
-      en: 'Choose which number to step to.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },

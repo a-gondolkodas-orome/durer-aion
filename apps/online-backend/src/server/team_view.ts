@@ -1,5 +1,6 @@
 import { TeamModel } from "./model";
 import { MatchStatus } from "schemas";
+import type { TeamMatches } from "./match_status";
 
 /** What the playing client is served for its own team.
  *
@@ -28,19 +29,19 @@ export interface PublicTeamView {
   strategyMatch: MatchStatus;
 }
 
-/** Narrows a team row to {@link PublicTeamView}.
+/** Narrows a team row, with its matches as they stand, to {@link PublicTeamView}.
  *
  * Listing the fields rather than deleting the secret ones is deliberate: a
  * column added to the model later stays out of the response until someone
  * decides it belongs here.
  */
-export function publicTeamView(team: TeamModel): PublicTeamView {
+export function publicTeamView(team: TeamModel, matches: TeamMatches): PublicTeamView {
   return {
     teamName: team.teamName,
     category: team.category,
     credentials: team.credentials,
     pageState: team.pageState,
-    relayMatch: team.relayMatch,
-    strategyMatch: team.strategyMatch,
+    relayMatch: matches.relayMatch,
+    strategyMatch: matches.strategyMatch,
   };
 }

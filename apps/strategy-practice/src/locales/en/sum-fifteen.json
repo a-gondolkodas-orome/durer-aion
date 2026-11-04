@@ -1,0 +1,9 @@
+{
+  "board": {
+    "computerNumbers": "Computer's numbers",
+    "playerNumbers": "'s numbers: ",
+    "yourNumbers": "Your numbers"
+  },
+  "rule": "The numbers 1 to 9 are given. The two players alternately pick a number that nobody has chosen before. A player wins as soon as three of their own numbers add up to 15. If all nine numbers have been claimed and neither player has three numbers summing to 15, then the second player wins.",
+  "step": "Choose one of the still-available numbers."
+}

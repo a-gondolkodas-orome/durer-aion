@@ -128,7 +128,7 @@ describe('switchMode', () => {
 // `botStrategy` has nobody to play the other side against a single player.
 describe('variant availability by mode', () => {
   const startBoard = (): Board => ['initial'];
-  const named = (name: string) => ({ hu: name, en: name });
+  const named = (name: string) => () => name;
 
   // 'Gamma' borrows the default variant's start board, so it can only be played
   // against the bot.
@@ -217,7 +217,7 @@ describe('variant availability by mode', () => {
 
 describe('variant in the URL', () => {
   const startBoard = (): Board => ['initial'];
-  const named = (name: string) => ({ hu: name, en: name });
+  const named = (name: string) => () => name;
 
   // Alpha is the default and carries no id, so it is addressed by its index;
   // Beta names one, the way a variant worth a durable link does.
@@ -469,18 +469,18 @@ describe('win/loss tracking', () => {
 describe('per-variant rule', () => {
   it('shows the default variant rule and switches when another variant is selected', () => {
     const config: StrategyGameConfig<Board> = {
-      presentation: { rule: { hu: 'TOP_RULE', en: 'TOP_RULE' }, getPlayerStepDescription: () => '' },
+      presentation: { rule: 'TOP_RULE', getPlayerStepDescription: () => '' },
       BoardClient: MinimalBoardClient,
       gameplay: defaultGameplay,
       variants: [
         {
           botStrategy: () => [],
           generateStartBoard: (): Board => ['a'],
-          rule: { hu: 'RULE_ONE', en: 'RULE_ONE' },
+          rule: 'RULE_ONE',
           isDefault: true
         },
         {
-          rule: { hu: 'RULE_TWO', en: 'RULE_TWO' }
+          rule: 'RULE_TWO'
         }
       ]
     };
@@ -500,7 +500,7 @@ describe('per-variant rule', () => {
 
   it('falls back to presentation.rule when the active variant has no rule', () => {
     const config: StrategyGameConfig<Board> = {
-      presentation: { rule: { hu: 'TOP_RULE', en: 'TOP_RULE' }, getPlayerStepDescription: () => '' },
+      presentation: { rule: 'TOP_RULE', getPlayerStepDescription: () => '' },
       BoardClient: MinimalBoardClient,
       gameplay: defaultGameplay,
       variants: [
@@ -512,7 +512,7 @@ describe('per-variant rule', () => {
         {
           botStrategy: () => [],
           generateStartBoard: (): Board => ['b'],
-          rule: { hu: 'RULE_TWO', en: 'RULE_TWO' }
+          rule: 'RULE_TWO'
         }
       ]
     };
@@ -563,7 +563,7 @@ describe('umami game-finished event', () => {
   // link name a variant the same way.
   const identifiedVariants: VariantInput<Board>[] = [
     { id: 'alpha', isDefault: true, botStrategy: () => [], generateStartBoard: (): Board => [] },
-    { label: { hu: 'Beta', en: 'Beta' }, botStrategy: () => [], generateStartBoard: (): Board => [] }
+    { label: () => 'Beta', botStrategy: () => [], generateStartBoard: (): Board => [] }
   ];
 
   it('reports the variant by its id', () => {

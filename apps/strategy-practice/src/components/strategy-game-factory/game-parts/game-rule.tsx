@@ -1,9 +1,9 @@
 import React from 'react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 
 export const GameRule = ({ ruleDescription }: { ruleDescription: React.ReactNode }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
   return <section className="flex justify-center mb-4 mt-1 max-w-[100ch]">
     <Disclosure defaultOpen>
       {({ open }) => (
@@ -11,7 +11,7 @@ export const GameRule = ({ ruleDescription }: { ruleDescription: React.ReactNode
           <DisclosureButton
             className="w-full bg-slate-200 dark:bg-slate-700 text-lg sm:text-xl flex justify-center"
           >
-            <span className="grow">{t({ hu: 'Játékszabályok', en: 'Game rules' })}</span>
+            <span className="grow">{t('rules')}</span>
             <span className="pr-4" aria-hidden="true">
               <span
                 className="inline-block transition-transform"

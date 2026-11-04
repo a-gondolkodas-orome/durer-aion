@@ -1,0 +1,4 @@
+{
+  "rule": "The game starts with a positive integer. On each turn, the current player picks one of the non-zero digits of the current number and subtracts it. The player who reaches 0 wins.",
+  "step": "Choose a digit to subtract from the current number."
+}

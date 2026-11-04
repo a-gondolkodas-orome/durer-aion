@@ -1,0 +1,4 @@
+{
+  "rule": "A pályán mindig két kupac korong található. Egy lépésben az éppen soron következő játékos az egyik kupacból elvesz páros sok korongot (legalább kettőt), és a másik kupachoz hozzáad feleannyit. Az veszít, aki nem tud lépni.",
+  "step": "Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból."
+}

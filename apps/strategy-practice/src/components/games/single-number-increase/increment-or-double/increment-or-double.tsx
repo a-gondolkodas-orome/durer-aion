@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { isLosing, moves, target, type Board } from './gameplay';
 import { smartBotStrategy } from './bot-strategy';
@@ -27,33 +28,20 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A két játékos pozitív egész számokat mond felváltva úgy, hogy ha az előző által mondott
-    szám x, akkor a következő x + 1-et vagy 2x-et mondhat. A kezdő játékosnak 1-et kell mondania.
-    Az veszít, aki először mond {target}-nél nagyobb számot.
-  </>,
-  en: <>
-    The two players alternately say positive integers: if the previous number said is x, the next
-    player may say x + 1 or 2x. The starting player must say 1. Whoever first says a number greater
-    than {target} loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('single-number-increase');
+  return <Trans t={t} i18nKey="incrementOrDouble.rule" values={{ target }} />;
 };
 
-const getPlayerStepDescription = ({ board }: { board: Board }) => {
-  if (board === 0) {
-    return { hu: 'Mondd az első számot: 1.', en: 'Say the first number: 1.' };
-  }
-  return {
-    hu: 'Mondj eggyel nagyobb (x+1) vagy kétszer akkora (2x) számot.',
-    en: 'Say one more (x+1) or double (2x).'
-  };
+const StepDescription = ({ board }: { board: Board }) => {
+  const { t } = useTranslation('single-number-increase');
+  return board === 0 ? t('incrementOrDouble.step.first') : t('incrementOrDouble.step.next');
 };
 
 export const IncrementOrDouble = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ board }) => <StepDescription board={board} />
   },
   BoardClient,
   gameplay: { moves },

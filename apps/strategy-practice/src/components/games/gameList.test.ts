@@ -1,5 +1,6 @@
 import { gameList } from './gameList';
 import * as gameComponents from './index';
+import huCatalog from '../../locales/hu/catalog.json';
 
 const components = gameComponents as Record<string, unknown>;
 
@@ -26,6 +27,17 @@ describe('gameList integrity', () => {
   it('re-exports a defined component for every game', () => {
     for (const key of Object.keys(gameList)) {
       expect(components[key], `missing component for "${key}"`).toBeDefined();
+    }
+  });
+
+  // The catalog is read by game key, which `i18n:check` cannot follow from the
+  // code, so it leaves the catalog out of its unused-key check and this stands
+  // in for it. The two languages against each other are `i18n:check`'s and
+  // locales.test.ts's.
+  it('names exactly the registered games in the catalog', () => {
+    expect(Object.keys(huCatalog).sort()).toEqual(Object.keys(gameList).sort());
+    for (const [key, entry] of Object.entries(huCatalog)) {
+      expect(entry.name, `no name for "${key}"`).toBeTruthy();
     }
   });
 });

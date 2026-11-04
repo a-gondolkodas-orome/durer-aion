@@ -1,0 +1,15 @@
+{
+  "board": {
+    "edge": "{{number}}. él — satírozd be",
+    "triangle": "{{number}}. háromszög — tegyél bele kört"
+  },
+  "role": {
+    "circle": "Körjátékos leszek",
+    "line": "Vonaljátékos leszek"
+  },
+  "rule": "Ebben a játékban ketten játszanak, a vonal-, illetve a körjátékos. A vonaljátékos a táblán minden lépésében besatírozza egy kis háromszög egyik oldalát, a körjátékos pedig kört tesz egy kis háromszög belsejébe. A játékot a vonaljátékos kezdi. A vonaljátékos akkor nyer, ha sikerül egy olyan kis háromszöget létrehoznia, aminek mindhárom oldala satírozott, és nincs a belsejében kör. Ha ez a helyzet előáll, akkor a játék véget is ér. A körjátékos akkor nyer, ha minden háromszög belsejébe került már kör. A tábla egy 6×6-os háromszögrács.",
+  "step": {
+    "circle": "Tegyél kört egy üres kis háromszög belsejébe: kattints a háromszögre.",
+    "line": "Satírozd be egy kis háromszög egyik oldalát: kattints egy élre."
+  }
+}

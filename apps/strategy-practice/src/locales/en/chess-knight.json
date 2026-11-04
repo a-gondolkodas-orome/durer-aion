@@ -1,0 +1,4 @@
+{
+  "rule": "A knight is placed on one square of a 4 × 4 board. Two players take turns moving the knight. The knight may not move to any square it has already visited, including the starting square. The player who cannot move loses.",
+  "step": "Move the knight to a free square."
+}

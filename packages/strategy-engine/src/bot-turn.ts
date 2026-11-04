@@ -5,7 +5,7 @@ import type { CoreState } from './store';
 // shell paced, the headless runner (run-match.ts) immediately. Pacing is
 // therefore the caller's concern, never the strategy's: a bot that scheduled its
 // own follow-up with setTimeout could not run outside a browser. See
-// src/components/CLAUDE.md § Bot contract.
+// src/components/AGENTS.md § Bot contract.
 export const asBotMoves = <TMove extends NamedBotMove>(named: TMove | TMove[]): TMove[] =>
   Array.isArray(named) ? named : [named];
 

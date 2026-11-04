@@ -7,6 +7,4 @@ npm-debug.log*
 .vscode
 # rollup-plugin-visualizer output
 stats.html
-# coverage output: the `npm run coverage` html report
-/reports
 .claude/settings.local.json

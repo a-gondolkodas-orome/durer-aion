@@ -5,7 +5,7 @@ import {
   Model,
   ModelAttributes,
 } from "sequelize";
-import { EMAIL_MAX_LENGTH, MatchStatus, OTHER_MAX_LENGTH, TEAMNAME_MAX_LENGTH } from "schemas";
+import { EMAIL_MAX_LENGTH, OTHER_MAX_LENGTH, PageState, TEAMNAME_MAX_LENGTH } from "schemas";
 
 // Sequelize adds the timestamp columns itself, and only for names the attribute
 // list leaves free. Omitting them from the attribute types therefore keeps them
@@ -19,22 +19,21 @@ export class TeamModel extends Model<
   InferCreationAttributes<TeamModel, OmitTimestamps>
 > {
   declare teamId: string;
-  // Important fields
   declare joinCode: string;
   declare teamName: string;
   declare category: string;
   declare credentials: string;
   declare email: string;
 
-  declare pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY';
+  declare pageState: PageState;
 
-  declare relayMatch: MatchStatus;
-  declare strategyMatch: MatchStatus;
+  // The team's current match of each kind, or null: its status is read off the
+  // match itself (server/match_status.ts), never stored here.
+  declare relayMatchID: string | null;
+  declare strategyMatchID: string | null;
 
-  // Search fields
   declare other: string;
 
-  // timestamps!
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -55,8 +54,7 @@ export { OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH } from "schemas";
  *
  * The trail is a convenience and the admin action is the point, so a full field
  * costs the note rather than the reset. Callers pass the field as it came off
- * the row: a team imported from a row with no `Other` column has null there, and
- * `+=` on that used to write the string "null" into the notes.
+ * the row: a team imported from a row with no `Other` column has null there.
  */
 export function appendOtherNote(other: string | null | undefined, note: string): string {
   const current = other ?? '';
@@ -85,7 +83,6 @@ export const teamAttributes: ModelAttributes<
       }
     }
   },
-  // metadata
   category: {
     type: DataTypes.STRING,
   },
@@ -126,6 +123,10 @@ export const teamAttributes: ModelAttributes<
   },
   credentials: {
     type: DataTypes.STRING,
+    unique: {
+      name: "credentials",
+      msg: 'Credentials already exist.'
+    },
     validate: {
       is: {
         args: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
@@ -136,11 +137,13 @@ export const teamAttributes: ModelAttributes<
   pageState: {
     type: DataTypes.STRING,
   },
-  relayMatch: {
-    type: DataTypes.JSON,
+  relayMatchID: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
-  strategyMatch: {
-    type: DataTypes.JSON,
+  strategyMatchID: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   other: {
     type: DataTypes.STRING(OTHER_MAX_LENGTH),

@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { range } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, type Ctx, GameBoard
 } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { generateStartBoard, moves, type Board, type TurnState } from './gameplay';
@@ -37,50 +38,27 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnState>) 
   );
 };
 
-const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board, TurnState>) => {
-  if (ctx.currentPlayer === 1 && ctx.turnState === null) {
-    return {
-      hu: 'Kattints arra a mezőre, ahova az első korongot szeretnéd rakni. (1/2)',
-      en: 'Click the square where you want to place the first piece. (1/2)'
-    };
-  }
-  if (ctx.currentPlayer === 1 && ctx.turnState !== null) {
-    return {
-      hu: 'Kattints arra a mezőre, ahova a második korongot szeretnéd rakni. (2/2)',
-      en: 'Click the square where you want to place the second piece. (2/2)'
-    };
-  }
-  return {
-    hu: 'Kattints arra a mezőre, ahova korongot szeretnél lerakni. (1/1)',
-    en: 'Click the square where you want to place a piece. (1/1)'
-  };
+const Rule = () => {
+  const { t } = useTranslation('distinct-squares');
+  return t('rule.fiveSquares');
 };
 
-const rule = {
-  hu: <>
-    A játék során egy öt mezőből álló táblára helyezünk korongokat. Kezdetben egy korong van a táblán.
-    Ezután minden körben a kezdőjátékos egy korongot helyez a táblára, majd ezután a második játékos tesz le két
-    korongot. (A két korongot lehet azonos, illetve különböző mezőkre is tenni.) A játék 3 kör után ér véget,
-    amikor a 10. korong felkerül a táblára. A második játékos akkor nyer, ha a játék végén
-    minden mezőn különböző számú korong áll.
-  </>,
-  en: <>
-    Players place pieces on a board of five squares. One piece is on the board at the start.
-    Each round the first player places one piece, then the second player places two pieces (both
-    may go on the same or different squares). The game ends after 3 rounds when the 10th piece is
-    placed. The second player wins if every square has a different number of pieces at the end.
-  </>
+const StepDescription = ({ ctx }: { ctx: Ctx<TurnState> }) => {
+  const { t } = useTranslation('distinct-squares');
+  if (ctx.currentPlayer === 1 && ctx.turnState === null) return t('step.fiveSquares.first');
+  if (ctx.currentPlayer === 1 && ctx.turnState !== null) return t('step.fiveSquares.second');
+  return t('step.fiveSquares.single');
 };
 
 export const FiveSquares = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

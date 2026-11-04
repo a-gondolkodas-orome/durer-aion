@@ -22,14 +22,13 @@
  *     into the other's caller.
  */
 
+import { isCompetitionCategory } from './model';
+
 export const TEAM_IMPORT_HEADER = [
   'Teamname', 'Category', 'Email', 'Other', 'ID', 'Login Code', 'Credentials',
 ] as const;
 
 export type TeamImportColumn = typeof TEAM_IMPORT_HEADER[number];
-
-/** The age categories, which decide which games a team is served. */
-export const TEAM_CATEGORIES = ['C', 'D', 'E'] as const;
 
 export const TEAMNAME_MAX_LENGTH = 255;
 export const EMAIL_MAX_LENGTH = 255;
@@ -51,11 +50,11 @@ export const OTHER_IMPORT_MAX_LENGTH = 700;
 /** How wide the `other` column is. The backend's `model.ts` re-exports it and
  * builds the column and its validator from it, so the two cannot disagree.
  *
- * The import's own ceiling: up to here a value is something this app wrote —
- * an archive export carries the audit trail back — and trimming it to
- * `OTHER_IMPORT_MAX_LENGTH` costs the trail, which is a convenience. Past here
- * it is a value no screen here could have produced, so it is refused rather
- * than quietly cut down to two thirds of what was typed. */
+ * The import's own ceiling: up to here a value is cut to
+ * `OTHER_IMPORT_MAX_LENGTH`, which costs the end of a note. Past here it is
+ * refused rather than quietly cut down to two thirds of what was typed — a
+ * value that long is more likely a column that swallowed its neighbours than a
+ * note. */
 export const OTHER_MAX_LENGTH = 1024;
 
 export const JOIN_CODE_PATTERN = /^[0-9]{3}-[0-9]{4}-[0-9]{3}$/;
@@ -66,38 +65,45 @@ export const JOIN_CODE_PATTERN = /^[0-9]{3}-[0-9]{4}-[0-9]{3}$/;
 export const TEAM_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export const CREDENTIALS_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-export type TeamTsvProblemCode =
+/** Every problem the import can report. A list rather than only a union, so
+ * `swagger.test.ts` can hold the API document's enum to it. */
+export const TEAM_TSV_PROBLEM_CODES = [
   // The file as a whole.
-  | 'header-mismatch'
-  | 'missing-header'
-  | 'no-rows'
-  | 'wrong-column-count'
+  'header-mismatch',
+  'missing-header',
+  'no-rows',
+  'wrong-column-count',
   // One cell.
-  | 'empty-teamname'
-  | 'teamname-too-long'
-  | 'invalid-category'
-  | 'email-too-long'
-  | 'other-missing'
-  | 'other-truncated'
-  | 'other-too-long'
-  | 'invalid-team-id'
-  | 'invalid-join-code'
-  | 'invalid-credentials'
+  'empty-teamname',
+  'teamname-too-long',
+  'invalid-category',
+  'email-too-long',
+  'other-missing',
+  'other-truncated',
+  'other-too-long',
+  'invalid-team-id',
+  'invalid-join-code',
+  'invalid-credentials',
   // A value this file uses twice.
-  | 'duplicate-teamname'
-  | 'duplicate-team-id'
-  | 'duplicate-join-code'
+  'duplicate-teamname',
+  'duplicate-team-id',
+  'duplicate-join-code',
+  'duplicate-credentials',
   // A value a live team already holds. Only the server can see these, so
   // `parseTeamsTsv` never reports them.
-  | 'teamname-taken'
-  | 'team-id-taken'
-  | 'join-code-taken'
+  'teamname-taken',
+  'team-id-taken',
+  'join-code-taken',
+  'credentials-taken',
   // The row *is* a team that is already there, rather than clashing with one:
   // accepted and not written again. Server-only for the same reason.
-  | 'already-exists'
-  | 'category-differs'
-  | 'email-differs'
-  | 'database-refused';
+  'already-exists',
+  'category-differs',
+  'email-differs',
+  'database-refused',
+] as const;
+
+export type TeamTsvProblemCode = typeof TEAM_TSV_PROBLEM_CODES[number];
 
 export interface TeamTsvProblem {
   /** The file's own 1-based line number, header included, so it is the line a
@@ -168,7 +174,7 @@ function sameHeader(found: readonly string[]): boolean {
  * that happens: rows copied out of a spreadsheet without the line above them.
  */
 function looksLikeTeamRow(cells: readonly string[]): boolean {
-  return (TEAM_CATEGORIES as readonly string[]).includes(cells[1] ?? '')
+  return isCompetitionCategory(cells[1] ?? '')
     || TEAM_ID_PATTERN.test(cells[4] ?? '')
     || JOIN_CODE_PATTERN.test(cells[5] ?? '');
 }
@@ -211,6 +217,7 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
   const firstTeamname = new Map<string, number>();
   const firstTeamId = new Map<string, number>();
   const firstJoinCode = new Map<string, number>();
+  const firstCredentials = new Map<string, number>();
 
   for (let index = noHeader ? headerIndex : headerIndex + 1; index < lines.length; index++) {
     const row = index + 1;
@@ -261,7 +268,7 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
       }
     }
 
-    if (!(TEAM_CATEGORIES as readonly string[]).includes(category)) {
+    if (!isCompetitionCategory(category)) {
       error({ row, column: 'Category', code: 'invalid-category', found: category });
     }
 
@@ -276,13 +283,10 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
     } else if (other.length > OTHER_MAX_LENGTH) {
       error({ row, column: 'Other', code: 'other-too-long', found: `${other.length}` });
     } else if (other.length > OTHER_IMPORT_MAX_LENGTH) {
-      // Cut rather than refused, because the file that has one of these is an
-      // archive export: `other` carries the audit trail the admin routes append,
-      // so a team reset often enough comes back longer than the import keeps.
-      // Refusing it would take the whole file with it — the import is all or
-      // nothing — and the round trip is the only way to restore a batch onto
-      // another instance. The tail goes first, which is the trail; the notes an
-      // organiser typed are at the front.
+      // Cut rather than refused: refusing it would take the whole file with it
+      // — the import is all or nothing — over the one column that is notes
+      // rather than identity. The tail goes; what a note leads with, the names
+      // and the school, is at the front and survives.
       warn({ row, column: 'Other', code: 'other-truncated', found: `${other.length}` });
       keptOther = other.slice(0, OTHER_IMPORT_MAX_LENGTH);
     }
@@ -317,8 +321,17 @@ export function parseTeamsTsv(content: string): TeamTsvParseResult {
       }
     }
 
-    if (credentials !== '' && !CREDENTIALS_PATTERN.test(credentials)) {
-      error({ row, column: 'Credentials', code: 'invalid-credentials', found: credentials });
+    if (credentials !== '') {
+      if (!CREDENTIALS_PATTERN.test(credentials)) {
+        error({ row, column: 'Credentials', code: 'invalid-credentials', found: credentials });
+      } else {
+        const first = firstCredentials.get(credentials);
+        if (first === undefined) {
+          firstCredentials.set(credentials, row);
+        } else {
+          error({ row, column: 'Credentials', code: 'duplicate-credentials', found: credentials, otherRow: first });
+        }
+      }
     }
 
     rows.push({ row, teamname, category, email, other: keptOther, teamId, joinCode, credentials });

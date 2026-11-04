@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
-import { render, screen, fireEvent } from '@testing-library/react';
+import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Link, MemoryRouter, useLocation } from 'react-router';
-import { LanguageProvider } from './language-context';
-import { useLanguage } from 'strategy-engine/react';
+import { LanguageProvider, browserLanguage, siteLanguage, useLanguage } from './language-context';
+import i18next from './i18n';
 
 // The provider reads the language from two places at once — the `?lang=` param and
 // localStorage — and writes both, so the harness exposes the URL as well.
@@ -29,7 +31,12 @@ const renderAt = (entry = '/') => render(
 const language = () => screen.getByTestId('language').textContent;
 const search = () => screen.getByTestId('search').textContent;
 
-beforeEach(() => localStorage.clear());
+// jsdom's browser is American English, which the provider would follow; the
+// site's audience browses in Hungarian.
+beforeEach(() => {
+  localStorage.clear();
+  vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['hu-HU']);
+});
 
 describe('LanguageProvider', () => {
   it('is Hungarian when nothing says otherwise', () => {
@@ -59,7 +66,7 @@ describe('LanguageProvider', () => {
     expect(localStorage.getItem('lang')).toBe('en');
   });
 
-  it('clears both when Hungarian — the default — is chosen back', () => {
+  it('clears the URL but stores the choice when Hungarian — the default — is chosen back', () => {
     localStorage.setItem('lang', 'en');
     renderAt('/?lang=en');
 
@@ -67,7 +74,25 @@ describe('LanguageProvider', () => {
 
     expect(language()).toBe('hu');
     expect(search()).toBe('');
+    expect(localStorage.getItem('lang')).toBe('hu');
+  });
+
+  it('follows the browser language when nothing was chosen, without storing it', () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB', 'de']);
+    renderAt();
+    expect(language()).toBe('en');
     expect(localStorage.getItem('lang')).toBeNull();
+  });
+
+  it('keeps Hungarian chosen in an English browser', () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
+    renderAt('/?lang=en');
+
+    fireEvent.click(screen.getByText('choose hu'));
+    cleanup();
+    renderAt();
+
+    expect(language()).toBe('hu');
   });
 
   it('follows a navigation that carries a lang param', () => {
@@ -86,6 +111,77 @@ describe('LanguageProvider', () => {
 
     expect(search()).toBe('');
     expect(language()).toBe('en');
+  });
+});
+
+describe('LanguageProvider driving i18next', () => {
+  it('starts i18next in the language it read', () => {
+    localStorage.setItem('lang', 'en');
+    renderAt();
+    expect(i18next.language).toBe('en');
+  });
+
+  // A regression: i18next once followed only in an effect, so the first commit
+  // showed Hungarian to a reader who had chosen English.
+  it('renders the stored language from the very first commit', () => {
+    localStorage.setItem('lang', 'en');
+    const committed: string[] = [];
+    const Probe = () => {
+      const { t } = useTranslation('factory');
+      const text = t('newGame');
+      useLayoutEffect(() => { committed.push(text); });
+      return null;
+    };
+    render(<MemoryRouter><LanguageProvider><Probe /></LanguageProvider></MemoryRouter>);
+    expect(committed[0]).toBe('New game');
+  });
+
+  it('switches i18next along with its own state', () => {
+    renderAt();
+    expect(i18next.language).toBe('hu');
+
+    fireEvent.click(screen.getByText('choose en'));
+    expect(i18next.language).toBe('en');
+
+    fireEvent.click(screen.getByText('choose hu'));
+    expect(i18next.language).toBe('hu');
+  });
+});
+
+describe('siteLanguage', () => {
+  it('reads a regional tag as its language', () => {
+    expect(siteLanguage('en-GB')).toBe('en');
+    expect(siteLanguage('HU')).toBe('hu');
+  });
+
+  it('is null for a language the site does not have, or none', () => {
+    expect(siteLanguage('fr')).toBeNull();
+    expect(siteLanguage(null)).toBeNull();
+  });
+});
+
+describe('LanguageProvider and an unknown language', () => {
+  it('keeps i18next and its own state on the same supported language', () => {
+    localStorage.setItem('lang', 'en');
+    renderAt('/?lang=fr');
+    expect(language()).toBe('en');
+    expect(i18next.language).toBe('en');
+  });
+});
+
+describe('browserLanguage', () => {
+  it('is Hungarian when the browser lists it anywhere, even after English', () => {
+    expect(browserLanguage(['en-US', 'HU'])).toBe('hu');
+    expect(browserLanguage(['hu-HU'])).toBe('hu');
+  });
+
+  it('is English when the browser lists no Hungarian, whatever it lists instead', () => {
+    expect(browserLanguage(['en-GB'])).toBe('en');
+    expect(browserLanguage(['de-DE', 'fr'])).toBe('en');
+  });
+
+  it('is null for an empty list', () => {
+    expect(browserLanguage([])).toBeNull();
   });
 });
 

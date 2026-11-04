@@ -35,7 +35,7 @@ export const defaultGameplay: Gameplay<Board> = {
 };
 
 // Naming no move is a bug in a strategy, so the engine throws for it in dev
-// (see src/components/CLAUDE.md § Bot contract). A do-nothing default therefore
+// (see src/components/AGENTS.md § Bot contract). A do-nothing default therefore
 // left every vsComputer spec one stray scheduled beat away from failing on a
 // strategy it never meant to test — which is exactly how #490 came about. The
 // default plays instead: whatever gameplay the config carries, it names the

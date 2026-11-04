@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { range } from 'lodash';
+import { Trans, useTranslation } from 'react-i18next';
 import {
-  strategyGameFactory, GameBoard, type BoardClientProps, type StrategyArgs
+  strategyGameFactory, testVariantLabel, GameBoard, type BoardClientProps, type Ctx
 } from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import {
@@ -197,71 +198,24 @@ const BoardClient = ({ board: { bacteria, goals }, ctx, moves }: BoardClientProp
   );
 };
 
-const getPlayerStepDescription = ({ ctx }: StrategyArgs<Board>) => {
-  if (ctx.currentPlayer === ATTACKER) {
-    return {
-      hu: 'Kattints egy mezőre, amin van baktérium és hajtsd végre ' +
-        'a három lehetséges támadás egyikét egy további szabályos kattintással.',
-      en: 'Click on a square with bacteria and perform one of the three possible attacks with a second valid click.'
-    };
-  } else {
-    return {
-      hu: 'Kattints egy mezőre, amin van baktérium, hogy eltávolíts egy baktériumot onnan.',
-      en: 'Click on a square with bacteria to remove one bacterium from it.'
-    };
-  }
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('bacteria');
+  return ctx.currentPlayer === ATTACKER ? t('step.attacker') : t('step.defender');
 };
 
-const ruleBody = (goalsClause: { hu: string; en: string }) => ({
-  hu: <>
-    A zöld körökkel jelölt mezőkön (a tábla alsó sorában) baktériumok találhatók,
-    a tábla felső sorában {goalsClause.hu} mezők a CÉL mezők.
-    A játékban egy Támadó és Védekező játékos felváltva lép. A Védekező játékos
-    minden körében levesz pontosan 1 baktériumot bármely általa választott mezőről.
-    A Támadó játékos a következő háromféle lépés egyikét választhatja:
-    <br />
-    1. Egy mezőn lévő összes baktériummal egyszerre balra vagy jobbra lép egyet.
-    <br />
-    2. Egyetlen baktériummal előre ugrik két sornyit.
-    <br />
-    3. Kijelöl egy mezőt, ahol végbemegy a sejtosztódás. Ekkor az ezen mezőn
-    lévő összes baktérium osztódik: és mindegyikből egy-egy példány balra előre,
-    ill. jobbra előre lép.
-    <br />A Támadó akkor nyer, ha legalább egy baktérium bejut valamelyik CÉL
-    mezőbe; a Védekező pedig akkor, ha az összes baktérium eltűnt a pályáról.
-  </>,
-  en: <>
-    Squares with green dots (in the bottom row) contain bacteria; the marked squares
-    in the top row {goalsClause.en} are GOAL squares.
-    An Attacker and a Defender take turns. On each turn the
-    Defender removes exactly 1 bacterium from any square of their choice.
-    The Attacker chooses one of the following three moves:
-    <br />
-    1. Move all bacteria on one square one step left or right.
-    <br />
-    2. Move a single bacterium forward by two rows (a jump).
-    <br />
-    3. Select a square where cell division occurs: every bacterium on that square divides, and
-    one copy moves diagonally forward-left and one copy moves diagonally forward-right.
-    <br />The Attacker wins if at least one bacterium reaches a GOAL square; the Defender wins
-    if all bacteria are removed from the board.
-  </>
-});
-
-const rule = ruleBody({ hu: 'megjelölt', en: '' });
-const adjacentRule = ruleBody({ hu: 'megjelölt (szomszédos)', en: '— which are adjacent —' });
-const scatteredRule = ruleBody({ hu: 'megjelölt (nem feltétlenül szomszédos)', en: '— not necessarily adjacent —' });
-
-const roleLabels: [{ hu: string; en: string }, { hu: string; en: string }] = [
-  { hu: 'Támadó', en: 'Attacker' },
-  { hu: 'Védekező', en: 'Defender' }
-];
+// The variants differ only in how the rule describes the GOAL squares.
+const Rule = ({ goals }: { goals: 'any' | 'adjacent' | 'scattered' }) => {
+  const { t } = useTranslation('bacteria');
+  if (goals === 'adjacent') return <Trans t={t} i18nKey="rule.adjacent" />;
+  if (goals === 'scattered') return <Trans t={t} i18nKey="rule.scattered" />;
+  return <Trans t={t} i18nKey="rule.any" />;
+};
 
 export const Bacteria = strategyGameFactory({
   presentation: {
-    rule,
-    roleLabels,
-    getPlayerStepDescription
+    rule: <Rule goals="any" />,
+    roleLabels: [t => t('bacteria:role.attacker'), t => t('bacteria:role.defender')],
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
@@ -269,20 +223,20 @@ export const Bacteria = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       startBoards: testStartBoards,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: adjacentStartBoards,
-      rule: adjacentRule,
-      label: { hu: 'Szomszédos CÉLok', en: 'Adjacent GOALs' },
+      rule: <Rule goals="adjacent" />,
+      label: t => t('bacteria:variant.adjacent'),
       isDefault: true
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: scatteredStartBoards,
-      rule: scatteredRule,
-      label: { hu: 'Szórt CÉLok', en: 'Scattered GOALs' }
+      rule: <Rule goals="scattered" />,
+      label: t => t('bacteria:variant.scattered')
     }
   ]
 });

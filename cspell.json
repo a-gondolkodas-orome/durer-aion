@@ -58,6 +58,7 @@
     "gameover",
     "gamestate",
     "gamewrapper",
+    "gpgsign",
     "guessnum",
     "headlessly",
     "hflip",
@@ -68,7 +69,6 @@
     "letsencrypt",
     "lintable",
     "Lngs",
-    "logoutofthiswholething",
     "matchid",
     "maxpoints",
     "memoises",
@@ -80,15 +80,19 @@
     "multisets",
     "nameid",
     "negamax",
+    "networkidle",
     "newcops",
     "newgrp",
     "newstate",
+    "NOSYSTEM",
     "notistack",
     "NXDOMAIN",
+    "ocde",
     "onwarn",
     "packument",
     "passwordauthentication",
     "permitrootlogin",
+    "pglite",
     "PGPASSWORD",
     "playout",
     "playouts",
@@ -102,6 +106,7 @@
     "prevrelayid",
     "prevstratid",
     "privkey",
+    "requestfailed",
     "Robbable",
     "RRBBBB",
     "skimmable",
@@ -109,7 +114,6 @@
     "splittable",
     "Sprague",
     "strat",
-    "strategydict",
     "stratstep",
     "subtable",
     "supersegments",
@@ -138,10 +142,7 @@
     "unstub",
     "urlcat",
     "usermod",
-    "visszaállítás",
-    "visszaállítása",
-    "visszaállítod",
-    "visszaállítva",
+    "venv",
     "Vieta",
     "webroot",
     "worktree",
@@ -149,33 +150,24 @@
     "xors",
     "yearidx"
   ],
-  "flagWords": [],
+  "useGitignore": true,
   "ignorePaths": [
     "node_modules",
     "dist",
     "build",
     "site",
-    "*.log",
-    "package.json",
     "coverage/**/*",
-    "docker-compose*",
-    "scripts/test.tsv*",
     "**/src/teamData.ts"
-  ],
-  "languageSettings": [
-    {
-      "languageId": "typescript"
-    }
   ],
   "dictionaryDefinitions": [
     {
       "name": "hu-extra",
-      "path": "./hungarian-words.txt",
+      "path": "./cspell/hungarian-words.txt",
       "addWords": true
     },
     {
       "name": "hu-hunspell",
-      "path": "./hungarian-hunspell-words.txt"
+      "path": "./cspell/hungarian-hunspell-words.txt"
     }
   ],
   "overrides": [

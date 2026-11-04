@@ -11,8 +11,8 @@ import type { Variant } from 'strategy-engine';
 // highlight comes from the label's own class, so this is invisible on screen.)
 
 const variants: Variant[] = [
-  { originalIndex: 0, label: { hu: 'Könnyű', en: 'Easy' }, disabled: false, hasBotStrategy: true },
-  { originalIndex: 1, label: { hu: 'Nehéz', en: 'Hard' }, disabled: false, hasBotStrategy: true }
+  { originalIndex: 0, label: () => 'Könnyű', disabled: false, hasBotStrategy: true },
+  { originalIndex: 1, label: () => 'Nehéz', disabled: false, hasBotStrategy: true }
 ];
 
 describe('ModeSelector', () => {

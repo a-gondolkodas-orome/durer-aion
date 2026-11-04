@@ -1,0 +1,20 @@
+{
+  "board": {
+    "amount": "{{amount}} db",
+    "changeTo": "Legyen belőlük:",
+    "coinGroup": "{{amount}} darab {{value}} értékű érme",
+    "target": "{{value}} értékű érme"
+  },
+  "rule": {
+    "generic": "Kezdetben van 10 érme az asztalon, melyek értékei kis pozitív egészek (1-től 4-ig vagy 5-ig). A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz, hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti). Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni.",
+    "withMax": "Kezdetben van 10 érme az asztalon, melyek értékei 1 és {{maxValue}} közé eső egészek lehetnek. A két játékos felváltva lép. A soron lévő játékos kiválaszt egy K értéket, amire igaz, hogy van az asztalon K értékű érme, és az összes K értékű érmét átváltoztatja valamilyen kisebb L értékűre (mindet ugyanarra az L értékre, ahol az L érték 1 és K−1 közötti). Az nyer, akinek a lépése után minden érme azonos értékű lesz. A kezdőállás ismeretében Te döntheted el, hogy a kezdő vagy a második játékos bőrébe szeretnél-e bújni."
+  },
+  "step": {
+    "chooseTarget": "Válaszd ki, mi legyen a(z) {{value}} értékű érmék új (kisebb) értéke.",
+    "chooseValue": "Válaszd ki, melyik értékű érméket változtatod meg (egyszerre az összeset)."
+  },
+  "variant": {
+    "fiveValues": "5 érték",
+    "fourValues": "4 érték"
+  }
+}

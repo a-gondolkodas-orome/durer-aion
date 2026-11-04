@@ -1,18 +1,20 @@
 import { random } from 'lodash';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   strategyGameFactory,
   type BoardClientProps,
   GameBoard,
   useHoverPreview,
-  useDeferredMove
+  useDeferredMove,
+  testVariantLabel,
+  fullVariantLabel
 } from 'strategy-game-factory';
 import { PileArea, PileCard, previewProps, previewsByHover, type DiscardState } from '../pile-card';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isSplitAllowed, moves, withPileRemoved, type Board, type Piece } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pile-splitting-games');
   const { value: validHoveredPiece, ...preview } = useHoverPreview<Piece>(ctx.moveCount);
   const deferMove = useDeferredMove(ctx.moveCount);
 
@@ -67,10 +69,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
     return {
       disabled,
-      'aria-label': t({
-        hu: `vágás a(z) ${pieceId + 1}. korong után`,
-        en: `split after piece ${pieceId + 1}`
-      }),
+      'aria-label': t('board.splitAfter', { number: pieceId + 1 }),
       onClick: () => clickPiece({ pileId, pieceId }),
       ...(disabled ? {} : previewProps({ pileId, pieceId }, preview))
     };
@@ -94,42 +93,33 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const getPlayerStepDescription = () => ({
-  hu: 'Kattints a korongra, ahol ketté akarod vágni a kupacot.',
-  en: 'Click the piece where you want to split the pile.'
-});
+const Rule = () => {
+  const { t } = useTranslation('pile-splitting-games');
+  return <Trans t={t} i18nKey="rule.two" />;
+};
 
-const rule = {
-  hu: <>
-    A pályán mindig két kupac korong található.
-    A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe
-    legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk.
-    Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    There are always two piles of pieces on the board. The current player chooses one pile and
-    splits it into two smaller piles (each must contain at least 1 piece); the other pile is
-    discarded. The player who cannot move loses.
-  </>
+const StepDescription = () => {
+  const { t } = useTranslation('pile-splitting-games');
+  return t('step.two');
 };
 
 export const PileSplitter = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt', en: 'Test' },
+      label: testVariantLabel,
       generateStartBoard: () => ([random(2, 5), random(2, 5)])
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: () => ([random(3, 10), random(3, 10)]),
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

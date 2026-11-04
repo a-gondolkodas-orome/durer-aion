@@ -6,12 +6,10 @@ import {
 } from './gameplay';
 import { policeWin, smartBotStrategy } from './bot-strategy';
 
-// ---------------------------------------------------------------------------
 // Independent reference, written straight from the rules: no memoisation and no
 // code shared with the module under test, so the search is graded against
 // something other than itself. `movesLeft` is how many of the thief's moves are
 // still to come.
-// ---------------------------------------------------------------------------
 const refPoliceWinAfterPoliceTurn = (
   p0: number, p1: number, thief: number, movesLeft: number
 ): boolean => {

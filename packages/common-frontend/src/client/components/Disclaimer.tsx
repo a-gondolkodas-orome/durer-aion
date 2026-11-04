@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import { Stack, alpha } from "@mui/system";
 import { useToHome } from "../hooks/user-hooks";
-import { useClientRepo } from "../api-repository-interface";
+import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 

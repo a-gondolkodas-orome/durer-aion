@@ -1,0 +1,46 @@
+{
+  "doublingReduction": {
+    "rule": "Két játékos felváltva vesz el néhány kavicsot egy kupacból. Minden lépésben legalább egy kavicsot el kell venni. Az veszít, aki nem tud szabályosan lépni. A kezdő játékos az első lépésben legfeljebb eggyel kevesebb kavicsot vehet el, mint amennyi a kupacban van; ezután mindenki szigorúan kevesebbet vehet el, mint kétszer annyit, mint amennyit a másik játékos az előző lépésben elvett."
+  },
+  "pebblePile": {
+    "pebbles": "Kavicsok",
+    "step": "Kattints egy kavicsra: legfeljebb {{cap}} kavicsot vehetsz el."
+  },
+  "primeExponentials": {
+    "board": {
+      "power": "Kivonandó prímhatvány:",
+      "result": "Eredmény:"
+    },
+    "rule": "Egy 1000-nél kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék, ebből a játékosok felváltva vonnak le egy tetszőleges prímhatványt. Az nyer, aki a nullát mondja!",
+    "step": "Válassz egy prímhatványt amit kivonsz."
+  },
+  "primelyToZero": {
+    "rule": "A bábu a 30 és 80 közé eső egyik mezőről indul. A soron következő játékos a bábut egy kisebb sorszámú mezőre lépteti, de a lépés mérete (a két mező sorszámának különbsége) sosem lehet összetett szám. Az nyer, aki a 0 mezőre lép.",
+    "step": "Válaszd ki, melyik mezőre lépsz."
+  },
+  "take1OrHalve": {
+    "board": {
+      "takeHalf": "Elveszem a felét",
+      "takeOne": "Elveszek egyet"
+    },
+    "rule": "Kezdetben van egy kupac zseton az asztalon. A soron lévő játékos elvehet egy zsetont a kupacból, vagy ha páros számú zseton van az asztalon, akkor elveheti a zsetonok felét. Az nyer, akinek a lépése után nem marad zseton az asztalon.",
+    "step": {
+      "even": "Egy zsetont vegyél el vagy felezz.",
+      "odd": "Vegyél el egy zsetont."
+    }
+  },
+  "takePowerOfTwo": {
+    "board": {
+      "availablePowers": "Lehetséges hatványok:",
+      "preview": "Kivonandó 2-hatvány: 2^{{exponent}} = {{power}}. Eredmény: {{result}}."
+    },
+    "rule": "Egy 300-nál kisebb, (gép által meghatározott) pozitív egész számtól kezdődik a játék, ebből a játékosok felváltva vonnak le egy tetszőleges 2-hatványt. Az nyer, aki a nullát mondja!",
+    "step": "Válaszd ki a 2 hatványát amit ki szeretnél vonni."
+  },
+  "threeMore": {
+    "rule": "Ketten felváltva vesznek el egy kupac kavicsból legalább egy kavicsot. A kezdő játékos első lépésben legfeljebb 4 kavicsot vehet el. Ezután mindkét játékos maximum hárommal több kavicsot vehet el, mint amennyit a másik vett el legutóbb. Az nyer, aki az utolsó kavicso(ka)t veszi el."
+  },
+  "waningStones": {
+    "rule": "Ketten felváltva vesznek el egy kupac kavicsból legalább egy kavicsot. A kezdő első lépésben legfeljebb a kezdeti kavicsok felét veheti el. Ezután mindkét játékos maximum annyit vehet el, mint amennyit a másik vett el legutóbb. Az nyer, aki az utolsó kavicso(ka)t veszi el."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "rule": {
+    "fiveSquares": "Players place pieces on a board of five squares. One piece is on the board at the start. Each round the first player places one piece, then the second player places two pieces (both may go on the same or different squares). The game ends after 3 rounds when the 10th piece is placed. The second player wins if every square has a different number of pieces at the end.",
+    "twoTimesTwo": "There is a board with 4 squares. Both players take turns placing one piece at a time, for a total of 3 pieces each. The second player wins if, at the end of the game, all squares hold a different number of pieces — i.e., there is exactly one square with 3 pieces, one with 2, one with 1, and one with 0."
+  },
+  "step": {
+    "fiveSquares": {
+      "first": "Click the square where you want to place the first piece. (1/2)",
+      "second": "Click the square where you want to place the second piece. (2/2)",
+      "single": "Click the square where you want to place a piece. (1/1)"
+    },
+    "twoTimesTwo": "Click the square where you want to place a piece."
+  }
+}

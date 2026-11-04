@@ -4,7 +4,7 @@ import { Button, alpha } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import {
-  OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH, TeamTsvProblem, TeamTsvProblemCode,
+  COMPETITION_CATEGORIES, OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH, TeamTsvProblem, TeamTsvProblemCode,
   parseTeamsTsv, teamsToImportTsv,
 } from 'schemas';
 import { ImportResultDto } from '../dto/TeamStateDto';
@@ -21,24 +21,26 @@ const PROBLEM_TEXT: Record<TeamTsvProblemCode, string> = {
   'wrong-column-count': 'Több oszlop van a sorban, mint a formátumban — valószínűleg tabulátor került valamelyik mezőbe.',
   'empty-teamname': 'Hiányzik a csapatnév.',
   'teamname-too-long': 'A csapatnév túl hosszú (legfeljebb 255 karakter).',
-  'invalid-category': 'A kategória nem C, D vagy E.',
+  'invalid-category': `A kategória nem ${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} vagy ${COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1]}.`,
   'email-too-long': 'Az e-mail cím túl hosszú (legfeljebb 255 karakter).',
   'other-missing': 'Az „Other” mező üres. Ez alapján lehet később azonosítani a csapatot: nevek, iskola, e-mail címek.',
   'other-truncated': `Az „Other” mező hosszabb, mint amennyit az importálás megtart: `
-    + `az első ${OTHER_IMPORT_MAX_LENGTH} karakter kerül be, a végén lévő előzmények nem.`,
+    + `az első ${OTHER_IMPORT_MAX_LENGTH} karakter kerül be, a többi nem.`,
   'other-too-long': `Az „Other” mező túl hosszú (legfeljebb ${OTHER_MAX_LENGTH} karakter).`,
   'invalid-team-id': 'Az ID nem érvényes UUIDv4.',
   'invalid-join-code': 'A belépőkód nem 111-2222-333 alakú.',
   'invalid-credentials': 'A credentials nem érvényes UUID.',
+  'duplicate-credentials': 'Ez a credentials kétszer szerepel a fájlban.',
   'duplicate-teamname': 'Ez a csapatnév kétszer szerepel a fájlban.',
   'duplicate-team-id': 'Ez az ID kétszer szerepel a fájlban.',
   'duplicate-join-code': 'Ez a belépőkód kétszer szerepel a fájlban.',
   'teamname-taken': 'Már van ilyen nevű csapat.',
   'team-id-taken': 'Már van ilyen ID-jú csapat.',
   'join-code-taken': 'Már van ilyen belépőkódú csapat.',
+  'credentials-taken': 'Ez a credentials már egy másik csapaté.',
   'already-exists': 'Ez a csapat már létezik: változatlanul marad, nem importáljuk újra.',
   'category-differs': 'A csapat már létezik, más kategóriával (fájlban ≠ élőben). NEM változtattuk meg — '
-    + 'ha tényleg át kell sorolni, az admin felületen kell.',
+    + 'a kategóriát csak az adatbázisban, kézzel lehet módosítani.',
   'email-differs': 'A csapat már létezik, más e-mail címmel (fájlban ≠ élőben). NEM változtattuk meg.',
   'database-refused': 'Az adatbázis visszautasította ezt a sort.',
 };
@@ -112,9 +114,10 @@ function exportFileName(): string {
 ///
 /// `onImported` fires when teams are live, since the list the page's other tab
 /// shows is stale from that moment, and it carries the join codes the import
-/// generated. Those are held by the page rather than here: no admin screen
-/// shows a join code, so this table is the only copy, and this tab is unmounted
-/// the moment the organiser goes to look at the teams that just landed.
+/// generated. Those are held by the page rather than here: this tab's answer is
+/// about one file and the next one replaces it, while the codes of every import
+/// the page made are worth keeping — a team's dialog shows its own code, one
+/// team at a time, so this table is the only list of them.
 export function ImportTeams(props: {
   exported: string[][] | null,
   onImported: (exportTable: string[][]) => void,
@@ -218,8 +221,8 @@ export function ImportTeams(props: {
           : `${answer.imported} új csapat importálva, ${answer.accepted} már létezett`,
         { variant: 'success' },
       );
-      // Handed over without being asked for, since a closed tab means digging
-      // the codes out of the database by hand. Its own catch because the import
+      // Handed over without being asked for, since a closed tab means opening
+      // every new team's dialog to read its code off one at a time. Its own catch because the import
       // has already succeeded: reporting a failed download as a failed import
       // would send the organiser to re-run one that cannot work twice.
       try {

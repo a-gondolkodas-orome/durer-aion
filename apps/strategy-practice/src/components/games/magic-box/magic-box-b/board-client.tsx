@@ -1,21 +1,12 @@
 import { range } from 'lodash';
-import { useTranslation, type I18nString } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { LINES, type Board } from './gameplay';
-
-const LINE_LABELS: I18nString[] = [
-  { hu: '1. sor', en: 'Row 1' },
-  { hu: '2. sor', en: 'Row 2' },
-  { hu: '3. sor', en: 'Row 3' },
-  { hu: '1. oszlop', en: 'Column 1' },
-  { hu: '2. oszlop', en: 'Column 2' },
-  { hu: '3. oszlop', en: 'Column 3' }
-];
 
 const BOX_SIZE = 'w-64 sm:w-72';
 
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('magic-box');
   const { stones, pendingLine } = board;
 
 
@@ -53,8 +44,8 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
                 key={row}
                 disabled={!moves.designateLine.isAllowed(board, row)}
                 onClick={() => moves.designateLine(board, row)}
-                title={t(LINE_LABELS[row])}
-                aria-label={t(LINE_LABELS[row])}
+                title={t('board.row', { number: row + 1 })}
+                aria-label={t('board.row', { number: row + 1 })}
                 className={`${selectorButtonClass} w-10`}
               >
                 ←
@@ -69,8 +60,8 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
               key={col}
               disabled={!moves.designateLine.isAllowed(board, 3 + col)}
               onClick={() => moves.designateLine(board, 3 + col)}
-              title={t(LINE_LABELS[3 + col])}
-              aria-label={t(LINE_LABELS[3 + col])}
+              title={t('board.column', { number: col + 1 })}
+              aria-label={t('board.column', { number: col + 1 })}
               className={`${selectorButtonClass} h-10`}
             >
               ↑

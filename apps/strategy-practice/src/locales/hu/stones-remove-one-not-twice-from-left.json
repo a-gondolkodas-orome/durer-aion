@@ -1,0 +1,8 @@
+{
+  "board": {
+    "left": "Bal",
+    "right": "Jobb"
+  },
+  "rule": "Két kupacban kavicsok vannak elhelyezve. A két játékos felváltva lép, és minden lépés során egy kavicsot kell elvenniük valamelyik kupacból. Egy játékos azonban nem vehet el két egymást követő lépésben a bal oldali kupacból. Az veszít, aki nem tud lépni.",
+  "step": "Kattints a kupacra ahonnan el szeretnél venni egy kavicsot."
+}

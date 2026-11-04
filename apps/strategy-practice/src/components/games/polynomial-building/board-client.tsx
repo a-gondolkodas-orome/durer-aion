@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { type BoardClientProps, GameBoard } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { type Board, type Coef, COEFS, integerRoots } from './gameplay';
 
 // Any integer is allowed; the digit cap only keeps arithmetic exact (< 2^53).
@@ -28,7 +28,7 @@ const CoefChip = (
 );
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('polynomial-building');
   const [inputs, setInputs] = useState<Record<Coef, string>>({ a: '', b: '', c: '' });
 
   // The text has to parse before there is a value to judge; from there on the
@@ -77,7 +77,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 onKeyDown={e => { if (e.key === 'Enter') submit(coef); }}
                 className="w-36 px-2 py-1.5 rounded-md border-2 border-slate-400
                   disabled:opacity-50 bg-transparent"
-                placeholder={t({ hu: 'egész szám', en: 'integer' })}
+                placeholder={t('board.integer')}
               />
               <button
                 disabled={!isValidValue(inputs[coef])
@@ -87,7 +87,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900
                   enabled:hocus:border-blue-300 disabled:opacity-50"
               >
-                {t({ hu: 'Beállít', en: 'Set' })}
+                {t('board.set')}
               </button>
             </div>
           ))}
@@ -97,14 +97,11 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {roots !== undefined && (
         <p className="mt-4 text-sm">
           {roots
-            ? t({
-              hu: `P(x) = ${factor(roots[0])}·${factor(roots[1])}·${factor(roots[2])} — gyökök: ${roots.join(', ')}`,
-              en: `P(x) = ${factor(roots[0])}·${factor(roots[1])}·${factor(roots[2])} — roots: ${roots.join(', ')}`
+            ? t('board.roots', {
+              product: `${factor(roots[0])}·${factor(roots[1])}·${factor(roots[2])}`,
+              roots: roots.join(', ')
             })
-            : t({
-              hu: 'A polinomnak nincs három egész gyöke.',
-              en: 'The polynomial does not have three integer roots.'
-            })}
+            : t('board.noIntegerRoots')}
         </p>
       )}
     </GameBoard>

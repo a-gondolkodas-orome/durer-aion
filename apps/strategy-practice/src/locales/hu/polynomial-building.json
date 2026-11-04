@@ -1,0 +1,18 @@
+{
+  "board": {
+    "integer": "egész szám",
+    "noIntegerRoots": "A polinomnak nincs három egész gyöke.",
+    "roots": "P(x) = {{product}} — gyökök: {{roots}}",
+    "set": "Beállít"
+  },
+  "role": {
+    "first": "1. játékos (egész gyökök)",
+    "second": "2. játékos"
+  },
+  "rule": "Legyen <formula>P(x) = x³ + ax² + bx + c</formula> egy polinom. Két játékos felváltva határozza meg a, b, c értékeit. Tetszőleges sorrendben választanak a, b, c értékeinek egész számokat. Az első játékos célja, hogy a polinomnak mindhárom gyöke egész legyen. A második játékos célja, hogy ezt megakadályozza.",
+  "step": {
+    "last": "Állítsd be az utolsó együtthatót ({{coefs}}) egy egész számra.",
+    "oneOfRemaining": "Állítsd be az egyik hátralévő együtthatót ({{coefs}}) egy egész számra.",
+    "or": "vagy"
+  }
+}

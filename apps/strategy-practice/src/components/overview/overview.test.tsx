@@ -3,6 +3,7 @@ import { render, screen, within, fireEvent } from '@testing-library/react';
 import { Overview } from './overview';
 import type { Category, GameList, IconKey } from '../games/gameList';
 import { HashRouter } from 'react-router';
+import i18next from 'i18next';
 
 interface CanonicalConstants { iconKeys: readonly IconKey[]; categories: readonly Category[] }
 
@@ -10,19 +11,27 @@ vi.mock('../games/gameList', async (importOriginal): Promise<CanonicalConstants 
   ...(await importOriginal<CanonicalConstants>()),
   gameList: {
     GameA1: {
-      name: { hu: 'A egy' },
       category: ['A'],
       year: { k: '', v: '11/12' },
       round: 'döntő',
       featured: true,
       icon: 'chess'
     },
-    GameA2: { name: { hu: 'A kettő' }, category: ['A'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'number' },
-    GameB1: { name: { hu: 'B egy' }, category: ['B'], year: { k: '', v: '13/14' }, round: 'döntő', icon: 'number' },
-    GameC1: { name: { hu: 'C egy' }, category: ['C'], year: { k: '', v: '14/15' }, round: 'online', icon: 'coins' },
-    GameCD: { name: { hu: 'CD' }, category: ['C', 'D'], year: { k: '', v: '15/16' }, round: 'döntő', icon: 'piles' }
+    GameA2: { category: ['A'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'number' },
+    GameB1: { category: ['B'], year: { k: '', v: '13/14' }, round: 'döntő', icon: 'number' },
+    GameC1: { category: ['C'], year: { k: '', v: '14/15' }, round: 'online', icon: 'coins' },
+    GameCD: { category: ['C', 'D'], year: { k: '', v: '15/16' }, round: 'döntő', icon: 'piles' }
   }
 }));
+
+// The mocked games' names, where the real ones live: the catalog namespace.
+i18next.addResourceBundle('hu', 'catalog', {
+  GameA1: { name: 'A egy' },
+  GameA2: { name: 'A kettő' },
+  GameB1: { name: 'B egy' },
+  GameC1: { name: 'C egy' },
+  GameCD: { name: 'CD' }
+}, true);
 
 const renderOverview = () => render(<HashRouter><Overview /></HashRouter>);
 

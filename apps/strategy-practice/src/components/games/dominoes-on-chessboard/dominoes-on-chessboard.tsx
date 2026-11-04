@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { range, isEqual } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard, useHoverPreview
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { isCovered, moves, BOARDSIZE, type Board, type Field } from './gameplay';
 
@@ -126,39 +129,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const toldalek = {
-  '4': 'e',
-  '6': 'o',
-  '8': 'a'
-}
+const Rule = () => {
+  const { t } = useTranslation('dominoes-on-chessboard');
+  return <Trans t={t} i18nKey="rule" values={{ size: BOARDSIZE }} />;
+};
 
-const rule = {
-  hu: <>
-    Két játékos felváltva tesz egy-egy dominót egy {BOARDSIZE} × {BOARDSIZE}-{toldalek[BOARDSIZE]}s
-    sakktáblára úgy, hogy két élszomszédos üres mezőt fedjen le. Az veszít, aki nem tud tenni.
-  </>,
-  en: <>
-    Two players take turns placing a domino on a {BOARDSIZE} × {BOARDSIZE} chessboard so that it
-    covers two adjacent empty squares. The player who cannot place a domino loses.
-  </>
+const StepDescription = () => {
+  const { t } = useTranslation('dominoes-on-chessboard');
+  return t('step');
 };
 
 export const DominoesOnChessboard = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy üres mezőre, majd egy szomszédjára, hogy lehelyezz egy dominót.',
-      en: 'Click an empty square, then a neighbour of it, to place a domino.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [[]],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true,
       notAlwaysOptimal: true
     }

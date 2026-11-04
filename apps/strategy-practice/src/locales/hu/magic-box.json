@@ -1,0 +1,21 @@
+{
+  "board": {
+    "column": "{{number}}. oszlop",
+    "row": "{{number}}. sor"
+  },
+  "role": {
+    "placeFirst": "Először rakok",
+    "placeSecond": "Másodszor rakok"
+  },
+  "rule": {
+    "a": "A mágikus ládában kilenc rekesz van 3×3-as elrendezésben. Két játékos felváltva pakol köveket a láda rekeszeibe, minden rekeszbe legfeljebb egy kő rakható. Ha egy sorban vagy oszlopban mindhárom rekeszben van kő, a láda alja kiszakad. Az a játékos veszít, akinek a lépése után a láda kiszakad.",
+    "b": "A mágikus ládában kilenc rekesz van 3×3-as elrendezésben. Két játékos felváltva pakol köveket a láda rekeszeibe, minden rekeszbe legfeljebb egy kő rakható. Az egyik játékos kijelöl egy sort vagy oszlopot, és a másik játékosnak ebbe a sorba vagy oszlopba kell raknia egy követ. Ezután a szerepek megfordulnak: aki most rakott le egy követ, kijelöl egy sort vagy oszlopot a másiknak, és ez így ismétlődik felváltva. A játék akkor ér véget, ha valaki nem tud követ lerakni a kijelölt sorba vagy oszlopba — ő veszít. Az elején eldönthetitek, hogy ki rakja le az első követ, és ki jelöl ki elsőként sort vagy oszlopot."
+  },
+  "step": {
+    "a": "Helyezz le egy kavicsot egy üres rekeszbe kattintással.",
+    "b": {
+      "designate": "Jelölj ki egy sort vagy oszlopot, ahova a másik játékosnak a következő követ kell raknia.",
+      "place": "Helyezz le egy kavicsot a kijelölt sorba vagy oszlopba."
+    }
+  }
+}

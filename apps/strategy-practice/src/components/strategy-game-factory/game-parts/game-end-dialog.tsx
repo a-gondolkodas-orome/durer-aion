@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { ModeSelector, DifficultySelector } from './common/game-controls';
 import { getCtaText } from './common/cta-text';
 import type { Ctx, Variant, Mode } from 'strategy-engine';
@@ -19,7 +19,7 @@ const NewGameControls = ({
   getVariantsForMode: (mode: Mode) => Variant[]
   onNewGame: (mode: Mode, variantIndex: number) => void
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
   const [localMode, setLocalMode] = useState<Mode>(ctx.isHumanVsHumanGame ? 'vsHuman' : 'vsComputer');
   const [localVariantIndex, setLocalVariantIndex] = useState(selectedVariantIndex);
 
@@ -54,7 +54,7 @@ const NewGameControls = ({
         onClick={() => onNewGame(localMode, localVariantIndex)}
         className="primary-button"
       >
-        {t({ hu: 'Új játék', en: 'New game' })}
+        {t('newGame')}
       </button>
     </div>
   );
@@ -71,7 +71,7 @@ export const GameEndDialog = ({
   getVariantsForMode: (mode: Mode) => Variant[]
   onNewGame: (mode: Mode, variantIndex: number) => void
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('factory');
 
   return (
     <Dialog
@@ -84,17 +84,17 @@ export const GameEndDialog = ({
         <DialogPanel className="rounded-sm bg-surface-elevated max-w-sm w-full p-2">
           <header className="flex items-baseline mb-2">
             <DialogTitle className="grow block text-xl sm:text-2xl text-center">
-              {t({ hu: 'A játék véget ért', en: 'Game over' })}
+              {t('gameOver')}
             </DialogTitle>
             <button
               onClick={() => setIsOpen(false)}
-              aria-label={t({ hu: 'Bezárás', en: 'Close' })}
+              aria-label={t('close')}
               className="bg-slate-200 dark:bg-slate-700 rounded-sm text-xl sm:text-2xl px-1
                 hocus:bg-slate-300 dark:hocus:bg-slate-600"
             >×</button>
           </header>
           <Description className="text-base sm:text-lg block text-justify mb-2">
-            {t(getCtaText(ctx))}
+            {getCtaText(ctx, t)}
           </Description>
           <NewGameControls
             ctx={ctx}

@@ -1,0 +1,4 @@
+{
+  "rule": "Two players take turns colouring one small triangle. A triangle may only be coloured if none of its side-adjacent triangles have been coloured yet. The player who cannot move loses.",
+  "step": "Click on a small triangle."
+}

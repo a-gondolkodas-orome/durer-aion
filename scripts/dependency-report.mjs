@@ -1,42 +1,45 @@
 // A lockfile pins every dependency exactly, so a package four minors behind looks exactly like one
-// released yesterday until something asks. This reports what is behind (README § Dependency
-// updates), across every workspace at once.
+// released yesterday until something asks. This reports what is behind (docs/DEPENDENCIES.md),
+// across every workspace at once, and with `--write` makes the routine half of it: `npm run
+// update:minors` bumps every pin to the newest release inside its major.
 //
 // It is the outward-facing half of check-versions.test.mjs: that one compares the versions
 // written down in this repo against *each other* and fails the test run on a mismatch; this one compares them against *upstream* and never fails anything.
 //
 // Four sources, each read-only over the network:
 //   - npm packages: every workspace's dependencies + devDependencies, against the registry's
-//     `latest` dist-tag. The workspaces themselves are not among them — see npmRows.
+//     `latest` dist-tag — or the newest version below it that `.npmrc`'s min-release-age lets npm
+//     install, see release-age.mjs. The workspaces themselves are not among them — see npmPins.
 //   - GitHub Actions: every `uses:` in .github/workflows, against the action's latest release.
-//   - Node: each .nvmrc, against the newest release sharing its major.
+//   - Node: the .nvmrc, against the newest release sharing its major.
 //   - Docker images: the tag each deployed image is pinned to, against Docker Hub — see DOCKER_IMAGES.
 //
 // Deliberately not `npm outdated`: the lockfile already names the installed version, so the
-// registry can be asked directly and this needs no install and no node_modules.
+// registry can be asked directly, and the script needs nothing from node_modules.
 // Deliberately not `npm audit` either — advisories are Dependabot alerts' job, and they arrive with
 // an urgency a monthly digest would only dilute.
 import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { isWorkspaceLink, resolvedVersion } from './resolved-versions.mjs';
+import { compareStable, isStable, newestMature, newestWithinMajor, releases } from './release-age.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 const read = file => readFileSync(`${repoRoot}${file}`, 'utf8');
+const manifestPath = workspace => (workspace ? `${workspace}/package.json` : 'package.json');
 
 const WORKFLOWS = '.github/workflows/';
 
 // Places a version is written down that no package.json names, so a bump has to touch them in the
 // same commit. check-versions.test.mjs fails until they agree; this only says where to look.
-export const ALSO_WRITTEN_IN = {
+const ALSO_WRITTEN_IN = {
   playwright: ['apps/strategy-practice/.devcontainer/Dockerfile']
 };
 
 // Majors this repo has decided not to take yet, and the one line that says why. Listing them
 // among the real work made every month's issue read as five upgrades when only one was: they are
 // reported, because a hold worth keeping is worth re-reading, but in their own section.
-// README § Held back deliberately owns the reasoning and is where a hold is argued or lifted; the
-// value here is only the caption a table cell has room for. The spec fails when the two lists stop
-// naming the same packages, so a hold cannot be lifted in one of them alone.
+// DEPENDENCIES.md § Held back deliberately owns the reasoning and is where a hold is argued or
+// lifted; the line here is only the caption a table cell has room for. The spec fails when the two
+// lists stop naming the same packages, so a hold cannot be lifted in one of them alone.
 export const HELD_BACK = {
   koa: 'boardgame.io constructs the Koa app, at koa@^2',
   '@koa/router': 'the backend types boardgame.io\'s own @koa/router@10 instance',
@@ -44,17 +47,11 @@ export const HELD_BACK = {
   '@types/node': 'policy: tracks the Node major in .nvmrc'
 };
 
-// Node is written down far more often than it is depended on, and listing all of it in a table cell
-// would crowd out the version. check-versions.test.mjs carries the list; the row carries the count.
-const NVMRC_COMPANIONS = {
-  '.nvmrc': ['4 more files — see scripts/check-versions.test.mjs']
-};
-
 // The images a deployment actually runs. Pinning them exactly (#203) made two deploys weeks apart
 // the same deploy; it also means nothing moves them when a base image ships a security patch, which
 // is what these rows are for.
 // `line` is how many version components a row may not cross, and the reasoning is the same one
-// nodeRows gives: a major is a decision, not a monthly nudge — the compose file argues postgres's.
+// nodeRow gives: a major is a decision, not a monthly nudge — the compose file argues postgres's.
 // nginx is the exception at 2, because its majors and minors both carry meaning: 1.30.x is the
 // stable line and 1.31.x is mainline, both current on Docker Hub, so a major-wide row would keep
 // offering mainline as if it were a patch.
@@ -79,6 +76,66 @@ const fetchJson = async url => {
   return response.json();
 };
 
+// The version `workspace` installs, from the lockfile — '' is the root package. npm hoists what it
+// can and nests the rest, and which one is not stable across installs; when a package is in both
+// places, the nested copy is the one that workspace resolves, so it is looked at first.
+export const findResolved = (lockfile, name, workspace = '') =>
+  (workspace && lockfile.packages[`${workspace}/node_modules/${name}`]?.version)
+  || lockfile.packages[`node_modules/${name}`]?.version;
+
+let lockfile;
+export const resolvedVersion = (name, workspace) =>
+  findResolved(lockfile ??= JSON.parse(read('package-lock.json')), name, workspace);
+
+// The workspaces npm installs, plus '' for the root package, which carries the shared build and
+// test tooling. Read from the `workspaces` field rather than globbed off disk: a directory left
+// behind by a rename keeps its node_modules and has no package.json to read.
+const workspaces = () => {
+  const { workspaces: patterns } = JSON.parse(read('package.json'));
+  return ['', ...patterns.flatMap(pattern => {
+    if (!pattern.endsWith('/*')) return [pattern];
+    const parent = pattern.slice(0, -2);
+    return readdirSync(`${repoRoot}${parent}`)
+      .map(entry => `${parent}/${entry}`)
+      .filter(dir => existsSync(`${repoRoot}${dir}/package.json`));
+  })];
+};
+
+// Every registry dependency of every workspace: `{ name, current, uses }`, where `current` is the
+// installed version and `uses` the `{ workspace, section, pinned }` entries that name it.
+// Keyed by package *and* installed version, not by name: a workspace is free to pin a version
+// the others have not taken yet, and one row per name would report one of the two versions as
+// if it were both. Two upgrades, two rows — and `where` says which is which.
+const npmPins = manifests => {
+  // A sibling workspace has no upstream to be behind: it is this repo, and the registry answers
+  // about whatever public package happens to share its name (`game`, `schemas`).
+  const ownNames = new Set(manifests.values().map(manifest => manifest.name));
+  const pins = new Map();
+  for (const [workspace, manifest] of manifests) {
+    for (const section of ['dependencies', 'devDependencies']) {
+      for (const [name, pinned] of Object.entries(manifest[section] ?? {})) {
+        if (ownNames.has(name)) continue;
+        // The installed version, not the declared range: comparing `^1.2.0` against the registry's
+        // `1.5.0` would report every dependency as behind forever.
+        const current = resolvedVersion(name, workspace) ?? pinned;
+        const key = `${name}@${current}`;
+        if (!pins.has(key)) pins.set(key, { name, current, uses: [] });
+        pins.get(key).uses.push({ workspace, section, pinned });
+      }
+    }
+  }
+  return [...pins.values()].sort((a, b) => a.name.localeCompare(b.name) || a.current.localeCompare(b.current));
+};
+
+const readManifests = () => new Map(workspaces().map(workspace => [workspace, JSON.parse(read(manifestPath(workspace)))]));
+
+// One registry question per package, however many rows or pins name it.
+const lookups = new Map();
+const releasesOf = name => {
+  if (!lookups.has(name)) lookups.set(name, releases(name));
+  return lookups.get(name);
+};
+
 // A row is { name, current, where, latest } once resolved, or { name, current, where, error } when
 // the lookup failed. A failed lookup is reported, never thrown: one unreachable registry must not
 // cost the whole report, and a row that silently vanished would read as "up to date".
@@ -90,48 +147,10 @@ const checkVersion = async (name, current, where, lookup) => {
   }
 };
 
-// The workspaces npm installs, plus '' for the root package, which carries the shared build and
-// test tooling. Read from the `workspaces` field rather than globbed off disk: a directory left
-// behind by a rename keeps its node_modules and has no package.json to read.
-export const workspaces = () => {
-  const { workspaces: patterns } = JSON.parse(read('package.json'));
-  return ['', ...patterns.flatMap(pattern => {
-    if (!pattern.endsWith('/*')) return [pattern];
-    const parent = pattern.slice(0, -2);
-    return readdirSync(`${repoRoot}${parent}`)
-      .map(entry => `${parent}/${entry}`)
-      .filter(dir => existsSync(`${repoRoot}${dir}/package.json`));
-  })];
-};
-
-const npmRows = () => {
-  // Keyed by package *and* installed version, not by name: a workspace is free to pin a version
-  // the others have not taken yet, and one row per name would report one of the two versions as
-  // if it were both. Two upgrades, two rows — and `where` says which is which.
-  const rows = new Map();
-
-  for (const workspace of workspaces()) {
-    const packageJson = JSON.parse(read(workspace ? `${workspace}/package.json` : 'package.json'));
-    for (const [name, declared] of Object.entries({ ...packageJson.dependencies, ...packageJson.devDependencies })) {
-      // A sibling workspace has no upstream to be behind: it is this repo, and the registry answers
-      // about whatever public package happens to share its name. See resolved-versions.mjs.
-      if (isWorkspaceLink(name, workspace)) continue;
-      // The installed version, not the declared range: comparing `^1.2.0` against the registry's
-      // `1.5.0` would report every dependency as behind forever. See resolved-versions.mjs.
-      const current = resolvedVersion(name, workspace) ?? declared;
-      const key = `${name}@${current}`;
-      if (!rows.has(key)) rows.set(key, { name, current, where: [] });
-      rows.get(key).where.push(workspace || 'root');
-    }
-  }
-
-  return [...rows.values()]
-    .sort((a, b) => a.name.localeCompare(b.name) || a.current.localeCompare(b.current))
-    .map(({ name, current, where }) =>
-      checkVersion(name, current, [...where, ...(ALSO_WRITTEN_IN[name] ?? [])], async () =>
-        (await fetchJson(`https://registry.npmjs.org/${name}/latest`)).version)
-    );
-};
+const npmRows = manifests => npmPins(manifests).map(({ name, current, uses }) => {
+  const where = [...new Set(uses.map(({ workspace }) => workspace || 'root')), ...(ALSO_WRITTEN_IN[name] ?? [])];
+  return checkVersion(name, current, where, async () => newestMature({ current, ...(await releasesOf(name)) }));
+});
 
 const actionRows = () => {
   const workflows = readdirSync(`${repoRoot}${WORKFLOWS}`).filter(file => /\.ya?ml$/.test(file));
@@ -155,24 +174,21 @@ const actionRows = () => {
     }));
 };
 
-const nodeRows = () => {
-  const files = ['.nvmrc', ...workspaces().filter(Boolean).map(workspace => `${workspace}/.nvmrc`)]
-    .filter(file => existsSync(`${repoRoot}${file}`));
-
-  return files.map(file => {
-    const current = read(file).trim();
-    return checkVersion('Node', current, [file, ...(NVMRC_COMPANIONS[file] ?? [])], async () => {
-      const releases = await fetchJson('https://nodejs.org/dist/index.json');
-      const major = current.split('.')[0];
-      // The feed is newest-first, and staying on the pinned major is the point — a major bump is a
-      // decision, not something a monthly report should nudge.
-      const newest = releases.find(release => release.version.replace(/^v/, '').split('.')[0] === major);
-      if (!newest) throw new Error(`no release found for Node ${major}.x`);
-      // An .nvmrc names either a whole major (`24`) or an exact version (`24.11.1`), and a file
-      // that pins only the major is current for the whole of it. Compare at the precision it was
-      // written with, or the root would be reported behind every month with nothing to change.
-      return newest.version.replace(/^v/, '').split('.').slice(0, current.split('.').length).join('.');
-    });
+// Node is written down far more often than it is depended on, and listing all of it in a table cell
+// would crowd out the version. check-versions.test.mjs carries the list; the row carries the count.
+const nodeRow = () => {
+  const current = read('.nvmrc').trim();
+  return checkVersion('Node', current, ['.nvmrc', 'the rest in check-versions.test.mjs'], async () => {
+    const feed = await fetchJson('https://nodejs.org/dist/index.json');
+    const major = current.split('.')[0];
+    // The feed is newest-first, and staying on the pinned major is the point — a major bump is a
+    // decision, not something a monthly report should nudge.
+    const newest = feed.find(release => release.version.replace(/^v/, '').split('.')[0] === major);
+    if (!newest) throw new Error(`no release found for Node ${major}.x`);
+    // An .nvmrc names either a whole major (`24`) or an exact version (`24.11.1`), and a file
+    // that pins only the major is current for the whole of it. Compare at the precision it was
+    // written with, or it would be reported behind every month with nothing to change.
+    return newest.version.replace(/^v/, '').split('.').slice(0, current.split('.').length).join('.');
   });
 };
 
@@ -216,14 +232,16 @@ const dockerRows = () => DOCKER_IMAGES.map(({ image, where, line }) => {
 const isMajorBump = ({ current, latest }) =>
   current.replace(/^v/, '').split('.')[0] !== latest.replace(/^v/, '').split('.')[0];
 
+// A hold is about the major: a patch released inside the version we are held at is still routine,
+// so only a major bump of a held package is a held row.
+const isHeld = row => !row.error && row.current !== row.latest && isMajorBump(row) && row.name in HELD_BACK;
+
 // Pure: rows in, markdown out. The only branchy part of this script, and the only part worth a spec.
 export const formatReport = rows => {
   const failed = rows.filter(row => row.error);
   const behind = rows.filter(row => !row.error && row.current !== row.latest);
-  // A hold is about the major: a patch released inside the version we are held at is still routine,
-  // so only the major bumps are partitioned, and the rest of the split is untouched.
-  const held = behind.filter(row => isMajorBump(row) && row.name in HELD_BACK);
-  const major = behind.filter(row => isMajorBump(row) && !(row.name in HELD_BACK));
+  const held = behind.filter(isHeld);
+  const major = behind.filter(row => isMajorBump(row) && !isHeld(row));
   const minor = behind.filter(row => !isMajorBump(row));
 
   if (behind.length === 0 && failed.length === 0) {
@@ -259,15 +277,15 @@ export const formatReport = rows => {
     ...table(
       `Major (${major.length})`,
       major,
-      'One at a time, against the upstream upgrade guide — see [#168](https://github.com/a-gondolkodas-orome/durer-jatekok/issues/168) for the shape.'
+      'One at a time, against the upstream upgrade guide — see [#253](https://github.com/a-gondolkodas-orome/durer-aion/pull/253) for the shape.'
     ),
-    // Absolute, not relative: this report's home is an issue body, where `README.md#…` resolves
+    // Absolute, not relative: this report's home is an issue body, where `DEPENDENCIES.md#…` resolves
     // against the issue rather than the repository.
     ...table(
       `Held back deliberately (${held.length})`,
       held,
-      'Not work: each stays until its named blocker moves — see [README § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion#held-back-deliberately).',
-      ['held back by', ({ name }) => HELD_BACK[name]]
+      'Not work: each stays until its named blocker moves — see [DEPENDENCIES.md § Held back deliberately](https://github.com/a-gondolkodas-orome/durer-aion/blob/main/docs/DEPENDENCIES.md#held-back-deliberately).',
+      ['held back by', row => HELD_BACK[row.name]]
     ),
     ...(failed.length === 0
       ? []
@@ -277,22 +295,94 @@ export const formatReport = rows => {
         ...failed.map(({ name, current, where, error }) => `- \`${name}\` (pinned ${current} in ${where.join(', ')}): ${error}`),
         ''
       ]),
+    // No package.json names latex.js, so none of the sources above sees it, and it releases too
+    // rarely to be worth one of its own.
+    'latex.js is loaded from jsdelivr and pinned in each frontend\'s `index.html`, outside this table: compare that pin with [npm](https://www.npmjs.com/package/latex.js) by hand.',
+    '',
     '<sub>Generated by `npm run report:outdated`. Majors stay manual; this only remembers.</sub>'
   ].join('\n');
 };
 
-// Guarded so the spec can import formatReport without the script reaching for the network.
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const rows = await Promise.all([...npmRows(), ...actionRows(), ...nodeRows(), ...dockerRows()]);
-  const report = formatReport(rows);
+const report = async () => {
+  const rows = await Promise.all([...npmRows(readManifests()), ...actionRows(), nodeRow(), ...dockerRows()]);
+  const text = formatReport(rows);
 
   const outFile = process.argv[process.argv.indexOf('--out') + 1];
-  if (process.argv.includes('--out') && outFile) writeFileSync(outFile, report);
-  console.log(report);
+  if (process.argv.includes('--out') && outFile) writeFileSync(outFile, text);
+  console.log(text);
 
   // The workflow decides whether to open, edit or close its issue from this, rather than by
   // grepping the report's prose. A failed lookup deliberately counts as "behind": the one thing
   // the report must never do is stay quiet about a version it could not check.
   const behind = rows.some(({ error, current, latest }) => error || current !== latest);
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `behind=${behind}\n`);
+};
+
+// `--write`, the routine half of docs/DEPENDENCIES.md: every pin to the newest installable release
+// inside its major, in every workspace at once. A package several workspaces share lands on one
+// number by construction, so the tree keeps deduping it to a single install. Majors never move here
+// — a major is a decision, taken one at a time (#168) — which is also what keeps the held-back
+// list respected without consulting it. Edits the package.json files and nothing else; the
+// lockfile is npm's to write.
+const writeMinors = async () => {
+  const manifests = readManifests();
+  const pins = npmPins(manifests);
+  const names = [...new Set(pins.map(({ name }) => name))];
+  // A failed lookup is a report, not a crash — but it does fail the run, because a dependency
+  // silently left behind would read as "already current".
+  const found = new Map(await Promise.all(names.map(async name => [name, await releasesOf(name).catch(error => error)])));
+
+  const bumped = new Map(); // `${name} ${from} -> ${to}` line -> [workspaces]
+  const changed = new Set();
+  const problems = [];
+  for (const { name, uses } of pins) {
+    const lookup = found.get(name);
+    for (const { workspace, section, pinned } of uses) {
+      const where = workspace || 'root';
+      if (lookup instanceof Error) {
+        problems.push(`${name} (pinned ${pinned} in ${where}): ${lookup.message}`);
+        continue;
+      }
+      if (!isStable(pinned)) {
+        problems.push(`${name} in ${where}: '${pinned}' is not an exact stable version, left alone`);
+        continue;
+      }
+      // Only what `.npmrc`'s min-release-age lets npm install; a release still inside the window
+      // is the next sweep's.
+      const newest = newestWithinMajor(lookup.mature, pinned);
+      // Undefined, or below the pin, when the pin itself is younger than the window — taken on
+      // purpose (docs/DEPENDENCIES.md § Release-age cooldown), so never walked back.
+      if (newest === undefined || compareStable(newest, pinned) <= 0) continue;
+      manifests.get(workspace)[section][name] = newest;
+      changed.add(workspace);
+      const line = `${name.padEnd(35)} ${pinned.padEnd(10)} -> ${newest}`;
+      if (!bumped.has(line)) bumped.set(line, []);
+      bumped.get(line).push(where);
+    }
+  }
+
+  for (const workspace of changed) {
+    writeFileSync(`${repoRoot}${manifestPath(workspace)}`, JSON.stringify(manifests.get(workspace), null, 2) + '\n');
+  }
+
+  if (bumped.size === 0) {
+    console.log(`Every pinned version is current within its major — ${names.length} packages checked.`);
+  } else {
+    console.log(`Bumped, within each pinned major (${bumped.size} of ${names.length} packages):\n`);
+    for (const [line, where] of [...bumped].sort()) console.log(`  ${line}   (${where.join(', ')})`);
+    // npm test includes check-versions.test.mjs, which fails until a bump reaches ALSO_WRITTEN_IN too.
+    console.log('\nNext: npm install,');
+    console.log('then the usual gates — npm run build, npm run lint, npm run typecheck, npm test.');
+    console.log('Majors stay with npm run report:outdated.');
+  }
+
+  if (problems.length > 0) {
+    console.error(`\nCould not update (${problems.length}):\n${problems.map(problem => `  ${problem}`).join('\n')}`);
+    process.exitCode = 1;
+  }
+};
+
+// Guarded so the spec can import formatReport without the script reaching for the network.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  await (process.argv.includes('--write') ? writeMinors() : report());
 }

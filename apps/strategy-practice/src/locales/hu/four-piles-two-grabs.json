@@ -1,0 +1,9 @@
+{
+  "board": {
+    "decrease": "−1 a(z) {{number}}. kupacból",
+    "increase": "+1 a(z) {{number}}. kupacból",
+    "submit": "Elveszem a kavicsokat"
+  },
+  "rule": "Négy kupacban vannak kavicsok. A két játékos felváltva lép: a soron következő játékos kiválaszt két nem üres kupacot, és mindegyikből elvesz néhány kavicsot (mindkettőből legalább egyet; a két kupacból elvett mennyiség lehet különböző). Az a játékos veszít, aki nem tud lépni – vagyis az nyer, akinek a lépése után már legfeljebb egy kupacban marad kavics.",
+  "step": "Válassz két nem üres kupacot, és állítsd be, hány kavicsot veszel el belőlük."
+}

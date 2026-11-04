@@ -1,0 +1,20 @@
+{
+  "board": {
+    "day": "Day {{day}} · {{kmUsed}}/{{kmPerDay}} km",
+    "endDay": "End Day",
+    "night": "Night {{day}}"
+  },
+  "role": {
+    "architect": "Architect",
+    "bandits": "Bandits"
+  },
+  "rule": {
+    "a": "The city of Óxisz is surrounded by a regular octagon-shaped wall, with adjacent vertices 10 km apart. The city's architect wants to build a watchtower at each of the eight vertices in four days, but the bandits want to prevent this. The architect builds a tower whenever their daily journey touches a vertex (including at the very start or end of the day) where no tower stands yet. The architect starts from vertex A, can only move along the walls, can travel at most 40 km per day, and must spend the night at a vertex. Each night the bandits may choose one vertex and destroy the tower there. The architect wins if all eight vertices have a watchtower at sunset on day four; otherwise the bandits win.",
+    "b": "The city of Óxisz is surrounded by a regular decagon-shaped wall, with adjacent vertices 10 km apart. The city's architect wants to build a watchtower at each of the ten vertices in four days, but the bandits want to prevent this. The architect builds a tower whenever their daily journey touches a vertex (including at the very start or end of the day) where no tower stands yet. The architect starts from vertex A, can only move along the walls, can travel at most 50 km per day, and must spend the night at a vertex. Each night the bandits may choose one vertex and destroy the tower there. The architect wins if all ten vertices have a watchtower at sunset on day four; otherwise the bandits win."
+  },
+  "step": {
+    "architect": "Day {{day}}: Move to an adjacent vertex ({{movesLeft}} moves left), or end the day.",
+    "bandits": "Night {{day}}: Click a tower to destroy it.",
+    "endDay": "Day {{day}}: End the day!"
+  }
+}

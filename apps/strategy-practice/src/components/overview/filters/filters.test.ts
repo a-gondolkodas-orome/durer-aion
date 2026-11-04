@@ -3,13 +3,13 @@ import type { GameList } from '../../games/gameList';
 
 const list: GameList = {
   EasyA: {
-    name: { hu: 'A' }, category: ['A'], year: { k: '', v: '11/12' }, round: 'döntő', featured: true, icon: 'chess'
+    category: ['A'], year: { k: '', v: '11/12' }, round: 'döntő', featured: true, icon: 'chess'
   },
-  EasyB: { name: { hu: 'B' }, category: ['B'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'coins' },
+  EasyB: { category: ['B'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'coins' },
   MidCD: {
-    name: { hu: 'CD' }, category: ['C', 'D'], year: { k: '', v: '20/21' }, round: 'döntő', featured: true, icon: 'coins'
+    category: ['C', 'D'], year: { k: '', v: '20/21' }, round: 'döntő', featured: true, icon: 'coins'
   },
-  HardE: { name: { hu: 'E' }, category: ['E', 'E+'], year: { k: '', v: '22/23' }, round: 'online', icon: 'number' }
+  HardE: { category: ['E', 'E+'], year: { k: '', v: '22/23' }, round: 'online', icon: 'number' }
 };
 
 describe('filterByCategories', () => {

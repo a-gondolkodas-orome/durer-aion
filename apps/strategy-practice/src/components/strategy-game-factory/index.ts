@@ -13,5 +13,6 @@ export type {
 } from 'strategy-engine';
 
 export { strategyGameFactory } from './strategy-game-factory';
+export { testVariantLabel, fullVariantLabel } from './game-parts/common/labels';
 export type { StrategyGame } from './strategy-game-factory';
 export { GameBoard, useHoverPreview, useMoveScopedState, useDeferredMove } from 'strategy-engine/react';

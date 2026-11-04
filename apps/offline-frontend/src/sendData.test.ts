@@ -3,8 +3,7 @@ import type { LogEntry } from "boardgame.io";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // The join code names every uploaded file; where it is stored is
-// stored-team-state's business, and mocking it keeps this suite off the
-// workspace packages' unbuilt `dist`.
+// stored-team-state's business.
 vi.mock("./stored-team-state", () => ({
   readStoredTeamState: () => ({ joinCode: "ABC123" }),
 }));
@@ -21,7 +20,7 @@ const entry = {
 } as unknown as LogEntry;
 
 // Never resolves: sendData logs the response status, and a test run keeps its
-// output to the report (vitest.setup.mts). What it sent is what matters here.
+// output to the report (vitest/setup.mts). What it sent is what matters here.
 const fetchMock = vi.fn(
   (_input: RequestInfo | URL, _init?: RequestInit) => new Promise<Response>(() => undefined)
 );

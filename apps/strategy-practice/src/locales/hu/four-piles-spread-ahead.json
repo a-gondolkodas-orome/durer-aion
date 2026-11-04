@@ -1,0 +1,7 @@
+{
+  "board": {
+    "pile": "{{number}}. kupac"
+  },
+  "rule": "Adott négy, korongokból álló kupac, melyek 1-től 4-ig vannak számozva. Egy lépésben a soron következő játékos választ m és n egész számokat, melyekre <formula>1 ≤ m < n ≤ 4</formula>, majd az n sorszámú kupacból elvesz m korongot, és az <formula>n − 1, n − 2, . . . , n − m</formula> sorszámú kupacokba egyesével szétosztja az elvett korongokat. Az veszít, aki nem tud lépni.",
+  "step": "Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból."
+}

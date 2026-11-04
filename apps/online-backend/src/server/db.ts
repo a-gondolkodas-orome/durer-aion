@@ -1,10 +1,8 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { InProgressMatchStatus } from 'schemas';
+import { GameType } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
-import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
-import { InferAttributes, InferCreationAttributes, Sequelize, Op, Transaction, UniqueConstraintError, ValidationError, WhereOptions } from 'sequelize';
-import type { OmitTimestamps } from './model';
+import { Sequelize, Op, ValidationError, WhereOptions } from 'sequelize';
 
 /** The fields an import supplies for a team; everything else about a new team
  * is the same for all of them. */
@@ -18,20 +16,21 @@ export interface NewTeam {
   credentials: string;
 }
 
-/** The values live teams already hold, for an importer that has to generate the
- * ones a file left blank and wants to say which row clashes rather than hand
- * back a constraint name. */
+/** The values live teams already hold — one set per unique column — for an
+ * importer that has to generate the ones a file left blank and wants to say
+ * which row clashes rather than hand back a constraint name. */
 export interface TakenIdentifiers {
   teamIds: Set<string>;
   teamNames: Set<string>;
   joinCodes: Set<string>;
+  credentials: Set<string>;
 }
 
 /** A live team as the import reads it.
  *
  * Whole rows rather than a set per column, because the import has to tell a row
  * that *is* one of these teams from a row that merely clashes with one, and
- * three independent sets cannot say which team a value belongs to.
+ * independent sets cannot say which team a value belongs to.
  *
  * `category` and `email` come along so an accepted row can be checked against
  * what is live and the differences named. `other` deliberately does not: the
@@ -42,6 +41,7 @@ export interface LiveTeam {
   teamId: string;
   teamName: string;
   joinCode: string;
+  credentials: string;
   category: string;
   email: string;
 }
@@ -55,26 +55,6 @@ class ImportRejected extends Error {
   }
 }
 
-/** What one deletion moved and one restore moves back: how many teams, and the
- * team names for an answer an organiser can read. */
-export interface RestoreResult {
-  restored: string[];
-  conflicts: string[];
-}
-
-// The team's own columns, by name, so a restore copies exactly those off an
-// archive row and not the two the archive adds.
-const teamColumns = Object.keys(teamAttributes) as (keyof InferAttributes<TeamModel, OmitTimestamps>)[];
-
-// `%` and `_` are wildcards inside a LIKE pattern, so a fragment carrying them
-// would match more than the caller asked for — a bare `%` matches every team.
-// Backslash is postgres' default LIKE escape character, so no ESCAPE clause is
-// needed; it has to escape itself too, or a trailing one would escape the `%`
-// that the pattern appends.
-export function escapeLike(fragment: string): string {
-  return fragment.replace(/[\\%_]/g, character => `\\${character}`);
-}
-
 // Everything a new team starts with beyond what the file supplies: no matches
 // played, and the disclaimer still to accept.
 function newTeamRow(team: NewTeam) {
@@ -85,11 +65,20 @@ function newTeamRow(team: NewTeam) {
     category: team.category,
     email: team.email,
     credentials: team.credentials,
-    strategyMatch: { state: "NOT STARTED" } as const,
-    relayMatch: { state: "NOT STARTED" } as const,
+    strategyMatchID: null,
+    relayMatchID: null,
     teamName: team.teamname,
     pageState: 'DISCLAIMER' as const,
   };
+}
+
+// `%` and `_` are wildcards inside a LIKE or ILIKE pattern, so a fragment
+// carrying them would match more than the caller asked for — a bare `%` matches
+// every team. Backslash is postgres' default escape character for both, so no
+// ESCAPE clause is needed; it has to escape itself too, or a trailing one would
+// escape the `%` that the pattern appends.
+export function escapeLike(fragment: string): string {
+  return fragment.replace(/[\\%_]/g, character => `\\${character}`);
 }
 
 export class TeamsRepository {
@@ -100,37 +89,26 @@ export class TeamsRepository {
       sequelize: db.sequelize,
       tableName: "Teams",
     });
-    DeletedTeamModel.init(deletedTeamAttributes, {
-      sequelize: db.sequelize,
-      tableName: "DeletedTeams",
-    });
   }
   async connect() {
     await this.sequelize.sync();
   }
   /**
-   * Teams whose `other` field contains every one of the given fragments.
-   * An empty list matches all teams: `Sequelize.and()` with no arguments
-   * produces no WHERE clause.
+   * Teams whose `other` field contains every one of the given fragments,
+   * whatever their case: the column is the organisers' own notes, so what an
+   * organiser types is a fragment they remember rather than the case it was
+   * stored in. An empty list matches all teams: `Sequelize.and()` with no
+   * arguments produces no WHERE clause.
+   *
+   * `ILIKE` folds case the way the database's own locale says, so the accented
+   * letters fold only on a UTF-8 aware one: on a cluster initialised with plain
+   * `C`, `Ő` and `ő` stay different while ASCII still folds. Accents are not
+   * folded away on any locale — `Adam` does not find `Ádám`.
    */
   async fetch(filter: string[]) : Promise<TeamModel[]> {
     return await TeamModel.findAll({ where:
-      Sequelize.and(...filter.map(part => ({ 'other': { [Op.like]: `%${escapeLike(part)}%` } }))),
+      Sequelize.and(...filter.map(part => ({ 'other': { [Op.iLike]: `%${escapeLike(part)}%` } }))),
     });
-  }
-
-  async deduceMatch(matchID:string):Promise<TeamModel | null> {
-    const matches =  await TeamModel.findAll({ where:
-      Sequelize.or([
-        { relayMatch: 'IN PROGRESS' },
-        { strategyMatch: 'IN PROGRESS' }
-      ])
-    });
-    console.log(matches)
-    return matches.find(team => {
-      return (team.relayMatch as InProgressMatchStatus).matchID === matchID ||
-        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
-    }) ?? null;
   }
 
   async listTeams(): Promise<TeamModel[] | null> {
@@ -142,24 +120,60 @@ export class TeamsRepository {
       (searchCondition)
     });
   }
+  /**
+   * Puts the team into its new match, but only while its page and both match
+   * ids are still the ones `team` holds, so of two starts made from the same
+   * reading only one is written. Returns whether the row was written.
+   */
+  async startMatch(team: TeamModel, gameType: GameType, matchID: string): Promise<boolean> {
+    const [updated] = await TeamModel.update({
+      pageState: gameType,
+      [gameType === "RELAY" ? "relayMatchID" : "strategyMatchID"]: matchID,
+    }, {
+      where: {
+        teamId: team.teamId,
+        pageState: team.pageState,
+        relayMatchID: team.relayMatchID,
+        strategyMatchID: team.strategyMatchID,
+      },
+    });
+    return updated > 0;
+  }
+  /**
+   * Takes the team home, but only while both match ids are still the ones
+   * `team` holds: whether a match is in progress is read off the match, not
+   * the row, so the caller checks that, and a start landing after it read the
+   * team changes an id here. Returns whether the row was written.
+   */
+  async goHome(team: TeamModel): Promise<boolean> {
+    const [updated] = await TeamModel.update({ pageState: "HOME" }, {
+      where: { teamId: team.teamId, relayMatchID: team.relayMatchID, strategyMatchID: team.strategyMatchID },
+    });
+    return updated > 0;
+  }
+
+  async insertTeam(team: NewTeam) {
+    return await TeamModel.create(newTeamRow(team));
+  }
 
   /**
-   * The teams an import has to reckon with. Read before one so a generated join
-   * code is checked against them rather than trusted, so a clash is reported
-   * against the row that causes it, and so a row naming a team that is already
-   * there can be recognised as that team rather than refused.
+   * The teams an import has to reckon with. Read before one so a generated
+   * identifier is checked against them rather than trusted, so a clash is
+   * reported against the row that causes it, and so a row naming a team that is
+   * already there can be recognised as that team rather than refused.
    *
    * It is not the guard — the unique constraints are, and `insertTeams` rolls
    * the file back on one. This read only buys the readable answer.
    */
   async liveTeams(): Promise<LiveTeam[]> {
     const teams = await TeamModel.findAll({
-      attributes: ['teamId', 'teamName', 'joinCode', 'category', 'email'],
+      attributes: ['teamId', 'teamName', 'joinCode', 'credentials', 'category', 'email'],
     });
     return teams.map(team => ({
       teamId: team.teamId,
       teamName: team.teamName,
       joinCode: team.joinCode,
+      credentials: team.credentials,
       category: team.category,
       email: team.email,
     }));
@@ -169,12 +183,10 @@ export class TeamsRepository {
    * A whole import, in one transaction: every team or none. Returns the row the
    * database refused, or null when they all went in.
    *
-   * All-or-nothing, unlike `restoreBatch` next door, which deliberately gives
-   * each row its own transaction. The difference is that a restore invents
-   * nothing — the archived rows carry their own join codes, so re-running one
-   * is idempotent. An import generates the codes it writes, so a half-finished
-   * one cannot be retried: the teams that landed would clash with themselves on
-   * the second run, and their codes would be split across two export files.
+   * An import generates the codes it writes, so a half-finished one could not
+   * be cleanly retried: the teams that landed would be accepted on the second
+   * run rather than written, and their codes would be split across two export
+   * files.
    *
    * One transaction is also the fast way to do it. 500 rows under autocommit is
    * 500 commits, each waiting on its own fsync; here it is one.
@@ -197,99 +209,6 @@ export class TeamsRepository {
       if (error instanceof ImportRejected) return { failedRow: error.failedRow, error: error.validation };
       throw error;
     }
-  }
-
-  /**
-   * Copies the team into `DeletedTeams`, then drops it: how many were dropped,
-   * so 0 for a team that was not there. One transaction, so a failure between
-   * the two statements leaves both tables as they were rather than a team gone
-   * without its copy; and the row is locked while it is read, so two admins
-   * deleting the same team at once archive it once, and the second is told it
-   * was not there.
-   *
-   * The team's matches stay. The archived row keeps both match ids, and the
-   * match rows are the record of what was played.
-   */
-  async removeTeam(teamId: string): Promise<number> {
-    return await this.sequelize.transaction(async transaction => {
-      const team = await TeamModel.findOne({ where: { teamId }, transaction, lock: Transaction.LOCK.UPDATE });
-      if (!team) return 0;
-      await DeletedTeamModel.create({
-        ...team.toJSON(),
-        deletedAt: new Date(),
-      }, { transaction });
-      return await TeamModel.destroy({ where: { teamId }, transaction });
-    });
-  }
-
-  /**
-   * Every team into the archive under one `deletedAt`, then all of them
-   * dropped, in one transaction. The shared timestamp is what makes the rows a
-   * batch: the archive has no column for one, and `sequelize.sync()` would not
-   * add it to an existing table (DEPLOYMENT.md), so the timestamp is what a
-   * caller names the batch by when restoring it.
-   */
-  async removeAllTeams(): Promise<{ deleted: number, deletedAt: Date }> {
-    return await this.sequelize.transaction(async transaction => {
-      const teams = await TeamModel.findAll({ transaction, lock: Transaction.LOCK.UPDATE });
-      const deletedAt = new Date();
-      await DeletedTeamModel.bulkCreate(
-        teams.map(team => ({ ...team.toJSON(), deletedAt })),
-        { transaction },
-      );
-      const deleted = await TeamModel.destroy({ where: { teamId: teams.map(team => team.teamId) }, transaction });
-      return { deleted, deletedAt };
-    });
-  }
-
-  /** The archive, newest deletion first; within a batch, in deletion order. */
-  async listDeletedTeams(): Promise<DeletedTeamModel[]> {
-    return await DeletedTeamModel.findAll({ order: [['deletedAt', 'DESC'], ['deletionId', 'ASC']] });
-  }
-
-  /**
-   * The archived row back into `Teams` with everything it had — page state and
-   * both matches included, so a team deleted mid-round resumes where it was —
-   * and out of the archive, in one transaction. `null` for a `deletionId` the
-   * archive does not have.
-   *
-   * A live team holding the same id, join code or name fails the insert on its
-   * unique constraint, and sequelize's `UniqueConstraintError` propagates: the
-   * transaction rolls back and the archive keeps its row. There is no check
-   * ahead of the insert, because the constraint is the check and cannot race.
-   */
-  async restoreTeam(deletionId: number): Promise<TeamModel | null> {
-    return await this.sequelize.transaction(async transaction => {
-      const archived = await DeletedTeamModel.findOne({ where: { deletionId }, transaction, lock: Transaction.LOCK.UPDATE });
-      if (!archived) return null;
-      const values = archived.toJSON();
-      const team = Object.fromEntries(
-        teamColumns.map(column => [column, values[column]]),
-      ) as InferCreationAttributes<TeamModel, OmitTimestamps>;
-      const restored = await TeamModel.create(team, { transaction });
-      await DeletedTeamModel.destroy({ where: { deletionId }, transaction });
-      return restored;
-    });
-  }
-
-  /**
-   * A batch — the rows sharing a `deletedAt` — restored row by row, each in its
-   * own transaction, so a team that clashes with a live one is reported and the
-   * rest still come back. A row someone else restored meanwhile is in neither
-   * list.
-   */
-  async restoreBatch(deletedAt: Date): Promise<RestoreResult> {
-    const rows = await DeletedTeamModel.findAll({ where: { deletedAt }, order: [['deletionId', 'ASC']] });
-    const result: RestoreResult = { restored: [], conflicts: [] };
-    for (const row of rows) {
-      try {
-        if (await this.restoreTeam(row.deletionId)) result.restored.push(row.teamName);
-      } catch (error) {
-        if (!(error instanceof UniqueConstraintError)) throw error;
-        result.conflicts.push(row.teamName);
-      }
-    }
-    return result;
   }
 }
 

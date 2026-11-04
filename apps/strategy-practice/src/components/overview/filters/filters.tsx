@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
-import { every } from 'lodash';
 import { gameList, categories, iconKeys, type Category, type GameList, type IconKey } from '../../games/gameList';
-import { useTranslation, type I18nString } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameIcon, iconLabels } from '../game-icons';
 
 // Keep only games matching at least one of the selected categories. An empty
@@ -12,9 +11,7 @@ export const filterByCategories = (
   list: GameList
 ): string[] => {
   if (selected.length === 0) return ids;
-  return ids.filter(id =>
-    !every(list[id].category, c => !selected.includes(c))
-  );
+  return ids.filter(id => list[id].category.some(c => selected.includes(c)));
 };
 
 // The distinct icons actually used by the catalog, in canonical `iconKeys`
@@ -55,12 +52,12 @@ export const FilterToggle = ({ open, onToggle, activeCount }: {
   onToggle: () => void
   activeCount: number
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('overview');
   return (
     <button
       onClick={onToggle}
       aria-expanded={open}
-      aria-label={t({ hu: 'Szűrők', en: 'Filters' })}
+      aria-label={t('filters.toggle')}
       className={`
         h-8 px-2 inline-flex items-center gap-1 rounded-sm drop-shadow-md
         ${open || activeCount > 0 ? 'primary-control-selected' : 'primary-control-muted'}
@@ -85,18 +82,18 @@ interface FilterOption<T> {
 }
 
 const FilterRow = <T,>({ label, options, selected, onChange }: {
-  label: I18nString
+  label: string
   options: FilterOption<T>[]
   selected: T[]
   onChange: (selected: T[]) => void
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('overview');
   const toggle = (value: T) =>
     onChange(selected.includes(value) ? selected.filter(s => s !== value) : [...selected, value]);
 
   return (
     <div className="flex flex-wrap items-center gap-1 text-sm">
-      <span className="w-20 shrink-0">{t(label)}</span>
+      <span className="w-20 shrink-0">{label}</span>
       {options.map(({ value, content, label: optionLabel, buttonClassName }) => {
         const isSelected = selected.includes(value);
         return (
@@ -116,7 +113,7 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
       <button
         onClick={() => onChange([])}
         disabled={selected.length === 0}
-        aria-label={t({ hu: 'Szűrés törlése', en: 'Clear filters' })}
+        aria-label={t('filters.clear')}
         className={`
           h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
           enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
@@ -130,29 +127,33 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
 export const CategoryFilter = ({ selected, onChange }: {
   selected: Category[]
   onChange: (selected: Category[]) => void
-}) => (
-  <FilterRow
-    label={{ hu: 'Kategória', en: 'Category' }}
-    selected={selected}
-    onChange={onChange}
-    options={categories.map(c => ({ value: c, content: c }))}
-  />
-);
+}) => {
+  const { t } = useTranslation('overview');
+  return (
+    <FilterRow
+      label={t('filters.category')}
+      selected={selected}
+      onChange={onChange}
+      options={categories.map(c => ({ value: c, content: c }))}
+    />
+  );
+};
 
 export const IconFilter = ({ selected, onChange }: {
   selected: IconKey[]
   onChange: (selected: IconKey[]) => void
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('overview');
+  const labels = iconLabels(t);
   return (
     <FilterRow
-      label={{ hu: 'Típus', en: 'Type' }}
+      label={t('filters.type')}
       selected={selected}
       onChange={onChange}
       options={getUsedIcons(gameList).map(iconKey => ({
         value: iconKey,
         content: <GameIcon iconKey={iconKey} />,
-        label: t(iconLabels[iconKey]),
+        label: labels[iconKey],
         buttonClassName: 'w-7 p-1'
       }))}
     />

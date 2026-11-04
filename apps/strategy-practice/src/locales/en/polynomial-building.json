@@ -1,0 +1,18 @@
+{
+  "board": {
+    "integer": "integer",
+    "noIntegerRoots": "The polynomial does not have three integer roots.",
+    "roots": "P(x) = {{product}} — roots: {{roots}}",
+    "set": "Set"
+  },
+  "role": {
+    "first": "1st player (integer roots)",
+    "second": "2nd player"
+  },
+  "rule": "Let <formula>P(x) = x³ + ax² + bx + c</formula> be a polynomial. Two players alternately determine the values of a, b, c. In any order, they choose integer values for a, b, c. The first player's goal is for all three roots of the polynomial to be integers. The second player's goal is to prevent this.",
+  "step": {
+    "last": "Set the last remaining coefficient ({{coefs}}) to an integer.",
+    "oneOfRemaining": "Set one of the remaining coefficients ({{coefs}}) to an integer.",
+    "or": "or"
+  }
+}

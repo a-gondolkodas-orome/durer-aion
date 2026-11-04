@@ -3,13 +3,13 @@ import type { GameList } from '../../games/gameList';
 
 const list: GameList = {
   EasyA: {
-    name: { hu: 'A' }, category: ['A'], year: { k: '', v: '11/12' }, round: 'döntő', featured: true, icon: 'chess'
+    category: ['A'], year: { k: '', v: '11/12' }, round: 'döntő', featured: true, icon: 'chess'
   },
-  EasyB: { name: { hu: 'B' }, category: ['B'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'coins' },
+  EasyB: { category: ['B'], year: { k: '', v: '12/13' }, round: 'döntő', icon: 'coins' },
   MidCD: {
-    name: { hu: 'CD' }, category: ['C', 'D'], year: { k: '', v: '20/21' }, round: 'döntő', featured: true, icon: 'coins'
+    category: ['C', 'D'], year: { k: '', v: '20/21' }, round: 'döntő', featured: true, icon: 'coins'
   },
-  HardE: { name: { hu: 'E' }, category: ['E', 'E+'], year: { k: '', v: '22/23' }, round: 'online', icon: 'number' }
+  HardE: { category: ['E', 'E+'], year: { k: '', v: '22/23' }, round: 'online', icon: 'number' }
 };
 
 describe('getFeaturedGames', () => {
@@ -53,9 +53,9 @@ describe('orderByCategoryThenYear', () => {
 
   it('orders newest-first within the same category', () => {
     const l: typeof list = {
-      A1: { name: { hu: 'A1' }, category: ['A'], year: { k: '', v: '11/12' }, round: 'döntő', icon: 'chess' },
-      A2: { name: { hu: 'A2' }, category: ['A'], year: { k: '', v: '20/21' }, round: 'döntő', icon: 'chess' },
-      B1: { name: { hu: 'B1' }, category: ['B'], year: { k: '', v: '15/16' }, round: 'döntő', icon: 'chess' }
+      A1: { category: ['A'], year: { k: '', v: '11/12' }, round: 'döntő', icon: 'chess' },
+      A2: { category: ['A'], year: { k: '', v: '20/21' }, round: 'döntő', icon: 'chess' },
+      B1: { category: ['B'], year: { k: '', v: '15/16' }, round: 'döntő', icon: 'chess' }
     };
     expect(orderByCategoryThenYear(['A1', 'B1', 'A2'], l)).toEqual(['A2', 'A1', 'B1']);
   });

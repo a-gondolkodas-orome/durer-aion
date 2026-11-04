@@ -1,0 +1,11 @@
+{
+  "board": {
+    "first": "First",
+    "second": "Second"
+  },
+  "rule": "At the start each player has three cards in front of them: one showing rock, one paper, one scissors. Players take turns removing a card from the other player until only one card remains for each player. The remaining cards are then compared by rock-paper-scissors rules to determine the winner; if both cards show the same symbol, the first player wins.",
+  "step": {
+    "fromFirst": "Remove a card from the other (First) player.",
+    "fromSecond": "Remove a card from the other (Second) player."
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "filters": {
+    "category": "Kategória",
+    "clear": "Szűrés törlése",
+    "toggle": "Szűrők",
+    "type": "Típus"
+  },
+  "icon": {
+    "board": "Tábla",
+    "cards": "Kártyák",
+    "chess": "Sakk",
+    "coins": "Érmék",
+    "coloring": "Színezés",
+    "dominoes": "Dominó",
+    "house": "Ház",
+    "number": "Számok",
+    "piles": "Kupacok",
+    "pursuit": "Üldözés",
+    "pyramid": "Piramis",
+    "scissor": "Kő-papír-olló",
+    "smallGraph": "Gráf"
+  },
+  "intro": "A <i>stratégiás játék</i> egy két szereplős játék, amelyben nincs szerencsefaktor: optimális stratégiával mindig nyerni lehet, így matekfeladatként is tekinthető. Az alábbi, A-tól E+ kategóriáig nehezedő játékok a <durerinfo>Dürer Versenyen</durerinfo> szerepeltek.",
+  "round": {
+    "final": "döntő"
+  },
+  "section": {
+    "AB": "5-8. osztályosoknak (A-B kategória)",
+    "CDE": "9-12. osztályosoknak (C-D-E kategória)",
+    "featured": "Kiemelt játékok"
+  },
+  "siteName": "Dürer játékok",
+  "title": "Dürer stratégiás játékok"
+}

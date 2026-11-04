@@ -1,25 +1,24 @@
 import { describe, test, afterEach, beforeEach, expect, vi, type MockInstance } from "vitest";
-import { gameWrapper, isMakeMovePayloadReadOnly } from "./gamewrapper";
+import { gameWrapper, isMakeMovePayloadReadOnly, LATE_MOVE_GRACE_MS } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
-  createGameWithoutStartingPosition,
-  createGameWithMoveWithoutStartingPosition,
+  createGameWithWinAndLose,
+  createGameWithMove,
 } from "./game_for_testing";
+import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints, type GameType } from "./types";
 
 describe("gameWrapper", () => {
   const setup = vi.fn();
 
   const move = vi.fn();
-  const startingPosition = vi.fn();
   const wrappedGame = gameWrapper(
-    createGameWithMoveWithoutStartingPosition(setup, move)
+    createGameWithMove(setup, move)
   );
 
   beforeEach(() => {
     vi.resetAllMocks();
 
     setup.mockReturnValue({ data: "setup" });
-    startingPosition.mockReturnValue({ data: "startingPosition" });
   });
 
   test("whether client calls into wrapped setup", () => {
@@ -44,6 +43,40 @@ describe("gameWrapper", () => {
 
     expect(client.getState()?.ctx.phase).toStrictEqual("chooseRole");
     expect(client.getState()?.G.data).toStrictEqual("startingPosition");
+  });
+
+  test.each([
+    ["a mixin key", { data: "startingPosition", points: 12 }],
+    ["an array", ["startingPosition"]],
+    ["no object", "startingPosition"],
+    ["null", null],
+  ])("the bot's starting position may not be %s", (_, position) => {
+    // boardgame.io reports every move it rejects on the console.
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+
+    client.moves.setStartingPosition(position);
+
+    expect(rejected).toHaveBeenCalledOnce();
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(JUDGE_PLAYER);
+    expect(client.getState()?.G.data).toStrictEqual("setup");
+    expect(client.getState()?.G.points).toStrictEqual(0);
+    rejected.mockRestore();
+  });
+
+  test("only the bot may set the starting position", () => {
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
+    expect(rejected).toHaveBeenCalledOnce();
+    expect(client.getState()?.G.data).toStrictEqual("setup");
+    rejected.mockRestore();
   });
 
   test("chooseRole", () => {
@@ -78,7 +111,7 @@ describe("gameWrapper", () => {
 
 describe("gameWrapper high-level logic", () => {
   const setup = () => ({ data: "asd" });
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(setup));
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(setup));
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -145,7 +178,7 @@ describe("gameWrapper high-level logic", () => {
   test("reports the end of each round with the current points", () => {
     const reports: { phase: string; points: number }[] = [];
     const client = Client({
-      game: gameWrapper(createGameWithoutStartingPosition(setup), (report) => {
+      game: gameWrapper(createGameWithWinAndLose(setup), (report) => {
         reports.push({ phase: report.phase, points: report.G.points });
       }),
       numPlayers: 2,
@@ -170,6 +203,44 @@ describe("gameWrapper high-level logic", () => {
     ]);
   });
 
+  const startGame = (client: ReturnType<typeof Client>, difficulty: "live" | "test") => {
+    client.moves.chooseNewGameType(difficulty);
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+  };
+
+  test("records each live game's result in order, the match-ending win included", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    const play = (difficulty: "live" | "test", move: "win" | "lose") => {
+      startGame(client, difficulty);
+      client.moves[move]();
+    };
+
+    play("live", "lose");
+    play("test", "win");
+    play("live", "win");
+    play("live", "lose");
+    play("live", "win");
+    play("live", "win");
+
+    expect(client.getState()?.ctx.gameover).toBeDefined();
+    expect(client.getState()?.G.liveResults).toStrictEqual(["lost", "won", "lost", "won", "won"]);
+    expect(client.getState()?.G.points).toStrictEqual(6);
+  });
+
+  test("records the live game the time ran out in as unfinished", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    startGame(client, "live");
+    client.moves.lose();
+    startGame(client, "live");
+
+    client.events.endGame?.();
+
+    expect(client.getState()?.G.liveResults).toStrictEqual(["lost", "unfinished"]);
+  });
+
   test("win in test", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
@@ -188,7 +259,7 @@ describe("gameWrapper high-level logic", () => {
 });
 
 describe("gameWrapper clock", () => {
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "asd" })));
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(() => ({ data: "asd" })));
 
   afterEach(() => {
     vi.useRealTimers();
@@ -236,10 +307,137 @@ describe("gameWrapper clock", () => {
   });
 });
 
-describe("gameWrapper move guards", () => {
-  const wrappedGame = gameWrapper(createGameWithoutStartingPosition(() => ({ data: "setup" })));
+test("polling the clock does not spend a limited turn's move", () => {
+  const oneMovePerTurn: GameType<{ data: string }> = {
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G }) => { G.data = "stepped"; } },
+    turn: { minMoves: 1, maxMoves: 1 },
+  };
+  const client = Client({ game: gameWrapper(oneMovePerTurn), numPlayers: 2 });
+  client.start();
+  client.moves.chooseNewGameType("live");
+  client.moves.setStartingPosition({ data: "startingPosition" });
+  client.moves.chooseRole(GUESSER_PLAYER);
 
-  // Both tests here provoke a move boardgame.io rejects, and it reports every
+  client.moves.getTime();
+  client.moves.getTime();
+
+  expect(client.getState()?.ctx.numMoves).toStrictEqual(0);
+  expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+});
+
+/// A game whose one move ends its own turn without ending the match, so the
+/// play phase stays open and both sides get a turn.
+function steppingGame(turnEnd = vi.fn()): GameType<{ data: string }> {
+  return {
+    name: "stub-game",
+    setup: () => ({ data: "setup" }),
+    possibleMoves: () => [{ move: "step" }],
+    moves: { step: ({ G, events }) => { G.data = "stepped"; events.endTurn(); } },
+    turn: { onEnd: ({ playerID }) => { turnEnd(playerID); } },
+  };
+}
+
+/// A live match in the play phase with the team to move.
+function playing(game: GameType<{ data: string }>) {
+  const client = Client({ game: gameWrapper(game), numPlayers: 2 });
+  client.start();
+  client.moves.chooseNewGameType("live");
+  client.moves.setStartingPosition({ data: "startingPosition" });
+  client.moves.chooseRole(GUESSER_PLAYER);
+  return client;
+}
+
+// Regression: the wrapper forwarded boardgame.io's `playerID` to a game's
+// `turn.onEnd`, and bgio gives that hook none.
+test("a game's turn.onEnd is told whose turn is ending", () => {
+  const turnEnd = vi.fn();
+  const client = playing(steppingGame(turnEnd));
+  turnEnd.mockReset();
+
+  client.moves.step();
+  client.moves.step();
+
+  expect(turnEnd.mock.calls.flat()).toStrictEqual([GUESSER_PLAYER, JUDGE_PLAYER]);
+});
+
+describe("gameWrapper deadline", () => {
+  const START = new Date("2026-03-21T18:00:00.000Z");
+  const END = new Date(START.getTime() + 30 * 60 * 1000);
+  const at = (msPastTheEnd: number) => vi.setSystemTime(new Date(END.getTime() + msPastTheEnd));
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(START);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("a team's move within the allowance is taken", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS - 1000);
+    client.moves.step();
+
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+  });
+
+  // The one late move is played, then the match ends.
+  test("a team's move past the allowance is applied and ends the match", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.step();
+
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  test("a team's clock poll past the allowance ends the match", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.getTime();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  // A team that has left the page sends no move, so only the end of the bot's
+  // turn can close the match.
+  test("the bot answering past the allowance ends the match", () => {
+    const client = playing(steppingGame());
+    at(LATE_MOVE_GRACE_MS - 1000);
+    client.moves.step();
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.step();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+  });
+
+  // A match must not close while a move it has just taken is still on screen.
+  test("the bot answering within the allowance leaves the match open", () => {
+    const client = playing(steppingGame());
+    at(1000);
+    client.moves.step();
+
+    at(2000);
+    client.moves.step();
+
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+  });
+});
+
+describe("gameWrapper move guards", () => {
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(() => ({ data: "setup" })));
+
+  // Every test here provokes a move boardgame.io rejects, and it reports every
   // one of those on the console, so each takes the message it causes rather
   // than leaving it in the test report.
   let rejected: MockInstance<typeof console.error>;
@@ -272,5 +470,63 @@ describe("gameWrapper move guards", () => {
     expect(client.getState()?.G.difficulty).toStrictEqual("live");
     expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
     expect(rejected).toHaveBeenCalledOnce();
+  });
+
+  test("the team cannot choose a difficulty that does not exist", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+
+    client.moves.chooseNewGameType("expert");
+
+    expect(client.getState()?.G.difficulty).toBeNull();
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+    expect(rejected).toHaveBeenCalledOnce();
+  });
+});
+
+describe("gameWrapper move log", () => {
+  const wrappedGame = gameWrapper(createGameWithWinAndLose(() => ({ data: "asd" })));
+  const timeOfMoves = new Date("2026-11-14T09:30:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(timeOfMoves);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("every step of a match is logged with the time it was made", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole("0");
+    client.moves.win();
+
+    const moves = client.getState()?.log.filter(entry => entry.action.type === "MAKE_MOVE");
+    expect(moves?.map(entry => [entry.action.payload.type, entry.metadata])).toStrictEqual([
+      ["chooseNewGameType", { time: timeOfMoves.toISOString() }],
+      ["setStartingPosition", { time: timeOfMoves.toISOString() }],
+      ["chooseRole", { time: timeOfMoves.toISOString() }],
+      ["win", { time: timeOfMoves.toISOString() }],
+    ]);
+  });
+
+  test("a clock poll is logged without a time", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.getTime();
+
+    const [poll] = client.getState()?.log ?? [];
+    expect(poll?.action.payload.type).toStrictEqual("getTime");
+    expect(poll?.metadata).toBeUndefined();
+  });
+});
+
+describe("strategyPoints", () => {
+  test("drops with each loss and stays at its floor after five", () => {
+    expect([0, 1, 2, 3, 4, 5, 9].map(strategyPoints)).toStrictEqual([12, 9, 6, 4, 3, 2, 2]);
   });
 });

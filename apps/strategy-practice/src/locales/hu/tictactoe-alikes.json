@@ -1,0 +1,21 @@
+{
+  "antiTicTacToe": {
+    "rule": "A 3×3-as antiamőba játékban a kezdő piros, a második kék korongokat rak le. Felváltva lépnek, és az veszít, akinek először lesz a saját színéből három korongja egy sorban, oszlopban vagy átlóban. Ha mind a kilenc mező foglalt és nincs ilyen koronghármas, akkor a kezdő nyer.",
+    "step": "Helyezz le egy korongot egy üres mezőre kattintással."
+  },
+  "ticTacToe": {
+    "rule": "Két játékos játszik egy 3 × 3-as táblán kék és piros korongokkal a szokásos amőba szabályai szerint, tehát felváltva tesznek le korongokat, és ha egy sorban, oszlopban vagy átlóban összegyűlik három azonos színű korong, az adott játékos nyer. Ha az első 9 korong lehelyezése után döntetlen az állás (azaz egyik játékos sem nyert), akkor tovább folytatják a játékot, a soron következő játékos a másik játékos egy már lehelyezett korongját fehérre színezheti. Ezek után az nyer, aki először hoz létre három fehér korongot egy sorban, oszlopban vagy átlóban.",
+    "step": {
+      "place": "Helyezz le egy korongot egy üres mezőre kattintással.",
+      "whitenBlue": "Kattints egy kék korongra.",
+      "whitenRed": "Kattints egy piros korongra."
+    }
+  },
+  "ticTacToeDoubleStart": {
+    "rule": "A 3 × 3-as duplánkezdő amőba játékban először a kezdő tesz le két piros korongot, majd a második egy kék korongot és innentől felváltva egy-egy korongot tesznek le a saját színükből, amíg be nem telik a tábla. A kezdő nyer, ha a játék végén van valahol három piros egy sorban, oszlopban vagy átlóban, de sehol sincs három kék egy sorban, oszlopban vagy átlóban; egyébként a második nyer.",
+    "step": {
+      "first": "Helyezz le két korongot egy-egy üres mezőre kattintással.",
+      "next": "Helyezz le egy korongot egy üres mezőre kattintással."
+    }
+  }
+}

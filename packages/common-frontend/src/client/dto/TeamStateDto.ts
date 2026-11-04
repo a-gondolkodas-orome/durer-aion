@@ -1,6 +1,8 @@
-import { Ctx } from "boardgame.io";
-import { GameStateMixin, MyGameState as RelayGameState } from "game";
-import { TeamTsvProblem, TeamTsvProblemCode } from "schemas";
+import type { Ctx } from "boardgame.io";
+import type { GameStateMixin, MyGameState as RelayGameState } from "game";
+import type { MatchStatus, PageState, TeamTsvProblem, TeamTsvProblemCode } from "schemas";
+
+export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -14,7 +16,7 @@ export interface TeamModelDto {
   category: string;
   credentials: string;
   email?: string;
-  pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY'
+  pageState: PageState
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
 }
@@ -28,26 +30,6 @@ export function adminTeamId(team: TeamModelDto): string {
     throw new Error(`A(z) ${team.teamName} csapat azonosítója hiányzik.`);
   }
   return team.teamId;
-}
-
-/// An archived team: the row as it was when deleted, plus when. Rows sharing a
-/// `deletedAt` were deleted by one "delete all" and form a batch, which is how
-/// the server names them for a restore. Only the admin routes serve these, so
-/// the three secrets `TeamModelDto` leaves optional are always present.
-export interface DeletedTeamDto extends TeamModelDto {
-  teamId: string;
-  joinCode: string;
-  email: string;
-  other: string;
-  deletedAt: string;
-  deletionId: number;
-}
-
-/// What a batch restore did: team names live again, and team names a live
-/// team blocked, which stay archived.
-export interface RestoreResultDto {
-  restored: string[];
-  conflicts: string[];
 }
 
 /// What a team import did, and everything wrong with the file it was given.
@@ -100,23 +82,4 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-export interface FinishedMatchStatus {
-  state: 'FINISHED';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-  score: number;
-}
-
-export interface NotStartedMatchStatus {
-  state: 'NOT STARTED';
-}
-
-export interface InProgressMatchStatus {
-  state: 'IN PROGRESS';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-}
-
-export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
+export type { FinishedMatchStatus, InProgressMatchStatus, LiveGameResult, MatchStatus, NotStartedMatchStatus, RelayProblemResult } from "schemas";

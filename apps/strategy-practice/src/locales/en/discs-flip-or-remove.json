@@ -1,0 +1,14 @@
+{
+  "board": {
+    "discs": "{{red}} red and {{blue}} blue discs"
+  },
+  "rule": {
+    "bounded": "At the start there are some discs on the table, at most {{maxDiscs}}, each either red or blue. The current player has four possible moves:<br/>• Remove 1 or 2 blue discs from the table.<br/>• Flip 1 or 2 red discs to blue.<br/>The player who cannot move loses.",
+    "generic": "At the start there are some red or blue discs on the table. The current player has four possible moves:<br/>• Remove 1 or 2 blue discs from the table.<br/>• Flip 1 or 2 red discs to blue.<br/>The player who cannot move loses."
+  },
+  "step": "Click the rightmost or second-to-last blue disc to remove 1 or 2 blue discs, or do the same with red discs to flip 1 or 2 of them to blue.",
+  "variant": {
+    "sixDiscs": "6 discs",
+    "tenDiscs": "10 discs"
+  }
+}

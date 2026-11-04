@@ -1,0 +1,11 @@
+{
+  "role": {
+    "sheriff": "Nyomozó",
+    "thief": "Tolvaj"
+  },
+  "rule": {
+    "nine": "<b>Nyomozó és Tolvaj</b> az alábbi játékot játssza. Kilenc kártya van az asztalon lévő készletben, az 1, 2, ..., {{cardCount}} számokkal jelölve. Nyomozó és Tolvaj felváltva vesz a kezébe egyet-egyet az asztalon lévő kártyák közül úgy, hogy az első kártyát Nyomozó veszi el. Tolvaj akkor nyer, ha a játék végéig összegyűjt három olyan kártyát, melyek közül az egyiken lévő szám a másik kettőnek az átlaga. Nyomozó pedig akkor nyer, ha Tolvaj nem gyűjt össze három ilyen kártyát.",
+    "seven": "<b>Nyomozó és Tolvaj</b> az alábbi játékot játssza. Hét kártya van az asztalon lévő készletben, az 1, 2, ..., {{cardCount}} számokkal jelölve. A játék {{cardCount}} lépésből áll, minden lépésben az egyik játékos kezébe vesz egyet az asztalon lévő kártyák közül. Az alábbi sorrend szerint lépnek a játékosok:<br/><b>1. Nyomozó, 2. Tolvaj, 3. Nyomozó, 4. Tolvaj, 5. Nyomozó, 6. Tolvaj, 7. Tolvaj.</b><br/>Tolvaj akkor nyer, ha a játék végéig összegyűjt három olyan kártyát, melyek közül az egyiken lévő szám a másik kettőnek az átlaga. Nyomozó pedig akkor nyer, ha Tolvaj nem gyűjt össze három ilyen kártyát."
+  },
+  "step": "Válassz egy kártyát."
+}

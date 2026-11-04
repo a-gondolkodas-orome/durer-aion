@@ -1,0 +1,46 @@
+{
+  "doublingReduction": {
+    "rule": "Two players alternately take some pebbles from a pile. At least one pebble must be taken each turn, and whoever cannot move loses. On the opening move the starting player may take at most one fewer than the whole pile; after that, each player may take strictly fewer than twice as many as the other player took on the previous move."
+  },
+  "pebblePile": {
+    "pebbles": "Pebbles",
+    "step": "Click a pebble: you may take at most {{cap}} pebble(s)."
+  },
+  "primeExponentials": {
+    "board": {
+      "power": "Prime power to subtract:",
+      "result": "Result:"
+    },
+    "rule": "The game starts from a positive integer less than 1000 (chosen by the computer). Players take turns subtracting any prime power. The player who reaches zero wins!",
+    "step": "Choose a prime power to subtract."
+  },
+  "primelyToZero": {
+    "rule": "The piece starts on a field numbered between 30 and 80. On each turn, the current player moves the piece to a lower-numbered field, but the step size (the difference between the two field numbers) can never be a composite number. The player who reaches field 0 wins.",
+    "step": "Choose which field to move to."
+  },
+  "take1OrHalve": {
+    "board": {
+      "takeHalf": "Take half",
+      "takeOne": "Take one"
+    },
+    "rule": "There is a pile of tokens on the table. On each turn the current player may remove one token, or — if the number of tokens is even — take half of them. The player whose move leaves no tokens on the table wins.",
+    "step": {
+      "even": "Take one token or take half.",
+      "odd": "Take one token."
+    }
+  },
+  "takePowerOfTwo": {
+    "board": {
+      "availablePowers": "Available powers:",
+      "preview": "Power to subtract: 2^{{exponent}} = {{power}}. Result: {{result}}."
+    },
+    "rule": "The game starts from a positive integer below 300 chosen by the computer. Players alternate subtracting any power of 2. The player who reaches zero wins!",
+    "step": "Choose a power of 2 to subtract."
+  },
+  "threeMore": {
+    "rule": "Two players alternately take at least one pebble from a pile. On the opening move the starting player may take at most 4 pebbles. After that, each player may take at most three more pebbles than the other player took last time. Whoever takes the last pebble(s) wins."
+  },
+  "waningStones": {
+    "rule": "Two players alternately take at least one pebble from a pile. On the opening move the starting player may take at most half of the initial pebbles. After that, each player may take at most as many as the other took last time. Whoever takes the last pebble(s) wins."
+  }
+}

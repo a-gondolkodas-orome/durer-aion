@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import {
+  COMPETITION_CATEGORIES,
   OTHER_IMPORT_MAX_LENGTH,
   ParsedTeamRow,
   TeamTsvProblem,
@@ -50,8 +51,8 @@ export interface ImportResult {
    *
    * It carries an accepted team only where the *file* already supplied that
    * team's join code. The codes this app holds are deliberately not read back
-   * into it: no screen here shows a join code, and the import tab is not the
-   * place to become the first. */
+   * into it: the admin page shows a join code only on request, one team at a
+   * time in its dialog, and a download of every live team's would undo that. */
   exportTable: string[][];
 }
 
@@ -118,6 +119,9 @@ function fill(row: ParsedTeamRow, taken: TakenIdentifiers): NewTeam {
   const joinCode = row.joinCode === '' ? draw(generateLoginCode, taken.joinCodes, 'join code') : row.joinCode;
   taken.joinCodes.add(joinCode);
 
+  const credentials = row.credentials === '' ? draw(randomUUID, taken.credentials, 'credentials') : row.credentials;
+  taken.credentials.add(credentials);
+
   return {
     teamname: row.teamname,
     category: row.category,
@@ -125,9 +129,7 @@ function fill(row: ParsedTeamRow, taken: TakenIdentifiers): NewTeam {
     other: row.other,
     teamId,
     joinCode,
-    // Not checked against anything: `credentials` carries no unique constraint,
-    // only a format (`model.ts`).
-    credentials: row.credentials === '' ? randomUUID() : row.credentials,
+    credentials,
   };
 }
 
@@ -213,19 +215,21 @@ export async function importTeamsFromTsv(
     teamIds: new Set(live.map(team => team.teamId)),
     teamNames: new Set(live.map(team => team.teamName)),
     joinCodes: new Set(live.map(team => team.joinCode)),
+    credentials: new Set(live.map(team => team.credentials)),
   };
 
   const accepted = new Set<number>();
   for (const row of parsed.rows) {
     const existing = byName.get(row.teamname);
     // Identity is the team name: it is the one identifier every row carries,
-    // since a blank one is already an error. The other two only have to
+    // since a blank one is already an error. The other three only have to
     // corroborate it — supplied, they must be this team's own; blank, the row
     // is not asking for anything in particular.
     if (
       existing !== undefined
       && (row.teamId === '' || row.teamId === existing.teamId)
       && (row.joinCode === '' || row.joinCode === existing.joinCode)
+      && (row.credentials === '' || row.credentials === existing.credentials)
     ) {
       accepted.add(row.row);
       problems.push({
@@ -261,6 +265,9 @@ export async function importTeamsFromTsv(
     }
     if (row.joinCode !== '' && taken.joinCodes.has(row.joinCode)) {
       problems.push({ row: row.row, column: 'Login Code', severity: 'error', code: 'join-code-taken', found: row.joinCode });
+    }
+    if (row.credentials !== '' && taken.credentials.has(row.credentials)) {
+      problems.push({ row: row.row, column: 'Credentials', severity: 'error', code: 'credentials-taken', found: row.credentials });
     }
   }
 
@@ -323,7 +330,7 @@ function describe(problem: TeamTsvProblem): string {
     'wrong-column-count': 'more columns than the format has, so the row is not what it looks like',
     'empty-teamname': 'no team name',
     'teamname-too-long': 'team name is too long',
-    'invalid-category': 'category is not C, D or E',
+    'invalid-category': `category is not ${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} or ${COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1]}`,
     'email-too-long': 'email is too long',
     'other-missing': '"Other" is empty; it is what identifies a team later — names, school, addresses',
     'other-truncated':
@@ -335,9 +342,11 @@ function describe(problem: TeamTsvProblem): string {
     'duplicate-teamname': 'team name is used twice in this file',
     'duplicate-team-id': 'ID is used twice in this file',
     'duplicate-join-code': 'login code is used twice in this file',
+    'duplicate-credentials': 'credentials are used twice in this file',
     'teamname-taken': 'a team of this name already exists',
     'team-id-taken': 'a team with this ID already exists',
     'join-code-taken': 'a team with this login code already exists',
+    'credentials-taken': 'a team with these credentials already exists',
     'already-exists': 'this team is already there and was left as it is, not imported again',
     'category-differs': 'the team is already there with a different category (file, then live); it was not changed',
     'email-differs': 'the team is already there with a different email (file, then live); it was not changed',

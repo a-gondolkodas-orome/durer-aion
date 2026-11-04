@@ -1,4 +1,7 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { generateStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -23,29 +26,25 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A játék egy pozitív egész számmal indul. Minden lépésben a soron következő játékos
-    kiválasztja az aktuális szám egyik nem 0 számjegyét, és kivonja belőle. Az nyer, aki 0-t ér el.
-  </>,
-  en: <>
-    The game starts with a positive integer. On each turn, the current player picks one of the
-    non-zero digits of the current number and subtracts it. The player who reaches 0 wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('digit-subtraction');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('digit-subtraction');
+  return t('step');
 };
 
 export const DigitSubtraction = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz egy számjegyet, amelyet kivonsz az aktuális számból.',
-      en: 'Choose a digit to subtract from the current number.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

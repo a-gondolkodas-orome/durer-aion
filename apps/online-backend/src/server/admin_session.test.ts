@@ -12,12 +12,15 @@ import { configureTeamsRouter } from "./router";
 const PASSWORD = "organiser-password";
 const CREDENTIALS = `Basic ${Buffer.from(`${ADMIN_USER}:${PASSWORD}`).toString("base64")}`;
 
-const team = {
+const columns = {
   teamId: "8eae8669-125c-42e5-8b49-89afbac31679",
   joinCode: "000-0000-000",
   credentials: "secret-token",
   email: "team@example.com",
-} as unknown as TeamModel;
+  relayMatchID: null,
+  strategyMatchID: null,
+};
+const team = { ...columns, toJSON: () => columns } as unknown as TeamModel;
 
 const teamsWith = (rows: TeamModel[]) =>
   ({ listTeams: vi.fn().mockResolvedValue(rows) }) as unknown as TeamsRepository;
@@ -54,7 +57,9 @@ describe("the admin routes over HTTP", () => {
     const response = await request("/team/admin/all", { headers: { authorization: CREDENTIALS } });
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toStrictEqual([team]);
+    expect(await response.json()).toStrictEqual([
+      { ...columns, relayMatch: { state: "NOT STARTED" }, strategyMatch: { state: "NOT STARTED" } },
+    ]);
   });
 
   // The challenge is what makes the browser ask, which is the whole of the

@@ -4,20 +4,47 @@
 // calling script — a `BoardClient` is exactly the thing these helpers cannot
 // know about.
 //
-// Playwright is a dependency of this app but nothing imports it (see the "//"
-// note in package.json), so resolve it explicitly rather than from the
-// caller's directory, which is usually somewhere under /tmp. Since the
-// workspace join there is one install at the monorepo root, and npm decides
-// per version conflict whether a package hoists there or nests here — so try
-// both, nearest first.
-import { existsSync } from 'node:fs';
+// Playwright is a devDependency of the monorepo root, not of this app, so
+// resolve it there explicitly rather than from the caller's directory, which
+// is usually somewhere under /tmp.
+import { existsSync, readdirSync } from 'node:fs';
 
-const playwright = ['../../../node_modules/playwright/index.mjs', '../../../../../node_modules/playwright/index.mjs']
-  .map(candidate => new URL(candidate, import.meta.url))
-  .find(url => existsSync(url))?.href
-  ?? (() => { throw new Error('playwright not found in the app or the repo root — run npm ci at the root'); })();
+const playwrightUrl = new URL('../../../../../node_modules/playwright/index.mjs', import.meta.url);
+if (!existsSync(playwrightUrl)) throw new Error('playwright not found at the repo root — run npm ci there');
+const playwright = playwrightUrl.href;
 
 export const DEV_URL = 'http://localhost:8012';
+
+// Claude Code's cloud container bakes one Chromium under PLAYWRIGHT_BROWSERS_PATH
+// and sets PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD, so when the pinned playwright wants
+// another revision its own browser is not there. Launching is what says so — a
+// headless launch runs the headless shell, not `chromium.executablePath()` — and
+// only then does this fall back to the newest baked shell, saying which, since a
+// different revision can render differently. PLAYWRIGHT_CHROMIUM_EXECUTABLE
+// overrides both.
+const launchBrowser = async chromium => {
+  const override = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+  if (override) return chromium.launch({ executablePath: override });
+  try {
+    return await chromium.launch();
+  } catch (error) {
+    const baked = bakedHeadlessShell();
+    if (!baked || !String(error.message).includes("Executable doesn't exist")) throw error;
+    console.warn(`play-game-in-browser: playwright's own Chromium is missing, launching ${baked}`);
+    return chromium.launch({ executablePath: baked });
+  }
+};
+
+const bakedHeadlessShell = () => {
+  const dir = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!dir || !existsSync(dir)) return undefined;
+  return readdirSync(dir)
+    .map(name => /^chromium_headless_shell-(\d+)$/.exec(name))
+    .filter(Boolean)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .map(([name]) => `${dir}/${name}/chrome-headless-shell-linux64/chrome-headless-shell`)
+    .find(path => existsSync(path));
+};
 
 const START_BUTTON = { vsComputerFirst: 'Kezdő leszek', vsComputerSecond: 'Második leszek' };
 
@@ -26,15 +53,13 @@ const START_BUTTON = { vsComputerFirst: 'Kezdő leszek', vsComputerSecond: 'Más
 // the `#`; a bare /game/<id> silently renders the overview instead.
 export const launchGame = async (gameId, { mode = 'vsComputerFirst', variant, viewport } = {}) => {
   const { chromium } = await import(playwright);
-  // Claude Code's web container bakes one Chromium and asks that it be used as-is
-  // (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD is set there); when playwright's pinned
-  // revision is newer than the baked one, this is the documented way through.
-  const browser = await chromium.launch(
-    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {}
-  );
+  const browser = await launchBrowser(chromium);
   const page = await browser.newPage({ viewport: viewport ?? { width: 900, height: 1100 } });
 
-  await page.goto(`${DEV_URL}/#/game/${gameId}`);
+  // The labels clicked below are Hungarian. Without `?lang=` the app follows the
+  // browser's language, English on most machines; the param pins the app alone,
+  // where a browser locale would also reformat every number it prints.
+  await page.goto(`${DEV_URL}/#/game/${gameId}?lang=hu`);
   // The role chooser is the shell's pre-game state, so its arrival is what says
   // the app booted — the board renders before a game is running, too.
   await page.getByText('Válassz szerepet!').waitFor();

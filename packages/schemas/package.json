@@ -1,7 +1,6 @@
 {
   "name": "schemas",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
   "files": [
     "dist/**"
   ],
@@ -14,14 +13,12 @@
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
+  "license": "MIT",
   "scripts": {
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt schemas\""
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }

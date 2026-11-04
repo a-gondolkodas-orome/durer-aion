@@ -1,0 +1,4 @@
+{
+  "rule": "Bergengócia fővárosában legalább 7 és legfeljebb 10 bank található, melyek körben, a Nagykörút mentén helyezkednek el. Két rivális bűnbanda ezen bankok kirablását tervezi, mégpedig úgy, hogy felváltva választanak ki egy-egy bankot. Nem választanak ki olyat, amit már korábban az egyikük kifosztott, és olyat sem, aminek már mindkét szomszédját kirabolták, mert ott már lesben áll a rendőrség. Az a banda veszít, aki már nem talál bankot, amit kirabolhat.<br/><em>C kategóriában 7, D kategóriában 9 bankkal szerepelt a feladat a versenyen.</em>",
+  "step": "Válassz egy kirabolható bankot."
+}

@@ -2,7 +2,7 @@ import { Container, Dialog, Stack, Button } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import { MoreVert } from '@mui/icons-material';
-import { useClientRepo } from '../api-repository-interface';
+import { useClientRepo } from '../client-repo-context';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
@@ -10,7 +10,15 @@ import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
-export function Header(props: { teamName: string | null, admin: boolean, titles?: string[], homeAddress?: string }) {
+/// `languageSwitcher` is for the sites that are meant to be read in either
+/// language; the competition round and its admin pages are Hungarian only.
+export function Header(props: {
+  teamName: string | null,
+  languageSwitcher?: boolean,
+  titles?: string[],
+  homeAddress?: string,
+  onChooseLanguage?: (language: string) => void
+}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const logout = useLogout();
@@ -35,10 +43,13 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
       width: '100%',
       height: 102,
     }}>
-      <Container sx={{
-        paddingLeft: '10px',
-        paddingRight: '10px',
-        zIndex: 3,
+      {/* `maxWidth={false}`, as for the page's own Container in `Main`: otherwise
+          MUI's 1280px lg width overrides the 1200px below. The padding is
+          responsive for the same reason: MUI's own, 24px from sm up, overrides a
+          plain value. The home pages' gutter is the same, so they line up. */}
+      <Container maxWidth={false} sx={{
+        paddingLeft: { xs: '10px', sm: '24px' },
+        paddingRight: { xs: '10px', sm: '24px' },
         position: 'relative',
         maxWidth: '1200px',
         flexDirection: 'row',
@@ -102,12 +113,12 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
               flex: 1
             }}>
             </Stack>
-            {props.admin &&
-              <LanguageDropdown fontColor={theme.palette.primary.contrastText} />
+            {props.languageSwitcher &&
+              <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
             }
           </Stack>
         }
-        {(props.teamName || props.admin) && <Stack sx={{
+        {(props.teamName || props.languageSwitcher) && <Stack sx={{
           display: {
             xs: 'flex',
             md: 'none'
@@ -161,7 +172,7 @@ export function Header(props: { teamName: string | null, admin: boolean, titles?
               }}
             >{t('header.logout')}</Button>
           </>}
-          {props.admin && <LanguageDropdown />}
+          {props.languageSwitcher && <LanguageDropdown onChoose={props.onChooseLanguage} />}
         </Dialog>
       </Container>
     </Stack>

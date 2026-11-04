@@ -1,10 +1,10 @@
 import type { FC } from 'react';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { strategyGameFactory, type BoardClientProps, type Ctx, GameBoard } from 'strategy-game-factory';
 import { smartBotStrategy } from './bot-strategy';
 import { RockSvg } from './symbols/rock-svg';
 import { PaperSvg } from './symbols/paper-svg';
 import { ScissorSvg } from '../shared/scissor-svg';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { CARDS, startBoard, moves, type Board, type Card } from './gameplay';
 
 const cardSvgs: Record<Card, FC> = {
@@ -14,13 +14,13 @@ const cardSvgs: Record<Card, FC> = {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('rock-paper-scissor');
 
   return (
   <GameBoard>
     <div className="grid grid-cols-4 gap-y-3">
-      <h2 className="text-center col-start-1">{t({ hu: 'Kezdő', en: 'First' })}</h2>
-      <h2 className="text-center col-start-4">{t({ hu: 'Második', en: 'Second' })}</h2>
+      <h2 className="text-center col-start-1">{t('board.first')}</h2>
+      <h2 className="text-center col-start-4">{t('board.second')}</h2>
 
       {CARDS.map(card => {
         const CardSvg = cardSvgs[card];
@@ -46,29 +46,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A játék kezdetekor mindkét játékos elé leteszünk három kártyát: az egyik követ, a
-    másik papírt, a harmadik ollót ábrázol. Ezután a játékosok felváltva elvesznek egy-egy kártyát a
-    másik játékos elől, egészen addig, amíg már csak egy-egy kártya marad. Ekkor a megmaradt kártyákat
-    ütköztetik a „kő-papír-olló" játék szabályai szerint, így eldöntve, hogy ki a győztes; ha mindkét
-    kártyán ugyanaz van, akkor a Kezdő nyert.
-  </>,
-  en: <>
-    At the start each player has three cards in front of them: one showing rock, one paper, one
-    scissors. Players take turns removing a card from the other player until only one card remains
-    for each player. The remaining cards are then compared by rock-paper-scissors rules to determine
-    the winner; if both cards show the same symbol, the first player wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('rock-paper-scissor');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = ({ ctx }: { ctx: Ctx }) => {
+  const { t } = useTranslation('rock-paper-scissor');
+  return ctx.currentPlayer === 0 ? t('step.fromSecond') : t('step.fromFirst');
 };
 
 export const RockPaperScissor = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: ({ ctx }) => ({
-      hu: `Távolíts el egy kártyát a másik (${ctx.currentPlayer === 0 ? 'Második' : 'Első'}) játékos elől.`,
-      en: `Remove a card from the other (${ctx.currentPlayer === 0 ? 'Second' : 'First'}) player.`
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: ({ ctx }) => <StepDescription ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },

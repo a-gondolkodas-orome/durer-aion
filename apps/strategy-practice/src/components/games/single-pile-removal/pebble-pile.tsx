@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { GameBoard, useHoverPreview, type BoardClientProps } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { cap, type Board } from './gameplay';
 
 // The pile UI shared by the pebble take-away games.
@@ -45,11 +45,11 @@ const StonePile = ({ board, isTakeAllowed, onTake, moveCount }: {
 };
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('single-pile-removal');
   return (
     <GameBoard>
       <p className="text-center text-2xl font-bold mb-2">
-        {t({ hu: 'Kavicsok', en: 'Pebbles' })}: {board.stones}
+        {t('pebblePile.pebbles')}: {board.stones}
       </p>
       <StonePile
         board={board}
@@ -61,7 +61,9 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-export const getPlayerStepDescription = ({ board }: { board: Board }) => ({
-  hu: `Kattints egy kavicsra: legfeljebb ${cap(board)} kavicsot vehetsz el.`,
-  en: `Click a pebble: you may take at most ${cap(board)} pebble(s).`
-});
+const StepDescription = ({ board }: { board: Board }) => {
+  const { t } = useTranslation('single-pile-removal');
+  return t('pebblePile.step', { cap: cap(board) });
+};
+
+export const getPlayerStepDescription = ({ board }: { board: Board }) => <StepDescription board={board} />;

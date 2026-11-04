@@ -1,9 +1,11 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { range, map } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { startBoard, edges, moves, type Board } from './gameplay';
-import { useTranslation } from 'language';
 
 // Screen position of each node; the drawn skeleton (see `edges` in gameplay)
 // connects these by node id.
@@ -21,28 +23,28 @@ const cubeCoords = [
 // Keyed by `colors` in gameplay — the logic-side palette — which is why this is
 // only ever indexed with a board cell rather than a literal key. An uncoloured
 // cell holds '' and misses; the two lookups below guard for that themselves.
-export const nodeColors: Record<
-  string, { bg: string; name: { hu: string; en: string }; svg: string }
-> = {
+export const nodeColors: Record<string, { bg: string; svg: string }> = {
   'red': {
     bg: 'bg-red-500 text-inherit enabled:hocus:bg-red-600',
-    name: { hu: 'Piros', en: 'Red' },
     svg: 'var(--color-red-500)'
   },
   'blue': {
     bg: 'bg-blue-500 enabled:hocus:bg-blue-600',
-    name: { hu: 'Kék', en: 'Blue' },
     svg: 'var(--color-blue-500)'
   },
   'yellow': {
     bg: 'bg-yellow-500 text-inherit enabled:hocus:bg-yellow-600',
-    name: { hu: 'Sárga', en: 'Yellow' },
     svg: 'var(--color-yellow-500)'
   }
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('cube-coloring');
+  const colourName: Record<string, string> = {
+    red: t('colour.red'),
+    blue: t('colour.blue'),
+    yellow: t('colour.yellow')
+  };
   // null = no colour picked; picking the selected colour again deselects it
   const [color, setColor] = useState<string | null>(null);
   const [x, setX] = useState(0);
@@ -79,14 +81,14 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   return (
   <GameBoard>
     <header className="flex gap-2">
-      {map(nodeColors, ({ bg, name }, colorKey) =>
+      {map(nodeColors, ({ bg }, colorKey) =>
         <button
           key={colorKey}
           disabled={!ctx.isClientMoveAllowed || (color !== null && color !== colorKey)}
           className={`primary-button ${bg}`}
           onClick={() => pick(colorKey)}
         >
-          {t(name)}
+          {colourName[colorKey]}
         </button>
       )}
     </header>
@@ -136,40 +138,25 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Adott egy téglatest rácsa, aminek be van húzva az egyik testátlója.
-    Egy lépésben az éppen soron lévő játékos megszínezi valamelyik még színezetlen csúcsot
-    pirosra, sárgára vagy kékre úgy,
-    hogy ne keletkezzen két szomszédos csúcs, amik azonos színűek.
-    Ha valamelyik játékos nem tud lépni, akkor véget ér a játék.
-    A kezdő játékos nyer, ha minden csúcs meg lett színezve, míg a második akkor nyer,
-    ha van olyan csúcs ami nem lett kiszínezve.
-  </>,
-  en: <>
-    The skeleton of a cuboid is given, in which one of the solid
-    diagonals is drawn. On each turn the current player colours one of
-    the yet uncoloured vertices with one of three colours (meaning that he
-    puts a red, yellow or blue disc on top of the vertex) so that no two
-    adjacent vertices have the same colour. The game ends when the
-    next player can no longer move. The player who started
-    wins if all the vertices have been coloured, whereas the second player
-    wins if there remain uncoloured vertices.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('cube-coloring');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('cube-coloring');
+  return t('step');
 };
 
 export const CubeColoring = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz színt, majd színezz meg egy csúcsot!',
-      en: 'Choose a colour, then colour a vertex.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: fullVariantLabel, isDefault: true }
   ]
 });

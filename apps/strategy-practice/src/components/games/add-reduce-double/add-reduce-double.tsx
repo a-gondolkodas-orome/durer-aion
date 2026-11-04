@@ -1,5 +1,8 @@
 import { range, random } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import { useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard, useHoverPreview
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { moves, type Board, type Piece } from './gameplay';
 
@@ -91,26 +94,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A pályán mindig két kupac korong található. Egy lépésben az éppen soron következő játékos az egyik
-    kupacból elvesz páros sok korongot (legalább kettőt), és a másik kupachoz hozzáad feleannyit.
-    Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    We have two piles of pieces. In each step, the current player adds at least one piece
-    to one of the piles and takes away two times as many pieces from the other pile. The player who
-    cannot move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('add-reduce-double');
+  return t('rule');
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('add-reduce-double');
+  return t('step');
 };
 
 export const AddReduceDouble = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy korongra, hogy jelezd, hány korongot szeretnél elvenni a kupacból.',
-      en: 'Click a piece to indicate how many you want to remove.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -118,12 +115,12 @@ export const AddReduceDouble = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: () => ([random(2, 5), random(2, 5)]),
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: () => ([random(3, 10), random(3, 10)]),
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

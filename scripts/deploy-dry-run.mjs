@@ -4,10 +4,9 @@
 // and the Run workflow button on .github/workflows/dry-run-deploy.yml inside that repo. One code
 // path, so what CI publishes is what a maintainer can reproduce locally.
 //
-// The base path is derived from the repository being deployed to rather than typed in. It used to
-// live in apps/offline-frontend/package.json as a `/repository-name` placeholder a maintainer
-// edited and had to remember not to commit — which is how a real secret repo name once reached a
-// public commit (#296).
+// The base path is derived from the repository being deployed to rather than typed in. A
+// `/repository-name` placeholder in apps/offline-frontend/package.json, edited by hand and
+// remembered not to be committed, is how a secret repo name reaches a public commit (#296).
 
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';

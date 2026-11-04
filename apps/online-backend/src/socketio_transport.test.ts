@@ -7,7 +7,7 @@
  * understand each other (#461): they are separate installs of separate
  * packages, and a client that cannot sync is a round nobody can play, on a tree
  * that installs and typechecks perfectly. That they stay *one* install of
- * socket.io on the server side is scripts/socketio-single-copy.test.mjs.
+ * socket.io on the server side is socketio-single-copy.test.mjs.
  *
  * Still no substitute for the round against `npm run stack:up`: nginx and the
  * built frontend are not in front of this, and postgres is not behind it.
@@ -72,7 +72,7 @@ function updateMatching(socket: Socket, done: (state: BgioState) => boolean): Pr
 /** Only the fields these assertions read. */
 interface BgioState {
   ctx: { phase: string; currentPlayer: string };
-  G: { stonesLeft: number; stonesRight: number; difficulty: string | null };
+  G: { difficulty: string | null; cells: (string | null)[] };
   _stateID: number;
 }
 
@@ -88,7 +88,7 @@ describe("the socket transport a browser talks to", () => {
   beforeEach(async () => {
     // boardgame.io announces the port it bound on, and the bot transport logs
     // each turn it takes. Both are the code under test talking, so the spy
-    // stands in for the recorder in vitest.setup.mts for this file.
+    // stands in for the recorder in vitest/setup.mts for this file.
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     // What the bot signs its moves with; the server reads it from the
@@ -145,7 +145,10 @@ describe("the socket transport a browser talks to", () => {
    *  this resolves with is a whole round trip: player packet in, state through
    *  the game, bot packet out. */
   async function startLiveGame(socket: Socket, from: BgioState): Promise<BgioState> {
-    const botAnswered = updateMatching(socket, ({ G }) => G.stonesLeft > 0);
+    const botAnswered = updateMatching(
+      socket,
+      ({ ctx }) => ctx.phase === "chooseRole" && ctx.currentPlayer === HUMAN_ID,
+    );
     socket.emit(
       "update",
       makeMove("chooseNewGameType", ["live"], HUMAN_ID),
@@ -171,9 +174,30 @@ describe("the socket transport a browser talks to", () => {
     const state = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
 
     expect(state.G.difficulty).toBe("live");
-    expect(state.G.stonesRight).toBeGreaterThan(0);
+    expect(state.ctx.phase).toBe("chooseRole");
     // The bot took the judge's turn, so it is the player's again.
     expect(state.ctx.currentPlayer).not.toBe(BOT_ID);
+  });
+
+  it("carries the player's move to the game, and the bot's reply back", async () => {
+    await createStoredMatch();
+    const socket = await connectClient();
+    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
+
+    const playing = updateMatching(socket, ({ ctx }) => ctx.phase === "play");
+    socket.emit("update", makeMove("chooseRole", [HUMAN_ID], HUMAN_ID), live._stateID, MATCH_ID, HUMAN_ID);
+    const play = await playing;
+    expect(play.ctx.currentPlayer).toBe(HUMAN_ID);
+
+    // In category E the first player places one O; the bot answers with its Xs,
+    // which only its strategy, run on the server, can have chosen.
+    const botReplied = updateMatching(socket, ({ G, ctx }) =>
+      G.cells.includes("X") && ctx.currentPlayer === HUMAN_ID);
+    socket.emit("update", makeMove("placeMarks", [[12]], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
+    const state = await botReplied;
+
+    expect(state.G.cells[12]).toBe("O");
+    expect(state.G.cells.filter(cell => cell === "X")).toHaveLength(2);
   });
 
   it("gives a reconnecting player the state their last one left", async () => {

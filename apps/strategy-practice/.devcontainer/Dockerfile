@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/javascript-node:24-bookworm
+FROM mcr.microsoft.com/devcontainers/javascript-node:26-bookworm
 
 # The image tag only pins the Node major (MCR publishes no Node patch tags), so the exact version
 # comes from the node devcontainer feature — see devcontainer.json.
@@ -7,9 +7,9 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:24-bookworm
 # adopted. The npm that matters here is the one bundled with the pinned Node, so keep it quiet.
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
-# Must stay in sync with the "playwright" version in package.json — a mismatch means
+# Must stay in sync with the "playwright" version in the root package.json — a mismatch means
 # node_modules/playwright looks for a browser revision that isn't in the image.
-ARG PLAYWRIGHT_VERSION=1.62.1
+ARG PLAYWRIGHT_VERSION=1.64.1
 
 # Shared location so the browsers installed here as root are usable by the `node` user.
 # Without this they land in /root/.cache/ms-playwright and are invisible at runtime.

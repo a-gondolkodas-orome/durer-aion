@@ -1,6 +1,9 @@
 import { Fragment } from 'react';
 import { range, random } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview, testVariantLabel, fullVariantLabel
+} from 'strategy-game-factory';
 import { generateStartBoard, moves, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -103,27 +106,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    A pályán néhány kupac gyufaszál található. Felváltva lépünk, kétféle lépés
-    megengedett: vagy egyetlen gyufát elveszünk valamelyik kupacból, vagy egy
-    kupacot felosztunk két kisebb kupacra. Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    There are several piles of matchsticks on the board. Players take turns; two
-    kinds of move are allowed: either remove a single match from one of the
-    piles, or split a pile into two smaller piles. The player who cannot move
-    loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('matchstick-piles');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('matchstick-piles');
+  return t('step');
 };
 
 export const MatchstickPiles = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Vegyél el egy gyufát egy kupacból, vagy vágj ketté egy kupacot a rések valamelyikénél.',
-      en: 'Take a match from a pile, or split a pile in two at one of the gaps.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -131,12 +127,12 @@ export const MatchstickPiles = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: () => range(random(2, 3)).map(() => random(2, 5)),
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

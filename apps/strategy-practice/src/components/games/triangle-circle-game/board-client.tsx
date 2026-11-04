@@ -1,4 +1,4 @@
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameBoard, type BoardClientProps, useHoverPreview } from 'strategy-game-factory';
 import { BOARD_OUTLINE, EDGES, TRIANGLES, type Edge } from './geometry';
 import { type Board } from './gameplay';
@@ -18,7 +18,7 @@ const insetEdge = (edge: Edge) => ({
 });
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('triangle-circle-game');
   // The preview is move-scoped, so shading an edge clears it without a reset.
   const { value: hoveredEdge, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
@@ -51,7 +51,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               tabIndex={triangleClickable(tri.id) ? 0 : undefined}
               role={triangleClickable(tri.id) ? 'button' : undefined}
               aria-label={triangleClickable(tri.id)
-                ? t({ hu: `${tri.id + 1}. háromszög — tegyél bele kört`, en: `Triangle ${tri.id + 1} — drop a circle` })
+                ? t('board.triangle', { number: tri.id + 1 })
                 : undefined}
             />
           ))}
@@ -133,7 +133,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               onKeyUp={event => { if (event.key === 'Enter') moves.shadeEdge(board, edge.id); }}
               tabIndex={0}
               role="button"
-              aria-label={t({ hu: `${edge.id + 1}. él — satírozd be`, en: `Edge ${edge.id + 1} — shade it` })}
+              aria-label={t('board.edge', { number: edge.id + 1 })}
             />
           ))}
         </g>
