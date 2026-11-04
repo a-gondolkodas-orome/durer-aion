@@ -21,12 +21,12 @@ const LINE = '#cccccc';
 const HEADER = '#eeeeee';
 // Paler with each try, so the order reads by lightness alone, without
 // telling hues apart.
-const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
-const WRONG = '#f4b4ae';
+export const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
+export const WRONG = '#f4b4ae';
 const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
 // ran out in, cannot be mistaken for a header cell.
-const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
+export const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
 
 interface Cell {
   content: ReactNode;
