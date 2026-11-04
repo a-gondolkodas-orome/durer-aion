@@ -114,15 +114,15 @@ const PAGE_STATE_LABEL: Record<PageState, string> = {
 function PageStateLine(props: { pageState: PageState }) {
   return (
     <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', marginTop: '4px', fontSize: 13, color: MUTED }}>
-        <Box sx={{ width: 8, height: 8, borderRadius: '4px', backgroundColor: 'primary.main' }}/>
-        <span>
-          Most: <Box component="b" sx={{ color: 'text.primary', fontWeight: 500 }}>{PAGE_STATE_LABEL[props.pageState]}</Box>
-          {/* `allowedToStart` in the backend refuses a match from this page. */}
-          {props.pageState === 'DISCLAIMER' && ' · még nem indíthat játékot'}
-        </span>
-        <Box component="code" sx={{ fontSize: 11, backgroundColor: '#f5f5f5', padding: '1px 5px', borderRadius: '3px' }}>{props.pageState}</Box>
-        <HelpButton label="Most" help="Melyik oldalt látja a csapat. A játék oldalán a vége után is ott marad, amíg vissza nem lép."/>
-      </Stack>
+      <Box sx={{ width: 8, height: 8, borderRadius: '4px', backgroundColor: 'primary.main' }}/>
+      <span>
+        Most: <Box component="b" sx={{ color: 'text.primary', fontWeight: 500 }}>{PAGE_STATE_LABEL[props.pageState]}</Box>
+        {' ('}<Box component="code" sx={{ fontSize: 11 }}>{props.pageState}</Box>{')'}
+        {/* `allowedToStart` in the backend refuses a match from this page. */}
+        {props.pageState === 'DISCLAIMER' && ' · még nem indíthat játékot'}
+      </span>
+      <HelpButton label="Most" help="Melyik oldalt látja a csapat. A játék oldalán a vége után is ott marad, amíg vissza nem lép."/>
+    </Stack>
   );
 }
 

@@ -226,8 +226,9 @@ test('the team dialog names the page the team is on', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, pageState: 'DISCLAIMER' }]);
   renderAdmin(alpha.teamId);
 
-  expect(await screen.findByText('Tájékoztató oldalon')).toBeInTheDocument();
-  expect(screen.getByText('DISCLAIMER')).toBeInTheDocument();
+  // The raw value glosses the label, before what the page means for the team.
+  const label = await screen.findByText('Tájékoztató oldalon');
+  expect(label.parentElement).toHaveTextContent(/^Most: Tájékoztató oldalon \(DISCLAIMER\) · még nem indíthat játékot$/);
 });
 
 test('a match that has not started cannot be reset', async () => {
