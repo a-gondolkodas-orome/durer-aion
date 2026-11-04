@@ -153,8 +153,9 @@ The admin pages are at `http://localhost/admin`, user `admin`, password from
 `.env.docker`; `/admin/<teamId>` opens one team directly.
 
 Team import has two paths: `npm run teams:import`, which runs
-`scripts/import_teams.sh` inside the container, and `PUT /team/admin/import`,
-which takes the TSV as an upload; the admin page has no form for it (yet).
+`scripts/import_teams.sh` inside the container, and the admin page's
+**Importálás** tab, which uploads the TSV to `PUT /team/admin/import` and
+downloads the generated join codes once the teams are in.
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition

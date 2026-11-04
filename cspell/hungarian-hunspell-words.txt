@@ -60,6 +60,7 @@ beírni
 beírt
 bejelentkezhettek
 bejelölgetni
+bekerültek
 bekötötte
 beküldött
 belebújások
@@ -255,6 +256,7 @@ felváltva
 Fenntartjuk
 festhetjük
 festhetünk
+figyelmeztetései
 foknyit
 folytathatjuk
 fordításához
@@ -312,6 +314,7 @@ huszárjait
 huszárok
 hússzorosánál
 húzhatunk
+indítása
 indíthatja
 indulása
 írhattunk
@@ -419,6 +422,7 @@ kikövetkeztetni
 kiküszöbölni
 kilépnek
 kilométeren
+kimaradnak
 kimérhető
 kinyitja
 kinyitni
@@ -539,6 +543,7 @@ leszámítva
 leszámolni
 leszúrni
 leszúrt
+letöltött
 letörli
 letörni
 letörölhetjük

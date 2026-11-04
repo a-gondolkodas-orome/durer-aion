@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
-import { MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
+import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -218,4 +218,98 @@ test('a single team\'s page has no tabs, not even while the list loads', async (
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   expect(await screen.findAllByText('Mutasd')).not.toHaveLength(0);
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+});
+
+const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportResultDto => ({
+  successful: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
+});
+
+const alphaCodes = ['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
+
+/** Picks a file on the import tab and starts the import. */
+const importFile = async (name = 'teams.tsv') => {
+  fireEvent.click(await screen.findByRole('tab', { name: 'Importálás' }));
+  const file = new File(['Teamname\tCategory\n'], name);
+  fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  return file;
+};
+
+/** The text of every file the page hands the browser, in order. */
+const savedDownloads = (): string[] => {
+  const saved: string[] = [];
+  vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
+    void (blob as Blob).text().then(text => saved.push(text));
+    return 'blob:codes';
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  return saved;
+};
+
+test('the import tab uploads the picked file, saves the join codes, and reloads the list', async () => {
+  const getAll = vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams')
+    .mockResolvedValue(importAnswer({ successful: 1, export_table: [alphaCodes] }));
+  const saved = savedDownloads();
+  renderAdmin();
+
+  const file = await importFile();
+
+  expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
+  expect(importTeams).toHaveBeenCalledWith(file);
+  // Unasked for: it is the only copy of the codes the import generated.
+  await waitFor(() => { expect(saved).toHaveLength(1); });
+  expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
+  await waitFor(() => { expect(getAll).toHaveBeenCalledTimes(2); });
+});
+
+test('the import tab lists the server\'s errors and warnings, not its narration', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importAnswer({
+    failed: 1,
+    logs: {
+      sev: ['info', 'warn', 'error', 'error'],
+      value: ['Generating login code', '"Other" field not set', 'Invalid category', '-'.repeat(52)],
+    },
+  }));
+  const saved = savedDownloads();
+  renderAdmin();
+
+  await importFile();
+
+  expect(await screen.findByText('Invalid category')).toBeInTheDocument();
+  expect(screen.getByText('"Other" field not set')).toBeInTheDocument();
+  expect(screen.queryByText('Generating login code')).not.toBeInTheDocument();
+  expect(screen.getAllByRole('listitem').filter(item => item.textContent === '-'.repeat(52))).toEqual([]);
+  // Nothing went in, so there is nothing to save.
+  expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
+  expect(saved).toEqual([]);
+});
+
+test('a second import keeps the codes of the first', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const bravoCodes = ['Bravo', 'D', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b'];
+  vi.spyOn(repo, 'importTeams')
+    .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [alphaCodes] }))
+    .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [bravoCodes] }));
+  const saved = savedDownloads();
+  renderAdmin();
+
+  await importFile();
+  expect(await screen.findByText('Belépőkódok letöltése')).toBeInTheDocument();
+  await importFile();
+  await waitFor(() => { expect(saved).toHaveLength(2); });
+
+  expect(saved[1]).toContain('111-2222-333');
+  expect(saved[1]).toContain('444-5555-666');
+});
+
+test('the import tab says why the server refused the file', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockRejectedValue(new Error('Csak .tsv kiterjesztésű fájlt lehet importálni.'));
+  renderAdmin();
+
+  await importFile('teams.csv');
+
+  expect(await screen.findByText('Csak .tsv kiterjesztésű fájlt lehet importálni.')).toBeInTheDocument();
 });

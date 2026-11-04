@@ -32,6 +32,21 @@ export function adminTeamId(team: TeamModelDto): string {
   return team.teamId;
 }
 
+/// What `PUT /team/admin/import` answers: the import goes row by row, so some
+/// rows can land while others fail. `logs` is the server's own English
+/// narration, `sev` and `value` index-aligned.
+export interface TeamImportResultDto {
+  successful: number;
+  failed: number;
+  /// The teams that landed, in the import's column order, with the generated
+  /// id, join code and credentials filled in. The only copy of those codes.
+  export_table: string[][];
+  logs: {
+    sev: ('info' | 'warn' | 'error')[];
+    value: string[];
+  };
+}
+
 /// One admin endpoint serves both kinds of match, and the payload carries no
 /// discriminant of its own: a relay match's G is the relay game state, a
 /// strategy match's is whatever the game defines plus gameWrapper's mixin — of

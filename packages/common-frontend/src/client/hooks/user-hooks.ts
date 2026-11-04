@@ -162,3 +162,8 @@ export const useStartStrategy = () => {
     setTeamState(state);
   };
 };
+
+export const useImportTeams = () => {
+  const repo = useClientRepo();
+  return async (file: File) => await repo.importTeams(file);
+};

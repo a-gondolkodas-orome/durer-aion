@@ -1,4 +1,4 @@
-import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -21,6 +21,7 @@ export interface ClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
+  importTeams(file: File): Promise<TeamImportResultDto>
   // The end report of a relay whose time ran out with no move to end it: the
   // game ends a match past its time only on a move arriving after the grace
   // for late answers, and a team waiting at the buzzer sends none. Locally the

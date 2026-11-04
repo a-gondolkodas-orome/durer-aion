@@ -6,6 +6,7 @@ import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TeamDetailDialog } from './TeamDetailDialog';
+import { ImportTeams } from './ImportTeams';
 import { csvToolbar } from './CsvToolbar';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
@@ -23,7 +24,7 @@ const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: f
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
-const TABS = ['csapatok', 'statisztika'] as const;
+const TABS = ['csapatok', 'statisztika', 'importalas'] as const;
 type AdminTab = typeof TABS[number];
 
 function tabFromUrl(): AdminTab {
@@ -41,8 +42,8 @@ function tabToUrl(tab: AdminTab) {
   window.history.replaceState(window.history.state, '', url);
 }
 
-// Both panels stay mounted, so the grid keeps its filter, sort and page while
-// the other tab is open. Not `display: none`: the DataGrid measures its parent
+// Every panel stays mounted, so the grid keeps its filter, sort and page — and
+// the import the join codes it holds — while another tab is open. Not `display: none`: the DataGrid measures its parent
 // on every resize, and a zero width logs an error and lays it out for 0px.
 const panelProps = (panel: AdminTab, open: AdminTab) => ({
   role: 'tabpanel',
@@ -56,7 +57,7 @@ export function Admin(props: { teamId?: string }) {
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
-  const { data } = useSWR("users/all", getAll)
+  const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
@@ -119,6 +120,7 @@ export function Admin(props: { teamId?: string }) {
       >
         <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
         <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
+        <Tab label="Importálás" value="importalas" id="admin-tab-importalas" aria-controls="admin-panel-importalas"/>
       </Tabs>
       <Stack {...panelProps('csapatok', tab)}>
         <Stack sx={{ height: "635px" }}>
@@ -296,6 +298,9 @@ export function Admin(props: { teamId?: string }) {
       </Stack>
       <Stack {...panelProps('statisztika', tab)}>
         <Stats data={teams}/>
+      </Stack>
+      <Stack {...panelProps('importalas', tab)}>
+        <ImportTeams onImported={() => { void mutate(); }}/>
       </Stack>
       </>}
     </Stack>

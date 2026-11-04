@@ -3,17 +3,24 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto } from "common-frontend";
+import type { ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
 // (vite.config.ts) the way nginx does in the docker stack.
-function apiAxiosInstance(): AxiosInstance {
+function apiAxiosInstance(timeoutMs = 10000): AxiosInstance {
   return axios.create({
     baseURL: '/',
-    timeout: 10000,
+    timeout: timeoutMs,
   });
 }
+
+// An import writes its rows one by one, so a competition's thousand teams can
+// take longer than the default allows. Giving up early does not stop the
+// server, and the answer it drops is the only copy of the join codes the
+// import generated, so this outlasts nginx's own 60-second
+// `proxy_read_timeout`: past that the codes are lost either way.
+const IMPORT_TIMEOUT_MS = 90_000;
 
 function makeAxiosError(any_error: unknown): AxiosError {
   if (!axios.isAxiosError(any_error)) {
@@ -183,6 +190,31 @@ export class RealClientRepository implements ClientRepository {
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
+  }
+
+  async importTeams(file: File): Promise<TeamImportResultDto> {
+    const body = new FormData();
+    body.append('file', file);
+    try {
+      const result = await apiAxiosInstance(IMPORT_TIMEOUT_MS).put('/team/admin/import', body);
+      return result.data as TeamImportResultDto;
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      // The route checks the name the browser sent.
+      if (err.response?.status === 400) {
+        throw new Error('Csak .tsv kiterjesztésű fájlt lehet importálni.', { cause: e });
+      }
+      if (err.response?.status === 413) {
+        throw new Error('A fájl túl nagy.', { cause: e });
+      }
+      if (err.code === 'ECONNABORTED') {
+        // The server was not told to stop, so some teams may be in.
+        throw new Error('Az importálás túl sokáig tartott. Frissíts, és nézd meg, mely csapatok kerültek be, '
+          + 'mielőtt újra próbálod.', { cause: e });
+      }
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {
