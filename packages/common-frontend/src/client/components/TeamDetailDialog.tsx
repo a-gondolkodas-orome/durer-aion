@@ -12,7 +12,8 @@ import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface } from './ConfirmDialog';
+import { ConfirmDialogInterface, formatMinutes } from './ConfirmDialog';
+import { BORDER, DANGER, DANGER_BORDER, DANGER_DIVIDER, DIALOG_BACKGROUND, DIVIDER, FOOTER_BACKGROUND, MUTED } from './adminStyles';
 import { Countdown } from './Countdown';
 import { relayProblemResults, STRATEGY_POINTS_BY_LOSSES } from 'game';
 import { RelayResultsTable, SOLVED_ON_TRY, StrategyGamesTable, UNANSWERED, WRONG } from './ResultTables';
@@ -23,10 +24,6 @@ import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 type MatchKind = 'relay' | 'strategy';
 
 export const TEAM_DIALOG_TITLE_ID = 'team-dialog-title';
-
-const BORDER = '#e6e0c8';
-const DIVIDER = '#efe9d4';
-const MUTED = '#5f6368';
 
 /// `page` is the team's own `/admin/<teamId>` tab, where the team's name is the
 /// page's title and links back to the list. In the dialog the name is an h2,
@@ -46,7 +43,7 @@ export function TeamDetailDialog(props: {
         width: "1200px",
         maxWidth: "100%",
         fontSize: 14,
-        backgroundColor: props.page ? 'transparent' : '#fffdf5',
+        backgroundColor: props.page ? 'transparent' : DIALOG_BACKGROUND,
       }}>
       <Header team={teamState} page={props.page}/>
       <Stack sx={{ gap: '20px', padding: { xs: '16px 12px 24px', md: '24px 32px 32px' } }}>
@@ -127,6 +124,7 @@ function PageStateLine(props: { pageState: PageState }) {
 }
 
 const MATCH_NAME: Record<MatchKind, string> = { relay: 'váltó', strategy: 'stratégia' };
+const MATCH_TITLE: Record<MatchKind, string> = { relay: 'Váltó', strategy: 'Stratégia' };
 
 /// The total so far, marked as not final until both matches have finished: a
 /// running match's points are its game's points at the moment they were fetched.
@@ -174,7 +172,7 @@ const cardFooterSx = {
   justifyContent: 'space-between',
   gap: '12px 16px',
   padding: { xs: '14px 16px', md: '12px 24px' },
-  backgroundColor: '#fbf9f1',
+  backgroundColor: FOOTER_BACKGROUND,
   borderTop: `1px solid ${DIVIDER}`,
   borderRadius: '0 0 12px 12px',
 } as const;
@@ -197,7 +195,7 @@ function StatusChip(props: { state: MatchStatus['state'] }) {
 }
 
 function MatchCard(props: { kind: MatchKind, heading: 'h2' | 'h3', teamName: string, status: MatchStatus, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
-  const title = props.kind === 'relay' ? 'Váltó' : 'Stratégia';
+  const title = MATCH_TITLE[props.kind];
   const status = props.status;
   if (status.state === 'NOT STARTED') {
     return (
@@ -396,7 +394,14 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
         })}
         onSubmit={(values) => {
           props.setConfirmDialog({
-            text: `Erősítsd meg, hogy ${props.teamName} csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+            title: 'Idő hozzáadása',
+            facts: [
+              { label: 'Csapat', value: props.teamName },
+              { label: 'Játék', value: MATCH_TITLE[props.kind] },
+              { label: 'Változás', value: formatMinutes(Number(values.time)) },
+            ],
+            description: 'A játék vége ennyivel tolódik.',
+            confirmLabel: 'Hozzáadás',
             confirm: async () => {
               try {
                 await addMinutes(status.matchID, values.time);
@@ -458,6 +463,11 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
   );
 }
 
+// The match itself is kept; the backend's reset routes note its id in the
+// team's notes (`other`). Each row and its confirmation say the same.
+const RESET_RELAY = <>A váltó NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>befejezett váltónál sem</b>. A meccs megmarad, az azonosítója <code>prevrelayid:</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp a váltó oldalán van, a kezdőlapra kerül.</>;
+const RESET_STRATEGY = <>A stratégiás játék NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>befejezett játéknál sem</b>. A meccs megmarad, az azonosítója <code>prevstratid:</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp a stratégiás oldalon van, a kezdőlapra kerül.</>;
+
 /// The resets, together: both are destructive and both ask first.
 function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const resetRelay = useResetRelay();
@@ -465,9 +475,17 @@ function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamSt
   const { enqueueSnackbar } = useSnackbar();
   const { team } = props;
 
-  const confirmReset = (text: string, reset: (teamId: string) => Promise<TeamModelDto>) => {
+  const confirmReset = (kind: MatchKind, description: ReactNode, reset: (teamId: string) => Promise<TeamModelDto>) => {
+    const status = kind === 'relay' ? team.relayMatch : team.strategyMatch;
     props.setConfirmDialog({
-      text,
+      title: `${MATCH_TITLE[kind]} alaphelyzetbe állítása`,
+      facts: [
+        { label: 'Csapat', value: team.teamName },
+        { label: 'Állapot', value: STATUS_CHIP[status.state].label },
+      ],
+      description,
+      confirmLabel: `${MATCH_TITLE[kind]} reset`,
+      danger: true,
       confirm: async () => {
         try {
           props.setTeamState(await reset(adminTeamId(team)));
@@ -481,34 +499,26 @@ function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamSt
   };
 
   return (
-    <Stack component="section" aria-label="Veszélyzóna" sx={{ ...cardSx, borderColor: '#f1c4c4' }}>
-      <Stack sx={{ ...cardHeaderSx, borderBottom: '1px solid #f6dada' }}>
-        <WarningAmber sx={{ color: '#c62828', fontSize: 20 }}/>
-        <Box component={props.heading} sx={{ ...cardTitleSx, color: '#c62828' }}>Veszélyzóna</Box>
+    <Stack component="section" aria-label="Veszélyzóna" sx={{ ...cardSx, borderColor: DANGER_BORDER }}>
+      <Stack sx={{ ...cardHeaderSx, borderBottom: `1px solid ${DANGER_DIVIDER}` }}>
+        <WarningAmber sx={{ color: DANGER, fontSize: 20 }}/>
+        <Box component={props.heading} sx={{ ...cardTitleSx, color: DANGER }}>Veszélyzóna</Box>
         <Box sx={{ fontSize: 13, color: MUTED }}>Mindkettő megerősítést kér.</Box>
       </Stack>
-      {/* The match itself is kept; the backend's reset routes note its id in
-          the team's notes (`other`). */}
       <ResetRow
         first
         title="Váltó alaphelyzetbe állítása"
-        description={<>A váltó NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>befejezett váltónál sem</b>. A meccs megmarad, az azonosítója <code>prevrelayid:</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp a váltó oldalán van, a kezdőlapra kerül.</>}
+        description={RESET_RELAY}
         button="Váltó reset"
         notStarted={team.relayMatch.state === 'NOT STARTED'}
-        onClick={() => confirmReset(
-          `Erősítsd meg, hogy ${team.teamName} csapatnak alaphelyzetbe akarod állítani a váltó állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
-          resetRelay,
-        )}
+        onClick={() => confirmReset('relay', RESET_RELAY, resetRelay)}
       />
       <ResetRow
         title="Stratégia alaphelyzetbe állítása"
-        description={<>A stratégiás játék NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>befejezett játéknál sem</b>. A meccs megmarad, az azonosítója <code>prevstratid:</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp a stratégiás oldalon van, a kezdőlapra kerül.</>}
+        description={RESET_STRATEGY}
         button="Stratégia reset"
         notStarted={team.strategyMatch.state === 'NOT STARTED'}
-        onClick={() => confirmReset(
-          `Erősítsd meg, hogy ${team.teamName} csapatnak alaphelyzetbe akarod állítani a stratégiás állását. A játék NOT STARTED állapotba kerül, a csapat újra elindíthatja.`,
-          resetStrategy,
-        )}
+        onClick={() => confirmReset('strategy', RESET_STRATEGY, resetStrategy)}
       />
     </Stack>
   );
@@ -521,7 +531,7 @@ function ResetRow(props: { first?: boolean, title: string, description: ReactNod
       alignItems: { xs: 'stretch', sm: 'center' },
       gap: { xs: '10px', sm: '24px' },
       padding: { xs: '14px 16px', md: '14px 24px' },
-      borderTop: props.first ? 0 : '1px solid #f6dada',
+      borderTop: props.first ? 0 : `1px solid ${DANGER_DIVIDER}`,
     }}>
       <Box sx={{ flex: 1 }}>
         <Box sx={{ fontWeight: 600 }}>{props.title}</Box>

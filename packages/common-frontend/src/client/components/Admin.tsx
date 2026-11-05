@@ -11,7 +11,7 @@ import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialogInterface, ConfirmDialog, formatMinutes } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -244,8 +244,15 @@ export function Admin(props: { teamId?: string }) {
               .required('Nincs megadva érték')
             })}
           onSubmit={(values) => {
+            const running = teams.flatMap(it => [it.relayMatch, it.strategyMatch]).filter(it => it.state === "IN PROGRESS").length;
             setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+              title: 'Idő hozzáadása minden futó játéknak',
+              facts: [
+                { label: 'Érintett játékok', value: `${running} futó játék` },
+                { label: 'Változás', value: formatMinutes(Number(values.time)) },
+              ],
+              description: 'Minden most futó váltó és stratégiás játék vége ennyivel tolódik. A még el nem kezdett játékokat nem érinti.',
+              confirmLabel: 'Hozzáadás mindenkinek',
               confirm: async () => {
                 try {
                   for (const a of teams) {
