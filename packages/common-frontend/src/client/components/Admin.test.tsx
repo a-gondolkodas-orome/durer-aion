@@ -314,6 +314,16 @@ test('the team list, with the add-time form, and the stats are on two tabs, the 
   expect(window.location.search).toBe('');
 });
 
+test('the stats say what the numbers in each triple count', async () => {
+  window.history.replaceState(null, '', '/admin?tab=statisztika');
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+
+  expect(await screen.findByText('még nem kezdte el')).toBeVisible();
+  expect(screen.getByText('folyamatban')).toBeVisible();
+  expect(screen.getByText('befejezte')).toBeVisible();
+});
+
 test('the tab named in the URL is the one that opens', async () => {
   window.history.replaceState(null, '', '/admin?tab=statisztika');
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
