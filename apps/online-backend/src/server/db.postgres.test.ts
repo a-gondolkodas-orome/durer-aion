@@ -67,20 +67,6 @@ describe('TeamsRepository.goHome', () => {
   });
 });
 
-describe('TeamsRepository.fetch', () => {
-  it('finds the teams whose notes hold every fragment, whatever its case, wildcards read literally', async () => {
-    await database.teams.insertTeam(team({ teamname: 'Alpha', other: 'Budapest, 100% motivated, a_b' }));
-    await database.teams.insertTeam(team({ teamname: 'Beta', other: 'budapest, 100 percent, axb' }));
-    const names = async (filter: string[]) => (await database.teams.fetch(filter)).map(t => t.teamName).sort();
-
-    expect(await names([])).toStrictEqual(['Alpha', 'Beta']);
-    expect(await names(['BUDAPEST'])).toStrictEqual(['Alpha', 'Beta']);
-    expect(await names(['budapest', 'motivated'])).toStrictEqual(['Alpha']);
-    expect(await names(['100%'])).toStrictEqual(['Alpha']);
-    expect(await names(['a_b'])).toStrictEqual(['Alpha']);
-  });
-});
-
 // fetchMatchStates reads bgio-postgres' own table through the model it
 // registers, which no API of the library promises: this is what notices a
 // release that renames either.

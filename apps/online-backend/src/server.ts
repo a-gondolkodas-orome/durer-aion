@@ -1,39 +1,14 @@
 import './env';
-import {
-  GameRelay,
-  MyGameWrappers as strategyGameWrappers,
-  gameWrapper,
-  strategyNames,
-} from 'game';
-import { StrategyWrappers as StrategyStrategy } from 'game/bot';
-import { RelayStrategy } from 'relay-bot';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
-import botWrapper from './botwrapper';
+import { competitionGames } from './games';
 import { configureTeamsRouter } from './server/router';
 import { getDb } from './server/db';
-import { getAdminCredentials, getBotCredentials, relayNames } from './server/common';
+import { getAdminCredentials, getBotCredentials } from './server/common';
 import { requireAdmin } from './server/admin_session';
 
-const games = [
-  { ...GameRelay, name: relayNames.C },
-  { ...GameRelay, name: relayNames.D },
-  { ...GameRelay, name: relayNames.E },
-  { ...gameWrapper(strategyGameWrappers.C()), name: strategyNames.C },
-  { ...gameWrapper(strategyGameWrappers.D()), name: strategyNames.D },
-  { ...gameWrapper(strategyGameWrappers.E()), name: strategyNames.E },
-];
-
-
-const bot_factories = [
-  botWrapper(RelayStrategy("C")),
-  botWrapper(RelayStrategy("D")),
-  botWrapper(RelayStrategy("E")),
-  botWrapper(StrategyStrategy.C()),
-  botWrapper(StrategyStrategy.D()),
-  botWrapper(StrategyStrategy.E()),
-];
+const games = competitionGames.map(({ game }) => game);
 
 if (argv[2] === "sanity-check") {
   console.log("OK");
@@ -46,9 +21,9 @@ getAdminCredentials(); // give love if no creds are supplied
 const { db, teams } = getDb();
 
 const botSetup = Object.fromEntries(
-  games.map((game, idx) =>
+  competitionGames.map(({ game, bot }) =>
     [game.name,
-    new (bot_factories[idx])({
+    new bot({
       enumerate: game.ai?.enumerate,
       seed: game.seed,
     })]
