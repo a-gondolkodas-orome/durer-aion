@@ -57,14 +57,7 @@ export function ImportTeams(props: { onImported: () => void }) {
         : `${answer.successful} csapat importálva, ${answer.failed} sor hibás`,
       { variant: answer.failed === 0 ? 'success' : 'warning' });
       // Unasked for: the answer is the only copy of the generated join codes.
-      // Its own catch, since the teams are in by now and a failed download is
-      // not a failed import.
-      try {
-        downloadTsv(codesFileName(), codesTsv(held));
-      } catch {
-        enqueueSnackbar('A csapatok bekerültek, de a belépőkódokat nem sikerült letölteni. '
-          + 'Használd a „Belépőkódok letöltése” gombot.', { variant: 'warning' });
-      }
+      downloadTsv(codesFileName(), codesTsv(held));
     } catch (e: unknown) {
       enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
     } finally {

@@ -43,8 +43,9 @@ function tabToUrl(tab: AdminTab) {
 }
 
 // Every panel stays mounted, so the grid keeps its filter, sort and page — and
-// the import the join codes it holds — while another tab is open. Not `display: none`: the DataGrid measures its parent
-// on every resize, and a zero width logs an error and lays it out for 0px.
+// the import the join codes it holds — while another tab is open. Not
+// `display: none`: the DataGrid measures its parent on every resize, and a zero
+// width logs an error and lays it out for 0px.
 const panelProps = (panel: AdminTab, open: AdminTab) => ({
   role: 'tabpanel',
   id: `admin-panel-${panel}`,
