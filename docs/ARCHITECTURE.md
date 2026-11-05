@@ -20,7 +20,8 @@ Every match, relay or strategy, is a two-player boardgame.io match.
 `PlayerIDType` in `packages/game/src/common/types.ts` defines both. The client
 gets the game's rules but never the bot: what the bot knows (the relay's
 answers, a strategy's lookup tables) lives in `relay-bot` and the `game/bot`
-entry, which only the server and the dry run import.
+entry. The server and the dry run import both; the relay practice site imports
+`relay-bot` for its judge.
 
 ## A team's way through the round
 
@@ -32,8 +33,8 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
    `PUT /team/admin/import`, creates each row in `DISCLAIMER` with both match
    ids null.
 2. **Login.** `POST /team/join` swaps the join code for a session cookie;
-   `team_session.ts` is what the cookie is and why. Every `/team/me` route then
-   loads the team through `requireTeam`.
+   `team_session.ts` is what the cookie is and why. Every `/team/me` route but
+   `logout` then loads the team through `requireTeam`.
 3. **The team's view.** `GET /team/me` answers `publicTeamView` (`team_view.ts`)
    with both matches' status. The frontend keeps that one object in
    `team-state-store.ts`, and `Main.tsx` picks the screen from its `pageState`.
@@ -74,7 +75,8 @@ transport. It adds two things to each game's namespace:
 The backend's `botwrapper.ts` turns a strategy function — `(state, botID) => [args, moveName]`
 — into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
 game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
-move land first. `server.ts` pairs each game with its bot by name.
+move land first. `competitionGames` (`games.ts`) lists each game beside its
+bot, and `server.ts` builds both the game list and the bots from it.
 
 ## The two kinds of match
 
@@ -86,11 +88,12 @@ move land first. `server.ts` pairs each game with its bot by name.
   (`setStartingPosition`);
 - `chooseRole` — the team chooses who moves first;
 - `play` — the game's own moves, until one sets `G.winner`. Then it is back to
-  `startNewGame`.
+  `startNewGame`, unless the game's move ended the whole match itself
+  (`20ocde` does on a second win in a row).
 
-A `live` sub-game's result is pushed to `G.liveResults`. A move past the end
-plus `LATE_MOVE_GRACE_MS` ends the match. What a game folder provides is
-[`README.md`](../README.md) § *Creating a new game*.
+A `live` sub-game's result is pushed to `G.liveResults`. In the `play` phase, a
+move past the end plus `LATE_MOVE_GRACE_MS` ends the match. What a game folder
+provides is [`README.md`](../README.md) § *Creating a new game*.
 
 **A relay match** is `RelayWrapper` (`packages/game/src/games/relay/game.ts`).
 It is not wrapped, and has its own clock (60 minutes). The team starts it, and
@@ -131,12 +134,14 @@ writes the results ([`README.md`](../README.md) § *Admin*).
 is for tests.
 
 - **The offline dry run** (`/proba-verseny/`) runs the same `game` package and
-  the same bots in the browser, on boardgame.io's local master (its `myclient.ts`),
+  the same bots in the browser, on `localWithBots` (`local-with-bots.ts` in
+  `common-frontend`, a persisted boardgame.io `Local`),
   with the team's state in localStorage (`OfflineClientRepository`). The
   wrappers' report callbacks — `sendStrategyFunction` and `sendRelayFunction` —
   are how it uploads each step.
-- **The relay practice site** (`/valto/`) runs the relay game in the browser
-  against its own problem sets.
+- **The relay practice site** (`/valto/`) runs the relay game in the browser,
+  also on `localWithBots`, with `relay-bot`'s judge (`relayStrategy`) over its
+  own problem sets — so a change to the judge's scoring changes this site too.
 - **The strategy practice site** (`/jatekok/`) shares none of this: it runs on
   `strategy-engine`, without boardgame.io. Its own
   [`AGENTS.md`](../apps/strategy-practice/AGENTS.md) is the authority.
