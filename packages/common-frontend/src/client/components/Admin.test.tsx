@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
@@ -188,7 +188,8 @@ test('a countdown that has reached zero follows the minutes added to it', async 
   vi.spyOn(repo, 'addMinutes').mockResolvedValue('');
   fireEvent.change(screen.getByPlaceholderText('perc'), { target: { value: '60' } });
   fireEvent.click(screen.getByRole('button', { name: 'Hozzáadás' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Megerősítés' }));
+  const confirm = await screen.findByRole('dialog', { name: 'Idő hozzáadása' });
+  fireEvent.click(within(confirm).getByRole('button', { name: 'Hozzáadás' }));
 
   await waitFor(() => expect(screen.getByTestId('relayRemaining')).toHaveTextContent(/^(00:59:5\d|01:00:0\d)$/), { timeout: 3000 });
 }, 10000);
@@ -342,4 +343,29 @@ test('a single team\'s page has no tabs, not even while the list loads', async (
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   expect(await screen.findAllByText('Mutasd')).not.toHaveLength(0);
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+});
+
+test('a reset asks first, names the team, and does nothing when cancelled', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
+  const reset = vi.spyOn(repo, 'resetRelay').mockResolvedValue(alpha);
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 7 });
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Váltó reset' }));
+  let confirm = await screen.findByRole('dialog', { name: 'Váltó alaphelyzetbe állítása' });
+  expect(within(confirm).getByText('Alpha')).toBeInTheDocument();
+  expect(within(confirm).getByText('Végzett')).toBeInTheDocument();
+  fireEvent.click(within(confirm).getByRole('button', { name: 'Mégse' }));
+  await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Váltó alaphelyzetbe állítása' })).not.toBeInTheDocument());
+  expect(reset).not.toHaveBeenCalled();
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Váltó reset' }));
+  confirm = await screen.findByRole('dialog', { name: 'Váltó alaphelyzetbe állítása' });
+  expect(confirm).toHaveAccessibleDescription(/^A váltó NOT STARTED állapotba kerül/);
+  const button = within(confirm).getByRole('button', { name: 'Váltó reset' });
+  // The other match's word does not unlock it; the right one, without accents, does.
+  fireEvent.change(within(confirm).getByLabelText('Írd be: váltó'), { target: { value: 'stratégia' } });
+  expect(button).toBeDisabled();
+  fireEvent.change(within(confirm).getByLabelText('Írd be: váltó'), { target: { value: ' Valto ' } });
+  fireEvent.click(button);
+  await waitFor(() => expect(reset).toHaveBeenCalledWith(alpha.teamId));
 });
