@@ -236,26 +236,6 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Run a user defined filter query on teams
-   *
-   * @param {string|string[]} filter - Get parameter to pass the filter
-   * @returns {TeamModel[]} - List of the selected teams
-   */
-  router.get("/team/admin/filter", adminAuth, koaBody(), async (ctx) => {
-    const filter_string: string | string[] | undefined =
-      ctx.request.query["filter"];
-    let filters: string[];
-    if (filter_string === undefined) {
-      filters = [];
-    } else if (typeof filter_string === "string") {
-      filters = filter_string.split(",");
-    } else {
-      filters = filter_string;
-    }
-    ctx.body = await adminTeamViews(ctx.db, await teams.fetch(filters));
-  });
-
-  /**
    * Get all teams as a full object
    * @returns {TeamModel[]} - List of the selected teams
    */
