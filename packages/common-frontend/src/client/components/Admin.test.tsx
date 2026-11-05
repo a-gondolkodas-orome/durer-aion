@@ -360,6 +360,12 @@ test('a reset asks first, names the team, and does nothing when cancelled', asyn
 
   fireEvent.click(await screen.findByRole('button', { name: 'Váltó reset' }));
   confirm = await screen.findByRole('dialog', { name: 'Váltó alaphelyzetbe állítása' });
-  fireEvent.click(within(confirm).getByRole('button', { name: 'Váltó reset' }));
+  expect(confirm).toHaveAccessibleDescription(/^A váltó NOT STARTED állapotba kerül/);
+  const button = within(confirm).getByRole('button', { name: 'Váltó reset' });
+  // The other match's word does not unlock it; the right one, without accents, does.
+  fireEvent.change(within(confirm).getByLabelText('Írd be: váltó'), { target: { value: 'stratégia' } });
+  expect(button).toBeDisabled();
+  fireEvent.change(within(confirm).getByLabelText('Írd be: váltó'), { target: { value: ' Valto ' } });
+  fireEvent.click(button);
   await waitFor(() => expect(reset).toHaveBeenCalledWith(alpha.teamId));
 });

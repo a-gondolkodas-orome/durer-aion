@@ -26,7 +26,7 @@ export interface ConfirmDialogInterface {
 const TITLE_ID = 'confirm-dialog-title';
 const DESCRIPTION_ID = 'confirm-dialog-description';
 
-// Case, accents and surrounding spaces do not matter: "torles" is accepted.
+// Case, accents and surrounding spaces do not matter: "valto" is accepted.
 const fold = (s: string) => s.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
 export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | null, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
@@ -36,7 +36,9 @@ export function ConfirmDialog(props: { confirmDialog: ConfirmDialogInterface | n
     open={confirmDialog != null}
     onClose={() => setConfirmDialog(null)}
     aria-labelledby={TITLE_ID}
-    aria-describedby={DESCRIPTION_ID}
+    // Only the description describes the dialog: the facts are a list of their
+    // own, and the typed-word field has its own label.
+    aria-describedby={confirmDialog?.description ? DESCRIPTION_ID : undefined}
     slotProps={{ paper: { sx: {
       width: 520,
       maxWidth: { xs: 'calc(100% - 24px)', sm: 'calc(100% - 64px)' },
@@ -89,7 +91,7 @@ function ConfirmContent(props: { confirmDialog: ConfirmDialogInterface, setConfi
         </Box>
       </Stack>
     </Stack>
-    <Stack id={DESCRIPTION_ID} sx={{ gap: '16px', padding: { xs: '16px', sm: '20px 24px' } }}>
+    <Stack sx={{ gap: '16px', padding: { xs: '16px', sm: '20px 24px' } }}>
       {facts && facts.length > 0 && <Box component="dl" sx={{
         display: 'grid',
         gridTemplateColumns: 'max-content 1fr',
@@ -105,7 +107,7 @@ function ConfirmContent(props: { confirmDialog: ConfirmDialogInterface, setConfi
           <Box component="dd" sx={{ margin: 0, fontWeight: 600, fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>{fact.value}</Box>
         </Box>)}
       </Box>}
-      {description && <Box sx={{ color: MUTED, lineHeight: 1.5, '& code': { fontSize: 12, backgroundColor: '#f5f5f5', padding: '1px 4px', borderRadius: '3px' } }}>
+      {description && <Box id={DESCRIPTION_ID} sx={{ color: MUTED, lineHeight: 1.5, '& code': { fontSize: 12, backgroundColor: '#f5f5f5', padding: '1px 4px', borderRadius: '3px' } }}>
         {description}
       </Box>}
       {requiredWords !== undefined && <TextField

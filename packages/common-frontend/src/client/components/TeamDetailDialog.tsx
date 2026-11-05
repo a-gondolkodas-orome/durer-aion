@@ -463,10 +463,19 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
   );
 }
 
-// The match itself is kept; the backend's reset routes note its id in the
-// team's notes (`other`). Each row and its confirmation say the same.
-const RESET_RELAY = <>A váltó NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>befejezett váltónál sem</b>. A meccs megmarad, az azonosítója <code>prevrelayid:</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp a váltó oldalán van, a kezdőlapra kerül.</>;
-const RESET_STRATEGY = <>A stratégiás játék NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>befejezett játéknál sem</b>. A meccs megmarad, az azonosítója <code>prevstratid:</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp a stratégiás oldalon van, a kezdőlapra kerül.</>;
+/// What tells the two resets apart: the match's name in the sentences, the
+/// prefix the backend's reset route notes its id under in the team's notes
+/// (`other`), the team's page it moves them off, and the word typed to confirm.
+const RESET: Record<MatchKind, { subject: string, finished: string, notePrefix: string, page: string, word: string }> = {
+  relay: { subject: 'A váltó', finished: 'befejezett váltónál sem', notePrefix: 'prevrelayid:', page: 'a váltó oldalán', word: 'váltó' },
+  strategy: { subject: 'A stratégiás játék', finished: 'befejezett játéknál sem', notePrefix: 'prevstratid:', page: 'a stratégiás oldalon', word: 'stratégia' },
+};
+
+/// The match itself is kept. Each reset row and its confirmation show this.
+function resetDescription(kind: MatchKind) {
+  const r = RESET[kind];
+  return <>{r.subject} NOT STARTED állapotba kerül, a csapat újra elindíthatja. A mostani meccse leválik róla, a pontjai nem számítanak tovább, <b>{r.finished}</b>. A meccs megmarad, az azonosítója <code>{r.notePrefix}</code> jelöléssel az Egyéb mezőbe kerül. Ha a csapat épp {r.page} van, a kezdőlapra kerül.</>;
+}
 
 /// The resets, together: both are destructive and both ask first.
 function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
@@ -475,7 +484,7 @@ function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamSt
   const { enqueueSnackbar } = useSnackbar();
   const { team } = props;
 
-  const confirmReset = (kind: MatchKind, description: ReactNode, reset: (teamId: string) => Promise<TeamModelDto>) => {
+  const confirmReset = (kind: MatchKind, reset: (teamId: string) => Promise<TeamModelDto>) => {
     const status = kind === 'relay' ? team.relayMatch : team.strategyMatch;
     props.setConfirmDialog({
       title: `${MATCH_TITLE[kind]} alaphelyzetbe állítása`,
@@ -483,9 +492,10 @@ function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamSt
         { label: 'Csapat', value: team.teamName },
         { label: 'Állapot', value: STATUS_CHIP[status.state].label },
       ],
-      description,
+      description: resetDescription(kind),
       confirmLabel: `${MATCH_TITLE[kind]} reset`,
       danger: true,
+      requiredWords: [RESET[kind].word],
       confirm: async () => {
         try {
           props.setTeamState(await reset(adminTeamId(team)));
@@ -508,17 +518,17 @@ function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamSt
       <ResetRow
         first
         title="Váltó alaphelyzetbe állítása"
-        description={RESET_RELAY}
+        description={resetDescription('relay')}
         button="Váltó reset"
         notStarted={team.relayMatch.state === 'NOT STARTED'}
-        onClick={() => confirmReset('relay', RESET_RELAY, resetRelay)}
+        onClick={() => confirmReset('relay', resetRelay)}
       />
       <ResetRow
         title="Stratégia alaphelyzetbe állítása"
-        description={RESET_STRATEGY}
+        description={resetDescription('strategy')}
         button="Stratégia reset"
         notStarted={team.strategyMatch.state === 'NOT STARTED'}
-        onClick={() => confirmReset('strategy', RESET_STRATEGY, resetStrategy)}
+        onClick={() => confirmReset('strategy', resetStrategy)}
       />
     </Stack>
   );
