@@ -6,6 +6,7 @@ adhatunk
 Ajtóstól
 alakíthatod
 alátámasztottuk
+állítása
 állítások
 állítást
 állításunk
@@ -64,6 +65,7 @@ bekötötte
 beküldött
 belebújások
 belebújnak
+beleértve
 beletehetünk
 bélyeget
 benéznek
@@ -159,6 +161,7 @@ eljutunk
 elkapnák
 elképzelhető
 elkészítjük
+elkezdett
 elkezdhetjük
 elkezdi
 elosztania
@@ -295,6 +298,7 @@ hételemű
 hétfejű
 hétjegyű
 hétszöget
+hibakereséshez
 Holdimádók
 hosszúak
 hozzáadandó
@@ -324,6 +328,7 @@ járhasson
 járhatnak
 járhatunk
 jelölései
+jelöléssel
 jelölést
 jelölhettem
 juthattok
@@ -527,7 +532,7 @@ leírjuk
 leírni
 leírt
 leírta
-Lekérése
+lekérése
 lelegelhető
 lelegelni
 leosztva
@@ -912,6 +917,7 @@ virágok
 virágokért
 virágom
 viselkedésén
+visszaállítani
 visszakapjuk
 visszanézve
 Visszaragasztottam
