@@ -105,9 +105,12 @@ jobs:
           cache: npm
       - run: npm ci
       # The headless shell alone: smoke-site.mjs launches headless, and the full Chromium is
-      # a second download nothing here would run.
+      # a second download nothing here would run. No --with-deps: the runner image already has
+      # every library the shell links against, so all it added was nine font packages from the
+      # Ubuntu mirror — text the smoke test never looks at, and on a slow mirror six minutes of
+      # this job. A library a future image drops fails the launch by name, not silently.
       - name: Install the browser for the pinned Playwright
-        run: npx playwright install --with-deps --only-shell chromium
+        run: npx playwright install --only-shell chromium
       # The deploy's own script, so this is the artifact a merge would publish. pages-deploy.yml
       # runs the same smoke test before it uploads; this is the same check a merge earlier.
       - run: npm run site:build
