@@ -60,17 +60,18 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
     }
   };
 
-  let instruction = 'Válasszatok próba- vagy éles játékot!';
+  // Whose turn it is, and who won, the wrapper says above the board for every
+  // game; these lines are only what this game's rules add to that.
+  let instruction = '';
   if (ctx.phase === 'chooseRole') instruction = G.category === 'C'
     ? 'Válasszatok szerepet: a kezdő X-eket, a második köröket tesz le.'
     : 'Válasszatok szerepet: a kezdő köröket, a második X-eket tesz le.';
   if (ctx.phase === 'play') {
-    instruction = !active ? 'A gép lép.' : mark === 'O'
+    instruction = !active ? '' : mark === 'O'
       ? 'Tegyetek egy kört egy üres mezőre!'
       : selected === null ? 'Jelöljétek ki az első X helyét!'
         : 'Válasszátok ki a második X helyét! A kijelölt mezőre kattintva törölhetitek a kijelölést.';
   }
-  if (G.winner !== null) instruction = markForPlayer(G, G.winner) === 'O' ? 'A körökkel játszó játékos nyert.' : 'Az X-ekkel játszó játékos nyert.';
 
   return (
     <Box sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>

@@ -1,4 +1,4 @@
-{   
+{
   "chooser": {
     "detailedResults": "Eredmények részletesen",
     "filledAt": "Kitöltve ekkor",
@@ -12,7 +12,6 @@
     "gameDescriptionHtml": "<p>Ebben a feladatban egy kétszemélyes stratégiás játékot játszhattok, ahol az egyik játékos Ti lesztek, a másik játékos pedig a gép. Győzzétek le a gépet <b>kétszer egymás után</b> ebben a játékban! A kezdő helyzet ismeretében Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni.</p>         \n            <p>A sikeres teljesítésért az alábbiak szerint kaptok pontot:</p>\n              <ul>\n                <li>Ha egyszer sem veszítetek, akkor 12 pontot kaptok.</li>\n                <li>1, 2, 3, 4, illetve 5 vereség esetén a kapott pontszám 9-re, 6-ra, 4-re, 3-ra, illetve 2-re csökken.</li>\n                <li>Ennél több vereség esetén is 2 pontot kaptok, ha sikerül teljesítenetek a játékot.</li>\n                <li>Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, akkor 0 pontot kaptok.</li>\n              </ul>\n            <p>\n              Ha készen álltok, kattintsatok a lenti gombra és onnantól kezdve összesen 30 perc áll rendelkezésetekre.\n            </p>",
     "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
     "relayDescription": "A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és legfeljebb 9999). Minden váltófeladatra maximum 3 tippet adhattok le, egy-egy rossz tipp után az adott feladatra megszerezhető pontszám 1-gyel csökken. Helyes tipp vagy három rossz tipp után megkapjátok a következő feladatot. A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)",
-    "result": "Eredmények",
     "start": "Kezdjük"
   },
   "disclaimer": {
@@ -118,7 +117,26 @@
     "wrongGuess": "A válasz sajnos nem volt jó"
   },
   "strategy": {
-    "description": "Feladat leírása",
+    "board": {
+      "botTurn": "A gép lép…",
+      "finalViewOnly": "Végállás · csak nézhető",
+      "viewOnly": "Csak nézhető",
+      "yourTurn": "Ti jöttök!"
+    },
+    "chooser": {
+      "liveButton": "Éles játszma indítása",
+      "liveIfLose": "Ha veszítetek: újra két egymás utáni győzelem kell.",
+      "liveIfLoseDrop": "Ha veszítetek: a tét {{points}} lesz, és újra két egymás utáni győzelem kell.",
+      "liveIfWinDone": "Ha nyertek: megvan a második győzelem egymás után, és ezzel {{points}}.",
+      "liveIfWinFirst": "Ha nyertek: megvan az első győzelem a kettőből.",
+      "liveSub": "Pontért megy",
+      "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
+      "practiceButton": "Próbajáték indítása",
+      "practiceKeeps": "Az éles sorozatotok és a tét nem változik.",
+      "practiceSame": "Ugyanazok a szabályok, mint az éles játszmában.",
+      "starting": "Indul…",
+      "title": "Milyen játszmát kezdtek?"
+    },
     "endTable": {
       "game": "Éles játszma",
       "losses": "Vereség",
@@ -132,28 +150,45 @@
       "won": "Győzelem"
     },
     "firstPlayer": "Kezdő leszek",
-    "guide": {
-      "actions": "Akciók",
-      "botWins": "Sajnos a gép nyert.",
-      "endOfGame": "A játék végetért.",
-      "ifFirstPlayer": "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
-      "liveStarted": "Éles játék elindítva.",
-      "newGame": "Kezdj új játékot!",
-      "realGameWin": "Gratulálok, nyertetek! Verjétek meg még következőleg is a gépet a teljes győzelemhez!",
-      "testGameWin": "Gratulálok, a próbajátékban nyertetek!",
-      "testStarted": "Próbajáték elindítva.",
-      "waitingForServer": "Várakozás a szerverre...",
-      "yourTurn": "Most Te jössz!"
+    "goal": {
+      "firstWin": "Az első győzelem megvan",
+      "ifLose": "Egy éles vereség után újra két egymás utáni győzelem kell.",
+      "ifLoseDrop": "Egy éles vereség után újra két egymás utáni győzelem kell, és a tét {{points}} lesz.",
+      "oneMore": "Még egy győzelem kell",
+      "stake": "Most {{points}} a tét.",
+      "text": "Győzzétek le a gépet kétszer egymás után éles játszmában.",
+      "title": "A cél",
+      "twoMore": "Két győzelem kell"
     },
-    "instructionDescription": "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
-    "instructions": "Tudnivalók",
+    "mode": {
+      "live": "Éles játszma",
+      "liveNumber": "{{n}}. éles játszma · ez számít a pontozásba",
+      "practice": "Próbajáték",
+      "practiceKeeps": "Az éles sorozatotok nem változik",
+      "practiceSub": "Nem számít bele a pontozásba",
+      "stake": "Tét: {{points}}"
+    },
     "name": "Stratégiás játék",
     "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
-    "oneMoreWin": "Még egy győzelem éles játszmában: {{points}}",
-    "realGameButton": "Új éles játék kezdése",
-    "secondPlayer": "Második leszek",
-    "testGameButton": "Új próbajáték kezdése",
-    "twoWinsInARow": "Ha most kétszer egymás után nyertek éles játszmában: {{points}}"
+    "practiceWarning": {
+      "text": "Attól, hogy itt legyőzitek, élesben még kikaphattok.",
+      "title": "A próbagép nem feltétlenül játszik a legjobban."
+    },
+    "result": {
+      "liveLost": "A gép nyert.",
+      "liveLostDetail": "Újra két egymás utáni győzelem kell.",
+      "liveLostDrop": "Elérhető pont: {{before}} → {{after}}. Újra két egymás utáni győzelem kell.",
+      "liveWon": "Nyertetek! Ez az első a kettőből.",
+      "liveWonDetail": "Ha a következő éles játszmát is megnyeritek, megvan a {{points}}.",
+      "practiceDetail": "Ez nem számít a pontozásba.",
+      "practiceLost": "A gép nyert a próbajátékban.",
+      "practiceWon": "Nyertetek a próbajátékban."
+    },
+    "role": {
+      "prompt": "Kezdők vagy másodikak lesztek? Nézzétek meg előbb az állást."
+    },
+    "rules": "Szabályok",
+    "secondPlayer": "Második leszek"
   },
   "waitingRoom": {
     "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
