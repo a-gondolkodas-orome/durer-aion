@@ -294,6 +294,23 @@ test('the team dialog shows the email and the join code only on request, each on
   expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
 });
 
+// Both are optional in the import, which stores an empty string; a database
+// loaded before that holds null.
+test.each([
+  ['empty', ''],
+  ['null', null],
+])('a team whose email and notes are %s lists and opens like any other', async (_, missing) => {
+  const bare = { ...alpha, email: missing, other: missing } as unknown as TeamModelDto;
+  vi.spyOn(repo, 'getAll').mockResolvedValue([bare]);
+  renderAdmin();
+
+  fireEvent.click(await screen.findByText('Szerkesztés'));
+  const dialog = await screen.findByRole('dialog');
+  fireEvent.click(within(dialog).getAllByText('Mutasd')[0]);
+
+  expect(within(dialog).getByText('—')).toBeInTheDocument();
+});
+
 test('the team list, with the add-time form, and the stats are on two tabs, the list first', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   renderAdmin();
