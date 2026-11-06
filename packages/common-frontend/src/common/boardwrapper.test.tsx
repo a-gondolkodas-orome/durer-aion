@@ -95,6 +95,8 @@ describe('between games', () => {
     expect(screen.getByText('strategy.result.liveLostDrop')).toBeInTheDocument();
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
     expect(screen.getByText('strategy.board.finalViewOnly')).toBeInTheDocument();
+    // The lost game was played for the old stake; the new one is on the live card.
+    expect(screen.queryByText('strategy.mode.stake')).not.toBeInTheDocument();
     for (const button of startButtons()) {
       expect(button).toBeEnabled();
     }
@@ -135,6 +137,12 @@ describe('choosing a role', () => {
 });
 
 describe('during a game', () => {
+  test('frames a live game with its stake', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
+
+    expect(screen.getByText('strategy.mode.stake')).toBeInTheDocument();
+  });
+
   test('lets the team move on its turn', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
 

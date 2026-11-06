@@ -1,10 +1,10 @@
-import { Box, Button, Stack, alpha } from "@mui/material";
+import { Box, Button, Stack, alpha, useMediaQuery } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Countdown, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
@@ -59,6 +59,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
+    // `noSsr` reads the width on the first render, so the rules do not open
+    // and then snap shut on a phone.
+    const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
+    const [rulesOpen, setRulesOpen] = useState(wide);
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -114,9 +118,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             {t('general.warning.timeNotReal')}
           </Box>}
 
-          {/* Open from the start, and above everything it governs: a team
-              collapses it once read, but never has to look for it. */}
-          <Box component="details" open sx={{
+          {/* Above everything it governs, so a team never has to look for
+              it. Open from the start where it fits beside the game; on a
+              phone it would push the board two screens down, so it starts
+              collapsed there, its heading still first on the page. */}
+          <Box component="details" open={rulesOpen} onToggle={(event) => setRulesOpen(event.currentTarget.open)} sx={{
             border: '1px solid #d8d3c4', borderRadius: '14px', backgroundColor: '#fffdf5',
             padding: '12px 18px', fontSize: { xs: '15px', md: '17px' }, lineHeight: 1.5,
           }}>
@@ -124,7 +130,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             {description}
           </Box>
 
-          <ModeFrame difficulty={difficulty} liveNumber={G.numberOfTries} stake={strategyPoints(G.numberOfLoss)}>
+          <ModeFrame difficulty={difficulty} liveNumber={G.numberOfTries} stake={showResult ? null : strategyPoints(G.numberOfLoss)}>
             <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '20px', padding: { xs: '14px', md: '20px' } }}>
               <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px' }}>
                 <GoalPanel G={G} />
@@ -151,7 +157,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
 };
 
 /** The frame round the game: its band and border say whether this game counts. */
-function ModeFrame(props: { difficulty: Difficulty | null, liveNumber: number, stake: number, children: ReactNode }) {
+/// `stake` is null once the game is over: the frame then describes a game
+/// played for the stake before its result, and the next game's is on its card.
+function ModeFrame(props: { difficulty: Difficulty | null, liveNumber: number, stake: number | null, children: ReactNode }) {
   const { t } = useTranslation();
   const { difficulty } = props;
   const border = difficulty === 'live' ? `3px solid ${LIVE}`
@@ -177,12 +185,13 @@ function ModeFrame(props: { difficulty: Difficulty | null, liveNumber: number, s
             </Box>
           </Stack>
         </Stack>
-        <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600,
-          color: difficulty === 'live' ? LIVE_TEXT : '#1e293b' }}>
-          {difficulty === 'live'
-            ? t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })
-            : t('strategy.mode.practiceKeeps')}
-        </Box>
+        {(difficulty === 'test' || props.stake !== null) &&
+          <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600,
+            color: difficulty === 'live' ? LIVE_TEXT : '#1e293b' }}>
+            {difficulty === 'live'
+              ? t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })
+              : t('strategy.mode.practiceKeeps')}
+          </Box>}
       </Stack>}
       {props.children}
     </Box>
