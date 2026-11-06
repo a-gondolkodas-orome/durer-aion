@@ -261,7 +261,8 @@ strategy, keyboard and mobile usability.
 
 Hungarian is the default, English is added game by game; a game may ship in
 Hungarian only, with no English file, and English readers then see Hungarian. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
-one per game folder, `factory` for the chrome around every game, `overview`, and
+one per game folder, `factory` for the chrome around every game, `overview`,
+`settings` for the theme and language selects, and
 `catalog` for each game's name and title, under its `gameList.ts` key. The
 recommended i18n Ally VS Code extension shows the two languages side by side.
 
