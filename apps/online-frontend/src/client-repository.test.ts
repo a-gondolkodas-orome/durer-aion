@@ -15,6 +15,7 @@ function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
     get: (url: string) => { calls.push({ method: "get", url }); return answer("get", url); },
     post: (url: string, body?: unknown) => { calls.push({ method: "post", url, body }); return answer("post", url); },
     delete: (url: string) => { calls.push({ method: "delete", url }); return answer("delete", url); },
+    put: (url: string, body?: unknown) => { calls.push({ method: "put", url, body }); return answer("put", url); },
   } as unknown as AxiosInstance;
   vi.spyOn(axios, "create").mockReturnValue(instance);
   return calls;
@@ -106,5 +107,38 @@ describe("adding minutes to a match", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expect(new RealClientRepository().addMinutes("match-1", 5)).rejects.toThrow("Váratlan hiba történt");
+  });
+});
+
+describe("the team import", () => {
+  test("uploads the file as the route's one `file` field", async () => {
+    const calls = fakeAxios(ok);
+    const file = new File(["Teamname\n"], "teams.tsv");
+
+    await new RealClientRepository().importTeams(file);
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ method: "put", url: "/team/admin/import" });
+    expect((calls[0].body as FormData).get("file")).toBe(file);
+  });
+
+  // The answer is the only copy of the generated join codes, and nginx gives
+  // the backend 60 seconds (its default proxy_read_timeout): a client that gave
+  // up first would drop codes for teams that went in regardless.
+  test("waits longer than nginx does", async () => {
+    fakeAxios(ok);
+
+    await new RealClientRepository().importTeams(new File([""], "teams.tsv"));
+
+    const created = vi.mocked(axios.create).mock.calls.at(-1)?.[0];
+    expect(created?.timeout).toBeGreaterThan(60_000);
+  });
+
+  test("a file the route refuses for its name is said to need .tsv", async () => {
+    fakeAxios(() => status(400));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().importTeams(new File([""], "teams.csv")))
+      .rejects.toThrow("Csak .tsv kiterjesztésű fájlt lehet importálni.");
   });
 });

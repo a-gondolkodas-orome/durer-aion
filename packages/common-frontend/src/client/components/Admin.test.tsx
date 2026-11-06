@@ -8,7 +8,7 @@ import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
-import { MatchStateDto, TeamModelDto } from '../dto/TeamStateDto';
+import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -28,11 +28,18 @@ vi.mock('react-i18next', () => ({
 // failure. What this file is about is what the page does around the grid, so
 // the grid is a list of the rows it was handed, with the buttons the page puts
 // in each row.
+// The columns each grid was last given, so a test can read what its CSV
+// export would hold.
+const grids = vi.hoisted(() => ({ columns: [] as { field: string, disableExport?: boolean }[][] }));
 vi.mock('@mui/x-data-grid', () => {
   interface Row { id: string, teamName: string }
-  interface Column { field: string, renderCell?: (params: { row: Row }) => React.ReactNode }
+  interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row }) => React.ReactNode }
   return {
-    DataGrid: (props: { rows: Row[], columns: Column[] }) => (
+    DataGrid: (props: {
+      rows: Row[], columns: Column[],
+      slots?: { toolbar?: React.ComponentType<object> }, slotProps?: { toolbar?: object },
+    }) => { grids.columns.push(props.columns); return (<>
+      {props.slots?.toolbar && <props.slots.toolbar {...props.slotProps?.toolbar}/>}
       <ul>
         {props.rows.map(row => (
           <li key={row.id}>
@@ -43,9 +50,9 @@ vi.mock('@mui/x-data-grid', () => {
           </li>
         ))}
       </ul>
-    ),
+    </>); },
     ExportCsv: () => null,
-    Toolbar: () => null,
+    Toolbar: (props: { children: React.ReactNode }) => <div>{props.children}</div>,
   };
 });
 
@@ -294,6 +301,23 @@ test('the team dialog shows the email and the join code only on request, each on
   expect(screen.queryByText(/alpha@example\.com/)).not.toBeInTheDocument();
 });
 
+// Both are optional in the import, which stores an empty string; a database
+// loaded before that holds null.
+test.each([
+  ['empty', ''],
+  ['null', null],
+])('a team whose email and notes are %s lists and opens like any other', async (_, missing) => {
+  const bare = { ...alpha, email: missing, other: missing } as unknown as TeamModelDto;
+  vi.spyOn(repo, 'getAll').mockResolvedValue([bare]);
+  renderAdmin();
+
+  fireEvent.click(await screen.findByText('Szerkesztés'));
+  const dialog = await screen.findByRole('dialog');
+  fireEvent.click(within(dialog).getAllByText('Mutasd')[0]);
+
+  expect(within(dialog).getByText('—')).toBeInTheDocument();
+});
+
 test('the team list, with the add-time form, and the stats are on two tabs, the list first', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   renderAdmin();
@@ -355,6 +379,107 @@ test('a single team\'s page has no tabs, not even while the list loads', async (
   expect(screen.queryByRole('tab')).not.toBeInTheDocument();
 });
 
+const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportResultDto => ({
+  successful: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
+});
+
+const alphaCodes = ['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
+
+/** Picks a file on the import tab and starts the import. */
+const importFile = async (name = 'teams.tsv') => {
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  const file = new File(['Teamname\tCategory\n'], name);
+  fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
+  fireEvent.click(screen.getByText('Importálás indítása'));
+  return file;
+};
+
+/** The text of every file the page hands the browser, in order. */
+const savedDownloads = (): string[] => {
+  const saved: string[] = [];
+  vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
+    void (blob as Blob).text().then(text => saved.push(text));
+    return 'blob:codes';
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+  return saved;
+};
+
+test('the import tab uploads the picked file, and saves the join codes when asked', async () => {
+  const getAll = vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importTeams = vi.spyOn(repo, 'importTeams')
+    .mockResolvedValue(importAnswer({ successful: 1, export_table: [alphaCodes] }));
+  const saved = savedDownloads();
+  renderAdmin();
+
+  const file = await importFile();
+
+  expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
+  expect(importTeams).toHaveBeenCalledWith(file);
+  await waitFor(() => { expect(getAll).toHaveBeenCalledTimes(2); });
+  // A file of every team's secrets is not saved unasked.
+  expect(saved).toEqual([]);
+
+  fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
+
+  await waitFor(() => { expect(saved).toHaveLength(1); });
+  expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
+});
+
+test('the import tab lists the server\'s errors and warnings, not its narration', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importAnswer({
+    failed: 1,
+    logs: {
+      sev: ['info', 'warn', 'error', 'error'],
+      value: ['Generating login code', 'WARNING: Header not exactly how we defined it.', 'Invalid category', '-'.repeat(52)],
+    },
+  }));
+  const saved = savedDownloads();
+  renderAdmin();
+
+  await importFile();
+
+  expect(await screen.findByText('Invalid category')).toBeInTheDocument();
+  expect(screen.getByText('WARNING: Header not exactly how we defined it.')).toBeInTheDocument();
+  expect(screen.queryByText('Generating login code')).not.toBeInTheDocument();
+  expect(screen.getAllByRole('listitem').filter(item => item.textContent === '-'.repeat(52))).toEqual([]);
+  // Nothing went in, so there is nothing to save.
+  expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
+  expect(saved).toEqual([]);
+});
+
+test('a second import keeps the codes of the first', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const bravoCodes = ['Bravo', 'D', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b'];
+  vi.spyOn(repo, 'importTeams')
+    .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [alphaCodes] }))
+    .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [bravoCodes] }));
+  const saved = savedDownloads();
+  renderAdmin();
+
+  await importFile();
+  expect(await screen.findByText('Az importáltak belépőkódjainak letöltése')).toBeInTheDocument();
+  await importFile();
+  expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
+  await waitFor(() => { expect(screen.getByText('Importálás indítása')).toBeDisabled(); });
+  fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
+  await waitFor(() => { expect(saved).toHaveLength(1); });
+
+  expect(saved[0]).toContain('111-2222-333');
+  expect(saved[0]).toContain('444-5555-666');
+});
+
+test('the import tab says why the server refused the file', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockRejectedValue(new Error('Csak .tsv kiterjesztésű fájlt lehet importálni.'));
+  renderAdmin();
+
+  await importFile('teams.csv');
+
+  expect(await screen.findByText('Csak .tsv kiterjesztésű fájlt lehet importálni.')).toBeInTheDocument();
+});
+
 test('a reset asks first, names the team, and does nothing when cancelled', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   const reset = vi.spyOn(repo, 'resetRelay').mockResolvedValue(alpha);
@@ -378,4 +503,45 @@ test('a reset asks first, names the team, and does nothing when cancelled', asyn
   fireEvent.change(within(confirm).getByLabelText('Írd be: váltó'), { target: { value: ' Valto ' } });
   fireEvent.click(button);
   await waitFor(() => expect(reset).toHaveBeenCalledWith(alpha.teamId));
+});
+
+// The codes can be mailed out at any time, not only from the import that made
+// them. Email and notes are optional, and null on an older database.
+test('the list points to the export, which downloads every team with its join code', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([
+    { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as TeamModelDto,
+    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as TeamModelDto,
+  ]);
+  const saved = savedDownloads();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByText('Belépőkódokkal: Import/export fül'));
+
+  expect(screen.getByRole('tab', { name: 'Import/export' })).toHaveAttribute('aria-selected', 'true');
+  expect(window.location.search).toBe('?tab=import-export');
+  fireEvent.click(screen.getByText('Mind a(z) 2 csapat letöltése belépőkódokkal'));
+
+  await waitFor(() => { expect(saved).toHaveLength(1); });
+  expect(saved[0]).toBe([
+    'Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials',
+    // A tab in a cell would shift every column after it.
+    `Alpha\tC\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
+    'Bare\tC\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials',
+  ].join('\n') + '\n');
+});
+
+// The ID is the team's GUID, and the GUID is its session cookie's value: a
+// file holding it can log a team in. The CSV is meant to be shareable.
+test('the team list\'s CSV holds no login secret', async () => {
+  grids.columns = [];
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+  await screen.findByText('Alpha');
+
+  const exported = (grids.columns.at(-1) ?? []).filter(column => column.disableExport !== true).map(column => column.field);
+
+  expect(exported).not.toHaveLength(0);
+  for (const secret of ['id', 'teamId', 'joinCode', 'credentials', 'email']) {
+    expect(exported).not.toContain(secret);
+  }
 });

@@ -1,4 +1,4 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto } from "common-frontend/core";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend/core";
 import { teamData } from "./teamData";
 import type { RelayEndReport } from "game";
 import { handleGameReport } from "./game-report";
@@ -79,6 +79,10 @@ export class OfflineClientRepository implements ClientRepository {
 
   async addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
+  }
+
+  async importTeams(_file: File): Promise<TeamImportResultDto> {
+    throw Error("NOT call this");
   }
 
   async getMatchState(_matchId: string): Promise<MatchStateDto> {

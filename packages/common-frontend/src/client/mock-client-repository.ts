@@ -1,5 +1,5 @@
 import type { ClientRepository } from "./api-repository-interface";
-import type { MatchStateDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
 // build the apps bundle.
@@ -81,5 +81,8 @@ export class MockClientRepository implements ClientRepository {
   }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
+  }
+  importTeams(_file: File): Promise<TeamImportResultDto> {
+    throw Error("NOT call this");
   }
 }

@@ -3,10 +3,10 @@ import { useAddMinutes, useAll } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
-import { csvToolbar } from './CsvToolbar';
+import { ImportExport } from './ImportExport';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -16,14 +16,39 @@ import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
 
-const TeamsToolbar = csvToolbar('durer-csapatok');
+declare module '@mui/x-data-grid' {
+  interface ToolbarPropsOverrides {
+    onOpenExport?: () => void;
+  }
+}
+
+/// The list's CSV is the grid as it stands, filter included, and holds no
+/// login secret: the ID column, which is the session cookie's value, is left
+/// out. Every secret leaves the page through the Import/export tab, which this
+/// points to.
+function TeamsToolbar(props: { onOpenExport?: () => void }) {
+  return (
+    <Toolbar>
+      <ExportCsv
+        // allColumns so a column hidden by default is still in the file; the
+        // button columns opt out with disableExport.
+        options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
+      >
+        Letöltés CSV-ként
+      </ExportCsv>
+      <Button size="small" onClick={props.onOpenExport}>
+        Belépőkódokkal: Import/export fül
+      </Button>
+    </Toolbar>
+  );
+}
 
 // What the states mean is on MatchStatus in the `schemas` package.
 const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
-const TABS = ['csapatok', 'statisztika'] as const;
+const TABS = ['csapatok', 'statisztika', 'import-export'] as const;
 type AdminTab = typeof TABS[number];
 
 function tabFromUrl(): AdminTab {
@@ -41,9 +66,10 @@ function tabToUrl(tab: AdminTab) {
   window.history.replaceState(window.history.state, '', url);
 }
 
-// Both panels stay mounted, so the grid keeps its filter, sort and page while
-// the other tab is open. Not `display: none`: the DataGrid measures its parent
-// on every resize, and a zero width logs an error and lays it out for 0px.
+// Every panel stays mounted, so the grid keeps its filter, sort and page — and
+// the import the join codes it holds — while another tab is open. Not
+// `display: none`: the DataGrid measures its parent on every resize, and a zero
+// width logs an error and lays it out for 0px.
 const panelProps = (panel: AdminTab, open: AdminTab) => ({
   role: 'tabpanel',
   id: `admin-panel-${panel}`,
@@ -56,10 +82,14 @@ export function Admin(props: { teamId?: string }) {
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
-  const { data } = useSWR("users/all", getAll)
+  const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
+  const openTab = (next: AdminTab) => {
+    setTab(next);
+    tabToUrl(next);
+  };
 
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
   // Until the list loads it is not known whether the path names a team, so
@@ -113,14 +143,12 @@ export function Admin(props: { teamId?: string }) {
       {teams && <>
       <Tabs
         value={tab}
-        onChange={(_, value: AdminTab) => {
-          setTab(value);
-          tabToUrl(value);
-        }}
+        onChange={(_, value: AdminTab) => { openTab(value); }}
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
         <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
+        <Tab label="Import/export" value="import-export" id="admin-tab-import-export" aria-controls="admin-panel-import-export"/>
       </Tabs>
       <Stack {...panelProps('csapatok', tab)}>
         <Stack sx={{ height: "635px" }}>
@@ -130,6 +158,8 @@ export function Admin(props: { teamId?: string }) {
               headerName: 'ID',
               width: 75,
               editable: false,
+              // The team's GUID is its session cookie's value (team_view.ts).
+              disableExport: true,
             },
             {
               field: 'teamName',
@@ -229,6 +259,7 @@ export function Admin(props: { teamId?: string }) {
           pageSizeOptions={[10, 25, 50]}
           showToolbar
           slots={{ toolbar: TeamsToolbar }}
+          slotProps={{ toolbar: { onOpenExport: () => { openTab('import-export'); } } }}
           sx={{
             height: "auto",
           }}
@@ -306,6 +337,9 @@ export function Admin(props: { teamId?: string }) {
       </Stack>
       <Stack {...panelProps('statisztika', tab)}>
         <Stats data={teams}/>
+      </Stack>
+      <Stack {...panelProps('import-export', tab)}>
+        <ImportExport teams={teams} onImported={() => { void mutate(); }}/>
       </Stack>
       </>}
     </Stack>
