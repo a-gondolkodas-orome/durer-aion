@@ -71,9 +71,9 @@ export const Overview = () => {
           style={{ borderRadius: '10px' }}
         >
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
+          <RoundFilter selected={selectedRounds} onChange={setSelectedRounds} />
           <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
           <YearFilter range={yearRange} onChange={setYearRange} />
-          <RoundFilter selected={selectedRounds} onChange={setSelectedRounds} />
         </div>
       )}
 

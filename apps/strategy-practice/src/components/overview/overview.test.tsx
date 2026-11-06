@@ -125,7 +125,8 @@ describe('Overview', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
     fireEvent.change(screen.getByRole('slider', { name: 'Első év' }), { target: { value: 1 } });
     fireEvent.change(screen.getByRole('slider', { name: 'Utolsó év' }), { target: { value: 3 } });
-    expect(within(yearRow()).getByText('12/13 – 14/15')).toBeTruthy();
+    expect(within(yearRow()).getByText('12/13')).toBeTruthy();
+    expect(within(yearRow()).getByText('14/15')).toBeTruthy();
     expect(screen.getByText('A kettő')).toBeTruthy();
     expect(screen.getByText('C egy')).toBeTruthy();
     expect(screen.queryByText('CD')).toBeNull();
@@ -147,7 +148,8 @@ describe('Overview', () => {
     fireEvent.change(from, { target: { value: 2 } });
     fireEvent.click(within(yearRow()).getByRole('button', { name: 'Szűrés törlése' }));
     expect(screen.getByTestId('featured-strip')).toBeTruthy();
-    expect(within(yearRow()).getByText('11/12 – 15/16')).toBeTruthy();
+    expect(within(yearRow()).getByText('11/12')).toBeTruthy();
+    expect(within(yearRow()).getByText('15/16')).toBeTruthy();
     expect(filterBadge()).toBeNull();
   });
 

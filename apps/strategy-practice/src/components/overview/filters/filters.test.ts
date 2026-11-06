@@ -1,5 +1,6 @@
 import {
-  getUsedIcons, filterByCategories, filterByIcons, getUsedYears, filterByYears, filterByRounds
+  getUsedIcons, filterByCategories, filterByIcons, getUsedYears, filterByYears, filterByRounds,
+  yearRangeLabels
 } from './filters';
 import type { GameList } from '../../games/gameList';
 
@@ -61,6 +62,24 @@ describe('year and round filters', () => {
     expect(filterByYears(ids, null, list)).toEqual(ids);
     expect(filterByYears(ids, ['12/13', '20/21'], list)).toEqual(['EasyB', 'MidCD']);
     expect(filterByYears(ids, ['13/14', '19/20'], list)).toEqual([]);
+  });
+
+  describe('yearRangeLabels', () => {
+    const years = ['07/08', '08/09', '09/10', '10/11', '11/12', '12/13', '13/14', '14/15', '15/16', '16/17', '17/18'];
+
+    it('labels each end of the range where its thumb is', () => {
+      expect(yearRangeLabels(years, 0, 10)).toEqual([{ at: 0, text: '07/08' }, { at: 1, text: '17/18' }]);
+      expect(yearRangeLabels(years, 3, 8)).toEqual([{ at: 0.3, text: '10/11' }, { at: 0.8, text: '15/16' }]);
+    });
+
+    it('merges the two into one label between the thumbs once they are too close to read apart', () => {
+      expect(yearRangeLabels(years, 4, 5)).toEqual([{ at: 0.45, text: '11/12 – 12/13' }]);
+      expect(yearRangeLabels(years, 4, 6)).toEqual([{ at: 0.4, text: '11/12' }, { at: 0.6, text: '13/14' }]);
+    });
+
+    it('names a single year once', () => {
+      expect(yearRangeLabels(years, 6, 6)).toEqual([{ at: 0.6, text: '13/14' }]);
+    });
   });
 
   it('filters by round', () => {

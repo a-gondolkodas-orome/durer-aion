@@ -198,11 +198,17 @@ export const IconFilter = ({ selected, onChange }: {
   );
 };
 
-// Whether the year at `index` gets a label under its tick. Every fifth one
-// does, counting from the oldest, and so does the newest — the fifth before it
-// gives way when the two would sit too close to read.
-const isLabelledYear = (index: number, last: number) =>
-  index === last || (index % 5 === 0 && last - index > 2);
+// The years to write under the year slider, each at a position along it from 0
+// to 1: one under each thumb, or a single `from – to` between them once the two
+// would sit too close to read apart. A fifth of the track is the room two years
+// need on a phone-width slider.
+export const yearRangeLabels = (years: string[], from: number, to: number) => {
+  const last = years.length - 1;
+  const at = (index: number) => (last === 0 ? 0 : index / last);
+  if (from === to) return [{ at: at(from), text: years[from] }];
+  if (5 * (to - from) < last) return [{ at: (at(from) + at(to)) / 2, text: `${years[from]} – ${years[to]}` }];
+  return [{ at: at(from), text: years[from] }, { at: at(to), text: years[to] }];
+};
 
 export const YearFilter = ({ range, onChange }: {
   range: YearRange
@@ -217,24 +223,36 @@ export const YearFilter = ({ range, onChange }: {
     <div className="flex flex-wrap items-center gap-1 text-sm">
       <span className="w-20 shrink-0">{t('filters.year')}</span>
       {/* The padding keeps the end thumbs, centred on the slider's edges, inside the row. */}
-      <div className="flex-1 min-w-48 max-w-xl px-3 pt-1">
+      <div className="flex-1 min-w-48 max-w-xl px-3">
         <Slider
           size="small"
           value={[from, to]}
           min={0}
           max={last}
-          marks={years.map((year, index) => ({ value: index, label: isLabelledYear(index, last) ? year : undefined }))}
+          marks
           disableSwap
           onChange={(_, [newFrom, newTo]) =>
             onChange(newFrom === 0 && newTo === last ? null : [years[newFrom], years[newTo]])}
-          valueLabelDisplay="auto"
-          valueLabelFormat={index => years[index]}
           getAriaValueText={index => years[index]}
           getAriaLabel={thumb => (thumb === 0 ? t('filters.yearFrom') : t('filters.yearTo'))}
         />
+        {/* Shifting a label back by its own share of the track keeps the end ones
+            inside it: flush left at the start, centred midway, flush right at the end.
+            The thumbs announce their years themselves, so screen readers skip these. */}
+        <div
+          className={`relative h-4 -mt-1.5 text-xs tabular-nums
+            ${range === null ? 'opacity-60' : 'text-primary font-bold'}`}
+          aria-hidden
+        >
+          {yearRangeLabels(years, from, to).map(({ at, text }) => (
+            <span
+              key={text}
+              className="absolute whitespace-nowrap"
+              style={{ left: `${at * 100}%`, transform: `translateX(-${at * 100}%)` }}
+            >{text}</span>
+          ))}
+        </div>
       </div>
-      {/* The range in words: on a touch screen the thumbs' own labels show only mid-drag. */}
-      <span className={`tabular-nums ${range === null ? 'opacity-60' : ''}`}>{years[from]} – {years[to]}</span>
       <ClearButton onClear={() => onChange(null)} disabled={range === null} />
     </div>
   );
