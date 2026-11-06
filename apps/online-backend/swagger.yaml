@@ -162,30 +162,6 @@ paths:
         "404":
           description: Team not found
 
-  /team/admin/filter:
-    get:
-      summary: Run a user-defined filter query on teams
-      parameters:
-        - name: filter
-          in: query
-          schema:
-            type: array
-            items:
-              type: string
-      security:
-      - basicAdminAuth: []
-      tags:
-      - admin
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TeamModel"
-
   /team/admin/all:
     get:
       summary: Get all teams as full objects
@@ -503,6 +479,14 @@ components:
         pageState:
           type: string
           enum: ["DISCLAIMER", "HOME", "RELAY", "STRATEGY"]
+        relayMatchID:
+          type: string
+          nullable: true
+          description: The team's current relay match, the column the status below is read from.
+        strategyMatchID:
+          type: string
+          nullable: true
+          description: The team's current strategy match, the column the status below is read from.
         relayMatch:
           $ref: "#/components/schemas/MatchStatus"
         strategyMatch:

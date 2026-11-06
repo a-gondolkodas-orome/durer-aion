@@ -18,9 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
-// turbo.json allows comments and uses them, every one on a line of its own — the same
-// shape turbo-source-crossing.test.mjs reads it in. package.json has none and
-// does not mind being read this way.
+// turbo.json allows comments and uses them, every one on a line of its own.
+// package.json has none and does not mind being read this way.
 const readJsonc = file =>
   JSON.parse(
     readFileSync(join(repoRoot, file), 'utf8')
@@ -94,9 +93,8 @@ describe('the per-workspace lint split', () => {
 
   it('does not cache a task that reads another workspace\'s source', () => {
     // Type-aware lint reads across package boundaries, which a per-package input hash
-    // does not cover — the reasoning is turbo-source-crossing.test.mjs's, and
-    // this pins the same property for the tasks that test's `coveredByAnEdge` cannot
-    // reason about, having no `^build` edge to follow.
+    // does not cover — the reasoning apps/online-backend/turbo.json gives for its
+    // build and typecheck.
     for (const task of ['lint', 'lint:fix', '//#lint:root', '//#lint:fix:root']) {
       expect(turbo.tasks[task].cache, `turbo.json: "${task}" must not cache`).toBe(false);
     }

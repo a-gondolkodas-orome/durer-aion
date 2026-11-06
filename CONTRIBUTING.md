@@ -3,6 +3,10 @@
 Everything here is already written down somewhere. This page is the order to
 read it in, and the handful of rules that were only ever tacit.
 
+Contributions are welcome from people who take part in the Dürer competition
+themselves — as an organiser or as a teacher. Working with an AI assistant is
+fine; a pull request nobody stands behind is not.
+
 ## Your first change needs no docker
 
 The [`README.md`](README.md) opens with the competition stack — nginx, the
@@ -39,8 +43,10 @@ A change to the competition round itself does need the stack, and the README's
 npm run check
 ```
 
-That is the six CI gates that need no docker, cheapest first, in two or three
-minutes. CI runs a seventh, `npm run stack:build`.
+That is the six CI gates that need no docker or browser, cheapest first, in two or three
+minutes. CI runs two more: `npm run stack:build`, and the site smoke test —
+worth running yourself before merging a change to how an app on the Pages site
+is built (README § *The other sites*).
 
 Working only in `apps/strategy-practice`? `npm run check` from that directory is
 the same idea scoped to it, in about seventy seconds — the loop to iterate on.
@@ -91,6 +97,8 @@ of you while writing the description and they leave no trace in the body.
   authority on everything under that directory, testing and PR scope included.
 - [`README.md`](README.md) — running the round,
   dependency policy, deployment.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the live round runs,
+  from a team's login to its score.
 
 ## Traps that cost the most time
 
@@ -102,5 +110,6 @@ of you while writing the description and they leave no trace in the body.
   your command runs.
 - **`npm run setup`** creates the gitignored `.env` files from their samples. The
   `dev:*` scripts do it for you; `stack:*` does not.
-- **A push to `main` deploys the public practice site.** There is no staging step
-  and the checks do not gate it.
+- **A push to `main` deploys the public practice site.** There is no staging step,
+  and of the checks only the site smoke test gates it — it proves the site loads,
+  not that it is right.

@@ -1,5 +1,5 @@
-// Only missingKeys is tested, for the same reason update-minors.test.mjs stops at
-// newestWithinMajor: the rest is directory scanning and file copies. What could go
+// Only missingKeys is tested, for the same reason dependency-report.test.mjs stops at
+// its pure helpers: the rest is directory scanning and file copies. What could go
 // wrong here is reporting the wrong thing — a value difference a developer means to
 // have, or a key they added themselves — which is what would train someone to stop
 // reading the output.
@@ -20,7 +20,7 @@ describe('missingKeys', () => {
   });
 
   it('counts a key with an empty value as present', () => {
-    expect(missingKeys('VITE_SENTRY_DSN=\n', 'VITE_SENTRY_DSN=\n')).toEqual([]);
+    expect(missingKeys('VITE_S3_FOLDER=\n', 'VITE_S3_FOLDER=\n')).toEqual([]);
   });
 
   it('skips comments and blank lines rather than reading them as keys', () => {
@@ -39,7 +39,7 @@ describe('missingKeys', () => {
   });
 
   it('reports nothing for identical files', () => {
-    const text = "VITE_S3_BUCKET_NAME='aaa'\n\n#comment\nVITE_SENTRY_DSN=\n";
+    const text = "VITE_S3_BUCKET_NAME='aaa'\n\n#comment\nVITE_S3_FOLDER=\n";
     expect(missingKeys(text, text)).toEqual([]);
   });
 });

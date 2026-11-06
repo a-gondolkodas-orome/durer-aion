@@ -87,7 +87,7 @@
         @apply bg-primary text-white font-roboto sticky top-0 z-40 shadow-md;
     }
     .primary-footer {
-        @apply bg-primary text-white font-roboto fixed bottom-0 inset-x-0 flex md:hidden;
+        @apply bg-primary text-white font-roboto fixed bottom-0 inset-x-0 z-40 flex md:hidden;
         @apply justify-end items-center gap-3 px-3 py-4;
         box-shadow: 0 -3px 8px rgb(0 0 0 / 20%);
     }

@@ -47,7 +47,7 @@
   },
   "undo": "Visszavonás",
   "variant": {
-    "full": "Teljes",
+    "full": "Profi",
     "legend": "Változat",
     "level": "{{number}}. szint",
     "noBotStrategy": "Nincs gépi stratégia megadva",

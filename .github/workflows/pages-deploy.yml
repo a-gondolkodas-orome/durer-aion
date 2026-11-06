@@ -44,16 +44,21 @@ jobs:
       # A build failure in any app blocks the whole deploy, the accepted cost of a single site.
       - name: Build and assemble the site
         env:
-          # The apps read this through vite; empty — the repository variable being unset —
-          # leaves error reporting off rather than pointing the site at a dead endpoint. See
-          # *Error reporting* in README.md.
-          VITE_SENTRY_DSN: ${{ vars.SENTRY_DSN }}
           # The vite configs read HEAD when this is unset, which on a checkout
           # actions/checkout made is the same commit. Setting it says so
           # outright, and keeps the banner exact if a build ever comes from a
           # turbo cache rather than from these sources.
           VITE_GIT_COMMIT_HASH: ${{ github.sha }}
         run: node scripts/assemble-site.mjs
+
+      # ci.yml's site-smoke job runs this too, but in parallel with this workflow on the same push,
+      # so it cannot hold a deploy back. Here it can: a site that does not load is not uploaded,
+      # and gyakorlo.durerinfo.hu keeps serving the last one that did.
+      # Without --with-deps for the reason ci.yml's site-smoke job gives.
+      - name: Install the browser for the pinned Playwright
+        run: npx playwright install --only-shell chromium
+      - name: Smoke-test the assembled site
+        run: npm run site:smoke
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

@@ -5,7 +5,7 @@ import {
   Model,
   ModelAttributes,
 } from "sequelize";
-import { MatchStatus, PageState } from "schemas";
+import { PageState } from "schemas";
 
 // Sequelize adds the timestamp columns itself, and only for names the attribute
 // list leaves free. Omitting them from the attribute types therefore keeps them
@@ -27,8 +27,10 @@ export class TeamModel extends Model<
 
   declare pageState: PageState;
 
-  declare relayMatch: MatchStatus;
-  declare strategyMatch: MatchStatus;
+  // The team's current match of each kind, or null: its status is read off the
+  // match itself (server/match_status.ts), never stored here.
+  declare relayMatchID: string | null;
+  declare strategyMatchID: string | null;
 
   declare other: string;
 
@@ -142,11 +144,13 @@ export const teamAttributes: ModelAttributes<
   pageState: {
     type: DataTypes.STRING,
   },
-  relayMatch: {
-    type: DataTypes.JSON,
+  relayMatchID: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
-  strategyMatch: {
-    type: DataTypes.JSON,
+  strategyMatchID: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   other: {
     type: DataTypes.STRING(OTHER_MAX_LENGTH),

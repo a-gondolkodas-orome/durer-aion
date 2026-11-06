@@ -30,9 +30,9 @@ npm run teams:import  # loads scripts/test.tsv
 ```
 
 Coming back to a checkout you already have — switching to a branch to review it,
-say — is `npm run stack:up` on its own. Every `dev:*` and `stack:*` script runs
-`scripts/prepare.mjs` first, which installs and seeds only if it has to: the
-install happens when the lockfile or a workspace manifest actually moved.
+say — is `npm run stack:up` on its own, preceded by `npm ci` when that branch
+changed `package-lock.json`. No script installs for you. Every `dev:*` script and
+`stack:up` seed the env files first, which is silent when there is nothing to do.
 
 Open `http://localhost` and log in with the join code `000-0000-000`. That is
 the whole online round: the site teams see, the game server they play against,
@@ -206,6 +206,7 @@ The Pages site assembles all three plus a home page:
 ```bash
 npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
 npm run site:serve   # on http://localhost:4321
+npm run site:smoke   # opens each app in Chromium and fails on what does not load
 ```
 
 `site:build` is the same script `.github/workflows/pages-deploy.yml` runs, base
@@ -250,12 +251,14 @@ npm run build
 npm run i18n:check
 npm run spell-check
 npm run stack:build   # needs docker; the other six do not
+npm run site:build && npm run site:smoke   # needs Playwright's Chromium
 ```
 
-`npm run check` runs the six that need no docker, in one command and cheapest
+`npm run check` runs the six that need no docker or browser, in one command and cheapest
 first, so a misspelt word costs seconds rather than the two or three minutes the
 whole set takes. It is what to run before pushing; `stack:build` is separate because it
-needs docker.
+needs docker, and the site smoke test because it needs a browser and a full site
+build.
 
 <details><summary>Why formatting is ESLint's, and what it deliberately leaves alone</summary>
 
@@ -346,9 +349,7 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | --- | --- |
 | `.env.docker` | the docker stack — bot and admin credentials, the postgres password |
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` — which is all `teams:import:local` reads |
-| `apps/online-frontend/.env` | `VITE_SENTRY_DSN` for the competition site |
-| `apps/offline-frontend/.env` | the same for the dry run, plus the S3 bucket its play data goes to |
-| `apps/relay-practise-frontend/.env` | the same, for the relay practice site |
+| `apps/offline-frontend/.env` | the S3 bucket the dry run's play data goes to |
 
 Because setup never overwrites, a file you already have goes stale when its
 sample gains a setting — so setup, and each `dev:*` script that runs it first,
@@ -369,25 +370,8 @@ to the sample reached only whoever happened to delete their `.env` and re-run
 
 ## Error reporting
 
-Each frontend sends errors and pageload traces to Sentry only when its `.env`
-sets `VITE_SENTRY_DSN`. Without one the SDK is never initialised, so a build with
-nowhere to report to makes no requests rather than failing them.
-`pages-deploy.yml` passes the repository variable `SENTRY_DSN` to the builds,
-which is how `/valto/` and `/proba-verseny/` would get theirs — there is no
-`.env` in CI to read.
-
-The backend reports separately, to its own project, from a DSN still written
-into `apps/online-backend/src/server.ts` — its failures reach the server log, not
-a competitor's browser.
-
-<details><summary>Why the gate exists, and why no DSN is set</summary>
-
-It replaced a DSN hardcoded in all three entry points, pointing at a project
-`sentry.durerinfo.hu` answers `400` for: every visitor of the public practice
-sites got that failed POST in the console on load, and no report ever arrived.
-Issuing a DSN that works is a change on the Sentry server rather than in this
-repository; set it here once there is one.
-</details>
+Nothing reports errors to a service. The backend's are in its log
+(`docker compose logs backend`); a frontend's stay in the visitor's console.
 
 ## Usage tracking
 
@@ -446,16 +430,17 @@ that before a competition.
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are
    fine — a bot can keep its lookup tables in a file beside it — but what the bot and
-   the board *both* need goes in `game.ts`. A helper beside them is a file the
-   bot entry and the client entry have in common, which the walk below reads as
-   the bot reaching the served bundle, and fails.
+   the board *both* need goes in `game.ts`. ESLint enforces it: `game.ts`,
+   `board.tsx` and `main.tsx` may import nothing from beside them but `./game`
+   and `./board`, so a helper they share with the bot fails `npm run lint`.
 
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:
    `strategy-games.ts` (the game definition and its name — the `game` entry),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
-   `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the live
-   client `game` and `game/client`; the offline dry run all three.
+   The server's `games.ts`, which lists each game beside its bot, imports `game`
+   and `game/bot`; the live client `game` and `game/client`; the offline dry run
+   all three.
 
 What each file provides — the names are the ones the registries import. The
 game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and
@@ -471,16 +456,15 @@ the clock, the test/live choice, choosing who starts, tries and score.
     `events.endTurn()`. Each live game also scores the sub-game in its move
     (#459)
   - `possibleMoves`, every legal move, from which the bot picks at random
-  - optionally `turn`, which the live games use for the end-of-time checks
-    (#594)
+  - optionally `turn`, boardgame.io's turn hooks. Not for the end of time:
+    in the play phase `gameWrapper` ends a match on the first move past it
 
   A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
   a "pick two values, then commit" turn.
 - **`strategy.ts`** exports `strategyWrapper(category)`, returning
   `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
-  with `setStartingPosition` and the opening position — the bot is the only
-  source of it in both live games. `GameType.startingPosition` is typed but
-  `gameWrapper` never calls it (#35), so do not use it. `[undefined, moveName]`
+  with `startingPositionMove(position)` — the bot is the only source of the
+  opening position, which may name the game's own keys only. `[undefined, moveName]`
   makes the bot play a random move from `possibleMoves`.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the

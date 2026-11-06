@@ -11,6 +11,8 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'site');
+// PORT=0 asks the OS for a free port; the first line printed names the one it got, which is how
+// smoke-site.mjs finds the server it started.
 const port = Number(process.env.PORT || 4321);
 
 const TYPES = {
@@ -28,7 +30,7 @@ const TYPES = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   // Strip the query and normalise, then re-resolve under root: without the prefix check a
   // request for /../../etc/passwd would escape the served directory.
   const requested = decodeURIComponent(req.url.split('?')[0]);
@@ -50,8 +52,9 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(404).end(`Not found: ${requested}`);
   }
-}).listen(port, () => {
-  console.log(`site/ on http://localhost:${port}/`);
+});
+server.listen(port, () => {
+  console.log(`site/ on http://localhost:${server.address().port}/`);
   console.log('  /              home');
   console.log('  /jatekok/      strategy practice');
   console.log('  /proba-verseny/ competition dry run');

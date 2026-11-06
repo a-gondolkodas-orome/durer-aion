@@ -1,17 +1,8 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { FinishedMatchStatus, GameType, InProgressMatchStatus } from 'schemas';
+import { GameType } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
-import { Sequelize, Op, WhereOptions } from 'sequelize';
-
-// `%` and `_` are wildcards inside a LIKE or ILIKE pattern, so a fragment
-// carrying them would match more than the caller asked for — a bare `%` matches
-// every team. Backslash is postgres' default escape character for both, so no
-// ESCAPE clause is needed; it has to escape itself too, or a trailing one would
-// escape the `%` that the pattern appends.
-export function escapeLike(fragment: string): string {
-  return fragment.replace(/[\\%_]/g, character => `\\${character}`);
-}
+import { Sequelize, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -25,38 +16,6 @@ export class TeamsRepository {
   async connect() {
     await this.sequelize.sync();
   }
-  /**
-   * Teams whose `other` field contains every one of the given fragments,
-   * whatever their case: the column is the organisers' own notes, so what an
-   * organiser types is a fragment they remember rather than the case it was
-   * stored in. An empty list matches all teams: `Sequelize.and()` with no
-   * arguments produces no WHERE clause.
-   *
-   * `ILIKE` folds case the way the database's own locale says, so the accented
-   * letters fold only on a UTF-8 aware one: on a cluster initialised with plain
-   * `C`, `Ő` and `ő` stay different while ASCII still folds. Accents are not
-   * folded away on any locale — `Adam` does not find `Ádám`.
-   */
-  async fetch(filter: string[]) : Promise<TeamModel[]> {
-    return await TeamModel.findAll({ where:
-      Sequelize.and(...filter.map(part => ({ 'other': { [Op.iLike]: `%${escapeLike(part)}%` } }))),
-    });
-  }
-
-  async deduceMatch(matchID:string):Promise<TeamModel | null> {
-    const matches =  await TeamModel.findAll({ where:
-      Sequelize.or([
-        { relayMatch: 'IN PROGRESS' },
-        { strategyMatch: 'IN PROGRESS' }
-      ])
-    });
-    console.log(matches)
-    return matches.find(team => {
-      return (team.relayMatch as InProgressMatchStatus).matchID === matchID ||
-        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
-    }) ?? null;
-  }
-
   async listTeams(): Promise<TeamModel[] | null> {
     return await TeamModel.findAll();
   }
@@ -67,52 +26,33 @@ export class TeamsRepository {
     });
   }
   /**
-   * Records the team's match as finished, but only while that match is still
-   * the team's: the match id is checked in the same UPDATE that writes, so an
-   * admin reset landing after the caller read the team is not overwritten.
-   * Whether a row was written.
-   */
-  async finishMatch(
-    teamId: string,
-    type: "relayMatch" | "strategyMatch",
-    matchId: string,
-    status: FinishedMatchStatus,
-  ): Promise<boolean> {
-    const [updated] = await TeamModel.update({ [type]: status }, {
-      // A JSON path on the column: ("strategyMatch"#>>'{matchID}') = matchId.
-      where: { teamId, [type]: { matchID: matchId } } as WhereOptions<TeamModel>,
-    });
-    return updated > 0;
-  }
-
-  /**
    * Puts the team into its new match, but only while its page and both match
-   * states are still the ones `team` holds, so of two starts made from the
-   * same reading only one is written. Returns whether the row was written.
+   * ids are still the ones `team` holds, so of two starts made from the same
+   * reading only one is written. Returns whether the row was written.
    */
-  async startMatch(team: TeamModel, gameType: GameType, status: InProgressMatchStatus): Promise<boolean> {
+  async startMatch(team: TeamModel, gameType: GameType, matchID: string): Promise<boolean> {
     const [updated] = await TeamModel.update({
       pageState: gameType,
-      [gameType === "RELAY" ? "relayMatch" : "strategyMatch"]: status,
+      [gameType === "RELAY" ? "relayMatchID" : "strategyMatchID"]: matchID,
     }, {
       where: {
         teamId: team.teamId,
         pageState: team.pageState,
-        relayMatch: { state: team.relayMatch.state },
-        strategyMatch: { state: team.strategyMatch.state },
-      } as WhereOptions<TeamModel>,
+        relayMatchID: team.relayMatchID,
+        strategyMatchID: team.strategyMatchID,
+      },
     });
     return updated > 0;
   }
   /**
-   * Takes the team home unless a match is in progress, checked in the UPDATE
-   * itself so that a start landing after the caller read the team is not
-   * overwritten. Returns whether the row was written.
+   * Takes the team home, but only while both match ids are still the ones
+   * `team` holds: whether a match is in progress is read off the match, not
+   * the row, so the caller checks that, and a start landing after it read the
+   * team changes an id here. Returns whether the row was written.
    */
-  async goHome(teamId: string): Promise<boolean> {
-    const notInProgress = { state: { [Op.ne]: "IN PROGRESS" } };
+  async goHome(team: TeamModel): Promise<boolean> {
     const [updated] = await TeamModel.update({ pageState: "HOME" }, {
-      where: { teamId, relayMatch: notInProgress, strategyMatch: notInProgress } as WhereOptions<TeamModel>,
+      where: { teamId: team.teamId, relayMatchID: team.relayMatchID, strategyMatchID: team.strategyMatchID },
     });
     return updated > 0;
   }
@@ -125,8 +65,8 @@ export class TeamsRepository {
       category,
       email,
       credentials,
-      strategyMatch: { state: "NOT STARTED" },
-      relayMatch: { state: "NOT STARTED" },
+      strategyMatchID: null,
+      relayMatchID: null,
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });

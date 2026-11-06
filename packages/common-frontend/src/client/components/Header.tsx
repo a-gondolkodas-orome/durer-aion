@@ -10,9 +10,11 @@ import { LanguageDropdown } from './Langswitcher';
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
+/// `languageSwitcher` is for the sites that are meant to be read in either
+/// language; the competition round and its admin pages are Hungarian only.
 export function Header(props: {
   teamName: string | null,
-  admin: boolean,
+  languageSwitcher?: boolean,
   titles?: string[],
   homeAddress?: string,
   onChooseLanguage?: (language: string) => void
@@ -111,12 +113,12 @@ export function Header(props: {
               flex: 1
             }}>
             </Stack>
-            {props.admin &&
+            {props.languageSwitcher &&
               <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
             }
           </Stack>
         }
-        {(props.teamName || props.admin) && <Stack sx={{
+        {(props.teamName || props.languageSwitcher) && <Stack sx={{
           display: {
             xs: 'flex',
             md: 'none'
@@ -170,7 +172,7 @@ export function Header(props: {
               }}
             >{t('header.logout')}</Button>
           </>}
-          {props.admin && <LanguageDropdown onChoose={props.onChooseLanguage} />}
+          {props.languageSwitcher && <LanguageDropdown onChoose={props.onChooseLanguage} />}
         </Dialog>
       </Container>
     </Stack>

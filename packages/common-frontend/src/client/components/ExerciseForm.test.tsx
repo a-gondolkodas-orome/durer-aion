@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { expect, test, vi } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
@@ -10,12 +10,17 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+const refreshState = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock('../hooks/user-hooks', () => ({
-  useRefreshTeamState: () => () => Promise.resolve(),
+  useRefreshTeamState: () => refreshState,
 }));
 
-function renderForm(awaitingJudge: boolean) {
-  const onSubmit = vi.fn(() => Promise.resolve());
+afterEach(() => {
+  vi.restoreAllMocks();
+  refreshState.mockClear();
+});
+
+function renderForm(awaitingJudge: boolean, onSubmit = vi.fn((_result: number) => Promise.resolve())) {
   const form = (attempt: number) =>
     <SnackbarProvider>
       <ExerciseForm
@@ -30,11 +35,20 @@ function renderForm(awaitingJudge: boolean) {
   return { onSubmit, moveToAttempt: (attempt: number) => rerender(form(attempt)) };
 }
 
+// Formik submits asynchronously; act waits for it to settle.
+async function sendGuess() {
+  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
+  });
+}
+
 test('sends a guess on its turn', async () => {
   const { onSubmit } = renderForm(false);
   fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
   fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
   await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(42));
+  await waitFor(() => expect(refreshState).toHaveBeenCalledOnce());
 });
 
 // #623: a second guess before the judge ruled on the first was a move out of
@@ -47,11 +61,7 @@ test('blocks sending and typing while the judge has the turn', () => {
 
 test('focuses the input on the attempt after a guess from this screen', async () => {
   const { onSubmit, moveToAttempt } = renderForm(false);
-  fireEvent.change(screen.getByRole('textbox'), { target: { value: '42' } });
-  // Formik submits asynchronously; act waits for it to settle.
-  await act(async () => {
-    fireEvent.click(screen.getByRole('button', { name: 'relay.send' }));
-  });
+  await sendGuess();
   expect(onSubmit).toHaveBeenCalled();
   // A correct guess moves on to the next problem, three attempts on.
   moveToAttempt(7);
@@ -59,4 +69,18 @@ test('focuses the input on the attempt after a guess from this screen', async ()
   // A teammate's guess after that leaves the focus alone again.
   moveToAttempt(10);
   expect(screen.getByRole('textbox')).not.toHaveFocus();
+});
+
+// Regression for "throws": a `.catch` chained onto the handler's promise let
+// a handler that threw escape the form unreported.
+test.each<[string, () => Promise<void>]>([
+  ['rejects', () => Promise.reject(new Error('failed'))],
+  ['throws', () => { throw new Error('failed'); }],
+])('reports a handler that %s', async (_, handler) => {
+  const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  renderForm(false, vi.fn(handler));
+  await sendGuess();
+  expect(await screen.findByText('failed')).toBeInTheDocument();
+  expect(logged).toHaveBeenCalledOnce();
+  expect(refreshState).not.toHaveBeenCalled();
 });

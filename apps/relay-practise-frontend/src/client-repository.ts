@@ -1,7 +1,6 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend/core";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto } from "common-frontend/core";
 import { teamData } from "./teamData";
 import type { RelayEndReport } from "game";
-import { sendDataLogin, sendGameData } from "./sendData";
 import { handleGameReport } from "./game-report";
 import { readStoredTeamState } from "./stored-team-state";
 import { trackRelayStarted } from "./tracking";
@@ -26,7 +25,6 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendGameData({ component: "relay", phase: "start" });
     trackRelayStarted(teamState.teamName);
     // An earlier round's, which handleGameReport would take for this round's
     // finish.
@@ -47,7 +45,6 @@ export class OfflineClientRepository implements ClientRepository {
     const newState = { ...teamState, pageState: 'HOME' }
     if (teamState.relayMatch.state === "IN PROGRESS") {
       const score = Number(localStorage.getItem(relayPointsStorageKey()))
-      sendGameData({ component: "relay", phase: "end", G: { points: score } })
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
@@ -91,24 +88,6 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
 
-  // The local boardgame.io client judges the answer with the bundled bot, and
-  // its step report already goes out through RelayWrapper's sendGameData hook,
-  // so nothing is sent from here.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
-  }
-
   // Persisted as if the game had reported it, for toHome() to read.
   keepRelayEnd(report: RelayEndReport): void {
     handleGameReport(report);
@@ -138,7 +117,6 @@ export class OfflineClientRepository implements ClientRepository {
         },
       }
 
-      sendDataLogin(teamState);
       localStorage.setItem(teamStateStorageKey(),
         JSON.stringify(teamState)
       );

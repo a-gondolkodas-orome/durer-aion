@@ -1,8 +1,7 @@
 import { Client } from 'boardgame.io/react';
-import { Local } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameStateMixin, GameType } from 'game';
 import { boardWrapper } from 'common-frontend';
-import { matchStorageKey } from 'common-frontend/core';
+import { localWithBots, matchStorageKey } from 'common-frontend/core';
 import type { RelayBoard, StrategyBoard } from 'common-frontend';
 import type { MyGameState as RelayGameState, RelayMoveArgs } from 'game';
 import { RelayWrapper } from 'game';
@@ -18,16 +17,15 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
   description: ReactNode
   ) {
-  // The same key to both: what `Local` persists the match log under is what
-  // the step files report as the match's log.
+  // The same key to both: what the transport persists the match log under is
+  // what the step files report as the match's log.
   const storageKey = matchStorageKey(game.name);
   return Client({
     game: gameWrapper(game, (report) => handleGameReport(report, storageKey)),
     board: boardWrapper(board, description),
-    multiplayer: Local(
+    multiplayer: localWithBots(
       {
         bots: { '1': botWrapper(strategy) },
-        persist: true,
         storageKey,
       }
     ),
@@ -45,10 +43,9 @@ export function ClientRelayWithBot(
   return Client({
     game: RelayWrapper(handleGameReport),
     board: board,
-    multiplayer: Local(
+    multiplayer: localWithBots(
       {
         bots: { '1': botWrapper(strategy) },
-        persist: true,
         storageKey: matchStorageKey(gameName),
       }
     ),

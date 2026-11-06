@@ -47,7 +47,7 @@ async function renderBoard(ctx: Partial<Ctx>) {
   // Only the local apps' repositories keep an end report; the mock has none.
   const keepRelayEnd = vi.fn();
   repo.keepRelayEnd = keepRelayEnd;
-  const moves = { getTime: vi.fn(), startGame: vi.fn() };
+  const moves = { getTime: vi.fn(), startGame: vi.fn(), submitAnswer: vi.fn() };
   const props = { G, ctx: { currentPlayer: GUESSER_PLAYER, ...ctx }, moves } as unknown as Parameters<typeof InProgressRelay>[0];
   render(<ClientRepoProvider value={repo}><InProgressRelay {...props} selectRoundOnEnd/></ClientRepoProvider>);
   return keepRelayEnd;

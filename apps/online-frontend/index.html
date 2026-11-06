@@ -58,15 +58,9 @@
     katexCss.rel = "stylesheet";
     katexCss.href = new URL("css/katex.css", latexJs).href;
     document.head.append(katexCss);
-    import(latexJs)
+    import(/* @vite-ignore */ latexJs)
       .then(({ LaTeXJSComponent }) => customElements.define("latex-js", LaTeXJSComponent))
       .catch((error) => console.error("latex.js could not be loaded; tasks fall back to their LaTeX source", error))
-  </script>
-  <script type="module">
-    import { Buffer } from "buffer";
-    import process from "process";
-    window.Buffer = Buffer;
-    window.process = process;
   </script>
 </head>
 

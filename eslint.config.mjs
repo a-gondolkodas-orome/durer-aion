@@ -181,28 +181,22 @@ export default defineConfig(
   // just the same. The path patterns cover both ways a relative import can spell the
   // package: through `packages/` from an app, and as a sibling (`../../game/...`)
   // from another package. What the rule cannot see is the package's own graph — a
-  // board importing a strategy file; the walk in packages/game/src/entries.test.ts
-  // pins that.
+  // board importing a strategy file; the packages/game blocks below pin that.
   //
-  // The two exempt apps are named here rather than in a second block switching the
+  // The exemptions are written as `ignores`, never as a later block switching the
   // rules off, and the ban rides the core `no-restricted-imports` while the React
   // bans below use the typescript-eslint rule of the same name. Both for one reason:
-  // a flat config replaces a rule's options wholesale, so every extra block naming a
-  // rule is another way to disarm it silently — one block, and a rule name nothing
-  // else sets, cannot be. The core rule differs only in having no `allowTypeImports`,
-  // which this ban has no use for: nothing outside the bot needs to name a bot's
-  // types either. `.mts` and the rest of the extensions are in because a config or a
-  // script is as able to import the bot as a source file is.
+  // a flat config replaces a rule's options wholesale, so a block that names a rule
+  // for files another block also covers is a way to disarm it silently. The two
+  // blocks here cover disjoint files. The core rule differs only in having no
+  // `allowTypeImports`, which this ban has no use for: nothing outside the bot needs
+  // to name a bot's types either. `.mts` and the rest of the extensions are in
+  // because a config or a script is as able to import the bot as a source file is.
   //
-  // The relay problems ride the same ban, for the same reason and with one more
-  // exempt app. relay-practise-frontend is the public practice site: it serves past
-  // years' problem sets, which are public already, so it names `relay-bot` on
-  // purpose. Exempting it here rather than disabling the rule at its two import
-  // sites keeps this the only place an exemption is written down — but it also
-  // takes that app out of the `game/bot` ban it never needed, so
-  // apps/relay-practise-frontend/src/no-bot-entry.test.ts pins that it still names
-  // none, the way the walks elsewhere pin what a specifier ban cannot see. What that
-  // app's specifiers resolve to in turn is packages/game/src/entries.test.ts's walk.
+  // The relay problems ride the same ban, for the same reason, with one more exempt
+  // app: relay-practise-frontend is the public practice site, which serves past
+  // years' problem sets, public already, so it names `relay-bot` on purpose. It keeps
+  // the bot ban, in a block of its own.
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
     ignores: ['apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**'],
@@ -213,19 +207,66 @@ export default defineConfig(
       'no-restricted-syntax': ['error', noDynamicBotImport, noDynamicProblemsImport],
     },
   },
+  {
+    files: ['apps/relay-practise-frontend/**/*.{js,mjs,cjs,mts,ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [noBotInTheClient] }],
+      'no-restricted-syntax': ['error', noDynamicBotImport],
+    },
+  },
+  // Inside packages/game, the same boundary as import allowlists: only strategy-bots.ts
+  // names a bot, so nothing the `game` and `game/client` entries reach can be one. In a
+  // game folder the rules and the board import nothing from beside them but ./game and
+  // ./board, which covers a lookup table under any name; the shared registry imports
+  // only game.ts, which keeps the boards out of the server too. These ride the
+  // typescript-eslint rule because the block above already sets the core one for
+  // these files, and a second block would replace its options.
+  {
+    files: ['packages/game/src/games/strategy/*/{game.ts,board.tsx,main.tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^\\./(?!(game|board)(\\.jsx?)?$)',
+          message: "A game folder's rules and board import only ./game and ./board from beside them; what the bot and the board both need goes in game.ts.",
+        }],
+      }],
+    },
+  },
+  {
+    files: ['packages/game/src/games/strategy/strategy-games.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^\\./[^/]+/(?!game(\\.js)?$)',
+          message: "The `game` entry's registry imports only a game folder's game.ts.",
+        }],
+      }],
+    },
+  },
+  {
+    files: ['packages/game/src/games/strategy/strategy-client.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        patterns: [{
+          regex: '^\\./[^/]+/(?!(game|board|main)(\\.jsx?)?$)',
+          message: 'Only strategy-bots.ts imports a bot.',
+        }],
+      }],
+    },
+  },
   // The core of the package is what a bare node server imports; its React client half
-  // lives in src/react/ and is exempt — that is the whole point of the split. What this
-  // rule cannot see is a relative import resolving into src/react/; the walk in
-  // packages/strategy-engine/src/react-free.test.ts pins that. `import type` is allowed because
-  // it is erased: types.ts has to name React's node type to say what a game's rule text
-  // may be, and naming it costs a bare node nothing.
+  // lives in src/react/ and react.ts, and is exempt — that is the whole point of the
+  // split. The path patterns keep a relative import from reaching into either, which
+  // covers every .tsx too: they all live under src/react/. `import type` is allowed
+  // because it is erased: types.ts has to name React's node type to say what a game's
+  // rule text may be, and naming it costs a bare node nothing.
   {
     files: ['packages/strategy-engine/**/*.ts'],
     ignores: ['packages/strategy-engine/react.ts', 'packages/strategy-engine/src/react/**'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
-          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx'],
+          group: ['react', 'react/*', 'react-*', '*.tsx', '**/*.tsx', '**/react', '**/react/**', '**/react.*'],
           allowTypeImports: true,
           message: 'packages/strategy-engine runs with no framework attached; keep React on the app side.',
         }],

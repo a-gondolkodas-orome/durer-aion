@@ -1,17 +1,12 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
 import { getBotCredentials, relayNames } from "./common";
-import { AnyBgioGame, PlayerIDType, relayProblemResults, strategyNames } from "game";
+import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
-import { TeamsRepository } from "./db";
-import {
-  CompetitionCategory,
-  FinishedMatchStatus,
-  GameType,
-  InProgressMatchStatus,
-} from "schemas";
+import { CompetitionCategory, GameType } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
+import { teamMatches, type TeamMatches } from "./match_status";
 
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
@@ -92,34 +87,11 @@ export async function createGame(
   return body;
 }
 
-export async function startMatchStatus(
-  matchId: string,
-  ctx: Server.AppCtx
-): Promise<InProgressMatchStatus> {
-  const currentMatch = await ctx.db.fetch(matchId, { state: true });
-  return {
-    state: "IN PROGRESS",
-    matchID: matchId,
-    startAt: new Date(currentMatch.state.G.start),
-    endAt: new Date(currentMatch.state.G.end),
-  };
-}
-
-export async function endMatchStatus(
-  progressStatus: InProgressMatchStatus,
-  finalScore: number
-): Promise<FinishedMatchStatus> {
-  return {
-    state: "FINISHED",
-    matchID: progressStatus.matchID,
-    startAt: progressStatus.startAt,
-    endAt: progressStatus.endAt,
-    score: finalScore,
-  };
-}
-
-export async function allowedToStart(
-  team: TeamModel,
+/** Whether the team may start a match of `gameType`: one attempt at each
+ *  match, never both at once, and only after the disclaimer. */
+export function allowedToStart(
+  team: Pick<TeamModel, "pageState">,
+  matches: TeamMatches,
   gameType: GameType
 ) {
   if (team.pageState === "DISCLAIMER")
@@ -127,98 +99,12 @@ export async function allowedToStart(
   if (team.pageState === gameType)
     return false;
   if (
-    team.relayMatch.state === "IN PROGRESS" ||
-    team.strategyMatch.state === "IN PROGRESS"
+    matches.relayMatch.state === "IN PROGRESS" ||
+    matches.strategyMatch.state === "IN PROGRESS"
   )
     return false;
-  if (gameType === "STRATEGY" && team.strategyMatch.state === "FINISHED")
-    return false;
-  if (gameType === 'RELAY' && team.relayMatch.state === 'FINISHED')
-    return false;
-
-  return true;
-}
-
-export async function checkStaleMatch(
-  team: TeamModel
-): Promise<
-  | { isStale: false }
-  | { isStale: true; gameState: "relayMatch" | "strategyMatch" }
-> {
-  const now = new Date(Date());
-  if (team.relayMatch.state === "IN PROGRESS") {
-    if (typeof team.relayMatch.endAt === "string")
-      team.relayMatch.endAt = new Date(team.relayMatch.endAt);
-    if (team.relayMatch.endAt.getTime() < now.getTime())
-      return { isStale: true, gameState: "relayMatch" };
-  }
-
-  if (team.strategyMatch.state === "IN PROGRESS") {
-    if (typeof team.strategyMatch.endAt === "string")
-      team.strategyMatch.endAt = new Date(team.strategyMatch.endAt);
-    if (team.strategyMatch.endAt.getTime() < now.getTime())
-      return { isStale: true, gameState: "strategyMatch" };
-  }
-
-  return { isStale: false };
-}
-
-function inferenceGameType(gameName: string) {
-  let key: keyof typeof relayNames | keyof typeof strategyNames;
-  for (key in relayNames) {
-    if (relayNames[key] === gameName) return "relayMatch";
-  }
-  for (key in strategyNames) {
-    if (strategyNames[key] === gameName) return "strategyMatch";
-  }
-  throw new Error(`Unregistered gamename: ${gameName} `);
-}
-
-/** What closing a match needs of the repository. */
-export type MatchStore = Pick<TeamsRepository, "getTeam" | "finishMatch">;
-
-export async function closeMatch(
-  matchId: string,
-  teams: MatchStore,
-  db: StorageAPI.Async | StorageAPI.Sync
-) {
-  const currentMatch = await db.fetch(matchId, { state: true, metadata: true });
-  const teamId = currentMatch.metadata.players[0].name;
-  if (!teamId)
-    throw new Error(
-      `Match teamId is not valid, the match has the following players:${JSON.stringify(currentMatch.metadata.players)}`
-    );
-  const team: TeamModel | null = (await teams.getTeam({ teamId })) ?? null;
-  if (team == null)
-    throw new Error(
-      `Match team is not found, the match has the following players:${JSON.stringify(currentMatch.metadata.players)}`
-    );
-
-  const type = inferenceGameType(currentMatch.metadata.gameName);
-  // A FINISHED match is closed again on purpose: the stale check can close it
-  // before boardgame.io's game over, the game still scores some late moves, and
-  // this overwrites the score copied then.
-  const status = team[type];
-  // After an admin reset the old match still runs, and reaches game over while
-  // the team is NOT STARTED again or already playing its new match. Neither
-  // may be closed with the old match's points.
-  if (status.state === "NOT STARTED" || status.matchID !== matchId) {
-    console.log(
-      `Not closing match: ${matchId}, the team's current match is ${status.state === "NOT STARTED" ? "none" : status.matchID}`
-    );
-    return;
-  }
-  const mStat = status as InProgressMatchStatus;
-  const G = currentMatch.state.G;
-  const finishState = {
-    ...await endMatchStatus(mStat, G.points),
-    ...(type === "relayMatch" ? { relayResults: relayProblemResults(G) } : { strategyResults: G.liveResults }),
-  };
-  console.log(
-    `Closing match: ${matchId}, points: ${G.points}`
-  );
-  if (!(await teams.finishMatch(teamId, type, matchId, finishState)))
-    console.log(`Not closing match: ${matchId}, it was replaced while being closed`);
+  const own = gameType === "RELAY" ? matches.relayMatch : matches.strategyMatch;
+  return own.state === "NOT STARTED";
 }
 
 const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
@@ -228,22 +114,11 @@ const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
 
 export async function getNewGame(
   ctx: Server.AppCtx,
-  teams: MatchStore,
   games: AnyBgioGame[],
   gameType: GameType,
   team: TeamModel
 ) {
-  //if middleware setup was better understood, this should be in a separate middleware
-  const staleInfo = await checkStaleMatch(team);
-  if (staleInfo.isStale) {
-    await closeMatch(
-      (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
-      teams,
-      ctx.db
-    );
-  }
-
-  if (!(await allowedToStart(team, gameType))) {
+  if (!allowedToStart(team, await teamMatches(ctx.db, team), gameType)) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
   // The import admits only the competition's categories.

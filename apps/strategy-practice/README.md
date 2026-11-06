@@ -43,7 +43,7 @@ The hook lives at the repository root because only the root
 - **Codespaces** supports only a restricted set of devcontainer properties and
   may ignore the `mounts` block, in which case none of the persistence below
   happens.
-- **Playwright**: bumping `playwright` in `package.json` means bumping
+- **Playwright**: bumping `playwright` in the root `package.json` means bumping
   `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and rebuilding, or
   Playwright looks for a browser revision that is not in the image.
 - **Node** is pinned by the devcontainer feature in
@@ -77,17 +77,12 @@ npm test                 # unit tests; the root `npm test` runs them too
 npm run typecheck
 npm run lint:fix         # lint this app alone; `npm run lint:fix` at the root does the whole repo
 npm run build            # prod build — some problems only appear here
-
-npm run coverage         # line coverage, on demand
 ```
 
 `npm run check` is the inner loop while you work here: build, spell check,
 typecheck, this app's tests and its lint, about 70 seconds against the repository
 root's two-odd minutes. It is not a substitute for the root `npm run check` —
 that is what CI runs, and it covers this app too.
-
-What the coverage report is good for, and why nothing gates on it, is in
-[AGENTS.md § Coverage](AGENTS.md#coverage).
 
 ## IDE setup
 
@@ -310,10 +305,10 @@ ahead. Its eslint, typescript and vitest pins match the root's and its vite
 matches the other frontends'.
 
 Every dependency here is pinned exactly, as everywhere else in the monorepo
-(`save-exact` in `.npmrc`). `playwright` carries an extra constraint on top of
-that: the devcontainer image bakes browser binaries for one specific version, so
-the pin has to agree with `.devcontainer/Dockerfile` as well as with the
-lockfile. The root `npm test` fails when they disagree
+(`save-exact` in `.npmrc`). `playwright` is not one of them — it is pinned in the
+root `package.json`, where the site smoke test uses it — but this app's
+devcontainer bakes browser binaries for that one version, so the pin has to
+agree with `.devcontainer/Dockerfile` as well as with the lockfile. The root `npm test` fails when they disagree
 (`check-versions.test.mjs`), and does the same for every file the Node
 version is written down in — that test lists them.
 

@@ -75,7 +75,7 @@ export interface SendGameDataParams {
 // at the same moment. So the state is copied now and the file goes out once
 // the log is complete — one upload per step, as before.
 //
-// `logStorageKey` is the key the client gave `Local({ persist: true })`;
+// `logStorageKey` is the key the client gave `localWithBots`;
 // without one the file claims no log rather than an empty one.
 function sendStrategyStep(fileName: string, reported: object, logStorageKey?: string) {
   const state = JSON.parse(JSON.stringify(reported)) as object;

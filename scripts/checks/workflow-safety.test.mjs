@@ -17,45 +17,28 @@ const workflows = () =>
     .sort()
     .map(name => [`${WORKFLOWS}${name}`, readFileSync(`${repoRoot}${WORKFLOWS}${name}`, 'utf8').replace(/\r\n/g, '\n')]);
 
-// The body of every `run:`, whether written inline or as a block scalar. A block ends at the first
-// line indented no further than the `run:` key itself — the next step, or the next key of this one.
-const runScripts = source => {
-  const lines = source.split('\n');
-  const scripts = [];
-  for (let i = 0; i < lines.length; i++) {
-    const match = /^(\s*)(?:- )?run:(.*)$/.exec(lines[i]);
-    if (!match) continue;
-    const [, indent, rest] = match;
-    const start = i + 1;
-    if (!/^\s*[|>]/.test(rest)) {
-      scripts.push({ start, body: rest });
-      continue;
-    }
-    const body = [];
-    while (i + 1 < lines.length && (lines[i + 1].trim() === '' || lines[i + 1].search(/\S/) > indent.length)) {
-      body.push(lines[++i]);
-    }
-    scripts.push({ start, body: body.join('\n') });
-  }
-  return scripts;
-};
-
-// Each offending line as `path:line: text`, so a failure is the list of edits to make.
-const offenders = (pattern, within = script => script.body.split('\n').map((text, i) => [i, text])) =>
+// Every line of every workflow, as `path:line: text`, so a failure is the list of edits to make.
+// Comment lines are left out: YAML ignores them.
+const lines = () =>
   workflows().flatMap(([file, source]) =>
-    runScripts(source).flatMap(script =>
-      within(script)
-        .filter(([, text]) => pattern.test(text))
-        .map(([offset, text]) => `${file}:${script.start + offset}: ${text.trim()}`)
-    )
-  );
+    source.split('\n')
+      .map((text, i) => ({ where: `${file}:${i + 1}`, text }))
+      .filter(({ text }) => !/^\s*#/.test(text)));
+
+// A `${{ }}` is data as a YAML value — `env:`, `if:`, `with:` — and executable text inside a `run:`
+// script. A line that is not `key: value` is a block-scalar line, and every block scalar in these
+// workflows is a script, so that is where one may not stand; nor on a `run:` line itself.
+const isScriptLine = text => !/^\s*(- )?[\w.-]+:(\s|$)/.test(text) || /^\s*(- )?run:/.test(text);
+
+const offenders = (pattern, where = () => true) =>
+  lines().filter(({ text }) => pattern.test(text) && where(text)).map(({ where: at, text }) => `${at}: ${text.trim()}`);
 
 describe('a workflow that runs a shell script', () => {
   it('never expands a ${{ }} expression inside it', () => {
     // Actions substitutes the expression into the script before a shell ever parses it, so a value
     // someone else chooses — a branch name, an issue title, a commit message — becomes executable
     // text at that point. Passing it through `env:` and reading `"$VAR"` makes it a value again.
-    expect(offenders(/\$\{\{/), 'Pass these through the step\'s `env:` block and quote them:').toEqual([]);
+    expect(offenders(/\$\{\{/, isScriptLine), 'Pass these through the step\'s `env:` block and quote them:').toEqual([]);
   });
 
   it('never puts a secret in a URL', () => {

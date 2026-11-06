@@ -24,7 +24,7 @@ export default defineConfig({
   // `.js`, not the `.cjs` tsdown picks for node: the package is CJS-typed, so
   // `.js` already means CommonJS, and `npm start` names the file.
   fixedExtension: false,
-  // The map is what gives Sentry and the debugger the source lines back.
+  // The map is what gives the server log and the debugger the source lines back.
   // `start`, `dev` and `import-teams` run node with --enable-source-maps.
   sourcemap: true,
 
