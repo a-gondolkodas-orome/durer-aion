@@ -76,9 +76,9 @@ export function ImportTeams(props: { onImported: () => void }) {
     <Stack sx={{ gap: '16px', padding: '10px' }}>
       <Stack sx={{ fontSize: 14 }}>
         Tabulátorral elválasztott .tsv fájl, ebben az oszlopsorrendben: Teamname, Category, Email, Other, ID,
-        Login Code, Credentials. Az utolsó hármat üresen hagyva a szerver generálja őket. A csapatok egyenként
-        kerülnek be: a hibás sorok kimaradnak, a többi bekerül. A belépőkódokat a sikeres importálás után
-        letöltött fájl tartalmazza.
+        Login Code, Credentials. Az Email és az Other üresen hagyható, az utolsó hármat üresen hagyva a szerver
+        generálja őket. A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
+        A belépőkódokat a sikeres importálás után letöltött fájl tartalmazza.
       </Stack>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Button variant="outlined" color="primary" component="label" disabled={busy}>

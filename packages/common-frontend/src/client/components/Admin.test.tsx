@@ -404,7 +404,7 @@ test('the import tab lists the server\'s errors and warnings, not its narration'
     failed: 1,
     logs: {
       sev: ['info', 'warn', 'error', 'error'],
-      value: ['Generating login code', '"Other" field not set', 'Invalid category', '-'.repeat(52)],
+      value: ['Generating login code', 'WARNING: Header not exactly how we defined it.', 'Invalid category', '-'.repeat(52)],
     },
   }));
   const saved = savedDownloads();
@@ -413,7 +413,7 @@ test('the import tab lists the server\'s errors and warnings, not its narration'
   await importFile();
 
   expect(await screen.findByText('Invalid category')).toBeInTheDocument();
-  expect(screen.getByText('"Other" field not set')).toBeInTheDocument();
+  expect(screen.getByText('WARNING: Header not exactly how we defined it.')).toBeInTheDocument();
   expect(screen.queryByText('Generating login code')).not.toBeInTheDocument();
   expect(screen.getAllByRole('listitem').filter(item => item.textContent === '-'.repeat(52))).toEqual([]);
   // Nothing went in, so there is nothing to save.

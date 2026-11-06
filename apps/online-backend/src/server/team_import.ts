@@ -73,7 +73,12 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   await teams.connect();
   for (const row of table) {
     // Trim: Remove possible '\r' characters in windows CRLF
-    const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
+    const [teamname, category, ...optional_columns] = row.map(column => column.trim());
+    // Email and Other are optional: a row may leave them blank or end before
+    // them, and either way the team is stored with an empty string.
+    const email = optional_columns[0] ?? '';
+    const other = optional_columns[1] ?? '';
+    const extra_columns = optional_columns.slice(2);
     let ok = true;
     let teamId = extra_columns[0];
     let login_code = extra_columns[1];
@@ -94,13 +99,9 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       ok = false;
     }
 
-    if (other === undefined || other === "") {
-      onwarn(`"Other" field not set for team ${teamname}`);
-      onwarn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
-    }
     // Stricter than the column, on purpose: the admin routes append an audit
     // trail to this field, and `model.ts` says what the gap is for.
-    if (other !== undefined && other.length > OTHER_IMPORT_MAX_LENGTH) {
+    if (other.length > OTHER_IMPORT_MAX_LENGTH) {
       onerror(`"Other" filed is too long (${other.length} to be exact, expecting < ${OTHER_IMPORT_MAX_LENGTH})`);
       ok = false;
     }

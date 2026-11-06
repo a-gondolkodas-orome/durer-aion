@@ -57,6 +57,24 @@ describe('import_teams_from_tsv', () => {
     expect(result.failed).toBe(0);
   });
 
+  describe('takes Email and Other as optional', () => {
+    it.each([
+      ['left blank', ['Test Team', 'C', '', '', '', '', '']],
+      ['left out, the row ending after Category', ['Test Team', 'C']],
+    ])('%s', async (_, row) => {
+      tsv(row);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result.successful).toBe(1);
+      expect(create.mock.calls[0][0]).toMatchObject({ email: '', other: '' });
+      // An organiser acts on these, and a warning per team for a column the
+      // file need not fill would bury them.
+      expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
+      expect(result.export_table[0].slice(0, 4)).toEqual(['Test Team', 'C', '', '']);
+    });
+  });
+
   it('should log a warning if header does not match expected header', async () => {
     (readFileSync as Mock).mockReturnValue(
       'Teamname\tCategory\tOther\tEmail\tID\tLogin Code\tCredentials\nTest Team\tC\ttest@example.com\tSome Info\t\t\t',
