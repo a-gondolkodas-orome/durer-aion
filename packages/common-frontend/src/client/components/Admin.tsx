@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
-import { ImportTeams } from './ImportTeams';
+import { ImportExport } from './ImportExport';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -15,21 +15,18 @@ import { ConfirmDialogInterface, ConfirmDialog, formatMinutes } from './ConfirmD
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
-import { downloadTsv } from '../utils/download';
-import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
 declare module '@mui/x-data-grid' {
   interface ToolbarPropsOverrides {
-    teams?: TeamModelDto[];
+    onOpenExport?: () => void;
   }
 }
 
-/// The list's two downloads. The CSV is the grid as it stands, filter
-/// included. The other is every team with its join code and credentials, in
-/// the import's own format, so the codes can be mailed out at any time rather
-/// than only from the import that generated them.
-function TeamsToolbar(props: { teams?: TeamModelDto[] }) {
-  const teams = props.teams ?? [];
+/// The list's CSV is the grid as it stands, filter included, and holds no
+/// login secret: the ID column, which is the session cookie's value, is left
+/// out. Every secret leaves the page through the Import/export tab, which this
+/// points to.
+function TeamsToolbar(props: { onOpenExport?: () => void }) {
   return (
     <Toolbar>
       <ExportCsv
@@ -39,8 +36,8 @@ function TeamsToolbar(props: { teams?: TeamModelDto[] }) {
       >
         Letöltés CSV-ként
       </ExportCsv>
-      <Button size="small" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(teams.map(teamTsvRow))); }}>
-        Letöltés belépőkódokkal
+      <Button size="small" onClick={props.onOpenExport}>
+        Belépőkódokkal: Import/export fül
       </Button>
     </Toolbar>
   );
@@ -51,7 +48,7 @@ const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: f
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
-const TABS = ['csapatok', 'statisztika', 'importalas'] as const;
+const TABS = ['csapatok', 'statisztika', 'import-export'] as const;
 type AdminTab = typeof TABS[number];
 
 function tabFromUrl(): AdminTab {
@@ -89,6 +86,10 @@ export function Admin(props: { teamId?: string }) {
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
+  const openTab = (next: AdminTab) => {
+    setTab(next);
+    tabToUrl(next);
+  };
 
   const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
   // Until the list loads it is not known whether the path names a team, so
@@ -142,15 +143,12 @@ export function Admin(props: { teamId?: string }) {
       {teams && <>
       <Tabs
         value={tab}
-        onChange={(_, value: AdminTab) => {
-          setTab(value);
-          tabToUrl(value);
-        }}
+        onChange={(_, value: AdminTab) => { openTab(value); }}
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
         <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
-        <Tab label="Importálás" value="importalas" id="admin-tab-importalas" aria-controls="admin-panel-importalas"/>
+        <Tab label="Import/export" value="import-export" id="admin-tab-import-export" aria-controls="admin-panel-import-export"/>
       </Tabs>
       <Stack {...panelProps('csapatok', tab)}>
         <Stack sx={{ height: "635px" }}>
@@ -160,6 +158,8 @@ export function Admin(props: { teamId?: string }) {
               headerName: 'ID',
               width: 75,
               editable: false,
+              // The team's GUID is its session cookie's value (team_view.ts).
+              disableExport: true,
             },
             {
               field: 'teamName',
@@ -259,7 +259,7 @@ export function Admin(props: { teamId?: string }) {
           pageSizeOptions={[10, 25, 50]}
           showToolbar
           slots={{ toolbar: TeamsToolbar }}
-          slotProps={{ toolbar: { teams } }}
+          slotProps={{ toolbar: { onOpenExport: () => { openTab('import-export'); } } }}
           sx={{
             height: "auto",
           }}
@@ -338,8 +338,8 @@ export function Admin(props: { teamId?: string }) {
       <Stack {...panelProps('statisztika', tab)}>
         <Stats data={teams}/>
       </Stack>
-      <Stack {...panelProps('importalas', tab)}>
-        <ImportTeams onImported={() => { void mutate(); }}/>
+      <Stack {...panelProps('import-export', tab)}>
+        <ImportExport teams={teams} onImported={() => { void mutate(); }}/>
       </Stack>
       </>}
     </Stack>

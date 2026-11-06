@@ -28,14 +28,17 @@ vi.mock('react-i18next', () => ({
 // failure. What this file is about is what the page does around the grid, so
 // the grid is a list of the rows it was handed, with the buttons the page puts
 // in each row.
+// The columns each grid was last given, so a test can read what its CSV
+// export would hold.
+const grids = vi.hoisted(() => ({ columns: [] as { field: string, disableExport?: boolean }[][] }));
 vi.mock('@mui/x-data-grid', () => {
   interface Row { id: string, teamName: string }
-  interface Column { field: string, renderCell?: (params: { row: Row }) => React.ReactNode }
+  interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row }) => React.ReactNode }
   return {
     DataGrid: (props: {
       rows: Row[], columns: Column[],
       slots?: { toolbar?: React.ComponentType<object> }, slotProps?: { toolbar?: object },
-    }) => (<>
+    }) => { grids.columns.push(props.columns); return (<>
       {props.slots?.toolbar && <props.slots.toolbar {...props.slotProps?.toolbar}/>}
       <ul>
         {props.rows.map(row => (
@@ -47,7 +50,7 @@ vi.mock('@mui/x-data-grid', () => {
           </li>
         ))}
       </ul>
-    </>),
+    </>); },
     ExportCsv: () => null,
     Toolbar: (props: { children: React.ReactNode }) => <div>{props.children}</div>,
   };
@@ -384,7 +387,7 @@ const alphaCodes = ['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds
 
 /** Picks a file on the import tab and starts the import. */
 const importFile = async (name = 'teams.tsv') => {
-  fireEvent.click(await screen.findByRole('tab', { name: 'Importálás' }));
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
   const file = new File(['Teamname\tCategory\n'], name);
   fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
   fireEvent.click(screen.getByText('Importálás indítása'));
@@ -417,7 +420,7 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   // A file of every team's secrets is not saved unasked.
   expect(saved).toEqual([]);
 
-  fireEvent.click(screen.getByText('Belépőkódok letöltése'));
+  fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
@@ -456,11 +459,11 @@ test('a second import keeps the codes of the first', async () => {
   renderAdmin();
 
   await importFile();
-  expect(await screen.findByText('Belépőkódok letöltése')).toBeInTheDocument();
+  expect(await screen.findByText('Az importáltak belépőkódjainak letöltése')).toBeInTheDocument();
   await importFile();
   expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
   await waitFor(() => { expect(screen.getByText('Importálás indítása')).toBeDisabled(); });
-  fireEvent.click(screen.getByText('Belépőkódok letöltése'));
+  fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
   await waitFor(() => { expect(saved).toHaveLength(1); });
 
   expect(saved[0]).toContain('111-2222-333');
@@ -504,7 +507,7 @@ test('a reset asks first, names the team, and does nothing when cancelled', asyn
 
 // The codes can be mailed out at any time, not only from the import that made
 // them. Email and notes are optional, and null on an older database.
-test('the team list downloads every team with its join code, in the import\'s format', async () => {
+test('the list points to the export, which downloads every team with its join code', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([
     { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as TeamModelDto,
     { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as TeamModelDto,
@@ -512,7 +515,11 @@ test('the team list downloads every team with its join code, in the import\'s fo
   const saved = savedDownloads();
   renderAdmin();
 
-  fireEvent.click(await screen.findByText('Letöltés belépőkódokkal'));
+  fireEvent.click(await screen.findByText('Belépőkódokkal: Import/export fül'));
+
+  expect(screen.getByRole('tab', { name: 'Import/export' })).toHaveAttribute('aria-selected', 'true');
+  expect(window.location.search).toBe('?tab=import-export');
+  fireEvent.click(screen.getByText('Mind a(z) 2 csapat letöltése belépőkódokkal'));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe([
@@ -521,4 +528,20 @@ test('the team list downloads every team with its join code, in the import\'s fo
     `Alpha\tC\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
     'Bare\tC\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials',
   ].join('\n') + '\n');
+});
+
+// The ID is the team's GUID, and the GUID is its session cookie's value: a
+// file holding it can log a team in. The CSV is meant to be shareable.
+test('the team list\'s CSV holds no login secret', async () => {
+  grids.columns = [];
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin();
+  await screen.findByText('Alpha');
+
+  const exported = (grids.columns.at(-1) ?? []).filter(column => column.disableExport !== true).map(column => column.field);
+
+  expect(exported).not.toHaveLength(0);
+  for (const secret of ['id', 'teamId', 'joinCode', 'credentials', 'email']) {
+    expect(exported).not.toContain(secret);
+  }
 });

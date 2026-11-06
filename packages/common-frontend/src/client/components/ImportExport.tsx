@@ -3,15 +3,17 @@ import { Stack } from '@mui/system';
 import { Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { TeamImportResultDto } from '../dto/TeamStateDto';
+import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
-import { joinCodesFileName, teamsTsv } from '../utils/team-tsv';
+import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
-/// The team import for an organiser with the admin password and a browser, on
-/// the same route and the same importer as `npm run teams:import`. Rows are
-/// imported one by one, so a file with bad rows still loads the good ones.
-export function ImportTeams(props: { onImported: () => void }) {
+/// Where teams come in and where their secrets go out. The import runs on the
+/// same route and the same importer as `npm run teams:import`, row by row, so
+/// a file with bad rows still loads the good ones. The export is every team
+/// with its join code and credentials, in the import's own format: the one
+/// download on the admin page that carries a login secret.
+export function ImportExport(props: { teams: TeamModelDto[], onImported: () => void }) {
   const theme = useTheme();
   const importTeams = useImportTeams();
   const { enqueueSnackbar } = useSnackbar();
@@ -19,7 +21,7 @@ export function ImportTeams(props: { onImported: () => void }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TeamImportResultDto | null>(null);
   // Every import's codes, not the last one's, so one file holds the teams this
-  // page imported. The team list's own download holds every team's.
+  // page imported — late teams' codes to mail without everyone else's.
   const [codes, setCodes] = useState<string[][]>([]);
 
   const onPick = (event: ChangeEvent<HTMLInputElement>) => {
@@ -60,12 +62,13 @@ export function ImportTeams(props: { onImported: () => void }) {
 
   return (
     <Stack sx={{ gap: '16px', padding: '10px' }}>
+      <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
       <Stack sx={{ fontSize: 14 }}>
         Tabulátorral elválasztott .tsv fájl, ebben az oszlopsorrendben: Teamname, Category, Email, Other, ID,
         Login Code, Credentials. Az Email és az Other üresen hagyható, az utolsó hármat üresen hagyva a szerver
         generálja őket. A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
-        Az importált csapatok belépőkódjait a Belépőkódok letöltése gomb adja, az összes csapatét a Csapatok fülön
-        a Letöltés belépőkódokkal gomb.
+        Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét lent az
+        Exportálás rész.
       </Stack>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Button variant="outlined" color="primary" component="label" disabled={busy}>
@@ -83,7 +86,7 @@ export function ImportTeams(props: { onImported: () => void }) {
         </Button>
         {codes.length > 0 && (
           <Button variant="contained" color="primary" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(codes)); }}>
-            Belépőkódok letöltése
+            Az importáltak belépőkódjainak letöltése
           </Button>
         )}
       </Stack>
@@ -110,6 +113,21 @@ export function ImportTeams(props: { onImported: () => void }) {
           </Stack>
         </Stack>
       )}
+      <Stack component="h3" sx={{ margin: '16px 0 0', fontSize: 18, fontWeight: 500 }}>Exportálás</Stack>
+      <Stack sx={{ fontSize: 14 }}>
+        Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopsorrendjében. A fájl titkos
+        adatokat tartalmaz: aki egy csapat belépőkódját ismeri, beléphet a csapat nevében.
+      </Stack>
+      <Stack sx={{ flexDirection: 'row' }}>
+        <Button
+          variant="outlined"
+          color="primary"
+          disabled={props.teams.length === 0}
+          onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow))); }}
+        >
+          {`Mind a(z) ${props.teams.length} csapat letöltése belépőkódokkal`}
+        </Button>
+      </Stack>
     </Stack>
   );
 }
