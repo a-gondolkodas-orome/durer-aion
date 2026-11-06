@@ -6,7 +6,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
-import { ClientRepoProvider } from '../client-repo-context';
+import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
@@ -93,11 +93,13 @@ const renderAdmin = (teamId?: string) =>
   render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
-        <SWRConfig value={{ provider: () => new Map() }}>
-          <Layout>
-            <Admin teamId={teamId}/>
-          </Layout>
-        </SWRConfig>
+        <AdminRepoProvider value={repo}>
+          <SWRConfig value={{ provider: () => new Map() }}>
+            <Layout>
+              <Admin teamId={teamId}/>
+            </Layout>
+          </SWRConfig>
+        </AdminRepoProvider>
       </ClientRepoProvider>
     </ThemeProvider>
   );

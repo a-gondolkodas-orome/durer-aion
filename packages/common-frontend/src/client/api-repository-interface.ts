@@ -15,13 +15,6 @@ export interface ClientRepository {
   startRelay(): Promise<void>
   startStrategy(): Promise<void>
   toHome(): Promise<void>
-  getAll(): Promise<TeamModelDto[]>
-  getMatchState(matchId: string): Promise<MatchStateDto>
-  getMatchLogs(matchId: string): Promise<MatchStateDto>
-  resetRelay(teamId: string): Promise<TeamModelDto>
-  resetStrategy(teamId: string): Promise<TeamModelDto>
-  addMinutes(matchId: string, minutes: number): Promise<string>
-  importTeams(file: File): Promise<TeamImportResultDto>
   // The end report of a relay whose time ran out with no move to end it: the
   // game ends a match past its time only on a move arriving after the grace
   // for late answers, and a team waiting at the buzzer sends none. Locally the
@@ -31,4 +24,17 @@ export interface ClientRepository {
   // one: online the server keeps the score from the match state.
   keepRelayEnd?(report: RelayEndReport): void;
 
+}
+
+/// The organisers' routes, which only the online app has: the local apps have
+/// no server to ask and nothing to administer, so they implement only
+/// `ClientRepository`, and the admin page renders only where this is provided.
+export interface AdminClientRepository {
+  getAll(): Promise<TeamModelDto[]>
+  getMatchState(matchId: string): Promise<MatchStateDto>
+  getMatchLogs(matchId: string): Promise<MatchStateDto>
+  resetRelay(teamId: string): Promise<TeamModelDto>
+  resetStrategy(teamId: string): Promise<TeamModelDto>
+  addMinutes(matchId: string, minutes: number): Promise<string>
+  importTeams(file: File): Promise<TeamImportResultDto>
 }

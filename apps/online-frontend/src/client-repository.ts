@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend";
+import type { AdminClientRepository, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -32,7 +32,7 @@ function makeAxiosError(any_error: unknown): AxiosError {
 
 /** The team routes: the session cookie says which team, so nothing here
  * carries the team's id (issue #89). */
-export class RealClientRepository implements ClientRepository {
+export class RealClientRepository implements ClientRepository, AdminClientRepository {
 
   version = "ONLINE" as const;
 

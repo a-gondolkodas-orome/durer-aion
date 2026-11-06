@@ -1,5 +1,5 @@
 import type { ClientRepository } from "../api-repository-interface";
-import type { MatchStateDto, TeamModelDto } from "../dto/TeamStateDto";
+import type { TeamModelDto } from "../dto/TeamStateDto";
 import { bgioStoragePrefix, loginMarkerStorageKey, relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
 
 function removeGameStateLocalStorage() {
@@ -27,37 +27,6 @@ export class UserModel {
       localStorage.removeItem(loginMarkerStorageKey());
     }
     return state;
-  }
-
-  async adminAll(): Promise<TeamModelDto[] | null> {
-
-    const res = await this.repo.getAll();
-
-    return res;
-  }
-
-  async adminMatchState(matchId: string): Promise<MatchStateDto | null> {
-    const res = await this.repo.getMatchState(matchId);
-
-    return res;
-  }
-
-  async adminGetLogs(matchId: string): Promise<unknown | null> {
-    const res = await this.repo.getMatchLogs(matchId);
-
-    return res;
-  }
-
-  async resetRelay(teamId: string): Promise<TeamModelDto> {
-    return this.repo.resetRelay(teamId);
-  }
-
-  async resetStrategy(teamId: string): Promise<TeamModelDto> {
-    return this.repo.resetStrategy(teamId);
-  }
-
-  async addMinutes(matchId: string, minutes: number): Promise<void> {
-    await this.repo.addMinutes(matchId, minutes);
   }
 
   async startRelay(): Promise<void> {

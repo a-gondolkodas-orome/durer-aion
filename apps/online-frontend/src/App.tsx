@@ -1,5 +1,5 @@
 import React from 'react';
-import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
+import { Main, GameProvider, ClientRepoProvider, AdminRepoProvider } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 
@@ -35,7 +35,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <ClientRepoProvider
           value={clientRepository}>
-          <Main language={LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
+          <AdminRepoProvider value={clientRepository}>
+            <Main language={LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
+          </AdminRepoProvider>
         </ClientRepoProvider>
       </ThemeProvider>
     </GameProvider>

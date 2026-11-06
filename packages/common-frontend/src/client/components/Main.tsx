@@ -12,10 +12,13 @@ import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
 import { ErrorBoundary } from "./ErrorBoundary";
 import i18next from "i18next";
+import { useOptionalAdminRepo } from "../client-repo-context";
 
 export function Main(props: { language: string, gitCommitHash: string }) {
   const teamState = useTeamState();
-  const admin = window.location.pathname.includes('/admin');
+  // Only the online app provides an admin repository; elsewhere `/admin` is
+  // just a path, and the team's own pages answer it.
+  const admin = useOptionalAdminRepo() !== null && window.location.pathname.includes('/admin');
 
   useEffect(() => {
     void i18next.changeLanguage(props.language);
