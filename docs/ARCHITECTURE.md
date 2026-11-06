@@ -72,6 +72,30 @@ transport. It adds two things to each game's namespace:
   team's moves. The clock poll `getTime` is a read-only move, so it never wakes
   the bot (`isMakeMovePayloadReadOnly`).
 
+One team move, and the bot's answer to it:
+
+```mermaid
+sequenceDiagram
+    participant B as Browser (team, '0')
+    participant T as SocketIOButBotMoves
+    participant Q as match queue
+    participant S as storage
+    participant Bot as bot ('1')
+    B->>T: update (MAKE_MOVE)
+    T->>Q: boardgame.io's listener
+    Q->>S: apply the team's move, write state
+    Q-->>B: push the new state
+    Note over T: second listener — stops here for getTime
+    T->>Q: second listener
+    Q->>S: re-read the match
+    alt bot's turn, in startNewGame or play
+        Q->>Bot: play(state), after 400 ms
+        Bot-->>Q: move
+        Q->>S: Master.onUpdate with the bot's credentials
+        Q-->>B: push the new state
+    end
+```
+
 The backend's `botwrapper.ts` turns a strategy function — `(state, botID) => [args, moveName]`
 — into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
 game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
