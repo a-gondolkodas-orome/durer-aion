@@ -3,11 +3,10 @@ import { useAddMinutes, useAll } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportTeams } from './ImportTeams';
-import { csvToolbar } from './CsvToolbar';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -16,8 +15,36 @@ import { ConfirmDialogInterface, ConfirmDialog, formatMinutes } from './ConfirmD
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
+import { downloadTsv } from '../utils/download';
+import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
-const TeamsToolbar = csvToolbar('durer-csapatok');
+declare module '@mui/x-data-grid' {
+  interface ToolbarPropsOverrides {
+    teams?: TeamModelDto[];
+  }
+}
+
+/// The list's two downloads. The CSV is the grid as it stands, filter
+/// included. The other is every team with its join code and credentials, in
+/// the import's own format, so the codes can be mailed out at any time rather
+/// than only from the import that generated them.
+function TeamsToolbar(props: { teams?: TeamModelDto[] }) {
+  const teams = props.teams ?? [];
+  return (
+    <Toolbar>
+      <ExportCsv
+        // allColumns so a column hidden by default is still in the file; the
+        // button columns opt out with disableExport.
+        options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
+      >
+        Letöltés CSV-ként
+      </ExportCsv>
+      <Button size="small" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(teams.map(teamTsvRow))); }}>
+        Letöltés belépőkódokkal
+      </Button>
+    </Toolbar>
+  );
+}
 
 // What the states mean is on MatchStatus in the `schemas` package.
 const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
@@ -232,6 +259,7 @@ export function Admin(props: { teamId?: string }) {
           pageSizeOptions={[10, 25, 50]}
           showToolbar
           slots={{ toolbar: TeamsToolbar }}
+          slotProps={{ toolbar: { teams } }}
           sx={{
             height: "auto",
           }}

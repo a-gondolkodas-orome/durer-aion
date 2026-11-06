@@ -6,18 +6,7 @@ import { useSnackbar } from 'notistack';
 import { TeamImportResultDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
-
-// The importer's columns, in its order (`expected_header` in the backend's
-// team_import.ts), so the file saved here can be imported again as it is.
-const IMPORT_HEADER = ['Teamname', 'Category', 'Email', 'Other', 'ID', 'Login Code', 'Credentials'];
-
-function codesTsv(rows: string[][]): string {
-  return [IMPORT_HEADER, ...rows].map(row => row.join('\t')).join('\n') + '\n';
-}
-
-function codesFileName(): string {
-  return `durer-csapatok-${new Date().toISOString().replace(/[:.]/g, '-')}.tsv`;
-}
+import { joinCodesFileName, teamsTsv } from '../utils/team-tsv';
 
 /// The team import for an organiser with the admin password and a browser, on
 /// the same route and the same importer as `npm run teams:import`. Rows are
@@ -29,8 +18,8 @@ export function ImportTeams(props: { onImported: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TeamImportResultDto | null>(null);
-  // Every import's codes, not the last one's: a second file imported before
-  // the first one's codes were saved must not be what loses them.
+  // Every import's codes, not the last one's, so one file holds the teams this
+  // page imported. The team list's own download holds every team's.
   const [codes, setCodes] = useState<string[][]>([]);
 
   const onPick = (event: ChangeEvent<HTMLInputElement>) => {
@@ -49,15 +38,12 @@ export function ImportTeams(props: { onImported: () => void }) {
         enqueueSnackbar('Egy csapat sem került be.', { variant: 'error' });
         return;
       }
-      const held = [...codes, ...answer.export_table];
-      setCodes(held);
+      setCodes(held => [...held, ...answer.export_table]);
       props.onImported();
       enqueueSnackbar(answer.failed === 0
         ? `${answer.successful} csapat importálva`
         : `${answer.successful} csapat importálva, ${answer.failed} sor hibás`,
       { variant: answer.failed === 0 ? 'success' : 'warning' });
-      // Unasked for: the answer is the only copy of the generated join codes.
-      downloadTsv(codesFileName(), codesTsv(held));
     } catch (e: unknown) {
       enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
     } finally {
@@ -78,7 +64,8 @@ export function ImportTeams(props: { onImported: () => void }) {
         Tabulátorral elválasztott .tsv fájl, ebben az oszlopsorrendben: Teamname, Category, Email, Other, ID,
         Login Code, Credentials. Az Email és az Other üresen hagyható, az utolsó hármat üresen hagyva a szerver
         generálja őket. A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
-        A belépőkódokat a sikeres importálás után letöltött fájl tartalmazza.
+        Az importált csapatok belépőkódjait a Belépőkódok letöltése gomb adja, az összes csapatét a Csapatok fülön
+        a Letöltés belépőkódokkal gomb.
       </Stack>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Button variant="outlined" color="primary" component="label" disabled={busy}>
@@ -95,7 +82,7 @@ export function ImportTeams(props: { onImported: () => void }) {
           {busy ? 'Importálás…' : 'Importálás indítása'}
         </Button>
         {codes.length > 0 && (
-          <Button variant="outlined" color="primary" onClick={() => { downloadTsv(codesFileName(), codesTsv(codes)); }}>
+          <Button variant="contained" color="primary" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(codes)); }}>
             Belépőkódok letöltése
           </Button>
         )}

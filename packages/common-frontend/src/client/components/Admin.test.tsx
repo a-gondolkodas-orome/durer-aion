@@ -32,7 +32,11 @@ vi.mock('@mui/x-data-grid', () => {
   interface Row { id: string, teamName: string }
   interface Column { field: string, renderCell?: (params: { row: Row }) => React.ReactNode }
   return {
-    DataGrid: (props: { rows: Row[], columns: Column[] }) => (
+    DataGrid: (props: {
+      rows: Row[], columns: Column[],
+      slots?: { toolbar?: React.ComponentType<object> }, slotProps?: { toolbar?: object },
+    }) => (<>
+      {props.slots?.toolbar && <props.slots.toolbar {...props.slotProps?.toolbar}/>}
       <ul>
         {props.rows.map(row => (
           <li key={row.id}>
@@ -43,9 +47,9 @@ vi.mock('@mui/x-data-grid', () => {
           </li>
         ))}
       </ul>
-    ),
+    </>),
     ExportCsv: () => null,
-    Toolbar: () => null,
+    Toolbar: (props: { children: React.ReactNode }) => <div>{props.children}</div>,
   };
 });
 
@@ -398,7 +402,7 @@ const savedDownloads = (): string[] => {
   return saved;
 };
 
-test('the import tab uploads the picked file, saves the join codes, and reloads the list', async () => {
+test('the import tab uploads the picked file, and saves the join codes when asked', async () => {
   const getAll = vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const importTeams = vi.spyOn(repo, 'importTeams')
     .mockResolvedValue(importAnswer({ successful: 1, export_table: [alphaCodes] }));
@@ -409,10 +413,14 @@ test('the import tab uploads the picked file, saves the join codes, and reloads 
 
   expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
   expect(importTeams).toHaveBeenCalledWith(file);
-  // Unasked for: it is the only copy of the codes the import generated.
+  await waitFor(() => { expect(getAll).toHaveBeenCalledTimes(2); });
+  // A file of every team's secrets is not saved unasked.
+  expect(saved).toEqual([]);
+
+  fireEvent.click(screen.getByText('Belépőkódok letöltése'));
+
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
-  await waitFor(() => { expect(getAll).toHaveBeenCalledTimes(2); });
 });
 
 test('the import tab lists the server\'s errors and warnings, not its narration', async () => {
@@ -450,10 +458,13 @@ test('a second import keeps the codes of the first', async () => {
   await importFile();
   expect(await screen.findByText('Belépőkódok letöltése')).toBeInTheDocument();
   await importFile();
-  await waitFor(() => { expect(saved).toHaveLength(2); });
+  expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
+  await waitFor(() => { expect(screen.getByText('Importálás indítása')).toBeDisabled(); });
+  fireEvent.click(screen.getByText('Belépőkódok letöltése'));
+  await waitFor(() => { expect(saved).toHaveLength(1); });
 
-  expect(saved[1]).toContain('111-2222-333');
-  expect(saved[1]).toContain('444-5555-666');
+  expect(saved[0]).toContain('111-2222-333');
+  expect(saved[0]).toContain('444-5555-666');
 });
 
 test('the import tab says why the server refused the file', async () => {
@@ -489,4 +500,25 @@ test('a reset asks first, names the team, and does nothing when cancelled', asyn
   fireEvent.change(within(confirm).getByLabelText('Írd be: váltó'), { target: { value: ' Valto ' } });
   fireEvent.click(button);
   await waitFor(() => expect(reset).toHaveBeenCalledWith(alpha.teamId));
+});
+
+// The codes can be mailed out at any time, not only from the import that made
+// them. Email and notes are optional, and null on an older database.
+test('the team list downloads every team with its join code, in the import\'s format', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([
+    { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as TeamModelDto,
+    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as TeamModelDto,
+  ]);
+  const saved = savedDownloads();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByText('Letöltés belépőkódokkal'));
+
+  await waitFor(() => { expect(saved).toHaveLength(1); });
+  expect(saved[0]).toBe([
+    'Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials',
+    // A tab in a cell would shift every column after it.
+    `Alpha\tC\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
+    'Bare\tC\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials',
+  ].join('\n') + '\n');
 });
