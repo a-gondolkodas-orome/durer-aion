@@ -17,7 +17,7 @@ namespace. `gameList.test.ts` guards that the two stay 1-to-1 in sync.
 export const categories = ['A', 'B', 'C', 'D', 'E', 'E+'] as const;
 export type Category = typeof categories[number];
 
-type Round = 'döntő' | 'online'
+export type Round = 'döntő' | 'online'
 export type GameList = Record<string, GameEntry>;
 
 // Canonical list of icon keys into the overview icon registry

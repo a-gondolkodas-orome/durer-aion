@@ -110,9 +110,47 @@ describe('Overview', () => {
     // ...until the header funnel opens the panel, which reveals both rows at once
     fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
     expect(screen.getByRole('button', { name: 'C' })).toBeTruthy();
+    expect(screen.getByRole('slider', { name: 'Első év' })).toBeTruthy();
     // only icons actually in use are offered (coins, piles) — chess is used too
     expect(screen.getByRole('button', { name: 'Érmék' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Kupacok' })).toBeTruthy();
+  });
+
+  // The slider's values are positions in the years on offer: 11/12 to 15/16 here.
+  const yearRow = () => screen.getByText('Év').parentElement!;
+  const filterBadge = () => within(screen.getByRole('button', { name: 'Szűrők' })).queryByText('1');
+
+  it('narrows the catalog to a range of years, counted as one filter', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    fireEvent.change(screen.getByRole('slider', { name: 'Első év' }), { target: { value: 1 } });
+    fireEvent.change(screen.getByRole('slider', { name: 'Utolsó év' }), { target: { value: 3 } });
+    expect(within(yearRow()).getByText('12/13')).toBeTruthy();
+    expect(within(yearRow()).getByText('14/15')).toBeTruthy();
+    expect(screen.getByText('A kettő')).toBeTruthy();
+    expect(screen.getByText('C egy')).toBeTruthy();
+    expect(screen.queryByText('CD')).toBeNull();
+    expect(screen.queryByTestId('featured-strip')).toBeNull(); // GameA1 is 11/12
+    expect(filterBadge()).toBeTruthy();
+  });
+
+  // Unfiltered, the sections are collapsed and the featured strip (GameA1, 11/12) is back.
+  it('stops filtering by year once the range spans every year again, or is cleared', () => {
+    renderOverview();
+    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
+    const from = screen.getByRole('slider', { name: 'Első év' });
+    fireEvent.change(from, { target: { value: 2 } });
+    expect(screen.queryByTestId('featured-strip')).toBeNull();
+    fireEvent.change(from, { target: { value: 0 } });
+    expect(screen.getByTestId('featured-strip')).toBeTruthy();
+    expect(filterBadge()).toBeNull();
+
+    fireEvent.change(from, { target: { value: 2 } });
+    fireEvent.click(within(yearRow()).getByRole('button', { name: 'Szűrés törlése' }));
+    expect(screen.getByTestId('featured-strip')).toBeTruthy();
+    expect(within(yearRow()).getByText('11/12')).toBeTruthy();
+    expect(within(yearRow()).getByText('15/16')).toBeTruthy();
+    expect(filterBadge()).toBeNull();
   });
 
   it('narrows the catalog by icon type', () => {

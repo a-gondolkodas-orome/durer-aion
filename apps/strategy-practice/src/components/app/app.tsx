@@ -3,7 +3,7 @@ import { createHashRouter, RouterProvider, Outlet } from 'react-router';
 import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page/error-page';
 import { LanguageProvider } from 'language';
-import { ThemeProvider } from '../../theme';
+import { MuiThemeProvider, ThemeProvider } from '../../theme';
 import { usePageviewTracking } from '../../tracking';
 import { useDocumentTitle } from './document-title';
 import { gameList } from '../games/gameList';
@@ -23,10 +23,12 @@ const RootLayout = () => {
 
   return (
     <ThemeProvider>
-      <LanguageProvider>
-        <DocumentTitle />
-        <Outlet />
-      </LanguageProvider>
+      <MuiThemeProvider>
+        <LanguageProvider>
+          <DocumentTitle />
+          <Outlet />
+        </LanguageProvider>
+      </MuiThemeProvider>
     </ThemeProvider>
   );
 };

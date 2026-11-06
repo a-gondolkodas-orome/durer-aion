@@ -1,5 +1,8 @@
 import { type ReactNode } from 'react';
-import { gameList, categories, iconKeys, type Category, type GameList, type IconKey } from '../../games/gameList';
+import { Slider } from '@mui/material';
+import {
+  gameList, categories, iconKeys, type Category, type GameList, type IconKey, type Round
+} from '../../games/gameList';
 import { useTranslation } from 'react-i18next';
 import { GameIcon, iconLabels } from '../game-icons';
 
@@ -31,6 +34,33 @@ export const filterByIcons = (
 ): string[] => {
   if (selected.length === 0) return ids;
   return ids.filter(id => selected.includes(list[id].icon));
+};
+
+// The distinct years the catalog has games from, oldest first. A year reads
+// `07/08`, so text order is chronological — until the competition reaches 99/00.
+export const getUsedYears = (list: GameList): string[] =>
+  [...new Set(Object.values(list).map(entry => entry.year.v))].sort();
+
+// An inclusive range of years, `[from, to]`; `null` matches everything.
+export type YearRange = [string, string] | null;
+
+export const filterByYears = (
+  ids: string[],
+  range: YearRange,
+  list: GameList
+): string[] => {
+  if (range === null) return ids;
+  const [from, to] = range;
+  return ids.filter(id => from <= list[id].year.v && list[id].year.v <= to);
+};
+
+export const filterByRounds = (
+  ids: string[],
+  selected: Round[],
+  list: GameList
+): string[] => {
+  if (selected.length === 0) return ids;
+  return ids.filter(id => selected.includes(list[id].round));
 };
 
 // Funnel/filter glyph for the header toggle that shows or hides the filter panel.
@@ -87,7 +117,6 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
   selected: T[]
   onChange: (selected: T[]) => void
 }) => {
-  const { t } = useTranslation('overview');
   const toggle = (value: T) =>
     onChange(selected.includes(value) ? selected.filter(s => s !== value) : [...selected, value]);
 
@@ -110,17 +139,26 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
           >{content}</button>
         );
       })}
-      <button
-        onClick={() => onChange([])}
-        disabled={selected.length === 0}
-        aria-label={t('filters.clear')}
-        className={`
-          h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
-          enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
-          disabled:invisible disabled:cursor-default
-        `}
-      >×</button>
+      <ClearButton onClear={() => onChange([])} disabled={selected.length === 0} />
     </div>
+  );
+};
+
+// The × closing a filter row. It keeps its place while there is nothing to
+// clear, so the row does not shift as a filter comes and goes.
+const ClearButton = ({ onClear, disabled }: { onClear: () => void, disabled: boolean }) => {
+  const { t } = useTranslation('overview');
+  return (
+    <button
+      onClick={onClear}
+      disabled={disabled}
+      aria-label={t('filters.clear')}
+      className={`
+        h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
+        enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
+        disabled:invisible disabled:cursor-default
+      `}
+    >×</button>
   );
 };
 
@@ -156,6 +194,84 @@ export const IconFilter = ({ selected, onChange }: {
         label: labels[iconKey],
         buttonClassName: 'w-7 p-1'
       }))}
+    />
+  );
+};
+
+// The years to write under the year slider, each at a position along it from 0
+// to 1: one under each thumb, or a single `from – to` between them once the two
+// would sit too close to read apart. A fifth of the track is the room two years
+// need on a phone-width slider.
+export const yearRangeLabels = (years: string[], from: number, to: number) => {
+  const last = years.length - 1;
+  const at = (index: number) => (last === 0 ? 0 : index / last);
+  if (from === to) return [{ at: at(from), text: years[from] }];
+  if (5 * (to - from) < last) return [{ at: (at(from) + at(to)) / 2, text: `${years[from]} – ${years[to]}` }];
+  return [{ at: at(from), text: years[from] }, { at: at(to), text: years[to] }];
+};
+
+export const YearFilter = ({ range, onChange }: {
+  range: YearRange
+  onChange: (range: YearRange) => void
+}) => {
+  const { t } = useTranslation('overview');
+  const years = getUsedYears(gameList);
+  const last = years.length - 1;
+  const [from, to] = range === null ? [0, last] : range.map(year => years.indexOf(year));
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 text-sm">
+      <span className="w-20 shrink-0">{t('filters.year')}</span>
+      {/* The padding keeps the end thumbs, centred on the slider's edges, inside the row. */}
+      <div className="flex-1 min-w-48 max-w-xl px-3">
+        <Slider
+          size="small"
+          value={[from, to]}
+          min={0}
+          max={last}
+          marks
+          disableSwap
+          onChange={(_, [newFrom, newTo]) =>
+            onChange(newFrom === 0 && newTo === last ? null : [years[newFrom], years[newTo]])}
+          getAriaValueText={index => years[index]}
+          getAriaLabel={thumb => (thumb === 0 ? t('filters.yearFrom') : t('filters.yearTo'))}
+        />
+        {/* Shifting a label back by its own share of the track keeps the end ones
+            inside it: flush left at the start, centred midway, flush right at the end.
+            The thumbs announce their years themselves, so screen readers skip these. */}
+        <div
+          className={`relative h-4 -mt-1.5 text-xs tabular-nums
+            ${range === null ? 'opacity-60' : 'text-primary font-bold'}`}
+          aria-hidden
+        >
+          {yearRangeLabels(years, from, to).map(({ at, text }) => (
+            <span
+              key={text}
+              className="absolute whitespace-nowrap"
+              style={{ left: `${at * 100}%`, transform: `translateX(-${at * 100}%)` }}
+            >{text}</span>
+          ))}
+        </div>
+      </div>
+      <ClearButton onClear={() => onChange(null)} disabled={range === null} />
+    </div>
+  );
+};
+
+export const RoundFilter = ({ selected, onChange }: {
+  selected: Round[]
+  onChange: (selected: Round[]) => void
+}) => {
+  const { t } = useTranslation('overview');
+  return (
+    <FilterRow
+      label={t('filters.round')}
+      selected={selected}
+      onChange={onChange}
+      options={[
+        { value: 'döntő', content: t('round.final') },
+        { value: 'online', content: t('round.online') }
+      ]}
     />
   );
 };
