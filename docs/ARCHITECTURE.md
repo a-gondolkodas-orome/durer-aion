@@ -155,7 +155,9 @@ writes the results ([`README.md`](../README.md) § *Admin*).
 `common-frontend` talks to whatever is behind it through `ClientRepository`
 (`api-repository-interface.ts`): `ONLINE` is the REST API above
 (`online-frontend`'s `client-repository.ts`), `OFFLINE` is localStorage, `MOCK`
-is for tests.
+is for tests. The admin routes are a second interface, `AdminClientRepository`,
+which only the online app provides: the admin page renders where it is, and
+elsewhere `/admin` is an ordinary path.
 
 - **The offline dry run** (`/proba-verseny/`) runs the same `game` package and
   the same bots in the browser, on `localWithBots` (`local-with-bots.ts` in

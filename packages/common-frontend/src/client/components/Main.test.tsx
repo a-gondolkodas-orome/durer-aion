@@ -8,7 +8,7 @@ import '@testing-library/jest-dom';
 // `Main` calls `i18next.changeLanguage` while rendering, so i18next has to be
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
-import { ClientRepoProvider } from '../client-repo-context';
+import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
@@ -38,15 +38,19 @@ afterEach(() => {
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
 
 // `Header` reads the client repository off context, so `Main` cannot render
-// outside a provider — same as in the apps.
-const renderMain = () =>
-  render(
+// outside a provider — same as in the apps. The admin repository is the online
+// app's alone; `{ admin: false }` renders as the local apps do.
+const renderMain = (options: { admin: boolean } = { admin: true }) => {
+  const repo = new MockClientRepository();
+  const main = <Main language="hu" gitCommitHash="test" />;
+  return render(
     <ThemeProvider theme={outerTheme}>
-      <ClientRepoProvider value={new MockClientRepository()}>
-        <Main language="hu" gitCommitHash="test" />
+      <ClientRepoProvider value={repo}>
+        {options.admin ? <AdminRepoProvider value={repo}>{main}</AdminRepoProvider> : main}
       </ClientRepoProvider>
     </ThemeProvider>
   );
+};
 
 beforeEach(() => {
   MockTeamState.mockLoggedOut();
@@ -108,6 +112,18 @@ test('an organiser still holding a team session is not handed that team\'s board
 
   expect(getByTestId('adminRoot')).toBeInTheDocument();
   expect(queryByTestId('relayRoot')).not.toBeInTheDocument();
+});
+
+// The dry run renders the same `Main` with no admin repository: there `/admin`
+// is a path like any other, not a page whose every request would throw.
+test('/admin is the team\'s own page in an app with no admin repository', () => {
+  MockTeamState.mockLoggedOut();
+  window.history.replaceState({}, '', '/proba-verseny/admin');
+
+  const { getByTestId, queryByTestId } = renderMain({ admin: false });
+
+  expect(getByTestId('loginRoot')).toBeInTheDocument();
+  expect(queryByTestId('adminRoot')).not.toBeInTheDocument();
 });
 
 test('a team away from /admin still gets its own page', () => {

@@ -1,4 +1,4 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend/core";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto } from "common-frontend/core";
 import { teamData } from "./teamData";
 import type { RelayEndReport } from "game";
 import { handleGameReport } from "./game-report";
@@ -63,33 +63,6 @@ export class OfflineClientRepository implements ClientRepository {
 
   logout(): Promise<void> {
     return Promise.resolve();
-  }
-
-  async getAll(): Promise<TeamModelDto[]> {
-    return [];
-  }
-
-  async resetRelay(_teamId: string): Promise<TeamModelDto> {
-    throw Error("NOT call this");
-  }
-
-  async resetStrategy(_teamId: string): Promise<TeamModelDto> {
-    throw Error("NOT call this");
-  }
-
-  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
-  }
-
-  async importTeams(_file: File): Promise<TeamImportResultDto> {
-    throw Error("NOT call this");
-  }
-
-  async getMatchState(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
-  }
-  async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
   }
 
   // Persisted as if the game had reported it, for toHome() to read.
