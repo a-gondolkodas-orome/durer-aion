@@ -22,7 +22,7 @@ type Bot = BotStrategy<Board, Moves>
 // Smart bot.
 //
 // LINE side — provably winning (see forced-win.ts and the certificate in
-// forced-win.spec.ts): open with one of the certified central pair-heats,
+// forced-win.test.ts): open with one of the certified central pair-heats,
 // answer the circle player's reply with a second winning pair-heat, then run
 // the forced march. The plan covers every circle reply from the start position,
 // so as the line player this bot always wins; where several moves win equally

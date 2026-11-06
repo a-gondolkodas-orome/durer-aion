@@ -1,6 +1,5 @@
 import React from 'react';
-import './App.css';
-import { Main, GameProvider, ClientRepoProvider } from 'common-frontend';
+import { Main, GameProvider, ClientRepoProvider, AdminRepoProvider } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 
@@ -19,10 +18,14 @@ const theme = {
   },
 }
 
-function App() {
-  const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
-  const StrategyClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.StrategyClient })));
+// Module scope, not component scope: a lazy component or repository created in
+// App's body would get a new identity on every render, remounting the game
+// client under it.
+const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
+const StrategyClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.StrategyClient })));
+const clientRepository = new RealClientRepository();
 
+function App() {
   return (
     <GameProvider
       value={{
@@ -31,8 +34,10 @@ function App() {
     }}>
       <ThemeProvider theme={theme}>
         <ClientRepoProvider
-          value={new RealClientRepository()}>
-          <Main language={LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
+          value={clientRepository}>
+          <AdminRepoProvider value={clientRepository}>
+            <Main language={LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
+          </AdminRepoProvider>
         </ClientRepoProvider>
       </ThemeProvider>
     </GameProvider>

@@ -1,4 +1,5 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { useTranslation } from 'react-i18next';
+import { strategyGameFactory, testVariantLabel, type BoardClientProps, GameBoard } from 'strategy-game-factory';
 import { range } from 'lodash';
 import { DuckSvg } from './rubber-duck-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
@@ -58,53 +59,24 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const toldalek: Record<number, string> = {
-  6: 'o',
-  7: 'e'
+const Rule = ({ size }: { size?: { rows: number; cols: number } }) => {
+  const { t } = useTranslation('chess-ducks');
+  if (!size) return t('rule.generic');
+  return t('rule.sized', { rows: size.rows, cols: size.cols });
 };
 
-const rule = (ROWS: number, COLS: number) => ({
-  hu: <>
-    Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy
-    egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le
-    a {ROWS} × {COLS}-{toldalek[COLS]}s táblára kacsákat úgy, hogy a lerakott bábu ne üsse
-    a táblán levő kacsák egyikét sem. Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    Many people know how a knight moves in chess, but very few know how a duck moves: it can step
-    to any of its four orthogonal neighbours. Two players take turns placing ducks on the {ROWS} × {COLS} board
-    so that the newly placed piece does not attack any duck already on the board. The player who
-    cannot place a duck loses.
-  </>
-});
-
-const genericRule = {
-  hu: <>
-    Azt sokan tudják, hogy egy ló hogy lép a sakktáblán, de azt már nagyon kevesen, hogy
-    egy kacsa hogyan: a négy oldalszomszédos mezőre tud lépni. A két játékos felváltva rak le
-    a táblára kacsákat úgy, hogy a lerakott bábu ne üsse a táblán levő kacsák egyikét sem.
-    Az veszít, aki nem tud lépni.
-  </>,
-  en: <>
-    Many people know how a knight moves in chess, but very few know how a duck moves: it can step
-    to any of its four orthogonal neighbours. Two players take turns placing ducks on the board
-    so that the newly placed piece does not attack any duck already on the board. The player who
-    cannot place a duck loses.
-  </>
+const StepDescription = () => {
+  const { t } = useTranslation('chess-ducks');
+  return t('step');
 };
-
-const getPlayerStepDescription = () => ({
-  hu: 'Kattints egy mezőre, amit nem üt egyik kacsa sem.',
-  en: 'Click on a square that is not attacked by any duck.'
-});
 
 // Test variant covers both sub-games: a 4 × 6 or a 4 × 7 board.
 const testStartBoards: Board[] = [startBoard(4, 6), startBoard(4, 7)];
 
 export const ChessDucks = strategyGameFactory({
   presentation: {
-    rule: genericRule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -113,22 +85,22 @@ export const ChessDucks = strategyGameFactory({
       id: 'test',
       botStrategy: randomBotStrategy,
       startBoards: testStartBoards,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       id: '4x6',
       botStrategy: smartBotStrategy,
       startBoards: [startBoard(4, 6)],
-      rule: rule(4, 6),
-      label: { hu: '4×6', en: '4×6' },
+      rule: <Rule size={{ rows: 4, cols: 6 }} />,
+      label: t => t('chess-ducks:variant.4x6'),
       isDefault: true
     },
     {
       id: '4x7',
       botStrategy: smartBotStrategy,
       startBoards: [startBoard(4, 7)],
-      rule: rule(4, 7),
-      label: { hu: '4×7', en: '4×7' }
+      rule: <Rule size={{ rows: 4, cols: 7 }} />,
+      label: t => t('chess-ducks:variant.4x7')
     }
   ]
 });

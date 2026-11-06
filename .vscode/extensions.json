@@ -1,8 +1,16 @@
 {
+  // Kept in step with .devcontainer/devcontainer.json's `extensions`, which installs
+  // these rather than recommending them; .devcontainer/README.md says what each mirrors.
   "recommendations": [
     "dbaeumer.vscode-eslint",
+    "streetsidesoftware.code-spell-checker",
+    "vitest.explorer",
     "lokalise.i18n-ally",
-    "streetsidesoftware.code-spell-checker"
+    "editorconfig.editorconfig",
+    "bradlc.vscode-tailwindcss",
+    "ms-azuretools.vscode-docker",
+    "github.vscode-github-actions",
+    "redhat.vscode-yaml",
+    "anthropic.claude-code"
   ]
 }
-

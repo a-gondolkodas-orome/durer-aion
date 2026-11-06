@@ -29,17 +29,12 @@ export default defineConfig(() => ({
       // before `npm run dev` and no HMR into engine source. This app reads the
       // source, exactly as it did when these files sat under src/.
       {
-        find: /^engine$/,
-        replacement: fileURLToPath(new URL('../../packages/engine/index.ts', import.meta.url))
+        find: /^strategy-engine$/,
+        replacement: fileURLToPath(new URL('../../packages/strategy-engine/index.ts', import.meta.url))
       },
       {
-        find: /^engine\/react$/,
-        replacement: fileURLToPath(new URL('../../packages/engine/react.ts', import.meta.url))
-      },
-      // Source rather than a build, for the same reasons as `engine` above.
-      {
-        find: /^games$/,
-        replacement: fileURLToPath(new URL('../../packages/games/index.ts', import.meta.url))
+        find: /^strategy-engine\/react$/,
+        replacement: fileURLToPath(new URL('../../packages/strategy-engine/react.ts', import.meta.url))
       }
     ]
   },
@@ -79,8 +74,14 @@ export default defineConfig(() => ({
   },
   test: {
     globals: true,
+    // Without this vitest replaces every CSS import with an empty string, and the
+    // `styles.css?raw` styles.test.ts asserts on would pass against nothing. No
+    // component imports CSS, so processing it costs the suite nothing.
+    css: true,
     environment: 'node',
-    clearMocks: true,
+    // Node's own, undefined `localStorage` would shadow jsdom's — the root
+    // vitest.config.mts says why.
+    execArgv: ['--no-experimental-webstorage'],
     restoreMocks: true,
     // Reuse one context per worker instead of a fresh one per file (~40% faster).
     // Requires the setup file below: with a shared module cache, testing-library's
@@ -93,39 +94,12 @@ export default defineConfig(() => ({
     // written against this setup, and this is the app that exercises the engine
     // in a browser. Vitest resolves them through the alias above, so they test
     // the source rather than a build.
+    // The root config excludes these two directories from its own project, so
+    // what runs here is decided by the path, not by the file's name — see
+    // vitest.config.mts.
     include: [
-      'src/**/*.spec.{ts,tsx}',
-      '../../packages/engine/src/**/*.spec.{ts,tsx}',
-      '../../packages/games/src/**/*.spec.{ts,tsx}'
-    ],
-    // On demand only, never in `npm test` or CI, and with no thresholds — see
-    // AGENTS.md § Coverage for why, and for what the report is actually good
-    // for, which is what `include` below is spelled out for.
-    coverage: {
-      provider: 'v8',
-      // Without this, only files a test imported are reported, and a module no
-      // spec touches is missing from the report rather than showing up at 0%.
-      // The engine and games packages count as this app's source for coverage
-      // purposes: their specs run here (allowExternal is what lets v8 keep files
-      // above the app root).
-      allowExternal: true,
-      include: [
-        'src/**/*.{ts,tsx}',
-        '../../packages/engine/src/**/*.{ts,tsx}',
-        '../../packages/games/src/**/*.{ts,tsx}'
-      ],
-      exclude: [
-        'src/**/*.spec.{ts,tsx}',
-        'src/test-utils.ts',
-        'src/test-setup.ts',
-        'src/**/spec-helpers.tsx',
-        'src/main.tsx',
-        '../../packages/engine/src/**/*.spec.{ts,tsx}',
-        '../../packages/games/src/**/*.spec.{ts,tsx}'
-      ],
-      reporter: ['text', 'html'],
-      // /reports is gitignored
-      reportsDirectory: 'reports/coverage'
-    }
+      'src/**/*.test.{ts,tsx}',
+      '../../packages/strategy-engine/src/**/*.test.{ts,tsx}'
+    ]
   }
 }));

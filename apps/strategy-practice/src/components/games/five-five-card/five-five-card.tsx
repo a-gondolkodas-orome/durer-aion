@@ -1,19 +1,21 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
-import { useTranslation } from 'language';
 import { CARDS, startBoard, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('five-five-card');
 
   return (
   <GameBoard>
     <div className="grid grid-cols-4 gap-y-3">
       <h2 className="text-center col-start-1">
-        {t({ hu: 'Kezdő', en: 'First' })}
+        {t('board.first')}
       </h2>
       <h2 className="text-center col-start-4">
-        {t({ hu: 'Második', en: 'Second' })}
+        {t('board.second')}
       </h2>
 
       {CARDS.map(card => (
@@ -39,40 +41,29 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Mindkét játékos előtt 5-5 kártyalap van az 1-5 egész számokkal megszámozva.
-    A játékosok felváltva elvesznek egy-egy lapot a másik játékos elől, egészen addig, amíg
-    már csak egy-egy lap marad előttük. Ha a két megmaradt
-    szám összege páratlan, akkor az nyer, aki előtt a nagyobbik van; ha páros az összeg, akkor
-    pedig az, aki előtt a kisebbik (ha ugyanaz a szám marad meg a két játékos előtt, akkor az nyer,
-    aki kezdte a játékot).
-  </>,
-  en: <>
-    Each player has 5 cards in front of them numbered 1 to 5. The players take turns removing one
-    card from the other player's row until only one card remains in front of each player. If the sum
-    of the two remaining numbers is odd, the player with the larger number wins; if the sum is even,
-    the player with the smaller number wins (if both players have the same number left, the first
-    player wins).
-  </>
+const Rule = () => {
+  const { t } = useTranslation('five-five-card');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('five-five-card');
+  return t('step');
 };
 
 export const FiveFiveCard = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Vegyél el egy kártyát a másik játékos elől.',
-      en: 'Remove a card from the other player.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
     {
       botStrategy: smartBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

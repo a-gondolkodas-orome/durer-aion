@@ -1,5 +1,8 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { range, isEqual } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard, useHoverPreview } from 'strategy-game-factory';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard, useHoverPreview
+} from 'strategy-game-factory';
 import { ChessBishopSvg } from './chess-bishop-svg';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { BISHOP, FORBIDDEN, startBoard, moves, type Board, type Field } from './gameplay';
@@ -70,31 +73,25 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Két játékos felváltva tesz le a sakktáblára futókat. Egy új futót mindig
-    csak olyan mezőre tehetünk, amin még nem áll futó, és azt a mezőt nem is támadja futó. Az
-    veszít, aki nem tud lerakni futót.
-  </>,
-  en: <>
-    Two players take turns placing bishops on a chessboard. A new bishop may only be placed on a
-    square that is not already occupied by a bishop and is not attacked by any bishop. The player
-    who cannot place a bishop loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('chess-bishops');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('chess-bishops');
+  return t('step');
 };
 
 export const ChessBishops = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy mezőre, amit nem üt egyik futó sem.',
-      en: 'Click on a square that is not attacked by any bishop.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, startBoards: [startBoard], label: fullVariantLabel, isDefault: true }
   ]
 });

@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import type { GameEntry, Category } from '../../games/gameList';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameIcon } from '../game-icons';
 
 const chipBase = 'rounded-full drop-shadow-sm px-2 py-0.5 whitespace-nowrap bg-surface-elevated';
@@ -18,11 +18,9 @@ const categoryColorClass: Record<Category, string> = {
 
 
 export const GameCard = ({ gameId, gameProps }: { gameId: string; gameProps: GameEntry }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('overview');
 
-  const round = gameProps.round === 'döntő'
-    ? t({ hu: 'döntő', en: 'final' })
-    : gameProps.round;
+  const round = gameProps.round === 'döntő' ? t('round.final') : gameProps.round;
 
   const primaryCategory = gameProps.category[0];
   const categoryColor = categoryColorClass[primaryCategory];
@@ -32,7 +30,7 @@ export const GameCard = ({ gameId, gameProps }: { gameId: string; gameProps: Gam
     data-testid="game-card"
     className={`
       rounded-lg border p-1 sm:p-2 max-w-[20ch] sm:max-w-[32ch] w-full flex flex-col items-center
-      cursor-pointer primary-outline primary-tint-hover hocus:shadow-md
+      cursor-pointer hocus:border-primary hocus:bg-primary/10 hocus:shadow-md
       no-underline text-inherit transition-all
     `}
   >
@@ -46,7 +44,7 @@ export const GameCard = ({ gameId, gameProps }: { gameId: string; gameProps: Gam
       <GameIcon iconKey={gameProps.icon} />
     </span>
     <h2 className="mb-2 sm:mb-4 text-base sm:text-xl text-center">
-      {t(gameProps.name)}
+      {t(`${gameId}.name`, { ns: 'catalog' })}
     </h2>
     <div className="grow"></div>
     <div className="flex flex-wrap items-baseline gap-1 text-xs w-full">

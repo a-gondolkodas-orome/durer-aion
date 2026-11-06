@@ -1,0 +1,4 @@
+{
+  "rule": "Két játékos felváltva tör egy tábla csokit a rácsvonalai mentén. Kezdetben egy téglalap alakú csokoládé van, egy lépésben pontosan egy darabot törnek ketté. Az veszít, aki az első 1 × 1-est kénytelen letörni.",
+  "step": "Törj ketté egy csokidarabot egy rácsvonal mentén (1 × 1-est nem törhetsz le)."
+}

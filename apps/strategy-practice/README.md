@@ -43,14 +43,14 @@ The hook lives at the repository root because only the root
 - **Codespaces** supports only a restricted set of devcontainer properties and
   may ignore the `mounts` block, in which case none of the persistence below
   happens.
-- **Playwright**: bumping `playwright` in `package.json` means bumping
+- **Playwright**: bumping `playwright` in the root `package.json` means bumping
   `PLAYWRIGHT_VERSION` in `.devcontainer/Dockerfile` and rebuilding, or
   Playwright looks for a browser revision that is not in the image.
 - **Node** is pinned by the devcontainer feature in
   `.devcontainer/devcontainer.json` (the image tag only fixes the major) to the
-  version in the repository root's `.nvmrc`; the root README § Requirements lists
-  every file that repeats it. Bump them together, or the container quietly runs
-  a different Node than CI. The root `npm test` fails on either mismatch, so
+  version in the repository root's `.nvmrc`; the root
+  `check-versions.test.mjs` lists every file that repeats it. Bump them
+  together, or the container quietly runs a different Node than CI. The root `npm test` fails on either mismatch, so
   you will not find out the hard way.
 - **npm's update notifier is off** (`NPM_CONFIG_UPDATE_NOTIFIER`): the npm that
   matters is the one bundled with the pinned Node.
@@ -72,49 +72,64 @@ The hook lives at the repository root because only the root
 
 ```bash
 npm run dev              # compiles and hot-reloads for development
+npm run check            # the five below at once, this app only — the fast loop
 npm test                 # unit tests; the root `npm test` runs them too
 npm run typecheck
-npx eslint . --fix       # lint this app alone; `npm run lint:fix` at the root does the whole repo
+npm run lint:fix         # lint this app alone; `npm run lint:fix` at the root does the whole repo
 npm run build            # prod build — some problems only appear here
-
-npm run coverage         # line coverage, on demand
 ```
 
-What the coverage report is good for, and why nothing gates on it, is in
-[AGENTS.md § Coverage](AGENTS.md#coverage).
+`npm run check` is the inner loop while you work here: build, spell check,
+typecheck, this app's tests and its lint, about 70 seconds against the repository
+root's two-odd minutes. It is not a substitute for the root `npm run check` —
+that is what CI runs, and it covers this app too.
 
 ## IDE setup
 
-Recommended VS Code extensions:
+Recommended VS Code extensions — the same list `.devcontainer/devcontainer.json`
+installs, so a dev container needs nothing from this section:
 
 - [Eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 - [Tailwind Css](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
+- [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
+- [Vitest](https://marketplace.visualstudio.com/items?itemName=vitest.explorer)
+- [Claude Code](https://marketplace.visualstudio.com/items?itemName=anthropic.claude-code)
+
+This app's `.gitignore` excludes `.vscode/`, so the editor settings that go with
+them — eslint-on-save, and `formatOnSave` off so no formatter undoes it — are
+inlined in `.devcontainer/devcontainer.json` rather than committed as a
+workspace settings file. Working outside a container, copy them from there; the
+repository root keeps the equivalent settings in its own `.vscode/settings.json`.
 
 ## Adding a new game
 
 To keep track of who works on which game, use [this
 table](https://docs.google.com/spreadsheets/d/1-6u9PCtvf_gDHrs65x36pmDzFt4nZZx_IUuXrgS2aZk/edit#gid=0).
 
-1. Add the game metadata to `src/components/games/gameList.ts`.
-2. Create a folder for the game under `packages/games/src/` with the standard
+1. Add the game metadata to `src/components/games/gameList.ts`, and its name
+   under the same key in `src/locales/{hu,en}/catalog.json`.
+2. Create a folder for the game under `src/components/games/` with the standard
    files: a React-free `gameplay.ts` (the `Board` type, start boards and
    `moves`), `bot-strategy.ts`, the game itself `<game>.tsx` (plus
    `board-client.tsx` once the JSX outgrows the game file), and a
-   `gameplay.spec.ts` — see [Where it lives](#where-it-lives). A game there
-   exports a `StrategyGameConfig` object rather than a component;
-   `remove-divisor-multiple` is the one to copy.
-3. Export the config from `packages/games/index.ts`, then turn it into a page in
-   the barrel at `src/components/games/index.ts` —
-   `export const MyGame = strategyGameFactory(myGameConfig);` — keyed by the
+   `gameplay.test.ts` — see [Where it lives](#where-it-lives). Its text goes in
+   `src/locales/{hu,en}/<folder>.json`; see
+   [Internationalisation](#internationalisation-i18n).
+3. Wire it into the barrel at `src/components/games/index.ts`, keyed by the
    game's `gameList` key. The router in `src/components/app/app.tsx` picks it up
    automatically — no edit needed there.
 
-   The older games still live under `src/components/games/<game>/` and export a
-   component the barrel re-exports directly. Both shapes work; new games take
-   the first.
+   Two shapes are in use. Most games export the component `strategyGameFactory`
+   returns, and the barrel re-exports it: `export { MyGame } from './my-game/my-game';`.
+   `remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` instead
+   export a `StrategyGameConfig` object and let the barrel make the page:
+   `export const MyGame = strategyGameFactory(myGameConfig);`. Which shape everything
+   should settle on is open —
+   [#517](https://github.com/a-gondolkodas-orome/durer-aion/issues/517) — so copy
+   whichever of the two your reference game uses.
 
 Every field, edge case and enforcement rule of the engine API lives in
-[src/components/CLAUDE.md](src/components/CLAUDE.md). *It is recommended to copy
+[src/components/AGENTS.md](src/components/AGENTS.md). *It is recommended to copy
 and modify an existing, similar game.*
 
 ## Anatomy of a game
@@ -165,10 +180,22 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   </GameBoard>
 };
 
+// the text is in src/locales/{hu,en}/plus-one-two.json:
+// { "rule": "0-ról +1/+2 20-ig", "step": "Válaszd ki, hogy hánnyal növelsz." }
+const Rule = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('rule');
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('plus-one-two');
+  return t('step');
+};
+
 export const PlusOneTwo = strategyGameFactory({
   presentation: {
-    rule: <>0-ról +1/+2 20-ig</>,
-    getPlayerStepDescription: () => 'Válaszd ki, hogy hánnyal növelsz.'
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -193,12 +220,12 @@ within a turn (a hover, a pending selection) belongs in the component, not in
 
 **`variants[]`** — each supplies `generateStartBoard()` or `startBoards`, and a
 `botStrategy`: a pure function of the position that *names* the move it wants,
-`({ board, ctx }) => ({ move, args })`. See [src/components/CLAUDE.md § Bot
-contract](src/components/CLAUDE.md#bot-contract), and [AGENTS.md §
-Testing](AGENTS.md#testing) for what being a pure function buys a spec.
+`({ board, ctx }) => ({ move, args })`. See [src/components/AGENTS.md § Bot
+contract](src/components/AGENTS.md#bot-contract), and [AGENTS.md §
+Testing](AGENTS.md#testing) for what being a pure function buys a test.
 
-**`presentation`** — the rule text and `getPlayerStepDescription`, both i18n
-values.
+**`presentation`** — the rule and the step description: components reading the
+game's namespace, see [Internationalisation](#internationalisation-i18n).
 
 ### Where it lives
 
@@ -217,36 +244,42 @@ player interaction with it), `isHumanVsHumanGame`, `chosenRoleIndex`, and
 `turnState` for multi-stage turns. Never modify either in place.
 
 A multi-stage game pins what its `turnState` holds ([§ Pinning the turn
-state](src/components/CLAUDE.md#pinning-the-turn-state)), and every move takes
+state](src/components/AGENTS.md#pinning-the-turn-state)), and every move takes
 the current `board` as its first argument, including subsequent moves within one
 turn ([§ Game state
-architecture](src/components/CLAUDE.md#game-state-architecture-synchronous-store-outside-react)
+architecture](src/components/AGENTS.md#game-state-architecture-synchronous-store-outside-react)
 for why, given that the store is authoritative either way).
 
 ## Before opening a PR
 
 Walk the [new game
-checklist](src/components/CLAUDE.md#new-game-checklist) — both game modes,
+checklist](src/components/AGENTS.md#new-game-checklist) — both game modes,
 balanced starting positions, an AI the player cannot beat with a losing
 strategy, keyboard and mobile usability.
 
 ## Internationalisation (i18n)
 
-The site supports Hungarian (default) and English. See `TicTacToe`
-for a complete example. English translations are added on a game-per-game bases,
-it is fine to add new games with Hungarian only.
+Hungarian is the default, English is added game by game; a game may ship in
+Hungarian only, with no English file, and English readers then see Hungarian. Text is in i18next namespaces, `src/locales/<language>/<namespace>.json`:
+one per game folder, `factory` for the chrome around every game, `overview`, and
+`catalog` for each game's name and title, under its `gameList.ts` key. The
+recommended i18n Ally VS Code extension shows the two languages side by side.
 
-The `t()` helper resolves a value to the active language. The value can be a
-plain string if there are no translations available, or a `{ hu, en }` object.
-`useTranslation()` returns it; the hook lives in `packages/engine`
-(`src/react/translate.ts`) and is reached through the `language` barrel, which
-is a path alias — `import { useTranslation } from 'language';`, no `../../../`.
+A game's rule and step description are small components calling
+`useTranslation('shark-chase')`; `dominoes-on-chessboard` and `shark-chase` are
+the examples. Keys and namespaces are literals, so that i18n Ally and
+`npm run i18n:check` can follow them; the root [README](../../README.md#the-checks-ci-runs)
+says what the check needs. `{{size, numberAdjective}}` adds the Hungarian
+suffix: *6 × 6-os*. A variant or role label is a function of `t`, so its key
+stays a literal: `t => t('shark-chase:role.shark')`; most variants use the
+factory's `testVariantLabel` and `fullVariantLabel`. A spec that needs text reads
+it in one language, `i18next.getFixedT('hu', '<namespace>')`; `test-setup.ts`
+puts i18next back to Hungarian after every test. `npm run i18n:check` does not see a
+`t()` call written inside another's options, and reports that key unused: call
+it first, into a variable.
 
 Check the [Dürer Archive](https://durerinfo.hu/archivum/feladatsorok/) for
 existing translations.
-
-For an example of internationalizing an existing game, see
-[PR #213](https://github.com/a-gondolkodas-orome/durer-jatekok/pull/213).
 
 ## Technologies used
 
@@ -266,18 +299,18 @@ For an example of internationalizing an existing game, see
 ## Dependency updates
 
 The monthly report covers this app along with the rest of the monorepo, and the
-root [`README.md`](../../README.md) § Dependency updates is the authority on it.
+root [`docs/DEPENDENCIES.md`](../../docs/DEPENDENCIES.md) is the authority on it.
 This app appears in its own rows rather than the shared ones wherever it runs
 ahead. Its eslint, typescript and vitest pins match the root's and its vite
 matches the other frontends'.
 
 Every dependency here is pinned exactly, as everywhere else in the monorepo
-(`save-exact` in `.npmrc`). `playwright` carries an extra constraint on top of
-that: the devcontainer image bakes browser binaries for one specific version, so
-the pin has to agree with `.devcontainer/Dockerfile` as well as with the
-lockfile. The root `npm test` fails when they disagree
-(`scripts/check-versions.test.mjs`), and does the same for every file the Node
-version is written down in (the root README § Requirements lists them).
+(`save-exact` in `.npmrc`). `playwright` is not one of them — it is pinned in the
+root `package.json`, where the site smoke test uses it — but this app's
+devcontainer bakes browser binaries for that one version, so the pin has to
+agree with `.devcontainer/Dockerfile` as well as with the lockfile. The root `npm test` fails when they disagree
+(`check-versions.test.mjs`), and does the same for every file the Node
+version is written down in — that test lists them.
 
 ## License
 

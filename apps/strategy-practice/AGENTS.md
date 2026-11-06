@@ -23,14 +23,25 @@ GitHub Pages.
 lodash is already used extensively; feel free to reach for it where it helps
 readability.
 
+## How this app sits in the monorepo
+
+It is a workspace of the `durer-aion` monorepo with its own `eslint.config.js`
+and vitest config, which root `npm run lint` and `npm test` run next to the
+root's, each under its own setup. The ESLint difference is the rule set
+(`@eslint-react`, react-hooks, no trailing comma, `max-len` 120), not the
+toolchain: eslint, typescript, vitest and vite are the root's pins, hoisted. It
+came in as a subtree merge from `durer-jatekok` with that dialect already set,
+and reconciling the two would be a rewrite, so both configs stay.
+
 ## Architecture
 
-Most games live under `src/components/games/`, one folder per game, registered
-in `gameList.ts`. The newest ones live in `packages/games/src/` instead —
-`remove-divisor-multiple` and `stones-remove-one-not-twice-from-left` — where a
-game is a `StrategyGameConfig` object rather than a component, turned into a
-page by `strategyGameFactory` at its one export site in
-`src/components/games/index.ts`. That is the shape a **new** game takes; the
+Every game lives under `src/components/games/`, one folder per game, registered
+in `gameList.ts`. Two of them — `remove-divisor-multiple` and
+`stones-remove-one-not-twice-from-left` — export a `StrategyGameConfig` object
+rather than a component, turned into a page by `strategyGameFactory` at its one
+export site in `src/components/games/index.ts`. Which shape everything should
+settle on is open
+([#517](https://github.com/a-gondolkodas-orome/durer-aion/issues/517)); the
 folder layout below is the same either way.
 
 Shared infrastructure lives in `src/components/strategy-game-factory/`, a
@@ -42,10 +53,10 @@ sibling of `games/`:
   renders the board, the role chooser and the status line against the API every
   game implements. The flow itself — turn-taking, end-of-game detection,
   restart/clean state, the reducer, the store, `runMatch` and `playBotTurn` —
-  is in `packages/engine`, imported as `engine`, and `index.ts` here re-exports
+  is in `packages/strategy-engine`, imported as `strategy-engine`, and `index.ts` here re-exports
   it. Games import through that barrel — no deep imports. The barrel is a path
   alias, so no `../../` either, which is what makes the rule self-enforcing.
-  [src/components/CLAUDE.md](src/components/CLAUDE.md) has the detail.
+  [src/components/AGENTS.md](src/components/AGENTS.md) has the detail.
 
 Each game folder implements the optimal strategy (computer AI) and its own UI
 against that API. Strategy is implemented however is simplest: calculated on the
@@ -72,7 +83,7 @@ run in plain Node (durer-jatekok#313). ESLint enforces that — a `react` import
 or a value import from the `strategy-game-factory` barrel, is an error there; types
 from the barrel are fine, since `import type` is erased. A game whose gameplay
 is a handful of lines still gets the file: uniform layout is what makes the
-catalog skimmable, and it is what a spec and the bot's move pinning import
+catalog skimmable, and it is what a test and the bot's move pinning import
 without dragging in JSX.
 
 Two rules keep the boundary meaningful rather than nominal:
@@ -90,19 +101,19 @@ Two rules keep the boundary meaningful rather than nominal:
 A variant states its start position either as `generateStartBoard` or as
 `startBoards`, a curated list. Prefer the list whenever the positions are
 enumerable, and verify each entry with `forcedWinnerIndex` — the contract and
-the reasoning are in [src/components/CLAUDE.md § Curated start
-boards](src/components/CLAUDE.md#curated-start-boards).
+the reasoning are in [src/components/AGENTS.md § Curated start
+boards](src/components/AGENTS.md#curated-start-boards).
 
-### Where a spec lives
+### Where a test lives
 
-A spec is named after the module whose behaviour it asserts —
-`gameplay.spec.ts` for the rules, `bot-strategy.spec.ts` for the strategy,
-`<game>.spec.ts` for what the game file itself holds — plus a topical name
-(`solver.spec.ts`, `geometry.spec.ts`) where one part of the strategy is worth
+A test is named after the module whose behaviour it asserts —
+`gameplay.test.ts` for the rules, `bot-strategy.test.ts` for the strategy,
+`<game>.test.ts` for what the game file itself holds — plus a topical name
+(`solver.test.ts`, `geometry.test.ts`) where one part of the strategy is worth
 testing on its own. What the module *is* decides, not what the test reads along
 the way: "the bot only ever produces legal moves" belongs with the bot even
 though it checks a rule. What must not happen is moves being tested from
-anywhere but `gameplay.spec.ts`.
+anywhere but `gameplay.test.ts`.
 
 ## Testing
 
@@ -111,25 +122,25 @@ overview page must be covered by new unit tests, added before or alongside the
 change rather than as an afterthought.
 
 Game-specific logic is also worth testing when the winning strategy is
-non-trivial. Because bots name their moves, a spec can read a decision straight
+non-trivial. Because bots name their moves, a test can read a decision straight
 off the return value (`botNextMoveArgs` in `test-utils`, imported as
 `from 'test-utils'` — an alias, so no `../../../`). What comes back is the named
-move's own argument tuple, so name the game's moves wherever a spec types a
+move's own argument tuple, so name the game's moves wherever a test types a
 strategy — `BotStrategy<Board, Moves>`, not `BotStrategy<Board>`, which drops
 back to unchecked args. `runMatch`
-(`packages/engine/src/run-match.ts`) plays two strategies against each
+(`packages/strategy-engine/src/run-match.ts`) plays two strategies against each
 other through the real moves and the real reducer — no fake `moves` object, no
 hand-rolled game loop. That is what turns "the AI is truly optimal" into a test:
 the smart bot must win as the mover from a winning start board, and as the
 replier from a losing one (see `coins-in-3-piles`, `remove-row-or-column`).
 
-Every registered game is already swept once by `games/plays-to-an-end.spec.ts`,
+Every registered game is already swept once by `games/plays-to-an-end.test.ts`,
 which plays each variant headlessly and asserts only that a match completes and
 names a winner. `runMatch` throws on an unknown move, a move the game's own
 `validate` rejects, a move named after the turn ended, and a game that never
 ends, so a new game gets that much conformance for free. It tests the *game*,
 not the bot's judgement, and is kept cheap on purpose: variants whose bot
-searches are listed out of it by name (their own bot spec covers them), and the
+searches are listed out of it by name (their own bot test covers them), and the
 rest play as many random start boards as a small per-variant time budget allows.
 
 Size the sweep to what the strategy costs: every start board for a cheap
@@ -138,29 +149,6 @@ few representative ones for a strategy that searches (`totem-poles`: ~3 s for a
 handful of playouts), leaving the exhaustive argument to cheap unit tests of the
 characterisation itself — the Grundy value, the parity invariant, the win/loss
 predicate.
-
-### Coverage
-
-```bash
-npm run coverage         # line coverage, on demand
-```
-
-It is **on demand and has no threshold**, and should stay that way. The
-all-games sweeps — `plays-to-an-end`, `renders` and `json-round-trip` —
-execute ~94% of the source — that is how much of this repo is `games/` —
-while asserting only that a match ends and a board renders, so the global
-percentage reads high whatever the tests are worth, and a CI gate on it would be
-satisfied by registering another game. What the report is good for is the
-question grep cannot answer: which modules **no spec loads at all**, which is
-why `coverage.include` in `vite.config.js` names every file under `src/` rather
-than only what a test imported.
-
-A gate on the lines a PR *added*, measured with the sweeps excluded, ran on every
-PR until #431 retired it with the rest of the duplicated CI (#427): it was the suite run
-a second time, instrumented, for one number. What it asked for still holds — a
-new game or bot gets its `gameplay.spec.ts` and `bot-strategy.spec.ts` (§ Testing)
-— and is the reviewer's to check. Don't add a gate on the global number either;
-the reasons above have not changed.
 
 ## Planned future directions
 
@@ -171,9 +159,9 @@ the reasons above have not changed.
 
 **Replacing `boardgame.io` with this engine is not on the list.** The plan was
 drafted — this app and the live competition round are the same repository, and
-`packages/engine` was pulled out of here partly with that in mind — and then
+`packages/strategy-engine` was pulled out of here partly with that in mind — and then
 deprioritized, because upstream boardgame.io is under active development again
-(issue #277). The root [`CLAUDE.md`](../../CLAUDE.md) is the authority: don't
+(issue #277). The root [`AGENTS.md`](../../AGENTS.md) is the authority: don't
 build toward that replacement. What survives it is the engine work that pays
 for itself either way — a game's rules and its bot each importable with no
 React, which is why `gameplay.ts` and `bot-strategy.ts` are separate files.
@@ -189,7 +177,7 @@ the rest in-repo.
 The steps are in [README.md § Adding a new
 game](README.md#adding-a-new-game). The `strategyGameFactory` API, the move and
 bot contracts, the store architecture and the new-game checklist are in
-`src/components/CLAUDE.md`, which loads automatically when working under
+`src/components/AGENTS.md`, which loads automatically when working under
 `src/components/`; read it directly when discussing that design without opening
 a file there.
 

@@ -1,0 +1,7 @@
+{
+  "board": {
+    "pile": "{{number}}. pile"
+  },
+  "rule": "There are four piles of discs given, numbered from 1 to 4. Every turn the current player chooses integers m and n that satisfy <formula>1 ≤ m < n ≤ 4</formula> and takes m discs from pile number n and distributes them into the piles <formula>n − 1, n − 2, . . . , n − m</formula> by adding one disc to every pile. The player that has no available moves loses.",
+  "step": "Click on a disc to indicate the number of discs you want to remove."
+}

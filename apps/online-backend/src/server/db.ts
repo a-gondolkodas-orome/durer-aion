@@ -1,17 +1,8 @@
-import type { PostgresStore } from 'bgio-postgres';
-import { InProgressMatchStatus } from 'schemas';
+import { PostgresStore } from 'bgio-postgres';
+import { env } from 'process';
+import { GameType } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
-import { DeletedTeamModel, deletedTeamAttributes } from './deletedTeam';
-import { Sequelize, Op, WhereOptions } from 'sequelize';
-
-// `%` and `_` are wildcards inside a LIKE pattern, so a fragment carrying them
-// would match more than the caller asked for — a bare `%` matches every team.
-// Backslash is postgres' default LIKE escape character, so no ESCAPE clause is
-// needed; it has to escape itself too, or a trailing one would escape the `%`
-// that the pattern appends.
-export function escapeLike(fragment: string): string {
-  return fragment.replace(/[\\%_]/g, character => `\\${character}`);
-}
+import { Sequelize, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -21,39 +12,10 @@ export class TeamsRepository {
       sequelize: db.sequelize,
       tableName: "Teams",
     });
-    DeletedTeamModel.init(deletedTeamAttributes, {
-      sequelize: db.sequelize,
-      tableName: "DeletedTeams",
-    });
   }
   async connect() {
     await this.sequelize.sync();
   }
-  /**
-   * Teams whose `other` field contains every one of the given fragments.
-   * An empty list matches all teams: `Sequelize.and()` with no arguments
-   * produces no WHERE clause.
-   */
-  async fetch(filter: string[]) : Promise<TeamModel[]> {
-    return await TeamModel.findAll({ where:
-      Sequelize.and(...filter.map(part => ({ 'other': { [Op.like]: `%${escapeLike(part)}%` } }))),
-    });
-  }
-
-  async deduceMatch(matchID:string):Promise<TeamModel | null> {
-    const matches =  await TeamModel.findAll({ where:
-      Sequelize.or([
-        { relayMatch: 'IN PROGRESS' },
-        { strategyMatch: 'IN PROGRESS' }
-      ])
-    });
-    console.log(matches)
-    return matches.find(team => {
-      return (team.relayMatch as InProgressMatchStatus).matchID === matchID ||
-        (team.strategyMatch as InProgressMatchStatus).matchID === matchID
-    }) ?? null;
-  }
-
   async listTeams(): Promise<TeamModel[] | null> {
     return await TeamModel.findAll();
   }
@@ -63,6 +25,38 @@ export class TeamsRepository {
       (searchCondition)
     });
   }
+  /**
+   * Puts the team into its new match, but only while its page and both match
+   * ids are still the ones `team` holds, so of two starts made from the same
+   * reading only one is written. Returns whether the row was written.
+   */
+  async startMatch(team: TeamModel, gameType: GameType, matchID: string): Promise<boolean> {
+    const [updated] = await TeamModel.update({
+      pageState: gameType,
+      [gameType === "RELAY" ? "relayMatchID" : "strategyMatchID"]: matchID,
+    }, {
+      where: {
+        teamId: team.teamId,
+        pageState: team.pageState,
+        relayMatchID: team.relayMatchID,
+        strategyMatchID: team.strategyMatchID,
+      },
+    });
+    return updated > 0;
+  }
+  /**
+   * Takes the team home, but only while both match ids are still the ones
+   * `team` holds: whether a match is in progress is read off the match, not
+   * the row, so the caller checks that, and a start landing after it read the
+   * team changes an id here. Returns whether the row was written.
+   */
+  async goHome(team: TeamModel): Promise<boolean> {
+    const [updated] = await TeamModel.update({ pageState: "HOME" }, {
+      where: { teamId: team.teamId, relayMatchID: team.relayMatchID, strategyMatchID: team.strategyMatchID },
+    });
+    return updated > 0;
+  }
+
   async insertTeam(
       { teamname, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, category: string, email: string, other: string, teamId: string, joinCode: string, credentials: string }) {
@@ -71,20 +65,24 @@ export class TeamsRepository {
       category,
       email,
       credentials,
-      strategyMatch: { state: "NOT STARTED" },
-      relayMatch: { state: "NOT STARTED" },
+      strategyMatchID: null,
+      relayMatchID: null,
       teamName: teamname,
       pageState: 'DISCLAIMER',
     });
   }
+}
 
-  async removeTeam(teamId: string): Promise<number> {
-    const team = await TeamModel.findOne({ where: { teamId } });
-    if (!team) return 0;
-    await DeletedTeamModel.create({
-      ...team.toJSON(),
-      deletedAt: new Date(),
-    });
-    return await TeamModel.destroy({ where: { teamId } });
+// The one connection every entry opens: the server needs both halves — the
+// store is boardgame.io's match state and the repository the teams beside it —
+// while the team import needs only the repository.
+export function getDb() {
+  if (!env.DATABASE_URL) {
+    throw new Error('Failed to load DB data. Only postgres is supported!');
   }
+  const db = new PostgresStore(env.DATABASE_URL, { logging: false });
+  return {
+    db,
+    teams: new TeamsRepository(db),
+  };
 }

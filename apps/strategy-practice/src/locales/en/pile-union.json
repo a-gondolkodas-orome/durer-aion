@@ -1,0 +1,12 @@
+{
+  "board": {
+    "merge": "Merge",
+    "remove": "Remove 1"
+  },
+  "rule": "At the start of the game, several piles of matches are placed on the table, each containing at least two matches. Players alternate turns. Two moves are allowed: either remove one match from a pile, or merge two piles into one. The player who cannot make a legal move loses.",
+  "step": {
+    "first": "Remove 1 match from a pile, or merge two piles into one.",
+    "secondPile": "Click another pile to merge, or the same pile again to deselect.",
+    "singlePile": "Remove 1 match from the pile."
+  }
+}

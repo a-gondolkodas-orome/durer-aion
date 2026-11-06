@@ -1,5 +1,7 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { allNumbers, findWinningTriple, startBoard, moves, numbersOwnedBy, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -9,7 +11,7 @@ const ownedLabel = (owner: Board['owner'], player: 0 | 1): string => {
 };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('sum-fifteen');
   const { owner } = board;
 
   const winningTriple = ctx.phase === 'gameEnd' && ctx.winnerIndex !== null
@@ -23,15 +25,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
     if (ctx.isHumanVsHumanGame) {
       return <>
         <span className={colorClass}>{ctx.resolvedPlayerNames[player]}</span>
-        {t({ hu: ' számai: ', en: "'s numbers: " })}
+        {t('board.playerNumbers')}
       </>;
     }
     const isHuman = player === ctx.chosenRoleIndex;
     return <>
       <span className={colorClass}>
-        {t(isHuman
-          ? { hu: 'A te számaid', en: 'Your numbers' }
-          : { hu: 'A gép számai', en: "Computer's numbers" })}
+        {isHuman ? t('board.yourNumbers') : t('board.computerNumbers')}
       </span>
       {': '}
     </>;
@@ -72,39 +72,32 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Adottak 1-től 9-ig a számok. A két játékos felváltva kiválaszt magának egy olyan számot, amit
-    korábban még senki sem választott. Az a játékos nyer, akinek először megtalálható a saját számai
-    között három darab, melyek összege 15. Ha már mind a kilenc szám megtalálható valakinél, és egyik
-    játékosnál sem található három szám, melyek összege 15, akkor a második játékos nyert.
-  </>,
-  en: <>
-    The numbers 1 to 9 are given. The two players alternately pick a number that nobody has chosen
-    before. A player wins as soon as three of their own numbers add up to 15. If all nine numbers have
-    been claimed and neither player has three numbers summing to 15, then the second player wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('sum-fifteen');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('sum-fifteen');
+  return t('step');
 };
 
 export const SumFifteen = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz egy még szabad számot.',
-      en: 'Choose one of the still-available numbers.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       startBoards: [startBoard],
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

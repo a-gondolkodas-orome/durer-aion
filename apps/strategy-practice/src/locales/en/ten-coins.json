@@ -1,0 +1,20 @@
+{
+  "board": {
+    "amount": "×{{amount}}",
+    "changeTo": "Change them to:",
+    "coinGroup": "{{amount}} coins of value {{value}}",
+    "target": "value {{value}} coin"
+  },
+  "rule": {
+    "generic": "There are 10 coins on the table to start, each a small positive integer (1 to 4, or 1 to 5). The two players move alternately. On their turn the current player chooses a value K such that at least one coin of value K is on the table, and turns all coins of value K into some smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins equal in value after their move wins. Knowing the starting position, you may decide whether to play as the first or the second player.",
+    "withMax": "There are 10 coins on the table to start, each with an integer value between 1 and {{maxValue}}. The two players move alternately. On their turn the current player chooses a value K such that at least one coin of value K is on the table, and turns all coins of value K into some smaller value L (all to the same L, where L is between 1 and K−1). Whoever makes all coins equal in value after their move wins. Knowing the starting position, you may decide whether to play as the first or the second player."
+  },
+  "step": {
+    "chooseTarget": "Choose the new (smaller) value for the coins worth {{value}}.",
+    "chooseValue": "Choose which coin value to change (all of them at once)."
+  },
+  "variant": {
+    "fiveValues": "5 values",
+    "fourValues": "4 values"
+  }
+}

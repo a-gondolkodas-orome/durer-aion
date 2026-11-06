@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import type { Board, TurnState } from './gameplay';
 import { GameBoard, type BoardClientProps, useHoverPreview } from 'strategy-game-factory';
 
@@ -15,7 +15,7 @@ const getCoinShadowColor = (coinValue: number) => {
 };
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnState>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('coins-in-3-piles');
   const valueOfRemovedCoin = ctx.turnState?.removedCoinValue ?? null;
   const { value: validHoveredPile, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
@@ -47,7 +47,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnS
       >
         <div className="flex flex-col gap-1">
           <span className="font-semibold text-sm">
-            {t({ hu: 'Visszarakás:', en: 'Place back:' })}
+            {t('board.placeBack')}
           </span>
           <div className="flex gap-2">
             <button
@@ -55,7 +55,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board, TurnS
               className="secondary-button w-auto"
               onClick={() => moves.passAddition(board)}
             >
-              {t({ hu: 'Semmi ∅', en: 'Nothing ∅' })}
+              {t('board.nothing')}
             </button>
             {[1, 2].map(coinValue => (
               <button

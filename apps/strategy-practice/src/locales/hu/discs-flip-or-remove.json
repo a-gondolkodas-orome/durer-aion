@@ -1,0 +1,14 @@
+{
+  "board": {
+    "discs": "{{red}} piros és {{blue}} kék korong"
+  },
+  "rule": {
+    "bounded": "A játék kezdetén néhány, de legfeljebb {{maxDiscs}} piros vagy kék korong van az asztalon. A soron következő játékos összesen négyfélét léphet:<br/>• 1 vagy 2 kék korongot elvehet az asztalról.<br/>• 1 vagy 2 piros korongot átfordíthat kékké.<br/>Az veszít, aki nem tud lépni.",
+    "generic": "A játék kezdetén néhány piros vagy kék korong van az asztalon. A soron következő játékos összesen négyfélét léphet:<br/>• 1 vagy 2 kék korongot elvehet az asztalról.<br/>• 1 vagy 2 piros korongot átfordíthat kékké.<br/>Az veszít, aki nem tud lépni."
+  },
+  "step": "Kattints a jobb szélső vagy az attól eggyel balra lévő kék korongra 1 vagy 2 kék korong elvételéhez, vagy tedd ugyanezt piros koronggal 1 vagy 2 piros korong kékké fordításához.",
+  "variant": {
+    "sixDiscs": "6 korong",
+    "tenDiscs": "10 korong"
+  }
+}

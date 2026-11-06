@@ -1,0 +1,15 @@
+{
+  "board": {
+    "buildThree": "Build three piles from {{n}} pebbles:",
+    "caption": {
+      "keep": "✓ keep",
+      "pieces": "pieces",
+      "tooFew": "too few"
+    },
+    "pile": "Pile {{number}}",
+    "split": "Split",
+    "tooMany": "Too many pebbles used — each of the three piles needs at least 1."
+  },
+  "rule": "At the start there are three piles on the table, each with some pebbles. On their turn, the current player discards two of the piles and rebuilds three new piles from the pebbles of the remaining one. You lose if you can no longer build three piles from the remaining pebbles (i.e. the chosen pile has fewer than three pebbles).",
+  "step": "Choose which pile to keep (the other two are discarded), then split it into three new piles."
+}

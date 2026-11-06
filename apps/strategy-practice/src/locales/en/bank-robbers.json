@@ -1,0 +1,4 @@
+{
+  "rule": "The capital of Bergengocia has between 7 and 10 banks arranged in a circle along the Grand Boulevard. Two rival gangs plan to rob these banks by taking turns selecting one bank at a time. They may not select a bank that has already been robbed, nor one both of whose neighbours have already been robbed, as the police are lying in ambush there. The gang that can no longer find a bank to rob loses.<br/><em>In category C the problem used 7 banks, in category D it used 9 banks.</em>",
+  "step": "Choose a bank that can be robbed."
+}

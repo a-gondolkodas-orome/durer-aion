@@ -1,0 +1,91 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import i18nextModule from 'i18next';
+import { openInPreferredLanguage, rememberChosenLanguage } from './language';
+
+// A fresh instance per test, set up as common-frontend's i18n.ts sets up the
+// shared one.
+const makeI18n = async () => {
+  const i18n = i18nextModule.createInstance();
+  await i18n.init({
+    supportedLngs: ['en', 'hu'],
+    fallbackLng: 'hu',
+    load: 'languageOnly',
+    resources: { en: { translation: {} }, hu: { translation: {} } },
+  });
+  return i18n;
+};
+
+const open = async (url: string) => {
+  window.history.replaceState(null, '', url);
+  const i18n = await makeI18n();
+  await openInPreferredLanguage(i18n);
+  return i18n;
+};
+
+beforeEach(() => {
+  localStorage.clear();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('openInPreferredLanguage', () => {
+  // The bug in #219: every load forced Hungarian, so a reload lost English.
+  it('opens in the language chosen before a reload', async () => {
+    await open('/valto/');
+    rememberChosenLanguage('en');
+
+    const after = await open('/valto/');
+    expect(after.language).toBe('en');
+  });
+
+  // The same bug through a link: the reload keeps `?lang=`.
+  it('opens in the language chosen on a page a link opened', async () => {
+    await open('/valto/?lang=en');
+    rememberChosenLanguage('hu');
+
+    const after = await open(window.location.pathname + window.location.search);
+    expect(after.language).toBe('hu');
+  });
+
+  it('opens a link in the language it names', async () => {
+    localStorage.setItem('lang', 'hu');
+    const i18n = await open('/valto/?lang=en');
+    expect(i18n.language).toBe('en');
+  });
+
+  it('stays Hungarian in an English browser when nothing was chosen', async () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
+    const i18n = await open('/valto/');
+    expect(i18n.language).toBe('hu');
+  });
+});
+
+describe('rememberChosenLanguage', () => {
+  it('stores the choice and leaves the other parameters alone', () => {
+    window.history.replaceState(null, '', '/valto/?x=1');
+    rememberChosenLanguage('en');
+    expect(localStorage.getItem('lang')).toBe('en');
+    expect(window.location.search).toBe('?x=1');
+  });
+
+  it('drops the lang parameter, keeping the rest', () => {
+    window.history.replaceState(null, '', '/valto/?lang=en&x=1');
+    rememberChosenLanguage('en');
+    expect(window.location.search).toBe('?x=1');
+  });
+
+  // The default is stored too: the strategy practice site reads the same key,
+  // and there a stored choice outranks the browser.
+  it('stores Hungarian too', () => {
+    rememberChosenLanguage('hu');
+    expect(localStorage.getItem('lang')).toBe('hu');
+  });
+
+  it('ignores a language the site does not have', () => {
+    rememberChosenLanguage('fr');
+    expect(localStorage.getItem('lang')).toBeNull();
+  });
+});

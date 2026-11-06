@@ -1,0 +1,20 @@
+{
+  "board": {
+    "field": {
+      "blue": "{{number}}. mező, kék korong",
+      "empty": "{{number}}. mező, üres",
+      "red": "{{number}}. mező, piros korong"
+    },
+    "pass": "Passzolok"
+  },
+  "rule": "Egy sorban <i>n</i> mező van (itt legfeljebb 12); kezdetben a bal szélső mezőben egy piros, a jobb szélső mezőben egy kék korong áll. A kezdő játékos a pirossal, a másik a kékkel játszik. Egy lépésben a soron következő játékos háromféle lehetőség közül választ:<br/>• Egy saját színű korongot egy vagy két mezővel odébb helyez egy üres mezőbe (ezzel akár át is ugorhat egy másik korongot).<br/>• Lerak egy saját színű korongot egy olyan üres mezőbe, amely szomszédos egy olyan mezővel, amelyben saját korongja van.<br/>• Passzol, azaz nem csinál semmit.<br/><br/>Bármelyik lépés után, amikor egy üres mezőbe belekerül egy korong, az összes ezzel ellentétes színű korong, amely szomszédos mezőben van, átszíneződik erre a színre.<br/><br/>Ha a játék során bármikor több, mint <i>n</i>/2 piros korong van a táblán, a piros játékos azonnal nyer; ha bármikor legalább <i>n</i>/2 kék korong van, akkor a kék játékos azonnal nyer. Ha 200 lépésig egyik sem következik be, akkor a kék játékos nyer.",
+  "step": {
+    "text": "{{who}} Mozgass egy saját korongot 1–2 mezővel, tegyél le egy újat egy saját korong mellé, vagy passzolj. Piros: {{red}}/{{redGoal}}, kék: {{blue}}/{{blueGoal}}. Lépés: {{move}}/{{plyCap}}.",
+    "who": {
+      "blueToMove": "A kék van soron.",
+      "redToMove": "A piros van soron.",
+      "youAreBlue": "Te vagy a kék.",
+      "youAreRed": "Te vagy a piros."
+    }
+  }
+}

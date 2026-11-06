@@ -1,7 +1,9 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStateDto, BoardMoves, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
+import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
-import { readStoredTeamState } from "./stored-team-state";
+import { handleGameReport } from "./game-report";
+import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -64,6 +66,7 @@ export class OfflineClientRepository implements ClientRepository {
         state: "FINISHED",
         endAt: new Date(),
         score: score,
+        relayResults: readStoredRelayResults(),
       }
     }
     if (teamState.strategyMatch.state === "IN PROGRESS") {
@@ -72,6 +75,7 @@ export class OfflineClientRepository implements ClientRepository {
         state: "FINISHED",
         endAt: new Date(),
         score: Number(localStorage.getItem(strategyPointsStorageKey())),
+        strategyResults: readStoredStrategyResults(),
       }
     }
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
@@ -87,53 +91,12 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve();
   }
 
-  async getAll(): Promise<TeamModelDto[]> {
-    return [];
-  }
-
-  async resetRelay(_teamId: string): Promise<TeamModelDto> {
-    throw Error("NOT call this");
-  }
-
-  async resetStrategy(_teamId: string): Promise<TeamModelDto> {
-    throw Error("NOT call this");
-  }
-
-  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
-  }
-
-  async getMatchState(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
-  }
-  async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
-  }
-  async removeTeam(_teamId: string): Promise<void> {
-    throw Error("NOT call this");
-  }
-
-  // The local boardgame.io client judges the answer with the bundled bot, and
-  // its step report already goes out through RelayWrapper's sendGameData hook,
-  // so nothing is sent from here.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
+  // Persisted as if the game had reported it, for toHome() to read.
+  keepRelayEnd(report: RelayEndReport): void {
+    handleGameReport(report);
   }
 
   joinWithCode(joinCode: string): Promise<void> {
-    // return the joincode if it is in the teamData.ts file
-
     const i = teamData.findIndex(e => e.join_code === joinCode);
     const pageState = readStoredTeamState()?.pageState ?? "DISCLAIMER";
 

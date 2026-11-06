@@ -1,0 +1,115 @@
+# Contributing
+
+Everything here is already written down somewhere. This page is the order to
+read it in, and the handful of rules that were only ever tacit.
+
+Contributions are welcome from people who take part in the Dürer competition
+themselves — as an organiser or as a teacher. Working with an AI assistant is
+fine; a pull request nobody stands behind is not.
+
+## Your first change needs no docker
+
+The [`README.md`](README.md) opens with the competition stack — nginx, the
+backend and postgres in three containers — because that is what the online round
+is. Most first changes do not touch it. The practice sites run on their own:
+
+```bash
+npm ci                          # at the repository root, always — see the trap below
+npm run dev:strategy-practice   # the games site, on http://localhost:8012
+```
+
+No `.env` to fill in, no database, no credentials to ask anyone for.
+`npm run dev:relay-practice` and `npm run dev:offline` are the same deal, on
+:5173.
+
+Two shapes of first change fit in there:
+
+- **A word or a screen.** The games site keeps its text in
+  `apps/strategy-practice/src/locales/<language>/<game>.json`, one file per game
+  and language, so changing what a player reads is one edit there. The English
+  is British: colour, neighbour, disc.
+- **A new game.** One self-contained folder, and
+  [`apps/strategy-practice/README.md` § *Adding a new
+  game*](apps/strategy-practice/README.md#adding-a-new-game) is the recipe — it
+  names the game to copy, which is the way to do this. The nearly sixty games
+  already written are the other half of the documentation.
+
+A change to the competition round itself does need the stack, and the README's
+*Getting Started* is four commands to a running one.
+
+## Before you push
+
+```bash
+npm run check
+```
+
+That is the six CI gates that need no docker or browser, cheapest first, in two or three
+minutes. CI runs two more: `npm run stack:build`, and the site smoke test —
+worth running yourself before merging a change to how an app on the Pages site
+is built (README § *The other sites*).
+
+Working only in `apps/strategy-practice`? `npm run check` from that directory is
+the same idea scoped to it, in about seventy seconds — the loop to iterate on.
+The root one is still what CI runs.
+
+`npm run lint` is also the formatter, so `npm run lint:fix` settles most of what
+it finds. Your editor does it on save if you install the recommended extensions
+— VS Code offers them from `.vscode/extensions.json` when you open the repo.
+
+## Where your test goes
+
+Cover new logic with a test, and pin every regression you fix with one that
+fails without the fix.
+
+Name it `*.test.ts` or `*.test.tsx`, and put it under a workspace's `src/`,
+beside what it tests. That is the whole rule — which of the two vitest projects
+picks it up follows from where it is, not from what it is called.
+
+Both halves matter, because a suite no glob reaches does not fail: it is simply
+never run, and the green tick says nothing was wrong. `npm test` refuses either
+mistake by name (`test-file-naming.test.mjs`).
+
+One more: **a test that writes to the console fails.** `vitest/setup.mts` says
+why and how to opt out when a test means to exercise a logging path. If a
+`console.log` you left in from debugging fails an unrelated assertion, that is
+this.
+
+## Commits and pull requests
+
+Commit subjects are imperative and name the *effect*, not the file touched —
+`Refuse a socket sync for a match that does not exist`, `Give nginx a TLS include
+point instead of an edited config`. The pull request number is appended when the
+pull request is merged; you do not write it yourself.
+
+**Pull requests are split by atomicity, not size.** One independent change each,
+so a reviewer can take or leave them separately. A big mechanical change is one
+PR; two unrelated one-line fixes are two.
+
+Fill the template in. Its prompts are HTML comments, so you have them in front
+of you while writing the description and they leave no trace in the body.
+
+## The rest
+
+- [`AGENTS.md` § *Key Conventions*](AGENTS.md#key-conventions) — the house rules
+  this page does not carry: formatting through ESLint rather than prettier, what
+  to comment, which language user-facing text is in.
+- [`apps/strategy-practice/AGENTS.md`](apps/strategy-practice/AGENTS.md) — the
+  authority on everything under that directory, testing and PR scope included.
+- [`README.md`](README.md) — running the round,
+  dependency policy, deployment.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the live round runs,
+  from a team's login to its score.
+
+## Traps that cost the most time
+
+- **Never `npm ci` from inside a workspace.** There is one lockfile, at the root.
+  From `apps/strategy-practice` npm installs that subtree, leaves the root's
+  dependencies unmet and exits 0, and the other apps then fail to build.
+- **npm must be 11.x** — the npm bundled with the Node version in `.nvmrc`, so
+  `nvm use` gets you there. On any other major, every `npm run …` fails before
+  your command runs.
+- **`npm run setup`** creates the gitignored `.env` files from their samples. The
+  `dev:*` scripts do it for you; `stack:*` does not.
+- **A push to `main` deploys the public practice site.** There is no staging step,
+  and of the checks only the site smoke test gates it — it proves the site loads,
+  not that it is right.

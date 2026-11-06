@@ -1,0 +1,8 @@
+{
+  "board": {
+    "increase": "Növelek",
+    "subtract": "Kivonok"
+  },
+  "rule": "Adott egy pozitív egészekből álló <code>(n, k)</code> rendezett számpár. Két játékos felváltva lép, az <code>(a, b)</code> számpár helyére egy lépésben kerülhet vagy az <formula>(a, b + 1)</formula>, vagy az <formula>(a − b, b)</formula> számpár. Az nyer, aki először ír fel olyan számpárt, amelyben nem mindkét szám pozitív.",
+  "step": "Növeld a második számot eggyel vagy vond ki az elsőből."
+}

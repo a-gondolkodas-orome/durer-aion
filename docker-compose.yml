@@ -10,6 +10,16 @@ services:
       - ./apps/online-frontend/dist:/usr/share/nginx/html
     depends_on:
       - backend
+    healthcheck:
+      # Without one, `up --wait` counts a running container as up — including an
+      # nginx restart-looping on a bad mounted TLS snippet (DEPLOYMENT.md § 8).
+      # A TCP connect is enough for that: nginx listens only once it has loaded its
+      # config. It reads no response, so it does not vouch for what is served.
+      # bash's /dev/tcp, because the image carries no curl or wget.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/80"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
   backend:
     build: .
     restart: unless-stopped
@@ -18,8 +28,6 @@ services:
       - PORT=8000
       - BOT_CREDENTIALS=${BOT_CREDENTIALS}
       - ADMIN_CREDENTIALS=${ADMIN_CREDENTIALS}
-      - GAME_GLOBAL_START_T=${GAME_GLOBAL_START_T}
-      - GAME_GLOBAL_END_T=${GAME_GLOBAL_END_T}
     volumes:
       # Team import TSVs are dropped here on the host and run with `docker exec`,
       # so this is mounted in production too.
@@ -32,13 +40,13 @@ services:
     healthcheck:
       # A container that is up proves nothing here: under the dev overlay turbo
       # keeps the package watchers alive even when the server task has died, so
-      # `ps` reads healthy while nginx 502s every request. /games is
-      # boardgame.io's lobby route — unauthenticated, and only reachable once
-      # db.connect() has synced and the port is open. node, not curl, because
+      # `ps` reads healthy while nginx 502s every request. /team/me answers 401
+      # to a request with no session, and the server answers nothing at all
+      # until db.connect() has synced and the port is open. node, not curl, because
       # node is the one binary the image is guaranteed to have; node:http rather
       # than fetch, because fetch honours proxy environment variables and a
       # health probe at a loopback address should not depend on those.
-      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8000/games',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8000/team/me',r=>process.exit(r.statusCode===401?0:1)).on('error',()=>process.exit(1))"]
       interval: 5s
       timeout: 5s
       retries: 12

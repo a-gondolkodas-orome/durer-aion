@@ -2,16 +2,13 @@ import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError } from 'sequelize';
 import { TeamsRepository } from './db';
+import { OTHER_IMPORT_MAX_LENGTH } from './model';
+import { isCompetitionCategory } from 'schemas';
 
 function arraysEqual(a: string[], b: string[]) {
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (a.length !== b.length) return false;
-
-  // If you don't care about the order of the elements inside
-  // the array, you should sort both arrays here.
-  // Please note that calling sort on an array will modify that array.
-  // you might want to clone your array first.
 
   for (let i = 0; i < a.length; ++i) {
     if (a[i] !== b[i]) return false;
@@ -31,7 +28,6 @@ function generateLoginCode() {
 export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
   const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
   const { successful, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
-  //wrap out logs
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
@@ -68,45 +64,58 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   if (!arraysEqual(header, expected_header)) {
     onwarn("WARNING: Header not exactly how we defined it. This is not always a problem.");
     onwarn(`Found: ${header.join(', ')}`);
-    onwarn(`Expected: ${expected_header.join(', ')}`);
+    onwarn('Expected, in this order: Teamname (required), Category (required), Email (optional), Other (optional), '
+      + 'ID, Login Code, Credentials (optional: generated when left blank)');
+    if (header.length === 1) {
+      onwarn('The header has no tab in it: the columns must be separated by tabs, not spaces.');
+    }
   }
   const export_table: string[][] = [];
 
   let successful = 0;
-  let failed = 0; // not counting empty rows...
+  let failed = 0; // not counting blank lines
   await teams.connect();
   for (const row of table) {
+    // A blank line is what an editor leaves between blocks or at the end.
+    if (row.every(column => column.trim() === '')) {
+      continue;
+    }
+    // A line with text and no tab is not a row with blank columns: it is a
+    // file separated by spaces, which cannot be split safely — a team name
+    // holds spaces of its own.
+    if (row.length === 1) {
+      onerror(`No tab in the row "${row[0].trim()}": the columns must be separated by tabs, not spaces.`);
+      onerror('-----------------------------------------------------'); // separate errors
+      failed++;
+      continue;
+    }
     // Trim: Remove possible '\r' characters in windows CRLF
-    const [teamname, category, email, other, ...extra_columns] = row.map(column => column.trim());
+    const [teamname, category, ...optional_columns] = row.map(column => column.trim());
+    // Email and Other are optional: a row may leave them blank or end before
+    // them, and either way the team is stored with an empty string.
+    const email = optional_columns[0] ?? '';
+    const other = optional_columns[1] ?? '';
+    const extra_columns = optional_columns.slice(2);
     let ok = true;
     let teamId = extra_columns[0];
     let login_code = extra_columns[1];
     let credentials = extra_columns[2];
 
-    if (category === undefined) {
-      onwarn('Skipping empty row...');
-      // Do not print more error messages lol
-      continue;
-    }
 
     if (teamname === undefined || teamname === "") {
       onerror(`Empty teamname`);
       ok = false;
     }
 
-    // TODO: remove hard-coded values
-    if (!['C', 'D', 'E'].includes(category)) {
+    if (!isCompetitionCategory(category)) {
       onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
       ok = false;
     }
 
-    if (other === undefined || other === "") {
-      onwarn(`"Other" field not set for team ${teamname}`);
-      onwarn(`  The other field should include any info which could help identify a team. (team name, contestant names, school, email addresses, etc.)`);
-    }
-    //this is stricter than the modell definition, because other can increase it's size
-    if (other !== undefined && other.length > 700) {
-      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < 700)`);
+    // Stricter than the column, on purpose: the admin routes append an audit
+    // trail to this field, and `model.ts` says what the gap is for.
+    if (other.length > OTHER_IMPORT_MAX_LENGTH) {
+      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < ${OTHER_IMPORT_MAX_LENGTH})`);
       ok = false;
     }
 

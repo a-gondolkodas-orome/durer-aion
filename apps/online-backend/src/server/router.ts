@@ -1,17 +1,21 @@
 import koaBody from 'koa-body';
+import { unlink } from 'node:fs/promises';
 import * as Router from '@koa/router';
 import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
-import { InProgressMatchStatus } from 'schemas';
+import { GameType } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
-import { closeMatch, getNewGame, checkStaleMatch, startMatchStatus, createGame, injectBot, injectPlayer } from './team_manage';
+import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
+import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
+import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
+import { TeamModel, appendOtherNote } from './model';
 
 /**
  *
@@ -32,6 +36,28 @@ export function configureTeamsRouter(
   games: AnyBgioGame[],
   adminAuth: ReturnType<typeof requireAdmin>
 ) {
+  // Per router rather than per module, so its counts belong to the server it
+  // serves and a test starts with an empty one.
+  const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  // Overlapping starts can both pass `allowedToStart`; the conditional write
+  // picks one, and the loser's match, which no team points at, is wiped.
+  async function claimStart(ctx: Server.AppCtx, team: TeamModel, gameType: GameType, matchID: string) {
+    if (!(await teams.startMatch(team, gameType, matchID))) {
+      await ctx.db.wipe(matchID);
+      ctx.throw(403, "Team is not allowed to start game.");
+    }
+  }
+
+  // boardgame.io's lobby API, which nothing here uses, closed as one prefix so
+  // a route a later version adds is closed too. It runs first only because
+  // `server.run()` adds boardgame.io's routes to this router after ours.
+  // A status rather than a throw: nothing has gone wrong when someone scans
+  // this prefix, and anyone may.
+  router.use("/games", (ctx) => {
+    ctx.status = 404;
+  });
+
   /**
    * Get the log data about a specific match.
    *
@@ -86,7 +112,6 @@ export function configureTeamsRouter(
     if (!state) {
       ctx.throw(404, "Match " + matchID + " not found");
     }
-    // Fetch team
     const teamId = metadata.players[0].name;
     const team = await teams.getTeam({ teamId });
 
@@ -95,52 +120,27 @@ export function configureTeamsRouter(
       return;
     }
 
+    const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
+    if (gameType === null) {
+      ctx.throw(501, `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
+      return;
+    }
+    if (deriveMatchStatus(gameType, matchID, state, new Date()).state !== 'IN PROGRESS') {
+      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+    }
+
     const new_state = {
       ...state,
-      //manually increment stateID
       _stateID: state._stateID + 1
     }
 
-    //Update  new_state
     const newEndDate = new Date(state.G.end)
     newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
     new_state.G.end = newEndDate.toISOString();
     new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
-    //Update team
-    if (team.strategyMatch.state === "IN PROGRESS") {
-      if (team.strategyMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS strategy match found (${team.strategyMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        strategyMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else if (team.relayMatch.state === "IN PROGRESS") {
-      if (team.relayMatch.matchID !== matchID) {
-        ctx.throw(501, `IN PROGRESS relay match found (${team.relayMatch.matchID}), but it does not match with matchID (${matchID}). (Probably you are using an old matchID.)`);
-      }
-      await team.update({
-        relayMatch: {
-          state: "IN PROGRESS",
-          matchID: matchID,
-          startAt: new Date(new_state.G.start),
-          endAt: newEndDate,
-        }
-      })
-    }
-    else {
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
-    }
-
     await ctx.db.setState(matchID, new_state);
 
-    //Reconstruct game name from metadata
     const game = games.find(g => g.name === metadata.gameName);
     if (!game) {
       ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
@@ -163,10 +163,10 @@ export function configureTeamsRouter(
       }
     )
 
-    team.other += ` te[${matchID}]:${minutes}`;
+    team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
     await team.save();
 
-    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: team };
+    ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: await adminTeamView(ctx.db, team) };
 
   });
 
@@ -201,16 +201,14 @@ export function configureTeamsRouter(
       ctx.throw(404, `Team not found with teamID ${teamId}.`);
       return;
     }
-    // reset the strategy game while playing
     if (team.pageState === 'STRATEGY')
       team.pageState = 'HOME'
 
-    //log earlier matchid
-    if (team.strategyMatch.state !== 'NOT STARTED')
-      team.other += ` prevstratid:${team.strategyMatch.matchID}`
-    team.strategyMatch = { state: 'NOT STARTED' }
+    if (team.strategyMatchID !== null)
+      team.other = appendOtherNote(team.other, `prevstratid:${team.strategyMatchID}`)
+    team.strategyMatchID = null
     await team.save();
-    ctx.body = team;
+    ctx.body = await adminTeamView(ctx.db, team);
   });
 
   /**
@@ -227,52 +225,14 @@ export function configureTeamsRouter(
       ctx.throw(404, `Team not found with teamID ${teamId}.`);
       return;
     }
-    // reset the strategy game while playing
     if (team.pageState === 'RELAY')
       team.pageState = 'HOME'
 
-    //log earlier matchid
-    if (team.relayMatch.state !== 'NOT STARTED')
-      team.other += ` prevrelayid:${team.relayMatch.matchID}`
-    team.relayMatch = { state: 'NOT STARTED' }
+    if (team.relayMatchID !== null)
+      team.other = appendOtherNote(team.other, `prevrelayid:${team.relayMatchID}`)
+    team.relayMatchID = null
     await team.save();
-    ctx.body = team;
-  });
-
-  /**
-   * Remove a team by teamId.
-   *
-   * @param {string} teamID - The ID of the team.
-   */
-  router.delete("/team/admin/:teamID/remove", adminAuth, async (ctx) => {
-    const teamId = ctx.params.teamID;
-    const deleted = teams.removeTeam(teamId);
-    if (await deleted === 0) {
-      ctx.throw(404, `team with teamId ${teamId} not found.`);
-    }
-    ctx.body = {};
-  });
-
-  /**
-   * Run a user defined filter query on teams
-   *
-   * @param {string|string[]} filter - Get parameter to pass the filter
-   * @returns {TeamModel[]} - List of the selected teams
-   */
-  router.get("/team/admin/filter", adminAuth, koaBody(), async (ctx) => {
-    const filter_string: string | string[] | undefined =
-      ctx.request.query["filter"];
-    let filters: string[];
-    if (filter_string === undefined) {
-      filters = [];
-    } else if (typeof filter_string === "string") {
-      filters = filter_string.split(",");
-    } else {
-      filters = filter_string;
-    }
-    //TODO: fix the return type value
-    ctx.body = await teams.fetch(filters);
-    //    ctx.body = ['8eae8669-125c-42e5-8b49-89afbac31679', '18c3a69d-c477-4578-8dc1-6e430fbb4e80', '48df4969-a834-4131-ab75-24069a56d2d6'];
+    ctx.body = await adminTeamView(ctx.db, team);
   });
 
   /**
@@ -280,31 +240,32 @@ export function configureTeamsRouter(
    * @returns {TeamModel[]} - List of the selected teams
    */
   router.get("/team/admin/all", adminAuth, koaBody(), async (ctx) => {
-    ctx.body = await teams.listTeams();
+    ctx.body = await adminTeamViews(ctx.db, await teams.listTeams() ?? []);
   })
 
   /**
- * Get all teams as a full object
- * @returns {TeamModel[]} - List of the selected teams
- */
+   * Import teams from an uploaded TSV, the way `npm run teams:import` does.
+   * formidable stores the upload under a random name, so the extension is
+   * checked on the name the client sent.
+   */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
-    // Check if multiple files are uploaded
-    if (Array.isArray(file)) {
-      ctx.throw(400, 'Multiple files are not supported.');
-      return;
+    try {
+      if (Array.isArray(file)) {
+        ctx.throw(400, 'Multiple files are not supported.');
+        return;
+      }
+      if (!file?.originalFilename?.endsWith('.tsv')) {
+        ctx.status = 400;
+        ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
+        return;
+      }
+      ctx.body = await import_teams_from_tsv(teams, file.filepath);
+    } finally {
+      // Every field, not only `file`: formidable writes whatever is uploaded.
+      const uploaded = Object.values(ctx.request.files ?? {}).flat();
+      await Promise.all(uploaded.map(f => unlink(f.filepath).catch(() => undefined)));
     }
-
-    // Check if the file is a TSV file
-    if (!file || !file.filepath?.endsWith('.tsv')) {
-      ctx.status = 400;
-      ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
-      return;
-    }
-
-    const import_results = await import_teams_from_tsv(teams, file.filepath)
-
-    ctx.body = import_results;
   })
 
   /**
@@ -314,9 +275,14 @@ export function configureTeamsRouter(
    * secret, and a path lands in access logs and browser history. What the
    * cookie is and why, and why the body must be JSON, is `team_session.ts`.
    *
+   * This is the one route where an unauthenticated client guesses at a secret,
+   * so it is the one the attempt limit is on — `rate_limit.ts` for the numbers.
+   * It runs before the body parser: a client over its limit is answered
+   * without reading what it sent.
+   *
    * @param {string} code - the team's join code, as `{ "code": ... }`
    */
-  router.post("/team/join", requireJson, koaBody(), async (ctx) => {
+  router.post("/team/join", joinLimit, requireJson, koaBody(), async (ctx) => {
     const sent: unknown = (ctx.request.body as { code?: unknown } | undefined)?.code;
     const code = typeof sent === "string" ? sent : ctx.throw(400, "Expected { code: string }.");
     const team = await teams.getTeam({ joinCode: code }) ?? ctx.throw(404, "Team not found!");
@@ -338,50 +304,26 @@ export function configureTeamsRouter(
   });
 
   /**
-   * The logged-in team's own state. This is where a match whose time ran out
-   * while the team was away gets closed.
+   * The logged-in team's own state.
    *
    * @returns {PublicTeamView} - the team's own state, without its secrets
    */
   router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
-    let team = ctx.state.team;
-    const staleInfo = await checkStaleMatch(team);
-    if (staleInfo.isStale) {
-      console.log(`Stale found: ${JSON.stringify(staleInfo)}`);
-      await closeMatch(
-        (team[staleInfo.gameState] as InProgressMatchStatus).matchID,
-        teams,
-        ctx.db
-      );
-      team =
-        (await teams.getTeam({ teamId: team.teamId })) ??
-        ctx.throw(404, `Team with {teamId:${team.teamId}} not found.`);
-    }
-    ctx.body = publicTeamView(team);
+    const team = ctx.state.team;
+    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team));
   });
 
   /**
    * Let the logged-in team start a RELAY match.
    */
   router.post<TeamState>("/team/me/relay/play", requireTeam(teams), async (ctx) => {
-    //check if in progress, it is not allowed to play
-    //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, "RELAY", ctx.state.team);
+    const { game, team } = await getNewGame(ctx, games, "RELAY", ctx.state.team);
 
-    // about to start a game
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    //created new game, updated team state accordingly
-    const match = await startMatchStatus(body.matchID, ctx);
-    if (match.startAt === null || match.endAt === null) {
-      console.error(`GAME [${game.name}] initialiser doesn't initialise the timer!!!`)
-    }
-    await team.update({
-      pageState: "RELAY",
-      relayMatch: match,
-    });
+    await claimStart(ctx, team, "RELAY", body.matchID);
     ctx.body = body;
   });
 
@@ -389,20 +331,13 @@ export function configureTeamsRouter(
    * Let the logged-in team start a STRATEGY match.
    */
   router.post<TeamState>("/team/me/strategy/play", requireTeam(teams), async (ctx) => {
-    //check if in progress, it is not allowed to play
-    //check if it can be started, throw error if not
-    const { game, team } = await getNewGame(ctx, teams, games, "STRATEGY", ctx.state.team);
-    //about to start
+    const { game, team } = await getNewGame(ctx, games, "STRATEGY", ctx.state.team);
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
-    //created new game, updated team state accordingly
-    await team.update({
-      pageState: "STRATEGY",
-      strategyMatch: await startMatchStatus(body.matchID, ctx),
-    });
+    await claimStart(ctx, team, "STRATEGY", body.matchID);
     ctx.body = body;
   });
 
@@ -411,27 +346,14 @@ export function configureTeamsRouter(
    */
   router.post<TeamState>("/team/me/gohome", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    if (team.relayMatch.state === 'IN PROGRESS' || team.strategyMatch.state === 'IN PROGRESS')
+    const matches = await teamMatches(ctx.db, team);
+    if (matches.relayMatch.state === 'IN PROGRESS' || matches.strategyMatch.state === 'IN PROGRESS')
+      ctx.throw(403, "Not allowed, match in progress.")
+    // A start landing after this read changes a match id, and the write refuses.
+    if (!(await teams.goHome(team)))
       ctx.throw(403, "Not allowed, match in progress.")
 
-    //update team state to go home
-    await team.update({
-      pageState: "HOME",
-    });
-    ctx.body = publicTeamView(team);
-  });
-
-  /**
-   * Create a new BGio game
-   *
-   * @param {string} nameid - game ID to create
-   *
-   * This should be in line with boardgame.io/src/server/api.ts
-   */
-  router.post("/games/:nameid/create", async (ctx, next) => {
-    await next();
-    //Figured out where match id is stored
-    console.log(`Injecting bot in :${ctx.response.body.matchID}`);
-    await injectBot(ctx.db, ctx.response.body.matchID);
+    team.set({ pageState: "HOME" });
+    ctx.body = publicTeamView(team, matches);
   });
 }

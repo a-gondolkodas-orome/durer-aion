@@ -1,14 +1,14 @@
 import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io";
+import type { LiveGameResult } from "schemas";
 
 // boardgame.io does not export its plugin APIs by name. Taking them off the
 // context type it does export keeps this out of the package's build layout,
 // which is not an API and can be rearranged by a patch release.
 export type RandomAPI = DefaultPluginAPIs['random'];
 
-// boardgame.io's own Game interface defaults its generics to `any` (quoted
-// below); a caller that spells that out trips no-explicit-any on bgio's
-// defaults rather than on a choice of ours. One caged alias keeps the ban
-// meaningful everywhere else.
+// boardgame.io's own Game interface defaults its generics to `any`; a caller
+// that spells that out trips no-explicit-any on bgio's defaults rather than on
+// a choice of ours. One caged alias keeps the ban meaningful everywhere else.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyBgioGame = Game<any, Record<string, unknown>, any>;
 
@@ -22,14 +22,59 @@ export function otherPlayer(playerID: PlayerIDType): PlayerIDType {
 
 export const { GUESSER_PLAYER, JUDGE_PLAYER } = PlayerIDType;
 
+/// A practice ("test") game or a scored ("live") one. The team's client sends
+/// this as a move argument, so the move checks it against the list at runtime.
+export const DIFFICULTIES = ['test', 'live'] as const;
+export type Difficulty = typeof DIFFICULTIES[number];
+
+export function isDifficulty(value: unknown): value is Difficulty {
+  return DIFFICULTIES.some(it => it === value);
+}
+
 export interface GameStateMixin extends GameStateTimer {
   firstPlayer: null | PlayerIDType;
   winner: PlayerIDType | "draw" | null;
-  difficulty: null | undefined | string;
+  difficulty: null | undefined | Difficulty;
   numberOfTries: number;
   numberOfLoss: number;
   winningStreak: number;
   points: number;
+  // Every live game in order; gameWrapper's play phase appends to it and says
+  // when a game cut off by the time is included. The games never touch it.
+  liveResults: LiveGameResult[];
+}
+
+// `satisfies` makes this list exhaustive and exact: a key added to the mixin
+// and missing here, or one here that the mixin lacks, fails the typecheck.
+const GAME_STATE_MIXIN_KEYS: ReadonlySet<string> = new Set(Object.keys({
+  millisecondsRemaining: true,
+  start: true,
+  end: true,
+  firstPlayer: true,
+  winner: true,
+  difficulty: true,
+  numberOfTries: true,
+  numberOfLoss: true,
+  winningStreak: true,
+  points: true,
+  liveResults: true,
+} satisfies Record<keyof GameStateMixin, true>));
+
+/// A starting position arrives as a move argument and is merged into `G`, so
+/// it must be an object naming only the game's own keys: one naming a mixin
+/// key would rewrite the score or the clock.
+export function isOwnGameState(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    && Object.keys(value).every(key => !GAME_STATE_MIXIN_KEYS.has(key));
+}
+
+/// What winning twice in a row earns, by the live games lost before: the last
+/// entry stands for that many losses or more. A team that never wins twice in
+/// a row scores 0.
+export const STRATEGY_POINTS_BY_LOSSES = [12, 9, 6, 4, 3, 2] as const;
+
+export function strategyPoints(numberOfLoss: number): number {
+  return STRATEGY_POINTS_BY_LOSSES[Math.min(numberOfLoss, STRATEGY_POINTS_BY_LOSSES.length - 1)];
 }
 
 export interface GameStateTimer {
@@ -47,20 +92,20 @@ export interface PossibleMove {
   move: string;
   args?: unknown[];
 }
-export type StartingPositionFunction<G> = (_: { G: G & GameStateMixin; ctx: Ctx; playerID: PlayerIDType; random: RandomAPI }) => G;
+
+/// What a bot answers in the `startNewGame` phase: the opening position of the
+/// next game, which only the game's own half of the state may make up.
+export type StartingPositionMove<G> = [[G], 'setStartingPosition'];
+
+export function startingPositionMove<G>(position: G): StartingPositionMove<G> {
+  return [[position], 'setStartingPosition'];
+}
 
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState
 interface GameMixin<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
-  // A game may set its opening position here, or leave it to the bot, which
-  // sends it as the `setStartingPosition` move; the live games do the latter.
-  // Prefer this one when the position is not the bot's secret: it receives
-  // bgio's seeded `random`, so server and client agree on what was drawn,
-  // which `Math.random` in a strategy cannot give you. See CLAUDE.md,
-  // *Creating a New Game*.
-  startingPosition?: StartingPositionFunction<G>;
 }
 
 /// Base structure, passed through directly to boardgame.io.
@@ -71,24 +116,6 @@ interface WrappableGame<G = unknown, PluginAPIs extends Record<string, unknown> 
   moves?: MoveMap<G, PluginAPIs>;
   turn?: TurnConfig<G, PluginAPIs>;
 }
-
-/* Game Interface fragment for reference (bitch.)
-export interface Game<
-  G extends any = any,
-  PluginAPIs extends Record<string, unknown> = Record<string, unknown>,
-  SetupData extends any = any
-> {
-  name?: string;
-  minPlayers?: number;
-  maxPlayers?: number;
-  setup?: (
-    context: PluginAPIs & DefaultPluginAPIs & { ctx: Ctx },
-    setupData?: SetupData
-  ) => G;
-  moves?: MoveMap<G, PluginAPIs>;
-  turn?: TurnConfig<G, PluginAPIs>;
-}
-*/
 
 export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 

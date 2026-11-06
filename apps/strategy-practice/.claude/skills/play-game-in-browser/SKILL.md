@@ -1,14 +1,14 @@
 ---
 name: play-game-in-browser
-description: Launch the dev server and play a game in a real browser with Playwright, to verify a BoardClient or game-parts change. Use whenever board rendering, hover previews, mid-turn state, disabled pieces, theming or anything else visual changed — no spec in this repo covers board interaction.
+description: Launch the dev server and play a game in a real browser with Playwright, to verify a BoardClient or game-parts change. Use whenever board rendering, hover previews, mid-turn state, disabled pieces, theming or anything else visual changed — no test in this repo covers board interaction.
 ---
 
 # Play a game in a browser
 
 ## Why this exists
 
-Nothing in the test suite clicks a board. `plays-to-an-end.spec.ts` asserts that
-a match completes and names a winner, `renders.spec.tsx` that a board renders at
+Nothing in the test suite clicks a board. `plays-to-an-end.test.ts` asserts that
+a match completes and names a winner, `renders.test.tsx` that a board renders at
 all — both drive the *engine*, not the UI. So every claim about what a player
 sees mid-turn is unverified until someone plays the game.
 
@@ -76,11 +76,16 @@ deliberate, not a misconfiguration: the scratch path differs per session, and
 any allowlist entry broad enough to cover it would also authorise running any
 script in the repo unattended.
 
-The UI is Hungarian by default; the `EN` button in the header switches it, which
-is worth doing if your assertions read better in English.
+`launchGame` opens the game with `?lang=hu`, whatever the machine's locale; the
+`EN` button in the header switches it afterwards, which is worth doing if your
+assertions read better in English.
+
+Where the Chromium revision playwright pins is missing — Claude Code's cloud
+container — it launches the newest one baked under `PLAYWRIGHT_BROWSERS_PATH`
+and warns which; `PLAYWRIGHT_CHROMIUM_EXECUTABLE` points it at any other build.
 
 `sampleDuringBeat(page, read)` polls for 1.6 s. Mid-turn states last one
-`stepDelay()` beat — 750–1250 ms, `packages/engine/src/timing.ts` — so
+`stepDelay()` beat — 750–1250 ms, `packages/strategy-engine/src/timing.ts` — so
 they must be sampled, not awaited: by the time a `waitFor` on the next state
 resolves, the frame you wanted is gone. This is the only way to see the board
 between the two halves of a turn, which is where multi-move games go wrong.
@@ -108,4 +113,4 @@ Worth a playthrough whenever the diff touches a board:
 
 Stop the dev server and delete the scratch script. If you found a bug, the fix
 belongs with a note in the PR that it was found by playing the game — that is
-the only evidence available, since no spec can carry it.
+the only evidence available, since no test can carry it.

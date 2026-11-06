@@ -1,5 +1,8 @@
 import { range, isEqual } from 'lodash';
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, type BoardClientProps, GameBoard, testVariantLabel, fullVariantLabel
+} from 'strategy-game-factory';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { boardSize, generateStartBoard, isTarget, moves, type Board, type Field } from './gameplay';
 import { RookSvg } from '../shared/rook-svg';
@@ -51,31 +54,25 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Egy 8 × 8-as tábla egyik mezőjére elhelyezünk egy bástyát. A két játékos felváltva léphet a
-    bástyával. Egy lépésben vagy jobbra lehet akármennyit lépni, vagy lefelé lehet akármennyit lépni.
-    Az a játékos nyer, aki a jobb alsó mezőre lép a bástyával.
-  </>,
-  en: <>
-    A rook is placed on one of the squares of an 8 × 8 board. The two players move the rook
-    alternately. In a move you may go any number of squares to the right, or any number of squares
-    downward. The player who moves the rook onto the bottom-right square wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('rook-to-corner');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('rook-to-corner');
+  return t('step');
 };
 
 export const RookToCorner = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Kattints egy mezőre a bástyától jobbra vagy lefelé.',
-      en: 'Click a square to the right of or below the rook.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

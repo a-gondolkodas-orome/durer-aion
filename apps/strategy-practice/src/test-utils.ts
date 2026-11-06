@@ -1,7 +1,7 @@
 import {
   runMatch, asBotMoves,
   type BotStrategy, type Ctx, type Gameplay, type MoveDefinition, type NamedBotMove
-} from 'engine';
+} from 'strategy-engine';
 
 // Mock `ctx` for testing move functions and bot strategies. A game that pins
 // its mid-turn state names it — `makeCtx<TurnState>({ turnState: … })` — so the
@@ -66,7 +66,7 @@ export const playBotMove = <TBoard, TTurnState = unknown>(
 // Playouts that disagree therefore say nothing about the board — they mean the
 // bot threw the win away on some line, a bug rather than a fact about the
 // position — so this throws instead of returning a winner nobody can trust.
-// See src/components/CLAUDE.md § Curated start boards.
+// See src/components/AGENTS.md § Curated start boards.
 export const forcedWinnerIndex = <TBoard, TTurnState = unknown>({
   gameplay,
   botStrategy,

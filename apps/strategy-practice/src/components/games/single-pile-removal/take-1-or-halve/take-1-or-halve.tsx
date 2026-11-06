@@ -1,11 +1,13 @@
 import {
   strategyGameFactory,
+  testVariantLabel,
+  fullVariantLabel,
   type BoardClientProps,
   GameBoard,
   useHoverPreview
 } from 'strategy-game-factory';
 import { random, range } from 'lodash';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { moves, type Board, type HoveredAction } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
@@ -28,7 +30,7 @@ const CoinPile = ({ count, hoveredAction }: { count: number, hoveredAction: Hove
 );
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('single-pile-removal');
   const { value: hoveredAction, hoverProps } = useHoverPreview<'take1' | 'halve'>(ctx.moveCount);
   const canTake1 = moves.take1.isAllowed(board);
   const canHalve = moves.halve.isAllowed(board);
@@ -42,43 +44,32 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           disabled={!canTake1}
           onClick={() => moves.take1(board)}
           {...(canTake1 ? hoverProps('take1') : {})}
-        >{t({ hu: 'Elveszek egyet', en: 'Take one' })}</button>
+        >{t('take1OrHalve.board.takeOne')}</button>
         <button
           className="primary-button w-auto grow"
           disabled={!canHalve}
           onClick={() => moves.halve(board)}
           {...(canHalve ? hoverProps('halve') : {})}
-        >{t({ hu: 'Elveszem a felét', en: 'Take half' })}</button>
+        >{t('take1OrHalve.board.takeHalf')}</button>
       </div>
     </GameBoard>
   );
 };
 
-const rule = {
-  hu: <>
-    Kezdetben van egy kupac zseton az asztalon. A soron lévő
-    játékos elvehet egy zsetont a kupacból, vagy ha páros számú zseton van az asztalon, akkor elveheti a
-    zsetonok felét. Az nyer, akinek a lépése után nem marad zseton az asztalon.
-  </>,
-  en: <>
-    There is a pile of tokens on the table. On each turn the current player may remove one token,
-    or — if the number of tokens is even — take half of them.
-    The player whose move leaves no tokens on the table wins.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('single-pile-removal');
+  return <Trans t={t} i18nKey="take1OrHalve.rule" />;
 };
 
-const getPlayerStepDescription = ({ board }: { board: Board }) => {
-  if (board % 2 === 1) {
-    return { hu: 'Vegyél el egy zsetont.', en: 'Take one token.' };
-  } else {
-    return { hu: 'Egy zsetont vegyél el vagy felezz.', en: 'Take one token or take half.' };
-  }
-}
+const StepDescription = ({ board }: { board: Board }) => {
+  const { t } = useTranslation('single-pile-removal');
+  return board % 2 === 1 ? t('take1OrHalve.step.odd') : t('take1OrHalve.step.even');
+};
 
 export const Take1OrHalve = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ board }) => <StepDescription board={board} />
   },
   BoardClient,
   gameplay: { moves },
@@ -86,12 +77,12 @@ export const Take1OrHalve = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: () => random(5, 10),
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard: () => random(20, 27),
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

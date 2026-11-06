@@ -12,10 +12,13 @@
   ],
   "words": [
     "addminutes",
+    "adduser",
     "aion",
     "alikes",
     "argmax",
     "argmin",
+    "askpass",
+    "autostash",
     "bgio",
     "bivariance",
     "Bivariant",
@@ -55,15 +58,17 @@
     "gameover",
     "gamestate",
     "gamewrapper",
+    "gpgsign",
     "guessnum",
     "headlessly",
     "hflip",
+    "HSTS",
     "joincode",
     "langcode",
     "Langswitcher",
     "letsencrypt",
+    "lintable",
     "Lngs",
-    "logoutofthiswholething",
     "matchid",
     "maxpoints",
     "memoises",
@@ -75,12 +80,19 @@
     "multisets",
     "nameid",
     "negamax",
+    "networkidle",
     "newcops",
     "newgrp",
     "newstate",
+    "NOSYSTEM",
     "notistack",
+    "NXDOMAIN",
+    "ocde",
     "onwarn",
     "packument",
+    "passwordauthentication",
+    "permitrootlogin",
+    "pglite",
     "PGPASSWORD",
     "playout",
     "playouts",
@@ -94,6 +106,7 @@
     "prevrelayid",
     "prevstratid",
     "privkey",
+    "requestfailed",
     "Robbable",
     "RRBBBB",
     "skimmable",
@@ -101,7 +114,6 @@
     "splittable",
     "Sprague",
     "strat",
-    "strategydict",
     "stratstep",
     "subtable",
     "supersegments",
@@ -122,6 +134,7 @@
     "uncolorable",
     "uncompletable",
     "unconfigured",
+    "unlinted",
     "unmemoised",
     "unparseable",
     "unsplittable",
@@ -129,46 +142,39 @@
     "unstub",
     "urlcat",
     "usermod",
+    "venv",
     "Vieta",
+    "webroot",
     "worktree",
     "wrongid",
     "xors",
     "yearidx"
   ],
-  "flagWords": [],
+  "useGitignore": true,
   "ignorePaths": [
     "node_modules",
     "dist",
     "build",
     "site",
-    "*.log",
-    "package.json",
     "coverage/**/*",
-    "docker-compose*",
-    "scripts/test.tsv*",
     "**/src/teamData.ts"
-  ],
-  "languageSettings": [
-    {
-      "languageId": "typescript"
-    }
   ],
   "dictionaryDefinitions": [
     {
       "name": "hu-extra",
-      "path": "./hungarian-words.txt",
+      "path": "./cspell/hungarian-words.txt",
       "addWords": true
     },
     {
       "name": "hu-hunspell",
-      "path": "./hungarian-hunspell-words.txt"
+      "path": "./cspell/hungarian-hunspell-words.txt"
     }
   ],
   "overrides": [
     {
       "filename": [
         "apps/relay-practise-frontend/src/problems.ts",
-        "packages/strategy/src/games/relay/strategy.ts"
+        "packages/relay-bot/src/games/relay/strategy.ts"
       ],
       "ignoreRegExpList": [
         "/\\\\+[a-zA-Z]+/g",

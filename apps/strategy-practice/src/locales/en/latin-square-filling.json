@@ -1,0 +1,13 @@
+{
+  "board": {
+    "digit": "digit {{value}}",
+    "emptyCell": "empty cell",
+    "noDigitFits": "No digit fits here — pick another cell.",
+    "whichDigit": "Which digit do you write?"
+  },
+  "rule": "You are given a 3×3 grid. On their turn, the current player writes a 1, 2, or 3 into an empty cell, so that no row or column ends up containing two equal numbers. The first player wins if all 9 cells get filled; the second player wins if, before someone's turn, there is still an empty cell but no legal move is possible.",
+  "step": {
+    "first": "Click an empty cell, then write a 1, 2, or 3 into it. Your goal is to fill all 9 cells.",
+    "second": "Click an empty cell, then write a 1, 2, or 3 into it. Your goal is to get the other player stuck: an empty cell remains but no legal move is left."
+  }
+}

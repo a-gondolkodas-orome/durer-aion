@@ -2,18 +2,21 @@
 
 Closes #
 
-<!--- Summarize the goal of your work and what motivated it. --->
+<!--- Summarize the goal of your work and what motivated it. Prose, and only
+the why — what you did goes below. --->
 
 ## Key changes
 
-<!---
-- Shortly describe major updates in bullet points.
---->
+<!--- One bullet per major update, under 80 characters. A change that needs
+more is two bullets, the *Details* section, or the diff saying it itself. --->
   
 ## Details
 
-<!--- What was prior logic & what is current logic --->
+<!--- Only what the diff cannot say for itself: logic that is not obvious from
+it, open questions, edge cases left unsolved, anything else the reviewer should
+know — but never that the checks pass, which they report themselves. --->
 
-<!--- List open questions and other things your reviewer should know. --->
+## Screenshots
 
-<!--- Any edge cases you’re aware of that you have not solved for? --->
+<!--- For UI-heavy changes, before and after screenshots. Delete this section
+otherwise. --->

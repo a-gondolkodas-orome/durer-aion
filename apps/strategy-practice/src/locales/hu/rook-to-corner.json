@@ -1,0 +1,4 @@
+{
+  "rule": "Egy 8 × 8-as tábla egyik mezőjére elhelyezünk egy bástyát. A két játékos felváltva léphet a bástyával. Egy lépésben vagy jobbra lehet akármennyit lépni, vagy lefelé lehet akármennyit lépni. Az a játékos nyer, aki a jobb alsó mezőre lép a bástyával.",
+  "step": "Kattints egy mezőre a bástyától jobbra vagy lefelé."
+}

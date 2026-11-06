@@ -1,0 +1,4 @@
+{
+  "rule": "We have two piles of pieces. In each step, the current player adds at least one piece to one of the piles and takes away two times as many pieces from the other pile. The player who cannot move loses.",
+  "step": "Click a piece to indicate how many you want to remove."
+}

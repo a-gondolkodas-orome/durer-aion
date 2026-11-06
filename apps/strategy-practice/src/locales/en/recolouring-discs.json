@@ -1,0 +1,20 @@
+{
+  "board": {
+    "field": {
+      "blue": "Field {{number}}, blue disc",
+      "empty": "Field {{number}}, empty",
+      "red": "Field {{number}}, red disc"
+    },
+    "pass": "Pass"
+  },
+  "rule": "A row has <i>n</i> fields (at most 12 here); the leftmost field starts with a red disc and the rightmost with a blue disc. The first player plays red, the other plays blue. On a turn the player to move picks one of three options:<br/>• Move one of their own discs one or two fields into an empty field (this may jump over another disc).<br/>• Place a new disc of their own colour on an empty field adjacent to a field holding one of their discs.<br/>• Pass, i.e. do nothing.<br/><br/>After any move, when a disc enters an empty field, every disc of the opposite colour in an adjacent field is recoloured to that colour.<br/><br/>If at any moment there are more than <i>n</i>/2 red discs on the board, red wins immediately; if at any moment there are at least <i>n</i>/2 blue discs, blue wins immediately. If neither happens within 200 moves, blue wins.",
+  "step": {
+    "text": "{{who}} Move one of your discs by 1–2 fields, place a new one next to one of your discs, or pass. Red: {{red}}/{{redGoal}}, blue: {{blue}}/{{blueGoal}}. Move {{move}}/{{plyCap}}.",
+    "who": {
+      "blueToMove": "Blue to move.",
+      "redToMove": "Red to move.",
+      "youAreBlue": "You are blue.",
+      "youAreRed": "You are red."
+    }
+  }
+}

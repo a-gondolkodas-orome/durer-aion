@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { test, expect, vi } from 'vitest';
+import { afterEach, beforeEach, test, expect, vi } from 'vitest';
 import { MockTeamState } from '../hooks/mock-user-hooks';
 import { render } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
@@ -8,7 +8,8 @@ import '@testing-library/jest-dom';
 // `Main` calls `i18next.changeLanguage` while rendering, so i18next has to be
 // initialised the same way the apps initialise it: by importing this module.
 import '../../common/i18n';
-import { ClientRepoProvider, MockClientRepository } from '../api-repository-interface';
+import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
+import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
 
@@ -20,20 +21,40 @@ vi.mock('../hooks/user-hooks', () => {
   return MockTeamState.mockHook;
 });
 
+// What this file is about is which page `Main` puts up, not what the admin page
+// holds — and the real one renders a data grid jsdom cannot lay out.
+vi.mock('./Admin', () => ({
+  Admin: () => <div data-testid="adminRoot" />,
+}));
+
+// `Main` reads the path once, on mount, so each test below sets it before
+// rendering; this puts it back for the ones that expect a team's own page.
+afterEach(() => {
+  window.history.replaceState({}, '', '/');
+});
+
 // `Layout` merges its own theme into the surrounding one, so `Main` needs an
 // outer theme to merge with — the apps pass their accent colour here.
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
 
 // `Header` reads the client repository off context, so `Main` cannot render
-// outside a provider — same as in the apps.
-const renderMain = () =>
-  render(
+// outside a provider — same as in the apps. The admin repository is the online
+// app's alone; `{ admin: false }` renders as the local apps do.
+const renderMain = (options: { admin: boolean } = { admin: true }) => {
+  const repo = new MockClientRepository();
+  const main = <Main language="hu" gitCommitHash="test" />;
+  return render(
     <ThemeProvider theme={outerTheme}>
-      <ClientRepoProvider value={new MockClientRepository()}>
-        <Main language="hu" gitCommitHash="test" />
+      <ClientRepoProvider value={repo}>
+        {options.admin ? <AdminRepoProvider value={repo}>{main}</AdminRepoProvider> : main}
       </ClientRepoProvider>
     </ThemeProvider>
   );
+};
+
+beforeEach(() => {
+  MockTeamState.mockLoggedOut();
+});
 
 test('renders', () => {
   const { getByTestId } = renderMain();
@@ -67,4 +88,82 @@ test('main renders Strategy if team is in STRATEGY state', () => {
   MockTeamState.mockStrategy();
   const { getByTestId } = renderMain();
   expect(getByTestId("strategyRoot")).toBeInTheDocument();
+});
+
+// These two were independent conditions, so `/admin` rendered the admin page
+// *and* whatever the browser's own session was entitled to underneath it.
+test('the admin page is the whole page, not a panel above the login form', () => {
+  MockTeamState.mockLoggedOut();
+  window.history.replaceState({}, '', '/admin');
+
+  const { getByTestId, queryByTestId } = renderMain();
+
+  expect(getByTestId('adminRoot')).toBeInTheDocument();
+  expect(queryByTestId('loginRoot')).not.toBeInTheDocument();
+});
+
+// The worse half: an organiser who tested a team account still holds its
+// session, and the team's board is live and playable when it renders.
+test('an organiser still holding a team session is not handed that team\'s board', () => {
+  MockTeamState.mockRelay();
+  window.history.replaceState({}, '', '/admin/8eae8669-125c-42e5-8b49-89afbac31679');
+
+  const { getByTestId, queryByTestId } = renderMain();
+
+  expect(getByTestId('adminRoot')).toBeInTheDocument();
+  expect(queryByTestId('relayRoot')).not.toBeInTheDocument();
+});
+
+// The dry run renders the same `Main` with no admin repository: there `/admin`
+// is a path like any other, not a page whose every request would throw.
+test('/admin is the team\'s own page in an app with no admin repository', () => {
+  MockTeamState.mockLoggedOut();
+  window.history.replaceState({}, '', '/proba-verseny/admin');
+
+  const { getByTestId, queryByTestId } = renderMain({ admin: false });
+
+  expect(getByTestId('loginRoot')).toBeInTheDocument();
+  expect(queryByTestId('adminRoot')).not.toBeInTheDocument();
+});
+
+test('a team away from /admin still gets its own page', () => {
+  MockTeamState.mockRelay();
+
+  const { getByTestId, queryByTestId } = renderMain();
+
+  expect(getByTestId('relayRoot')).toBeInTheDocument();
+  expect(queryByTestId('adminRoot')).not.toBeInTheDocument();
+});
+
+// The admin pages are written in Hungarian only; switching to English turned
+// the header and the team dialog's result tables English, and nothing else.
+test('the admin page offers no language switcher', () => {
+  window.history.replaceState({}, '', '/admin');
+
+  const { queryByText } = renderMain();
+
+  expect(queryByText('Magyar')).not.toBeInTheDocument();
+});
+
+// MUI's default `maxWidth="lg"` caps a Container at the theme's lg breakpoint,
+// 1280px, overriding the 1200px in its sx: at 1280px the page then had no side
+// margin at all (#112).
+test('no Container takes MUI\'s lg max width over its own', () => {
+  const { container } = renderMain();
+  expect(container.querySelector('.MuiContainer-maxWidthLg')).toBeNull();
+});
+
+test('the logo is on the login page', () => {
+  const { getByTestId } = renderMain();
+  expect(getByTestId("loginLogo")).toBeInTheDocument();
+});
+
+test.each([
+  ['HOME', () => MockTeamState.mockHome()],
+  ['RELAY', () => MockTeamState.mockRelay()],
+  ['STRATEGY', () => MockTeamState.mockStrategy()],
+])('the logo is not on the page of a team in %s state', (_, mockState) => {
+  mockState();
+  const { queryByTestId } = renderMain();
+  expect(queryByTestId("loginLogo")).toBeNull();
 });

@@ -1,9 +1,10 @@
 import { useState, type ComponentProps } from 'react';
 import { range, random } from 'lodash';
 import {
-  strategyGameFactory, type BoardClientProps, type StrategyArgs, GameBoard, useHoverPreview
+  strategyGameFactory, type BoardClientProps, type Ctx, GameBoard, useHoverPreview,
+  testVariantLabel, fullVariantLabel
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { moves, type Board, type MoveType, type TurnState } from './gameplay';
 
@@ -70,7 +71,7 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
   canMerge: boolean
   onSelect: (type: MoveType) => void
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('pile-union');
 
   const labelClass = (active: boolean, disabled: boolean) => `
     grow py-1 px-2 text-center
@@ -98,7 +99,7 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
             checked={moveType === 'remove'}
             onChange={() => onSelect('remove')}
           />
-          {t({ hu: 'Elveszek 1-et', en: 'Remove 1' })}
+          {t('board.remove')}
         </label>
         <label
           className={labelClass(moveType === 'merge' && isClientMoveAllowed, !isClientMoveAllowed || !canMerge)}
@@ -110,7 +111,7 @@ const MoveTypeSelector = ({ moveType, isClientMoveAllowed, canMerge, onSelect }:
             onChange={() => onSelect('merge')}
             disabled={!canMerge}
           />
-          {t({ hu: 'Egyesítek', en: 'Merge' })}
+          {t('board.merge')}
         </label>
       </div>
     </fieldset>
@@ -176,49 +177,29 @@ const Matchstick = ({ dimmed }: { dimmed: boolean }) => (
   </div>
 );
 
-const getPlayerStepDescription = ({ board, ctx }: StrategyArgs<Board, TurnState>) => {
-  if (ctx.turnState !== null) {
-    return {
-      hu: 'Kattints egy másik kupacra az egyesítéshez, vagy ugyanerre a kupacra a kijelölés visszavonásához.',
-      en: 'Click another pile to merge, or the same pile again to deselect.'
-    };
-  }
-  if (board.length === 1) {
-    return {
-      hu: 'Vegyél el egy gyufát a kupacból.',
-      en: 'Remove 1 match from the pile.'
-    };
-  }
-  return {
-    hu: 'Vegyél el 1 gyufát egy kupacból, vagy egyesíts két kupacot.',
-    en: 'Remove 1 match from a pile, or merge two piles into one.'
-  };
+const StepDescription = ({ board, ctx }: { board: Board; ctx: Ctx<TurnState> }) => {
+  const { t } = useTranslation('pile-union');
+  if (ctx.turnState !== null) return t('step.secondPile');
+  if (board.length === 1) return t('step.singlePile');
+  return t('step.first');
 };
 
-const rule = {
-  hu: <>
-    A játék kezdetén néhány kupac gyufa van az asztalon, mindegyikben legalább két szál.
-    A játékosok felváltva lépnek, kétféle lépés megengedett: vagy egyetlen gyufát elveszünk valamelyik
-    kupacból, vagy egyesítünk két kupacot. Az veszít, aki nem tud szabályosan lépni.
-  </>,
-  en: <>
-    At the start of the game, several piles of matches are placed on the table, each containing
-    at least two matches. Players alternate turns. Two moves are allowed: either remove one match
-    from a pile, or merge two piles into one. The player who cannot make a legal move loses.
-  </>
+const Rule = () => {
+  const { t } = useTranslation('pile-union');
+  return <Trans t={t} i18nKey="rule" />;
 };
 
 export const PileUnion = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: ({ board, ctx }) => <StepDescription board={board} ctx={ctx} />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
     {
       botStrategy: randomBotStrategy,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
@@ -226,7 +207,7 @@ export const PileUnion = strategyGameFactory({
         const numPiles = random(2, 4);
         return Array.from({ length: numPiles }, () => random(2, 5));
       },
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

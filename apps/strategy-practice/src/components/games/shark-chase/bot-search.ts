@@ -9,7 +9,7 @@ type Bot = BotStrategy<Board, Moves>
 // of the lake first, then outwards. The rings are the sectors grouped by how far
 // they are from the centre — Manhattan distance, with Chebyshev separating the
 // diagonal ring from the straight one where both are two steps out — which is
-// exactly the two hand-written lists this replaces (bot-search.spec.ts pins that).
+// exactly the two hand-written lists this replaces (bot-search.test.ts pins that).
 export const preferenceRings = (size: number): number[][] => {
   const centre = (size - 1) / 2;
   const rings: { manhattan: number; chebyshev: number; cells: number[] }[] = [];

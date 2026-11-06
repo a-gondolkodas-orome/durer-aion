@@ -2,6 +2,11 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { RealClientRepository } from "./client-repository";
 
+// Uninitialised, i18next's `t` answers with nothing at all, which would make
+// the assertion below read `Error: undefined`; the app initialises it, a unit
+// test has no reason to.
+vi.mock("i18next", () => ({ default: { t: (key: string) => key } }));
+
 // Every call the repository makes, with what it was given. `axios.create` is
 // what the repository builds its client from, so this is the whole transport.
 function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
@@ -9,6 +14,8 @@ function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
   const instance = {
     get: (url: string) => { calls.push({ method: "get", url }); return answer("get", url); },
     post: (url: string, body?: unknown) => { calls.push({ method: "post", url, body }); return answer("post", url); },
+    delete: (url: string) => { calls.push({ method: "delete", url }); return answer("delete", url); },
+    put: (url: string, body?: unknown) => { calls.push({ method: "put", url, body }); return answer("put", url); },
   } as unknown as AxiosInstance;
   vi.spyOn(axios, "create").mockReturnValue(instance);
   return calls;
@@ -16,8 +23,8 @@ function fakeAxios(answer: (method: string, url: string) => Promise<unknown>) {
 
 const ok = () => Promise.resolve({ data: {} });
 
-const status = (code: number) =>
-  Promise.reject(new AxiosError("failed", "ERR_BAD_REQUEST", undefined, undefined, { status: code } as AxiosResponse));
+const status = (code: number, data?: unknown) =>
+  Promise.reject(new AxiosError("failed", "ERR_BAD_REQUEST", undefined, undefined, { status: code, data } as AxiosResponse));
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -38,6 +45,16 @@ describe("the team routes", () => {
     fakeAxios(() => status(404));
 
     await expect(new RealClientRepository().joinWithCode("999-9999-999")).rejects.toThrow("Nem létező kód");
+  });
+
+  // The message is a translation key, not a Hungarian string: what this pins
+  // is that a 429 picks that key, and `npm run i18n:check` that hu and en both
+  // carry it. i18next answers with the key itself here, uninitialised.
+  test("a client over the guessing limit is told to wait", async () => {
+    fakeAxios(() => status(429));
+
+    await expect(new RealClientRepository().joinWithCode("999-9999-999"))
+      .rejects.toThrow("login.error.tooManyAttempts");
   });
 
   // The session is the cookie, so the routes name no team; and starting a
@@ -71,5 +88,57 @@ describe("the team routes", () => {
     fakeAxios(() => status(401));
 
     expect(await new RealClientRepository().getTeamState()).toBeNull();
+  });
+});
+
+describe("adding minutes to a match", () => {
+  // Regression for #101: the check read axios's `code`, which is an error name
+  // such as "ERR_BAD_RESPONSE", never an HTTP status, so this never matched.
+  test("a match the server will not extend is reported as expired", async () => {
+    fakeAxios(() => status(501));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes("match-1", 5))
+      .rejects.toThrow("Lejárt játékot már nem lehet módosítani");
+  });
+
+  test("any other failure is reported like the other admin actions", async () => {
+    fakeAxios(() => status(500));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes("match-1", 5)).rejects.toThrow("Váratlan hiba történt");
+  });
+});
+
+describe("the team import", () => {
+  test("uploads the file as the route's one `file` field", async () => {
+    const calls = fakeAxios(ok);
+    const file = new File(["Teamname\n"], "teams.tsv");
+
+    await new RealClientRepository().importTeams(file);
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ method: "put", url: "/team/admin/import" });
+    expect((calls[0].body as FormData).get("file")).toBe(file);
+  });
+
+  // The answer is the only copy of the generated join codes, and nginx gives
+  // the backend 60 seconds (its default proxy_read_timeout): a client that gave
+  // up first would drop codes for teams that went in regardless.
+  test("waits longer than nginx does", async () => {
+    fakeAxios(ok);
+
+    await new RealClientRepository().importTeams(new File([""], "teams.tsv"));
+
+    const created = vi.mocked(axios.create).mock.calls.at(-1)?.[0];
+    expect(created?.timeout).toBeGreaterThan(60_000);
+  });
+
+  test("a file the route refuses for its name is said to need .tsv", async () => {
+    fakeAxios(() => status(400));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().importTeams(new File([""], "teams.csv")))
+      .rejects.toThrow("Csak .tsv kiterjesztésű fájlt lehet importálni.");
   });
 });

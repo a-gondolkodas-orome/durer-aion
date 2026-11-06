@@ -1,15 +1,13 @@
 // The client half of the registries — see strategy-games.ts. The frontends
 // import this through the `game/client` entry; the server never does.
-import { MyBoard as StonesBoard } from "./stones/board";
-import { MyBoard as Board19ocd } from "./19ocd/board";
+import { MyBoard as Board20ocde } from "./20ocde/board";
 
-export { descriptionC, descriptionD } from "./19ocd/main";
-export { descriptionE } from "./stones/main";
+export { descriptionC, descriptionD, descriptionE } from "./20ocde/main";
 
 const boards = {
-  C: Board19ocd,
-  D: Board19ocd,
-  E: StonesBoard,
+  C: Board20ocde,
+  D: Board20ocde,
+  E: Board20ocde,
 };
 
 // Generic over the category so the caller keeps the board's own state type: a

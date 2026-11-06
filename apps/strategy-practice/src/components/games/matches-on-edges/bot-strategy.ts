@@ -27,7 +27,7 @@ const opponentWinningReplies = (board: Board, move: Move, memo: Map<string, bool
 };
 
 // Optimal bot: verified against the official characterisation (see
-// bot-strategy.spec.ts). Plays a winning move when one exists, otherwise sets
+// bot-strategy.test.ts). Plays a winning move when one exists, otherwise sets
 // the hardest possible trap.
 export const smartBotStrategy: Bot = ({ board }) => {
   const memo = new Map<string, boolean>();

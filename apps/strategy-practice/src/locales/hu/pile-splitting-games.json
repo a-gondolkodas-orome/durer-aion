@@ -1,0 +1,18 @@
+{
+  "board": {
+    "discardPile": "kupac eldobása",
+    "discardPileOf": "{{size}} korongos kupac eldobása",
+    "keepPile": "mégsem dobod el ezt a kupacot",
+    "splitAfter": "vágás a(z) {{number}}. korong után"
+  },
+  "rule": {
+    "four": "A pályán kezdetben négy kupac korong van. A soron következő játékos először az egyik kupacot teljes egészében kiveszi a játékból; majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell). Egy lépést követően tehát újra 4 kupac marad. Az veszít, aki nem tud lépni.",
+    "three": "A pályán kezdetben 37 korong van, három kupacban. A soron következő játékos először az egyik kupacot teljes egészében kiveszi a játékból; majd egy másik kupacot kettéoszt két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell). Egy lépést követően tehát újra három kupac marad. Az veszít, aki nem tud lépni.",
+    "two": "A pályán mindig két kupac korong található. A soron következő játékos választ egy kupacot, és azt szétosztja két kisebb kupacra (mindkettőbe legalább 1 korongnak kerülnie kell), a másik kupacot pedig kidobjuk. Az veszít, aki nem tud lépni."
+  },
+  "step": {
+    "four": "Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.",
+    "three": "Először kattints az eltávolítandó kupacra, majd arra a korongra, ahol ketté akarod vágni a kupacot.",
+    "two": "Kattints a korongra, ahol ketté akarod vágni a kupacot."
+  }
+}

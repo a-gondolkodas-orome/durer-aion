@@ -2,7 +2,7 @@ import { range } from 'lodash';
 
 import { SharkSvg } from './assets/shark-chase-shark-svg';
 import { SubmarineSvg } from './assets/shark-chase-submarine-svg';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { type Board, RESEARCHERS, SHARK, sideLength } from './gameplay';
 import { GameBoard, type BoardClientProps, useMoveScopedState } from 'strategy-game-factory';
 
@@ -54,7 +54,7 @@ const OptionalNextSubmarine = ({ existingSubmarineCount }: { existingSubmarineCo
 // and in how many days the shark has to survive, which it does not.
 export const makeBoardClient = (maxTurn: number) => {
   const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-    const { t } = useTranslation();
+    const { t } = useTranslation('shark-chase');
     const [chosenPiece, setChosenPiece] = useMoveScopedState<number | null>(ctx.moveCount, null);
     const isCurrentPlayerResearcher = ctx.currentPlayer === RESEARCHERS;
     const isCurrentPlayerShark = ctx.currentPlayer === SHARK;
@@ -100,23 +100,20 @@ export const makeBoardClient = (maxTurn: number) => {
       const count = board.submarines[id];
       const contents: string[] = [];
       if (count >= 1) {
-        contents.push(t({
-          hu: `${count} tengeralattjáró`,
-          en: `${count} submarine${count > 1 ? 's' : ''}`
-        }));
+        contents.push(t('board.submarines', { count }));
       }
-      if (board.shark === id) contents.push(t({ hu: 'cápa', en: 'shark' }));
+      if (board.shark === id) contents.push(t('board.shark'));
       if (board.shark === id && isCurrentPlayerShark && canInteract) {
-        contents.push(t({ hu: 'itt maradok', en: 'stay here' }));
+        contents.push(t('board.stayHere'));
       }
-      const sector = t({ hu: `${id + 1}. szektor`, en: `Sector ${id + 1}` });
+      const sector = t('board.sector', { number: id + 1 });
       return contents.length > 0 ? `${sector}: ${contents.join(', ')}` : sector;
     };
 
     return (
     <GameBoard>
       <p className='font-bold text-lg'>
-        {t({ hu: 'Hátralévő lépések száma', en: 'Remaining moves' })}: {maxTurn + 1 - board.turn}
+        {t('board.remainingMoves')}: {maxTurn + 1 - board.turn}
       </p>
       <SubmarineSvg/>
       <SharkSvg/>
@@ -157,7 +154,7 @@ export const makeBoardClient = (maxTurn: number) => {
               <span
                 className="absolute bottom-1 z-50 w-[95%] secondary-button text-xs p-0.5
                   pointer-events-none"
-              >{t({ hu: 'Itt maradok', en: 'Stay here' })}</span>
+              >{t('board.stayHereButton')}</span>
             )}
         </button>
         ))}

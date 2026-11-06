@@ -1,0 +1,20 @@
+{
+  "board": {
+    "decrease": "−1 from pile {{number}}",
+    "increase": "+1 from pile {{number}}",
+    "pile": "Pile {{number}}, {{stones}} stones",
+    "pointLast": "Point at the last pile",
+    "pointTwo": "Point at these two piles",
+    "remove": "Remove the stones"
+  },
+  "role": {
+    "pointFirst": "I point first",
+    "takeFirst": "I take first"
+  },
+  "rule": "At the start of the game there are stones in a few piles. On a player's turn, two things happen in sequence: the other player points at two of the piles (or, if only one pile is left, at that one), then the player on turn removes some stones from one of the pointed piles (at least one, possibly all of them). Whoever takes the last stone wins.",
+  "step": {
+    "pointLast": "Point at the only remaining pile for the other player.",
+    "pointTwo": "Point at two piles for the other player to choose from.",
+    "take": "Take some stones from one of the pointed piles."
+  }
+}

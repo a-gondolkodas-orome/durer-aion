@@ -1,5 +1,8 @@
-import { Ctx } from "boardgame.io";
-import { GameStateMixin, MyGameState as RelayGameState } from "game";
+import type { Ctx } from "boardgame.io";
+import type { GameStateMixin, MyGameState as RelayGameState } from "game";
+import type { MatchStatus, PageState } from "schemas";
+
+export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -13,7 +16,7 @@ export interface TeamModelDto {
   category: string;
   credentials: string;
   email?: string;
-  pageState: 'DISCLAIMER' | 'HOME' | 'RELAY' | 'STRATEGY'
+  pageState: PageState
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
 }
@@ -27,6 +30,21 @@ export function adminTeamId(team: TeamModelDto): string {
     throw new Error(`A(z) ${team.teamName} csapat azonosítója hiányzik.`);
   }
   return team.teamId;
+}
+
+/// What `PUT /team/admin/import` answers: the import goes row by row, so some
+/// rows can land while others fail. `logs` is the server's own English
+/// narration, `sev` and `value` index-aligned.
+export interface TeamImportResultDto {
+  successful: number;
+  failed: number;
+  /// The teams that landed, in the import's column order, with the generated
+  /// id, join code and credentials filled in. The only copy of those codes.
+  export_table: string[][];
+  logs: {
+    sev: ('info' | 'warn' | 'error')[];
+    value: string[];
+  };
 }
 
 /// One admin endpoint serves both kinds of match, and the payload carries no
@@ -49,23 +67,4 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-export interface FinishedMatchStatus {
-  state: 'FINISHED';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-  score: number;
-}
-
-export interface NotStartedMatchStatus {
-  state: 'NOT STARTED';
-}
-
-export interface InProgressMatchStatus {
-  state: 'IN PROGRESS';
-  startAt: Date;
-  endAt: Date;
-  matchID: string;
-}
-
-export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
+export type { FinishedMatchStatus, InProgressMatchStatus, LiveGameResult, MatchStatus, NotStartedMatchStatus, RelayProblemResult } from "schemas";

@@ -1,0 +1,4 @@
+{
+  "rule": "Adott az ábrán látható módosított malom pálya. A két játékos felváltva helyez le piros és kék korongokat a táblára. (Olyan mezőre nem rakhattok korongot, ahol már van valamilyen színű korong.) Az a játékos nyer, akinek először összegyűlik három egy vonalban lévő szomszédos korongja. Ha már minden mezőn szerepel korong, de egyik színű korongból sincs három szomszédos, melyek egy vonalban helyezkednek el, akkor a második játékos nyer.",
+  "step": "Kattints egy üres mezőre, hogy lerakj rá egy korongot."
+}

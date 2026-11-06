@@ -1,0 +1,7 @@
+{
+  "rule": "On 6 fields placed around a circle, an even number of discs (at most 30 in total) is distributed. Two players move alternately. On a turn the current player selects two neighbouring or second-neighbouring fields (that is, any two fields that are not opposite each other), neither of them empty, and removes one disc from each. The player who cannot move loses.",
+  "step": {
+    "first": "Pick a non-empty field to take a disc from.",
+    "second": "Click another non-empty field that is not opposite the selected one to take the second disc, or click the selected field to undo the selection."
+  }
+}

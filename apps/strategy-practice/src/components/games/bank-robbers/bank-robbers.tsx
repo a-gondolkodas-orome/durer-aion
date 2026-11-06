@@ -1,4 +1,7 @@
-import { strategyGameFactory, type BoardClientProps, GameBoard } from 'strategy-game-factory';
+import { Trans, useTranslation } from 'react-i18next';
+import {
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard
+} from 'strategy-game-factory';
 import { range } from 'lodash';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, isRobbable, moves, type Board } from './gameplay';
@@ -64,36 +67,25 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
   );
 };
 
-const rule = {
-  hu: <>
-    Bergengócia fővárosában legalább 7 és legfeljebb 10 bank található, melyek körben,
-    a Nagykörút mentén helyezkednek el. Két rivális bűnbanda ezen bankok kirablását tervezi,
-    mégpedig úgy, hogy felváltva választanak ki egy-egy bankot. Nem választanak ki olyat,
-    amit már korábban az egyikük kifosztott, és olyat sem, aminek már mindkét szomszédját kirabolták,
-    mert ott már lesben áll a rendőrség. Az a banda veszít, aki már nem talál bankot, amit kirabolhat.
-    <br /><em>C kategóriában 7, D kategóriában 9 bankkal szerepelt a feladat a versenyen.</em>
-  </>,
-  en: <>
-    The capital of Bergengocia has between 7 and 10 banks arranged in a circle along the Grand Boulevard.
-    Two rival gangs plan to rob these banks by taking turns selecting one bank at a time. They may not
-    select a bank that has already been robbed, nor one both of whose neighbours have already been robbed,
-    as the police are lying in ambush there. The gang that can no longer find a bank to rob loses.
-    <br /><em>In category C the problem used 7 banks, in category D it used 9 banks.</em>
-  </>
+const Rule = () => {
+  const { t } = useTranslation('bank-robbers');
+  return <Trans t={t} i18nKey="rule" />;
+};
+
+const StepDescription = () => {
+  const { t } = useTranslation('bank-robbers');
+  return t('step');
 };
 
 export const BankRobbers = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription: () => ({
-      hu: 'Válassz egy kirabolható bankot.',
-      en: 'Choose a bank that can be robbed.'
-    })
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
   variants: [
-    { botStrategy: randomBotStrategy, label: { hu: 'Teszt', en: 'Test' } },
-    { botStrategy: smartBotStrategy, generateStartBoard, label: { hu: 'Teljes', en: 'Full' }, isDefault: true }
+    { botStrategy: randomBotStrategy, label: testVariantLabel },
+    { botStrategy: smartBotStrategy, generateStartBoard, label: fullVariantLabel, isDefault: true }
   ]
 });

@@ -1,0 +1,13 @@
+{
+  "board": {
+    "digit": "{{value}} számjegy",
+    "emptyCell": "üres mező",
+    "noDigitFits": "Ide egyik számjegy sem írható — válassz másik mezőt.",
+    "whichDigit": "Melyik számjegyet írod be?"
+  },
+  "rule": "Adott egy 3×3-as táblázat. Egy lépésben a soron következő játékos beír egy üres mezőbe egy 1-es, 2-es vagy 3-as számjegyet úgy, hogy ne keletkezzen olyan sor vagy oszlop, amiben van két azonos szám. A kezdő játékos akkor nyer, ha mind a 9 mezőbe kerül szám, míg a második akkor nyer, ha valakinek a köre előtt még van üres mező, de már nem tud szabályosan lépni.",
+  "step": {
+    "first": "Kattints egy üres mezőre, majd írj bele egy 1-es, 2-es vagy 3-as számjegyet. A célod, hogy végül mind a 9 mező megteljen.",
+    "second": "Kattints egy üres mezőre, majd írj bele egy 1-es, 2-es vagy 3-as számjegyet. A célod, hogy a másik játékos elakadjon: legyen üres mező, de már ne tudjon szabályosan lépni."
+  }
+}

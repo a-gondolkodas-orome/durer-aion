@@ -1,0 +1,21 @@
+{
+  "board": {
+    "column": "Column {{number}}",
+    "row": "Row {{number}}"
+  },
+  "role": {
+    "placeFirst": "I'll place first",
+    "placeSecond": "I'll place second"
+  },
+  "rule": {
+    "a": "The magic box has nine compartments in a 3×3 grid. Two players alternately place stones into the compartments, at most one stone per compartment. If all three compartments of some row or column contain a stone, the bottom of the box breaks. The player whose move causes this loses.",
+    "b": "The magic box has nine compartments in a 3×3 grid. Two players alternately place stones into the compartments, at most one stone per compartment. One player designates a row or column, and the other player must place a stone into it. Then the roles swap: whoever just placed a stone now designates a row or column for the other player, and this keeps alternating. The game ends when a player can't place a stone into the designated row or column — that player loses. At the start, you can choose whether you place the first stone, or designate the first row/column."
+  },
+  "step": {
+    "a": "Click on an empty compartment to place a stone.",
+    "b": {
+      "designate": "Designate a row or column where the other player must place their next stone.",
+      "place": "Place a stone into the designated row or column."
+    }
+  }
+}

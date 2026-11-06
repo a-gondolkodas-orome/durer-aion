@@ -1,7 +1,8 @@
 import {
-  strategyGameFactory, type BoardClientProps, GameBoard, useDeferredMove, useMoveScopedState
+  strategyGameFactory, testVariantLabel, fullVariantLabel, type BoardClientProps, GameBoard, useDeferredMove,
+  useMoveScopedState
 } from 'strategy-game-factory';
-import { useTranslation } from 'language';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   canSplit,
   generateStartBoard,
@@ -27,7 +28,7 @@ interface Inputs { p1: string; p2: string }
 const emptyInputs: Inputs = { p1: '', p2: '' };
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('three-piles-rebuild');
   const deferMove = useDeferredMove(ctx.moveCount);
   // Move-scoped: the kept pile and the typed parts expire when the board
   // advances (own or bot move).
@@ -69,10 +70,10 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
   const caption = (pileId: number): string => {
     if (board[pileId] === 0) return '🗑️';
-    if (activeKeepId === pileId) return t({ hu: '✓ megtartod', en: '✓ keep' });
+    if (activeKeepId === pileId) return t('board.caption.keep');
     if (keepId !== null) return '🗑️';
-    if (!canSplit(board[pileId])) return t({ hu: 'túl kevés', en: 'too few' });
-    return t({ hu: 'kavics', en: 'pieces' });
+    if (!canSplit(board[pileId])) return t('board.caption.tooFew');
+    return t('board.caption.pieces');
   };
 
   return (
@@ -108,16 +109,13 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {ctx.isClientMoveAllowed && keepId !== null && (
         <div className="mt-4 flex flex-col gap-3 bg-surface-elevated rounded-lg p-3 max-w-md">
           <p className="text-sm">
-            {t({
-              hu: `${n} kavicsból építs három kupacot:`,
-              en: `Build three piles from ${n} pebbles:`
-            })}
+            {t('board.buildThree', { n })}
           </p>
           <div className="flex items-end gap-2 flex-wrap">
             {(['p1', 'p2'] as const).map((key, i) => (
               <div key={key} className="flex flex-col gap-1">
                 <label htmlFor={`part-${key}`} className="text-xs text-slate-600 dark:text-slate-400">
-                  {t({ hu: `${i + 1}. kupac`, en: `Pile ${i + 1}` })}
+                  {t('board.pile', { number: i + 1 })}
                 </label>
                 <input
                   id={`part-${key}`}
@@ -133,7 +131,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             ))}
             <div className="flex flex-col gap-1">
               <span className="text-xs text-slate-600 dark:text-slate-400">
-                {t({ hu: '3. kupac', en: 'Pile 3' })}
+                {t('board.pile', { number: 3 })}
               </span>
               <span
                 className={`w-20 px-2 py-1.5 rounded-md border-2 border-dashed text-center tabular-nums
@@ -149,15 +147,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 enabled:hocus:bg-blue-100 dark:enabled:hocus:bg-blue-900
                 enabled:hocus:border-blue-300 disabled:opacity-50"
             >
-              {t({ hu: 'Újraosztom', en: 'Split' })}
+              {t('board.split')}
             </button>
           </div>
           {p1 !== null && p2 !== null && p3 !== null && p3 < 1 && (
             <p className="text-sm text-red-500">
-              {t({
-                hu: 'Túl sok kavicsot osztottál ki — mindhárom kupacba legalább 1 kell.',
-                en: 'Too many pebbles used — each of the three piles needs at least 1.'
-              })}
+              {t('board.tooMany')}
             </p>
           )}
         </div>
@@ -168,30 +163,20 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
 
 // "Keep, then split" is one decision, so the turn is named as a whole (mirrors
 // the pile-splitting games).
-const getPlayerStepDescription = () => ({
-  hu: 'Válaszd ki, melyik kupacot tartod meg (a másik kettőt eldobod), majd oszd három új kupacra.',
-  en: 'Choose which pile to keep (the other two are discarded), then split it into three new piles.'
-});
+const StepDescription = () => {
+  const { t } = useTranslation('three-piles-rebuild');
+  return t('step');
+};
 
-const rule = {
-  hu: <>
-    A játék kezdetén az asztalon van három kupac, mindegyikben néhány kaviccsal.
-    A soron következő játékos egy lépésében eldob két kupacot, és a megmaradt kupacban lévő
-    kavicsokból újra három kupacot csinál. Az veszít, aki már nem tud három kupacot építeni a
-    megmaradt kavicsokból (vagyis a kiválasztott kupacban kevesebb mint három kavics maradt).
-  </>,
-  en: <>
-    At the start there are three piles on the table, each with some pebbles. On their turn, the
-    current player discards two of the piles and rebuilds three new piles from the pebbles of the
-    remaining one. You lose if you can no longer build three piles from the remaining pebbles (i.e.
-    the chosen pile has fewer than three pebbles).
-  </>
+const Rule = () => {
+  const { t } = useTranslation('three-piles-rebuild');
+  return <Trans t={t} i18nKey="rule" />;
 };
 
 export const ThreePilesRebuild = strategyGameFactory({
   presentation: {
-    rule,
-    getPlayerStepDescription
+    rule: <Rule />,
+    getPlayerStepDescription: () => <StepDescription />
   },
   BoardClient,
   gameplay: { moves },
@@ -199,12 +184,12 @@ export const ThreePilesRebuild = strategyGameFactory({
     {
       botStrategy: randomBotStrategy,
       generateStartBoard: generateTestStartBoard,
-      label: { hu: 'Teszt', en: 'Test' }
+      label: testVariantLabel
     },
     {
       botStrategy: smartBotStrategy,
       generateStartBoard,
-      label: { hu: 'Teljes', en: 'Full' },
+      label: fullVariantLabel,
       isDefault: true
     }
   ]

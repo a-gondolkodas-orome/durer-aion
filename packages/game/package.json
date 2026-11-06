@@ -23,20 +23,24 @@
   "types": "./dist/index.d.mts",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt game\""
   },
+  "//": [
+    "@mui/icons-material is imported by no board here. It stays declared for a year's private game whose board uses an icon, so that import resolves from this package's own dependency rather than by npm hoisting common-frontend's copy — issue #432 is what that accident looks like when it breaks."
+  ],
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@mui/icons-material": "9.4.0",
-    "@mui/material": "9.4.0",
-    "lodash": "4.18.1"
+    "@mui/icons-material": "9.5.0",
+    "@mui/material": "9.5.0"
   },
   "devDependencies": {
-    "@types/lodash": "4.17.25",
-    "@types/react": "19.2.18"
+    "@types/react": "19.3.0",
+    "schemas": "*"
   },
   "peerDependencies": {
     "boardgame.io": "0.50.*",

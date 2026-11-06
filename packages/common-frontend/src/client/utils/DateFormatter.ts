@@ -1,9 +1,3 @@
-export const formatDate = (time: Date): string => {
-  return time.toLocaleDateString(["hu"], {
-    year: 'numeric', month: 'numeric', day: 'numeric'
-  })
-}
-
 export const formatTime = (time: Date): string => {
   if (!time.getHours) {
     time = new Date(time);

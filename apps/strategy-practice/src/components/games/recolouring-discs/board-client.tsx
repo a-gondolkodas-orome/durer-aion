@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { range } from 'lodash';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameBoard, type BoardClientProps, useMoveScopedState } from 'strategy-game-factory';
 import { type Board, type Cell, colorOf } from './gameplay';
 
@@ -32,7 +32,7 @@ const discClass = (cell: 'red' | 'blue' | null): string => {
 };
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('recolouring-discs');
   const { cells } = board;
   const myColor = ctx.currentPlayer === null ? null : colorOf(ctx.currentPlayer);
   const canInteract = ctx.isClientMoveAllowed && myColor !== null;
@@ -116,12 +116,10 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   };
 
   const label = (i: number): string => {
-    const content = cells[i] === 'red'
-      ? t({ hu: 'piros korong', en: 'red disc' })
-      : cells[i] === 'blue'
-        ? t({ hu: 'kék korong', en: 'blue disc' })
-        : t({ hu: 'üres', en: 'empty' });
-    return t({ hu: `${i + 1}. mező, ${content}`, en: `Field ${i + 1}, ${content}` });
+    const number = i + 1;
+    if (cells[i] === 'red') return t('board.field.red', { number });
+    if (cells[i] === 'blue') return t('board.field.blue', { number });
+    return t('board.field.empty', { number });
   };
 
   return (
@@ -170,7 +168,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       {canInteract && (
         <div className="flex justify-center mt-4">
           <button onClick={() => moves.pass(board)} className="primary-button w-auto">
-            {t({ hu: 'Passzolok', en: 'Pass' })}
+            {t('board.pass')}
           </button>
         </div>
       )}

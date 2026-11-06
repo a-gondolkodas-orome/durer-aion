@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { gameList, type Category, type IconKey } from '../games/gameList';
-import { useTranslation, LanguageSelector, type I18nNode } from 'language';
+import { gameList, type Category, type IconKey, type Round } from '../games/gameList';
+import { Trans, useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { LanguageSelector } from 'language';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import { IconButton } from '@mui/material';
 import { ThemeSwitcher } from '../../theme';
 import {
-  FilterToggle, CategoryFilter, IconFilter, filterByCategories, filterByIcons
+  FilterToggle, CategoryFilter, IconFilter, YearFilter, RoundFilter,
+  filterByCategories, filterByIcons, filterByYears, filterByRounds, type YearRange
 } from './filters/filters';
 import {
   FeaturedStrip,
@@ -18,31 +21,40 @@ import {
   type SectionKey
 } from './game-list/sections';
 
-const sectionTitles: Record<SectionKey, I18nNode> = {
-  AB: { hu: '5-8. osztályosoknak (A-B kategória)', en: 'For grades 5–8 (A–B category)' },
-  CDE: { hu: '9-12. osztályosoknak (C-D-E kategória)', en: 'For grades 9–12 (C-D-E category)' }
-};
+const sectionTitles = (t: TFunction<'overview'>): Record<SectionKey, string> => ({
+  AB: t('section.AB'),
+  CDE: t('section.CDE')
+});
 
 export const Overview = () => {
+  const { t } = useTranslation('overview');
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedIcons, setSelectedIcons] = useState<IconKey[]>([]);
+  const [yearRange, setYearRange] = useState<YearRange>(null);
+  const [selectedRounds, setSelectedRounds] = useState<Round[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const isFiltering = selectedCategories.length > 0 || selectedIcons.length > 0;
+  const isFiltering = selectedCategories.length > 0 || selectedIcons.length > 0 ||
+    yearRange !== null || selectedRounds.length > 0;
 
   const allIds = Object.keys(gameList);
-  const visibleIds = filterByIcons(
-    filterByCategories(allIds, selectedCategories, gameList),
-    selectedIcons,
+  const applyFilters = (ids: string[]) => filterByRounds(
+    filterByYears(
+      filterByIcons(
+        filterByCategories(ids, selectedCategories, gameList),
+        selectedIcons,
+        gameList
+      ),
+      yearRange,
+      gameList
+    ),
+    selectedRounds,
     gameList
   );
+  const visibleIds = applyFilters(allIds);
   const groups = groupBySection(visibleIds, gameList);
 
   const featuredIds = orderByCategoryThenYear(
-    filterByIcons(
-      filterByCategories(getFeaturedGames(gameList), selectedCategories, gameList),
-      selectedIcons,
-      gameList
-    ),
+    applyFilters(getFeaturedGames(gameList)),
     gameList
   );
 
@@ -50,13 +62,18 @@ export const Overview = () => {
     <OverviewHeader
       filtersOpen={showFilters}
       onToggleFilters={() => setShowFilters(o => !o)}
-      activeFilterCount={selectedCategories.length + selectedIcons.length}
+      activeFilterCount={selectedCategories.length + selectedIcons.length +
+        (yearRange === null ? 0 : 1) + selectedRounds.length}
     />
     <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
       {showFilters && (
-        <div className="mt-2 pt-3 flex flex-col gap-1 mb-2">
+        <div aria-label="filter" className="mt-2 pt-3 flex flex-col gap-1 mb-2 border-2 p-3"
+          style={{ borderRadius: '10px' }}
+        >
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
+          <RoundFilter selected={selectedRounds} onChange={setSelectedRounds} />
           <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
+          <YearFilter range={yearRange} onChange={setYearRange} />
         </div>
       )}
 
@@ -65,7 +82,7 @@ export const Overview = () => {
       {sectionOrder.map(section => (
         <CategorySection
           key={section}
-          title={sectionTitles[section]}
+          title={sectionTitles(t)[section]}
           gameIds={orderByCategoryThenYear(groups[section], gameList)}
           defaultOpen={defaultOpenSections.includes(section)}
           forceOpen={isFiltering}
@@ -74,8 +91,7 @@ export const Overview = () => {
       ))}
     </div>
 
-    <div className="primary-surface md:hidden fixed bottom-0 left-0 right-0 flex justify-end items-center gap-3 px-3
-      py-4">
+    <div className="primary-footer">
       <ThemeSwitcher />
       <LanguageSelector />
     </div>
@@ -87,9 +103,9 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
   onToggleFilters: () => void
   activeFilterCount: number
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('overview');
   return <>
-    <header className="primary-surface sticky top-0 z-40 shadow-md font-roboto">
+    <header className="primary-header">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -98,12 +114,12 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
               href="/.."
               aria-label="Home"
               size="small"
-              sx={{ color: 'white', '&:hover': { color: '#eeeeee' } }}
+              color="inherit"
             >
               <HomeRoundedIcon fontSize="small" />
             </IconButton>
-            <h1 className="text-white font-bold text-2xl sm:text-3xl tracking-tight">
-              {t({ hu: 'Dürer stratégiás játékok', en: 'Dürer Strategy Games' })}
+            <h1 className="text-2xl sm:text-3xl">
+              {t('title')}
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -117,21 +133,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
       </div>
     </header>
     <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
-      {t({
-        hu: <>
-          A <i>stratégiás játék</i> egy két szereplős játék,
-          amelyben nincs szerencsefaktor: optimális stratégiával mindig nyerni lehet,
-          így matekfeladatként is tekinthető.
-          Az alábbi, A-tól E+ kategóriáig nehezedő játékok
-          a <a href="https://durerinfo.hu">Dürer Versenyen</a> szerepeltek.
-        </>,
-        en: <>
-          A <i>strategy game</i> is a two-player game with no luck involved:
-          the right strategy always wins, making it essentially a math puzzle.
-          The games below, ranging from category A to E+ in difficulty,
-          all featured in the <a href="https://durerinfo.hu">Dürer Competition</a>.
-        </>
-      })}
+      <Trans t={t} i18nKey="intro" components={{ durerinfo: <a href="https://durerinfo.hu" /> }} />
     </div>
   </>;
 };

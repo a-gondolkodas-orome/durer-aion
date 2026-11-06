@@ -1,5 +1,6 @@
 import type { Ctx } from "boardgame.io";
-import { TeamModelDto } from "common-frontend";
+import { TeamModelDto } from "common-frontend/core";
+import { readPersistedLog } from "./bgio-log";
 import { readStoredTeamState } from "./stored-team-state";
 
 
@@ -27,7 +28,6 @@ function sendData(fileName: string, data: string) {
   const fd = new FormData();
   fd.append('key', folder + '/' + fileName);
   fd.append('file', data);
-  // utf8 charset
   fd.append('Content-Type', 'text/plain; charset=utf-8');
   fetch(
     bucketName,
@@ -68,13 +68,27 @@ export interface SendGameDataParams {
   // wrapper's score); the rest of G rides along in the JSON payload.
   G?: { currentProblem?: number; points?: number };
   ctx?: Ctx;
-  // Only ever JSON-stringified here, so whatever a caller reports as its log
-  // is passed through: gameWrapper's move context carries the log plugin.
-  log?: unknown;
 }
 
-export function sendGameData(params: SendGameDataParams) {
-  const { component, phase, answer, G, ctx, log } = params;
+// boardgame.io appends a step's own entries to the match log *after* the
+// reducer that reported the step returns, and revokes the draft `G` and `ctx`
+// at the same moment. So the state is copied now and the file goes out once
+// the log is complete — one upload per step, as before.
+//
+// `logStorageKey` is the key the client gave `localWithBots`;
+// without one the file claims no log rather than an empty one.
+function sendStrategyStep(fileName: string, reported: object, logStorageKey?: string) {
+  const state = JSON.parse(JSON.stringify(reported)) as object;
+  setTimeout(() => {
+    const log = logStorageKey === undefined ? undefined : readPersistedLog(logStorageKey);
+    sendData(fileName, JSON.stringify({ ...state, log }));
+  });
+}
+
+/// `logStorageKey` reaches the strategy step alone: it is the only file whose
+/// live counterpart is a log the organisers can fetch from the server.
+export function sendGameData(params: SendGameDataParams, logStorageKey?: string) {
+  const { component, phase, answer, G, ctx } = params;
   const joinCode = getJoinCode();
   switch (phase) {
     case "start":
@@ -88,7 +102,7 @@ export function sendGameData(params: SendGameDataParams) {
           break;
         }
         case "strategy":
-          sendData(joinCode + "_" + randomID + "_stratstep_" + now(), JSON.stringify({ G, ctx, log }));
+          sendStrategyStep(joinCode + "_" + randomID + "_stratstep_" + now(), { G, ctx }, logStorageKey);
           break;
         default:
           break;

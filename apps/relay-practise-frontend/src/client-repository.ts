@@ -1,7 +1,9 @@
-import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto, MatchStateDto, BoardMoves } from "common-frontend";
+import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto } from "common-frontend/core";
 import { teamData } from "./teamData";
-import { sendDataLogin, sendGameData } from "./sendData";
+import type { RelayEndReport } from "game";
+import { handleGameReport } from "./game-report";
 import { readStoredTeamState } from "./stored-team-state";
+import { trackRelayStarted } from "./tracking";
 import i18n from "i18next";
 
 export class OfflineClientRepository implements ClientRepository {
@@ -23,7 +25,10 @@ export class OfflineClientRepository implements ClientRepository {
         matchID: "",
       },
     }
-    sendGameData({ component: "relay", phase: "start" });
+    trackRelayStarted(teamState.teamName);
+    // An earlier round's, which handleGameReport would take for this round's
+    // finish.
+    localStorage.removeItem(relayPointsStorageKey());
     localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
@@ -40,7 +45,6 @@ export class OfflineClientRepository implements ClientRepository {
     const newState = { ...teamState, pageState: 'HOME' }
     if (teamState.relayMatch.state === "IN PROGRESS") {
       const score = Number(localStorage.getItem(relayPointsStorageKey()))
-      sendGameData({ component: "relay", phase: "end", G: { points: score } })
       newState.relayMatch = {
         ...teamState.relayMatch,
         state: "FINISHED",
@@ -61,53 +65,12 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve();
   }
 
-  async getAll(): Promise<TeamModelDto[]> {
-    return [];
-  }
-
-  async resetRelay(_teamId: string): Promise<TeamModelDto> {
-    throw Error("NOT call this");
-  }
-
-  async resetStrategy(_teamId: string): Promise<TeamModelDto> {
-    throw Error("NOT call this");
-  }
-
-  async addMinutes(_matchId: string, _minutes: number): Promise<string> {
-    return Promise.resolve("OK");
-  }
-
-  async getMatchState(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
-  }
-  async getMatchLogs(_matchId: string): Promise<MatchStateDto> {
-    throw Error("NOT call this");
-  }
-  async removeTeam(_teamId: string): Promise<void> {
-    throw Error("NOT call this");
-  }
-
-  // The local boardgame.io client judges the answer with the bundled bot, and
-  // its step report already goes out through RelayWrapper's sendGameData hook,
-  // so nothing is sent from here.
-  submitRelayAnswer(answer: number, moves: BoardMoves): Promise<void> {
-    moves.submitAnswer(answer);
-    return Promise.resolve();
-  }
-
-  startRelayGame(moves: BoardMoves): Promise<void> {
-    moves.startGame();
-    return Promise.resolve();
-  }
-
-  syncRelayTime(moves: BoardMoves): Promise<void> {
-    moves.getTime();
-    return Promise.resolve();
+  // Persisted as if the game had reported it, for toHome() to read.
+  keepRelayEnd(report: RelayEndReport): void {
+    handleGameReport(report);
   }
 
   joinWithCode(joinCode: string): Promise<void> {
-    // return the joincode if it is in the teamData.ts file
-
     const i = teamData.findIndex(e => e.join_code === joinCode);
 
     if (i > -1) {
@@ -131,7 +94,6 @@ export class OfflineClientRepository implements ClientRepository {
         },
       }
 
-      sendDataLogin(teamState);
       localStorage.setItem(teamStateStorageKey(),
         JSON.stringify(teamState)
       );

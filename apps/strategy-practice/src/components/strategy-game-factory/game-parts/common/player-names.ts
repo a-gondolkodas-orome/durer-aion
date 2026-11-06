@@ -1,16 +1,15 @@
-import type { I18nString } from 'language';
+import { useTranslation } from 'react-i18next';
 
-type Translate = (texts: I18nString) => string;
-
-export const DEFAULT_PLAYER_NAMES: [I18nString, I18nString] = [
-  { hu: '1. játékos', en: '1st player' },
-  { hu: '2. játékos', en: '2nd player' }
-];
+/** What an empty name field stands for, in the reader's language. */
+export const useDefaultPlayerNames = (): [string, string] => {
+  const { t } = useTranslation('factory');
+  return [t('player.defaultName.first'), t('player.defaultName.second')];
+};
 
 /** The names the game's messages actually use: what was typed, or the default. */
-export const resolvePlayerNames = (names: string[], t: Translate): [string, string] => [
-  names[0]?.trim() || t(DEFAULT_PLAYER_NAMES[0]),
-  names[1]?.trim() || t(DEFAULT_PLAYER_NAMES[1])
+export const resolvePlayerNames = (names: string[], defaults: [string, string]): [string, string] => [
+  names[0]?.trim() || defaults[0],
+  names[1]?.trim() || defaults[1]
 ];
 
 // Two players reading the same name in "Következik: …" cannot tell whose turn it
@@ -20,8 +19,8 @@ export const resolvePlayerNames = (names: string[], t: Translate): [string, stri
 // one goes first, and typing it into the first field collides the other way
 // round. Rejecting both keeps the rule a property of what was typed rather than
 // of which button is about to be pressed.
-export const havePlayerNameCollision = (names: string[], t: Translate): boolean =>
+export const havePlayerNameCollision = (names: string[], defaults: [string, string]): boolean =>
   [[names[0], names[1]], [names[1], names[0]]].some(seating => {
-    const [first, second] = resolvePlayerNames(seating, t);
+    const [first, second] = resolvePlayerNames(seating, defaults);
     return first.toLowerCase() === second.toLowerCase();
   });

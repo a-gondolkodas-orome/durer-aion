@@ -2,7 +2,7 @@ import { UserModel } from "./user-model";
 import { setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
-import { useClientRepo } from "../api-repository-interface";
+import { useAdminRepo, useClientRepo } from "../client-repo-context";
 
 export const useTeamState = (): TeamModelDto | null => {
   return useTeamStateValue();
@@ -27,9 +27,8 @@ export const LoadTeamState = () => {
             console.error("could not load the team state", e);
           });
 
-
-          userModel.addListener(setTeamState);
-  }, []);
+      return userModel.addListener(setTeamState);
+  }, [repo]);
 
   return null;
 };
@@ -44,51 +43,33 @@ export const useRefreshTeamState = () => {
 };
 
 export const useAll = () => {
-  const repo = useClientRepo();
-  return async () => {
-    const userModel = new UserModel(repo);
-    return await userModel.adminAll();
-  };
+  const repo = useAdminRepo();
+  return async () => await repo.getAll();
 };
 
 export const useGetLogs = () => {
-  const repo = useClientRepo();
-  return async (matchId: string) => {
-    const userModel = new UserModel(repo);
-    return await userModel.adminGetLogs(matchId);
-  };
+  const repo = useAdminRepo();
+  return async (matchId: string) => await repo.getMatchLogs(matchId);
 };
 
 export const useMatchState = () => {
-  const repo = useClientRepo();
-  return async (matchId: string) => {
-    const userModel = new UserModel(repo);
-    return await userModel.adminMatchState(matchId);
-  };
+  const repo = useAdminRepo();
+  return async (matchId: string) => await repo.getMatchState(matchId);
 };
 
 export const useResetRelay = () => {
-  const repo = useClientRepo();
-  return async (teamId: string) => {
-    const userModel = new UserModel(repo);
-    return await userModel.resetRelay(teamId);
-  };
+  const repo = useAdminRepo();
+  return async (teamId: string) => await repo.resetRelay(teamId);
 };
 
 export const useResetStrategy = () => {
-  const repo = useClientRepo();
-  return async (teamId: string) => {
-    const userModel = new UserModel(repo);
-    return await userModel.resetStrategy(teamId);
-  };
+  const repo = useAdminRepo();
+  return async (teamId: string) => await repo.resetStrategy(teamId);
 };
 
 export const useAddMinutes = () => {
-  const repo = useClientRepo();
-  return async (matchId: string, minutes: number) => {
-    const userModel = new UserModel(repo);
-    return await userModel.addMinutes(matchId, minutes);
-  };
+  const repo = useAdminRepo();
+  return async (matchId: string, minutes: number) => { await repo.addMinutes(matchId, minutes); };
 };
 
 export const useLogin = () => {
@@ -134,6 +115,26 @@ export const useToHome = () => {
   };
 };
 
+/**
+ * A finished match's way back: home, then a reload, or `instead` of the reload
+ * (the relay practice site logs out to its round selector). The handler is
+ * synchronous because React ignores what an event handler returns, so an async
+ * one would leave its promise unhandled.
+ */
+export const useBackToHome = (instead?: () => Promise<void>) => {
+  const refreshState = useRefreshTeamState();
+  const toHome = useToHome();
+  return () => void (async () => {
+    await refreshState();
+    await toHome();
+    if (instead) {
+      await instead();
+    } else {
+      window.location.reload();
+    }
+  })();
+};
+
 export const useStartStrategy = () => {
   const repo = useClientRepo();
   return async () => {
@@ -144,9 +145,7 @@ export const useStartStrategy = () => {
   };
 };
 
-export const useRemoveTeam = () => {
-  const repo = useClientRepo();
-  return async (teamId: string) => {
-    await repo.removeTeam(teamId);
-  };
+export const useImportTeams = () => {
+  const repo = useAdminRepo();
+  return async (file: File) => await repo.importTeams(file);
 };

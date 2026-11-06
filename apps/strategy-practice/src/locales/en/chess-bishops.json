@@ -1,0 +1,4 @@
+{
+  "rule": "Two players take turns placing bishops on a chessboard. A new bishop may only be placed on a square that is not already occupied by a bishop and is not attacked by any bishop. The player who cannot place a bishop loses.",
+  "step": "Click on a square that is not attacked by any bishop."
+}

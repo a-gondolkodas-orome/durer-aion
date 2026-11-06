@@ -1,0 +1,4 @@
+{
+  "rule": "In an Indian reservation there are {{poles}} totem poles arranged according to the left figure. Silent Stream and Red Fire play the following game: In turns they stretch ropes between pairs of poles in such a way that every stretched rope is parallel to a side of the big triangle and no rope can go along a pole that is already touched by another rope. Furthermore, if a rope's straight-line extension could be stretched instead under the above conditions, that extension must be stretched. The one who cannot stretch out more ropes according to the rules loses.",
+  "step": "Click two poles to connect them."
+}

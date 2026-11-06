@@ -1,0 +1,14 @@
+{
+  "board": {
+    "finishSplit": "Finish the split"
+  },
+  "role": {
+    "hunyadi": "Hunyadi",
+    "sultan": "Sultan"
+  },
+  "rule": "The Turkish sultan's army is attacking Hunyadi's castle. Some janissaries stand on various steps of the castle staircase. Each morning the sultan splits his army into a red and a blue force. Hunyadi then destroys either the red or the blue force, as he chooses. At night every surviving janissary moves up one step. Hunyadi wins if he destroys the sultan's entire army. The sultan wins if any janissary reaches the castle.",
+  "step": {
+    "hunyadi": "Click a soldier to destroy all troops of that colour.",
+    "sultan": "Click soldiers to split your army in two."
+  }
+}

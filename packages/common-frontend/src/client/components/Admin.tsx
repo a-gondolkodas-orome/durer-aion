@@ -1,60 +1,100 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll, useRemoveTeam } from '../hooks/user-hooks';
-import { Button, Dialog, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { Fragment, useEffect, useState } from 'react';
+import { useAddMinutes, useAll } from '../hooks/user-hooks';
+import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
-import { TeamModelDto, adminTeamId } from '../dto/TeamStateDto';
-import { TeamDetailDialog } from './TeamDetailDialog';
+import { TeamModelDto } from '../dto/TeamStateDto';
+import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
+import { ImportExport } from './ImportExport';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { FinishedMatchStatus } from 'schemas';
-import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialogInterface, ConfirmDialog, formatMinutes } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
 
-// Only the export button: the columns/filter/density controls the stock
-// GridToolbar also carries are not what this page is for.
-function TeamsToolbar() {
+declare module '@mui/x-data-grid' {
+  interface ToolbarPropsOverrides {
+    onOpenExport?: () => void;
+  }
+}
+
+/// The list's CSV is the grid as it stands, filter included, and holds no
+/// login secret: the ID column, which is the session cookie's value, is left
+/// out. Every secret leaves the page through the Import/export tab, which this
+/// points to.
+function TeamsToolbar(props: { onOpenExport?: () => void }) {
   return (
     <Toolbar>
       <ExportCsv
-        // allColumns so the `other` column, hidden by default below, is still
-        // in the file; the two button columns opt out with disableExport.
+        // allColumns so a column hidden by default is still in the file; the
+        // button columns opt out with disableExport.
         options={{ fileName: 'durer-csapatok', utf8WithBom: true, allColumns: true }}
       >
         Letöltés CSV-ként
       </ExportCsv>
+      <Button size="small" onClick={props.onOpenExport}>
+        Belépőkódokkal: Import/export fül
+      </Button>
     </Toolbar>
   );
 }
+
+// What the states mean is on MatchStatus in the `schemas` package.
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
+
+// The open tab is kept in `?tab=`, so a reload or a shared link opens the same
+// one. Anything else in it is read as the default.
+const TABS = ['csapatok', 'statisztika', 'import-export'] as const;
+type AdminTab = typeof TABS[number];
+
+function tabFromUrl(): AdminTab {
+  const tab = new URLSearchParams(window.location.search).get('tab');
+  return TABS.find(it => it === tab) ?? 'csapatok';
+}
+
+function tabToUrl(tab: AdminTab) {
+  const url = new URL(window.location.href);
+  if (tab === 'csapatok') {
+    url.searchParams.delete('tab');
+  } else {
+    url.searchParams.set('tab', tab);
+  }
+  window.history.replaceState(window.history.state, '', url);
+}
+
+// Every panel stays mounted, so the grid keeps its filter, sort and page — and
+// the import the join codes it holds — while another tab is open. Not
+// `display: none`: the DataGrid measures its parent on every resize, and a zero
+// width logs an error and lays it out for 0px.
+const panelProps = (panel: AdminTab, open: AdminTab) => ({
+  role: 'tabpanel',
+  id: `admin-panel-${panel}`,
+  'aria-labelledby': `admin-tab-${panel}`,
+  sx: panel === open ? {} : { visibility: 'hidden', height: 0, overflow: 'hidden' },
+});
 
 export function Admin(props: { teamId?: string }) {
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
-  const removeTeam = useRemoveTeam();
   const { enqueueSnackbar } = useSnackbar();
-  const { data } = useSWR("users/all", getAll)
+  const { data, mutate } = useSWR("users/all", getAll)
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
-  const [teamFromPath, setTeamFromPath] = useState<TeamModelDto | null>(null);
-  const [adminPageOpen, setAdminPageOpen] = useState<boolean>(true);
+  const [tab, setTab] = useState<AdminTab>(tabFromUrl);
+  const openTab = (next: AdminTab) => {
+    setTab(next);
+    tabToUrl(next);
+  };
 
-  useEffect(() => {
-    if (props.teamId) {
-      const current = data?.find(d => d.teamId === props.teamId)
-      if (current) {
-        setTeamFromPath(current);
-      }
-    } else if (teamFromPath) {
-      setTeamFromPath(null);
-    }
-  }, [data, props.teamId, teamFromPath]);
+  const teamFromPath = props.teamId ? data?.find(d => d.teamId === props.teamId) ?? null : null;
+  // Until the list loads it is not known whether the path names a team, so
+  // neither the team nor the tabs show; an unknown team falls back to the list.
+  const teams = teamFromPath ? undefined : data;
 
   return (
     <Stack sx={{
@@ -88,6 +128,7 @@ export function Admin(props: { teamId?: string }) {
             },
           }
         } }}
+        aria-labelledby={TEAM_DIALOG_TITLE_ID}
         open={
           selectedRow != null
         } onClose={() => {
@@ -96,27 +137,29 @@ export function Admin(props: { teamId?: string }) {
           {selectedRow && <TeamDetailDialog data={selectedRow} setConfirmDialog={setConfirmDialog}/>}
       </Dialog>
       <ConfirmDialog confirmDialog={confirmDialog}  setConfirmDialog={setConfirmDialog}/>
-      <Stack sx={{ width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-        <IconButton
-          onClick={() => setAdminPageOpen(!adminPageOpen)}
-          size="large"
-          sx={{ marginRight: "8px" }}
-        >
-          {adminPageOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-        </IconButton>
-        <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület </Stack>
-      </Stack>
-      {adminPageOpen && <>
-        {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog}/>}
-        {!teamFromPath && <Stack sx={{
-          height: "635px",
-        }}>
-          {data && <DataGrid columns={[
+      {/* A team's own tab is titled with the team's name, by the dialog. */}
+      {!teamFromPath && <Stack sx={{ fontSize: "32px", textAlign: "center" }}>Admin felület</Stack>}
+      {teamFromPath && <TeamDetailDialog data={teamFromPath} setConfirmDialog={setConfirmDialog} page/>}
+      {teams && <>
+      <Tabs
+        value={tab}
+        onChange={(_, value: AdminTab) => { openTab(value); }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
+      >
+        <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
+        <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
+        <Tab label="Import/export" value="import-export" id="admin-tab-import-export" aria-controls="admin-panel-import-export"/>
+      </Tabs>
+      <Stack {...panelProps('csapatok', tab)}>
+        <Stack sx={{ height: "635px" }}>
+          <DataGrid columns={[
             {
               field: 'id',
               headerName: 'ID',
               width: 75,
               editable: false,
+              // The team's GUID is its session cookie's value (team_view.ts).
+              disableExport: true,
             },
             {
               field: 'teamName',
@@ -133,24 +176,28 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'pageState',
               headerName: 'Állapot',
+              description: 'Melyik oldalt látja a csapat: DISCLAIMER, HOME, RELAY vagy STRATEGY. A játék oldalán a vége után is ott marad, amíg vissza nem lép.',
               width: 150,
               editable: false,
             },
             {
               field: 'other',
               headerName: 'Egyéb',
+              description: 'Az importált szervezői megjegyzések, és amit a rendszer fűz hozzájuk: te[<meccs>]:<perc> minden hozzáadott percnél, prevrelayid: / prevstratid: minden reset után. Alapból rejtett, de a CSV-ben benne van.',
               width: 250,
               editable: false,
             },
             {
               field: 'relayMatchState',
               headerName: 'Relay',
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
             {
               field: 'strategyMatchState',
               headerName: 'Strategy',
+              description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
             },
@@ -189,7 +236,7 @@ export function Admin(props: { teamId?: string }) {
               }
             }
           ]}
-          rows={data.map((a) => {
+          rows={teams.map((a) => {
             return {
               id: a.teamId,
               relayMatchState: a.relayMatch.state,
@@ -212,12 +259,13 @@ export function Admin(props: { teamId?: string }) {
           pageSizeOptions={[10, 25, 50]}
           showToolbar
           slots={{ toolbar: TeamsToolbar }}
+          slotProps={{ toolbar: { onOpenExport: () => { openTab('import-export'); } } }}
           sx={{
             height: "auto",
           }}
-          />}
-        </Stack>}
-        {!teamFromPath && data && <Stack sx={{ padding: "10px" }}>
+          />
+        </Stack>
+        <Stack sx={{ padding: "10px" }}>
           idő hozzáadása minden aktív játékosnak:
           <Form
           initialValues={{ time: '' }}
@@ -228,11 +276,18 @@ export function Admin(props: { teamId?: string }) {
               .required('Nincs megadva érték')
             })}
           onSubmit={(values) => {
+            const running = teams.flatMap(it => [it.relayMatch, it.strategyMatch]).filter(it => it.state === "IN PROGRESS").length;
             setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+              title: 'Idő hozzáadása minden futó játéknak',
+              facts: [
+                { label: 'Érintett játékok', value: `${running} futó játék` },
+                { label: 'Változás', value: formatMinutes(Number(values.time)) },
+              ],
+              description: 'Minden most futó váltó és stratégiás játék vége ennyivel tolódik. A még el nem kezdett játékokat nem érinti.',
+              confirmLabel: 'Hozzáadás mindenkinek',
               confirm: async () => {
                 try {
-                  for (const a of data ?? []) {
+                  for (const a of teams) {
                     if (a.relayMatch.state === "IN PROGRESS") {
                       await addMinutes(a.relayMatch.matchID, values.time);
                     }
@@ -278,36 +333,14 @@ export function Admin(props: { teamId?: string }) {
             </Stack>
           )}/>
         </Form>
-        </Stack>}
-        {!teamFromPath && data &&
-          <Button
-            color="error"
-            variant="contained"
-            sx={{ margin: '10px 0', maxWidth: 300 }}
-            onClick={() => {
-              setConfirmDialog({
-                text: 'Biztosan törlöd az összes csapatot? Ez a művelet nem visszavonható!',
-                confirm: async () => {
-                  try {
-                    for (const team of data) {
-                      await removeTeam(adminTeamId(team));
-                    }
-                    enqueueSnackbar('Összes csapat törölve', { variant: 'success' });
-                    // Refresh the list
-                    if (typeof window !== 'undefined') {
-                      await getAll();
-                    }
-                  } catch (e) {
-                    const message = e instanceof Error ? e.message : "Váratlan hiba történt";
-                    enqueueSnackbar(message, { variant: 'error' });
-                  }
-                }
-              });
-            }}
-          >
-            Összes csapat törlése
-          </Button>}
-      {!teamFromPath && data && <Stats data={data}/>}
+        </Stack>
+      </Stack>
+      <Stack {...panelProps('statisztika', tab)}>
+        <Stats data={teams}/>
+      </Stack>
+      <Stack {...panelProps('import-export', tab)}>
+        <ImportExport teams={teams} onImported={() => { void mutate(); }}/>
+      </Stack>
       </>}
     </Stack>
   )
@@ -320,8 +353,8 @@ function Stats(props: { data: TeamModelDto[] }) {
     const bothNotStarted = current.filter(it => it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
     const relayInProgress = current.filter(it => it.relayMatch.state === "IN PROGRESS").length;
     const strategyInProgress = current.filter(it => it.strategyMatch.state === "IN PROGRESS").length;
-    const finishedRelayScores = current.filter(it => it.relayMatch.state === "FINISHED").map(it => (it.relayMatch as FinishedMatchStatus).score);
-    const finishedStrategyScores = current.filter(it => it.strategyMatch.state === "FINISHED").map(it => (it.strategyMatch as FinishedMatchStatus).score);
+    const finishedRelayScores = current.flatMap(it => it.relayMatch.state === "FINISHED" ? [it.relayMatch.score] : []);
+    const finishedStrategyScores = current.flatMap(it => it.strategyMatch.state === "FINISHED" ? [it.strategyMatch.score] : []);
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {
@@ -343,7 +376,14 @@ function Stats(props: { data: TeamModelDto[] }) {
       })),
     }
   })
-  return <Table>
+  return <>
+  <Stack sx={{ fontSize: '14px', padding: '10px' }}>
+    <span>
+      A hármasok csapatszámok: <Progress notStarted='még nem kezdte el' inProgress='folyamatban' finished='befejezte'/>.
+      A Teljes verseny oszlopban befejezte, aki mindkét játékot befejezte, és még nem kezdte el, aki egyiket sem.
+    </span>
+  </Stack>
+  <Table>
     <TableHead>
       <TableRow>
         <TableCell>Kategória</TableCell>
@@ -369,10 +409,14 @@ function Stats(props: { data: TeamModelDto[] }) {
       ))}
     </TableBody>
   </Table>
+  </>
 }
 
-export function Progress(props: { notStarted: number, inProgress: number, finished: number }) {
+// Not started is grey, not red: early in a round it is the expected state.
+// Also the legend above the stats table, with words in place of the counts.
+export function Progress(props: { notStarted: ReactNode, inProgress: ReactNode, finished: ReactNode }) {
+  const theme = useTheme();
   return (<>
-    <i title='NOT STARTED' style={{ color: "red" }}>{props.notStarted}</i> / <i title='IN PROGRESS' style={{ color: "orange" }}>{props.inProgress}</i> / <i title='FINISHED' style={{ color: "green" }}>{[props.finished]}</i>
+    <i title='NOT STARTED' style={{ color: theme.palette.text.secondary }}>{props.notStarted}</i> / <i title='IN PROGRESS' style={{ color: "orange" }}>{props.inProgress}</i> / <i title='FINISHED' style={{ color: "green" }}>{props.finished}</i>
   </>);
 }

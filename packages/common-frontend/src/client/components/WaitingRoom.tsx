@@ -2,6 +2,13 @@ import { Stack, alpha } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
+// Nothing renders this: `pageState` is DISCLAIMER | HOME | RELAY | STRATEGY, with
+// no WAITING among them, and nothing on the server gates on a competition-wide
+// window either — #345 removed the unused `checkGlobalTime()` and the config
+// behind it, the round's start being enforced by handing the join codes out when
+// it opens. This screen and its `waitingRoom.*` keys in both locales are what a
+// WAITING status would render if the deadline #345 leaves open is ever built: as
+// admin-set state in the database, not as an environment variable.
 export function WaitingRoom() {
   const theme = useTheme();
   const { t } = useTranslation();

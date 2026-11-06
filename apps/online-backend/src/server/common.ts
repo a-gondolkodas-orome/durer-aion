@@ -1,3 +1,4 @@
+import type { CompetitionCategory } from 'schemas';
 import { env } from 'process';
 
 export function getBotCredentials() {
@@ -7,21 +8,15 @@ export function getBotCredentials() {
   return env.BOT_CREDENTIALS;
 }
 
-export function getGameStartAndEndTime() {
-  if (!env.GAME_GLOBAL_START_T) {
-    throw new Error('No GAME_GLOBAL_START_T supplied! Do set it in the environment');
+export function getAdminCredentials() {
+  if (!env.ADMIN_CREDENTIALS) {
+    throw new Error('No ADMIN_CREDENTIALS supplied! Do set it in the environment');
   }
-  if (!env.GAME_GLOBAL_END_T) {
-    throw new Error('No GAME_GLOBAL_END_T supplied! Do set it in the environment');
-  }
-  return {
-    globalStartAt: new Date(env.GAME_GLOBAL_START_T),
-    globalEndAt: new Date(env.GAME_GLOBAL_END_T),
-  };
+  return env.ADMIN_CREDENTIALS;
 }
 
 export const relayNames = {
   C: 'relay_c',
   D: 'relay_d',
   E: 'relay_e',
-}
+} satisfies Record<CompetitionCategory, string>;

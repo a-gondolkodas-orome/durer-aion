@@ -1,0 +1,18 @@
+{
+  "board": {
+    "nothing": "Nothing ∅",
+    "placeBack": "Place back:"
+  },
+  "rule": {
+    "any": "There are some coins in a heap, of value 1, 2, or 3 pengő. In a move, the player may take a coin from the heap and put back a coin of smaller value in its place, or nothing. The winner is the one who takes the last coin from the heap.",
+    "fixed": "There are three 1-pengő, five 2-pengő, and seven 3-pengő coins in a heap. In a move, the player takes a coin from the heap and puts back a coin of smaller value in its place, or nothing. The winner is the one who takes the last coin from the heap."
+  },
+  "step": {
+    "placeBack": "Choose an option in the place back bar.",
+    "take": "Click a coin to remove it."
+  },
+  "variant": {
+    "fixed": "3-5-7 (A)",
+    "random": "Random (B)"
+  }
+}

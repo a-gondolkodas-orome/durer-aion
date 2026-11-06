@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { useTranslation } from 'language';
+import { useTranslation } from 'react-i18next';
 import { GameBoard, type BoardClientProps, useMoveScopedState } from 'strategy-game-factory';
 import { type Board, requiredPointCount } from './gameplay';
 
@@ -56,7 +56,7 @@ type Removal = { index: number; amount: number } | null
 const nonePointed: number[] = [];
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('take-and-point');
   const { piles, pointed } = board;
   const stage: 'point' | 'remove' = pointed === null ? 'point' : 'remove';
 
@@ -104,10 +104,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           const isPointed = pointed?.includes(i) ?? false;
           const isSelected = selectedForPoint.includes(i);
           const removeCount = removal?.index === i ? removal.amount : 0;
-          const label = t({
-            hu: `${i + 1}. kupac, ${count} kavics`,
-            en: `Pile ${i + 1}, ${count} stones`
-          });
+          const label = t('board.pile', { number: i + 1, stones: count });
 
           if (stage === 'point') {
             return (
@@ -139,12 +136,12 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
               {isPointed && (
                 <div className="flex items-center gap-2">
                   <Stepper
-                    label={t({ hu: `−1 a(z) ${i + 1}. kupacból`, en: `−1 from pile ${i + 1}` })}
+                    label={t('board.decrease', { number: i + 1 })}
                     disabled={!canInteract || removeCount === 0}
                     onClick={() => adjustRemoval(i, -1)}
                   >−</Stepper>
                   <Stepper
-                    label={t({ hu: `+1 a(z) ${i + 1}. kupacból`, en: `+1 from pile ${i + 1}` })}
+                    label={t('board.increase', { number: i + 1 })}
                     // One more stone must itself be a legal take; the second
                     // clause is local UI state (only one pile per turn).
                     disabled={!moves.takeStones.isAllowed(board, i, removeCount + 1)
@@ -165,8 +162,8 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           className="primary-button w-auto mt-4 mx-auto"
         >
           {pointCount === 1
-            ? t({ hu: 'Rámutatok az utolsó kupacra', en: 'Point at the last pile' })
-            : t({ hu: 'Rámutatok e két kupacra', en: 'Point at these two piles' })}
+            ? t('board.pointLast')
+            : t('board.pointTwo')}
         </button>
       )}
       {canInteract && stage === 'remove' && (
@@ -175,7 +172,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           onClick={submitRemoval}
           className="primary-button w-auto mt-4 mx-auto"
         >
-          {t({ hu: 'Elveszem a kavicsokat', en: 'Remove the stones' })}
+          {t('board.remove')}
         </button>
       )}
     </GameBoard>

@@ -1,0 +1,21 @@
+{
+  "incrementOrDouble": {
+    "rule": "The two players alternately say positive integers: if the previous number said is x, the next player may say x + 1 or 2x. The starting player must say 1. Whoever first says a number greater than {{target}} loses.",
+    "step": {
+      "first": "Say the first number: 1.",
+      "next": "Say one more (x+1) or double (2x)."
+    }
+  },
+  "plusOneTwoThree": {
+    "rule": "The game starts at zero. Players take turns moving along the positive integers: each player may advance by 1, 2, or 3. The player who first steps past {{target}} loses.",
+    "step": "Choose which number to step to."
+  },
+  "superstitiousCounting": {
+    "board": {
+      "restriction": "Previous step: {{previous}}. Forbidden: {{forbidden}}.",
+      "target": "Value of m: {{target}}"
+    },
+    "rule": "Károly and Dezső wish to count up to <code>m</code> and play the following game in the meantime: they start from 0 and the two players can add a positive number less than 13 to the previous number, taking turns. However because of their superstition, if one of them added <code>x</code>, then the other one in the next step cannot add <code>13-x</code>. The first player to reach or exceed <code>m</code> loses.",
+    "step": "Click on a number to step onto it."
+  }
+}

@@ -12,17 +12,19 @@ Each game is listed here exactly once. Where a component's export name differs
 from the key, alias it on re-export (`export { PolicemanthiefA as Policemanthief }`).
 That indirection is the point: renaming or moving a component only touches its
 line here — the key, and therefore the route, never changes. Keep entries in abc
-order by key. `gameList.spec.ts` guards that this set of keys and
+order by key. `gameList.test.ts` guards that this set of keys and
 `gameList` stay in one-to-one sync.
 
-A game that has moved to `packages/games` exports a config object rather than a
-component, and this file is where it becomes a page: the one
-`strategyGameFactory(config)` call per game, in its abc slot like any other
-entry. That keeps the package host-agnostic — a competition shell consumes the
-same config without this wrapping.
+Two games export a `StrategyGameConfig` object rather than a component, and this
+file is where each becomes a page: one `strategyGameFactory(config)` call, in the
+game's abc slot like any other entry. Which shape a game should take is open —
+see the issue linked from `src/components/AGENTS.md` § Two game shapes.
 */
 import { strategyGameFactory } from 'strategy-game-factory';
-import { removeDivisorMultipleConfig, stonesRemoveOneNotTwiceFromLeftConfig } from 'games';
+import { removeDivisorMultipleConfig } from './remove-divisor-multiple/remove-divisor-multiple';
+import {
+  stonesRemoveOneNotTwiceFromLeftConfig
+} from './stones-remove-one-not-twice-from-left/stones-remove-one-not-twice-from-left';
 
 export { AddReduceDouble } from './add-reduce-double/add-reduce-double';
 export { AmorAndCupido } from './amor-and-cupido/amor-and-cupido';
@@ -100,4 +102,5 @@ export { TriangularGridRopes15 } from './totem-poles/triangular-grid-ropes-15/tr
 export { TwelveSquares } from './twelve-squares/twelve-squares';
 export { TwoOfThreeTakeaway } from './two-of-three-takeaway/two-of-three-takeaway';
 export { TwoTimesTwo } from './distinct-squares/two-times-two/two-times-two';
+export { TwoXsOneO, TwoXsOneODE } from './two-xs-one-o/two-xs-one-o';
 export { WaningStones } from './single-pile-removal/waning-stones/waning-stones';

@@ -3,21 +3,32 @@ import { createHashRouter, RouterProvider, Outlet } from 'react-router';
 import { Overview } from '../overview/overview';
 import { ErrorPage } from '../error-page/error-page';
 import { LanguageProvider } from 'language';
-import { ThemeProvider } from '../../theme';
+import { MuiThemeProvider, ThemeProvider } from '../../theme';
 import { usePageviewTracking } from '../../tracking';
+import { useDocumentTitle } from './document-title';
 import { gameList } from '../games/gameList';
 import * as gameComponents from '../games';
 
 const components = gameComponents as Record<string, ComponentType>;
+
+// A component of its own because the title reads the language, so it has to sit
+// under the provider that RootLayout renders.
+const DocumentTitle = () => {
+  useDocumentTitle();
+  return null;
+};
 
 const RootLayout = () => {
   usePageviewTracking();
 
   return (
     <ThemeProvider>
-      <LanguageProvider>
-        <Outlet />
-      </LanguageProvider>
+      <MuiThemeProvider>
+        <LanguageProvider>
+          <DocumentTitle />
+          <Outlet />
+        </LanguageProvider>
+      </MuiThemeProvider>
     </ThemeProvider>
   );
 };

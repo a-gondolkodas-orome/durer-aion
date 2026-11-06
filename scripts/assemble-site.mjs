@@ -12,10 +12,9 @@ import { cpSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// The one line that moves the whole site. `/` now that gyakorlo.durerinfo.hu resolves and the
-// site is served from it; it was `/durer-aion/` while it lived on the default Pages domain,
-// where a project site sits under its repo name. Every subpath below is composed from it, so
-// the switch stays one edit rather than one per app.
+// The one line that moves the whole site: `/`, because gyakorlo.durerinfo.hu serves it from
+// the root rather than from a repo-name subpath. Every subpath below is composed from it, so
+// moving the site stays one edit rather than one per app.
 const SITE_ROOT = '/';
 
 // The custom domain, declared by pages/home/CNAME and asserted at the end.
@@ -28,15 +27,23 @@ const run = (command, args, options = {}) =>
   execFileSync(command, args, {
     cwd: repoRoot,
     stdio: 'inherit',
+    // npx is `npx.cmd` on Windows, and node cannot exec a .cmd without a shell: the spawn fails
+    // with ENOENT rather than the command running, so `npm run site:build` never worked there
+    // (#483 is the same root cause, one script over). Safe to hand these to cmd.exe — every
+    // argument below is a plain flag with nothing a shell would reinterpret.
+    shell: process.platform === 'win32',
     ...options,
     env: { ...process.env, ...options.env },
   });
 
 const step = message => console.log(`\n=== ${message}`);
 
+// Through turbo, exactly as the two below and as the root `npm run build`: turbo builds
+// whatever a workspace package the app imports needs first. A bare `npm run build` inside the
+// app would skip that, and the app importing its first built package would fail here on a
+// missing `dist` while CI's build job stayed green — with a push to `main` being the deploy.
 step('Build strategy game practice');
-run('npm', ['run', 'build'], {
-  cwd: join(repoRoot, 'apps/strategy-practice'),
+run('npx', ['turbo', 'build', '--filter=strategy-practice'], {
   env: { SITE_BASE: `${SITE_ROOT}jatekok/` },
 });
 

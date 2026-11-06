@@ -1,0 +1,4 @@
+{
+  "rule": "A játék egy pozitív egész számmal indul. Minden lépésben a soron következő játékos kiválasztja az aktuális szám egyik nem 0 számjegyét, és kivonja belőle. Az nyer, aki 0-t ér el.",
+  "step": "Válassz egy számjegyet, amelyet kivonsz az aktuális számból."
+}

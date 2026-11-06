@@ -1,53 +1,6 @@
 {
-  "ts-node": {
-    "compilerOptions": {
-        "module": "CommonJS"
-    }
-  },
-  "compilerOptions": {
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ESNext",
-    "types": ["vite/client"],
-    "paths": {
-      "game": ["../../packages/game"],
-      "game/bot": ["../../packages/game/dist/bot.d.mts"],
-      "game/client": ["../../packages/game/dist/client.d.mts"],
-      "strategy": ["../../packages/strategy"],
-      "schemas": ["../../packages/schemas"],
-      "common-frontend": ["../../packages/common-frontend"]
-    }
-  },
+  "extends": "../../tsconfig.frontend.json",
   "include": [
-    "src",
-    "../../packages/*/src",
-    "../../packages/*/index.d.ts", 
-    "../../packages/*/index.ts"
-  ],
-  // This app typechecks every package's src, not only its own, so it also has to
-  // skip every package's suites — and packages/engine came from apps/strategy-practice,
-  // where suites are named .spec rather than .test (root CLAUDE.md § Tech Stack).
-  // A `**/` pattern is anchored at this directory and so never reaches up into
-  // packages/; the paths below have to walk the same way `include` does.
-  "exclude": [
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/__tests__/**",
-    "../../packages/*/src/**/*.test.ts",
-    "../../packages/*/src/**/*.test.tsx",
-    "../../packages/*/src/**/*.spec.ts",
-    "../../packages/*/src/**/*.spec.tsx"
+    "src"
   ]
 }

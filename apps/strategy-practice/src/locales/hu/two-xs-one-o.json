@@ -1,0 +1,15 @@
+{
+  "board": {
+    "cell": "{{row}}. sor, {{column}}. oszlop: {{content}}",
+    "empty": "üres"
+  },
+  "rule": {
+    "oFirst": "Adott egy 5×5-ös tábla. A játékosok felváltva lépnek, az első játékos O jeleket, a második pedig X jeleket helyez le a tábla még üres mezőire. Az első játékos minden lépésekor egy O-t helyezhet le, a második viszont minden lépésében két X-et tehet a táblára. A második játékos nyer, ha sikerül egy csak X-ekből álló sort vagy oszlopot létrehoznia. Az első játékos pedig akkor nyer, ha a tábla megtelik X és O jelekkel úgy, hogy a második játékos nem nyert.",
+    "xFirst": "Adott egy 5×5-ös tábla. A játékosok felváltva lépnek, az első játékos X jeleket, a második pedig O jeleket helyez le a tábla még üres mezőire. Az első játékos minden lépésekor két X-et helyezhet le, a második viszont minden lépésében csak egy O-t tehet a táblára. Az első játékos nyer, ha sikerül egy csak X-ekből álló sort vagy oszlopot létrehoznia. A második játékos pedig akkor nyer, ha a tábla megtelik X és O jelekkel úgy, hogy az első játékos nem nyert."
+  },
+  "step": {
+    "firstX": "Tegyél le két X-et a tábla üres mezőire!",
+    "o": "Tegyél le egy O-t a tábla egyik üres mezőjére!",
+    "secondX": "Tegyél le még egy X-et!"
+  }
+}
