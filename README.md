@@ -439,8 +439,9 @@ that before a competition.
    `packages/game/src/games/strategy/`, one per package entry:
    `strategy-games.ts` (the game definition and its name — the `game` entry),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
-   `apps/online-backend/src/server.ts` imports `game` and `game/bot`; the live
-   client `game` and `game/client`; the offline dry run all three.
+   The server's `games.ts`, which lists each game beside its bot, imports `game`
+   and `game/bot`; the live client `game` and `game/client`; the offline dry run
+   all three.
 
 What each file provides — the names are the ones the registries import. The
 game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and

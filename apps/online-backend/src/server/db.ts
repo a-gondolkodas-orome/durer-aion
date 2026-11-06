@@ -2,16 +2,7 @@ import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
 import { GameType } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
-import { Sequelize, Op, WhereOptions } from 'sequelize';
-
-// `%` and `_` are wildcards inside a LIKE or ILIKE pattern, so a fragment
-// carrying them would match more than the caller asked for — a bare `%` matches
-// every team. Backslash is postgres' default escape character for both, so no
-// ESCAPE clause is needed; it has to escape itself too, or a trailing one would
-// escape the `%` that the pattern appends.
-export function escapeLike(fragment: string): string {
-  return fragment.replace(/[\\%_]/g, character => `\\${character}`);
-}
+import { Sequelize, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
   sequelize: Sequelize;
@@ -25,24 +16,6 @@ export class TeamsRepository {
   async connect() {
     await this.sequelize.sync();
   }
-  /**
-   * Teams whose `other` field contains every one of the given fragments,
-   * whatever their case: the column is the organisers' own notes, so what an
-   * organiser types is a fragment they remember rather than the case it was
-   * stored in. An empty list matches all teams: `Sequelize.and()` with no
-   * arguments produces no WHERE clause.
-   *
-   * `ILIKE` folds case the way the database's own locale says, so the accented
-   * letters fold only on a UTF-8 aware one: on a cluster initialised with plain
-   * `C`, `Ő` and `ő` stay different while ASCII still folds. Accents are not
-   * folded away on any locale — `Adam` does not find `Ádám`.
-   */
-  async fetch(filter: string[]) : Promise<TeamModel[]> {
-    return await TeamModel.findAll({ where:
-      Sequelize.and(...filter.map(part => ({ 'other': { [Op.iLike]: `%${escapeLike(part)}%` } }))),
-    });
-  }
-
   async listTeams(): Promise<TeamModel[] | null> {
     return await TeamModel.findAll();
   }

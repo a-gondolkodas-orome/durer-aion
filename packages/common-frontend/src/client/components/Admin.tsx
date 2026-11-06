@@ -1,7 +1,7 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
-import { Fragment, useState } from 'react';
+import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
@@ -12,7 +12,7 @@ import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { ConfirmDialogInterface, ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialogInterface, ConfirmDialog, formatMinutes } from './ConfirmDialog';
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
@@ -156,6 +156,7 @@ export function Admin(props: { teamId?: string }) {
             {
               field: 'other',
               headerName: 'Egyéb',
+              description: 'Az importált szervezői megjegyzések, és amit a rendszer fűz hozzájuk: te[<meccs>]:<perc> minden hozzáadott percnél, prevrelayid: / prevstratid: minden reset után. Alapból rejtett, de a CSV-ben benne van.',
               width: 250,
               editable: false,
             },
@@ -247,8 +248,15 @@ export function Admin(props: { teamId?: string }) {
               .required('Nincs megadva érték')
             })}
           onSubmit={(values) => {
+            const running = teams.flatMap(it => [it.relayMatch, it.strategyMatch]).filter(it => it.state === "IN PROGRESS").length;
             setConfirmDialog({
-              text: `Erősítsd meg, hogy minden aktuális csapatnak meg akarod növelni az idejét ${values.time} perccel`,
+              title: 'Idő hozzáadása minden futó játéknak',
+              facts: [
+                { label: 'Érintett játékok', value: `${running} futó játék` },
+                { label: 'Változás', value: formatMinutes(Number(values.time)) },
+              ],
+              description: 'Minden most futó váltó és stratégiás játék vége ennyivel tolódik. A még el nem kezdett játékokat nem érinti.',
+              confirmLabel: 'Hozzáadás mindenkinek',
               confirm: async () => {
                 try {
                   for (const a of teams) {
@@ -340,7 +348,14 @@ function Stats(props: { data: TeamModelDto[] }) {
       })),
     }
   })
-  return <Table>
+  return <>
+  <Stack sx={{ fontSize: '14px', padding: '10px' }}>
+    <span>
+      A hármasok csapatszámok: <Progress notStarted='még nem kezdte el' inProgress='folyamatban' finished='befejezte'/>.
+      A Teljes verseny oszlopban befejezte, aki mindkét játékot befejezte, és még nem kezdte el, aki egyiket sem.
+    </span>
+  </Stack>
+  <Table>
     <TableHead>
       <TableRow>
         <TableCell>Kategória</TableCell>
@@ -366,10 +381,14 @@ function Stats(props: { data: TeamModelDto[] }) {
       ))}
     </TableBody>
   </Table>
+  </>
 }
 
-export function Progress(props: { notStarted: number, inProgress: number, finished: number }) {
+// Not started is grey, not red: early in a round it is the expected state.
+// Also the legend above the stats table, with words in place of the counts.
+export function Progress(props: { notStarted: ReactNode, inProgress: ReactNode, finished: ReactNode }) {
+  const theme = useTheme();
   return (<>
-    <i title='NOT STARTED' style={{ color: "red" }}>{props.notStarted}</i> / <i title='IN PROGRESS' style={{ color: "orange" }}>{props.inProgress}</i> / <i title='FINISHED' style={{ color: "green" }}>{[props.finished]}</i>
+    <i title='NOT STARTED' style={{ color: theme.palette.text.secondary }}>{props.notStarted}</i> / <i title='IN PROGRESS' style={{ color: "orange" }}>{props.inProgress}</i> / <i title='FINISHED' style={{ color: "green" }}>{props.finished}</i>
   </>);
 }
