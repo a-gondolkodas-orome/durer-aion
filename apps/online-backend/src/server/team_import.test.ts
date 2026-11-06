@@ -75,6 +75,31 @@ describe('import_teams_from_tsv', () => {
     });
   });
 
+  // Tabs turned into spaces on the way, as a paste out of a web page or an
+  // editor does. Each line then reads as one column, and was skipped as an
+  // "empty row": nothing imported, and nothing counted as failed.
+  it('fails a row with no tab, saying the file must be tab-separated', async () => {
+    (readFileSync as Mock).mockReturnValue('Teamname  Category\nimporttest  D\nsuper name  C\n');
+
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+    expect(result.successful).toBe(0);
+    expect(result.failed).toBe(2);
+    expect(create).not.toHaveBeenCalled();
+    expect(result.logs.value).toContain('The header has no tab in it: the columns must be separated by tabs, not spaces.');
+    expect(result.logs.value).toContain('No tab in the row "super name  C": the columns must be separated by tabs, not spaces.');
+  });
+
+  it('passes over blank lines without a word', async () => {
+    (readFileSync as Mock).mockReturnValue(`${HEADER}\n\nTest Team\tC\n   \n\r\n`);
+
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+    expect(result.successful).toBe(1);
+    expect(result.failed).toBe(0);
+    expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
+  });
+
   it('should log a warning if header does not match expected header', async () => {
     (readFileSync as Mock).mockReturnValue(
       'Teamname\tCategory\tOther\tEmail\tID\tLogin Code\tCredentials\nTest Team\tC\ttest@example.com\tSome Info\t\t\t',
