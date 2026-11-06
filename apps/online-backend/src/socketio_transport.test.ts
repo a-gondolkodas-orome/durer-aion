@@ -16,6 +16,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AddressInfo } from "node:net";
 import { io as connect, Socket } from "socket.io-client";
 import { createMatch } from "boardgame.io/internal";
+import { Master } from "boardgame.io/master";
 import { Server } from "boardgame.io/server";
 import { MyGameWrappers, gameWrapper, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
@@ -210,6 +211,57 @@ describe("the socket transport a browser talks to", () => {
     const afterReload = await syncAs(await connectClient(), MATCH_ID, HUMAN_ID);
     expect(afterReload._stateID).toBe(beforeReload._stateID);
     expect(afterReload.G).toStrictEqual(beforeReload.G);
+  });
+
+  /** The judge's turn the server lost: the player's move is stored, and
+   *  nothing asked the bot to answer it — what a backend restart between the
+   *  two leaves. The move goes in through a master of its own, so no
+   *  transport hears of it. */
+  async function leaveOnJudgesTurn(): Promise<void> {
+    const master = new Master(game, server.db, { send: () => undefined, sendAll: () => undefined });
+    const { state } = await server.db.fetch(MATCH_ID, { state: true });
+    const move = makeMove("chooseNewGameType", ["live"], HUMAN_ID) as Parameters<Master["onUpdate"]>[0];
+    await master.onUpdate(move, state._stateID, MATCH_ID, HUMAN_ID);
+  }
+
+  it("takes a judge's turn nobody took when a board syncs", async () => {
+    await createStoredMatch();
+    await leaveOnJudgesTurn();
+    const socket = await connectClient();
+    const botAnswered = updateMatching(socket, ({ ctx }) => ctx.currentPlayer === HUMAN_ID);
+
+    const stuck = await syncAs(socket, MATCH_ID, HUMAN_ID);
+    expect(stuck.ctx.currentPlayer).toBe(BOT_ID);
+    const state = await botAnswered;
+
+    expect(state.ctx.phase).toBe("chooseRole");
+    expect(state._stateID).toBeGreaterThan(stuck._stateID);
+  });
+
+  it("hands a syncing board the stored state once more", async () => {
+    await createStoredMatch();
+    const socket = await connectClient();
+    const resent = updateMatching(socket, () => true);
+
+    const synced = await syncAs(socket, MATCH_ID, HUMAN_ID);
+
+    expect((await resent)._stateID).toBe(synced._stateID);
+  });
+
+  it("sends a sync that fails the credential check nothing more", async () => {
+    await createStoredMatch();
+    const { metadata } = await server.db.fetch(MATCH_ID, { metadata: true });
+    metadata.players[0].credentials = "the-team's";
+    await server.db.setMetadata(MATCH_ID, metadata);
+    const socket = await connectClient();
+    const heard: string[] = [];
+    socket.onAny((event: string) => heard.push(event));
+
+    socket.emit("sync", MATCH_ID, HUMAN_ID, "someone-else's", 2);
+    // Past the bot's think time, which a resend would wait behind.
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    expect(heard).not.toContain("update");
   });
 
   it("refuses a sync for a match nobody created", async () => {
