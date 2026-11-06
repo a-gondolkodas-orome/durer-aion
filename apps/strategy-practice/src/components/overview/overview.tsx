@@ -8,7 +8,7 @@ import { IconButton } from '@mui/material';
 import { ThemeSwitcher } from '../../theme';
 import {
   FilterToggle, CategoryFilter, IconFilter, YearFilter, RoundFilter,
-  filterByCategories, filterByIcons, filterByYears, filterByRounds
+  filterByCategories, filterByIcons, filterByYears, filterByRounds, type YearRange
 } from './filters/filters';
 import {
   FeaturedStrip,
@@ -30,11 +30,11 @@ export const Overview = () => {
   const { t } = useTranslation('overview');
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedIcons, setSelectedIcons] = useState<IconKey[]>([]);
-  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [yearRange, setYearRange] = useState<YearRange>(null);
   const [selectedRounds, setSelectedRounds] = useState<Round[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const isFiltering = selectedCategories.length > 0 || selectedIcons.length > 0 ||
-    selectedYears.length > 0 || selectedRounds.length > 0;
+    yearRange !== null || selectedRounds.length > 0;
 
   const allIds = Object.keys(gameList);
   const applyFilters = (ids: string[]) => filterByRounds(
@@ -44,7 +44,7 @@ export const Overview = () => {
         selectedIcons,
         gameList
       ),
-      selectedYears,
+      yearRange,
       gameList
     ),
     selectedRounds,
@@ -63,7 +63,7 @@ export const Overview = () => {
       filtersOpen={showFilters}
       onToggleFilters={() => setShowFilters(o => !o)}
       activeFilterCount={selectedCategories.length + selectedIcons.length +
-        selectedYears.length + selectedRounds.length}
+        (yearRange === null ? 0 : 1) + selectedRounds.length}
     />
     <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
       {showFilters && (
@@ -72,7 +72,7 @@ export const Overview = () => {
         >
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
           <IconFilter selected={selectedIcons} onChange={setSelectedIcons} />
-          <YearFilter selected={selectedYears} onChange={setSelectedYears} />
+          <YearFilter range={yearRange} onChange={setYearRange} />
           <RoundFilter selected={selectedRounds} onChange={setSelectedRounds} />
         </div>
       )}

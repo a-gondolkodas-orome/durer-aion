@@ -5,6 +5,8 @@
     "toggle": "Filters",
     "type": "Type",
     "year": "Year",
+    "yearFrom": "First year",
+    "yearTo": "Last year",
     "round": "Round"
   },
   "icon": {

@@ -5,6 +5,8 @@
     "toggle": "Szűrők",
     "type": "Típus",
     "year": "Év",
+    "yearFrom": "Első év",
+    "yearTo": "Utolsó év",
     "round": "Forduló"
   },
   "icon": {

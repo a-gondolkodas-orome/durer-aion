@@ -110,54 +110,45 @@ describe('Overview', () => {
     // ...until the header funnel opens the panel, which reveals both rows at once
     fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
     expect(screen.getByRole('button', { name: 'C' })).toBeTruthy();
-    expect(screen.getByRole('checkbox', { name: '11/12' }).getAttribute('title')).toBe('11/12');
+    expect(screen.getByRole('slider', { name: 'Első év' })).toBeTruthy();
     // only icons actually in use are offered (coins, piles) — chess is used too
     expect(screen.getByRole('button', { name: 'Érmék' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Kupacok' })).toBeTruthy();
   });
 
-  it('filters by selected years using timeline checkboxes', () => {
+  // The slider's values are positions in the years on offer: 11/12 to 15/16 here.
+  const yearRow = () => screen.getByText('Év').parentElement!;
+  const filterBadge = () => within(screen.getByRole('button', { name: 'Szűrők' })).queryByText('1');
+
+  it('narrows the catalog to a range of years, counted as one filter', () => {
     renderOverview();
     fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
-    const year = screen.getByRole('checkbox', { name: '14/15' });
-    expect(year.getAttribute('aria-checked')).toBe('false');
-    fireEvent.click(year);
-    expect(year.getAttribute('aria-checked')).toBe('true');
+    fireEvent.change(screen.getByRole('slider', { name: 'Első év' }), { target: { value: 1 } });
+    fireEvent.change(screen.getByRole('slider', { name: 'Utolsó év' }), { target: { value: 3 } });
+    expect(within(yearRow()).getByText('12/13 – 14/15')).toBeTruthy();
+    expect(screen.getByText('A kettő')).toBeTruthy();
     expect(screen.getByText('C egy')).toBeTruthy();
-    expect(screen.queryByText('A kettő')).toBeNull();
-    expect(screen.queryByText('B egy')).toBeNull();
+    expect(screen.queryByText('CD')).toBeNull();
+    expect(screen.queryByTestId('featured-strip')).toBeNull(); // GameA1 is 11/12
+    expect(filterBadge()).toBeTruthy();
   });
 
-  it('selects years while dragging across timeline checkboxes', () => {
+  // Unfiltered, the sections are collapsed and the featured strip (GameA1, 11/12) is back.
+  it('stops filtering by year once the range spans every year again, or is cleared', () => {
     renderOverview();
     fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
-    const first = screen.getByRole('checkbox', { name: '11/12' });
-    const second = screen.getByRole('checkbox', { name: '12/13' });
-    fireEvent.pointerDown(first);
-    fireEvent.pointerEnter(second);
-    fireEvent.pointerUp(second);
-    expect(first.getAttribute('aria-checked')).toBe('true');
-    expect(second.getAttribute('aria-checked')).toBe('true');
-    expect(screen.queryByText('B egy')).toBeNull();
-  });
+    const from = screen.getByRole('slider', { name: 'Első év' });
+    fireEvent.change(from, { target: { value: 2 } });
+    expect(screen.queryByTestId('featured-strip')).toBeNull();
+    fireEvent.change(from, { target: { value: 0 } });
+    expect(screen.getByTestId('featured-strip')).toBeTruthy();
+    expect(filterBadge()).toBeNull();
 
-  it('selects years from pointer movement on the timeline', () => {
-    renderOverview();
-    fireEvent.click(screen.getByRole('button', { name: 'Szűrők' }));
-    const first = screen.getByRole('checkbox', { name: '11/12' });
-    const second = screen.getByRole('checkbox', { name: '12/13' });
-    const timeline = first.parentElement?.parentElement;
-    expect(timeline).toBeTruthy();
-    Object.defineProperty(timeline, 'setPointerCapture', { value: vi.fn() });
-    Object.defineProperty(document, 'elementsFromPoint', {
-      configurable: true,
-      value: vi.fn().mockReturnValue([second])
-    });
-    fireEvent.pointerDown(first, { pointerId: 1, pointerType: 'touch' });
-    fireEvent.pointerMove(timeline!, { clientX: 35, clientY: 0, pointerId: 1, pointerType: 'touch' });
-    fireEvent.pointerUp(timeline!, { pointerId: 1, pointerType: 'touch' });
-    expect(first.getAttribute('aria-checked')).toBe('true');
-    expect(second.getAttribute('aria-checked')).toBe('true');
+    fireEvent.change(from, { target: { value: 2 } });
+    fireEvent.click(within(yearRow()).getByRole('button', { name: 'Szűrés törlése' }));
+    expect(screen.getByTestId('featured-strip')).toBeTruthy();
+    expect(within(yearRow()).getByText('11/12 – 15/16')).toBeTruthy();
+    expect(filterBadge()).toBeNull();
   });
 
   it('narrows the catalog by icon type', () => {

@@ -52,9 +52,15 @@ describe('filterByIcons', () => {
 describe('year and round filters', () => {
   const ids = Object.keys(list);
 
-  it('lists each used year once and filters by year', () => {
-    expect(getUsedYears(list)).toEqual(['11/12', '12/13', '20/21', '22/23']);
-    expect(filterByYears(ids, ['12/13', '22/23'], list)).toEqual(['EasyB', 'HardE']);
+  it('lists each used year once, oldest first', () => {
+    const shuffled = { HardE: list.HardE, EasyA: list.EasyA, MidCD: list.MidCD, EasyB: list.EasyB, Again: list.EasyB };
+    expect(getUsedYears(shuffled)).toEqual(['11/12', '12/13', '20/21', '22/23']);
+  });
+
+  it('keeps the games of an inclusive range of years', () => {
+    expect(filterByYears(ids, null, list)).toEqual(ids);
+    expect(filterByYears(ids, ['12/13', '20/21'], list)).toEqual(['EasyB', 'MidCD']);
+    expect(filterByYears(ids, ['13/14', '19/20'], list)).toEqual([]);
   });
 
   it('filters by round', () => {

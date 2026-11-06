@@ -1,4 +1,5 @@
-import { type PointerEvent as ReactPointerEvent, type ReactNode, useRef } from 'react';
+import { type ReactNode } from 'react';
+import { Slider } from '@mui/material';
 import {
   gameList, categories, iconKeys, type Category, type GameList, type IconKey, type Round
 } from '../../games/gameList';
@@ -35,18 +36,22 @@ export const filterByIcons = (
   return ids.filter(id => selected.includes(list[id].icon));
 };
 
-export const getUsedYears = (list: GameList): string[] => {
-  const years = new Set(Object.values(list).map(entry => entry.year.v));
-  return [...years];
-};
+// The distinct years the catalog has games from, oldest first. A year reads
+// `07/08`, so text order is chronological — until the competition reaches 99/00.
+export const getUsedYears = (list: GameList): string[] =>
+  [...new Set(Object.values(list).map(entry => entry.year.v))].sort();
+
+// An inclusive range of years, `[from, to]`; `null` matches everything.
+export type YearRange = [string, string] | null;
 
 export const filterByYears = (
   ids: string[],
-  selected: string[],
+  range: YearRange,
   list: GameList
 ): string[] => {
-  if (selected.length === 0) return ids;
-  return ids.filter(id => selected.includes(list[id].year.v));
+  if (range === null) return ids;
+  const [from, to] = range;
+  return ids.filter(id => from <= list[id].year.v && list[id].year.v <= to);
 };
 
 export const filterByRounds = (
@@ -112,7 +117,6 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
   selected: T[]
   onChange: (selected: T[]) => void
 }) => {
-  const { t } = useTranslation('overview');
   const toggle = (value: T) =>
     onChange(selected.includes(value) ? selected.filter(s => s !== value) : [...selected, value]);
 
@@ -135,17 +139,26 @@ const FilterRow = <T,>({ label, options, selected, onChange }: {
           >{content}</button>
         );
       })}
-      <button
-        onClick={() => onChange([])}
-        disabled={selected.length === 0}
-        aria-label={t('filters.clear')}
-        className={`
-          h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
-          enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
-          disabled:invisible disabled:cursor-default
-        `}
-      >×</button>
+      <ClearButton onClear={() => onChange([])} disabled={selected.length === 0} />
     </div>
+  );
+};
+
+// The × closing a filter row. It keeps its place while there is nothing to
+// clear, so the row does not shift as a filter comes and goes.
+const ClearButton = ({ onClear, disabled }: { onClear: () => void, disabled: boolean }) => {
+  const { t } = useTranslation('overview');
+  return (
+    <button
+      onClick={onClear}
+      disabled={disabled}
+      aria-label={t('filters.clear')}
+      className={`
+        h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
+        enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
+        disabled:invisible disabled:cursor-default
+      `}
+    >×</button>
   );
 };
 
@@ -185,99 +198,44 @@ export const IconFilter = ({ selected, onChange }: {
   );
 };
 
-export const YearFilter = ({ selected, onChange }: {
-  selected: string[]
-  onChange: (selected: string[]) => void
+// Whether the year at `index` gets a label under its tick. Every fifth one
+// does, counting from the oldest, and so does the newest — the fifth before it
+// gives way when the two would sit too close to read.
+const isLabelledYear = (index: number, last: number) =>
+  index === last || (index % 5 === 0 && last - index > 2);
+
+export const YearFilter = ({ range, onChange }: {
+  range: YearRange
+  onChange: (range: YearRange) => void
 }) => {
   const { t } = useTranslation('overview');
   const years = getUsedYears(gameList);
-  const dragging = useRef(false);
-  const suppressClick = useRef(false);
-  const visited = useRef(new Set<string>());
-  const timeline = useRef<HTMLDivElement>(null);
-  const toggle = (year: string) =>
-    onChange(selected.includes(year) ? selected.filter(value => value !== year) : [...selected, year]);
-  const startDragging = (year: string) => {
-    dragging.current = true;
-    suppressClick.current = true;
-    visited.current = new Set([year]);
-    toggle(year);
-  };
-  const dragOver = (year: string) => {
-    if (!dragging.current || visited.current.has(year)) return;
-    visited.current.add(year);
-    toggle(year);
-  };
-  const finishDragging = () => {
-    dragging.current = false;
-    visited.current.clear();
-  };
-  const moveDragging = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragging.current) return;
-    const node = document.elementsFromPoint(event.clientX, event.clientY)
-      .find(element => element instanceof HTMLElement && element.dataset.year);
-    if (node instanceof HTMLElement && node.dataset.year) dragOver(node.dataset.year);
-  };
-  const capturePointer = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (timeline.current?.setPointerCapture) timeline.current.setPointerCapture(event.pointerId);
-    const year = event.currentTarget.dataset.year;
-    if (year) startDragging(year);
-  };
+  const last = years.length - 1;
+  const [from, to] = range === null ? [0, last] : range.map(year => years.indexOf(year));
 
   return (
-    <div className="flex flex-wrap items-center gap-1 text-sm mb-2">
+    <div className="flex flex-wrap items-center gap-1 text-sm">
       <span className="w-20 shrink-0">{t('filters.year')}</span>
-      <div
-        ref={timeline}
-        className="relative flex min-w-32 w-full shrink-0 items-center justify-between
-          overflow-clip py-3 px-3 touch-none"
-        onPointerUp={finishDragging}
-        onPointerCancel={finishDragging}
-        onPointerMove={moveDragging}
-        style={{ maxWidth: `${35 * years.length + 20}px` }}
-      >
-        <span className="absolute left-2 right-2 top-1/2 h-px bg-slate-300 dark:bg-slate-600" aria-hidden />
-        {years.map((year, index) => {
-          const isSelected = selected.includes(year);
-          return (
-            <div
-              key={year}
-              data-year={year}
-              className="relative z-10 flex h-9 shrink-0 items-center justify-center"
-              onPointerEnter={() => dragOver(year)}
-            >
-              {(index === 0 || index === years.length - 1) && (
-                <span className="absolute text-xs" style={{ bottom: '-10px' }}>{year}</span>
-              )}
-              <button
-                onClick={() => {
-                  if (suppressClick.current) suppressClick.current = false;
-                  else toggle(year);
-                }}
-                onPointerDown={capturePointer}
-                data-year={year}
-                role="checkbox"
-                aria-checked={isSelected}
-                aria-label={year}
-                title={year}
-                className="absolute flex h-6 w-6 items-center justify-center rounded-full
-                  hocus:bg-primary/10"
-                />
-              <span className={`h-3 w-3 rounded-full border-2 border-surface
-                  ${isSelected ? 'bg-primary' : 'bg-slate-400 dark:bg-slate-500'}`}
-                />
-            </div>
-          );
-        })}
+      {/* The padding keeps the end thumbs, centred on the slider's edges, inside the row. */}
+      <div className="flex-1 min-w-48 max-w-xl px-3 pt-1">
+        <Slider
+          size="small"
+          value={[from, to]}
+          min={0}
+          max={last}
+          marks={years.map((year, index) => ({ value: index, label: isLabelledYear(index, last) ? year : undefined }))}
+          disableSwap
+          onChange={(_, [newFrom, newTo]) =>
+            onChange(newFrom === 0 && newTo === last ? null : [years[newFrom], years[newTo]])}
+          valueLabelDisplay="auto"
+          valueLabelFormat={index => years[index]}
+          getAriaValueText={index => years[index]}
+          getAriaLabel={thumb => (thumb === 0 ? t('filters.yearFrom') : t('filters.yearTo'))}
+        />
       </div>
-      <button
-        onClick={() => onChange([])}
-        disabled={selected.length === 0}
-        aria-label={t('filters.clear')}
-        className="h-7 inline-flex items-center px-2 rounded-sm drop-shadow-md
-          enabled:hocus:bg-slate-200 dark:enabled:hocus:bg-slate-700
-          disabled:invisible disabled:cursor-default"
-      >×</button>
+      {/* The range in words: on a touch screen the thumbs' own labels show only mid-drag. */}
+      <span className={`tabular-nums ${range === null ? 'opacity-60' : ''}`}>{years[from]} – {years[to]}</span>
+      <ClearButton onClear={() => onChange(null)} disabled={range === null} />
     </div>
   );
 };
