@@ -97,6 +97,8 @@ of you while writing the description and they leave no trace in the body.
   authority on everything under that directory, testing and PR scope included.
 - [`README.md`](README.md) — running the round,
   dependency policy, deployment.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the live round runs,
+  from a team's login to its score.
 
 ## Traps that cost the most time
 
