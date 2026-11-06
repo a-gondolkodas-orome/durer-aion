@@ -108,6 +108,9 @@ describe('import_teams_from_tsv', () => {
     const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.logs.value).toContain('WARNING: Header not exactly how we defined it. This is not always a problem.');
+    // What the file has to have, and what it may leave out.
+    expect(result.logs.value).toContain('Expected, in this order: Teamname (required), Category (required), '
+      + 'Email (optional), Other (optional), ID, Login Code, Credentials (optional: generated when left blank)');
   });
 
   it('should fail if the category is invalid', async () => {

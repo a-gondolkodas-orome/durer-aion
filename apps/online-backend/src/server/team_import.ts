@@ -64,7 +64,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   if (!arraysEqual(header, expected_header)) {
     onwarn("WARNING: Header not exactly how we defined it. This is not always a problem.");
     onwarn(`Found: ${header.join(', ')}`);
-    onwarn(`Expected: ${expected_header.join(', ')}`);
+    onwarn('Expected, in this order: Teamname (required), Category (required), Email (optional), Other (optional), '
+      + 'ID, Login Code, Credentials (optional: generated when left blank)');
     if (header.length === 1) {
       onwarn('The header has no tab in it: the columns must be separated by tabs, not spaces.');
     }
