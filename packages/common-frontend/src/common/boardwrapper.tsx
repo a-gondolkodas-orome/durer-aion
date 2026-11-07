@@ -1,7 +1,8 @@
-import { Box, Button, Stack, alpha, useMediaQuery } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import TimerOffOutlinedIcon from "@mui/icons-material/TimerOffOutlined";
@@ -108,19 +109,25 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px' }}>
             <Box sx={{ fontSize: '22px', fontWeight: 700 }}>{t('strategy.name')}</Box>
             <Box sx={{ flex: 1 }} />
-            <Stack sx={{ flexDirection: 'row', gap: '6px', fontSize: '17px' }}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '17px' }}>
               <b>{t('general.remainingTime')}:</b>
-              {!finished && <Countdown
-                msRemaining={msRemaining ?? null}
-                setMsRemaining={setMsRemaining}
-                getServerTimer={moves.getTime}
-                endTime={new Date(G.end)}
-                serverRemainingMs={G.millisecondsRemaining} />}
+              {finished
+                ? <code>00:00:00</code>
+                : <Countdown
+                  msRemaining={msRemaining ?? null}
+                  setMsRemaining={setMsRemaining}
+                  getServerTimer={moves.getTime}
+                  endTime={new Date(G.end)}
+                  serverRemainingMs={G.millisecondsRemaining} />}
+              {/* The dry run's clock is only the browser's. Said behind an
+                  icon: in full it took more of the screen than the clock. */}
+              {isOffline && <Tooltip title={t('general.warning.timeNotReal')} enterTouchDelay={0} arrow>
+                <IconButton size="small" aria-label={t('general.warning.timeNotReal')} sx={{ padding: '2px' }}>
+                  <InfoOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>}
             </Stack>
           </Stack>
-          {isOffline && <Box sx={{ fontSize: '11px', maxWidth: '260px', marginLeft: 'auto', marginTop: '-12px' }}>
-            {t('general.warning.timeNotReal')}
-          </Box>}
 
           {/* Above everything it governs, so a team never has to look for
               it. Open from the start where it fits beside the game; on a

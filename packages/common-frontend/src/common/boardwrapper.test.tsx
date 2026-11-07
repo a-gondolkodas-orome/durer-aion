@@ -171,6 +171,8 @@ describe('during a game', () => {
     expect(screen.getByText('strategy.result.timeUp')).toBeInTheDocument();
     expect(screen.getByText('strategy.result.timeUpDetail')).toBeInTheDocument();
     expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
+    // The countdown would show XX:XX:XX ten seconds past the end.
+    expect(screen.getByText('00:00:00')).toBeInTheDocument();
   });
 
   test('frames a live game with its stake, and a practice game as not counting', () => {
