@@ -101,7 +101,7 @@ describe("adminTeamViews", () => {
 
     expect(views).toHaveLength(1);
     expect(views[0].relayMatch).toMatchObject({ matchID: "m1" });
-    expect(error).toHaveBeenCalledWith("Team broken left out of the admin list:", expect.objectContaining({ message: expect.stringContaining("gone") }));
+    expect(error).toHaveBeenCalledWith("Team broken left out of the admin list: match gone is not in storage.");
     error.mockRestore();
   });
 });

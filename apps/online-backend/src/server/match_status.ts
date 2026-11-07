@@ -93,8 +93,9 @@ export async function teamMatches(
 }
 
 /** The admin routes' teams: each row, and both its matches as they stand, from
- *  one read of storage for the whole list. A broken row is left out and
- *  logged, so it does not cost the organisers the rest of the list (#706). */
+ *  one read of storage for the whole list. A row naming a match storage does
+ *  not have is left out and logged, so it does not cost the organisers the rest
+ *  of the list (#706); any other error still fails the list. */
 export async function adminTeamViews(
   db: Storage,
   teams: TeamModel[],
@@ -102,12 +103,12 @@ export async function adminTeamViews(
   const states = await fetchMatchStates(db, teams.flatMap(matchIDs));
   const now = new Date();
   return teams.flatMap(team => {
-    try {
-      return [{ ...team.toJSON(), ...matchesOf(team, states, now) }];
-    } catch (e) {
-      console.error(`Team ${team.teamId} left out of the admin list:`, e);
+    const missing = matchIDs(team).filter(id => !states.has(id));
+    if (missing.length > 0) {
+      console.error(`Team ${team.teamId} left out of the admin list: match ${missing.join(", ")} is not in storage.`);
       return [];
     }
+    return [{ ...team.toJSON(), ...matchesOf(team, states, now) }];
   });
 }
 
