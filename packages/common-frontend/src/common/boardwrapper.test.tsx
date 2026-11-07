@@ -102,6 +102,16 @@ describe('between games', () => {
     }
   });
 
+  // Offered under the final position, the next game took a scroll to find,
+  // and sat lower than before the first game.
+  test('offers the next game above the board, as before the first', () => {
+    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { winner: JUDGE_PLAYER, numberOfLoss: 1 });
+
+    const chooser = screen.getByText('strategy.chooser.title');
+    expect(chooser.compareDocumentPosition(boardArea()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('status').compareDocumentPosition(chooser) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   test('shows a live win as the first of two', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER },
       { winner: GUESSER_PLAYER, winningStreak: 1, liveResults: ['won'] });

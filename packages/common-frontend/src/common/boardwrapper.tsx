@@ -83,7 +83,6 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const difficulty = G.difficulty ?? null;
     const lastResult = betweenGames && G.winner !== null ? (G.winner === GUESSER_PLAYER ? 'won' : 'lost') : null;
     const showResult = betweenGames && !finished && !judgeToMove && lastResult !== null && difficulty !== null;
-    const chooser = <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null} />;
     const boardState: BoardState =
       finished ? 'locked'
       : betweenGames ? (lastResult !== null && !judgeToMove ? 'locked' : 'empty')
@@ -138,15 +137,16 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               </Stack>
               <Stack sx={{ flex: 1, minWidth: 0, gap: '14px' }}>
                 {showResult && <ResultBar G={G} difficulty={difficulty} result={lastResult} />}
-                {betweenGames && !finished && !showResult && chooser}
+                {/* Above the board every time, before the first game and after
+                    each one: under the board it took a scroll past the final
+                    position to find. */}
+                {betweenGames && !finished &&
+                  <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null} />}
                 {ctx.phase === 'chooseRole' && !finished && <RoleChooser moves={moves} enabled={teamToMove} />}
                 {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
                 <BoardArea state={boardState} hasResult={lastResult !== null || finished}>
                   {board(props)}
                 </BoardArea>
-                {/* After a game its result and final position come first, as
-                    one piece, and the next game is offered under them. */}
-                {showResult && chooser}
               </Stack>
             </Stack>
           </ModeFrame>
