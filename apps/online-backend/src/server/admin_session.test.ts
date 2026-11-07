@@ -8,6 +8,7 @@ import type { TeamsRepository } from "./db";
 import type { TeamModel } from "./model";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { ADMIN_ATTEMPT_LIMIT } from "./rate_limit";
 
 const PASSWORD = "organiser-password";
 const CREDENTIALS = `Basic ${Buffer.from(`${ADMIN_USER}:${PASSWORD}`).toString("base64")}`;
@@ -21,6 +22,8 @@ const columns = {
   strategyMatchID: null,
 };
 const team = { ...columns, toJSON: () => columns } as unknown as TeamModel;
+
+const WRONG = `Basic ${Buffer.from(`${ADMIN_USER}:not-the-password`).toString("base64")}`;
 
 const teamsWith = (rows: TeamModel[]) =>
   ({ listTeams: vi.fn().mockResolvedValue(rows) }) as unknown as TeamsRepository;
@@ -97,6 +100,82 @@ describe("the admin routes over HTTP", () => {
     const request = await serve(teamsWith([]));
 
     expect((await request("/game/ADMIN/some-match/state")).status).toBe(401);
+  });
+});
+
+// Issue #719: the password is one secret guarding every team's join code, so
+// guessing at it is limited like guessing at a join code is.
+describe("guessing the admin password", () => {
+  const servers: http.Server[] = [];
+
+  afterEach(async () => {
+    await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
+  });
+
+  async function serve(teams: TeamsRepository) {
+    const app = new Koa<Koa.DefaultState, Server.AppCtx>();
+    // Every refusal below is an error koa would log.
+    app.silent = true;
+    // No match exists, so the match routes answer 404 to the organisers.
+    app.context.db = { fetch: () => Promise.resolve({}) } as unknown as Server.AppCtx["db"];
+    const router = new Router<Koa.DefaultState, Server.AppCtx>();
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    app.use(router.routes());
+    const handle = app.callback();
+    const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
+    servers.push(server);
+    await new Promise(resolve => server.once("listening", resolve));
+    const { port } = server.address() as AddressInfo;
+    return (path: string, authorization?: string) =>
+      fetch(`http://127.0.0.1:${port}${path}`, authorization ? { headers: { authorization } } : undefined);
+  }
+
+  async function spendAttempts(request: Awaited<ReturnType<typeof serve>>) {
+    for (let i = 0; i < ADMIN_ATTEMPT_LIMIT; i++) {
+      expect((await request("/team/admin/all", WRONG)).status).toBe(401);
+    }
+  }
+
+  // Refused even with the right password: answering it would tell a guesser
+  // which of their guesses was the one.
+  it("stops guessing at the limit, the right password included", async () => {
+    const teams = teamsWith([team]);
+    const request = await serve(teams);
+
+    await spendAttempts(request);
+    const refused = await request("/team/admin/all", CREDENTIALS);
+
+    expect(refused.status).toBe(429);
+    expect(refused.headers.get("retry-after")).toMatch(/^\d+$/);
+    expect(teams.listTeams).not.toHaveBeenCalled();
+  });
+
+  it("counts every admin route against one budget", async () => {
+    const request = await serve(teamsWith([]));
+
+    await spendAttempts(request);
+
+    expect((await request("/game/admin/some-match/state", WRONG)).status).toBe(429);
+  });
+
+  // A request with no credentials is how the browser learns to ask for them.
+  it("charges nothing for a request that sent no password", async () => {
+    const request = await serve(teamsWith([team]));
+
+    for (let i = 0; i < ADMIN_ATTEMPT_LIMIT + 5; i++) {
+      expect((await request("/team/admin/all")).status).toBe(401);
+    }
+    expect((await request("/team/admin/all", CREDENTIALS)).status).toBe(200);
+  });
+
+  // The charge is given back once the password checks out, so what the route
+  // itself answers is not a failed guess.
+  it("charges nothing for an organiser's request the route refuses", async () => {
+    const request = await serve(teamsWith([]));
+
+    for (let i = 0; i < ADMIN_ATTEMPT_LIMIT + 5; i++) {
+      expect((await request("/game/admin/no-such-match/state", CREDENTIALS)).status).toBe(404);
+    }
   });
 });
 
