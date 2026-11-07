@@ -1,4 +1,4 @@
-import type { AdminTeamDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -30,11 +30,11 @@ export interface ClientRepository {
 /// no server to ask and nothing to administer, so they implement only
 /// `ClientRepository`, and the admin page renders only where this is provided.
 export interface AdminClientRepository {
-  getAll(): Promise<AdminTeamDto[]>
+  getAll(): Promise<TeamModelDto[]>
   getMatchState(matchId: string): Promise<MatchStateDto>
   getMatchLogs(matchId: string): Promise<MatchStateDto>
-  resetRelay(teamId: string): Promise<AdminTeamDto>
-  resetStrategy(teamId: string): Promise<AdminTeamDto>
+  resetRelay(teamId: string): Promise<TeamModelDto>
+  resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   importTeams(file: File): Promise<TeamImportResultDto>
 }

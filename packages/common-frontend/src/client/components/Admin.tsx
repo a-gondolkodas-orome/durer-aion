@@ -4,7 +4,7 @@ import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, Tabl
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
 import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
-import { AdminMatchStatus, AdminTeamDto } from '../dto/TeamStateDto';
+import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
 import Form from './form';
@@ -44,12 +44,7 @@ function TeamsToolbar(props: { onOpenExport?: () => void }) {
 }
 
 // What the states mean is on MatchStatus in the `schemas` package.
-const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet. BROKEN: a sor nem létező meccsre mutat; a játék alaphelyzetbe állítása javítja.';
-
-/// A broken match shows the id the row names, so the organisers can find it.
-function matchStateCell(status: AdminMatchStatus): string {
-  return status.state === 'BROKEN' ? `BROKEN: ${status.matchID}` : status.state;
-}
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
@@ -88,7 +83,7 @@ export function Admin(props: { teamId?: string }) {
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
-  const [selectedRow, setSelectedRow] = useState<AdminTeamDto | null>(null);
+  const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
   const openTab = (next: AdminTab) => {
@@ -244,8 +239,8 @@ export function Admin(props: { teamId?: string }) {
           rows={teams.map((a) => {
             return {
               id: a.teamId,
-              relayMatchState: matchStateCell(a.relayMatch),
-              strategyMatchState: matchStateCell(a.strategyMatch),
+              relayMatchState: a.relayMatch.state,
+              strategyMatchState: a.strategyMatch.state,
               ...a,
             };
           })}
@@ -351,7 +346,7 @@ export function Admin(props: { teamId?: string }) {
   )
 }
 
-function Stats(props: { data: AdminTeamDto[] }) {
+function Stats(props: { data: TeamModelDto[] }) {
   const categories = Array.from(new Set(props.data.map(it => it.category)));
   const stat = categories.sort().map(cat => {
     const current = props.data.filter(it => it.category === cat);

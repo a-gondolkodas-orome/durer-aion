@@ -1,5 +1,5 @@
 import type { AdminClientRepository, ClientRepository } from "./api-repository-interface";
-import type { AdminTeamDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
 // build the apps bundle.
@@ -64,7 +64,7 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
     this.session = code;
     return Promise.resolve();
   }
-  getAll(): Promise<AdminTeamDto[]> {
+  getAll(): Promise<TeamModelDto[]> {
     return Promise.resolve([]);
   }
   getMatchState(_matchId: string): Promise<MatchStateDto> {
@@ -73,10 +73,10 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
   getMatchLogs(_matchId: string): Promise<MatchStateDto> {
     throw Error("NOT call this");
   }
-  resetRelay(_teamId: string): Promise<AdminTeamDto> {
+  resetRelay(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
-  resetStrategy(_teamId: string): Promise<AdminTeamDto> {
+  resetStrategy(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
