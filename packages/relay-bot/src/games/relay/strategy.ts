@@ -1,5 +1,5 @@
 import { State } from 'boardgame.io';
-import { MyGameState, RelayMoveArgs } from 'game';
+import { MyGameState, RELAY_MAX_TRIES, RelayMoveArgs } from 'game';
 
 export interface Problem {
   problemText: string;
@@ -185,7 +185,7 @@ export function relayStrategy(problemList: Problem[]) {
     let correctnessPreviousAnswer = false;
     if (state.G.answer === problemList[state.G.currentProblem].answer) {
       correctnessPreviousAnswer = true;
-    } else if (state.G.numberOfTry < 3) {
+    } else if (state.G.numberOfTry < RELAY_MAX_TRIES) {
       return [[state.G.currentProblemAvailablePoints - 1], "nextTry"];
     }
 

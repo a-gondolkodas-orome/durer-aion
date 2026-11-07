@@ -62,6 +62,7 @@ beírt
 bejelentkezhettek
 bejelölgetni
 bekötötte
+beküldésével
 beküldött
 belebújások
 belebújnak
@@ -547,7 +548,6 @@ leszámítva
 leszámolni
 leszúrni
 leszúrt
-letöltött
 letörli
 letörni
 letörölhetjük
@@ -885,6 +885,7 @@ tolhatunk
 Továbbjutás
 továbbjutnak
 továbbjutó
+továbbléphettek
 törhetsz
 törhetünk
 trükkösen
@@ -927,4 +928,5 @@ visszanézve
 Visszaragasztottam
 visszarakási
 visszatérjen
+visszatérni
 vízszintesen
