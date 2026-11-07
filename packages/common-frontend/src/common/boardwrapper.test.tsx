@@ -219,6 +219,19 @@ describe('the goal panel', () => {
 });
 
 // jsdom has no matchMedia, so these render as on a phone.
+// Behind the end dialog: the second slot stayed empty though both wins were in.
+describe('the goal panel after the second win', () => {
+  test('fills both slots and names nothing at stake', () => {
+    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER, gameover: true },
+      { winner: GUESSER_PLAYER, winningStreak: 2, points: 12, liveResults: ['won', 'won'] });
+
+    expect(screen.getByRole('img', { name: 'strategy.goal.firstWin', hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'strategy.goal.secondWin', hidden: true })).toBeInTheDocument();
+    expect(screen.getByText('strategy.goal.done')).toBeInTheDocument();
+    expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
+  });
+});
+
 describe('the bar above the game', () => {
   test('names the screen before the first game, and keeps the clock', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { difficulty: null });

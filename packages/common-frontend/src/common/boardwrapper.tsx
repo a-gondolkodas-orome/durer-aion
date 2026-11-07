@@ -239,6 +239,9 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
   const { G, practice } = props;
   const stake = strategyPoints(G.numberOfLoss);
   const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
+  // The second win in a row ends the match, so a streak of two shows only
+  // behind the end dialog, and nothing is at stake any more.
+  const done = G.winningStreak >= 2;
   return (
     <Stack sx={{ gap: '12px', backgroundColor: practice ? PRACTICE_TINT : LIVE_TINT, borderRadius: '14px', padding: '16px' }}>
       <Box sx={{ fontSize: '13px', fontWeight: 600, color: practice ? PRACTICE : LIVE_TEXT, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
@@ -246,14 +249,14 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
       </Box>
       <Box sx={{ fontSize: '17px', fontWeight: 600, lineHeight: 1.35 }}>{t('strategy.goal.text')}</Box>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-        <StreakSlot won={G.winningStreak >= 1} label="1" practice={practice} />
+        <StreakSlot won={G.winningStreak >= 1} label="1" wonLabel={t('strategy.goal.firstWin')} practice={practice} />
         <Box sx={{ width: '18px', height: '3px', backgroundColor: practice ? '#cbd5e1' : '#e8b79a' }} />
-        <StreakSlot won={false} label="2" practice={practice} />
+        <StreakSlot won={done} label="2" wonLabel={t('strategy.goal.secondWin')} practice={practice} />
         <Box sx={{ fontSize: '15px', marginLeft: '6px' }}>
-          {G.winningStreak >= 1 ? t('strategy.goal.oneMore') : t('strategy.goal.twoMore')}
+          {done ? t('strategy.goal.done') : G.winningStreak >= 1 ? t('strategy.goal.oneMore') : t('strategy.goal.twoMore')}
         </Box>
       </Stack>
-      <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
+      {!done && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
         {/* In a practice game the stake is the next live game's, not this one's. */}
         {practice
           ? t('strategy.goal.stakeNextLive', { points: t('general.points', { count: stake }) })
@@ -261,17 +264,16 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
         {stakeAfterLoss < stake
           ? t('strategy.goal.ifLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
           : t('strategy.goal.ifLose')}
-      </Box>
+      </Box>}
       {G.liveResults.length > 0 && <StrategyGamesTable results={G.liveResults} />}
     </Stack>
   );
 }
 
-function StreakSlot(props: { won: boolean, label: string, practice: boolean }) {
-  const { t } = useTranslation();
+function StreakSlot(props: { won: boolean, label: string, wonLabel: string, practice: boolean }) {
   const size = '44px';
   return props.won
-    ? <Box role="img" aria-label={t('strategy.goal.firstWin')} sx={{
+    ? <Box role="img" aria-label={props.wonLabel} sx={{
       width: size, height: size, borderRadius: '50%', backgroundColor: WIN, color: '#fff',
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}><CheckIcon /></Box>

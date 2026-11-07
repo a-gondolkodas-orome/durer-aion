@@ -152,10 +152,12 @@
     },
     "firstPlayer": "Kezdő leszek",
     "goal": {
+      "done": "Megvan a két győzelem!",
       "firstWin": "Az első győzelem megvan",
       "ifLose": "Egy éles vereség után újra két egymás utáni győzelem kell.",
       "ifLoseDrop": "Egy éles vereség után újra két egymás utáni győzelem kell, és a tét {{points}} lesz.",
       "oneMore": "Még egy győzelem kell",
+      "secondWin": "A második győzelem megvan",
       "stake": "Most {{points}} a tét.",
       "stakeNextLive": "A következő éles játszmában {{points}} a tét.",
       "text": "Győzzétek le a gépet kétszer egymás után éles játszmában.",
