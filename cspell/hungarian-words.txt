@@ -28,6 +28,8 @@ egyenlőszárú
 egyenlőszárúak
 egyesblokk
 egysátorban
+elolvasása
+elolvastátok
 emailben
 emailjeidet
 esekkel

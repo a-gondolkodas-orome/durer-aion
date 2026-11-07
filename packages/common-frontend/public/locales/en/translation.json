@@ -136,8 +136,8 @@
       "liveSub": "Counts towards your score",
       "noAbandon": "A game, once started, has to be played to the end.",
       "practiceButton": "Start a practice game",
-      "practiceKeeps": "Your live streak and the stake stay as they are.",
       "practiceSame": "The same rules as in a live game.",
+      "readRulesFirst": "You can start a game once you have read the rules: say so with the button under them.",
       "starting": "Starting…",
       "title": "Which game do you start?"
     },
@@ -193,6 +193,10 @@
       "prompt": "Will you go first or second? Look at the position first."
     },
     "rules": "Rules",
+    "rulesFirst": {
+      "button": "We have read them",
+      "title": "Read the rules first!"
+    },
     "secondPlayer": "I will be the second"
   },
   "waitingRoom": {

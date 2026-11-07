@@ -60,9 +60,16 @@ const boardArea = () => screen.getByTestId('strategyBoard');
 describe('between games', () => {
   // `startNewGame` with the team to move is the gap between games, never a
   // move inside one: the match opens on it, and a game that ends returns to it.
-  test('offers the first game of the match on a faded board', () => {
+  test('offers the first game of the match on a faded board, once the rules are read', () => {
     const moves = renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { difficulty: null });
 
+    // The rules lead the first screen, and hold the start buttons until read.
+    expect(screen.getByText('strategy.rulesFirst.title')).toBeInTheDocument();
+    for (const button of startButtons()) {
+      expect(button).toBeDisabled();
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'strategy.rulesFirst.button' }));
+    expect(screen.queryByText('strategy.rulesFirst.title')).not.toBeInTheDocument();
     for (const button of startButtons()) {
       expect(button).toBeEnabled();
     }

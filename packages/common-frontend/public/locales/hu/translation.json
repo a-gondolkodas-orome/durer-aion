@@ -132,8 +132,8 @@
       "liveSub": "Pontért megy",
       "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
       "practiceButton": "Próbajáték indítása",
-      "practiceKeeps": "Az éles sorozatotok és a tét nem változik.",
       "practiceSame": "Ugyanazok a szabályok, mint az éles játszmában.",
+      "readRulesFirst": "Játszmát a szabályok elolvasása után kezdhettek: a szabályok alatti gombbal jelezzétek, hogy elolvastátok.",
       "starting": "Indul…",
       "title": "Milyen játszmát kezdtek?"
     },
@@ -189,6 +189,10 @@
       "prompt": "Kezdők vagy másodikak lesztek? Nézzétek meg előbb az állást."
     },
     "rules": "Szabályok",
+    "rulesFirst": {
+      "button": "Elolvastuk, értjük",
+      "title": "Először olvassátok el a szabályokat!"
+    },
     "secondPlayer": "Második leszek"
   },
   "waitingRoom": {
