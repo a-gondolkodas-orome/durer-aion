@@ -154,17 +154,13 @@
     },
     "firstPlayer": "We go first",
     "goal": {
-      "done": "You have both wins!",
-      "firstWin": "First win done",
       "ifLose": "After a live loss, you need two wins in a row again.",
       "ifLoseDrop": "After a live loss, you need two wins in a row again, and the stake drops to {{points}}.",
-      "oneMore": "One more win needed",
-      "secondWin": "Second win done",
+      "progress": "Live wins in a row:",
       "stake": "{{points}} are at stake now.",
       "stakeNextLive": "{{points}} are at stake in the next live game.",
       "text": "Beat the computer twice in a row in live games.",
-      "title": "The goal",
-      "twoMore": "Two wins needed"
+      "title": "The goal"
     },
     "mode": {
       "live": "Live game",

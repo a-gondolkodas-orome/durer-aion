@@ -1,6 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, alpha, useMediaQuery } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, alpha, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
@@ -29,21 +27,23 @@ import type { TFunction } from "i18next";
 export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
 export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
-// Live and practice differ in more than hue — solid against dashed, a flag
-// against a flask — so the mode reads without telling colours apart. A won
-// game is green in both modes: the live orange sits too close to the red of a
-// loss to mark a win.
+// The mode's colour is kept to the bar and the frame round the game, the one
+// place that says which game this is; the rest of the screen is neutral.
+// Live and practice differ in more than hue there — solid against dashed, a
+// flag against a flask — so the mode reads without telling colours apart. A
+// won game is green in both modes: the live orange sits too close to the red
+// of a loss to mark a win.
 const LIVE = '#c2410c';
 const LIVE_TEXT = '#9a3412';
-const LIVE_TINT = '#fff1e6';
 const PRACTICE = '#475569';
 const PRACTICE_BORDER = '#64748b';
 const PRACTICE_TINT = '#f1f5f9';
-const PRACTICE_STRIPES = 'repeating-linear-gradient(135deg, #eef2f6 0 14px, #e2e8f0 14px 28px)';
+const PRACTICE_BAR = '#e8edf2';
 const WIN = '#1b5e20';
 const LOSS = '#8e1b10';
 const MUTED = '#57606a';
 const LOCKED = '#424a53';
+const NEUTRAL_BORDER = '#d0d7de';
 
 /// What the board area shows. `empty` has no position worth reading: no game
 /// yet, or the bot still placing the next one. `locked` has one the team
@@ -130,16 +130,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             difficulty={difficulty}
             liveNumber={G.numberOfTries}
             detailLine={showResult && difficulty === 'live' ? liveResultDetail(G, lastResult, t) : null}
-            status={<>
-              {/* The bar's free spot says what is going on while a game is
-                  on: the stake and whose turn, in place of rows of their own
-                  above the board. */}
-              {stakeInBar &&
-                <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
-                  {t('strategy.mode.stake', { points: pointsText(t, strategyPoints(G.numberOfLoss)) })}
-                </Box>}
-              {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
-            </>}
+            status={stakeInBar &&
+              <Box sx={{ fontSize: '16px', fontWeight: 600 }}>
+                {t('strategy.mode.stake', { points: pointsText(t, strategyPoints(G.numberOfLoss)) })}
+              </Box>}
             clock={<Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px' }}>
               {/* On a phone an icon stands for the label, so the bar's right
                   half fits one line. */}
@@ -241,7 +235,7 @@ function ModeFrame(props: {
         flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
         gap: '8px 20px', padding: '10px 18px',
         ...(difficulty === 'live' ? { backgroundColor: LIVE, color: '#fff' }
-          : difficulty === 'test' ? { background: PRACTICE_STRIPES, color: '#1e293b' }
+          : difficulty === 'test' ? { backgroundColor: PRACTICE_BAR, color: '#1e293b' }
           : { backgroundColor: '#f6f4ee', color: '#1f2328' }),
       }}>
         <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
@@ -250,7 +244,7 @@ function ModeFrame(props: {
           {difficulty === null
             ? <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{t('strategy.name')}</Box>
             : <Stack>
-              <Box sx={{ fontSize: '19px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <Box sx={{ fontSize: '20px', fontWeight: 700 }}>
                 {difficulty === 'live' ? t('strategy.mode.live') : t('strategy.mode.practice')}
               </Box>
               <Box sx={{ fontSize: '14px' }}>
@@ -286,8 +280,6 @@ function lossCost(G: GameStateMixin, t: TFunction): { drops: boolean, points: st
 }
 
 /** The goal of the match and how far the team is: the streak, the stake, the live games so far. */
-/// In a practice game the panel turns slate like the frame round it: the
-/// streak it shows is the live one, which the practice game leaves alone.
 function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boolean, showIfLose: boolean }) {
   const { t } = useTranslation();
   const { G, practice, showStake, showIfLose } = props;
@@ -295,20 +287,23 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boo
   const loss = lossCost(G, t);
   // The second win in a row ends the match, so a streak of two shows only
   // behind the end dialog, and nothing is at stake any more.
-  const done = G.winningStreak >= 2;
+  const streak = Math.min(G.winningStreak, 2);
+  const done = streak === 2;
   return (
-    <Stack sx={{ gap: '12px', backgroundColor: practice ? PRACTICE_TINT : LIVE_TINT, borderRadius: '14px', padding: '16px' }}>
-      <Box sx={{ fontSize: '13px', fontWeight: 600, color: practice ? PRACTICE : LIVE_TEXT, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+    <Stack sx={{ gap: '10px', backgroundColor: '#fff', border: `1px solid ${NEUTRAL_BORDER}`, borderRadius: '14px', padding: '16px' }}>
+      <Box sx={{ fontSize: '13px', fontWeight: 600, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
         {t('strategy.goal.title')}
       </Box>
       <Box sx={{ fontSize: '17px', fontWeight: 600, lineHeight: 1.35 }}>{t('strategy.goal.text')}</Box>
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-        <StreakSlot won={G.winningStreak >= 1} label="1" wonLabel={t('strategy.goal.firstWin')} practice={practice} />
-        <Box sx={{ width: '18px', height: '3px', backgroundColor: practice ? '#cbd5e1' : '#e8b79a' }} />
-        <StreakSlot won={done} label="2" wonLabel={t('strategy.goal.secondWin')} practice={practice} />
-        <Box sx={{ fontSize: '15px', marginLeft: '6px' }}>
-          {done ? t('strategy.goal.done') : G.winningStreak >= 1 ? t('strategy.goal.oneMore') : t('strategy.goal.twoMore')}
-        </Box>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '15px' }}>
+        {t('strategy.goal.progress')} <b>{streak} / 2</b>
+        {/* The count says it; the dots only let it be seen at a glance. */}
+        <Stack aria-hidden sx={{ flexDirection: 'row', gap: '6px' }}>
+          {[0, 1].map(i => <Box key={i} sx={{
+            width: '14px', height: '14px', borderRadius: '50%', boxSizing: 'border-box',
+            ...(i < streak ? { backgroundColor: WIN } : { border: '2px solid #8c959f' }),
+          }} />)}
+        </Stack>
       </Stack>
       {!done && (showStake || showIfLose) && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
         {/* In a practice game the stake is the next live game's, not this one's. */}
@@ -321,19 +316,6 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boo
       {G.liveResults.length > 0 && <StrategyGamesTable results={G.liveResults} />}
     </Stack>
   );
-}
-
-function StreakSlot(props: { won: boolean, label: string, wonLabel: string, practice: boolean }) {
-  const size = '44px';
-  return props.won
-    ? <Box role="img" aria-label={props.wonLabel} sx={{
-      width: size, height: size, borderRadius: '50%', backgroundColor: WIN, color: '#fff',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    }}><CheckIcon /></Box>
-    : <Box sx={{
-      width: size, height: size, borderRadius: '50%', border: `3px dashed ${props.practice ? PRACTICE_BORDER : LIVE}`, boxSizing: 'border-box',
-      color: props.practice ? PRACTICE : LIVE_TEXT, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    }}>{props.label}</Box>;
 }
 
 function PracticeWarning() {
@@ -354,12 +336,11 @@ function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
     : (result === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'));
   return (
     <Stack role="status" sx={{
-      flexDirection: 'row', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '5px 14px',
+      flexDirection: 'row', alignItems: 'center', borderRadius: '999px', padding: '5px 14px',
       backgroundColor: result === 'won' ? WIN : LOSS, color: '#fff', fontSize: '15px', fontWeight: 700,
       // Lifts it off the dashed edge it sits on.
       boxShadow: '0 0 0 3px #fff',
     }}>
-      {result === 'won' ? <CheckIcon aria-hidden fontSize="small" /> : <CloseIcon aria-hidden fontSize="small" />}
       {headline}
     </Stack>
   );
@@ -426,16 +407,13 @@ function ModeCard(props: {
   const { live, open } = props;
   return (
     <Stack sx={{
-      border: live ? `3px solid ${LIVE}` : `3px dashed ${PRACTICE_BORDER}`, borderRadius: '16px',
+      border: `1px solid ${NEUTRAL_BORDER}`, borderRadius: '16px',
       padding: '16px', gap: '10px', backgroundColor: '#fff',
     }}>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
-        {live
-          ? <FlagOutlinedIcon aria-hidden sx={{ color: LIVE, fontSize: '30px' }} />
-          : <ScienceOutlinedIcon aria-hidden sx={{ color: PRACTICE, fontSize: '30px' }} />}
         <Stack sx={{ flex: 1 }}>
           <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{props.title}</Box>
-          {open && <Box sx={{ fontSize: '14px', fontWeight: 600, color: live ? LIVE_TEXT : PRACTICE }}>{props.subtitle}</Box>}
+          {open && <Box sx={{ fontSize: '14px', fontWeight: 600, color: MUTED }}>{props.subtitle}</Box>}
         </Stack>
         <IconButton aria-label={t('strategy.chooser.details')} aria-expanded={open} onClick={props.onToggle}>
           <ExpandMoreIcon sx={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -470,8 +448,8 @@ function RoleChooser(props: { moves: StrategyWrapperMoves, enabled: boolean }) {
   const { t } = useTranslation();
   const buttonSx = { flex: 1, minHeight: '50px', fontSize: '16px', textTransform: 'none', borderRadius: '10px' } as const;
   return (
-    <Stack sx={{ gap: '10px', backgroundColor: LIVE_TINT, border: `2px solid ${LIVE}`, borderRadius: '14px', padding: '14px' }}>
-      <Box sx={{ fontSize: '16px', fontWeight: 600 }}>{t('strategy.role.prompt')}</Box>
+    <Stack sx={{ gap: '10px' }}>
+      <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{t('strategy.role.prompt')}</Box>
       <Stack sx={{ flexDirection: 'row', gap: '10px' }}>
         <Button sx={buttonSx} variant="contained" disabled={!props.enabled} onClick={() => props.moves.chooseRole(GUESSER_PLAYER)}>
           {t('strategy.firstPlayer')}
@@ -484,15 +462,42 @@ function RoleChooser(props: { moves: StrategyWrapperMoves, enabled: boolean }) {
   );
 }
 
-function TurnLabel(props: { teamToMove: boolean }) {
+/// Whose turn it is, on the board's top edge, where the team looks to move:
+/// the strongest signal on the screen while a game is on.
+function TurnLabel() {
   const { t } = useTranslation();
   return (
     <Box role="status" sx={{
-      borderRadius: '999px', padding: '6px 16px', fontWeight: 600, boxShadow: '0 0 0 2px #fff',
-      ...(props.teamToMove ? { backgroundColor: 'primary.main', color: 'primary.contrastText' } : { backgroundColor: '#dde1e6', color: LOCKED }),
+      borderRadius: '999px', padding: '8px 22px', fontSize: '19px', fontWeight: 700,
+      backgroundColor: 'primary.main', color: 'primary.contrastText',
+      boxShadow: '0 0 0 4px #fff',
     }}>
-      {props.teamToMove ? t('strategy.board.yourTurn') : t('strategy.board.botTurn')}
+      {t('strategy.board.yourTurn')}
     </Box>
+  );
+}
+
+/// The bot's turn. The bot mostly answers within a state update or two, so the
+/// spinner waits a moment before it shows: shown at once, it would flash on
+/// every move; it is there for a server that is slow to answer.
+function WaitLabel() {
+  const { t } = useTranslation();
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setSlow(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+  return (
+    <Stack role="status" sx={{
+      flexDirection: 'row', alignItems: 'center', gap: '10px',
+      borderRadius: '999px', padding: '7px 20px', fontSize: '17px', fontWeight: 600,
+      backgroundColor: LOCKED, color: '#fff', boxShadow: '0 0 0 4px #fff',
+    }}>
+      <Box sx={{ width: '16px', height: '16px', display: 'flex' }}>
+        {slow && <CircularProgress data-testid="botThinking" size={16} thickness={5} color="inherit" />}
+      </Box>
+      {t('strategy.board.botTurn')}
+    </Stack>
   );
 }
 
@@ -517,7 +522,7 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
       position: 'relative', borderRadius: '14px', backgroundColor: '#fafaf7',
       // Room for the label that straddles the top edge, clear of whatever is
       // above the board.
-      marginTop: props.result !== null ? '18px' : state === 'locked' ? '12px' : 0,
+      marginTop: props.result !== null ? '18px' : state === 'locked' ? '12px' : '24px',
     }}>
       <Box
         component="fieldset"
@@ -529,15 +534,22 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
           // A fieldset's own border, margin and min-content width reset.
           border: 0, margin: 0, minWidth: 0,
           display: 'flex', padding: '15px', borderRadius: '14px',
+          // The turn labels sit centred, over the board's own first line.
+          ...((state === 'live' || state === 'waiting') && { paddingTop: '30px' }),
           ...(state !== 'live' && { '& *': { cursor: 'default' } }),
           ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
           ...(state === 'locked' && { outline: '2px dashed #8c959f', outlineOffset: '-2px' }),
+          ...(state === 'live' && { outline: '3px solid', outlineColor: 'primary.main', outlineOffset: '-3px' }),
           transition: 'opacity 0.3s',
         }}>
         {props.children}
       </Box>
-      {/* On the dashed edge, like a label on a frame, so it takes no
-          height of the board's. */}
+      {/* On the edge, like a label on a frame, so it takes no height of the
+          board's: the result, whose turn, or that it is only to look at. */}
+      {(state === 'live' || state === 'waiting') &&
+        <Box sx={{ position: 'absolute', top: '-20px', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+          {state === 'live' ? <TurnLabel /> : <WaitLabel />}
+        </Box>}
       {props.result !== null
         ? <Box sx={{ position: 'absolute', top: '-16px', right: '16px', left: '16px', display: 'flex', justifyContent: 'flex-end' }}>
           {props.result}

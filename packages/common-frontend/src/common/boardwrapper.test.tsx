@@ -132,7 +132,7 @@ describe('between games', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.liveWon');
     expect(screen.getByText('strategy.result.liveWonDetail')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'strategy.goal.firstWin' })).toBeInTheDocument();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
     // After a game the cards are folded to their title and button, and open on demand.
     expect(screen.queryByText('strategy.chooser.liveIfWinDone')).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'strategy.chooser.details' })[1]);
@@ -190,6 +190,8 @@ describe('during a game', () => {
   test('lets the team move on its turn', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
 
+    // On the board's own edge, where the team looks to move.
+    expect(boardArea().parentElement).toContainElement(screen.getByRole('status'));
     expect(screen.getByRole('status')).toHaveTextContent('strategy.board.yourTurn');
     expect(boardArea()).toHaveAttribute('data-state', 'live');
     expect(boardArea()).toBeEnabled();
@@ -202,6 +204,7 @@ describe('during a game', () => {
     renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER });
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.board.botTurn');
+    expect(boardArea().parentElement).toContainElement(screen.getByRole('status'));
     expect(boardArea()).toHaveAttribute('data-state', 'waiting');
     expect(boardArea()).toBeDisabled();
     play.mockClear();
@@ -217,6 +220,14 @@ describe('during a game', () => {
 
     expect(screen.getAllByRole('dialog')).toHaveLength(1);
     expect(screen.queryByText('strategy.rulesFirst.title')).not.toBeInTheDocument();
+  });
+
+  // Shown at once, the spinner would flash on every one of the bot's moves.
+  test('shows a spinner only once the bot is slow to answer', async () => {
+    renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER });
+
+    expect(screen.queryByTestId('botThinking')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('botThinking')).toBeInTheDocument();
   });
 
   test('locks the board and offers nothing once the time ran out', () => {
@@ -270,13 +281,11 @@ describe('the goal panel', () => {
 // jsdom has no matchMedia, so these render as on a phone.
 // Behind the end dialog: the second slot stayed empty though both wins were in.
 describe('the goal panel after the second win', () => {
-  test('fills both slots and names nothing at stake', () => {
+  test('counts both wins and names nothing at stake', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER, gameover: true },
       { winner: GUESSER_PLAYER, winningStreak: 2, points: 12, liveResults: ['won', 'won'] });
 
-    expect(screen.getByRole('img', { name: 'strategy.goal.firstWin', hidden: true })).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'strategy.goal.secondWin', hidden: true })).toBeInTheDocument();
-    expect(screen.getByText('strategy.goal.done')).toBeInTheDocument();
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
     expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
   });
 });
