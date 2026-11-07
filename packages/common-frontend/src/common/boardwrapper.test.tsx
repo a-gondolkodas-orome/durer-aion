@@ -135,7 +135,9 @@ describe('between games', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceWon');
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceDetail');
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.practiceWarning.title');
+    // Said once on the screen, on the practice card, not again in the bar.
+    expect(screen.getAllByText('strategy.practiceWarning.title')).toHaveLength(1);
+    expect(screen.getByRole('status')).not.toHaveTextContent('strategy.practiceWarning.title');
     // The band of the game that just ended still names its mode.
     expect(screen.getByText('strategy.mode.practiceKeeps')).toBeInTheDocument();
   });
@@ -200,11 +202,13 @@ describe('during a game', () => {
 });
 
 describe('the goal panel', () => {
-  test('turns to the practice colours, and says the live standing holds, in a practice game', () => {
+  // "Most N pont a tét" beside a practice game read as if the practice game
+  // were played for it.
+  test('names the stake as the next live game\'s in a practice game', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { difficulty: 'test' });
 
-    expect(screen.getByText('strategy.goal.titlePractice')).toBeInTheDocument();
-    expect(screen.queryByText('strategy.goal.title')).not.toBeInTheDocument();
+    expect(screen.getByText(/strategy\.goal\.stakeNextLive/)).toBeInTheDocument();
+    expect(screen.queryByText(/strategy\.goal\.stake /)).not.toBeInTheDocument();
   });
 });
 

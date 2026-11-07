@@ -160,9 +160,9 @@
       "ifLoseDrop": "After a live loss you need two wins in a row again, and the stake drops to {{points}}.",
       "oneMore": "One more win needed",
       "stake": "{{points}} at stake now.",
+      "stakeNextLive": "{{points}} at stake in the next live game.",
       "text": "Beat the computer twice in a row in live games.",
       "title": "The goal",
-      "titlePractice": "The goal · your live standing does not change now",
       "twoMore": "Two wins needed"
     },
     "mode": {
@@ -176,8 +176,8 @@
     "name": "Strategy game",
     "notSupported": "UNSUPPORTED GAME STATE",
     "practiceWarning": {
-      "text": "Beating it here does not mean you will beat it in a live game.",
-      "title": "The practice computer does not necessarily play its best."
+      "text": "The practice computer does not necessarily play its best, and live games may start from other positions: beating it here does not mean you will win a live game.",
+      "title": "Practice games are mainly for trying out how the game goes, and checking that you understand the rules."
     },
     "result": {
       "liveLost": "The computer won.",

@@ -139,7 +139,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px' }}>
                 {rulesFirst && <RulesFirst description={description} onRead={() => setRulesRead(true)} />}
                 <GoalPanel G={G} practice={difficulty === 'test'} />
-                {difficulty === 'test' && <PracticeWarning />}
+                {/* Once a screen: between games the practice card carries it. */}
+                {difficulty === 'test' && !betweenGames && <PracticeWarning />}
                 {/* Beside the board on a wide screen, where the column has
                     room to spare: open from the start, and no height spent. */}
                 {wide && !rulesFirst && <Box component="details" open={!rulesFolded} onToggle={(event) => setRulesFolded(!event.currentTarget.open)} sx={{
@@ -243,7 +244,7 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
   return (
     <Stack sx={{ gap: '12px', backgroundColor: practice ? PRACTICE_TINT : LIVE_TINT, borderRadius: '14px', padding: '16px' }}>
       <Box sx={{ fontSize: '13px', fontWeight: 600, color: practice ? PRACTICE : LIVE_TEXT, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-        {practice ? t('strategy.goal.titlePractice') : t('strategy.goal.title')}
+        {t('strategy.goal.title')}
       </Box>
       <Box sx={{ fontSize: '17px', fontWeight: 600, lineHeight: 1.35 }}>{t('strategy.goal.text')}</Box>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
@@ -255,7 +256,10 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
         </Box>
       </Stack>
       <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
-        {t('strategy.goal.stake', { points: t('general.points', { count: stake }) })}{' '}
+        {/* In a practice game the stake is the next live game's, not this one's. */}
+        {practice
+          ? t('strategy.goal.stakeNextLive', { points: t('general.points', { count: stake }) })
+          : t('strategy.goal.stake', { points: t('general.points', { count: stake }) })}{' '}
         {stakeAfterLoss < stake
           ? t('strategy.goal.ifLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
           : t('strategy.goal.ifLose')}
@@ -332,7 +336,6 @@ function ResultBar(props: { G: GameStateMixin, difficulty: Difficulty, result: '
         {headline}
       </Stack>
       <Box sx={{ fontSize: '15px', lineHeight: 1.45 }}>{detail}</Box>
-      {!live && result === 'won' && <PracticeWarning />}
     </Stack>
   );
 }

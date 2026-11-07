@@ -156,9 +156,9 @@
       "ifLoseDrop": "Egy éles vereség után újra két egymás utáni győzelem kell, és a tét {{points}} lesz.",
       "oneMore": "Még egy győzelem kell",
       "stake": "Most {{points}} a tét.",
+      "stakeNextLive": "A következő éles játszmában {{points}} a tét.",
       "text": "Győzzétek le a gépet kétszer egymás után éles játszmában.",
       "title": "A cél",
-      "titlePractice": "A cél · az éles állás most nem változik",
       "twoMore": "Két győzelem kell"
     },
     "mode": {
@@ -172,8 +172,8 @@
     "name": "Stratégiás játék",
     "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
     "practiceWarning": {
-      "text": "Attól, hogy itt legyőzitek, élesben még kikaphattok.",
-      "title": "A próbagép nem feltétlenül játszik a legjobban."
+      "text": "A próbagép nem feltétlenül játszik a legjobban, és az éles játszmák kezdőállása is más lehet: attól, hogy itt legyőzitek, élesben még kikaphattok.",
+      "title": "A próbajáték elsősorban arra való, hogy kipróbáljátok a játék menetét, és lássátok, jól értitek-e a szabályokat."
     },
     "result": {
       "liveLost": "A gép nyert.",
