@@ -84,3 +84,36 @@ test.each<[string, () => Promise<void>]>([
   expect(logged).toHaveBeenCalledOnce();
   expect(refreshState).not.toHaveBeenCalled();
 });
+
+function renderWithTries(previousTries: number[]) {
+  render(
+    <SnackbarProvider>
+      <ExerciseForm
+        previousTries={previousTries}
+        previousCorrectness={previousTries.length > 0 ? false : null}
+        attempt={4 + previousTries.length}
+        onSubmit={vi.fn(() => Promise.resolve())}
+        awaitingJudge={false}
+      />
+    </SnackbarProvider>,
+  );
+}
+
+test('the first try shows the count but no hint about moving on', () => {
+  renderWithTries([]);
+  expect(screen.getByText('relay.tryCount')).toBeInTheDocument();
+  expect(screen.queryByText('relay.tryHint')).not.toBeInTheDocument();
+  expect(screen.queryByText('relay.tryHintLast')).not.toBeInTheDocument();
+});
+
+test('after a wrong try, the form says that running out of tries moves on for good', () => {
+  renderWithTries([1]);
+  expect(screen.getByText('relay.tryHint')).toBeInTheDocument();
+  expect(screen.queryByText('relay.tryHintLast')).not.toBeInTheDocument();
+});
+
+test('the last try warns that a wrong answer leaves the problem', () => {
+  renderWithTries([1, 2]);
+  expect(screen.getByText('relay.tryHintLast')).toBeInTheDocument();
+  expect(screen.queryByText('relay.tryHint')).not.toBeInTheDocument();
+});
