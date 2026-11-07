@@ -67,8 +67,8 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
   // game; these lines are only what this game's rules add to that.
   let instruction = '';
   if (ctx.phase === 'chooseRole') instruction = G.category === 'C'
-    ? 'Válasszatok szerepet: a kezdő X-eket, a második köröket tesz le.'
-    : 'Válasszatok szerepet: a kezdő köröket, a második X-eket tesz le.';
+    ? 'A kezdő X-eket, a második köröket tesz le.'
+    : 'A kezdő köröket, a második X-eket tesz le.';
   if (ctx.phase === 'play') {
     instruction = !active ? '' : mark === 'O'
       ? 'Tegyetek egy kört egy üres mezőre!'

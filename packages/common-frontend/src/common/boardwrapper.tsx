@@ -72,6 +72,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     // chosen that has happened, so nothing needs to remember it across a
     // reload.
     const [rulesRead, setRulesRead] = useState(false);
+    // The game cards open together, and fold whenever a game starts: after
+    // the first one the team knows the two kinds apart.
+    const [cardsOpen, setCardsOpen] = useState(G.difficulty == null);
+    const [cardsShownFor, setCardsShownFor] = useState(ctx.phase);
+    if (cardsShownFor !== ctx.phase) {
+      setCardsShownFor(ctx.phase);
+      if (ctx.phase !== 'startNewGame') setCardsOpen(false);
+    }
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -93,6 +101,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const lastResult = betweenGames && G.winner !== null ? (G.winner === GUESSER_PLAYER ? 'won' : 'lost') : null;
     const rulesFirst = difficulty === null && !rulesRead;
     const showResult = betweenGames && !finished && !judgeToMove && lastResult !== null && difficulty !== null;
+    const stakeInBar = difficulty === 'live' && !showResult && !finished;
+    const chooserShown = betweenGames && !finished;
     const boardState: BoardState =
       finished ? 'locked'
       : betweenGames ? (lastResult !== null && !judgeToMove ? 'locked' : 'empty')
@@ -121,7 +131,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               {/* The bar's free spot says what is going on while a game is
                   on: the stake and whose turn, in place of rows of their own
                   above the board. */}
-              {difficulty === 'live' && !showResult && !finished &&
+              {stakeInBar &&
                 <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
                   {t('strategy.mode.stake', { points: t('general.points', { count: strategyPoints(G.numberOfLoss) }) })}
                 </Box>}
@@ -152,7 +162,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               {/* On a phone the goal follows the board: the bar already has
                   the stake, and the board is what the team came for. */}
               <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px', order: { xs: 2, md: 0 } }}>
-                <GoalPanel G={G} practice={difficulty === 'test'} />
+                {/* Each sentence once on the screen: the bar's badge has the stake,
+                    and the open live card what a loss costs. */}
+                <GoalPanel G={G} practice={difficulty === 'test'}
+                  showStake={!stakeInBar} showIfLose={!(chooserShown && cardsOpen)} />
                 {/* Once a screen: between games the practice card carries it. */}
                 {difficulty === 'test' && !betweenGames && <PracticeWarning />}
                 {/* Beside the board on a wide screen, where the column has
@@ -169,8 +182,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                 {/* Above the board every time, before the first game and after
                     each one: under the board it took a scroll past the final
                     position to find. */}
-                {betweenGames && !finished &&
-                  <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null} />}
+                {chooserShown &&
+                  <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null}
+                    open={cardsOpen} onToggle={() => setCardsOpen(!cardsOpen)} />}
                 {ctx.phase === 'chooseRole' && !finished && <RoleChooser moves={moves} enabled={teamToMove} />}
                 <BoardArea state={boardState} final={lastResult !== null || finished}
                   result={showResult ? <ResultChip difficulty={difficulty} result={lastResult} /> : null}>
@@ -254,9 +268,9 @@ function ModeFrame(props: {
 /** The goal of the match and how far the team is: the streak, the stake, the live games so far. */
 /// In a practice game the panel turns slate like the frame round it: the
 /// streak it shows is the live one, which the practice game leaves alone.
-function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
+function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boolean, showIfLose: boolean }) {
   const { t } = useTranslation();
-  const { G, practice } = props;
+  const { G, practice, showStake, showIfLose } = props;
   const stake = strategyPoints(G.numberOfLoss);
   const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
   // The second win in a row ends the match, so a streak of two shows only
@@ -276,14 +290,15 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean }) {
           {done ? t('strategy.goal.done') : G.winningStreak >= 1 ? t('strategy.goal.oneMore') : t('strategy.goal.twoMore')}
         </Box>
       </Stack>
-      {!done && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
+      {!done && (showStake || showIfLose) && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
         {/* In a practice game the stake is the next live game's, not this one's. */}
-        {practice
+        {showStake && (practice
           ? t('strategy.goal.stakeNextLive', { points: t('general.points', { count: stake }) })
-          : t('strategy.goal.stake', { points: t('general.points', { count: stake }) })}{' '}
-        {stakeAfterLoss < stake
+          : t('strategy.goal.stake', { points: t('general.points', { count: stake }) }))}
+        {showStake && showIfLose && ' '}
+        {showIfLose && (stakeAfterLoss < stake
           ? t('strategy.goal.ifLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
-          : t('strategy.goal.ifLose')}
+          : t('strategy.goal.ifLose'))}
       </Box>}
       {G.liveResults.length > 0 && <StrategyGamesTable results={G.liveResults} />}
     </Stack>
@@ -346,19 +361,18 @@ function liveResultDetail(G: GameStateMixin, result: 'won' | 'lost', t: TFunctio
 /// and what a live one would change, sit next to the button that starts it.
 function ModeChooser(props: {
   G: GameStateMixin, moves: StrategyWrapperMoves, enabled: boolean, starting: Difficulty | null,
+  open: boolean, onToggle: () => void,
 }) {
   const { t } = useTranslation();
-  const { G, moves, enabled, starting } = props;
+  const { G, moves, enabled, starting, open, onToggle } = props;
   const stake = strategyPoints(G.numberOfLoss);
   const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
   const ifWin = G.winningStreak >= 1
     ? t('strategy.chooser.liveIfWinDone', { points: t('general.points', { count: stake }) })
     : t('strategy.chooser.liveIfWinFirst');
-  // After the first game the team knows the two kinds: the cards fold to
-  // what tells them apart and their buttons, and open for the rest. Together,
-  // as they are read side by side: one open beside one folded left the
-  // folded one an empty box of the open one's height.
-  const [open, setOpen] = useState(G.difficulty == null);
+  // Folded, a card keeps what tells the two apart and its button. They open
+  // together, as they are read side by side: one open beside one folded left
+  // the folded one an empty box of the open one's height.
   const ifLose = stakeAfterLoss < stake
     ? t('strategy.chooser.liveIfLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
     : t('strategy.chooser.liveIfLose');
@@ -373,7 +387,7 @@ function ModeChooser(props: {
           subtitle={t('strategy.mode.practiceSub')}
           note={<><b>{t('strategy.practiceWarning.title')}</b> {t('strategy.practiceWarning.text')}</>}
           open={open}
-          onToggle={() => setOpen(!open)}
+          onToggle={onToggle}
           button={starting === 'test' ? t('strategy.chooser.starting') : t('strategy.chooser.practiceButton')}
           enabled={enabled}
           onClick={() => moves.chooseNewGameType('test')}
@@ -384,7 +398,7 @@ function ModeChooser(props: {
           subtitle={t('strategy.chooser.liveSub')}
           points={[ifWin, ifLose]}
           open={open}
-          onToggle={() => setOpen(!open)}
+          onToggle={onToggle}
           button={starting === 'live' ? t('strategy.chooser.starting') : t('strategy.chooser.liveButton')}
           enabled={enabled}
           onClick={() => moves.chooseNewGameType('live')}

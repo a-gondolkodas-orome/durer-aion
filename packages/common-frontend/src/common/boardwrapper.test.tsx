@@ -227,6 +227,24 @@ describe('the goal panel', () => {
     expect(screen.getByText(/strategy\.goal\.stakeNextLive/)).toBeInTheDocument();
     expect(screen.queryByText(/strategy\.goal\.stake /)).not.toBeInTheDocument();
   });
+
+  // Each sentence once on the screen.
+  test('leaves the stake to the bar during a live game', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
+
+    expect(screen.getByText('strategy.mode.stake')).toBeInTheDocument();
+    expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
+    expect(screen.getByText(/strategy\.goal\.ifLoseDrop/)).toBeInTheDocument();
+  });
+
+  test('leaves what a loss costs to the live card while the cards are open', () => {
+    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { winner: JUDGE_PLAYER, numberOfLoss: 1 });
+
+    expect(screen.getByText(/strategy\.goal\.ifLoseDrop/)).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'strategy.chooser.details' })[0]);
+    expect(screen.getByText('strategy.chooser.liveIfLoseDrop')).toBeInTheDocument();
+    expect(screen.queryByText(/strategy\.goal\.ifLose/)).not.toBeInTheDocument();
+  });
 });
 
 // jsdom has no matchMedia, so these render as on a phone.
