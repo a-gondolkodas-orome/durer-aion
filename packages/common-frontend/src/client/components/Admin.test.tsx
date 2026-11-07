@@ -8,7 +8,7 @@ import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
-import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
+import { AdminTeamDto, MatchStateDto, TeamImportResultDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -32,8 +32,8 @@ vi.mock('react-i18next', () => ({
 // export would hold.
 const grids = vi.hoisted(() => ({ columns: [] as { field: string, disableExport?: boolean }[][] }));
 vi.mock('@mui/x-data-grid', () => {
-  interface Row { id: string, teamName: string }
-  interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row }) => React.ReactNode }
+  interface Row { id: string, teamName: string, [field: string]: unknown }
+  interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row, value: unknown }) => React.ReactNode }
   return {
     DataGrid: (props: {
       rows: Row[], columns: Column[],
@@ -45,7 +45,7 @@ vi.mock('@mui/x-data-grid', () => {
           <li key={row.id}>
             {row.teamName}
             {props.columns.filter(column => column.renderCell).map(column => (
-              <span key={column.field}>{column.renderCell?.({ row })}</span>
+              <span key={column.field}>{column.renderCell?.({ row, value: row[column.field] })}</span>
             ))}
           </li>
         ))}
@@ -56,7 +56,7 @@ vi.mock('@mui/x-data-grid', () => {
   };
 });
 
-const team = (teamId: string, teamName: string): TeamModelDto => ({
+const team = (teamId: string, teamName: string): AdminTeamDto => ({
   teamId,
   teamName,
   category: 'C',
@@ -104,7 +104,7 @@ const renderAdmin = (teamId?: string) =>
     </ThemeProvider>
   );
 
-const openTeamWithRelay = (relayMatch: TeamModelDto['relayMatch']) => {
+const openTeamWithRelay = (relayMatch: AdminTeamDto['relayMatch']) => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch }]);
   renderAdmin(alpha.teamId);
 };
@@ -309,7 +309,7 @@ test.each([
   ['empty', ''],
   ['null', null],
 ])('a team whose email and notes are %s lists and opens like any other', async (_, missing) => {
-  const bare = { ...alpha, email: missing, other: missing } as unknown as TeamModelDto;
+  const bare = { ...alpha, email: missing, other: missing } as unknown as AdminTeamDto;
   vi.spyOn(repo, 'getAll').mockResolvedValue([bare]);
   renderAdmin();
 
@@ -511,8 +511,8 @@ test('a reset asks first, names the team, and does nothing when cancelled', asyn
 // them. Email and notes are optional, and null on an older database.
 test('the list points to the export, which downloads every team with its join code', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([
-    { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as TeamModelDto,
-    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as TeamModelDto,
+    { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as AdminTeamDto,
+    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as AdminTeamDto,
   ]);
   const saved = savedDownloads();
   renderAdmin();
@@ -546,4 +546,36 @@ test('the team list\'s CSV holds no login secret', async () => {
   for (const secret of ['id', 'teamId', 'joinCode', 'credentials', 'email']) {
     expect(exported).not.toContain(secret);
   }
+});
+
+// #706: a row naming a match storage does not have. The server marks it
+// rather than failing the list, and the page has to show it.
+const brokenRelay = { state: 'BROKEN' as const, matchID: 'goneMatchId' };
+
+test('a broken row is announced above the list, with the missing match in its cell', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch: brokenRelay }, team('0b6c8d2e-3f4a-4b5c-8d9e-0f1a2b3c4d5e', 'Beta')]);
+  renderAdmin();
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(/^1 csapat sora nem létező meccsre mutat: Alpha\./);
+  expect(screen.getByText('BROKEN: goneMatchId')).toBeInTheDocument();
+  expect(screen.getAllByText('NOT STARTED')).toHaveLength(3);
+});
+
+test('the stats leave a broken row out, and say so', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch: brokenRelay }]);
+  window.history.replaceState(null, '', '/admin?tab=statisztika');
+  renderAdmin();
+
+  expect(await screen.findByText(/1 hibás sorú csapat nem szerepel a táblázatban/)).toBeInTheDocument();
+});
+
+test('a broken match names the missing match, fetches nothing, and can be reset', async () => {
+  const getMatchState = vi.spyOn(repo, 'getMatchState');
+  openTeamWithRelay(brokenRelay);
+
+  expect(await screen.findByTestId('relayBrokenMatch')).toHaveTextContent('goneMatchId');
+  expect(screen.getByText('Hibás')).toBeInTheDocument();
+  expect(screen.getByText('váltó ? (hibás) + stratégia 0 (nem kezdte el)')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Váltó reset' })).toBeEnabled();
+  expect(getMatchState).not.toHaveBeenCalled();
 });

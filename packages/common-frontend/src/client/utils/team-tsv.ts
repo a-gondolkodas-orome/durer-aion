@@ -1,4 +1,4 @@
-import type { TeamModelDto } from '../dto/TeamStateDto';
+import type { AdminTeamDto } from '../dto/TeamStateDto';
 
 // The importer's columns, in its order (`expected_header` in the backend's
 // team_import.ts), so a file written here goes back in through the import.
@@ -16,7 +16,7 @@ export function teamsTsv(rows: readonly (readonly (string | null | undefined)[])
 /** A team as the admin routes serve it, in the importer's column order. Email
  * and notes can be empty, or null on a database loaded before the import
  * stored empty strings. */
-export function teamTsvRow(team: TeamModelDto & { other?: string | null }): (string | null | undefined)[] {
+export function teamTsvRow(team: AdminTeamDto & { other?: string | null }): (string | null | undefined)[] {
   return [team.teamName, team.category, team.email, team.other, team.teamId, team.joinCode, team.credentials];
 }
 

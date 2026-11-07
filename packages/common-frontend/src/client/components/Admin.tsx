@@ -1,10 +1,10 @@
 import { Stack } from '@mui/system';
 import { useAddMinutes, useAll } from '../hooks/user-hooks';
-import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Alert, Box, Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
-import { TeamModelDto } from '../dto/TeamStateDto';
+import { DataGrid, ExportCsv, GridRenderCellParams, Toolbar } from '@mui/x-data-grid';
+import { AdminMatchStatus, AdminTeamDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
 import Form from './form';
@@ -44,7 +44,22 @@ function TeamsToolbar(props: { onOpenExport?: () => void }) {
 }
 
 // What the states mean is on MatchStatus in the `schemas` package.
-const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet.';
+const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: fut, időt lehet hozzáadni. FINISHED: nem indíthatja újra, de a pontszáma még nőhet. BROKEN: a sor nem létező meccsre mutat, az azonosítója mellette; a játék alaphelyzetbe állítása javítja.';
+
+/// A broken match carries the id the row names, so the cell, and the CSV,
+/// say which match is missing.
+function matchStateCell(status: AdminMatchStatus): string {
+  return status.state === 'BROKEN' ? `BROKEN: ${status.matchID}` : status.state;
+}
+
+function MatchStateCell(props: GridRenderCellParams) {
+  const value = String(props.value);
+  return value.startsWith('BROKEN')
+    ? <Box component="span" sx={{ color: 'error.main', fontWeight: 600 }}>{value}</Box>
+    : value;
+}
+
+const isBroken = (team: AdminTeamDto) => team.relayMatch.state === 'BROKEN' || team.strategyMatch.state === 'BROKEN';
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
@@ -83,7 +98,7 @@ export function Admin(props: { teamId?: string }) {
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
-  const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
+  const [selectedRow, setSelectedRow] = useState<AdminTeamDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
   const openTab = (next: AdminTab) => {
@@ -95,6 +110,7 @@ export function Admin(props: { teamId?: string }) {
   // Until the list loads it is not known whether the path names a team, so
   // neither the team nor the tabs show; an unknown team falls back to the list.
   const teams = teamFromPath ? undefined : data;
+  const broken = teams?.filter(isBroken) ?? [];
 
   return (
     <Stack sx={{
@@ -151,6 +167,10 @@ export function Admin(props: { teamId?: string }) {
         <Tab label="Import/export" value="import-export" id="admin-tab-import-export" aria-controls="admin-panel-import-export"/>
       </Tabs>
       <Stack {...panelProps('csapatok', tab)}>
+        {broken.length > 0 && <Alert severity="error" sx={{ margin: '10px 0' }}>
+          {broken.length} csapat sora nem létező meccsre mutat: {broken.map(it => it.teamName).join(', ')}.
+          A csapat ezért nem tölt be. Nyisd meg, és állítsd alaphelyzetbe a hibás játékát.
+        </Alert>}
         <Stack sx={{ height: "635px" }}>
           <DataGrid columns={[
             {
@@ -193,6 +213,7 @@ export function Admin(props: { teamId?: string }) {
               description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
+              renderCell: MatchStateCell,
             },
             {
               field: 'strategyMatchState',
@@ -200,6 +221,7 @@ export function Admin(props: { teamId?: string }) {
               description: MATCH_STATE_DESCRIPTION,
               width: 120,
               editable: false,
+              renderCell: MatchStateCell,
             },
             {
               field: 'view',
@@ -239,8 +261,8 @@ export function Admin(props: { teamId?: string }) {
           rows={teams.map((a) => {
             return {
               id: a.teamId,
-              relayMatchState: a.relayMatch.state,
-              strategyMatchState: a.strategyMatch.state,
+              relayMatchState: matchStateCell(a.relayMatch),
+              strategyMatchState: matchStateCell(a.strategyMatch),
               ...a,
             };
           })}
@@ -346,10 +368,14 @@ export function Admin(props: { teamId?: string }) {
   )
 }
 
-function Stats(props: { data: TeamModelDto[] }) {
-  const categories = Array.from(new Set(props.data.map(it => it.category)));
+function Stats(props: { data: AdminTeamDto[] }) {
+  // A broken row has a match in no known state, so it is left out of every
+  // count rather than counted as one of them; the list marks it.
+  const counted = props.data.filter(it => !isBroken(it));
+  const brokenCount = props.data.length - counted.length;
+  const categories = Array.from(new Set(counted.map(it => it.category)));
   const stat = categories.sort().map(cat => {
-    const current = props.data.filter(it => it.category === cat);
+    const current = counted.filter(it => it.category === cat);
     const bothNotStarted = current.filter(it => it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
     const relayInProgress = current.filter(it => it.relayMatch.state === "IN PROGRESS").length;
     const strategyInProgress = current.filter(it => it.strategyMatch.state === "IN PROGRESS").length;
@@ -381,6 +407,7 @@ function Stats(props: { data: TeamModelDto[] }) {
     <span>
       A hármasok csapatszámok: <Progress notStarted='még nem kezdte el' inProgress='folyamatban' finished='befejezte'/>.
       A Teljes verseny oszlopban befejezte, aki mindkét játékot befejezte, és még nem kezdte el, aki egyiket sem.
+      {brokenCount > 0 && <Box component="b" sx={{ color: 'error.main' }}> {brokenCount} hibás sorú csapat nem szerepel a táblázatban.</Box>}
     </span>
   </Stack>
   <Table>

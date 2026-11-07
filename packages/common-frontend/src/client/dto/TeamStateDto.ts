@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { MatchStatus, PageState } from "schemas";
+import type { AdminMatchStatus, MatchStatus, PageState } from "schemas";
 
 export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
@@ -21,11 +21,18 @@ export interface TeamModelDto {
   strategyMatch: MatchStatus;
 }
 
+/// A team as the admin routes serve it: a match may also read BROKEN, which a
+/// team's own routes refuse instead of serving (`BrokenMatchStatus`).
+export interface AdminTeamDto extends Omit<TeamModelDto, 'relayMatch' | 'strategyMatch'> {
+  relayMatch: AdminMatchStatus;
+  strategyMatch: AdminMatchStatus;
+}
+
 /// The GUID of a team an admin page is acting on. Optional on the DTO because
 /// the team's own state leaves it out, but every row the authenticated admin
 /// routes serve carries it — so its absence here is a bug, not a case to
 /// render around, and the surrounding handlers report the throw.
-export function adminTeamId(team: TeamModelDto): string {
+export function adminTeamId(team: AdminTeamDto): string {
   if (team.teamId === undefined) {
     throw new Error(`A(z) ${team.teamName} csapat azonosítója hiányzik.`);
   }
@@ -67,4 +74,4 @@ export interface MatchStateLogDto {
   automatic: boolean;
 }
 
-export type { FinishedMatchStatus, InProgressMatchStatus, LiveGameResult, MatchStatus, NotStartedMatchStatus, RelayProblemResult } from "schemas";
+export type { AdminMatchStatus, BrokenMatchStatus, FinishedMatchStatus, InProgressMatchStatus, LiveGameResult, MatchStatus, NotStartedMatchStatus, RelayProblemResult } from "schemas";
