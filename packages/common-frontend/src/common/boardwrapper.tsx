@@ -66,9 +66,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
     const [rulesFolded, setRulesFolded] = useState(false);
     const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
-    // Before the first game the rules lead the screen, and no game starts
-    // until the team says it has read them. Once a game has been chosen that
-    // has happened, so nothing needs to remember it across a reload.
+    // Before the first game the rules open in a dialog of their own, which
+    // only the team's word that it has read them closes. Once a game has been
+    // chosen that has happened, so nothing needs to remember it across a
+    // reload.
     const [rulesRead, setRulesRead] = useState(false);
 
     useEffect(() => {
@@ -138,7 +139,6 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           >
             <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '20px', padding: { xs: '14px', md: '20px' } }}>
               <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px' }}>
-                {rulesFirst && <RulesFirst description={description} onRead={() => setRulesRead(true)} />}
                 <GoalPanel G={G} practice={difficulty === 'test'} />
                 {/* Once a screen: between games the practice card carries it. */}
                 {difficulty === 'test' && !betweenGames && <PracticeWarning />}
@@ -158,8 +158,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                     each one: under the board it took a scroll past the final
                     position to find. */}
                 {betweenGames && !finished &&
-                  <ModeChooser G={G} moves={moves} enabled={teamToMove && !rulesFirst} rulesFirst={rulesFirst}
-                    starting={judgeToMove ? difficulty : null} />}
+                  <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null} />}
                 {ctx.phase === 'chooseRole' && !finished && <RoleChooser moves={moves} enabled={teamToMove} />}
                 {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
                 <BoardArea state={boardState} hasResult={lastResult !== null || finished}>
@@ -169,6 +168,18 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             </Stack>
           </ModeFrame>
         </Stack>
+        {/* No onClose: neither a click beside it nor Esc stands for having
+            read the rules. */}
+        <Dialog open={rulesFirst} fullScreen={!wide} maxWidth="md" fullWidth>
+          <DialogTitle sx={{ fontWeight: 700 }}>{t('strategy.rulesFirst.title')}</DialogTitle>
+          <DialogContent sx={{ fontSize: { xs: '16px', md: '18px' }, lineHeight: 1.6 }}>{description}</DialogContent>
+          <DialogActions sx={{ padding: '16px 24px' }}>
+            <Button variant="contained" fullWidth onClick={() => setRulesRead(true)}
+              sx={{ minHeight: '48px', fontSize: '16px', fontWeight: 600, textTransform: 'none', borderRadius: '10px' }}>
+              {t('strategy.rulesFirst.button')}
+            </Button>
+          </DialogActions>
+        </Dialog>
         {!wide && <Dialog open={rulesDialogOpen} onClose={() => setRulesDialogOpen(false)}>
           <DialogTitle>{t('strategy.rules')}</DialogTitle>
           <DialogContent sx={{ fontSize: '15px', lineHeight: 1.5 }}>{description}</DialogContent>
@@ -292,24 +303,6 @@ function PracticeWarning() {
   );
 }
 
-/** The rules as the first screen shows them: leading the page, until read. */
-function RulesFirst(props: { description: ReactNode, onRead: () => void }) {
-  const { t } = useTranslation();
-  return (
-    <Stack sx={{
-      gap: '12px', border: '2px solid #1f2328', borderRadius: '14px', backgroundColor: '#fffdf5',
-      padding: '16px', fontSize: '16px', lineHeight: 1.5,
-    }}>
-      <Box sx={{ fontSize: '19px', fontWeight: 700 }}>{t('strategy.rulesFirst.title')}</Box>
-      {props.description}
-      <Button variant="contained" onClick={props.onRead}
-        sx={{ minHeight: '48px', fontSize: '16px', fontWeight: 600, textTransform: 'none', borderRadius: '10px' }}>
-        {t('strategy.rulesFirst.button')}
-      </Button>
-    </Stack>
-  );
-}
-
 /** How the game that just ended went, above its final position. */
 function ResultBar(props: { G: GameStateMixin, difficulty: Difficulty, result: 'won' | 'lost' }) {
   const { t } = useTranslation();
@@ -343,7 +336,7 @@ function ResultBar(props: { G: GameStateMixin, difficulty: Difficulty, result: '
 /// Two cards rather than two alike buttons: what each kind of game counts for,
 /// and what a live one would change, sit next to the button that starts it.
 function ModeChooser(props: {
-  G: GameStateMixin, moves: StrategyWrapperMoves, enabled: boolean, rulesFirst: boolean, starting: Difficulty | null,
+  G: GameStateMixin, moves: StrategyWrapperMoves, enabled: boolean, starting: Difficulty | null,
 }) {
   const { t } = useTranslation();
   const { G, moves, enabled, starting } = props;
@@ -362,13 +355,11 @@ function ModeChooser(props: {
     <Stack sx={{ gap: '10px' }}>
       <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{t('strategy.chooser.title')}</Box>
       <Box sx={{ fontSize: '15px', color: MUTED, marginTop: '-6px' }}>{t('strategy.chooser.noAbandon')}</Box>
-      {props.rulesFirst && <Box sx={{ fontSize: '15px', fontWeight: 600 }}>{t('strategy.chooser.readRulesFirst')}</Box>}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: '14px' }}>
         <ModeCard
           live={false}
           title={t('strategy.mode.practice')}
           subtitle={t('strategy.mode.practiceSub')}
-          points={[t('strategy.chooser.practiceSame')]}
           note={<><b>{t('strategy.practiceWarning.title')}</b> {t('strategy.practiceWarning.text')}</>}
           folded={folded}
           button={starting === 'test' ? t('strategy.chooser.starting') : t('strategy.chooser.practiceButton')}
@@ -391,7 +382,7 @@ function ModeChooser(props: {
 }
 
 function ModeCard(props: {
-  live: boolean, title: string, subtitle: string, points: string[], note?: ReactNode, folded: boolean,
+  live: boolean, title: string, subtitle: string, points?: string[], note?: ReactNode, folded: boolean,
   button: string, enabled: boolean, onClick: () => void,
 }) {
   const { t } = useTranslation();
@@ -415,9 +406,9 @@ function ModeCard(props: {
         </IconButton>
       </Stack>
       {open && <>
-        <Box component="ul" sx={{ margin: 0, paddingLeft: '20px', fontSize: '15px', lineHeight: 1.45 }}>
+        {props.points && <Box component="ul" sx={{ margin: 0, paddingLeft: '20px', fontSize: '15px', lineHeight: 1.45 }}>
           {props.points.map(point => <li key={point}>{point}</li>)}
-        </Box>
+        </Box>}
         {props.note && <Box sx={{ fontSize: '14px', lineHeight: 1.45, backgroundColor: PRACTICE_TINT, borderRadius: '10px', padding: '8px 12px' }}>
           {props.note}
         </Box>}

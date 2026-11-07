@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { Ctx } from 'boardgame.io';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from 'game';
@@ -60,18 +60,19 @@ const boardArea = () => screen.getByTestId('strategyBoard');
 describe('between games', () => {
   // `startNewGame` with the team to move is the gap between games, never a
   // move inside one: the match opens on it, and a game that ends returns to it.
-  test('offers the first game of the match on a faded board, once the rules are read', () => {
+  test('offers the first game of the match on a faded board, once the rules are read', async () => {
     const moves = renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { difficulty: null });
 
-    // The rules lead the first screen, and hold the start buttons until read.
-    expect(screen.getByText('strategy.rulesFirst.title')).toBeInTheDocument();
-    for (const button of startButtons()) {
-      expect(button).toBeDisabled();
-    }
-    // Before any game the cards are open, with all they say.
-    expect(screen.getByText('strategy.chooser.practiceSame')).toBeInTheDocument();
+    // The rules open the first screen in a dialog, which Esc does not close.
+    expect(screen.getByRole('dialog')).toHaveTextContent('strategy.rulesFirst.title');
+    expect(screen.getByRole('dialog')).toHaveTextContent('the rules');
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'strategy.rulesFirst.button' }));
-    expect(screen.queryByText('strategy.rulesFirst.title')).not.toBeInTheDocument();
+    // The dialog stays in the document while it fades out.
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    // Before any game the cards are open, with all they say.
+    expect(screen.getByText('strategy.practiceWarning.title')).toBeInTheDocument();
     for (const button of startButtons()) {
       expect(button).toBeEnabled();
     }
