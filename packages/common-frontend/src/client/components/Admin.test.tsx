@@ -8,7 +8,7 @@ import { SWRConfig } from 'swr';
 import { ThemeProvider } from '@mui/material/styles';
 import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
-import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
+import { AdminTeamDto, MatchStateDto, TeamImportResultDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 
@@ -56,7 +56,7 @@ vi.mock('@mui/x-data-grid', () => {
   };
 });
 
-const team = (teamId: string, teamName: string): TeamModelDto => ({
+const team = (teamId: string, teamName: string): AdminTeamDto => ({
   teamId,
   teamName,
   category: 'C',
@@ -104,7 +104,7 @@ const renderAdmin = (teamId?: string) =>
     </ThemeProvider>
   );
 
-const openTeamWithRelay = (relayMatch: TeamModelDto['relayMatch']) => {
+const openTeamWithRelay = (relayMatch: AdminTeamDto['relayMatch']) => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch }]);
   renderAdmin(alpha.teamId);
 };
@@ -309,7 +309,7 @@ test.each([
   ['empty', ''],
   ['null', null],
 ])('a team whose email and notes are %s lists and opens like any other', async (_, missing) => {
-  const bare = { ...alpha, email: missing, other: missing } as unknown as TeamModelDto;
+  const bare = { ...alpha, email: missing, other: missing } as unknown as AdminTeamDto;
   vi.spyOn(repo, 'getAll').mockResolvedValue([bare]);
   renderAdmin();
 
@@ -511,8 +511,8 @@ test('a reset asks first, names the team, and does nothing when cancelled', asyn
 // them. Email and notes are optional, and null on an older database.
 test('the list points to the export, which downloads every team with its join code', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([
-    { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as TeamModelDto,
-    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as TeamModelDto,
+    { ...alpha, email: 'a@b.com', joinCode: '111-2222-333', other: 'Radnóti\tBudapest' } as AdminTeamDto,
+    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bare'), email: null, joinCode: '444-5555-666', other: null } as unknown as AdminTeamDto,
   ]);
   const saved = savedDownloads();
   renderAdmin();
@@ -546,4 +546,16 @@ test('the team list\'s CSV holds no login secret', async () => {
   for (const secret of ['id', 'teamId', 'joinCode', 'credentials', 'email']) {
     expect(exported).not.toContain(secret);
   }
+});
+
+// #706: a row naming a match storage does not have, which the server marks
+// rather than failing the list.
+test('a broken match names the missing match, fetches nothing, and can be reset', async () => {
+  const getMatchState = vi.spyOn(repo, 'getMatchState');
+  openTeamWithRelay({ state: 'BROKEN', matchID: 'goneMatchId' });
+
+  expect(await screen.findByText('goneMatchId')).toBeInTheDocument();
+  expect(screen.getByText('Hibás')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Váltó reset' })).toBeEnabled();
+  expect(getMatchState).not.toHaveBeenCalled();
 });

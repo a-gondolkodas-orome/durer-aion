@@ -7,7 +7,7 @@ import WarningAmber from '@mui/icons-material/WarningAmber';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { Dispatch, ReactNode, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
-import { TeamModelDto, MatchStatus, PageState, adminTeamId } from '../dto/TeamStateDto';
+import { AdminMatchStatus, AdminTeamDto, MatchStatus, PageState, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
 import { ErrorMessage, Field, FieldProps } from 'formik';
 import Form from "./form";
@@ -29,7 +29,7 @@ export const TEAM_DIALOG_TITLE_ID = 'team-dialog-title';
 /// page's title and links back to the list. In the dialog the name is an h2,
 /// which names the dialog (`TEAM_DIALOG_TITLE_ID`).
 export function TeamDetailDialog(props: {
-  data: TeamModelDto,
+  data: AdminTeamDto,
   setConfirmDialog: Dispatch<ConfirmDialogInterface | null>,
   page?: boolean,
 }) {
@@ -55,7 +55,7 @@ export function TeamDetailDialog(props: {
   )
 }
 
-function Header(props: { team: TeamModelDto, page?: boolean }) {
+function Header(props: { team: AdminTeamDto, page?: boolean }) {
   const { team } = props;
   return <>
     <Stack sx={{
@@ -128,7 +128,7 @@ const MATCH_TITLE: Record<MatchKind, string> = { relay: 'Váltó', strategy: 'St
 
 /// The total so far, marked as not final until both matches have finished: a
 /// running match's points are its game's points at the moment they were fetched.
-function Total(props: { team: TeamModelDto }) {
+function Total(props: { team: AdminTeamDto }) {
   const relay = useMatchPoints(props.team.relayMatch);
   const strategy = useMatchPoints(props.team.strategyMatch);
   const statuses = { relay: props.team.relayMatch, strategy: props.team.strategyMatch };
@@ -178,13 +178,14 @@ const cardFooterSx = {
 } as const;
 const cardTitleSx = { margin: 0, fontSize: 18, fontWeight: 600 } as const;
 
-const STATUS_CHIP: Record<MatchStatus['state'], { label: string, color: string, background: string }> = {
+const STATUS_CHIP: Record<AdminMatchStatus['state'], { label: string, color: string, background: string }> = {
   'NOT STARTED': { label: 'Nem kezdte el', color: '#424242', background: '#eeeeee' },
   'IN PROGRESS': { label: 'Folyamatban', color: '#0d47a1', background: '#e3f2fd' },
   'FINISHED': { label: 'Végzett', color: '#1b5e20', background: '#e8f5e9' },
+  'BROKEN': { label: 'Hibás', color: '#b71c1c', background: '#ffebee' },
 };
 
-function StatusChip(props: { state: MatchStatus['state'] }) {
+function StatusChip(props: { state: AdminMatchStatus['state'] }) {
   const chip = STATUS_CHIP[props.state];
   return (
     <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: 26, padding: '0 10px', borderRadius: '13px', fontSize: 12, fontWeight: 600, color: chip.color, backgroundColor: chip.background }}>
@@ -194,9 +195,22 @@ function StatusChip(props: { state: MatchStatus['state'] }) {
   );
 }
 
-function MatchCard(props: { kind: MatchKind, heading: 'h2' | 'h3', teamName: string, status: MatchStatus, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+function MatchCard(props: { kind: MatchKind, heading: 'h2' | 'h3', teamName: string, status: AdminMatchStatus, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const title = MATCH_TITLE[props.kind];
   const status = props.status;
+  if (status.state === 'BROKEN') {
+    return (
+      <Stack component="section" aria-label={title} sx={cardSx}>
+        <Stack sx={cardHeaderSx}>
+          <Box component={props.heading} sx={cardTitleSx}>{title}</Box>
+          <StatusChip state={status.state}/>
+        </Stack>
+        <Box sx={{ padding: { xs: '16px', md: '20px 24px' } }}>
+          A(z) <code>{status.matchID}</code> meccs nincs az adatbázisban. Alaphelyzetbe állítása javítja.
+        </Box>
+      </Stack>
+    );
+  }
   if (status.state === 'NOT STARTED') {
     return (
       <Stack component="section" aria-label={title} sx={cardSx}>
@@ -478,13 +492,13 @@ function resetDescription(kind: MatchKind) {
 }
 
 /// The resets, together: both are destructive and both ask first.
-function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+function DangerZone(props: { heading: 'h2' | 'h3', team: AdminTeamDto, setTeamState: (team: AdminTeamDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const { enqueueSnackbar } = useSnackbar();
   const { team } = props;
 
-  const confirmReset = (kind: MatchKind, reset: (teamId: string) => Promise<TeamModelDto>) => {
+  const confirmReset = (kind: MatchKind, reset: (teamId: string) => Promise<AdminTeamDto>) => {
     const status = kind === 'relay' ? team.relayMatch : team.strategyMatch;
     props.setConfirmDialog({
       title: `${MATCH_TITLE[kind]} alaphelyzetbe állítása`,
@@ -571,10 +585,12 @@ function useMatchStateData(matchId: string | null) {
 /// `G.points` as of the list's last load, and the match state the dialog
 /// fetches is fresher, for an answer judged just past the end; a running
 /// match's points are known only from that fetch.
-function useMatchPoints(status: MatchStatus): number | undefined {
-  const { data } = useMatchStateData(status.state === "NOT STARTED" ? null : status.matchID);
+function useMatchPoints(status: AdminMatchStatus): number | undefined {
+  const { data } = useMatchStateData(status.state === "NOT STARTED" || status.state === "BROKEN" ? null : status.matchID);
   if (status.state === "NOT STARTED")
     return 0;
+  if (status.state === "BROKEN")
+    return undefined;
   if (status.state === "IN PROGRESS")
     return data?.G.points;
   return data?.G.points ?? status.score;

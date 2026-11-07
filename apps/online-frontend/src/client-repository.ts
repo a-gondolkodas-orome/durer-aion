@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { AdminClientRepository, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend";
+import type { AdminClientRepository, AdminTeamDto, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -127,7 +127,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     }
   }
 
-  async getAll(): Promise<TeamModelDto[]> {
+  async getAll(): Promise<AdminTeamDto[]> {
     const url = urlcat('/team/admin/all', {
     });
     let result;
@@ -139,10 +139,10 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
       throw new Error('Váratlan hiba történt', { cause: e });
     }
 
-    return result.data as TeamModelDto[];
+    return result.data as AdminTeamDto[];
   }
 
-  async resetRelay(teamId: string): Promise<TeamModelDto> {
+  async resetRelay(teamId: string): Promise<AdminTeamDto> {
     const url = urlcat('/team/admin/:teamId/reset/relay', {
       teamId,
     });
@@ -154,10 +154,10 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
       console.error(err.message)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-    return result.data as TeamModelDto;
+    return result.data as AdminTeamDto;
   }
 
-  async resetStrategy(teamId: string): Promise<TeamModelDto> {
+  async resetStrategy(teamId: string): Promise<AdminTeamDto> {
     const url = urlcat('/team/admin/:teamId/reset/strategy', {
       teamId,
     });
@@ -169,7 +169,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
       console.error(err.message)
       throw new Error('Váratlan hiba történt', { cause: e });
     }
-    return result.data as TeamModelDto;
+    return result.data as AdminTeamDto;
   }
 
   async addMinutes(matchId: string, minutes: number): Promise<string> {

@@ -3,7 +3,7 @@ import { Stack } from '@mui/system';
 import { Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
+import { AdminTeamDto, TeamImportResultDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
@@ -13,7 +13,7 @@ import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 /// a file with bad rows still loads the good ones. The export is every team
 /// with its join code and credentials, in the import's own format: the one
 /// download on the admin page that carries a login secret.
-export function ImportExport(props: { teams: TeamModelDto[], onImported: () => void }) {
+export function ImportExport(props: { teams: AdminTeamDto[], onImported: () => void }) {
   const theme = useTheme();
   const importTeams = useImportTeams();
   const { enqueueSnackbar } = useSnackbar();

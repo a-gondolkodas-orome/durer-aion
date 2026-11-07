@@ -54,6 +54,18 @@ export type LiveGameResult = 'won' | 'lost' | 'unfinished';
 
 export type MatchStatus = NotStartedMatchStatus | InProgressMatchStatus | FinishedMatchStatus;
 
+/// A team row naming a match that storage does not have: a hand edit or a
+/// partial restore of the database, nothing the app does itself. Only the
+/// admin routes serve it, so organisers see which row is broken while every
+/// other row stays readable; a team's own routes refuse instead, and a team
+/// never sees a state it could act on. An admin reset clears the column.
+export interface BrokenMatchStatus {
+  state: 'BROKEN';
+  matchID: string;
+}
+
+export type AdminMatchStatus = MatchStatus | BrokenMatchStatus;
+
 /// Every screen a team can be on. The list is here, not just the type, because
 /// the frontends validate stored team state against it.
 export const PAGE_STATES = ['DISCLAIMER', 'HOME', 'RELAY', 'STRATEGY'] as const;
