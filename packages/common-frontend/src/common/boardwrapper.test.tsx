@@ -133,6 +133,11 @@ describe('between games', () => {
     expect(screen.queryByText('strategy.chooser.liveIfWinDone')).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'strategy.chooser.details' })[1]);
     expect(screen.getByText('strategy.chooser.liveIfWinDone')).toBeInTheDocument();
+    // Both open together: opened alone, one card stood beside an empty box.
+    expect(screen.getByText('strategy.practiceWarning.title')).toBeInTheDocument();
+    for (const toggle of screen.getAllByRole('button', { name: 'strategy.chooser.details' })) {
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    }
   });
 
   test('says a practice win does not count, and that the live computer may play better', () => {

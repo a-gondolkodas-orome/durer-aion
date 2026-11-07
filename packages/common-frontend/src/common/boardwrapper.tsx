@@ -345,9 +345,11 @@ function ModeChooser(props: {
   const ifWin = G.winningStreak >= 1
     ? t('strategy.chooser.liveIfWinDone', { points: t('general.points', { count: stake }) })
     : t('strategy.chooser.liveIfWinFirst');
-  // After the first game the team knows the two kinds: each card folds to
-  // what tells them apart and its button, and opens for the rest.
-  const folded = G.difficulty != null;
+  // After the first game the team knows the two kinds: the cards fold to
+  // what tells them apart and their buttons, and open for the rest. Together,
+  // as they are read side by side: one open beside one folded left the
+  // folded one an empty box of the open one's height.
+  const [open, setOpen] = useState(G.difficulty == null);
   const ifLose = stakeAfterLoss < stake
     ? t('strategy.chooser.liveIfLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
     : t('strategy.chooser.liveIfLose');
@@ -361,7 +363,8 @@ function ModeChooser(props: {
           title={t('strategy.mode.practice')}
           subtitle={t('strategy.mode.practiceSub')}
           note={<><b>{t('strategy.practiceWarning.title')}</b> {t('strategy.practiceWarning.text')}</>}
-          folded={folded}
+          open={open}
+          onToggle={() => setOpen(!open)}
           button={starting === 'test' ? t('strategy.chooser.starting') : t('strategy.chooser.practiceButton')}
           enabled={enabled}
           onClick={() => moves.chooseNewGameType('test')}
@@ -371,7 +374,8 @@ function ModeChooser(props: {
           title={t('strategy.mode.live')}
           subtitle={t('strategy.chooser.liveSub')}
           points={[ifWin, ifLose]}
-          folded={folded}
+          open={open}
+          onToggle={() => setOpen(!open)}
           button={starting === 'live' ? t('strategy.chooser.starting') : t('strategy.chooser.liveButton')}
           enabled={enabled}
           onClick={() => moves.chooseNewGameType('live')}
@@ -382,12 +386,11 @@ function ModeChooser(props: {
 }
 
 function ModeCard(props: {
-  live: boolean, title: string, subtitle: string, points?: string[], note?: ReactNode, folded: boolean,
+  live: boolean, title: string, subtitle: string, points?: string[], note?: ReactNode, open: boolean, onToggle: () => void,
   button: string, enabled: boolean, onClick: () => void,
 }) {
   const { t } = useTranslation();
-  const { live } = props;
-  const [open, setOpen] = useState(!props.folded);
+  const { live, open } = props;
   return (
     <Stack sx={{
       border: live ? `3px solid ${LIVE}` : `3px dashed ${PRACTICE_BORDER}`, borderRadius: '16px',
@@ -401,7 +404,7 @@ function ModeCard(props: {
           <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{props.title}</Box>
           {open && <Box sx={{ fontSize: '14px', fontWeight: 600, color: live ? LIVE_TEXT : PRACTICE }}>{props.subtitle}</Box>}
         </Stack>
-        <IconButton aria-label={t('strategy.chooser.details')} aria-expanded={open} onClick={() => setOpen(!open)}>
+        <IconButton aria-label={t('strategy.chooser.details')} aria-expanded={open} onClick={props.onToggle}>
           <ExpandMoreIcon sx={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
         </IconButton>
       </Stack>
