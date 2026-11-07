@@ -12,7 +12,8 @@ export interface SettingOption<T extends string> {
 // The compact select the header and footer settings share. It takes the text
 // colour around it, so it reads on the coloured header and the plain footer
 // alike, in both themes. `icon` stands before the closed select's label in
-// place of the chosen option's own.
+// place of the chosen option's own; without it, the chosen option's icon stands
+// for its label.
 //
 // The size is set here, not inherited: the bars around it do not all set one.
 // With the underline gone, the outline is what shows keyboard focus.
@@ -31,10 +32,9 @@ export const SettingSelect = <T extends string>({ value, onChange, options, labe
     inputProps={{ 'aria-label': label }}
     renderValue={chosen => {
       const option = options.find(o => o.value === chosen);
-      // Where the option's own icon names it, the label is left to screen
-      // readers on the narrowest phones, whose footer cannot fit it beside the
-      // other select and the bug-report link.
-      const labelClass = !icon && option?.icon ? 'max-[359px]:sr-only' : undefined;
+      // Where the option's own icon names it, the closed select shows the icon
+      // alone and leaves the label to screen readers; the open menu has both.
+      const labelClass = !icon && option?.icon ? 'sr-only' : undefined;
       return (
         <span className="flex items-center gap-1">
           {icon ?? option?.icon}<span lang={option?.lang} className={labelClass}>{option?.label}</span>
