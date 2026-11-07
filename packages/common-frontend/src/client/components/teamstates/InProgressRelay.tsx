@@ -1,6 +1,6 @@
 import { Stack } from '@mui/system';
 import { useEffect, useEffectEvent, useMemo } from 'react';
-import { Countdown, useMsRemaining } from '../Countdown';
+import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
 import { GUESSER_PLAYER, MyGameState, relayProblemResults } from 'game';
 import { useBackToHome, useLogout } from '../../hooks/user-hooks';
@@ -103,6 +103,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             width: '100%',
             fontSize: 18,
             flexDirection: 'row',
+            alignItems: 'center',
             display: {
               md: 'none'
             },
@@ -110,12 +111,13 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             marginBottom: '20px'
           }}>
             <b style={{ marginRight: '5px' }}>{t('general.remainingTime')}:</b>
-            <Countdown
+            {finished ? ENDED_CLOCK : <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={() => undefined}
               getServerTimer={() => undefined}
               endTime={new Date(G.end)}
-              serverRemainingMs={G.millisecondsRemaining}/>
+              serverRemainingMs={G.millisecondsRemaining}/>}
+            {isOffline && <OfflineClockNote />}
           </Stack>
         <Stack sx={{
           width: {
@@ -169,24 +171,17 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             width: '100%',
             fontSize: 18,
             flexDirection: 'row',
+            alignItems: 'center',
           }}>
             <b style={{ marginRight: '5px' }}>{t('general.remainingTime')}:</b>
-            {!finished && <Countdown
+            {finished ? ENDED_CLOCK : <Countdown
               msRemaining={msRemaining ?? null}
               setMsRemaining={setMsRemaining}
               getServerTimer={syncTime}
               endTime={new Date(G.end)}
               serverRemainingMs={G.millisecondsRemaining} />}
+            {isOffline && <OfflineClockNote />}
           </Stack>
-          { isOffline &&
-            <Stack sx={{
-              flexDirection: 'row',
-              width: '250px',
-              fontSize: '10px',
-            }}>
-            ({t('general.warning.timeNotReal')})
-            </Stack>
-          }
           <Stack sx={{
             marginTop: '12px',
             paddingTop: '12px',

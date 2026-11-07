@@ -1,13 +1,12 @@
-import { Box, Button, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
+import { Box, Button, Stack, alpha, useMediaQuery } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import TimerOffOutlinedIcon from "@mui/icons-material/TimerOffOutlined";
 import { useEffect, useMemo, useState } from "react";
-import { Countdown, useMsRemaining } from "../client/components/Countdown";
+import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { StrategyGamesTable } from "../client/components/ResultTables";
@@ -112,20 +111,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '17px' }}>
               <b>{t('general.remainingTime')}:</b>
               {finished
-                ? <code>00:00:00</code>
+                ? ENDED_CLOCK
                 : <Countdown
                   msRemaining={msRemaining ?? null}
                   setMsRemaining={setMsRemaining}
                   getServerTimer={moves.getTime}
                   endTime={new Date(G.end)}
                   serverRemainingMs={G.millisecondsRemaining} />}
-              {/* The dry run's clock is only the browser's. Said behind an
-                  icon: in full it took more of the screen than the clock. */}
-              {isOffline && <Tooltip title={t('general.warning.timeNotReal')} enterTouchDelay={0} arrow>
-                <IconButton size="small" aria-label={t('general.warning.timeNotReal')} sx={{ padding: '2px' }}>
-                  <InfoOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>}
+              {isOffline && <OfflineClockNote />}
             </Stack>
           </Stack>
 
