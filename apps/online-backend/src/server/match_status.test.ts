@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { Ctx, StorageAPI } from "boardgame.io";
-import { deriveMatchStatus, teamMatches } from "./match_status";
+import { adminTeamViews, deriveMatchStatus, teamMatches } from "./match_status";
+import type { TeamModel } from "./model";
 
 const START = "2026-03-21T10:00:00.000Z";
 const END = "2026-03-21T11:00:00.000Z";
@@ -83,5 +84,24 @@ describe("teamMatches", () => {
   it("reads the match out of storage", async () => {
     expect((await teamMatches(storage({ m1: { G: relayG, ctx: ctx() } }), { relayMatchID: "m1", strategyMatchID: null }, at(-1000))).relayMatch)
       .toMatchObject({ state: "IN PROGRESS", matchID: "m1" });
+  });
+});
+
+describe("adminTeamViews", () => {
+  const storage = (states: Record<string, unknown>) =>
+    ({ fetch: (id: string) => ({ state: states[id] }) }) as unknown as StorageAPI.Sync;
+  const row = (teamId: string, relayMatchID: string | null) =>
+    ({ teamId, relayMatchID, strategyMatchID: null, toJSON: () => ({ teamId }) }) as unknown as TeamModel;
+
+  // #706: one row naming a match storage does not have used to fail the whole list.
+  it("leaves out a row naming a match storage does not have, and logs it", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const views = await adminTeamViews(storage({ m1: { G: relayG, ctx: ctx() } }), [row("broken", "gone"), row("healthy", "m1")]);
+
+    expect(views).toHaveLength(1);
+    expect(views[0].relayMatch).toMatchObject({ matchID: "m1" });
+    expect(error).toHaveBeenCalledWith("Team broken left out of the admin list: match gone is not in storage.");
+    error.mockRestore();
   });
 });
