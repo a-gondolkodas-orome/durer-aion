@@ -480,7 +480,12 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
   const { t } = useTranslation();
   const { state } = props;
   return (
-    <Box sx={{ position: 'relative', borderRadius: '14px', backgroundColor: '#fafaf7' }}>
+    <Box sx={{
+      position: 'relative', borderRadius: '14px', backgroundColor: '#fafaf7',
+      // Room for the label that straddles the top edge, clear of whatever is
+      // above the board.
+      marginTop: props.result !== null ? '18px' : state === 'locked' ? '12px' : 0,
+    }}>
       <Box
         data-testid="strategyBoard"
         data-state={state}
