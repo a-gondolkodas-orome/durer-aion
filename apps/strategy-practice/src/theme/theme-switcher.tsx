@@ -1,26 +1,23 @@
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
+import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from './theme-context';
+import { SettingSelect } from '../components/setting-select/setting-select';
 
 export const ThemeSwitcher = () => {
+  const { t } = useTranslation('settings');
   const { theme, setTheme } = useTheme();
   return (
-    <span className="text-sm whitespace-nowrap">
-      <button
-        onClick={() => setTheme('light')}
-        className={`px-1 ${theme === 'light' ? 'font-bold' : 'opacity-50 hocus:opacity-70'}`}
-        aria-label="Light mode"
-      >☀</button>
-      <span className="opacity-40" aria-hidden="true">|</span>
-      <button
-        onClick={() => setTheme('system')}
-        className={`px-1 ${theme === 'system' ? 'font-bold' : 'opacity-50 hocus:opacity-70'}`}
-        aria-label="System theme"
-      >◑</button>
-      <span className="opacity-40" aria-hidden="true">|</span>
-      <button
-        onClick={() => setTheme('dark')}
-        className={`px-1 ${theme === 'dark' ? 'font-bold' : 'opacity-50 hocus:opacity-70'}`}
-        aria-label="Dark mode"
-      >☾</button>
-    </span>
+    <SettingSelect
+      value={theme}
+      onChange={setTheme}
+      label={t('theme.label')}
+      options={[
+        { value: 'light', label: t('theme.light'), icon: <LightModeOutlinedIcon fontSize="small" /> },
+        { value: 'system', label: t('theme.system'), icon: <SettingsBrightnessOutlinedIcon fontSize="small" /> },
+        { value: 'dark', label: t('theme.dark'), icon: <DarkModeOutlinedIcon fontSize="small" /> }
+      ]}
+    />
   );
 };
