@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
-import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
+import { JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { BOARD_SIZE, isLegalPlacement, markForPlayer, winningLine } from './game';
 import type { MyGameState } from './game';
@@ -44,9 +44,6 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
   const mark = markForPlayer(G, ctx.currentPlayer);
   const line = winningLine(G.cells);
   const ownMark = G.firstPlayer === null || playerID === null ? null : markForPlayer(G, playerID);
-  // The wrapper's win and loss colours: the theme's own colour is green in
-  // the dry run, which would make the bot's winning line read as the team's.
-  const lineColour = G.winner === GUESSER_PLAYER ? '#1b5e20' : '#8e1b10';
 
   const chooseCell = (index: number) => {
     if (!active || G.cells[index] !== null) return;
@@ -97,8 +94,8 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
               }),
               '&.Mui-disabled': { color: 'primary.main', borderColor: 'divider' },
               ...(line.includes(index) && {
-                bgcolor: lineColour,
-                '&.Mui-disabled': { color: '#fff', borderColor: lineColour },
+                bgcolor: 'primary.main',
+                '&.Mui-disabled': { color: 'primary.contrastText', borderColor: 'primary.main' },
               }),
             }}
           >
