@@ -1,5 +1,5 @@
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
-import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
+import DesktopWindowsOutlinedIcon from '@mui/icons-material/DesktopWindowsOutlined';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from './theme-context';
@@ -15,7 +15,7 @@ export const ThemeSwitcher = () => {
       label={t('theme.label')}
       options={[
         { value: 'light', label: t('theme.light'), icon: <LightModeOutlinedIcon fontSize="small" /> },
-        { value: 'system', label: t('theme.system'), icon: <SettingsBrightnessOutlinedIcon fontSize="small" /> },
+        { value: 'system', label: t('theme.system'), icon: <DesktopWindowsOutlinedIcon fontSize="small" /> },
         { value: 'dark', label: t('theme.dark'), icon: <DarkModeOutlinedIcon fontSize="small" /> }
       ]}
     />
