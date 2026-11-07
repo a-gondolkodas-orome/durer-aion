@@ -3,7 +3,7 @@ import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightne
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from './theme-context';
-import { SettingSelect } from './setting-select';
+import { SettingSelect } from '../components/setting-select/setting-select';
 
 export const ThemeSwitcher = () => {
   const { t } = useTranslation('settings');

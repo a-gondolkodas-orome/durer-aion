@@ -43,6 +43,13 @@ describe('ThemeSwitcher', () => {
     expect(shown()).toBe('Világos');
   });
 
+  it('reads a stored theme the site does not offer as system', () => {
+    localStorage.setItem('theme', 'auto');
+    renderSwitcher();
+
+    expect(shown()).toBe('Rendszer');
+  });
+
   it('switches the theme, and the page with it', () => {
     renderSwitcher();
 

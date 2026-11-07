@@ -13,10 +13,13 @@ const ThemeContext = createContext<ThemeContextValue>({
   setTheme: () => { /* no provider above: nothing to set */ }
 });
 
+// A stored value the site does not offer, from an old version or another page on
+// the origin, says nothing, as an absent one does.
+export const storedTheme = (stored: string | null): Theme =>
+  stored === 'light' || stored === 'dark' ? stored : 'system';
+
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem('theme') as Theme | null) ?? 'system'
-  );
+  const [theme, setThemeState] = useState<Theme>(() => storedTheme(localStorage.getItem('theme')));
 
   useEffect(() => {
     const root = document.documentElement;
