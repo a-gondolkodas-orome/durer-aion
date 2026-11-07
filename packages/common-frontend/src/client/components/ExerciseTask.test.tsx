@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { expect, test, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ExerciseTask } from './ExerciseTask';
 
@@ -9,17 +9,31 @@ vi.mock('react-i18next', () => ({
   Trans: () => null,
 }));
 
-test('the task image opens in a new tab, for the browser to zoom', () => {
-  const url = 'https://example.com/figure.png';
-  render(<ExerciseTask task="" serial={1} availablePoints={3} pictureUrl={url} />);
-  const link = screen.getByRole('link', { name: 'relay.taskImage' });
-  expect(link).toHaveAttribute('href', url);
-  expect(link).toHaveAttribute('target', '_blank');
-  expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+const task = (pictureUrl: string | null) =>
+  <ExerciseTask task="" serial={1} availablePoints={3} pictureUrl={pictureUrl} />;
+
+test('clicking the task image zooms it in place, and clicking again zooms it back out', () => {
+  render(task('https://example.com/figure.png'));
+  const toggle = screen.getByRole('button', { name: 'relay.taskImage' });
+  expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+  fireEvent.click(toggle);
+  expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+  fireEvent.click(toggle);
+  expect(toggle).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('a task without an image shows no link or hint', () => {
-  render(<ExerciseTask task="" serial={1} availablePoints={3} pictureUrl={null} />);
-  expect(screen.queryByRole('link')).not.toBeInTheDocument();
-  expect(screen.queryByText('relay.enlargeImage')).not.toBeInTheDocument();
+test('the next task\'s image starts fitted, not zoomed', () => {
+  const { rerender } = render(task('https://example.com/first.png'));
+  fireEvent.click(screen.getByRole('button', { name: 'relay.taskImage' }));
+
+  rerender(task('https://example.com/second.png'));
+  expect(screen.getByRole('button', { name: 'relay.taskImage' })).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('a task without an image shows no zoom control or hint', () => {
+  render(task(null));
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  expect(screen.queryByText('relay.zoomImage')).not.toBeInTheDocument();
 });

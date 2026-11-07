@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Stack } from "@mui/system";
-import { Typography } from "@mui/material";
+import { ButtonBase, Typography } from "@mui/material";
 import { useTranslation, Trans } from "react-i18next";
 
 export interface ExerciseTaskProps {
@@ -10,21 +10,38 @@ export interface ExerciseTaskProps {
   pictureUrl: string | null;
 }
 
+// Fitted stretches small figures to the panel's width, at the cost of some
+// blur. Zoomed doubles that and scrolls sideways, staying on the page so the
+// answer form remains usable.
+const fittedImage: React.CSSProperties = { display: 'block', width: '100%', height: 'auto', maxHeight: '70vh', objectFit: 'contain', cursor: 'zoom-in' };
+const zoomedImage: React.CSSProperties = { display: 'block', width: '100%', height: 'auto', cursor: 'zoom-out' };
+
 export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: ExerciseTaskProps) => {
   const completestring = `<latex-js hyphenate="false">${props.task}
 </latex-js>`;
   const { t } = useTranslation();
+  const [zoomed, setZoomed] = useState(false);
+  // A new task starts fitted.
+  const [shownUrl, setShownUrl] = useState(props.pictureUrl);
+  if (shownUrl !== props.pictureUrl) {
+    setShownUrl(props.pictureUrl);
+    setZoomed(false);
+  }
   return <Stack>
     <Trans sx={{ fontSize: '20px' }}
       i18nKey='relay.task'
       values={{ num: props.serial, availablePoints: t('general.points', { count: props.availablePoints }) }}
       />
     <div dangerouslySetInnerHTML={{ __html: completestring }} />
-    {/* A new tab leaves zooming to the browser, pinch-zoom on phones included; the round keeps running in this one. */}
-    {props.pictureUrl && <a href={props.pictureUrl} target="_blank" rel="noopener noreferrer" title={t('relay.enlargeImage')}>
-      <img src={props.pictureUrl} style={{ maxWidth: '80%', display: 'flex', marginLeft: 'auto', marginRight: 'auto', marginTop: "30px", cursor: 'zoom-in' }} alt={t('relay.taskImage')}/>
-    </a>}
-    {props.pictureUrl && <Typography variant="caption" sx={{ textAlign: 'center', mt: 1 }}>{t('relay.enlargeImage')}</Typography>}
+    {props.pictureUrl && <>
+      <div style={{ overflowX: 'auto', marginTop: '30px' }}>
+        <ButtonBase onClick={() => setZoomed(z => !z)} aria-pressed={zoomed} disableRipple
+          sx={{ display: 'block', width: zoomed ? '200%' : '100%', '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main' } }}>
+          <img src={props.pictureUrl} style={zoomed ? zoomedImage : fittedImage} alt={t('relay.taskImage')}/>
+        </ButtonBase>
+      </div>
+      <Typography variant="caption" sx={{ textAlign: 'center', mt: 1 }}>{t('relay.zoomImage')}</Typography>
+    </>}
   </Stack>
 
 }

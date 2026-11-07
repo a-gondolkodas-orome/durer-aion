@@ -107,7 +107,6 @@
       "range": "A megoldás 0 és 9999 között van",
       "type": "Számot kell írnod"
     },
-    "enlargeImage": "Kattints a képre, hogy új lapon megnyíljon, ahol nagyíthatod",
     "goodGuess": "A válasz helyes volt",
     "guess": "Tipp:",
     "guessNum": "{{guessnum}}. próba:",
@@ -116,7 +115,8 @@
     "send": "Küldés",
     "task": "{{num}}. feladat ({{availablePoints}})",
     "taskImage": "A feladathoz tartozó kép (ha nem töltött be, próbáld meg frissíteni az oldalt!)",
-    "wrongGuess": "A válasz sajnos nem volt jó"
+    "wrongGuess": "A válasz sajnos nem volt jó",
+    "zoomImage": "Kattints a képre a nagyításhoz vagy kicsinyítéshez"
   },
   "strategy": {
     "description": "Feladat leírása",
