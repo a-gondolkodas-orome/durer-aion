@@ -5,7 +5,9 @@ import { isIPv6 } from 'node:net';
 import { Address6 } from 'ip-address';
 import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 
-/** Rate limiting for the routes that answer a guess at a secret (issue #437).
+/** Rate limiting for the routes that answer a guess at a secret (issues #437,
+ * #719): the join code on `POST /team/join`, and the organisers' password on
+ * every admin route (`admin_session.ts`).
  *
  * `POST /team/join` answers a guess at a team's join code, so what it needs is
  * a ceiling on the attempts. The code is ten digits (`server/team_import.ts`),
@@ -44,6 +46,17 @@ export interface RateLimitOptions {
 export const JOIN_ATTEMPT_LIMIT = 20;
 export const JOIN_ATTEMPT_WINDOW_SECONDS = 60;
 
+/** Wrong admin passwords allowed one client per quarter hour, across all the
+ * admin routes together.
+ *
+ * Lower than the join limit, and over a longer window: the password is one
+ * secret guarding every team's join code, the only people who should be typing
+ * it are a handful of organisers, and a mistyped password costs them nothing
+ * until the tenth time.
+ */
+export const ADMIN_ATTEMPT_LIMIT = 10;
+export const ADMIN_ATTEMPT_WINDOW_SECONDS = 15 * 60;
+
 /** How much of an IPv6 address counts as one client.
  *
  * A single subscriber is handed a whole prefix — commonly a /56, sometimes a
@@ -75,39 +88,58 @@ export function clientKey(ip: string): string {
   return new Address6(`${ip}/${IPV6_CLIENT_PREFIX}`).networkForm();
 }
 
-/** Answers 429 to a client that has spent its window's attempts.
+/** A client's budget of failed attempts, for a middleware that decides for
+ * itself what counts as one — `rateLimit` below, and the admin login.
  *
- * Written rather than thrown: koa's error handler drops every header set
- * before an error, `Retry-After` with them.
+ * The limiter is the returned object's own, so two callers do not share a
+ * client's budget.
+ */
+export function attemptLimiter({ limit, windowSeconds }: RateLimitOptions) {
+  const attempts = new RateLimiterMemory({ points: limit, duration: windowSeconds });
+
+  return {
+    /** Charges one attempt, or answers 429 and returns false when the client
+     * has none left.
+     *
+     * Written rather than thrown: koa's error handler drops every header set
+     * before an error, `Retry-After` with them. */
+    async charge(ctx: Server.AppCtx): Promise<boolean> {
+      try {
+        await attempts.consume(clientKey(ctx.ip));
+        return true;
+      } catch (refusal) {
+        // Being over the limit is how this rejects; anything else is the store
+        // failing, which no route should answer as if the client were at fault.
+        if (!(refusal instanceof RateLimiterRes)) throw refusal;
+        ctx.set('Retry-After', `${Math.ceil(refusal.msBeforeNext / 1000)}`);
+        ctx.status = 429;
+        ctx.body = 'Too many attempts.';
+        return false;
+      }
+    },
+
+    /** Gives back the attempt `charge` took, once it turned out not to be a
+     * failed guess. */
+    async refund(ctx: Server.AppCtx): Promise<void> {
+      await attempts.reward(clientKey(ctx.ip));
+    },
+  };
+}
+
+/** Answers 429 to a client that has spent its window's attempts.
  *
  * The attempt is charged before the route runs and given back if it turns out
  * to have succeeded. A route that answers 4xx or 5xx, or one that throws —
  * which is how a missing join code is reported — keeps the charge.
- *
- * The limiter is the returned middleware's own, so two routes do not share a
- * client's budget.
  */
-export function rateLimit(
-  { limit, windowSeconds }: RateLimitOptions
-): Router.Middleware<DefaultState, Server.AppCtx> {
-  const attempts = new RateLimiterMemory({ points: limit, duration: windowSeconds });
+export function rateLimit(options: RateLimitOptions): Router.Middleware<DefaultState, Server.AppCtx> {
+  const attempts = attemptLimiter(options);
 
   return async (ctx, next) => {
-    const key = clientKey(ctx.ip);
-    try {
-      await attempts.consume(key);
-    } catch (refusal) {
-      // Being over the limit is how this rejects; anything else is the store
-      // failing, which no route should answer as if the client were at fault.
-      if (!(refusal instanceof RateLimiterRes)) throw refusal;
-      ctx.set('Retry-After', `${Math.ceil(refusal.msBeforeNext / 1000)}`);
-      ctx.status = 429;
-      ctx.body = 'Too many attempts.';
-      return;
-    }
+    if (!(await attempts.charge(ctx))) return;
 
     await next();
 
-    if (ctx.status < 400) await attempts.reward(key);
+    if (ctx.status < 400) await attempts.refund(ctx);
   };
 }
