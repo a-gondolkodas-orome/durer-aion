@@ -162,6 +162,7 @@
       "stake": "{{points}} at stake now.",
       "text": "Beat the computer twice in a row in live games.",
       "title": "The goal",
+      "titlePractice": "The goal · your live standing does not change now",
       "twoMore": "Two wins needed"
     },
     "mode": {
@@ -179,6 +180,8 @@
       "title": "The practice computer does not necessarily play its best."
     },
     "result": {
+      "complete": "You beat the computer twice in a row!",
+      "completeDetail": "Task complete: {{points}}. The strategy game result is final.",
       "liveLost": "The computer won.",
       "liveLostDetail": "You need two wins in a row again.",
       "liveLostDrop": "Points available: {{before}} → {{after}}. You need two wins in a row again.",
@@ -186,7 +189,10 @@
       "liveWonDetail": "Win the next live game too, and the {{points}} are yours.",
       "practiceDetail": "This does not count towards your score.",
       "practiceLost": "The computer won the practice game.",
-      "practiceWon": "You won the practice game."
+      "practiceWon": "You won the practice game.",
+      "showResults": "Results",
+      "timeUp": "Time is up.",
+      "timeUpDetail": "The strategy game has ended. Without two wins in a row, you scored 0 points."
     },
     "role": {
       "prompt": "Will you go first or second? Look at the position first."

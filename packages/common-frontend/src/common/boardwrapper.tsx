@@ -4,6 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
+import TimerOffOutlinedIcon from "@mui/icons-material/TimerOffOutlined";
 import { useEffect, useMemo, useState } from "react";
 import { Countdown, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
@@ -63,6 +64,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     // and then snap shut on a phone.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
     const [rulesOpen, setRulesOpen] = useState(wide);
+    // The end of the match opens its dialog; a click beside it, or Esc,
+    // closes it onto the final position and the end bar, which reopens it.
+    const [endDismissed, setEndDismissed] = useState(false);
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -92,7 +96,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
 
     return (
       <>
-        <EndDialog open={finished} onClose={backToHome}>
+        <EndDialog open={finished && !endDismissed} onClose={() => setEndDismissed(true)}>
           <StrategyEndTable allPoints={G.points} liveResults={G.liveResults} />
         </EndDialog>
         <Stack sx={{
@@ -130,13 +134,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             {description}
           </Box>
 
-          <ModeFrame difficulty={difficulty} liveNumber={G.numberOfTries} stake={showResult ? null : strategyPoints(G.numberOfLoss)}>
+          <ModeFrame difficulty={difficulty} liveNumber={G.numberOfTries} stake={showResult || finished ? null : strategyPoints(G.numberOfLoss)}>
             <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '20px', padding: { xs: '14px', md: '20px' } }}>
               <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px' }}>
-                <GoalPanel G={G} />
+                <GoalPanel G={G} practice={difficulty === 'test'} over={finished} />
                 {difficulty === 'test' && <PracticeWarning />}
               </Stack>
               <Stack sx={{ flex: 1, minWidth: 0, gap: '14px' }}>
+                {finished && <EndBar G={G} onShowResults={() => setEndDismissed(false)} onBack={backToHome} />}
                 {showResult && <ResultBar G={G} difficulty={difficulty} result={lastResult} />}
                 {betweenGames && !finished && !showResult && chooser}
                 {ctx.phase === 'chooseRole' && !finished && <RoleChooser moves={moves} enabled={teamToMove} />}
@@ -199,37 +204,40 @@ function ModeFrame(props: { difficulty: Difficulty | null, liveNumber: number, s
 }
 
 /** The goal of the match and how far the team is: the streak, the stake, the live games so far. */
-function GoalPanel(props: { G: GameStateMixin }) {
+/// In a practice game the panel turns slate like the frame round it: the
+/// streak it shows is the live one, which the practice game leaves alone.
+function GoalPanel(props: { G: GameStateMixin, practice: boolean, over: boolean }) {
   const { t } = useTranslation();
-  const { G } = props;
+  const { G, practice } = props;
   const stake = strategyPoints(G.numberOfLoss);
   const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
   return (
-    <Stack sx={{ gap: '12px', backgroundColor: LIVE_TINT, borderRadius: '14px', padding: '16px' }}>
-      <Box sx={{ fontSize: '13px', fontWeight: 600, color: LIVE_TEXT, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-        {t('strategy.goal.title')}
+    <Stack sx={{ gap: '12px', backgroundColor: practice ? PRACTICE_TINT : LIVE_TINT, borderRadius: '14px', padding: '16px' }}>
+      <Box sx={{ fontSize: '13px', fontWeight: 600, color: practice ? PRACTICE : LIVE_TEXT, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        {practice ? t('strategy.goal.titlePractice') : t('strategy.goal.title')}
       </Box>
       <Box sx={{ fontSize: '17px', fontWeight: 600, lineHeight: 1.35 }}>{t('strategy.goal.text')}</Box>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-        <StreakSlot won={G.winningStreak >= 1} label="1" />
-        <Box sx={{ width: '18px', height: '3px', backgroundColor: '#e8b79a' }} />
-        <StreakSlot won={false} label="2" />
+        <StreakSlot won={G.winningStreak >= 1} label="1" practice={practice} />
+        <Box sx={{ width: '18px', height: '3px', backgroundColor: practice ? '#cbd5e1' : '#e8b79a' }} />
+        <StreakSlot won={false} label="2" practice={practice} />
         <Box sx={{ fontSize: '15px', marginLeft: '6px' }}>
           {G.winningStreak >= 1 ? t('strategy.goal.oneMore') : t('strategy.goal.twoMore')}
         </Box>
       </Stack>
-      <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
+      {/* Once the match is over nothing is at stake, and the end bar says why. */}
+      {!props.over && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
         {t('strategy.goal.stake', { points: t('general.points', { count: stake }) })}{' '}
         {stakeAfterLoss < stake
           ? t('strategy.goal.ifLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
           : t('strategy.goal.ifLose')}
-      </Box>
+      </Box>}
       {G.liveResults.length > 0 && <StrategyGamesTable results={G.liveResults} />}
     </Stack>
   );
 }
 
-function StreakSlot(props: { won: boolean, label: string }) {
+function StreakSlot(props: { won: boolean, label: string, practice: boolean }) {
   const { t } = useTranslation();
   const size = '44px';
   return props.won
@@ -238,8 +246,8 @@ function StreakSlot(props: { won: boolean, label: string }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}><CheckIcon /></Box>
     : <Box sx={{
-      width: size, height: size, borderRadius: '50%', border: `3px dashed ${LIVE}`, boxSizing: 'border-box',
-      color: LIVE_TEXT, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      width: size, height: size, borderRadius: '50%', border: `3px dashed ${props.practice ? PRACTICE_BORDER : LIVE}`, boxSizing: 'border-box',
+      color: props.practice ? PRACTICE : LIVE_TEXT, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     }}>{props.label}</Box>;
 }
 
@@ -279,6 +287,37 @@ function ResultBar(props: { G: GameStateMixin, difficulty: Difficulty, result: '
       </Stack>
       <Box sx={{ fontSize: '15px', lineHeight: 1.45 }}>{detail}</Box>
       {!live && result === 'won' && <PracticeWarning />}
+    </Stack>
+  );
+}
+
+/// How the match ended, above its final position: two live wins in a row, or
+/// the time. Only the second win in a row scores, so points mean the former.
+function EndBar(props: { G: GameStateMixin, onShowResults: () => void, onBack: () => void }) {
+  const { t } = useTranslation();
+  const complete = props.G.points > 0;
+  return (
+    <Stack role="status" sx={{ alignItems: 'center', gap: '8px', textAlign: 'center' }}>
+      <Stack sx={{
+        flexDirection: 'row', alignItems: 'center', gap: '8px', borderRadius: '999px', padding: '8px 20px',
+        backgroundColor: complete ? WIN : LOCKED, color: '#fff', fontSize: '18px', fontWeight: 700,
+      }}>
+        {complete ? <CheckIcon aria-hidden /> : <TimerOffOutlinedIcon aria-hidden />}
+        {complete ? t('strategy.result.complete') : t('strategy.result.timeUp')}
+      </Stack>
+      <Box sx={{ fontSize: '15px', lineHeight: 1.45 }}>
+        {complete
+          ? t('strategy.result.completeDetail', { points: t('general.points', { count: props.G.points }) })
+          : t('strategy.result.timeUpDetail')}
+      </Box>
+      <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: '10px' }}>
+        <Button variant="contained" onClick={props.onBack} sx={{ minHeight: '44px', textTransform: 'none', borderRadius: '10px' }}>
+          {t('general.backHome')}
+        </Button>
+        <Button variant="outlined" onClick={props.onShowResults} sx={{ minHeight: '44px', textTransform: 'none', borderRadius: '10px' }}>
+          {t('strategy.result.showResults')}
+        </Button>
+      </Stack>
     </Stack>
   );
 }
