@@ -547,7 +547,6 @@ leszámítva
 leszámolni
 leszúrni
 leszúrt
-letöltött
 letörli
 letörni
 letörölhetjük
@@ -636,6 +635,7 @@ megnézzük
 megnöveljük
 Megnyert
 megnyerte
+megnyíljon
 megoldhatja
 megoldjátok
 megoldóak
@@ -693,6 +693,7 @@ mondhatták
 mondhatunk
 morajlást
 működését
+nagyíthatod
 Nagykövetséget
 Napimádók
 négyjegyű

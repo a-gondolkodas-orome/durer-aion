@@ -111,6 +111,7 @@
       "range": "The solution is between 0 and 9999",
       "type": "Answer must be a number"
     },
+    "enlargeImage": "Click the image to open it in a new tab, where you can zoom in",
     "goodGuess": "Your answer is correct",
     "guess": "Guess:",
     "guessNum": "Guess #{{guessnum}}:",
