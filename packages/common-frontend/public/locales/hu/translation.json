@@ -127,11 +127,11 @@
       "details": "Részletek",
       "liveButton": "Éles játszma indítása",
       "liveIfLose": "Ha veszítetek: újra két egymás utáni győzelem kell.",
-      "liveIfLoseDrop": "Ha veszítetek: a tét {{points}} lesz, és újra két egymás utáni győzelem kell.",
-      "liveIfWinDone": "Ha nyertek: megvan a második győzelem egymás után, és ezzel {{points}}.",
+      "liveIfLoseDrop": "Ha veszítetek: újra két egymás utáni győzelem kell, és a tét {{points}} lesz.",
+      "liveIfWinDone": "Ha nyertek: megvan a két győzelem egymás után, és {{points}} a tiétek.",
       "liveIfWinFirst": "Ha nyertek: megvan az első győzelem a kettőből.",
-      "liveSub": "Pontért megy",
-      "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
+      "liveSub": "Beleszámít a pontozásba",
+      "noAbandon": "Az elkezdett játszmát végig kell játszani.",
       "practiceButton": "Próbajáték indítása",
       "starting": "Indul…",
       "title": "Milyen játszmát kezdtek?"
@@ -143,28 +143,28 @@
       "points": "Pont",
       "reminder": "Ne feledkezzetek meg a váltóról sem!",
       "result": "Eredmény",
-      "rules": "A gyakorló játszmák nem számítanak. Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, 0 pontot kaptok.",
+      "rules": "A próbajátékok nem számítanak bele a pontozásba. Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, 0 pontot kaptok.",
       "title": "A stratégiás játék eredménye",
       "unfinished": "Befejezetlen: lejárt közben az idő",
       "won": "Győzelem"
     },
-    "firstPlayer": "Kezdő leszek",
+    "firstPlayer": "Mi kezdünk",
     "goal": {
       "done": "Megvan a két győzelem!",
       "firstWin": "Az első győzelem megvan",
-      "ifLose": "Egy éles vereség után újra két egymás utáni győzelem kell.",
-      "ifLoseDrop": "Egy éles vereség után újra két egymás utáni győzelem kell, és a tét {{points}} lesz.",
+      "ifLose": "Éles vereség után újra két egymás utáni győzelem kell.",
+      "ifLoseDrop": "Éles vereség után újra két egymás utáni győzelem kell, és a tét {{points}} lesz.",
       "oneMore": "Még egy győzelem kell",
       "secondWin": "A második győzelem megvan",
       "stake": "Most {{points}} a tét.",
       "stakeNextLive": "A következő éles játszmában {{points}} a tét.",
-      "text": "Győzzétek le a gépet kétszer egymás után éles játszmában.",
+      "text": "Győzzétek le a gépet kétszer egymás után éles játszmákban.",
       "title": "A cél",
       "twoMore": "Két győzelem kell"
     },
     "mode": {
       "live": "Éles játszma",
-      "liveNumber": "{{n}}. éles játszma · ez számít a pontozásba",
+      "liveNumber": "{{n}}. éles játszma · beleszámít a pontozásba",
       "practice": "Próbajáték",
       "practiceSub": "Nem számít bele a pontozásba",
       "stake": "Tét: {{points}}"
@@ -178,21 +178,21 @@
     "result": {
       "liveLost": "A gép nyert.",
       "liveLostDetail": "Újra két egymás utáni győzelem kell.",
-      "liveLostDrop": "Elérhető pont: {{before}} → {{after}}. Újra két egymás utáni győzelem kell.",
+      "liveLostDrop": "Tét: {{before}} → {{after}} pont. Újra két egymás utáni győzelem kell.",
       "liveWon": "Nyertetek! Ez az első a kettőből.",
-      "liveWonDetail": "Ha a következő éles játszmát is megnyeritek, megvan a {{points}}.",
+      "liveWonDetail": "Ha a következő éles játszmát is megnyeritek, {{points}} a tiétek.",
       "practiceLost": "A gép nyert a próbajátékban.",
       "practiceWon": "Nyertetek a próbajátékban."
     },
     "role": {
-      "prompt": "Kezdők vagy másodikak lesztek? Nézzétek meg előbb az állást."
+      "prompt": "Ti kezdtek, vagy a gép? Előbb nézzétek meg az állást."
     },
     "rules": "Szabályok",
     "rulesFirst": {
       "button": "Elolvastuk, értjük",
       "title": "Először olvassátok el a szabályokat!"
     },
-    "secondPlayer": "Második leszek"
+    "secondPlayer": "A gép kezd"
   },
   "waitingRoom": {
     "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",

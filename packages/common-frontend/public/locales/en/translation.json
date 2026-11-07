@@ -131,14 +131,14 @@
       "details": "Details",
       "liveButton": "Start a live game",
       "liveIfLose": "If you lose: you need two wins in a row again.",
-      "liveIfLoseDrop": "If you lose: the stake drops to {{points}}, and you need two wins in a row again.",
-      "liveIfWinDone": "If you win: that is your second win in a row, worth {{points}}.",
-      "liveIfWinFirst": "If you win: that is your first win of the two.",
+      "liveIfLoseDrop": "If you lose: you need two wins in a row again, and the stake drops to {{points}}.",
+      "liveIfWinDone": "If you win: that makes two wins in a row, and {{points}} are yours.",
+      "liveIfWinFirst": "If you win: that is the first of the two wins.",
       "liveSub": "Counts towards your score",
-      "noAbandon": "A game, once started, has to be played to the end.",
+      "noAbandon": "Once you start a game, you have to finish it.",
       "practiceButton": "Start a practice game",
       "starting": "Starting…",
-      "title": "Which game do you start?"
+      "title": "What kind of game will you start?"
     },
     "endTable": {
       "game": "Live game",
@@ -147,28 +147,28 @@
       "points": "Points",
       "reminder": "Don't forget to do the relay too!",
       "result": "Result",
-      "rules": "Practice games do not count. If you do not beat the computer twice in a row within 30 minutes, you get 0 points.",
+      "rules": "Practice games do not count towards your score. If you do not beat the computer twice in a row within 30 minutes, you get 0 points.",
       "title": "Strategy game results",
       "unfinished": "Unfinished: the time ran out",
       "won": "Win"
     },
-    "firstPlayer": "I will be the first",
+    "firstPlayer": "We go first",
     "goal": {
-      "done": "Both wins done!",
+      "done": "You have both wins!",
       "firstWin": "First win done",
-      "ifLose": "After a live loss you need two wins in a row again.",
-      "ifLoseDrop": "After a live loss you need two wins in a row again, and the stake drops to {{points}}.",
+      "ifLose": "After a live loss, you need two wins in a row again.",
+      "ifLoseDrop": "After a live loss, you need two wins in a row again, and the stake drops to {{points}}.",
       "oneMore": "One more win needed",
       "secondWin": "Second win done",
-      "stake": "{{points}} at stake now.",
-      "stakeNextLive": "{{points}} at stake in the next live game.",
+      "stake": "{{points}} are at stake now.",
+      "stakeNextLive": "{{points}} are at stake in the next live game.",
       "text": "Beat the computer twice in a row in live games.",
       "title": "The goal",
       "twoMore": "Two wins needed"
     },
     "mode": {
       "live": "Live game",
-      "liveNumber": "Live game {{n}} · this one counts towards your score",
+      "liveNumber": "Live game {{n}} · counts towards your score",
       "practice": "Practice game",
       "practiceSub": "Does not count towards your score",
       "stake": "At stake: {{points}}"
@@ -176,27 +176,27 @@
     "name": "Strategy game",
     "notSupported": "UNSUPPORTED GAME STATE",
     "practiceWarning": {
-      "text": "The practice computer does not necessarily play its best, and live games may start from other positions: beating it here does not mean you will win a live game.",
-      "title": "Practice games are mainly for trying out how the game goes, and checking that you understand the rules."
+      "text": "The practice computer may not play its best, and live games may start from a different position: beating it here does not mean you will win a live game.",
+      "title": "Practice games are mainly for getting a feel for the game and checking that you understand the rules."
     },
     "result": {
       "liveLost": "The computer won.",
       "liveLostDetail": "You need two wins in a row again.",
-      "liveLostDrop": "Points available: {{before}} → {{after}}. You need two wins in a row again.",
-      "liveWon": "You won! That is the first of two.",
-      "liveWonDetail": "Win the next live game too, and the {{points}} are yours.",
+      "liveLostDrop": "At stake: {{before}} → {{after}} points. You need two wins in a row again.",
+      "liveWon": "You won! That is the first of the two wins.",
+      "liveWonDetail": "Win the next live game too, and {{points}} are yours.",
       "practiceLost": "The computer won the practice game.",
       "practiceWon": "You won the practice game."
     },
     "role": {
-      "prompt": "Will you go first or second? Look at the position first."
+      "prompt": "Who goes first, you or the computer? Look at the position first."
     },
     "rules": "Rules",
     "rulesFirst": {
-      "button": "We have read them",
+      "button": "We have read and understood them",
       "title": "Read the rules first!"
     },
-    "secondPlayer": "I will be the second"
+    "secondPlayer": "The computer goes first"
   },
   "waitingRoom": {
     "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",
