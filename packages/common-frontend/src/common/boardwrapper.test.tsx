@@ -103,11 +103,13 @@ describe('between games', () => {
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.liveLost');
     // The loss lowered the stake, so the bar says from what to what.
     expect(screen.getByText('strategy.result.liveLostDrop')).toBeInTheDocument();
-    // In the bar, in place of the game's number and the stake, not a row above the board.
+    // The consequence takes the bar's second line, in place of the game's number.
     expect(screen.queryByText('strategy.mode.liveNumber')).not.toBeInTheDocument();
-    expect(screen.queryByText('strategy.mode.stake')).not.toBeInTheDocument();
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
-    expect(screen.getByText('strategy.board.finalViewOnly')).toBeInTheDocument();
+    // The result labels the final position itself: red on the live bar's
+    // orange read poorly, and a row of its own cost the board height.
+    expect(boardArea().parentElement).toContainElement(screen.getByRole('status'));
+    expect(screen.queryByText('strategy.board.finalViewOnly')).not.toBeInTheDocument();
     // The lost game was played for the old stake; the new one is on the live card.
     expect(screen.queryByText('strategy.mode.stake')).not.toBeInTheDocument();
     for (const button of startButtons()) {
@@ -122,7 +124,6 @@ describe('between games', () => {
 
     const chooser = screen.getByText('strategy.chooser.title');
     expect(chooser.compareDocumentPosition(boardArea()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByRole('status').compareDocumentPosition(chooser) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   test('shows a live win as the first of two', () => {

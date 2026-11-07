@@ -118,15 +118,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             liveNumber={G.numberOfTries}
             detailLine={showResult && difficulty === 'live' ? liveResultDetail(G, lastResult, t) : null}
             status={<>
-              {/* The bar's free spot says what is going on: the stake and
-                  whose turn while a game is on, and a game's result after it,
-                  each in place of a row of its own above the board. */}
+              {/* The bar's free spot says what is going on while a game is
+                  on: the stake and whose turn, in place of rows of their own
+                  above the board. */}
               {difficulty === 'live' && !showResult && !finished &&
                 <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
                   {t('strategy.mode.stake', { points: t('general.points', { count: strategyPoints(G.numberOfLoss) }) })}
                 </Box>}
               {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
-              {showResult && <ResultChip difficulty={difficulty} result={lastResult} />}
             </>}
             clock={<Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px' }}>
               {/* On a phone an icon stands for the label, so the bar's right
@@ -173,7 +172,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                 {betweenGames && !finished &&
                   <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null} />}
                 {ctx.phase === 'chooseRole' && !finished && <RoleChooser moves={moves} enabled={teamToMove} />}
-                <BoardArea state={boardState} hasResult={lastResult !== null || finished}>
+                <BoardArea state={boardState} final={lastResult !== null || finished}
+                  result={showResult ? <ResultChip difficulty={difficulty} result={lastResult} /> : null}>
                   {board(props)}
                 </BoardArea>
               </Stack>
@@ -312,7 +312,7 @@ function PracticeWarning() {
   );
 }
 
-/** How the game that just ended went, in the bar above its final position. */
+/** How the game that just ended went, as the label on its final position. */
 function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
   const { t } = useTranslation();
   const { difficulty, result } = props;
@@ -321,10 +321,10 @@ function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
     : (result === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'));
   return (
     <Stack role="status" sx={{
-      flexDirection: 'row', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '6px 16px',
-      backgroundColor: result === 'won' ? WIN : LOSS, color: '#fff', fontWeight: 700,
-      // On the live bar's orange the chip needs an edge of its own.
-      boxShadow: '0 0 0 2px #fff',
+      flexDirection: 'row', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '5px 14px',
+      backgroundColor: result === 'won' ? WIN : LOSS, color: '#fff', fontSize: '15px', fontWeight: 700,
+      // Lifts it off the dashed edge it sits on.
+      boxShadow: '0 0 0 3px #fff',
     }}>
       {result === 'won' ? <CheckIcon aria-hidden fontSize="small" /> : <CloseIcon aria-hidden fontSize="small" />}
       {headline}
@@ -474,7 +474,9 @@ function TurnLabel(props: { teamToMove: boolean }) {
 
 /// The game's own board, faded, locked or live as `BoardState` says. Out of
 /// `live` it is inert, so no click reaches a move the server would refuse.
-function BoardArea(props: { state: BoardState, hasResult: boolean, children: ReactNode }) {
+/// A finished game's `result` is its final position's label; otherwise a
+/// locked board says it is only to look at.
+function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode, children: ReactNode }) {
   const { t } = useTranslation();
   const { state } = props;
   return (
@@ -495,13 +497,17 @@ function BoardArea(props: { state: BoardState, hasResult: boolean, children: Rea
       </Box>
       {/* On the dashed edge, like a label on a frame, so it takes no
           height of the board's. */}
-      {state === 'locked' && <Stack sx={{
-        position: 'absolute', top: '-12px', right: '16px', flexDirection: 'row', alignItems: 'center', gap: '6px',
-        backgroundColor: LOCKED, color: '#fff', borderRadius: '999px', padding: '4px 12px', fontSize: '13px', fontWeight: 600,
-      }}>
-        <LockOutlinedIcon aria-hidden sx={{ fontSize: '16px' }} />
-        {props.hasResult ? t('strategy.board.finalViewOnly') : t('strategy.board.viewOnly')}
-      </Stack>}
+      {props.result !== null
+        ? <Box sx={{ position: 'absolute', top: '-16px', right: '16px', left: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+          {props.result}
+        </Box>
+        : state === 'locked' && <Stack sx={{
+          position: 'absolute', top: '-12px', right: '16px', flexDirection: 'row', alignItems: 'center', gap: '6px',
+          backgroundColor: LOCKED, color: '#fff', borderRadius: '999px', padding: '4px 12px', fontSize: '13px', fontWeight: 600,
+        }}>
+          <LockOutlinedIcon aria-hidden sx={{ fontSize: '16px' }} />
+          {props.final ? t('strategy.board.finalViewOnly') : t('strategy.board.viewOnly')}
+        </Stack>}
     </Box>
   );
 }
