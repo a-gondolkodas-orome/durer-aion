@@ -1,6 +1,7 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, alpha, useMediaQuery } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, alpha, useMediaQuery } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -217,12 +218,9 @@ function ModeFrame(props: {
             </Stack>}
         </Stack>
         <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: { xs: '8px 10px', md: '8px 16px' } }}>
-          {(difficulty === 'test' || (difficulty === 'live' && props.stake !== null)) &&
-            <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600,
-              color: difficulty === 'live' ? LIVE_TEXT : '#1e293b' }}>
-              {difficulty === 'live'
-                ? t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })
-                : t('strategy.mode.practiceKeeps')}
+          {difficulty === 'live' && props.stake !== null &&
+            <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
+              {t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })}
             </Box>}
           {props.clock}
           {props.rulesButton}
@@ -352,6 +350,9 @@ function ModeChooser(props: {
   const ifWin = G.winningStreak >= 1
     ? t('strategy.chooser.liveIfWinDone', { points: t('general.points', { count: stake }) })
     : t('strategy.chooser.liveIfWinFirst');
+  // After the first game the team knows the two kinds: each card folds to
+  // what tells them apart and its button, and opens for the rest.
+  const folded = G.difficulty != null;
   const ifLose = stakeAfterLoss < stake
     ? t('strategy.chooser.liveIfLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
     : t('strategy.chooser.liveIfLose');
@@ -367,6 +368,7 @@ function ModeChooser(props: {
           subtitle={t('strategy.mode.practiceSub')}
           points={[t('strategy.chooser.practiceSame')]}
           note={<><b>{t('strategy.practiceWarning.title')}</b> {t('strategy.practiceWarning.text')}</>}
+          folded={folded}
           button={starting === 'test' ? t('strategy.chooser.starting') : t('strategy.chooser.practiceButton')}
           enabled={enabled}
           onClick={() => moves.chooseNewGameType('test')}
@@ -376,6 +378,7 @@ function ModeChooser(props: {
           title={t('strategy.mode.live')}
           subtitle={t('strategy.chooser.liveSub')}
           points={[ifWin, ifLose]}
+          folded={folded}
           button={starting === 'live' ? t('strategy.chooser.starting') : t('strategy.chooser.liveButton')}
           enabled={enabled}
           onClick={() => moves.chooseNewGameType('live')}
@@ -386,10 +389,12 @@ function ModeChooser(props: {
 }
 
 function ModeCard(props: {
-  live: boolean, title: string, subtitle: string, points: string[], note?: ReactNode,
+  live: boolean, title: string, subtitle: string, points: string[], note?: ReactNode, folded: boolean,
   button: string, enabled: boolean, onClick: () => void,
 }) {
+  const { t } = useTranslation();
   const { live } = props;
+  const [open, setOpen] = useState(!props.folded);
   return (
     <Stack sx={{
       border: live ? `3px solid ${LIVE}` : `3px dashed ${PRACTICE_BORDER}`, borderRadius: '16px',
@@ -399,17 +404,22 @@ function ModeCard(props: {
         {live
           ? <FlagOutlinedIcon aria-hidden sx={{ color: LIVE, fontSize: '30px' }} />
           : <ScienceOutlinedIcon aria-hidden sx={{ color: PRACTICE, fontSize: '30px' }} />}
-        <Stack>
+        <Stack sx={{ flex: 1 }}>
           <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{props.title}</Box>
-          <Box sx={{ fontSize: '14px', fontWeight: 600, color: live ? LIVE_TEXT : PRACTICE }}>{props.subtitle}</Box>
+          {open && <Box sx={{ fontSize: '14px', fontWeight: 600, color: live ? LIVE_TEXT : PRACTICE }}>{props.subtitle}</Box>}
         </Stack>
+        <IconButton aria-label={t('strategy.chooser.details')} aria-expanded={open} onClick={() => setOpen(!open)}>
+          <ExpandMoreIcon sx={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        </IconButton>
       </Stack>
-      <Box component="ul" sx={{ margin: 0, paddingLeft: '20px', fontSize: '15px', lineHeight: 1.45 }}>
-        {props.points.map(point => <li key={point}>{point}</li>)}
-      </Box>
-      {props.note && <Box sx={{ fontSize: '14px', lineHeight: 1.45, backgroundColor: PRACTICE_TINT, borderRadius: '10px', padding: '8px 12px' }}>
-        {props.note}
-      </Box>}
+      {open && <>
+        <Box component="ul" sx={{ margin: 0, paddingLeft: '20px', fontSize: '15px', lineHeight: 1.45 }}>
+          {props.points.map(point => <li key={point}>{point}</li>)}
+        </Box>
+        {props.note && <Box sx={{ fontSize: '14px', lineHeight: 1.45, backgroundColor: PRACTICE_TINT, borderRadius: '10px', padding: '8px 12px' }}>
+          {props.note}
+        </Box>}
+      </>}
       <Button
         variant={live ? 'contained' : 'outlined'}
         disabled={!props.enabled}

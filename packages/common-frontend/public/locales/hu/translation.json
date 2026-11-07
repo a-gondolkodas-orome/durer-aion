@@ -124,6 +124,7 @@
       "yourTurn": "Ti jöttök!"
     },
     "chooser": {
+      "details": "Részletek",
       "liveButton": "Éles játszma indítása",
       "liveIfLose": "Ha veszítetek: újra két egymás utáni győzelem kell.",
       "liveIfLoseDrop": "Ha veszítetek: a tét {{points}} lesz, és újra két egymás utáni győzelem kell.",
@@ -165,7 +166,6 @@
       "live": "Éles játszma",
       "liveNumber": "{{n}}. éles játszma · ez számít a pontozásba",
       "practice": "Próbajáték",
-      "practiceKeeps": "Az éles sorozatotok nem változik",
       "practiceSub": "Nem számít bele a pontozásba",
       "stake": "Tét: {{points}}"
     },

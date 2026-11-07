@@ -128,6 +128,7 @@
       "yourTurn": "Your turn!"
     },
     "chooser": {
+      "details": "Details",
       "liveButton": "Start a live game",
       "liveIfLose": "If you lose: you need two wins in a row again.",
       "liveIfLoseDrop": "If you lose: the stake drops to {{points}}, and you need two wins in a row again.",
@@ -169,7 +170,6 @@
       "live": "Live game",
       "liveNumber": "Live game {{n}} · this one counts towards your score",
       "practice": "Practice game",
-      "practiceKeeps": "Your live streak stays as it is",
       "practiceSub": "Does not count towards your score",
       "stake": "At stake: {{points}}"
     },

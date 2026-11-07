@@ -68,6 +68,8 @@ describe('between games', () => {
     for (const button of startButtons()) {
       expect(button).toBeDisabled();
     }
+    // Before any game the cards are open, with all they say.
+    expect(screen.getByText('strategy.chooser.practiceSame')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'strategy.rulesFirst.button' }));
     expect(screen.queryByText('strategy.rulesFirst.title')).not.toBeInTheDocument();
     for (const button of startButtons()) {
@@ -126,6 +128,9 @@ describe('between games', () => {
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.liveWon');
     expect(screen.getByText('strategy.result.liveWonDetail')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'strategy.goal.firstWin' })).toBeInTheDocument();
+    // After a game the cards are folded to their title and button, and open on demand.
+    expect(screen.queryByText('strategy.chooser.liveIfWinDone')).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'strategy.chooser.details' })[1]);
     expect(screen.getByText('strategy.chooser.liveIfWinDone')).toBeInTheDocument();
   });
 
@@ -135,11 +140,12 @@ describe('between games', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceWon');
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceDetail');
-    // Said once on the screen, on the practice card, not again in the bar.
-    expect(screen.getAllByText('strategy.practiceWarning.title')).toHaveLength(1);
+    // Said once on the screen, on the practice card, not again in the bar;
+    // the card is folded after a game, so it shows once that is opened.
     expect(screen.getByRole('status')).not.toHaveTextContent('strategy.practiceWarning.title');
-    // The band of the game that just ended still names its mode.
-    expect(screen.getByText('strategy.mode.practiceKeeps')).toBeInTheDocument();
+    expect(screen.queryByText('strategy.practiceWarning.title')).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'strategy.chooser.details' })[0]);
+    expect(screen.getAllByText('strategy.practiceWarning.title')).toHaveLength(1);
   });
 });
 
