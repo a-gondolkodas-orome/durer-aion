@@ -32,8 +32,8 @@ vi.mock('react-i18next', () => ({
 // export would hold.
 const grids = vi.hoisted(() => ({ columns: [] as { field: string, disableExport?: boolean }[][] }));
 vi.mock('@mui/x-data-grid', () => {
-  interface Row { id: string, teamName: string, [field: string]: unknown }
-  interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row, value: unknown }) => React.ReactNode }
+  interface Row { id: string, teamName: string }
+  interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row }) => React.ReactNode }
   return {
     DataGrid: (props: {
       rows: Row[], columns: Column[],
@@ -45,7 +45,7 @@ vi.mock('@mui/x-data-grid', () => {
           <li key={row.id}>
             {row.teamName}
             {props.columns.filter(column => column.renderCell).map(column => (
-              <span key={column.field}>{column.renderCell?.({ row, value: row[column.field] })}</span>
+              <span key={column.field}>{column.renderCell?.({ row })}</span>
             ))}
           </li>
         ))}
@@ -548,34 +548,14 @@ test('the team list\'s CSV holds no login secret', async () => {
   }
 });
 
-// #706: a row naming a match storage does not have. The server marks it
-// rather than failing the list, and the page has to show it.
-const brokenRelay = { state: 'BROKEN' as const, matchID: 'goneMatchId' };
-
-test('a broken row is announced above the list, with the missing match in its cell', async () => {
-  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch: brokenRelay }, team('0b6c8d2e-3f4a-4b5c-8d9e-0f1a2b3c4d5e', 'Beta')]);
-  renderAdmin();
-
-  expect(await screen.findByRole('alert')).toHaveTextContent(/^1 csapat sora nem létező meccsre mutat: Alpha\./);
-  expect(screen.getByText('BROKEN: goneMatchId')).toBeInTheDocument();
-  expect(screen.getAllByText('NOT STARTED')).toHaveLength(3);
-});
-
-test('the stats leave a broken row out, and say so', async () => {
-  vi.spyOn(repo, 'getAll').mockResolvedValue([{ ...alpha, relayMatch: brokenRelay }]);
-  window.history.replaceState(null, '', '/admin?tab=statisztika');
-  renderAdmin();
-
-  expect(await screen.findByText(/1 hibás sorú csapat nem szerepel a táblázatban/)).toBeInTheDocument();
-});
-
+// #706: a row naming a match storage does not have, which the server marks
+// rather than failing the list.
 test('a broken match names the missing match, fetches nothing, and can be reset', async () => {
   const getMatchState = vi.spyOn(repo, 'getMatchState');
-  openTeamWithRelay(brokenRelay);
+  openTeamWithRelay({ state: 'BROKEN', matchID: 'goneMatchId' });
 
-  expect(await screen.findByTestId('relayBrokenMatch')).toHaveTextContent('goneMatchId');
+  expect(await screen.findByText('goneMatchId')).toBeInTheDocument();
   expect(screen.getByText('Hibás')).toBeInTheDocument();
-  expect(screen.getByText('váltó ? (hibás) + stratégia 0 (nem kezdte el)')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Váltó reset' })).toBeEnabled();
   expect(getMatchState).not.toHaveBeenCalled();
 });

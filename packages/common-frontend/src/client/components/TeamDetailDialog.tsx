@@ -137,7 +137,7 @@ function Total(props: { team: AdminTeamDto }) {
   const sum = relay === undefined || strategy === undefined ? undefined : relay + strategy;
   const part = (kind: MatchKind, points: number | undefined) => {
     const state = statuses[kind].state;
-    return `${MATCH_NAME[kind]} ${points ?? '?'}${state === 'IN PROGRESS' ? ', még tart' : state === 'NOT STARTED' ? ' (nem kezdte el)' : state === 'BROKEN' ? ' (hibás)' : ''}`;
+    return `${MATCH_NAME[kind]} ${points ?? '?'}${state === 'IN PROGRESS' ? ', még tart' : state === 'NOT STARTED' ? ' (nem kezdte el)' : ''}`;
   };
   return (
     <Stack sx={{ marginLeft: 'auto', alignItems: 'flex-end', textAlign: 'right' }}>
@@ -200,14 +200,13 @@ function MatchCard(props: { kind: MatchKind, heading: 'h2' | 'h3', teamName: str
   const status = props.status;
   if (status.state === 'BROKEN') {
     return (
-      <Stack component="section" aria-label={title} sx={{ ...cardSx, borderColor: DANGER_BORDER }}>
-        <Stack sx={{ ...cardHeaderSx, borderBottom: `1px solid ${DANGER_DIVIDER}` }}>
+      <Stack component="section" aria-label={title} sx={cardSx}>
+        <Stack sx={cardHeaderSx}>
           <Box component={props.heading} sx={cardTitleSx}>{title}</Box>
           <StatusChip state={status.state}/>
         </Stack>
         <Box sx={{ padding: { xs: '16px', md: '20px 24px' } }}>
-          A csapat sora a(z) <Box component="code" data-testid={`${props.kind}BrokenMatch`}>{status.matchID}</Box> meccsre mutat, de ilyen meccs nincs az adatbázisban, ezért a csapat oldala nem tölt be.
-          A lenti Veszélyzónában a {MATCH_NAME[props.kind]} alaphelyzetbe állítása után a meccs leválik a sorról, és a csapat újra elindíthatja.
+          A(z) <code>{status.matchID}</code> meccs nincs az adatbázisban. Alaphelyzetbe állítása javítja.
         </Box>
       </Stack>
     );
