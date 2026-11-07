@@ -19,7 +19,7 @@ vi.mock('../client/hooks/user-hooks', () => MockTeamState.mockHook);
 
 const play = vi.fn();
 // A board with one control, to see whether a click on it gets through.
-const Board = boardWrapper<object>(() => <button data-testid="cell" onClick={play}>cell</button>, null);
+const Board = boardWrapper<object>(() => <button data-testid="cell" onClick={play}>cell</button>, <p>the rules</p>);
 
 /// Only the fields the wrapper reads; boardgame.io hands a board plenty more.
 function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
@@ -198,5 +198,23 @@ describe('the goal panel', () => {
 
     expect(screen.getByText('strategy.goal.titlePractice')).toBeInTheDocument();
     expect(screen.queryByText('strategy.goal.title')).not.toBeInTheDocument();
+  });
+});
+
+// jsdom has no matchMedia, so these render as on a phone.
+describe('the bar above the game', () => {
+  test('names the screen before the first game, and keeps the clock', () => {
+    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { difficulty: null });
+
+    expect(screen.getByText('strategy.name')).toBeInTheDocument();
+    expect(screen.getByTitle('general.remainingTime')).toBeInTheDocument();
+  });
+
+  test('opens the rules from its button on a phone', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
+
+    expect(screen.queryByText('the rules')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'strategy.rules' }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('the rules');
   });
 });

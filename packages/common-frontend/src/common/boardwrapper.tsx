@@ -1,7 +1,8 @@
-import { Box, Button, Stack, alpha, useMediaQuery } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, alpha, useMediaQuery } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import { useEffect, useMemo, useState } from "react";
@@ -59,10 +60,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
-    // `noSsr` reads the width on the first render, so the rules do not open
-    // and then snap shut on a phone.
+    // `noSsr` reads the width on the first render, so the rules do not show
+    // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
-    const [rulesOpen, setRulesOpen] = useState(wide);
+    const [rulesFolded, setRulesFolded] = useState(false);
+    const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -100,11 +102,19 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           borderRadius: "25px",
           gap: '16px',
         }}>
-          <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px' }}>
-            <Box sx={{ fontSize: '22px', fontWeight: 700 }}>{t('strategy.name')}</Box>
-            <Box sx={{ flex: 1 }} />
-            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '17px' }}>
-              <b>{t('general.remainingTime')}:</b>
+          {/* The screen has one bar of its own, the mode frame's: the clock
+              and, on a phone, the rules sit in it rather than in rows above
+              the board. */}
+          <ModeFrame
+            difficulty={difficulty}
+            liveNumber={G.numberOfTries}
+            stake={showResult || finished ? null : strategyPoints(G.numberOfLoss)}
+            clock={<Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px' }}>
+              {/* On a phone an icon stands for the label, so the bar's right
+                  half fits one line. */}
+              {wide
+                ? <Box component="span" sx={{ fontWeight: 600 }}>{t('general.remainingTime')}:</Box>
+                : <TimerOutlinedIcon fontSize="small" titleAccess={t('general.remainingTime')} />}
               {finished
                 ? ENDED_CLOCK
                 : <Countdown
@@ -114,26 +124,25 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                   endTime={new Date(G.end)}
                   serverRemainingMs={G.millisecondsRemaining} />}
               {isOffline && <OfflineClockNote />}
-            </Stack>
-          </Stack>
-
-          {/* Above everything it governs, so a team never has to look for
-              it. Open from the start where it fits beside the game; on a
-              phone it would push the board two screens down, so it starts
-              collapsed there, its heading still first on the page. */}
-          <Box component="details" open={rulesOpen} onToggle={(event) => setRulesOpen(event.currentTarget.open)} sx={{
-            border: '1px solid #d8d3c4', borderRadius: '14px', backgroundColor: '#fffdf5',
-            padding: '12px 18px', fontSize: { xs: '15px', md: '17px' }, lineHeight: 1.5,
-          }}>
-            <Box component="summary" sx={{ fontWeight: 700, cursor: 'pointer' }}>{t('strategy.rules')}</Box>
-            {description}
-          </Box>
-
-          <ModeFrame difficulty={difficulty} liveNumber={G.numberOfTries} stake={showResult || finished ? null : strategyPoints(G.numberOfLoss)}>
+            </Stack>}
+            rulesButton={!wide && <Button variant="outlined" color="inherit" size="small" onClick={() => setRulesDialogOpen(true)}
+              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '10px' }}>
+              {t('strategy.rules')}
+            </Button>}
+          >
             <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '20px', padding: { xs: '14px', md: '20px' } }}>
               <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px' }}>
                 <GoalPanel G={G} practice={difficulty === 'test'} />
                 {difficulty === 'test' && <PracticeWarning />}
+                {/* Beside the board on a wide screen, where the column has
+                    room to spare: open from the start, and no height spent. */}
+                {wide && <Box component="details" open={!rulesFolded} onToggle={(event) => setRulesFolded(!event.currentTarget.open)} sx={{
+                  border: '1px solid #d8d3c4', borderRadius: '14px', backgroundColor: '#fffdf5',
+                  padding: '12px 16px', fontSize: '15px', lineHeight: 1.5,
+                }}>
+                  <Box component="summary" sx={{ fontWeight: 700, cursor: 'pointer' }}>{t('strategy.rules')}</Box>
+                  {description}
+                </Box>}
               </Stack>
               <Stack sx={{ flex: 1, minWidth: 0, gap: '14px' }}>
                 {showResult && <ResultBar G={G} difficulty={difficulty} result={lastResult} />}
@@ -151,15 +160,26 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             </Stack>
           </ModeFrame>
         </Stack>
+        {!wide && <Dialog open={rulesDialogOpen} onClose={() => setRulesDialogOpen(false)}>
+          <DialogTitle>{t('strategy.rules')}</DialogTitle>
+          <DialogContent sx={{ fontSize: '15px', lineHeight: 1.5 }}>{description}</DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRulesDialogOpen(false)}>{t('general.close')}</Button>
+          </DialogActions>
+        </Dialog>}
       </>
     );
   };
 };
 
-/** The frame round the game: its band and border say whether this game counts. */
+/** The frame round the game: its bar and border say whether this game counts. */
 /// `stake` is null once the game is over: the frame then describes a game
 /// played for the stake before its result, and the next game's is on its card.
-function ModeFrame(props: { difficulty: Difficulty | null, liveNumber: number, stake: number | null, children: ReactNode }) {
+/// Before the first game the bar is neutral and names the screen instead.
+function ModeFrame(props: {
+  difficulty: Difficulty | null, liveNumber: number, stake: number | null,
+  clock: ReactNode, rulesButton: ReactNode, children: ReactNode,
+}) {
   const { t } = useTranslation();
   const { difficulty } = props;
   const border = difficulty === 'live' ? `3px solid ${LIVE}`
@@ -167,32 +187,39 @@ function ModeFrame(props: { difficulty: Difficulty | null, liveNumber: number, s
     : '1px solid #d8d3c4';
   return (
     <Box sx={{ border, borderRadius: '20px', overflow: 'hidden', backgroundColor: '#fff' }}>
-      {difficulty !== null && <Stack sx={{
+      <Stack sx={{
         flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
-        gap: '8px 24px', padding: '12px 20px',
-        ...(difficulty === 'live' ? { backgroundColor: LIVE, color: '#fff' } : { background: PRACTICE_STRIPES, color: '#1e293b' }),
+        gap: '8px 20px', padding: '10px 18px',
+        ...(difficulty === 'live' ? { backgroundColor: LIVE, color: '#fff' }
+          : difficulty === 'test' ? { background: PRACTICE_STRIPES, color: '#1e293b' }
+          : { backgroundColor: '#f6f4ee', color: '#1f2328' }),
       }}>
         <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
-          {difficulty === 'live'
-            ? <FlagOutlinedIcon aria-hidden sx={{ fontSize: '28px' }} />
-            : <ScienceOutlinedIcon aria-hidden sx={{ fontSize: '28px', color: PRACTICE }} />}
-          <Stack>
-            <Box sx={{ fontSize: '19px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              {difficulty === 'live' ? t('strategy.mode.live') : t('strategy.mode.practice')}
-            </Box>
-            <Box sx={{ fontSize: '14px' }}>
-              {difficulty === 'live' ? t('strategy.mode.liveNumber', { n: props.liveNumber }) : t('strategy.mode.practiceSub')}
-            </Box>
-          </Stack>
+          {difficulty === 'live' && <FlagOutlinedIcon aria-hidden sx={{ fontSize: '28px' }} />}
+          {difficulty === 'test' && <ScienceOutlinedIcon aria-hidden sx={{ fontSize: '28px', color: PRACTICE }} />}
+          {difficulty === null
+            ? <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{t('strategy.name')}</Box>
+            : <Stack>
+              <Box sx={{ fontSize: '19px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                {difficulty === 'live' ? t('strategy.mode.live') : t('strategy.mode.practice')}
+              </Box>
+              <Box sx={{ fontSize: '14px' }}>
+                {difficulty === 'live' ? t('strategy.mode.liveNumber', { n: props.liveNumber }) : t('strategy.mode.practiceSub')}
+              </Box>
+            </Stack>}
         </Stack>
-        {(difficulty === 'test' || props.stake !== null) &&
-          <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600,
-            color: difficulty === 'live' ? LIVE_TEXT : '#1e293b' }}>
-            {difficulty === 'live'
-              ? t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })
-              : t('strategy.mode.practiceKeeps')}
-          </Box>}
-      </Stack>}
+        <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: { xs: '8px 10px', md: '8px 16px' } }}>
+          {(difficulty === 'test' || (difficulty === 'live' && props.stake !== null)) &&
+            <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600,
+              color: difficulty === 'live' ? LIVE_TEXT : '#1e293b' }}>
+              {difficulty === 'live'
+                ? t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })
+                : t('strategy.mode.practiceKeeps')}
+            </Box>}
+          {props.clock}
+          {props.rulesButton}
+        </Stack>
+      </Stack>
       {props.children}
     </Box>
   );

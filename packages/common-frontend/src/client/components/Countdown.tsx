@@ -69,7 +69,7 @@ export function Countdown(
 export function OfflineClockNote() {
     const { t } = useTranslation();
     return <Tooltip title={t('general.warning.timeNotReal')} enterTouchDelay={0} arrow>
-        <IconButton size="small" aria-label={t('general.warning.timeNotReal')} sx={{ padding: '2px' }}>
+        <IconButton size="small" color="inherit" aria-label={t('general.warning.timeNotReal')} sx={{ padding: '2px' }}>
             <InfoOutlinedIcon fontSize="small" />
         </IconButton>
     </Tooltip>;
