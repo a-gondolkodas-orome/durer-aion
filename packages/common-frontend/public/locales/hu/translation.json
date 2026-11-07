@@ -107,6 +107,7 @@
       "range": "A megoldás 0 és 9999 között van",
       "type": "Számot kell írnod"
     },
+    "enlargeImage": "Kattints a képre, hogy új lapon megnyíljon, ahol nagyíthatod",
     "goodGuess": "A válasz helyes volt",
     "guess": "Tipp:",
     "guessNum": "{{guessnum}}. próba:",
