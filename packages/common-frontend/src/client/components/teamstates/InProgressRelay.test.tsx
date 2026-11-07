@@ -73,3 +73,12 @@ test('a relay the game ended reported its end itself', async () => {
   expect(screen.getByRole('dialog')).toBeInTheDocument();
   expect(keepRelayEnd).not.toHaveBeenCalled();
 });
+
+// Both clocks, the phone's above the task and the one beside the form, read
+// the end as 00:00:00: past the countdown's grace it would show XX:XX:XX.
+test('a relay whose time ran out reads 00:00:00 on its clocks', async () => {
+  await renderBoard({});
+
+  expect(screen.getAllByText('00:00:00')).toHaveLength(2);
+  expect(screen.queryByText('XX:XX:XX')).not.toBeInTheDocument();
+});
