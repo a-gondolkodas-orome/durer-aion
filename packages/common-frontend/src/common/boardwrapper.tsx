@@ -271,11 +271,18 @@ function ModeFrame(props: {
 
 const pointsText = (t: TFunction, count: number) => t('general.points', { count });
 
-/// What one more live loss costs: the stake drops only while the losses so far
-/// leave it room to. `points` is the stake after it, for the texts that say so.
+/// The stake before and after one more live loss, from `losses` so far: it
+/// drops only while the losses leave it room to.
+function stakeChange(losses: number) {
+  const before = strategyPoints(losses);
+  const after = strategyPoints(losses + 1);
+  return { before, after, drops: after < before };
+}
+
+/// What the next live loss would cost; `points` is the stake after it.
 function lossCost(G: GameStateMixin, t: TFunction): { drops: boolean, points: string } {
-  const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
-  return { drops: stakeAfterLoss < strategyPoints(G.numberOfLoss), points: pointsText(t, stakeAfterLoss) };
+  const { after, drops } = stakeChange(G.numberOfLoss);
+  return { drops, points: pointsText(t, after) };
 }
 
 /** The goal of the match and how far the team is: the streak, the stake, the live games so far. */
@@ -361,11 +368,9 @@ function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
 /// What a finished live game changed, for the bar's second line. A live loss
 /// has already been counted, so the stake it cost is the one before it.
 function liveResultDetail(G: GameStateMixin, result: 'won' | 'lost', t: TFunction): string {
-  const before = strategyPoints(Math.max(0, G.numberOfLoss - 1));
-  const after = strategyPoints(G.numberOfLoss);
-  return result === 'won' ? t('strategy.result.liveWonDetail', { points: pointsText(t, after) })
-    : before > after ? t('strategy.result.liveLostDrop', { before, after })
-    : t('strategy.result.liveLostDetail');
+  if (result === 'won') return t('strategy.result.liveWonDetail', { points: pointsText(t, strategyPoints(G.numberOfLoss)) });
+  const { before, after, drops } = stakeChange(Math.max(0, G.numberOfLoss - 1));
+  return drops ? t('strategy.result.liveLostDrop', { before, after }) : t('strategy.result.liveLostDetail');
 }
 
 /// Two cards rather than two alike buttons: what each kind of game counts for,
@@ -491,17 +496,19 @@ function TurnLabel(props: { teamToMove: boolean }) {
   );
 }
 
-/// The game's own board, faded, locked or live as `BoardState` says. Out of
-/// `live` no click reaches a move the server would refuse; the capture catches
-/// a key's click too. Not `inert`: that would also hide the position from a
-/// screen reader, and the team is to read it before choosing a role.
-/// A finished game's `result` is its final position's label; otherwise a
-/// locked board says it is only to look at.
 function swallowClick(event: MouseEvent) {
   event.stopPropagation();
   event.preventDefault();
 }
 
+/// The game's own board, faded, locked or live as `BoardState` says. Out of
+/// `live` no move reaches the server to be refused: the disabled fieldset
+/// disables every control inside, focus and keys included, and announces it,
+/// and the click capture covers what a board makes clickable without being a
+/// control. Not `inert`: that would also hide the position from a screen
+/// reader, and the team is to read it before choosing a role.
+/// A finished game's `result` is its final position's label; otherwise a
+/// locked board says it is only to look at.
 function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode, children: ReactNode }) {
   const { t } = useTranslation();
   const { state } = props;
@@ -513,11 +520,14 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
       marginTop: props.result !== null ? '18px' : state === 'locked' ? '12px' : 0,
     }}>
       <Box
+        component="fieldset"
         data-testid="strategyBoard"
         data-state={state}
-        aria-disabled={state !== 'live'}
+        disabled={state !== 'live'}
         onClickCapture={state === 'live' ? undefined : swallowClick}
         sx={{
+          // A fieldset's own border, margin and min-content width reset.
+          border: 0, margin: 0, minWidth: 0,
           display: 'flex', padding: '15px', borderRadius: '14px',
           ...(state !== 'live' && { '& *': { cursor: 'default' } }),
           ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),

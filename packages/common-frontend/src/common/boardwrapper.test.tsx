@@ -80,7 +80,7 @@ describe('between games', () => {
     // No game has been chosen, so there is no mode to frame it in.
     expect(screen.queryByText('strategy.mode.liveNumber')).not.toBeInTheDocument();
     expect(boardArea()).toHaveAttribute('data-state', 'empty');
-    expect(boardArea()).toHaveAttribute('aria-disabled', 'true');
+    expect(boardArea()).toBeDisabled();
 
     fireEvent.click(screen.getByRole('button', { name: 'strategy.chooser.liveButton' }));
     expect(moves.chooseNewGameType).toHaveBeenCalledWith('live');
@@ -165,9 +165,13 @@ describe('choosing a role', () => {
     const moves = renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER });
 
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
-    expect(boardArea()).toHaveAttribute('aria-disabled', 'true');
+    expect(boardArea()).toBeDisabled();
     expect(screen.getByText('strategy.board.viewOnly')).toBeInTheDocument();
-    // The position is there to be read, by a screen reader too, but not played.
+    // The position is there to be read, by a screen reader too, but not
+    // played: its controls are disabled, not hidden. `inert` would hide them,
+    // and the role query alone does not see that.
+    expect(boardArea().closest('[inert]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'cell' })).toBeDisabled();
     play.mockClear();
     fireEvent.click(screen.getByRole('button', { name: 'cell' }));
     expect(play).not.toHaveBeenCalled();
@@ -188,7 +192,7 @@ describe('during a game', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.board.yourTurn');
     expect(boardArea()).toHaveAttribute('data-state', 'live');
-    expect(boardArea()).toHaveAttribute('aria-disabled', 'false');
+    expect(boardArea()).toBeEnabled();
     fireEvent.click(screen.getByTestId('cell'));
     expect(play).toHaveBeenCalled();
   });
@@ -199,7 +203,7 @@ describe('during a game', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.board.botTurn');
     expect(boardArea()).toHaveAttribute('data-state', 'waiting');
-    expect(boardArea()).toHaveAttribute('aria-disabled', 'true');
+    expect(boardArea()).toBeDisabled();
     play.mockClear();
     fireEvent.click(screen.getByTestId('cell'));
     expect(play).not.toHaveBeenCalled();
