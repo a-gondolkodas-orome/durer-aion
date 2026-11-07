@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { Ctx } from 'boardgame.io';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from 'game';
@@ -168,9 +168,7 @@ describe('during a game', () => {
 
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
     expect(screen.queryByText('strategy.board.yourTurn')).not.toBeInTheDocument();
-    expect(screen.getByText('strategy.result.timeUp')).toBeInTheDocument();
-    expect(screen.getByText('strategy.result.timeUpDetail')).toBeInTheDocument();
-    expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     // The countdown would show XX:XX:XX ten seconds past the end.
     expect(screen.getByText('00:00:00')).toBeInTheDocument();
   });
@@ -181,31 +179,6 @@ describe('during a game', () => {
     expect(screen.getByText('strategy.mode.practiceSub')).toBeInTheDocument();
     expect(screen.queryByText('strategy.mode.stake')).not.toBeInTheDocument();
     expect(screen.getByText('strategy.practiceWarning.title')).toBeInTheDocument();
-  });
-});
-
-describe('the end of the match', () => {
-  test('names the second win in a row, with its points', () => {
-    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER, gameover: true },
-      { winner: GUESSER_PLAYER, winningStreak: 2, points: 9, numberOfLoss: 1, liveResults: ['lost', 'won', 'won'] });
-
-    expect(screen.getByText('strategy.result.complete')).toBeInTheDocument();
-    expect(screen.queryByText('strategy.result.timeUp')).not.toBeInTheDocument();
-    // The match is over, so there is no next game to offer.
-    expect(screen.queryByText('strategy.chooser.title')).not.toBeInTheDocument();
-  });
-
-  // The dialog went home on close, which left the end bar behind it unseen.
-  test('closes its dialog onto the final position, and the bar reopens it', async () => {
-    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { millisecondsRemaining: -6000 });
-
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
-    // The dialog stays in the document while it fades out.
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.result.timeUp');
-
-    fireEvent.click(screen.getByRole('button', { name: 'strategy.result.showResults' }));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });
 

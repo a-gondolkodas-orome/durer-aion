@@ -176,8 +176,6 @@
       "title": "A próbagép nem feltétlenül játszik a legjobban."
     },
     "result": {
-      "complete": "Kétszer egymás után legyőztétek a gépet!",
-      "completeDetail": "Feladat teljesítve: {{points}}. A stratégiás játék eredménye végleges.",
       "liveLost": "A gép nyert.",
       "liveLostDetail": "Újra két egymás utáni győzelem kell.",
       "liveLostDrop": "Elérhető pont: {{before}} → {{after}}. Újra két egymás utáni győzelem kell.",
@@ -185,10 +183,7 @@
       "liveWonDetail": "Ha a következő éles játszmát is megnyeritek, megvan a {{points}}.",
       "practiceDetail": "Ez nem számít a pontozásba.",
       "practiceLost": "A gép nyert a próbajátékban.",
-      "practiceWon": "Nyertetek a próbajátékban.",
-      "showResults": "Eredmények",
-      "timeUp": "Lejárt az idő.",
-      "timeUpDetail": "A stratégiás játék véget ért. Mivel nem lett meg a két egymás utáni győzelem, 0 pontot kaptatok."
+      "practiceWon": "Nyertetek a próbajátékban."
     },
     "role": {
       "prompt": "Kezdők vagy másodikak lesztek? Nézzétek meg előbb az állást."
