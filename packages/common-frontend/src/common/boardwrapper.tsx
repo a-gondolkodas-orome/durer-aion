@@ -18,7 +18,7 @@ import type { StrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
 import type { Difficulty, GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -72,8 +72,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     // chosen that has happened, so nothing needs to remember it across a
     // reload.
     const [rulesRead, setRulesRead] = useState(false);
-    // The game cards open together, and fold whenever a game starts: after
-    // the first one the team knows the two kinds apart.
+    // The game cards fold whenever a game starts: after the first one the
+    // team knows the two kinds apart, and a folded card keeps what tells them
+    // apart and its button. They open together, as they are read side by
+    // side: one open beside one folded leaves the folded one an empty box of
+    // the open one's height.
     const [cardsOpen, setCardsOpen] = useState(G.difficulty == null);
     const [cardsShownFor, setCardsShownFor] = useState(ctx.phase);
     if (cardsShownFor !== ctx.phase) {
@@ -133,7 +136,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                   above the board. */}
               {stakeInBar &&
                 <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
-                  {t('strategy.mode.stake', { points: t('general.points', { count: strategyPoints(G.numberOfLoss) }) })}
+                  {t('strategy.mode.stake', { points: pointsText(t, strategyPoints(G.numberOfLoss)) })}
                 </Box>}
               {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
             </>}
@@ -180,8 +183,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
               </Stack>
               <Stack sx={{ flex: 1, minWidth: 0, gap: '14px' }}>
                 {/* Above the board every time, before the first game and after
-                    each one: under the board it took a scroll past the final
-                    position to find. */}
+                    each one: under the final position it would take a scroll
+                    to find. */}
                 {chooserShown &&
                   <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null}
                     open={cardsOpen} onToggle={() => setCardsOpen(!cardsOpen)} />}
@@ -195,8 +198,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           </ModeFrame>
         </Stack>
         {/* No onClose: neither a click beside it nor Esc stands for having
-            read the rules. */}
-        <Dialog open={rulesFirst} fullScreen={!wide} maxWidth="md" fullWidth>
+            read the rules. Once the time is up there is nothing left to
+            read them for, and the end dialog must not sit under it. */}
+        <Dialog open={rulesFirst && !finished} fullScreen={!wide} maxWidth="md" fullWidth>
           <DialogTitle sx={{ fontWeight: 700 }}>{t('strategy.rulesFirst.title')}</DialogTitle>
           <DialogContent sx={{ fontSize: { xs: '16px', md: '18px' }, lineHeight: 1.6 }}>{description}</DialogContent>
           <DialogActions sx={{ padding: '16px 24px' }}>
@@ -265,14 +269,23 @@ function ModeFrame(props: {
   );
 }
 
+const pointsText = (t: TFunction, count: number) => t('general.points', { count });
+
+/// What one more live loss costs: the stake drops only while the losses so far
+/// leave it room to. `points` is the stake after it, for the texts that say so.
+function lossCost(G: GameStateMixin, t: TFunction): { drops: boolean, points: string } {
+  const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
+  return { drops: stakeAfterLoss < strategyPoints(G.numberOfLoss), points: pointsText(t, stakeAfterLoss) };
+}
+
 /** The goal of the match and how far the team is: the streak, the stake, the live games so far. */
 /// In a practice game the panel turns slate like the frame round it: the
 /// streak it shows is the live one, which the practice game leaves alone.
 function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boolean, showIfLose: boolean }) {
   const { t } = useTranslation();
   const { G, practice, showStake, showIfLose } = props;
-  const stake = strategyPoints(G.numberOfLoss);
-  const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
+  const stake = pointsText(t, strategyPoints(G.numberOfLoss));
+  const loss = lossCost(G, t);
   // The second win in a row ends the match, so a streak of two shows only
   // behind the end dialog, and nothing is at stake any more.
   const done = G.winningStreak >= 2;
@@ -293,12 +306,10 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boo
       {!done && (showStake || showIfLose) && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
         {/* In a practice game the stake is the next live game's, not this one's. */}
         {showStake && (practice
-          ? t('strategy.goal.stakeNextLive', { points: t('general.points', { count: stake }) })
-          : t('strategy.goal.stake', { points: t('general.points', { count: stake }) }))}
+          ? t('strategy.goal.stakeNextLive', { points: stake })
+          : t('strategy.goal.stake', { points: stake }))}
         {showStake && showIfLose && ' '}
-        {showIfLose && (stakeAfterLoss < stake
-          ? t('strategy.goal.ifLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
-          : t('strategy.goal.ifLose'))}
+        {showIfLose && (loss.drops ? t('strategy.goal.ifLoseDrop', { points: loss.points }) : t('strategy.goal.ifLose'))}
       </Box>}
       {G.liveResults.length > 0 && <StrategyGamesTable results={G.liveResults} />}
     </Stack>
@@ -352,7 +363,7 @@ function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
 function liveResultDetail(G: GameStateMixin, result: 'won' | 'lost', t: TFunction): string {
   const before = strategyPoints(Math.max(0, G.numberOfLoss - 1));
   const after = strategyPoints(G.numberOfLoss);
-  return result === 'won' ? t('strategy.result.liveWonDetail', { points: t('general.points', { count: after }) })
+  return result === 'won' ? t('strategy.result.liveWonDetail', { points: pointsText(t, after) })
     : before > after ? t('strategy.result.liveLostDrop', { before, after })
     : t('strategy.result.liveLostDetail');
 }
@@ -365,17 +376,11 @@ function ModeChooser(props: {
 }) {
   const { t } = useTranslation();
   const { G, moves, enabled, starting, open, onToggle } = props;
-  const stake = strategyPoints(G.numberOfLoss);
-  const stakeAfterLoss = strategyPoints(G.numberOfLoss + 1);
   const ifWin = G.winningStreak >= 1
-    ? t('strategy.chooser.liveIfWinDone', { points: t('general.points', { count: stake }) })
+    ? t('strategy.chooser.liveIfWinDone', { points: pointsText(t, strategyPoints(G.numberOfLoss)) })
     : t('strategy.chooser.liveIfWinFirst');
-  // Folded, a card keeps what tells the two apart and its button. They open
-  // together, as they are read side by side: one open beside one folded left
-  // the folded one an empty box of the open one's height.
-  const ifLose = stakeAfterLoss < stake
-    ? t('strategy.chooser.liveIfLoseDrop', { points: t('general.points', { count: stakeAfterLoss }) })
-    : t('strategy.chooser.liveIfLose');
+  const loss = lossCost(G, t);
+  const ifLose = loss.drops ? t('strategy.chooser.liveIfLoseDrop', { points: loss.points }) : t('strategy.chooser.liveIfLose');
   return (
     <Stack sx={{ gap: '10px' }}>
       <Box sx={{ fontSize: '20px', fontWeight: 700 }}>{t('strategy.chooser.title')}</Box>
@@ -487,9 +492,16 @@ function TurnLabel(props: { teamToMove: boolean }) {
 }
 
 /// The game's own board, faded, locked or live as `BoardState` says. Out of
-/// `live` it is inert, so no click reaches a move the server would refuse.
+/// `live` no click reaches a move the server would refuse; the capture catches
+/// a key's click too. Not `inert`: that would also hide the position from a
+/// screen reader, and the team is to read it before choosing a role.
 /// A finished game's `result` is its final position's label; otherwise a
 /// locked board says it is only to look at.
+function swallowClick(event: MouseEvent) {
+  event.stopPropagation();
+  event.preventDefault();
+}
+
 function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode, children: ReactNode }) {
   const { t } = useTranslation();
   const { state } = props;
@@ -504,10 +516,10 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
         data-testid="strategyBoard"
         data-state={state}
         aria-disabled={state !== 'live'}
-        inert={state !== 'live'}
+        onClickCapture={state === 'live' ? undefined : swallowClick}
         sx={{
           display: 'flex', padding: '15px', borderRadius: '14px',
-          pointerEvents: state === 'live' ? 'auto' : 'none',
+          ...(state !== 'live' && { '& *': { cursor: 'default' } }),
           ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
           ...(state === 'locked' && { outline: '2px dashed #8c959f', outlineOffset: '-2px' }),
           transition: 'opacity 0.3s',

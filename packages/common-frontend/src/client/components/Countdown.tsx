@@ -65,10 +65,11 @@ export function Countdown(
 }
 
 /// The dry run's note that its clock is only the browser's, behind an icon
-/// beside the clock: in full it took more of the screen than the clock.
+/// beside the clock: in full it would take more of the screen than the clock.
+/// A tap keeps it open long enough to read its two sentences.
 export function OfflineClockNote() {
     const { t } = useTranslation();
-    return <Tooltip title={t('general.warning.timeNotReal')} enterTouchDelay={0} arrow>
+    return <Tooltip title={t('general.warning.timeNotReal')} enterTouchDelay={0} leaveTouchDelay={10000} arrow>
         <IconButton size="small" color="inherit" aria-label={t('general.warning.timeNotReal')} sx={{ padding: '2px' }}>
             <InfoOutlinedIcon fontSize="small" />
         </IconButton>

@@ -80,7 +80,7 @@ describe('between games', () => {
     // No game has been chosen, so there is no mode to frame it in.
     expect(screen.queryByText('strategy.mode.liveNumber')).not.toBeInTheDocument();
     expect(boardArea()).toHaveAttribute('data-state', 'empty');
-    expect(boardArea()).toHaveAttribute('inert');
+    expect(boardArea()).toHaveAttribute('aria-disabled', 'true');
 
     fireEvent.click(screen.getByRole('button', { name: 'strategy.chooser.liveButton' }));
     expect(moves.chooseNewGameType).toHaveBeenCalledWith('live');
@@ -165,8 +165,12 @@ describe('choosing a role', () => {
     const moves = renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER });
 
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
-    expect(boardArea()).toHaveAttribute('inert');
+    expect(boardArea()).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText('strategy.board.viewOnly')).toBeInTheDocument();
+    // The position is there to be read, by a screen reader too, but not played.
+    play.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'cell' }));
+    expect(play).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'strategy.firstPlayer' }));
     expect(moves.chooseRole).toHaveBeenCalledWith(GUESSER_PLAYER);
   });
@@ -184,7 +188,7 @@ describe('during a game', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.board.yourTurn');
     expect(boardArea()).toHaveAttribute('data-state', 'live');
-    expect(boardArea()).not.toHaveAttribute('inert');
+    expect(boardArea()).toHaveAttribute('aria-disabled', 'false');
     fireEvent.click(screen.getByTestId('cell'));
     expect(play).toHaveBeenCalled();
   });
@@ -195,8 +199,20 @@ describe('during a game', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.board.botTurn');
     expect(boardArea()).toHaveAttribute('data-state', 'waiting');
-    expect(boardArea()).toHaveAttribute('inert');
+    expect(boardArea()).toHaveAttribute('aria-disabled', 'true');
+    play.mockClear();
+    fireEvent.click(screen.getByTestId('cell'));
+    expect(play).not.toHaveBeenCalled();
     expect(boardArea()).not.toHaveStyle({ opacity: '0.4' });
+  });
+
+  // The rules dialog opened over the end dialog, and asked to be read for a
+  // game that could no longer be played.
+  test('shows the end, not the rules, when the time ran out before any game', () => {
+    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER }, { difficulty: null, millisecondsRemaining: -6000 });
+
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    expect(screen.queryByText('strategy.rulesFirst.title')).not.toBeInTheDocument();
   });
 
   test('locks the board and offers nothing once the time ran out', () => {
