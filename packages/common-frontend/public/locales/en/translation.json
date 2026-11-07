@@ -185,7 +185,6 @@
       "liveLostDrop": "Points available: {{before}} → {{after}}. You need two wins in a row again.",
       "liveWon": "You won! That is the first of two.",
       "liveWonDetail": "Win the next live game too, and the {{points}} are yours.",
-      "practiceDetail": "This does not count towards your score.",
       "practiceLost": "The computer won the practice game.",
       "practiceWon": "You won the practice game."
     },

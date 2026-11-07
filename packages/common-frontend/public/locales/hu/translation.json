@@ -181,7 +181,6 @@
       "liveLostDrop": "Elérhető pont: {{before}} → {{after}}. Újra két egymás utáni győzelem kell.",
       "liveWon": "Nyertetek! Ez az első a kettőből.",
       "liveWonDetail": "Ha a következő éles játszmát is megnyeritek, megvan a {{points}}.",
-      "practiceDetail": "Ez nem számít a pontozásba.",
       "practiceLost": "A gép nyert a próbajátékban.",
       "practiceWon": "Nyertetek a próbajátékban."
     },

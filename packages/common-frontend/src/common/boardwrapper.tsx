@@ -21,6 +21,7 @@ import type { BoardProps } from "boardgame.io/react";
 import type { ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
 /// gameWrapper extends it, plus the client API. The wrapper passes its props
@@ -115,7 +116,18 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
           <ModeFrame
             difficulty={difficulty}
             liveNumber={G.numberOfTries}
-            stake={showResult || finished ? null : strategyPoints(G.numberOfLoss)}
+            detailLine={showResult && difficulty === 'live' ? liveResultDetail(G, lastResult, t) : null}
+            status={<>
+              {/* The bar's free spot says what is going on: the stake and
+                  whose turn while a game is on, and a game's result after it,
+                  each in place of a row of its own above the board. */}
+              {difficulty === 'live' && !showResult && !finished &&
+                <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
+                  {t('strategy.mode.stake', { points: t('general.points', { count: strategyPoints(G.numberOfLoss) }) })}
+                </Box>}
+              {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
+              {showResult && <ResultChip difficulty={difficulty} result={lastResult} />}
+            </>}
             clock={<Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px' }}>
               {/* On a phone an icon stands for the label, so the bar's right
                   half fits one line. */}
@@ -138,7 +150,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             </Button>}
           >
             <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '20px', padding: { xs: '14px', md: '20px' } }}>
-              <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px' }}>
+              {/* On a phone the goal follows the board: the bar already has
+                  the stake, and the board is what the team came for. */}
+              <Stack sx={{ width: { xs: '100%', md: '34%' }, flexShrink: 0, gap: '16px', order: { xs: 2, md: 0 } }}>
                 <GoalPanel G={G} practice={difficulty === 'test'} />
                 {/* Once a screen: between games the practice card carries it. */}
                 {difficulty === 'test' && !betweenGames && <PracticeWarning />}
@@ -153,14 +167,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
                 </Box>}
               </Stack>
               <Stack sx={{ flex: 1, minWidth: 0, gap: '14px' }}>
-                {showResult && <ResultBar G={G} difficulty={difficulty} result={lastResult} />}
                 {/* Above the board every time, before the first game and after
                     each one: under the board it took a scroll past the final
                     position to find. */}
                 {betweenGames && !finished &&
                   <ModeChooser G={G} moves={moves} enabled={teamToMove} starting={judgeToMove ? difficulty : null} />}
                 {ctx.phase === 'chooseRole' && !finished && <RoleChooser moves={moves} enabled={teamToMove} />}
-                {ctx.phase === 'play' && !finished && <TurnLabel teamToMove={teamToMove} />}
                 <BoardArea state={boardState} hasResult={lastResult !== null || finished}>
                   {board(props)}
                 </BoardArea>
@@ -193,12 +205,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
 };
 
 /** The frame round the game: its bar and border say whether this game counts. */
-/// `stake` is null once the game is over: the frame then describes a game
-/// played for the stake before its result, and the next game's is on its card.
-/// Before the first game the bar is neutral and names the screen instead.
+/// `status` fills the bar's free spot beside the clock, and `detailLine`, when
+/// set, takes the place of the line under the mode's name. Before the first
+/// game the bar is neutral and names the screen instead.
 function ModeFrame(props: {
-  difficulty: Difficulty | null, liveNumber: number, stake: number | null,
-  clock: ReactNode, rulesButton: ReactNode, children: ReactNode,
+  difficulty: Difficulty | null, liveNumber: number, detailLine: string | null,
+  status: ReactNode, clock: ReactNode, rulesButton: ReactNode, children: ReactNode,
 }) {
   const { t } = useTranslation();
   const { difficulty } = props;
@@ -224,15 +236,12 @@ function ModeFrame(props: {
                 {difficulty === 'live' ? t('strategy.mode.live') : t('strategy.mode.practice')}
               </Box>
               <Box sx={{ fontSize: '14px' }}>
-                {difficulty === 'live' ? t('strategy.mode.liveNumber', { n: props.liveNumber }) : t('strategy.mode.practiceSub')}
+                {props.detailLine ?? (difficulty === 'live' ? t('strategy.mode.liveNumber', { n: props.liveNumber }) : t('strategy.mode.practiceSub'))}
               </Box>
             </Stack>}
         </Stack>
         <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: { xs: '8px 10px', md: '8px 16px' } }}>
-          {difficulty === 'live' && props.stake !== null &&
-            <Box sx={{ backgroundColor: '#fff', borderRadius: '12px', padding: '6px 14px', fontWeight: 600, color: LIVE_TEXT }}>
-              {t('strategy.mode.stake', { points: t('general.points', { count: props.stake }) })}
-            </Box>}
+          {props.status}
           {props.clock}
           {props.rulesButton}
         </Stack>
@@ -303,34 +312,34 @@ function PracticeWarning() {
   );
 }
 
-/** How the game that just ended went, above its final position. */
-function ResultBar(props: { G: GameStateMixin, difficulty: Difficulty, result: 'won' | 'lost' }) {
+/** How the game that just ended went, in the bar above its final position. */
+function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
   const { t } = useTranslation();
-  const { G, difficulty, result } = props;
-  const live = difficulty === 'live';
-  // A live loss has already been counted, so the stake it cost is the one
-  // before it.
-  const before = strategyPoints(Math.max(0, G.numberOfLoss - 1));
-  const after = strategyPoints(G.numberOfLoss);
-  const headline = live
+  const { difficulty, result } = props;
+  const headline = difficulty === 'live'
     ? (result === 'won' ? t('strategy.result.liveWon') : t('strategy.result.liveLost'))
     : (result === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'));
-  const detail = !live ? t('strategy.result.practiceDetail')
-    : result === 'won' ? t('strategy.result.liveWonDetail', { points: t('general.points', { count: after }) })
-    : before > after ? t('strategy.result.liveLostDrop', { before, after })
-    : t('strategy.result.liveLostDetail');
   return (
-    <Stack role="status" sx={{ alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-      <Stack sx={{
-        flexDirection: 'row', alignItems: 'center', gap: '8px', borderRadius: '999px', padding: '8px 20px',
-        backgroundColor: result === 'won' ? WIN : LOSS, color: '#fff', fontSize: '18px', fontWeight: 700,
-      }}>
-        {result === 'won' ? <CheckIcon aria-hidden /> : <CloseIcon aria-hidden />}
-        {headline}
-      </Stack>
-      <Box sx={{ fontSize: '15px', lineHeight: 1.45 }}>{detail}</Box>
+    <Stack role="status" sx={{
+      flexDirection: 'row', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '6px 16px',
+      backgroundColor: result === 'won' ? WIN : LOSS, color: '#fff', fontWeight: 700,
+      // On the live bar's orange the chip needs an edge of its own.
+      boxShadow: '0 0 0 2px #fff',
+    }}>
+      {result === 'won' ? <CheckIcon aria-hidden fontSize="small" /> : <CloseIcon aria-hidden fontSize="small" />}
+      {headline}
     </Stack>
   );
+}
+
+/// What a finished live game changed, for the bar's second line. A live loss
+/// has already been counted, so the stake it cost is the one before it.
+function liveResultDetail(G: GameStateMixin, result: 'won' | 'lost', t: TFunction): string {
+  const before = strategyPoints(Math.max(0, G.numberOfLoss - 1));
+  const after = strategyPoints(G.numberOfLoss);
+  return result === 'won' ? t('strategy.result.liveWonDetail', { points: t('general.points', { count: after }) })
+    : before > after ? t('strategy.result.liveLostDrop', { before, after })
+    : t('strategy.result.liveLostDetail');
 }
 
 /// Two cards rather than two alike buttons: what each kind of game counts for,
@@ -455,7 +464,7 @@ function TurnLabel(props: { teamToMove: boolean }) {
   const { t } = useTranslation();
   return (
     <Box role="status" sx={{
-      alignSelf: 'center', borderRadius: '999px', padding: '8px 18px', fontWeight: 600,
+      borderRadius: '999px', padding: '6px 16px', fontWeight: 600, boxShadow: '0 0 0 2px #fff',
       ...(props.teamToMove ? { backgroundColor: 'primary.main', color: 'primary.contrastText' } : { backgroundColor: '#dde1e6', color: LOCKED }),
     }}>
       {props.teamToMove ? t('strategy.board.yourTurn') : t('strategy.board.botTurn')}
@@ -479,13 +488,15 @@ function BoardArea(props: { state: BoardState, hasResult: boolean, children: Rea
           display: 'flex', padding: '15px', borderRadius: '14px',
           pointerEvents: state === 'live' ? 'auto' : 'none',
           ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
-          ...(state === 'locked' && { outline: '2px dashed #8c959f', outlineOffset: '-2px', paddingTop: '44px' }),
+          ...(state === 'locked' && { outline: '2px dashed #8c959f', outlineOffset: '-2px' }),
           transition: 'opacity 0.3s',
         }}>
         {props.children}
       </Box>
+      {/* On the dashed edge, like a label on a frame, so it takes no
+          height of the board's. */}
       {state === 'locked' && <Stack sx={{
-        position: 'absolute', top: '10px', right: '10px', flexDirection: 'row', alignItems: 'center', gap: '6px',
+        position: 'absolute', top: '-12px', right: '16px', flexDirection: 'row', alignItems: 'center', gap: '6px',
         backgroundColor: LOCKED, color: '#fff', borderRadius: '999px', padding: '4px 12px', fontSize: '13px', fontWeight: 600,
       }}>
         <LockOutlinedIcon aria-hidden sx={{ fontSize: '16px' }} />

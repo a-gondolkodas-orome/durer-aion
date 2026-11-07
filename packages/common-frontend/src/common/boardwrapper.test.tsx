@@ -103,6 +103,9 @@ describe('between games', () => {
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.liveLost');
     // The loss lowered the stake, so the bar says from what to what.
     expect(screen.getByText('strategy.result.liveLostDrop')).toBeInTheDocument();
+    // In the bar, in place of the game's number and the stake, not a row above the board.
+    expect(screen.queryByText('strategy.mode.liveNumber')).not.toBeInTheDocument();
+    expect(screen.queryByText('strategy.mode.stake')).not.toBeInTheDocument();
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
     expect(screen.getByText('strategy.board.finalViewOnly')).toBeInTheDocument();
     // The lost game was played for the old stake; the new one is on the live card.
@@ -145,7 +148,8 @@ describe('between games', () => {
       { difficulty: 'test', winner: GUESSER_PLAYER });
 
     expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceWon');
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceDetail');
+    // The bar's "not counted" line says what the result bar used to repeat.
+    expect(screen.getByText('strategy.mode.practiceSub', { selector: 'div' })).toBeInTheDocument();
     // Said once on the screen, on the practice card, not again in the bar;
     // the card is folded after a game, so it shows once that is opened.
     expect(screen.getByRole('status')).not.toHaveTextContent('strategy.practiceWarning.title');
