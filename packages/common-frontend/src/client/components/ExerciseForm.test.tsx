@@ -99,9 +99,8 @@ function renderWithTries(previousTries: number[]) {
   );
 }
 
-test('the first try shows the count but no hint about moving on', () => {
+test('the first try shows no hint about moving on', () => {
   renderWithTries([]);
-  expect(screen.getByText('relay.tryCount')).toBeInTheDocument();
   expect(screen.queryByText('relay.tryHint')).not.toBeInTheDocument();
   expect(screen.queryByText('relay.tryHintLast')).not.toBeInTheDocument();
 });

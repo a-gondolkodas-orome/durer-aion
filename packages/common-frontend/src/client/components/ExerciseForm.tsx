@@ -76,10 +76,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      {t('relay.guess')}
-    </Stack>
-    <Stack sx={{ fontSize: 16, marginBottom: '10px' }}>
-      {t('relay.tryCount', { try: tryNumber, max: RELAY_MAX_TRIES })}
+      {t('relay.guess', { try: tryNumber, max: RELAY_MAX_TRIES })}
     </Stack>
     {/* Running out of tries is also the only way to give a problem up, so once
         a try has gone wrong the form says where the last one leads. */}
