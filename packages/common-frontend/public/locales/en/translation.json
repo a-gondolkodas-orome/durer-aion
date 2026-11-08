@@ -120,7 +120,7 @@
     "task": "Task #{{num}} ({{availablePoints}})",
     "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)",
     "wrongGuess": "Your guess is sadly wrong",
-    "zoomImage": "Click the image to zoom in or out"
+    "zoomImage": "Click the image to enlarge it"
   },
   "strategy": {
     "description": "Description",
