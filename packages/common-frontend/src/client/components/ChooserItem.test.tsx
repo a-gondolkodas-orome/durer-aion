@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { expect, test, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';

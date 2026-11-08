@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import type { TeamsRepository } from './db';
 import { startTestDatabase } from './test_database';
 import { TeamModel } from './model';

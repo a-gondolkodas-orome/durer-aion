@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import { strategyNames } from "game";
 import { competitionGames } from "./games";
 import { relayNames } from "./server/common";

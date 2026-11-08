@@ -16,6 +16,9 @@
     // common-frontend's ES6 it is ES2015, which rejects `import.meta`. tsdown
     // and vite do the real emit, so this only tells tsc how to read the sources.
     "module": "ESNext",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // The suites use vitest's globals (`describe`, `it`, `expect`, `vi`) without
+    // importing them; vitest.config.mts turns them on at runtime.
+    "types": ["vitest/globals"]
   }
 }

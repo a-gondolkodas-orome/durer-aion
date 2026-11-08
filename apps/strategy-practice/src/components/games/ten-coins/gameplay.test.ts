@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { moves, type Board, type TurnState } from './gameplay';
 import { makeCtx, moveValidator } from 'test-utils';
 

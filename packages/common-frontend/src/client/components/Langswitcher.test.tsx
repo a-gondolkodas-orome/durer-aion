@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { afterEach, expect, test, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import i18next from '../../common/i18n';
 import { LanguageDropdown } from './Langswitcher';

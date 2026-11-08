@@ -1,4 +1,3 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { RealClientRepository } from "./client-repository";
 
