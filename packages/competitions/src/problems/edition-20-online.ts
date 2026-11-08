@@ -1,11 +1,10 @@
-import type { Problem } from 'schemas';
+import type { ProblemBank } from '../sources';
 
 // Edition XX's online round (26/27): the problems its C, D and E relays share
 // between them, each written once. Which relay uses which, for how many points,
 // is configs/edition-20-online.ts.
-export const edition20OnlineProblems: Problem[] = [
-  {
-    id: '7u9twu7iwv--sarki-kutato-hatizsak',
+export const edition20OnlineProblems: ProblemBank = {
+  '7u9twu7iwv--sarki-kutato-hatizsak': {
     answer: 3,
     content: {
       hu: {
@@ -13,8 +12,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'uftk8tk3x5--asatas-falak',
+  'uftk8tk3x5--asatas-falak': {
     answer: 16,
     content: {
       hu: {
@@ -23,8 +21,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'ee56me9xl7--szurke-terulet',
+  'ee56me9xl7--szurke-terulet': {
     answer: 11,
     content: {
       hu: {
@@ -33,8 +30,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'ibyzuf63i2--eika-tanyer',
+  'ibyzuf63i2--eika-tanyer': {
     answer: 5,
     content: {
       hu: {
@@ -43,8 +39,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'jpn46e80fc--horgolt-pulcsik',
+  'jpn46e80fc--horgolt-pulcsik': {
     answer: 210,
     content: {
       hu: {
@@ -52,8 +47,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'lusl93bsck--csuszo-pingvinek-tavolsaggal',
+  'lusl93bsck--csuszo-pingvinek-tavolsaggal': {
     answer: 150,
     content: {
       hu: {
@@ -62,8 +56,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'tj4vz6098x--szimmetrikus-trapez',
+  'tj4vz6098x--szimmetrikus-trapez': {
     answer: 126,
     content: {
       hu: {
@@ -71,8 +64,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'ao294mpckz--bendi-kedvenc-szama',
+  'ao294mpckz--bendi-kedvenc-szama': {
     answer: 3612,
     content: {
       hu: {
@@ -80,8 +72,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'zmnout6gnw--malomtabla-bastyak',
+  'zmnout6gnw--malomtabla-bastyak': {
     answer: 36,
     content: {
       hu: {
@@ -90,8 +81,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: '1fyzco2gak--szurke-es-fekete-terulet',
+  '1fyzco2gak--szurke-es-fekete-terulet': {
     answer: 19,
     content: {
       hu: {
@@ -100,8 +90,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'wm898750hb--hatszog-nagyitas',
+  'wm898750hb--hatszog-nagyitas': {
     answer: 30,
     content: {
       hu: {
@@ -110,8 +99,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: '4hh6kc2pmy--lili-szamsor-7-es-10',
+  '4hh6kc2pmy--lili-szamsor-7-es-10': {
     answer: 1209,
     content: {
       hu: {
@@ -119,8 +107,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: '3acuj6wggz--sorozat-7-41',
+  '3acuj6wggz--sorozat-7-41': {
     answer: 8,
     content: {
       hu: {
@@ -128,8 +115,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'ch6finn1yi--csuszo-pingvinek',
+  'ch6finn1yi--csuszo-pingvinek': {
     answer: 150,
     content: {
       hu: {
@@ -138,8 +124,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: '3fydz3easz--lili-szamsor-ket-szam',
+  '3fydz3easz--lili-szamsor-ket-szam': {
     answer: 1026,
     content: {
       hu: {
@@ -147,8 +132,7 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-  {
-    id: 'kgrsz5u6yw--jegszobrasz-loherek',
+  'kgrsz5u6yw--jegszobrasz-loherek': {
     answer: 924,
     content: {
       hu: {
@@ -156,4 +140,4 @@ export const edition20OnlineProblems: Problem[] = [
       },
     },
   },
-];
+};

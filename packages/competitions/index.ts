@@ -1,3 +1,3 @@
 export { competitions, competitionSource, problems, problemSource } from './src/registry';
-export { inCodeCompetitionSource, inCodeProblemSource, resolveRelay } from './src/sources';
-export type { RelayProblem } from './src/sources';
+export { fromBanks, inCodeCompetitionSource, inCodeProblemSource, resolveRelay } from './src/sources';
+export type { CompetitionBank, ProblemBank, RelayProblem } from './src/sources';

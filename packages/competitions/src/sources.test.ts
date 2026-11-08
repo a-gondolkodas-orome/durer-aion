@@ -1,5 +1,5 @@
 import type { CompetitionConfig, Problem } from 'schemas';
-import { inCodeCompetitionSource, inCodeProblemSource, resolveRelay } from './sources';
+import { fromBanks, inCodeCompetitionSource, inCodeProblemSource, resolveRelay } from './sources';
 
 const problem = (id: string, answer: number): Problem => ({
   id, answer, content: { hu: { problemText: `${answer}?` } },
@@ -16,6 +16,18 @@ const competition: CompetitionConfig = {
   relay,
   metadata: { kind: 'other', label: { hu: 'Próba' } },
 };
+
+describe('fromBanks', () => {
+  it('gives every entry its id back', () => {
+    expect(fromBanks([{ [first.id]: { answer: 1, content: first.content } }, { [second.id]: { answer: 2, content: second.content } }]))
+      .toEqual([first, second]);
+  });
+
+  it('refuses an id two banks share', () => {
+    const bank = { [first.id]: { answer: 1, content: first.content } };
+    expect(() => fromBanks([bank, bank])).toThrow(first.id);
+  });
+});
 
 describe('inCodeProblemSource', () => {
   it('returns the problems it has and leaves out the ids it does not', async () => {

@@ -8,6 +8,24 @@ import type {
   RelayConfig,
 } from 'schemas';
 
+/// Problems as the code holds them: keyed by id, so a file states each id once
+/// and the compiler refuses one written twice in it.
+export type ProblemBank = Record<ProblemId, Omit<Problem, 'id'>>;
+
+/// Competitions as the code holds them, keyed by id like `ProblemBank`.
+export type CompetitionBank = Record<CompetitionId, Omit<CompetitionConfig, 'id'>>;
+
+/// The entries of several banks with their ids put back. An id in two banks is
+/// an error, where spreading them into one object would keep the last silently.
+export function fromBanks<T>(banks: readonly Record<string, T>[]): (T & { id: string })[] {
+  const seen = new Set<string>();
+  return banks.flatMap(bank => Object.entries(bank).map(([id, entry]) => {
+    if (seen.has(id)) throw new Error(`Two banks hold the id ${id}`);
+    seen.add(id);
+    return { id, ...entry };
+  }));
+}
+
 function byId<T extends { id: string }>(items: readonly T[], kind: string): Map<string, T> {
   const map = new Map<string, T>();
   for (const item of items) {

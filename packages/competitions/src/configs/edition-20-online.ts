@@ -1,11 +1,10 @@
-import type { CompetitionConfig } from 'schemas';
+import type { CompetitionBank } from '../sources';
 
 // Edition XX's online round (26/27), one competition per category. Each relay
-// refers to problems/edition-20-online.ts by id; the strategy game
-// is the round's one game, in the category's variant.
-export const edition20OnlineCompetitions: CompetitionConfig[] = [
-  {
-    id: 'mkhi1nnoim--20-online-c',
+// refers to problems/edition-20-online.ts by id; the strategy game is the
+// round's one game, in the category's variant.
+export const edition20OnlineCompetitions: CompetitionBank = {
+  'mkhi1nnoim--20-online-c': {
     languages: ['hu'],
     relay: {
       durationMinutes: 60,
@@ -24,8 +23,7 @@ export const edition20OnlineCompetitions: CompetitionConfig[] = [
     strategy: { durationMinutes: 30, gameId: '20o-c' },
     metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
   },
-  {
-    id: 'u4lw7pcca1--20-online-d',
+  'u4lw7pcca1--20-online-d': {
     languages: ['hu'],
     relay: {
       durationMinutes: 60,
@@ -44,8 +42,7 @@ export const edition20OnlineCompetitions: CompetitionConfig[] = [
     strategy: { durationMinutes: 30, gameId: '20o-d' },
     metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' },
   },
-  {
-    id: 'wkr6zml6mu--20-online-e',
+  'wkr6zml6mu--20-online-e': {
     languages: ['hu'],
     relay: {
       durationMinutes: 60,
@@ -64,4 +61,4 @@ export const edition20OnlineCompetitions: CompetitionConfig[] = [
     strategy: { durationMinutes: 30, gameId: '20o-e' },
     metadata: { kind: 'competition', edition: 20, round: 'online', category: 'E' },
   },
-];
+};
