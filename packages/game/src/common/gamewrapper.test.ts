@@ -530,3 +530,23 @@ describe("strategyPoints", () => {
     expect([0, 1, 2, 3, 4, 5, 9].map(strategyPoints)).toStrictEqual([12, 9, 6, 4, 3, 2, 2]);
   });
 });
+
+describe("gameWrapper duration", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test.each([
+    [undefined, 30],
+    [20, 20],
+  ])("a match given %s minutes ends %s minutes after it starts", (durationMinutes, expectedMinutes) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-21T10:00:00Z"));
+    const game = gameWrapper(createGameWithWinAndLose(() => ({ data: "setup" })), undefined, { durationMinutes });
+    const client = Client({ game, numPlayers: 2 });
+
+    const G = client.getState()?.G;
+    expect(G?.millisecondsRemaining).toStrictEqual(expectedMinutes * 60 * 1000);
+    expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toStrictEqual(expectedMinutes * 60 * 1000);
+  });
+});
