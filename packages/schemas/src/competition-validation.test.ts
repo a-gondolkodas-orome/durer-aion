@@ -1,19 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { CompetitionConfig, isEntityId, Problem, RelayConfig, StrategyConfig } from './competition';
+import { CompetitionConfig, isEntityId, localizeProblem, Problem, RelayConfig, StrategyConfig } from './competition';
 import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
 
 const bilingual: Problem = {
   id: 'k3x9q2m7ab--hatszog-terulet',
-  problemText: { hu: 'Mennyi?', en: 'How much?' },
   answer: 12,
-  url: { hu: 'https://example.com/a.png', en: 'https://example.com/a.png' },
-  help1: { hu: 'Tipp' },
+  content: {
+    hu: { problemText: 'Mennyi?', imageUrl: 'https://example.com/a.png', help1: 'Tipp' },
+    en: { problemText: 'How much?' },
+  },
 };
 
 const hungarianOnly: Problem = {
   id: 'p0q1r2s3t4--bolhapiac',
-  problemText: { hu: 'Hány tányér?' },
   answer: 133,
+  content: { hu: { problemText: 'Hány tányér?' } },
 };
 
 const relay: RelayConfig = {
@@ -74,11 +75,11 @@ describe('validateProblem', () => {
     expect(validateProblem({ ...hungarianOnly, id: '2026-c-1' })).toHaveLength(1);
   });
 
-  it('refuses a problem with no text, or an empty one', () => {
-    expect(validateProblem({ ...hungarianOnly, problemText: {} })).toEqual([
-      `problem ${hungarianOnly.id}: has no text in any language`,
+  it('refuses a problem with no content, or an empty text', () => {
+    expect(validateProblem({ ...hungarianOnly, content: {} })).toEqual([
+      `problem ${hungarianOnly.id}: has no content in any language`,
     ]);
-    expect(validateProblem({ ...hungarianOnly, problemText: { hu: ' ' } })).toEqual([
+    expect(validateProblem({ ...hungarianOnly, content: { hu: { problemText: ' ' } } })).toEqual([
       `problem ${hungarianOnly.id}: its hu text is empty`,
     ]);
   });
@@ -88,20 +89,24 @@ describe('validateProblem', () => {
       `problem ${hungarianOnly.id}: the answer 1.5 is not an integer`,
     ]);
   });
+});
 
-  it('refuses an image or a hint in a language the problem has no text in', () => {
-    expect(validateProblem({ ...hungarianOnly, url: { hu: 'a.png', en: 'a.png' } })).toEqual([
-      `problem ${hungarianOnly.id}: has a url in en but no text in en`,
-    ]);
-    expect(validateProblem({ ...hungarianOnly, help2: { en: 'Hint' } })).toEqual([
-      `problem ${hungarianOnly.id}: has a help2 in en but no text in en`,
-    ]);
+describe('localizeProblem', () => {
+  it('takes each field from the team\'s language where the problem has it', () => {
+    expect(localizeProblem(bilingual, 'en').problemText).toBe('How much?');
+    expect(localizeProblem(bilingual, 'hu')).toEqual({
+      problemText: 'Mennyi?', imageUrl: 'https://example.com/a.png', help1: 'Tipp', help2: undefined,
+    });
   });
 
-  it('refuses an image missing for one of the languages it has text in', () => {
-    expect(validateProblem({ ...bilingual, url: { hu: 'a.png' } })).toEqual([
-      `problem ${bilingual.id}: has an image, but none for its en text`,
-    ]);
+  it('falls back to another language field by field, so a shared image is given once', () => {
+    expect(localizeProblem(bilingual, 'en')).toEqual({
+      problemText: 'How much?', imageUrl: 'https://example.com/a.png', help1: 'Tipp', help2: undefined,
+    });
+  });
+
+  it('shows a problem with no content in the team\'s language in another one', () => {
+    expect(localizeProblem(hungarianOnly, 'en').problemText).toBe('Hány tányér?');
   });
 });
 
@@ -131,9 +136,10 @@ describe('validateCompetition', () => {
   });
 
   it('refuses no language, or one named twice', () => {
-    expect(validateCompetition({ ...competition, languages: [] }, references)).toEqual([
+    // Its relay problems and strategy game are then in none of its languages too.
+    expect(validateCompetition({ ...competition, languages: [] }, references)).toContain(
       `competition ${competition.id}: has no language`,
-    ]);
+    );
     expect(validateCompetition({ ...competition, languages: ['hu', 'hu'] }, references)).toEqual([
       `competition ${competition.id}: names a language twice`,
     ]);
@@ -181,19 +187,24 @@ describe('validateCompetition', () => {
     ]);
   });
 
-  it('refuses a relay problem with no text in one of the competition\'s languages', () => {
-    expect(validateCompetition({ ...base, languages: ['hu', 'en'], relay }, references)).toEqual([
-      `competition ${competition.id}: relay problem 1 (${hungarianOnly.id}) has no en text`,
+  it('accepts a relay problem missing one of the competition\'s languages, which is shown in another', () => {
+    expect(validateCompetition({ ...base, languages: ['hu', 'en'], relay }, references)).toEqual([]);
+  });
+
+  it('refuses a relay problem in none of the competition\'s languages', () => {
+    expect(validateCompetition({ ...base, languages: ['en'], relay }, references)).toEqual([
+      `competition ${competition.id}: relay problem 1 (${hungarianOnly.id}) is in none of the competition's languages`,
     ]);
   });
 
-  it('refuses a strategy game that is not registered, or not in the competition\'s languages', () => {
+  it('refuses a strategy game that is not registered, or in none of the competition\'s languages', () => {
     const unknown = { ...base, strategy: { ...strategy, gameId: 'stones-e' } };
     expect(validateCompetition(unknown, references)).toEqual([
       `competition ${competition.id}: the strategy game stones-e is not registered`,
     ]);
     expect(validateCompetition({ ...base, languages: ['en'], strategy }, references)).toEqual([
-      `competition ${competition.id}: the strategy game 19o-c has no en version`,
+      `competition ${competition.id}: the strategy game 19o-c is in none of the competition's languages`,
     ]);
+    expect(validateCompetition({ ...base, languages: ['hu', 'en'], strategy }, references)).toEqual([]);
   });
 });

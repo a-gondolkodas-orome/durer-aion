@@ -3,7 +3,6 @@ import {
   isEntityId,
   isLanguage,
   Language,
-  Localized,
   Problem,
   ProblemId,
   StrategyGameId,
@@ -34,10 +33,6 @@ function isPositiveInteger(value: number) {
   return Number.isSafeInteger(value) && value > 0;
 }
 
-function languagesOf(text: Localized): string[] {
-  return Object.keys(text).filter(language => text[language as Language] !== undefined);
-}
-
 /// Every way the problem breaks the rules `Problem` states, as messages; none
 /// means it is valid.
 export function validateProblem(problem: Problem): string[] {
@@ -47,36 +42,19 @@ export function validateProblem(problem: Problem): string[] {
     errors.push(`${where}: the id is not of the form <10 characters of [0-9a-z]>--<slug>`);
   }
 
-  const textLanguages = languagesOf(problem.problemText);
-  if (textLanguages.length === 0) {
-    errors.push(`${where}: has no text in any language`);
-  }
-  for (const language of textLanguages) {
-    if (!isLanguage(language)) {
-      errors.push(`${where}: has text in the unknown language "${language}"`);
-    } else if (problem.problemText[language]?.trim() === '') {
-      errors.push(`${where}: its ${language} text is empty`);
-    }
-  }
-
   if (!Number.isSafeInteger(problem.answer)) {
     errors.push(`${where}: the answer ${problem.answer} is not an integer`);
   }
 
-  const extras = { url: problem.url, help1: problem.help1, help2: problem.help2 };
-  for (const [field, text] of Object.entries(extras)) {
-    if (text === undefined) continue;
-    for (const language of languagesOf(text)) {
-      if (!textLanguages.includes(language)) {
-        errors.push(`${where}: has a ${field} in ${language} but no text in ${language}`);
-      }
-    }
+  const languages = Object.keys(problem.content);
+  if (languages.length === 0) {
+    errors.push(`${where}: has no content in any language`);
   }
-  if (problem.url !== undefined) {
-    for (const language of textLanguages) {
-      if (problem.url[language as Language] === undefined) {
-        errors.push(`${where}: has an image, but none for its ${language} text`);
-      }
+  for (const language of languages) {
+    if (!isLanguage(language)) {
+      errors.push(`${where}: has content in the unknown language "${language}"`);
+    } else if (problem.content[language]?.problemText.trim() === '') {
+      errors.push(`${where}: its ${language} text is empty`);
     }
   }
 
@@ -85,7 +63,9 @@ export function validateProblem(problem: Problem): string[] {
 
 /// Every way the competition breaks the rules `CompetitionConfig` states, or
 /// refers to something `references` does not have, as messages; none means it
-/// is valid. The problems it refers to are checked by `validateProblem`, not
+/// is valid. A relay problem or a strategy game needs only one of the
+/// competition's languages, since a team is shown another one where its own is
+/// missing; it may not be in none of them. The problems it refers to are checked by `validateProblem`, not
 /// here: a problem shared between competitions is reported once that way.
 export function validateCompetition(competition: CompetitionConfig, references: CompetitionReferences): string[] {
   const errors: string[] = [];
@@ -149,10 +129,8 @@ export function validateCompetition(competition: CompetitionConfig, references: 
         errors.push(`${at} does not exist`);
         return;
       }
-      for (const language of competition.languages) {
-        if (problem.problemText[language] === undefined) {
-          errors.push(`${at} has no ${language} text`);
-        }
+      if (!competition.languages.some(language => problem.content[language] !== undefined)) {
+        errors.push(`${at} is in none of the competition's languages`);
       }
     });
   }
@@ -166,10 +144,8 @@ export function validateCompetition(competition: CompetitionConfig, references: 
     if (game === undefined) {
       errors.push(`${where}: the strategy game ${gameId} is not registered`);
     } else {
-      for (const language of competition.languages) {
-        if (!game.languages.includes(language)) {
-          errors.push(`${where}: the strategy game ${gameId} has no ${language} version`);
-        }
+      if (!competition.languages.some(language => game.languages.includes(language))) {
+        errors.push(`${where}: the strategy game ${gameId} is in none of the competition's languages`);
       }
     }
   }

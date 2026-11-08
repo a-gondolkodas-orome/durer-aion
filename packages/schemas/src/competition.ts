@@ -11,9 +11,6 @@ export function isLanguage(value: unknown): value is Language {
   return (LANGUAGES as readonly unknown[]).includes(value);
 }
 
-/// A text in whichever of the languages it exists in.
-export type Localized = Partial<Record<Language, string>>;
-
 /// The id of a competition or a problem: ten random characters, `--`, then a
 /// slug for people to recognise it by, e.g. `k3x9q2m7ab--hatszog-terulet`.
 ///
@@ -34,21 +31,46 @@ export type ProblemId = string;
 /// positions.
 export type StrategyGameId = string;
 
+/// What a problem says in one language.
+export interface ProblemContent {
+  problemText: string;
+  imageUrl?: string;
+  help1?: string;
+  help2?: string;
+}
+
 /// One problem, which any number of relays may use. Its points belong to the
 /// relay, so a shared problem can be worth different points in two of them.
 ///
-/// It has text in at least one language, and an image or hint only in a
-/// language it has text in. An image, when there is one, is given for every
-/// language with text, even where the link is the same: a missing translated
-/// image is then an error rather than a silent fallback.
+/// It has content in at least one language. A team is shown its own language
+/// where the problem has it and another one where it does not, field by field:
+/// `localizeProblem` is that rule. So an image the same in both languages is
+/// given once.
 export interface Problem {
   id: ProblemId;
-  problemText: Localized;
   /// An integer, and the same in every language.
   answer: number;
-  url?: Localized;
-  help1?: Localized;
-  help2?: Localized;
+  content: Partial<Record<Language, ProblemContent>>;
+}
+
+/// The problem's content as a team with the given language sees it. Each field
+/// comes from the team's language if the problem has it there, else from the
+/// first of the other languages, in `LANGUAGES` order, that has it.
+export function localizeProblem(problem: Problem, language: Language): ProblemContent {
+  const blocks = [language, ...LANGUAGES.filter(other => other !== language)]
+    .map(each => problem.content[each])
+    .filter(block => block !== undefined);
+  if (blocks.length === 0) {
+    throw new Error(`Problem ${problem.id} has content in no language`);
+  }
+  const first = <K extends keyof ProblemContent>(field: K) =>
+    blocks.find(block => block[field] !== undefined)?.[field];
+  return {
+    problemText: blocks[0].problemText,
+    imageUrl: first('imageUrl'),
+    help1: first('help1'),
+    help2: first('help2'),
+  };
 }
 
 export interface RelayConfig {
@@ -81,7 +103,7 @@ export interface CompetitionMetadata {
 export interface CompetitionConfig {
   id: CompetitionId;
   /// One language is fixed; with both, the team chooses and can switch at any
-  /// time.
+  /// time. Something missing in the team's language is shown in another one.
   languages: Language[];
   /// Without one, matches may start at any time.
   startWindow?: StartWindow;
