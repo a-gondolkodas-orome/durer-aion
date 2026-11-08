@@ -427,13 +427,13 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
 });
 
-test('the import tab lists the server\'s errors and warnings, not its narration', async () => {
+test('the import tab lists the server\'s errors and warnings', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   vi.spyOn(repo, 'importTeams').mockResolvedValue(importAnswer({
     failed: 1,
     logs: {
-      sev: ['info', 'warn', 'error', 'error'],
-      value: ['Generating login code', 'WARNING: Header not exactly how we defined it.', 'Invalid category', '-'.repeat(52)],
+      sev: ['warn', 'error'],
+      value: ['Ezeket az oszlopokat nem ismerjük, kimaradnak: School', '2. sor (Bravo): a kategória nem C, D vagy E: „X”.'],
     },
   }));
   const saved = savedDownloads();
@@ -441,10 +441,8 @@ test('the import tab lists the server\'s errors and warnings, not its narration'
 
   await importFile();
 
-  expect(await screen.findByText('Invalid category')).toBeInTheDocument();
-  expect(screen.getByText('WARNING: Header not exactly how we defined it.')).toBeInTheDocument();
-  expect(screen.queryByText('Generating login code')).not.toBeInTheDocument();
-  expect(screen.getAllByRole('listitem').filter(item => item.textContent === '-'.repeat(52))).toEqual([]);
+  expect(await screen.findByText('2. sor (Bravo): a kategória nem C, D vagy E: „X”.')).toBeInTheDocument();
+  expect(screen.getByText('Ezeket az oszlopokat nem ismerjük, kimaradnak: School')).toBeInTheDocument();
   // Nothing went in, so there is nothing to save.
   expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
   expect(saved).toEqual([]);

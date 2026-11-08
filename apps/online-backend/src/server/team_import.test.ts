@@ -39,7 +39,9 @@ describe('import_teams_from_tsv', () => {
       const team = await TeamModel.build(values).validate();
       if (names.has(values.teamName)) {
         throw new UniqueConstraintError({
-          errors: [{ message: 'Teamname already exists.' } as ValidationErrorItem],
+          // What postgres' refusal carries through sequelize: the column, and
+          // the key a unique violation has.
+          errors: [{ message: 'Teamname already exists.', path: 'teamName', validatorKey: 'not_unique' } as ValidationErrorItem],
         });
       }
       names.add(values.teamName);
@@ -70,7 +72,7 @@ describe('import_teams_from_tsv', () => {
       expect(create.mock.calls[0][0]).toMatchObject({ email: '', other: '' });
       // An organiser acts on these, and a warning per team for a column the
       // file need not fill would bury them.
-      expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
+      expect(result.logs.value).toEqual([]);
       expect(result.export_table[0].slice(0, 4)).toEqual(['Test Team', 'C', '', '']);
     });
   });
@@ -85,7 +87,7 @@ describe('import_teams_from_tsv', () => {
 
     expect(result.successful).toBe(0);
     expect(create).not.toHaveBeenCalled();
-    expect(result.logs.value).toContain('The header has no tab in it: the columns must be separated by tabs, not spaces.');
+    expect(result.logs.value).toContain('A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.');
   });
 
   it('fails a row with no tab under a header that has them', async () => {
@@ -95,7 +97,7 @@ describe('import_teams_from_tsv', () => {
 
     expect(result.successful).toBe(1);
     expect(result.failed).toBe(1);
-    expect(result.logs.value).toContain('No tab in the row "importtest  D": the columns must be separated by tabs, not spaces.');
+    expect(result.logs.value).toEqual(['2. sor: nincs benne tabulátor („importtest  D”), az oszlopokat tabulátorral kell elválasztani, nem szóközzel.']);
   });
 
   it('passes over blank lines without a word', async () => {
@@ -105,7 +107,7 @@ describe('import_teams_from_tsv', () => {
 
     expect(result.successful).toBe(1);
     expect(result.failed).toBe(0);
-    expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
+    expect(result.logs.value).toEqual([]);
   });
 
   describe('reads each column by its header', () => {
@@ -122,7 +124,7 @@ describe('import_teams_from_tsv', () => {
       expect(create.mock.calls[0][0]).toMatchObject({
         teamName: 'Test Team', category: 'C', email: 'test@example.com', other: 'Some Info',
       });
-      expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
+      expect(result.logs.value).toEqual([]);
       // The export keeps the import's own order, so it goes back in as it is.
       expect(result.export_table[0].slice(0, 4)).toEqual(['Test Team', 'C', 'test@example.com', 'Some Info']);
     });
@@ -134,7 +136,7 @@ describe('import_teams_from_tsv', () => {
 
       expect(result.successful).toBe(2);
       expect(result.logs.value.filter((_, i) => result.logs.sev[i] === 'warn'))
-        .toEqual(['Ignoring the columns this import does not know: School, Phone']);
+        .toEqual(['Ezeket az oszlopokat nem ismerjük, kimaradnak: School, Phone']);
     });
 
     // Rows pasted out of a spreadsheet without the line above them: the first
@@ -146,9 +148,8 @@ describe('import_teams_from_tsv', () => {
 
       expect(result.successful).toBe(0);
       expect(create).not.toHaveBeenCalled();
-      expect(result.logs.value[result.logs.sev.indexOf('error')]).toBe(
-        'Imported nothing. The first line must be the header, naming at least Teamname and Category; '
-        + 'it names no Teamname and no Category.');
+      expect(result.logs.value[0]).toBe('Egy csapat sem került be. Az első sornak a fejlécnek kell lennie, '
+        + 'benne legalább a Teamname és a Category oszloppal; ebből hiányzik: Teamname, Category.');
     });
 
     it('refuses a header that names a column twice', async () => {
@@ -158,7 +159,7 @@ describe('import_teams_from_tsv', () => {
 
       expect(result.successful).toBe(0);
       expect(create).not.toHaveBeenCalled();
-      expect(result.logs.value).toContain('Imported nothing. The header names Email more than once.');
+      expect(result.logs.value).toContain('Egy csapat sem került be. A fejléc többször is tartalmazza: Email.');
     });
   });
 
@@ -209,11 +210,11 @@ describe('import_teams_from_tsv', () => {
 
   describe('refuses a row the model refuses, and goes on', () => {
     it.each([
-      ['a login code in the wrong format', ['Bad', 'C', '', 'x', '', 'ABC-123-XYZ', ''], 'JoinCode must be in the format 111-2222-333.'],
-      ['a team id that is not a UUID', ['Bad', 'C', '', 'x', 'custom-id', '', ''], 'TeamId must be a UUIDv4.'],
-      ['credentials that are not a UUID', ['Bad', 'C', '', 'x', '', '', 'not-a-uuid'], 'Credentials must be a valid UUIDv4.'],
-      ['a team name over 255 characters', ['B'.repeat(256), 'C', '', 'x', '', '', ''], 'Teamname must be between 1 and 255 characters.'],
-      ['an email over 255 characters', ['Bad', 'C', 'e'.repeat(256), 'x', '', '', ''], 'Email must be between 0 and 255 characters.'],
+      ['a login code in the wrong format', ['Bad', 'C', '', 'x', '', 'ABC-123-XYZ', ''], '2. sor (Bad): a belépőkód nem 111-2222-333 alakú.'],
+      ['a team id that is not a UUID', ['Bad', 'C', '', 'x', 'custom-id', '', ''], '2. sor (Bad): az ID nem érvényes UUIDv4.'],
+      ['credentials that are not a UUID', ['Bad', 'C', '', 'x', '', '', 'not-a-uuid'], '2. sor (Bad): a Credentials nem érvényes UUID.'],
+      ['a team name over 255 characters', ['B'.repeat(256), 'C', '', 'x', '', '', ''], `2. sor (${'B'.repeat(256)}): a csapatnév túl hosszú (legfeljebb 255 karakter).`],
+      ['an email over 255 characters', ['Bad', 'C', 'e'.repeat(256), 'x', '', '', ''], '2. sor (Bad): az Email túl hosszú (legfeljebb 255 karakter).'],
     ])('%s', async (_, row, message) => {
       tsv(row, ['Good', 'D', '', 'x', '', '', '']);
 
@@ -222,7 +223,7 @@ describe('import_teams_from_tsv', () => {
       expect(result.failed).toBe(1);
       expect(result.successful).toBe(1);
       expect(result.export_table.map(exported => exported[0])).toEqual(['Good']);
-      expect(result.logs.value).toContain(`Failed to validate team when adding to DB: ${message}`);
+      expect(result.logs.value).toEqual([message]);
     });
   });
 
@@ -233,6 +234,22 @@ describe('import_teams_from_tsv', () => {
 
     expect(result.failed).toBe(1);
     expect(create).not.toHaveBeenCalled();
+    expect(result.logs.value).toEqual(
+      [`2. sor (Test Team): az Other túl hosszú (${OTHER_IMPORT_MAX_LENGTH + 1} karakter, legfeljebb ${OTHER_IMPORT_MAX_LENGTH}).`]);
+  });
+
+  // One line per problem, each naming where it is: the admin page lists them
+  // as they come, so a line that only says "see above" is no use there.
+  it('names the line and the team in each problem, and nothing else', async () => {
+    tsv(['Alpha', 'C', '', '', '', '', ''], ['Bravo', 'X', '', '', '', '', ''], ['', 'D', '', '', '', '', '']);
+
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+    expect(result.logs.value).toEqual([
+      '3. sor (Bravo): a kategória nem C, D vagy E: „X”.',
+      '4. sor: hiányzik a csapatnév.',
+    ]);
+    expect(result.logs.sev).toEqual(['error', 'error']);
   });
 
   it('reports a team name the table already has, and goes on', async () => {
@@ -247,6 +264,6 @@ describe('import_teams_from_tsv', () => {
     expect(result.successful).toBe(2);
     expect(result.failed).toBe(1);
     expect(result.export_table.map(exported => exported[3])).toEqual(['first', 'third']);
-    expect(result.logs.value).toContain('Failed to validate team when adding to DB: Teamname already exists.');
+    expect(result.logs.value).toEqual(['3. sor (Twice): már van ilyen nevű csapat.']);
   });
 });

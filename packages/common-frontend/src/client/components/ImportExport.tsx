@@ -53,12 +53,8 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     }
   };
 
-  // The narration's per-row "Generating…" lines say nothing an organiser acts
-  // on, and the dashed lines it closes each failed row with are a terminal's
-  // separators, not messages.
   const messages = result === null ? [] : result.logs.value
-    .map((value, index) => ({ value, sev: result.logs.sev[index] }))
-    .filter(message => message.sev !== 'info' && !/^-+$/.test(message.value.trim()));
+    .map((value, index) => ({ value, sev: result.logs.sev[index] }));
 
   return (
     <Stack sx={{ gap: '16px', padding: '10px' }}>
@@ -98,7 +94,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       )}
       {messages.length > 0 && (
         <Stack sx={{ gap: '4px' }}>
-          <Stack sx={{ fontSize: 14 }}>A szerver hibaüzenetei és figyelmeztetései (angolul):</Stack>
+          <Stack sx={{ fontSize: 14 }}>Hibák és figyelmeztetések:</Stack>
           <Stack
             component="ul"
             sx={{ margin: 0, maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 13 }}

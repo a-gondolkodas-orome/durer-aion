@@ -33,16 +33,16 @@ export function adminTeamId(team: TeamModelDto): string {
 }
 
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some
-/// rows can land while others fail. `logs` is the server's own English
-/// narration, `sev` and `value` index-aligned.
+/// rows can land while others fail. `logs` holds one Hungarian line per
+/// problem, `sev` and `value` index-aligned.
 export interface TeamImportResultDto {
   successful: number;
   failed: number;
   /// The teams that landed, in the import's column order, with the generated
-  /// id, join code and credentials filled in. The only copy of those codes.
+  /// id, join code and credentials filled in.
   export_table: string[][];
   logs: {
-    sev: ('info' | 'warn' | 'error')[];
+    sev: ('warn' | 'error')[];
     value: string[];
   };
 }

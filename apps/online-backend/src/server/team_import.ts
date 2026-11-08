@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
-import { ValidationError } from 'sequelize';
+import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
-import { isCompetitionCategory } from 'schemas';
+import { COMPETITION_CATEGORIES, isCompetitionCategory } from 'schemas';
 
 // The importer's columns, in the order the export writes them. A file may hold
 // them in any order: each is found by its header, whatever its case.
@@ -31,16 +31,40 @@ function readHeader(header: string[]):
   });
   const twice = COLUMNS.filter(column => positions[column] === -1);
   if (twice.length > 0) {
-    return { refused: `The header names ${twice.join(', ')} more than once.` };
+    return { refused: `A fejléc többször is tartalmazza: ${twice.join(', ')}.` };
   }
   const missing = REQUIRED.filter(column => positions[column] === undefined);
   if (missing.length > 0) {
     // A first line holding a team rather than a header lands here too, which
     // is the point: read as a header, it would drop that team in silence.
-    return { refused: `The first line must be the header, naming at least ${REQUIRED.join(' and ')}; `
-      + `it names no ${missing.join(' and no ')}.` };
+    return { refused: `Az első sornak a fejlécnek kell lennie, benne legalább a ${REQUIRED.join(' és a ')} `
+      + `oszloppal; ebből hiányzik: ${missing.join(', ')}.` };
   }
   return { positions, unknown };
+}
+
+const CATEGORIES_TEXT = `${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} vagy `
+  + COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1];
+
+// The model's own messages are English (model.ts), and the admin page is
+// Hungarian; each is worded here by the column it is about. One the table does
+// not know is quoted as it came.
+const UNIQUE_TEXT: Record<string, string> = {
+  teamName: 'már van ilyen nevű csapat',
+  teamId: 'már van ilyen ID-jú csapat',
+  joinCode: 'már van ilyen belépőkódú csapat',
+  credentials: 'már van ilyen Credentials-ű csapat',
+};
+const INVALID_TEXT: Record<string, string> = {
+  teamName: 'a csapatnév túl hosszú (legfeljebb 255 karakter)',
+  teamId: 'az ID nem érvényes UUIDv4',
+  joinCode: 'a belépőkód nem 111-2222-333 alakú',
+  credentials: 'a Credentials nem érvényes UUID',
+  email: 'az Email túl hosszú (legfeljebb 255 karakter)',
+};
+function databaseText(item: ValidationErrorItem): string {
+  const table = item.validatorKey === 'not_unique' ? UNIQUE_TEXT : INVALID_TEXT;
+  return (item.path !== null ? table[item.path] : undefined) ?? item.message;
 }
 
 function randomDigits(numDigits: number) {
@@ -57,28 +81,24 @@ export async function import_teams_from_tsv_locally(teams: TeamsRepository, file
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
-  console.info("Summary:");
-  console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
+  console.info(`Összesen ${successful} csapat került be, ${failed} sor hibás.`);
   export_table.unshift([...COLUMNS]);
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
 
 export async function import_teams_from_tsv(teams: TeamsRepository, filename: string) {
   const logs: {
-    sev: ('info' | 'warn' | 'error')[];
+    sev: ('warn' | 'error')[];
     value: string[];
   } = {
     sev: [],
     value: [],
   };
 
-  function oninfo(msg: string) { logs.value.push(msg); logs.sev.push('info') }
   function onwarn(msg: string) { logs.value.push(msg); logs.sev.push('warn') }
   function onerror(msg: string) { logs.value.push(msg); logs.sev.push('error') }
 
 
-  oninfo("Importing teams.");
-  oninfo("  Use a .tsv file (UTF-8 format, no quoted strings, no tab characters)");
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
   const rows = untrimmed_rows;
   if (rows[rows.length - 1].trim() === "") {
@@ -89,24 +109,26 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   const export_table: string[][] = [];
   const read = readHeader(header);
   if ('refused' in read) {
-    onerror(`Imported nothing. ${read.refused}`);
-    onerror(`Found: ${header.map(cell => cell.trim()).join(', ')}`);
-    onerror('Columns, in any order: Teamname and Category (required); Email, Other, ID, Login Code and '
-      + 'Credentials (optional, the last three generated when left out or blank).');
+    onerror(`Egy csapat sem került be. ${read.refused}`);
+    onerror(`A fájl első sora: ${header.map(cell => cell.trim()).join(', ')}`);
+    onerror('Oszlopok, tetszőleges sorrendben: Teamname és Category (kötelező); Email, Other, ID, Login Code és '
+      + 'Credentials (elhagyható, az utolsó hármat ilyenkor a szerver generálja).');
     if (header.length === 1) {
-      onerror('The header has no tab in it: the columns must be separated by tabs, not spaces.');
+      onerror('A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.');
     }
     return { successful: 0, failed: 0, export_table, logs };
   }
   if (read.unknown.length > 0) {
-    onwarn(`Ignoring the columns this import does not know: ${read.unknown.join(', ')}`);
+    onwarn(`Ezeket az oszlopokat nem ismerjük, kimaradnak: ${read.unknown.join(', ')}`);
   }
   const { positions } = read;
 
   let successful = 0;
   let failed = 0; // not counting blank lines
   await teams.connect();
-  for (const row of table) {
+  for (const [index, row] of table.entries()) {
+    // The file's own line number, header included, as an editor shows it.
+    const line = index + 2;
     // A blank line is what an editor leaves between blocks or at the end.
     if (row.every(column => column.trim() === '')) {
       continue;
@@ -115,8 +137,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     // file separated by spaces, which cannot be split safely — a team name
     // holds spaces of its own.
     if (row.length === 1) {
-      onerror(`No tab in the row "${row[0].trim()}": the columns must be separated by tabs, not spaces.`);
-      onerror('-----------------------------------------------------'); // separate errors
+      onerror(`${line}. sor: nincs benne tabulátor („${row[0].trim()}”), az oszlopokat tabulátorral kell `
+        + 'elválasztani, nem szóközzel.');
       failed++;
       continue;
     }
@@ -131,6 +153,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     const category = cell("Category");
     const email = cell("Email");
     const other = cell("Other");
+    // Every problem names the line and the team, so each stands on its own.
+    const where = teamname === '' ? `${line}. sor` : `${line}. sor (${teamname})`;
     let ok = true;
     let teamId = cell("ID");
     let login_code = cell("Login Code");
@@ -138,44 +162,42 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
 
 
     if (teamname === "") {
-      onerror(`Empty teamname`);
+      onerror(`${where}: hiányzik a csapatnév.`);
       ok = false;
     }
 
     if (!isCompetitionCategory(category)) {
-      onerror(`ERROR: Invalid category [${category}] for team ${teamname}.`);
+      onerror(`${where}: a kategória nem ${CATEGORIES_TEXT}: „${category}”.`);
       ok = false;
     }
 
     // Stricter than the column, on purpose: the admin routes append an audit
     // trail to this field, and `model.ts` says what the gap is for.
     if (other.length > OTHER_IMPORT_MAX_LENGTH) {
-      onerror(`"Other" filed is too long (${other.length} to be exact, expecting < ${OTHER_IMPORT_MAX_LENGTH})`);
+      onerror(`${where}: az Other túl hosszú (${other.length} karakter, legfeljebb ${OTHER_IMPORT_MAX_LENGTH}).`);
       ok = false;
     }
 
     if (teamId === "") {
-      oninfo('Generating teamId')
       teamId = randomUUID();
     }
 
     if (login_code === "") {
-      oninfo('Generating login code')
       login_code = generateLoginCode();
     }
 
     if (credentials === "") {
-      oninfo('Generating credentials')
       credentials = randomUUID();
     }
 
     if (ok) {
-      oninfo(`Adding ${teamname} to DB.`);
       try {
         await teams.insertTeam({ teamname, category, email, other, teamId, joinCode: login_code, credentials });
       } catch (err) {
         if (err instanceof ValidationError) {
-          onerror(`Failed to validate team when adding to DB: ${err.errors.map(e => e.message).join(', ')}`);
+          // A constraint the database refuses can come with no items at all.
+          const reasons = err.errors.length > 0 ? err.errors.map(databaseText).join('; ') : err.message;
+          onerror(`${where}: ${reasons}.`);
           ok = false;
         } else {
           console.log('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
@@ -185,13 +207,10 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     }
 
     if (ok) {
-      oninfo(`Successfully imported team ${teamname}.`);
       const row_to_export = [teamname, category, email, other, teamId, login_code, credentials];
       export_table.push(row_to_export);
       successful++;
     } else {
-      onerror(`Failed to import team ${teamname}. See reasons above.`);
-      onerror('-----------------------------------------------------'); // separate errors
       failed++;
     }
   }
