@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { relayPointsStorageKey } from "common-frontend/core";
 
 import { OfflineClientRepository } from "./client-repository";

@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { describe, expect, test, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { Ctx } from 'boardgame.io';

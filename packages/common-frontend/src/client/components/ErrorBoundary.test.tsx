@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { test, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import '../../common/i18n';

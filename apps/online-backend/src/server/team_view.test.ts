@@ -1,4 +1,3 @@
-import { describe, it, expect } from "vitest";
 import { TeamModel } from "./model";
 import { publicTeamView } from "./team_view";
 import type { TeamMatches } from "./match_status";

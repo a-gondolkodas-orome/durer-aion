@@ -5,7 +5,6 @@
 // an order that is not the one we want.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
 import { HELD_BACK, findResolved, formatReport, newestTagInLine } from './dependency-report.mjs';
 
 const row = (name, current, latest, where = ['root']) => ({ name, current, latest, where });

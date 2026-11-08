@@ -4,7 +4,6 @@
 // workflow added later is covered the day it lands.
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
 
 const WORKFLOWS = '.github/workflows/';
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));

@@ -1,4 +1,3 @@
-import { expect, it } from 'vitest';
 import { Category, parseRelayTestCode, playableTests, relayTestCode } from './SelectRound';
 
 it('lists C+ years under E, keeping their real category', () => {

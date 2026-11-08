@@ -6,7 +6,6 @@
 // rather than the apps' output, which only a full build would show.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 const script = readFileSync(`${repoRoot}scripts/assemble-site.mjs`, 'utf8');

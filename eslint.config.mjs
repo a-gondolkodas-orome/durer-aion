@@ -55,6 +55,15 @@ const noDynamicProblemsImport = {
   message: noProblemsMessage,
 };
 
+// vitest.config.mts turns vitest's globals on, and every tsconfig types them, so
+// a suite does not import `describe`, `it`, `expect` or `vi`. `import type` stays
+// allowed: `Mock` and its kin have no global.
+const noVitestImport = {
+  name: 'vitest',
+  allowTypeImports: true,
+  message: "vitest's test API is global here; import only types from 'vitest'.",
+};
+
 // The half of the type-aware block below that asks the type checker a question,
 // as opposed to reading the syntax tree. Hoisted so the off-list that follows can be
 // derived from it rather than written out a second time: the pair cannot drift the
@@ -270,6 +279,9 @@ export default defineConfig(
           allowTypeImports: true,
           message: 'packages/strategy-engine runs with no framework attached; keep React on the app side.',
         }],
+        // The engine's suites are covered here rather than by the suites' block
+        // below, which would replace this rule's options for them.
+        paths: [noVitestImport],
       }],
     },
   },
@@ -299,12 +311,32 @@ export default defineConfig(
     files: ['apps/relay-practise-frontend/src/problems.ts'],
     rules: typeAwareRulesOff,
   },
+  // The suites, but for the engine's, which the block above covers, and
+  // apps/strategy-practice's, which its own config covers.
+  {
+    files: ['**/*.test.{ts,tsx,mjs}'],
+    ignores: ['packages/strategy-engine/**', 'apps/strategy-practice/**'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', { paths: [noVitestImport] }],
+    },
+  },
   // Build and repo tooling under scripts/ runs in Node, not the browser, so `process`, `console`,
   // `URL` and `fetch` are globals rather than undefined names.
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: {
       globals: { process: 'readonly', console: 'readonly', URL: 'readonly', fetch: 'readonly' },
+    },
+  },
+  // TypeScript checks undefined names itself, so no-undef is off for .ts; these are
+  // .mjs, where it reads vitest's globals as undefined without this list.
+  {
+    files: ['scripts/**/*.test.mjs'],
+    languageOptions: {
+      globals: Object.fromEntries(
+        ['describe', 'it', 'test', 'expect', 'vi', 'beforeAll', 'beforeEach', 'afterAll', 'afterEach']
+          .map(name => [name, 'readonly'])
+      ),
     },
   },
   {

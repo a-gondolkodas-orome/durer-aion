@@ -120,7 +120,8 @@
     "taskImage": "Image belonging to the current task (if it didn't load properly, try refreshing the page)",
     "tryHint": "After {{max}} wrong guesses, the next task follows. You cannot return to this task afterwards.",
     "tryHintLast": "If this guess is wrong too, the next task follows. You cannot return to this task afterwards.",
-    "wrongGuess": "Your guess is sadly wrong"
+    "wrongGuess": "Your guess is sadly wrong",
+    "zoomImage": "Click the image to enlarge it"
   },
   "strategy": {
     "board": {

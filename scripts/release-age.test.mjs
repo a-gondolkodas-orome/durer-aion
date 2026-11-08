@@ -1,7 +1,6 @@
 // The registry lookups are not tested, for the reason dependency-report.test.mjs gives. What is left
 // is the part that decides which version a sweep proposes: reading the window from .npmrc,
 // picking the newest release npm will actually install, and never crossing a major.
-import { expect, it } from 'vitest';
 import { matureVersions, newestMature, newestWithinMajor, parseMinReleaseAge } from './release-age.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;

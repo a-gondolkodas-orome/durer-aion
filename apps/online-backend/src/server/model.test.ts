@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { Sequelize } from 'sequelize';
 import { OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH, TeamModel, appendOtherNote, teamAttributes } from './model';
 

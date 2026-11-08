@@ -1,4 +1,3 @@
-import { describe, test, expect } from "vitest";
 import { formatDuration } from "./relay-results";
 
 describe("formatDuration", () => {
