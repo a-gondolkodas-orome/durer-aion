@@ -34,8 +34,10 @@ export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: 
         <img src={props.pictureUrl} style={fittedImage} alt={t('relay.taskImage')}/>
       </ButtonBase>
       <Typography variant="caption" sx={{ textAlign: 'center', mt: 1 }}>{t('relay.zoomImage')}</Typography>
-      {/* A click anywhere, Esc, or the close button shrinks it back. */}
-      <Dialog open={enlarged} onClose={close} fullScreen onClick={close}
+      {/* A click anywhere, Esc, or the close button shrinks it back. It covers the
+          snackbar layer (Layout's 1400), which would hide the close button: nothing
+          can be submitted from here, and a persistent snackbar is still there after. */}
+      <Dialog open={enlarged} onClose={close} fullScreen onClick={close} sx={{ zIndex: 1500 }}
         slotProps={{ paper: { sx: { backgroundColor: 'background.paper', padding: '2vmin' } } }}>
         <img src={props.pictureUrl} style={enlargedImage} alt={t('relay.taskImage')}/>
         <IconButton onClick={close} aria-label={t('general.close')}
