@@ -13,7 +13,6 @@
 // its own, as /socket.io/ does, so every proxied location repeats the pair: the counts must match.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
 
 const configPath = 'apps/online-frontend/nginx/nginx.conf';
 // Comments stripped: a directive quoted in one is not a directive. No value here contains a `#`.

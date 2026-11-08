@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import type { LogEntry } from "boardgame.io";
-import { beforeEach, describe, expect, test } from "vitest";
 import { readPersistedLog } from "./bgio-log";
 
 const KEY = "bgio_stones_e";

@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { type BotStrategy } from 'strategy-game-factory';
 import { botNextMove, makeCtx } from 'test-utils';
 import {

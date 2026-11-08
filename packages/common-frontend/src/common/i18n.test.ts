@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { afterAll, expect, test } from 'vitest';
 import i18next from './i18n';
 
 afterAll(() => i18next.changeLanguage('hu'));

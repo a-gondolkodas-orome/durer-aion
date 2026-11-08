@@ -1,4 +1,3 @@
-import { it, expect, beforeAll, beforeEach, afterAll, vi } from "vitest";
 import * as http from "node:http";
 import type { AddressInfo } from "node:net";
 import Koa from "koa";

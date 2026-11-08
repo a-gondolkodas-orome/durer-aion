@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18nextModule from 'i18next';
 import { openInPreferredLanguage, rememberChosenLanguage } from './language';
 

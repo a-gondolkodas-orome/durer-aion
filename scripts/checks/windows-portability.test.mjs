@@ -8,7 +8,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
 
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const SKIP = new Set(['node_modules', 'dist', 'build', 'reports', 'coverage', '.git']);

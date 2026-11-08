@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import {
   RED, BLUE, startCells, encode, applyMove, legalMoves, majorityWinner,
   FIRST_PLAYER_WIN_SIZES, SECOND_PLAYER_WIN_SIZES

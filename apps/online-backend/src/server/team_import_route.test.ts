@@ -1,4 +1,3 @@
-import { it, expect, vi } from "vitest";
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
 import Koa from "koa";

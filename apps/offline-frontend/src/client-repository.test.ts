@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { beforeEach, expect, test, vi } from "vitest";
 import { LOCAL_STORAGE_TEAMSTATE } from "common-frontend/core";
 import type { RelayEndReport } from "game";
 

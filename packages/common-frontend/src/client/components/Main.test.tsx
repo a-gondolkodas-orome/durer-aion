@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { afterEach, beforeEach, test, expect, vi } from 'vitest';
 import { MockTeamState } from '../hooks/mock-user-hooks';
 import { render } from '@testing-library/react';
 // `toBeInTheDocument` and friends.

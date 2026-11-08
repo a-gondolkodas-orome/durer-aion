@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { uniq, range } from 'lodash';
 import { playBotMove } from 'test-utils';
 import { smartBotStrategy } from './bot-strategy';

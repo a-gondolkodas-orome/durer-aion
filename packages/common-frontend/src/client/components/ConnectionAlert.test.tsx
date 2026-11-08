@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SnackbarProvider } from 'notistack';

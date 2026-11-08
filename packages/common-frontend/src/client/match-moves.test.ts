@@ -1,4 +1,3 @@
-import { expect, test } from "vitest";
 import { Client } from "boardgame.io/client";
 import { gameWrapper, GameRelay, MyGameWrappers } from "game";
 import { asRelayMoves, asStrategyWrapperMoves } from "./match-moves";
