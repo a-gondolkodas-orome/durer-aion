@@ -160,6 +160,11 @@ whenever the codes are to be mailed out: the one download on the admin page that
 carries a login secret. The team list's CSV leaves out the ID too, since a team's
 GUID is its session cookie's value.
 
+Both read the TSV's columns by their header, in any order and any case:
+`Teamname` and `Category` are required, `Email`, `Other`, `ID`, `Login Code` and
+`Credentials` may be left out, and a column the import does not know is ignored.
+A file whose first line is not such a header is refused whole.
+
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
 server: it needs Python packages the server has no reason to carry.

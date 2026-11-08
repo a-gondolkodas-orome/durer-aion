@@ -5,15 +5,42 @@ import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
 import { isCompetitionCategory } from 'schemas';
 
-function arraysEqual(a: string[], b: string[]) {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (a.length !== b.length) return false;
+// The importer's columns, in the order the export writes them. A file may hold
+// them in any order: each is found by its header, whatever its case.
+const COLUMNS = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"] as const;
+type Column = typeof COLUMNS[number];
+const REQUIRED: readonly Column[] = ["Teamname", "Category"];
 
-  for (let i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
+const headerKey = (cell: string) => cell.trim().toLowerCase();
+
+/** Where each known column is in the file, or the reason the header cannot be
+ * read. A column the header does not name reads as blank. */
+function readHeader(header: string[]):
+  { positions: Partial<Record<Column, number>>, unknown: string[] } | { refused: string } {
+  const positions: Partial<Record<Column, number>> = {};
+  const unknown: string[] = [];
+  header.forEach((cell, index) => {
+    const column = COLUMNS.find(name => headerKey(name) === headerKey(cell));
+    if (column === undefined) {
+      if (cell.trim() !== '') unknown.push(cell.trim());
+    } else if (positions[column] !== undefined) {
+      positions[column] = -1;
+    } else {
+      positions[column] = index;
+    }
+  });
+  const twice = COLUMNS.filter(column => positions[column] === -1);
+  if (twice.length > 0) {
+    return { refused: `The header names ${twice.join(', ')} more than once.` };
   }
-  return true;
+  const missing = REQUIRED.filter(column => positions[column] === undefined);
+  if (missing.length > 0) {
+    // A first line holding a team rather than a header lands here too, which
+    // is the point: read as a header, it would drop that team in silence.
+    return { refused: `The first line must be the header, naming at least ${REQUIRED.join(' and ')}; `
+      + `it names no ${missing.join(' and no ')}.` };
+  }
+  return { positions, unknown };
 }
 
 function randomDigits(numDigits: number) {
@@ -26,14 +53,13 @@ function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
 export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
-  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
   const { successful, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
   console.info("Summary:");
   console.info(`Successfully imported ${successful} teams, failed ${failed} times.`);
-  export_table.unshift(expected_header);
+  export_table.unshift([...COLUMNS]);
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
 
@@ -60,17 +86,22 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   }
   const table = rows.map(row => row.split('\t'));
   const header = table.shift() ?? [];
-  const expected_header = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"];
-  if (!arraysEqual(header, expected_header)) {
-    onwarn("WARNING: Header not exactly how we defined it. This is not always a problem.");
-    onwarn(`Found: ${header.join(', ')}`);
-    onwarn('Expected, in this order: Teamname (required), Category (required), Email (optional), Other (optional), '
-      + 'ID, Login Code, Credentials (optional: generated when left blank)');
-    if (header.length === 1) {
-      onwarn('The header has no tab in it: the columns must be separated by tabs, not spaces.');
-    }
-  }
   const export_table: string[][] = [];
+  const read = readHeader(header);
+  if ('refused' in read) {
+    onerror(`Imported nothing. ${read.refused}`);
+    onerror(`Found: ${header.map(cell => cell.trim()).join(', ')}`);
+    onerror('Columns, in any order: Teamname and Category (required); Email, Other, ID, Login Code and '
+      + 'Credentials (optional, the last three generated when left out or blank).');
+    if (header.length === 1) {
+      onerror('The header has no tab in it: the columns must be separated by tabs, not spaces.');
+    }
+    return { successful: 0, failed: 0, export_table, logs };
+  }
+  if (read.unknown.length > 0) {
+    onwarn(`Ignoring the columns this import does not know: ${read.unknown.join(', ')}`);
+  }
+  const { positions } = read;
 
   let successful = 0;
   let failed = 0; // not counting blank lines
@@ -89,20 +120,24 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       failed++;
       continue;
     }
-    // Trim: Remove possible '\r' characters in windows CRLF
-    const [teamname, category, ...optional_columns] = row.map(column => column.trim());
-    // Email and Other are optional: a row may leave them blank or end before
-    // them, and either way the team is stored with an empty string.
-    const email = optional_columns[0] ?? '';
-    const other = optional_columns[1] ?? '';
-    const extra_columns = optional_columns.slice(2);
+    // Trim: Remove possible '\r' characters in windows CRLF. A column the
+    // header leaves out, or a row ending before it, reads as blank, so a team
+    // with no Email or Other is stored with empty strings.
+    const cell = (column: Column) => {
+      const position = positions[column];
+      return position === undefined ? '' : (row[position] ?? '').trim();
+    };
+    const teamname = cell("Teamname");
+    const category = cell("Category");
+    const email = cell("Email");
+    const other = cell("Other");
     let ok = true;
-    let teamId = extra_columns[0];
-    let login_code = extra_columns[1];
-    let credentials = extra_columns[2];
+    let teamId = cell("ID");
+    let login_code = cell("Login Code");
+    let credentials = cell("Credentials");
 
 
-    if (teamname === undefined || teamname === "") {
+    if (teamname === "") {
       onerror(`Empty teamname`);
       ok = false;
     }
@@ -119,17 +154,17 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       ok = false;
     }
 
-    if (teamId === undefined || teamId === "") {
+    if (teamId === "") {
       oninfo('Generating teamId')
       teamId = randomUUID();
     }
 
-    if (login_code === undefined || login_code === "") {
+    if (login_code === "") {
       oninfo('Generating login code')
       login_code = generateLoginCode();
     }
 
-    if (credentials === undefined || credentials === "") {
+    if (credentials === "") {
       oninfo('Generating credentials')
       credentials = randomUUID();
     }
