@@ -238,25 +238,26 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
               {!rulesFirst && rulesButton}
             </Stack>
           </Stack>
-          <Stack sx={{ flexDirection: 'row', gap: '16px', alignItems: 'flex-start' }}>
+          <Box sx={{ position: 'relative' }}>
             <GameArea mode={difficulty} liveNumber={G.numberOfTries}
               status={status} tone={tone} sub={sub} actions={actions} callout={callout} intro={intro}
-              info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside} centred={!(wide && rulesOpen)}>
+              info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
               <BoardArea state={boardState}>{board(props)}</BoardArea>
             </GameArea>
-            {/* Beside the game, not over it: the board stays to read and play
-                while the rules are open. */}
+            {/* Over the margin to the right of the game, which stays where it
+                is: the board stays to read and play while the rules are open. */}
             {wide && rulesOpen && <Stack component="aside" aria-label={t('strategy.rules')} sx={{
-              width: '400px', flexShrink: 0, backgroundColor: '#fff', border: `1px solid ${LINE}`, borderRadius: '16px',
-              padding: '14px 18px', gap: '8px', position: 'sticky', top: '72px',
+              position: 'absolute', top: 0, right: 0, zIndex: 3, width: '330px',
+              backgroundColor: '#fff', border: `1px solid ${LINE}`, borderRadius: '16px',
+              boxShadow: '0 12px 32px rgba(0,0,0,.16)', padding: '14px 18px', gap: '8px',
             }}>
               <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ fontSize: '18px', fontWeight: 700 }}>{t('strategy.rules')}</Box>
                 <IconButton aria-label={t('general.close')} onClick={() => setRulesOpen(false)}><CloseIcon /></IconButton>
               </Stack>
-              <Box sx={{ fontSize: '16px', lineHeight: 1.6 }}>{presentation.rules}</Box>
+              <Box sx={{ fontSize: '15px', lineHeight: 1.55 }}>{presentation.rules}</Box>
             </Stack>}
-          </Stack>
+          </Box>
         </Stack>
         {/* No onClose: neither a click beside it nor Esc stands for having
             read the rules. Once the time is up there is nothing left to read
@@ -344,13 +345,13 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number }) {
 function GameArea(props: {
   mode: Difficulty | null, liveNumber: number, status: string, tone: Tone, sub: string,
   actions: ReactNode, callout: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
-  centred: boolean, children: ReactNode,
+  children: ReactNode,
 }) {
   const { mode, tone } = props;
   const toneColour = tone === 'go' ? 'primary.main' : tone === 'wait' ? MUTED : tone === 'won' ? WIN : tone === 'lost' ? LOSS : 'text.primary';
   return (
     <Stack data-testid="gameArea" data-mode={mode ?? 'none'} sx={{
-      flex: 1, minWidth: 0, maxWidth: '900px', marginX: props.centred ? 'auto' : 0,
+      minWidth: 0, maxWidth: '900px', marginX: 'auto',
       backgroundColor: '#fff', border: `1px solid ${LINE}`, borderRadius: '16px',
       borderTop: mode === 'live' ? `4px solid ${LIVE}` : mode === 'test' ? `4px dashed ${PRACTICE_BORDER}` : `4px solid ${LINE}`,
       padding: { xs: '10px 14px 16px', md: '12px 20px 18px' }, gap: '6px',
