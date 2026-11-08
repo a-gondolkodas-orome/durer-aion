@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, alpha, useMediaQuery } from "@mui/material";
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
@@ -290,21 +290,23 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boo
   const streak = Math.min(G.winningStreak, 2);
   const done = streak === 2;
   return (
-    <Stack sx={{ gap: '10px', backgroundColor: '#fff', border: `1px solid ${NEUTRAL_BORDER}`, borderRadius: '14px', padding: '16px' }}>
+    <Stack sx={{ gap: '8px', backgroundColor: '#fff', border: `1px solid ${NEUTRAL_BORDER}`, borderRadius: '14px', padding: '14px 16px' }}>
       <Box sx={{ fontSize: '13px', fontWeight: 600, color: MUTED, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
         {t('strategy.goal.title')}
       </Box>
       <Box sx={{ fontSize: '17px', fontWeight: 600, lineHeight: 1.35 }}>{t('strategy.goal.text')}</Box>
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '15px' }}>
-        {t('strategy.goal.progress')} <b>{streak} / 2</b>
-        {/* The count says it; the dots only let it be seen at a glance. */}
-        <Stack aria-hidden sx={{ flexDirection: 'row', gap: '6px' }}>
+      {/* The sentence above says what is counted, so on screen the count
+          stands alone; its name is for a screen reader, and a hover or tap. */}
+      <Tooltip title={t('strategy.goal.progress')} enterTouchDelay={0} placement="bottom-start">
+        <Stack role="img" aria-label={`${t('strategy.goal.progress')}: ${streak} / 2`}
+          sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', alignSelf: 'flex-start' }}>
           {[0, 1].map(i => <Box key={i} sx={{
-            width: '14px', height: '14px', borderRadius: '50%', boxSizing: 'border-box',
+            width: '18px', height: '18px', borderRadius: '50%', boxSizing: 'border-box',
             ...(i < streak ? { backgroundColor: WIN } : { border: '2px solid #8c959f' }),
           }} />)}
+          <Box component="b" sx={{ fontSize: '17px', marginLeft: '4px' }}>{streak} / 2</Box>
         </Stack>
-      </Stack>
+      </Tooltip>
       {!done && (showStake || showIfLose) && <Box sx={{ fontSize: '14px', color: MUTED, lineHeight: 1.4 }}>
         {/* In a practice game the stake is the next live game's, not this one's. */}
         {showStake && (practice

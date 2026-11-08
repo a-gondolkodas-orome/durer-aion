@@ -285,7 +285,8 @@ describe('the goal panel after the second win', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER, gameover: true },
       { winner: GUESSER_PLAYER, winningStreak: 2, points: 12, liveResults: ['won', 'won'] });
 
-    expect(screen.getByText('2 / 2')).toBeInTheDocument();
+    // Behind the dialog, which hides the page from the accessibility tree.
+    expect(screen.getByRole('img', { name: 'strategy.goal.progress: 2 / 2', hidden: true })).toBeInTheDocument();
     expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
   });
 });

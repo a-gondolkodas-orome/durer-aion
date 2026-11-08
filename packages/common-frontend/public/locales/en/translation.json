@@ -156,7 +156,7 @@
     "goal": {
       "ifLose": "After a live loss, you need two wins in a row again.",
       "ifLoseDrop": "After a live loss, you need two wins in a row again, and the stake drops to {{points}}.",
-      "progress": "Live wins in a row:",
+      "progress": "Live wins in a row",
       "stake": "{{points}} are at stake now.",
       "stakeNextLive": "{{points}} are at stake in the next live game.",
       "text": "Beat the computer twice in a row in live games.",
