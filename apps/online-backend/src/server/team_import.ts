@@ -112,14 +112,19 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   const header = table.shift() ?? [];
   const export_table: string[][] = [];
   const read = readHeader(header);
+  // A header with no tab is one cell, so every column reads as missing even
+  // when the words are all there: that is the one thing to say about it.
+  if (header.length === 1 && header[0].trim() !== '') {
+    onerror('Egy csapat sem került be. A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, '
+      + 'nem szóközzel.');
+    onerror(`A fájl első sora: „${header[0].trim()}”`);
+    return { successful: 0, existing: 0, failed: 0, export_table, logs };
+  }
   if ('refused' in read) {
     onerror(`Egy csapat sem került be. ${read.refused}`);
     onerror(`A fájl első sora: ${header.map(cell => cell.trim()).join(', ')}`);
     onerror('Oszlopok, tetszőleges sorrendben: Teamname és Category (kötelező); Email, Other, ID, Login Code és '
       + 'Credentials (elhagyható, az utolsó hármat ilyenkor a szerver generálja).');
-    if (header.length === 1) {
-      onerror('A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.');
-    }
     return { successful: 0, existing: 0, failed: 0, export_table, logs };
   }
   if (read.unknown.length > 0) {

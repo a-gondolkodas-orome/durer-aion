@@ -91,7 +91,21 @@ describe('import_teams_from_tsv', () => {
 
     expect(result.successful).toBe(0);
     expect(create).not.toHaveBeenCalled();
-    expect(result.logs.value).toContain('A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.');
+    // Only that: read as one cell, the header would also seem to lack the
+    // columns it plainly names.
+    expect(result.logs.value).toEqual([
+      'Egy csapat sem került be. A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.',
+      'A fájl első sora: „Teamname  Category”',
+    ]);
+  });
+
+  it('does not take an empty first line for a header without tabs', async () => {
+    (readFileSync as Mock).mockReturnValue('\nAlpha\tC\n');
+
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+    expect(result.successful).toBe(0);
+    expect(result.logs.value[0]).toMatch(/^Egy csapat sem került be\. Az első sornak a fejlécnek kell lennie/);
   });
 
   it('fails a row with no tab under a header that has them', async () => {
