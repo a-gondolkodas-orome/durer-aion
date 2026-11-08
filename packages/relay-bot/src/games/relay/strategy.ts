@@ -179,11 +179,15 @@ export const problems : RelayProblems = {
   ],
 }
 
+// This copy is in Hungarian only.
+const problemText = (problem: Problem) => ({ hu: problem.problemText });
+const imageUrl = (problem: Problem) => problem.url === undefined ? {} : { hu: problem.url };
+
 export function relayStrategy(problemList: Problem[]) {
   return (state: State<MyGameState>, _botID: string): [RelayMoveArgs, string] => {
     if (state.G.numberOfTry === 0) {
       const firstProblem = problemList[state.G.currentProblem];
-      return [[firstProblem.problemText, problemList.map(p => p.points), firstProblem.url ?? ""], "firstProblem"];
+      return [[problemText(firstProblem), problemList.map(p => p.points), imageUrl(firstProblem)], "firstProblem"];
     }
     let correctnessPreviousAnswer = false;
     if (state.G.answer === problemList[state.G.currentProblem].answer) {
@@ -194,7 +198,7 @@ export function relayStrategy(problemList: Problem[]) {
 
     if (state.G.currentProblem < problemList.length - 1) {
       const nextProblem = problemList[state.G.currentProblem + 1];
-      return [[nextProblem.problemText, correctnessPreviousAnswer, nextProblem.url ?? ""], "newProblem"];
+      return [[problemText(nextProblem), correctnessPreviousAnswer, imageUrl(nextProblem)], "newProblem"];
     }
     return [[correctnessPreviousAnswer], "endGame"];
   }

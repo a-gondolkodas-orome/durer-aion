@@ -1,6 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
-import type { RelayProblemResult } from "schemas";
+import type { Localized, RelayProblemResult } from "schemas";
 import { timestampMoves } from "../../common/timestamp";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 
@@ -11,7 +11,9 @@ interface Answer {
 
 export interface MyGameState {
   currentProblem: number;
-  problemText: string;
+  // The current problem in each of its languages, which the board picks from
+  // by the team's: a team can switch language mid-match.
+  problemText: Localized<string>;
   answer: number | null;
   points: number;
   correctnessPreviousAnswer: boolean | null;
@@ -26,13 +28,14 @@ export interface MyGameState {
   millisecondsRemaining: number;
   start: string;
   end: string;
-  url: string;
+  // Absent in a language the problem has no image in, empty if in none.
+  imageUrl: Localized<string>;
 }
 
 // The judge's moves' arguments, one tuple per move.
 export type RelayMoveArgs =
-  | [problemText: string, maxPointsList: number[], url: string] // firstProblem
-  | [problemText: string, correctnessPreviousAnswer: boolean, url: string] // newProblem
+  | [problemText: Localized<string>, maxPointsList: number[], imageUrl: Localized<string>] // firstProblem
+  | [problemText: Localized<string>, correctnessPreviousAnswer: boolean, imageUrl: Localized<string>] // newProblem
   | [availablePoints: number] // nextTry
   | [correctnessPreviousAnswer: boolean]; // endGame
 
@@ -57,7 +60,7 @@ export function relayProblemResults(G: Pick<MyGameState, "start" | "maxPointsLis
   }));
 }
 
-const lengthOfCompetition = 60 * 60; // seconds
+export const RELAY_DEFAULT_DURATION_MINUTES = 60;
 
 // How many answers a problem takes at most. The game does not enforce it: the
 // judge does, by serving the next problem after the last wrong one, which is
@@ -92,7 +95,15 @@ function getTime({ G, playerID }: FnContext<MyGameState> & { playerID: PlayerID 
   G.millisecondsRemaining = new Date(G.end).getTime() - new Date().getTime();
 }
 
-export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void = () => undefined): Game<MyGameState> {
+export interface RelayOptions {
+  durationMinutes?: number;
+}
+
+export function RelayWrapper(
+  sendRelayFunction: (_report: RelayReport) => void = () => undefined,
+  { durationMinutes = RELAY_DEFAULT_DURATION_MINUTES }: RelayOptions = {},
+): Game<MyGameState> {
+  const durationMs = durationMinutes * 60 * 1000;
   const GameRelay: Game<MyGameState> = {
     name: "relay",
     setup: () => {
@@ -100,7 +111,7 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         currentProblem: 0,
         // The judge's firstProblem move fills in the problem fields: the game
         // does not hold the problem bank, which the live client must not ship.
-        problemText: "",
+        problemText: {},
         answer: null,
         points: 0,
         correctnessPreviousAnswer: null,
@@ -109,10 +120,10 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
         currentProblemAvailablePoints: 0,
         maxPointsList: [],
         numberOfTry: 0,
-        millisecondsRemaining: 1000 * lengthOfCompetition,
+        millisecondsRemaining: durationMs,
         start: new Date().toISOString(),
-        end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
-        url: "",
+        end: new Date(Date.now() + durationMs).toISOString(),
+        imageUrl: {},
       };
     },
     phases:
@@ -125,12 +136,12 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
             }
             events.endTurn();
           },
-          firstProblem({ G, _ctx, playerID, events }, problemText: string, maxPointsList: number[], url: string) {
+          firstProblem({ G, _ctx, playerID, events }, problemText: Localized<string>, maxPointsList: number[], imageUrl: Localized<string>) {
             if (playerID !== JUDGE_PLAYER) {
               // Only the judge serves problems
               return INVALID_MOVE;
             }
-            G.url = url;
+            G.imageUrl = imageUrl;
             G.problemText = problemText;
             G.maxPointsList = maxPointsList;
             G.currentProblemAvailablePoints = maxPointsList[G.currentProblem];
@@ -191,12 +202,12 @@ export function RelayWrapper(sendRelayFunction: (_report: RelayReport) => void =
           sendRelayFunction({ component: "relay", phase: "end", G: G, ctx: ctx });
         },
         moves: { getTime, ...timestampMoves<MyGameState>({
-          newProblem({ G, _ctx, playerID, events }, problemText: string, correctnessPreviousAnswer: boolean, url: string) {
+          newProblem({ G, _ctx, playerID, events }, problemText: Localized<string>, correctnessPreviousAnswer: boolean, imageUrl: Localized<string>) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               // Only the judge serves problems, and only once an answer is in
               return INVALID_MOVE;
             }
-            G.url = url;
+            G.imageUrl = imageUrl;
             G.previousAnswers[G.currentProblem].push({ answer: G.answer, date: new Date().toISOString() });
             G.problemText = problemText;
             G.previousAnswers.push(Array(0));

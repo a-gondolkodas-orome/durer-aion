@@ -10,7 +10,7 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", [2, 3], "");
+    client.moves.firstProblem({ hu: "first problem text" }, [2, 3], {});
 
     expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(2);
     expect(client.getState()?.G.maxPointsList).toStrictEqual([2, 3]);
@@ -21,9 +21,9 @@ describe("GameRelay first problem points", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", [2, 3], "");
+    client.moves.firstProblem({ hu: "first problem text" }, [2, 3], {});
     client.moves.submitAnswer(120);
-    client.moves.newProblem("second problem text", true, "");
+    client.moves.newProblem({ hu: "second problem text" }, true, {});
 
     expect(client.getState()?.G.points).toStrictEqual(2);
     expect(client.getState()?.G.previousPoints[0]).toStrictEqual(2);
@@ -47,7 +47,7 @@ describe("RelayWrapper end report", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", [2, 3], "");
+    client.moves.firstProblem({ hu: "first problem text" }, [2, 3], {});
     client.moves.submitAnswer(120);
     client.moves.endGame(true);
 
@@ -73,7 +73,7 @@ describe("GameRelay move log", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", [2, 3], "");
+    client.moves.firstProblem({ hu: "first problem text" }, [2, 3], {});
     client.moves.getTime();
     client.moves.submitAnswer(120);
     client.moves.nextTry(1);
@@ -103,13 +103,13 @@ describe("RelayWrapper step report", () => {
     });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first problem text", [2, 3], "");
+    client.moves.firstProblem({ hu: "first problem text" }, [2, 3], {});
 
     client.moves.getTime();
     client.moves.submitAnswer(120);
     client.moves.nextTry(1);
     client.moves.submitAnswer(7);
-    client.moves.newProblem("second problem text", true, "");
+    client.moves.newProblem({ hu: "second problem text" }, true, {});
     client.moves.getTime();
 
     expect(steps).toStrictEqual([120, 7]);
@@ -122,17 +122,17 @@ describe("relayProblemResults", () => {
     client.start();
 
     client.moves.startGame();
-    client.moves.firstProblem("first", [4, 3, 5], "");
+    client.moves.firstProblem({ hu: "first" }, [4, 3, 5], {});
     client.moves.submitAnswer(1);
     client.moves.nextTry(3);
     client.moves.submitAnswer(2);
-    client.moves.newProblem("second", true, "");
+    client.moves.newProblem({ hu: "second" }, true, {});
     for (const lowered of [2, 1]) {
       client.moves.submitAnswer(lowered);
       client.moves.nextTry(lowered);
     }
     client.moves.submitAnswer(3);
-    client.moves.newProblem("third", false, "");
+    client.moves.newProblem({ hu: "third" }, false, {});
 
     const G = client.getState()?.G;
     expect(G && relayProblemResults(G).map(({ maxPoints, points, trySeconds }) => [maxPoints, points, trySeconds.length]))
@@ -157,5 +157,24 @@ describe("relayProblemResults", () => {
       { maxPoints: 4, points: 0, trySeconds: [30, 60, 5] },
       { maxPoints: 5, points: 0, trySeconds: [] },
     ]);
+  });
+});
+
+describe("RelayWrapper duration", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test.each([
+    [undefined, 60],
+    [45, 45],
+  ])("a relay given %s minutes ends %s minutes after it starts", (durationMinutes, expectedMinutes) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-10T10:00:00Z"));
+    const client = Client({ game: RelayWrapper(undefined, { durationMinutes }), numPlayers: 2 });
+
+    const G = client.getState()?.G;
+    expect(G?.millisecondsRemaining).toStrictEqual(expectedMinutes * 60 * 1000);
+    expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toStrictEqual(expectedMinutes * 60 * 1000);
   });
 });

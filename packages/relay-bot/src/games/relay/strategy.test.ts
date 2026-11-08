@@ -21,7 +21,7 @@ describe("relayStrategy", () => {
     );
 
     expect(move).toStrictEqual("firstProblem");
-    expect(args).toStrictEqual(["first", [2, 3], ""]);
+    expect(args).toStrictEqual([{ hu: "first" }, [2, 3], {}]);
   });
 
   test("advancing serves the next problem", () => {
@@ -31,7 +31,7 @@ describe("relayStrategy", () => {
     );
 
     expect(move).toStrictEqual("newProblem");
-    expect(args).toStrictEqual(["second", true, ""]);
+    expect(args).toStrictEqual([{ hu: "second" }, true, {}]);
   });
 });
 
@@ -61,7 +61,7 @@ describe("a relay round against the bot", () => {
   test("the round opens with the first problem, worth its full points", () => {
     const client = startRound();
 
-    expect(client.getState()?.G.problemText).toStrictEqual("first");
+    expect(client.getState()?.G.problemText).toStrictEqual({ hu: "first" });
     expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(2);
     expect(client.getState()?.G.numberOfTry).toStrictEqual(1);
   });
@@ -75,7 +75,7 @@ describe("a relay round against the bot", () => {
     expect(client.getState()?.G.numberOfTry).toStrictEqual(2);
     expect(client.getState()?.G.currentProblemAvailablePoints).toStrictEqual(1);
     expect(client.getState()?.G.correctnessPreviousAnswer).toBe(false);
-    expect(client.getState()?.G.problemText).toStrictEqual("first");
+    expect(client.getState()?.G.problemText).toStrictEqual({ hu: "first" });
   });
 
   test("a later correct answer scores what the problem is still worth", () => {
@@ -88,7 +88,7 @@ describe("a relay round against the bot", () => {
 
     expect(client.getState()?.G.points).toStrictEqual(1);
     expect(client.getState()?.G.previousPoints[0]).toStrictEqual(1);
-    expect(client.getState()?.G.problemText).toStrictEqual("second");
+    expect(client.getState()?.G.problemText).toStrictEqual({ hu: "second" });
   });
 
   test("the third wrong answer closes the problem with nothing scored", () => {
@@ -124,7 +124,7 @@ describe("relay answers", () => {
     const client = Client({ game: GameRelay, numPlayers: 2 });
     client.start();
     client.moves.startGame();
-    client.moves.firstProblem("first", [2, 3], "");
+    client.moves.firstProblem({ hu: "first" }, [2, 3], {});
     return client;
   };
 

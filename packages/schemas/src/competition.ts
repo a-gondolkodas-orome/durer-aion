@@ -95,17 +95,22 @@ export interface StartWindow {
 export const ROUNDS = ['online', 'local', 'final'] as const;
 export type Round = typeof ROUNDS[number];
 
+/// One value per language, any of them missing.
+export type Localized<T> = Partial<Record<Language, T>>;
+
+/// The value in the given language, else in the first of the others, in
+/// `LANGUAGES` order, that has one.
+export function inLanguage<T>(values: Localized<T>, language: Language): T | undefined {
+  return [language, ...LANGUAGES.filter(other => other !== language)]
+    .map(each => values[each])
+    .find(value => value !== undefined);
+}
+
 /// A name in at least one language, shown in another one where the reader's
 /// is missing.
-export type LocalizedLabel = Partial<Record<Language, string>>;
+export type LocalizedLabel = Localized<string>;
 
-/// The label in the given language, else in the first of the others, in
-/// `LANGUAGES` order, that has it.
-export function localizeLabel(label: LocalizedLabel, language: Language): string | undefined {
-  return [language, ...LANGUAGES.filter(other => other !== language)]
-    .map(each => label[each])
-    .find(text => text !== undefined);
-}
+export const localizeLabel: (label: LocalizedLabel, language: Language) => string | undefined = inLanguage;
 
 /// For teams and admins to orient themselves by. The platform decides nothing
 /// from it. A `competition` is one round of one edition of the Dürer, in one
