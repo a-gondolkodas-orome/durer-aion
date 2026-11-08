@@ -8,6 +8,7 @@ import { useSnackbar } from "notistack";
 import { useRefreshTeamState } from "../hooks/user-hooks";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import { RELAY_MAX_TRIES } from "game";
 
 function sanitizeValue(value: string) {
   const regex = /^([1-9]*[0-9]*)$/;
@@ -40,6 +41,8 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
     setFocusAttempt(props.attempt);
   }
   const { t } = useTranslation();
+  // The tries the judge has ruled on are this problem's previous answers.
+  const tryNumber = props.previousTries.length + 1;
   // Awaited inside the try, so a handler that throws is reported like one that
   // rejects. The form does not wait for it: it resets right after the call.
   const sendAnswer = async (result: number) => {
@@ -73,8 +76,15 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      {t('relay.guess')}
+      {t('relay.guess', { try: tryNumber, max: RELAY_MAX_TRIES })}
     </Stack>
+    {/* Running out of tries is also the only way to give a problem up, so once
+        a try has gone wrong the form says where the last one leads. */}
+    {tryNumber > 1 && <Stack sx={{ fontSize: 14, fontStyle: 'italic', marginBottom: '10px' }}>
+      {tryNumber >= RELAY_MAX_TRIES
+        ? t('relay.tryHintLast')
+        : t('relay.tryHint', { max: RELAY_MAX_TRIES })}
+    </Stack>}
     <Stack>
       <Form
         key={`result-${props.attempt}`}
