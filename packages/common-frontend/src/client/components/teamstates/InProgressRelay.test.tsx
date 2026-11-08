@@ -25,7 +25,7 @@ afterEach(() => {
 // on a move, so one left to run out has not ended.
 const G: MyGameState = {
   currentProblem: 1,
-  problemText: { hu: 'second problem' },
+  problemText: 'second problem',
   answer: null,
   points: 3,
   correctnessPreviousAnswer: true,
@@ -37,7 +37,7 @@ const G: MyGameState = {
   millisecondsRemaining: -6000,
   start: '2026-10-10T10:00:00Z',
   end: '2026-10-10T11:00:00Z',
-  imageUrl: {},
+  imageUrl: '',
 };
 
 // Relay practice's board: its way out logs out to the round selector, where

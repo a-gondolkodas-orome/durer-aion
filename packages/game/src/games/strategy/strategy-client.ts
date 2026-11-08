@@ -1,7 +1,7 @@
 // The client half of the registries — see strategy-games.ts. The frontends
 // import this through the `game/client` entry; the server never does.
 import type { ReactNode } from "react";
-import type { Localized } from "schemas";
+import type { Localizable } from "schemas";
 import { MyBoard as Board20ocde } from "./20ocde/board";
 import { descriptionC as description20oc, descriptionD as description20od, descriptionE as description20oe } from "./20ocde/main";
 import type { StrategyGameKey } from "./strategy-games";
@@ -12,13 +12,13 @@ const boards = {
   "20o-e": Board20ocde,
 } satisfies Record<StrategyGameKey, unknown>;
 
-// The rules text shown above the board, in each of the game's languages
-// (`strategyGames`).
+// The rules text shown above the board: one for every language, or one per
+// language the game lists (`strategyGames`).
 export const strategyDescriptions = {
-  "20o-c": { hu: description20oc },
-  "20o-d": { hu: description20od },
-  "20o-e": { hu: description20oe },
-} satisfies Record<StrategyGameKey, Localized<ReactNode>>;
+  "20o-c": description20oc,
+  "20o-d": description20od,
+  "20o-e": description20oe,
+} satisfies Record<StrategyGameKey, Localizable<ReactNode>>;
 
 // Generic over the game so the caller keeps the board's own state type: a
 // plain StrategyGameKey parameter would widen the result to a union of boards,

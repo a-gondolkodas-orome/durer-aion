@@ -1,6 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
-import type { Localized, RelayProblemResult } from "schemas";
+import type { Localizable, RelayProblemResult } from "schemas";
 import { timestampMoves } from "../../common/timestamp";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
 
@@ -11,9 +11,10 @@ interface Answer {
 
 export interface MyGameState {
   currentProblem: number;
-  // The current problem in each of its languages, which the board picks from
-  // by the team's: a team can switch language mid-match.
-  problemText: Localized<string>;
+  // The current problem, the same in every language or in each of its own,
+  // which the board picks from by the team's: a team can switch language
+  // mid-match.
+  problemText: Localizable<string>;
   answer: number | null;
   points: number;
   correctnessPreviousAnswer: boolean | null;
@@ -28,14 +29,14 @@ export interface MyGameState {
   millisecondsRemaining: number;
   start: string;
   end: string;
-  // Absent in a language the problem has no image in, empty if in none.
-  imageUrl: Localized<string>;
+  // Empty, or absent in a language, where the problem has no image.
+  imageUrl: Localizable<string>;
 }
 
 // The judge's moves' arguments, one tuple per move.
 export type RelayMoveArgs =
-  | [problemText: Localized<string>, maxPointsList: number[], imageUrl: Localized<string>] // firstProblem
-  | [problemText: Localized<string>, correctnessPreviousAnswer: boolean, imageUrl: Localized<string>] // newProblem
+  | [problemText: Localizable<string>, maxPointsList: number[], imageUrl: Localizable<string>] // firstProblem
+  | [problemText: Localizable<string>, correctnessPreviousAnswer: boolean, imageUrl: Localizable<string>] // newProblem
   | [availablePoints: number] // nextTry
   | [correctnessPreviousAnswer: boolean]; // endGame
 
@@ -111,7 +112,7 @@ export function RelayWrapper(
         currentProblem: 0,
         // The judge's firstProblem move fills in the problem fields: the game
         // does not hold the problem bank, which the live client must not ship.
-        problemText: {},
+        problemText: "",
         answer: null,
         points: 0,
         correctnessPreviousAnswer: null,
@@ -123,7 +124,7 @@ export function RelayWrapper(
         millisecondsRemaining: durationMs,
         start: new Date().toISOString(),
         end: new Date(Date.now() + durationMs).toISOString(),
-        imageUrl: {},
+        imageUrl: "",
       };
     },
     phases:
@@ -136,7 +137,7 @@ export function RelayWrapper(
             }
             events.endTurn();
           },
-          firstProblem({ G, _ctx, playerID, events }, problemText: Localized<string>, maxPointsList: number[], imageUrl: Localized<string>) {
+          firstProblem({ G, _ctx, playerID, events }, problemText: Localizable<string>, maxPointsList: number[], imageUrl: Localizable<string>) {
             if (playerID !== JUDGE_PLAYER) {
               // Only the judge serves problems
               return INVALID_MOVE;
@@ -202,7 +203,7 @@ export function RelayWrapper(
           sendRelayFunction({ component: "relay", phase: "end", G: G, ctx: ctx });
         },
         moves: { getTime, ...timestampMoves<MyGameState>({
-          newProblem({ G, _ctx, playerID, events }, problemText: Localized<string>, correctnessPreviousAnswer: boolean, imageUrl: Localized<string>) {
+          newProblem({ G, _ctx, playerID, events }, problemText: Localizable<string>, correctnessPreviousAnswer: boolean, imageUrl: Localizable<string>) {
             if (playerID !== JUDGE_PLAYER || G.answer === null) {
               // Only the judge serves problems, and only once an answer is in
               return INVALID_MOVE;

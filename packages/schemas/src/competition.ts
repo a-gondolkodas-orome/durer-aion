@@ -98,19 +98,34 @@ export type Round = typeof ROUNDS[number];
 /// One value per language, any of them missing.
 export type Localized<T> = Partial<Record<Language, T>>;
 
-/// The value in the given language, else in the first of the others, in
-/// `LANGUAGES` order, that has one.
-export function inLanguage<T>(values: Localized<T>, language: Language): T | undefined {
+/// A value the same in every language, or one per language. The plain form
+/// is for whoever writes for one language only and need not know of the other.
+export type Localizable<T> = T | Localized<T>;
+
+/// Whether a value is the per-language form: a plain object keyed by
+/// languages alone. A React element or an array is a plain value.
+export function isLocalized<T>(value: Localizable<T>): value is Localized<T> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype: unknown = Object.getPrototypeOf(value);
+  return (prototype === Object.prototype || prototype === null) && Object.keys(value).every(isLanguage);
+}
+
+/// A plain value as it is; else the value in the given language, or in the
+/// first of the others, in `LANGUAGES` order, that has one.
+export function inLanguage<T>(value: Localizable<T>, language: Language): T | undefined {
+  if (!isLocalized(value)) return value;
   return [language, ...LANGUAGES.filter(other => other !== language)]
-    .map(each => values[each])
-    .find(value => value !== undefined);
+    .map(each => value[each])
+    .find(each => each !== undefined);
 }
 
 /// A name in at least one language, shown in another one where the reader's
 /// is missing.
 export type LocalizedLabel = Localized<string>;
 
-export const localizeLabel: (label: LocalizedLabel, language: Language) => string | undefined = inLanguage;
+export function localizeLabel(label: LocalizedLabel, language: Language): string | undefined {
+  return inLanguage<string>(label, language);
+}
 
 /// For teams and admins to orient themselves by. The platform decides nothing
 /// from it. A `competition` is one round of one edition of the Dürer, in one

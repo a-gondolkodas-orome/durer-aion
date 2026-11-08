@@ -133,10 +133,10 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
           padding: '30px',
         }}>
           <ExerciseTask
-            task={inLanguage(G.problemText, language) ?? ''}
+            task={inLanguage<string>(G.problemText, language) ?? ''}
             availablePoints={G.currentProblemAvailablePoints}
             serial={G.currentProblem + 1}
-            pictureUrl={inLanguage(G.imageUrl, language) ?? null}
+            pictureUrl={inLanguage<string>(G.imageUrl, language) || null}
           />
         </Stack>
         <Stack sx={{

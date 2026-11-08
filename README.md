@@ -483,8 +483,9 @@ the clock, the test/live choice, choosing who starts, tries and score.
   status line and the end table come from `boardWrapper`
   (`packages/common-frontend/src/common/boardwrapper.tsx`).
 - **`main.tsx`** exports the rules text shown above the board, which
-  `strategyDescriptions` registers per game id and language; the board shows
-  the page's language, else another one.
+  `strategyDescriptions` registers per game id: one element for every
+  language, or `{ hu, en }` for a game in both, of which the board shows the
+  page's.
 
 A relay is not a new game but a problem list: `Problem[]` per category in
 `packages/relay-bot/src/games/relay/strategy.ts` for the competition, and per

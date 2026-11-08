@@ -101,6 +101,13 @@ describe('the strategy board on the judge\'s turn', () => {
 });
 
 describe('the strategy board\'s description', () => {
+  test('is the one given, whatever the page language, when it is given once', () => {
+    i18n.language = 'en';
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, <p>egyetlen szabály</p>));
+
+    expect(screen.getByText('egyetlen szabály')).toBeInTheDocument();
+  });
+
   test('is in the page language', () => {
     i18n.language = 'en';
     renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { hu: 'magyar szabály', en: 'English rule' }));

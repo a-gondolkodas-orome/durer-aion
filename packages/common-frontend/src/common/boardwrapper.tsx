@@ -13,7 +13,7 @@ import type { BoardProps } from "boardgame.io/react";
 import type { ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import { inLanguage, type Localized } from "schemas";
+import { inLanguage, type Localizable } from "schemas";
 import { useUiLanguage } from "../client/hooks/ui-language";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
@@ -21,8 +21,9 @@ import { useUiLanguage } from "../client/hooks/ui-language";
 /// through untouched, so a board may read anything bgio put there.
 export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
 export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
-/// A game's rules text in each of its languages; the board shows the page's.
-export type StrategyDescription = Localized<ReactNode>;
+/// A game's rules text, one for every language or one per language; the board
+/// shows the page's.
+export type StrategyDescription = Localizable<ReactNode>;
 
 export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDescription) {
   return (props: StrategyBoardProps<G>) => {
@@ -103,7 +104,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
             <Stack sx={{ fontWeight: 'bold', marginTop: '10px' }}>
               {t('strategy.description')}:
             </Stack>
-            {inLanguage(description, language)}
+            {inLanguage<ReactNode>(description, language)}
             <Stack sx={{ fontWeight: 'bold', marginTop: '10px' }}>
               {t('strategy.instructions')}:
             </Stack>
