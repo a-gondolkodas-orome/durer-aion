@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { ThemeProvider } from './theme-context';
 import { ThemeSwitcher } from './theme-switcher';
 
@@ -13,8 +13,13 @@ const stubMatchMedia = () => {
 };
 
 const renderSwitcher = () => render(<ThemeProvider><ThemeSwitcher /></ThemeProvider>);
-const button = (label: string) => screen.getByLabelText(label);
-const isActive = (label: string) => button(label).className.includes('font-bold');
+// The select in Hungarian, the language every test starts in (test-setup.ts).
+const select = () => screen.getByRole('combobox', { name: 'Megjelenés' });
+const shown = () => select().textContent;
+const choose = (label: string) => {
+  fireEvent.mouseDown(select());
+  fireEvent.click(within(screen.getByRole('listbox')).getByRole('option', { name: label }));
+};
 
 beforeEach(() => {
   localStorage.clear();
@@ -28,25 +33,29 @@ describe('ThemeSwitcher', () => {
   it('marks the theme in use, which is system until one is chosen', () => {
     renderSwitcher();
 
-    expect(isActive('System theme')).toBe(true);
-    expect(isActive('Light mode')).toBe(false);
-    expect(isActive('Dark mode')).toBe(false);
+    expect(shown()).toBe('Rendszer');
   });
 
   it('marks the theme an earlier session stored', () => {
     localStorage.setItem('theme', 'light');
     renderSwitcher();
 
-    expect(isActive('Light mode')).toBe(true);
-    expect(isActive('System theme')).toBe(false);
+    expect(shown()).toBe('Világos');
+  });
+
+  it('reads a stored theme the site does not offer as system', () => {
+    localStorage.setItem('theme', 'auto');
+    renderSwitcher();
+
+    expect(shown()).toBe('Rendszer');
   });
 
   it('switches the theme, and the page with it', () => {
     renderSwitcher();
 
-    fireEvent.click(button('Dark mode'));
+    choose('Sötét');
 
-    expect(isActive('Dark mode')).toBe(true);
+    expect(shown()).toBe('Sötét');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
     expect(localStorage.getItem('theme')).toBe('dark');
   });
@@ -55,12 +64,12 @@ describe('ThemeSwitcher', () => {
     localStorage.setItem('theme', 'dark');
     renderSwitcher();
 
-    fireEvent.click(button('Light mode'));
-    expect(isActive('Light mode')).toBe(true);
+    choose('Világos');
+    expect(shown()).toBe('Világos');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
 
-    fireEvent.click(button('System theme'));
-    expect(isActive('System theme')).toBe(true);
+    choose('Rendszer');
+    expect(shown()).toBe('Rendszer');
     expect(localStorage.getItem('theme')).toBeNull();
   });
 });
