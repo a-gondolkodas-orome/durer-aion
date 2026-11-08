@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { CompetitionConfig, isEntityId, localizeProblem, Problem, RelayConfig, StrategyConfig } from './competition';
 import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
 
