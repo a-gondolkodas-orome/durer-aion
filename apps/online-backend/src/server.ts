@@ -3,12 +3,20 @@ import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import { competitionGames } from './games';
+import { strategyGames } from 'game';
+import { assertValidRegistry } from 'problem-bank';
+import { registry } from 'problem-bank/all';
 import { configureTeamsRouter } from './server/router';
 import { getDb } from './server/db';
 import { getAdminCredentials, getBotCredentials } from './server/common';
 import { requireAdmin } from './server/admin_session';
 
 const games = competitionGames.map(({ game }) => game);
+
+// CI validates the same registry (packages/problem-bank/src/registry.test.ts);
+// this catches one that reached a server without it, such as a private repo's
+// edit, before any team starts a match.
+assertValidRegistry(registry, strategyGames);
 
 if (argv[2] === "sanity-check") {
   console.log("OK");

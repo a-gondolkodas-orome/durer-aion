@@ -20,6 +20,7 @@ services:
       - ./packages/game:/usr/src/app/packages/game
       - ./packages/schemas:/usr/src/app/packages/schemas
       - ./packages/relay-bot:/usr/src/app/packages/relay-bot
+      - ./packages/problem-bank:/usr/src/app/packages/problem-bank
       # Keep node_modules from image (avoid reinstall each time)
       # - /usr/src/app/node_modules
       # Give dist a volume of its own, so the watcher's output is not written

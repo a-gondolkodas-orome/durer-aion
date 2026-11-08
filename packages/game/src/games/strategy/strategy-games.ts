@@ -6,7 +6,7 @@
 // re-exporting `strategy` next to `board` is what would hand the bot to the
 // live client again. ESLint holds each registry to the files it may import
 // (eslint.config.mjs).
-import type { CompetitionCategory } from "schemas";
+import type { CompetitionCategory, StrategyGameId, StrategyGameInfo } from "schemas";
 import { MyGameWrapper as GameWrapper20ocde } from "./20ocde/game";
 import type { MyGameState as GameState20ocde } from "./20ocde/game";
 
@@ -23,6 +23,14 @@ export const MyGameWrappers = {
   D: () => GameWrapper20ocde("D"),
   E: () => GameWrapper20ocde("E"),
 }
+
+// The strategy games a competition can name (`StrategyConfig.gameId`), each a
+// game in one variant, and the languages its board and description exist in.
+export const strategyGames = {
+  "20o-c": { languages: ["hu"] },
+  "20o-d": { languages: ["hu"] },
+  "20o-e": { languages: ["hu"] },
+} satisfies Record<StrategyGameId, StrategyGameInfo>;
 
 export const strategyNames = {
   // need to be unique even if the game is the same

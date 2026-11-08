@@ -32,26 +32,28 @@ const noDynamicBotImport = {
 };
 
 const noProblemsMessage =
-  'The live client must not ship the relay problems: `relay-bot` carries their answers.';
+  'The live client must not ship the relay problems: `relay-bot` and `problem-bank` carry their answers.';
 
-// `relay-bot` is the relay problem bank — each problem's text, its answer and what
-// it is worth — so the live competition client must not name it, by the package or
-// by any path spelling of its source or its build. The bank is not behind a
-// sub-entry the way packages/game's bots are: the package *is* the bot, so the ban
-// is on the package itself.
+// `relay-bot` and `problem-bank` both hold relay problems — each problem's text,
+// its answer and what it is worth — so the live competition client must name
+// neither, by the package, by a sub-entry (`problem-bank/all`,
+// `problem-bank/banks/…`) or by any path to it. Neither is behind a sub-entry
+// the way packages/game's bots are: the package *is* the secret, so the ban is
+// on the package itself. The names are specific enough to ban any path segment
+// spelled so: a generic one such as `competitions` would also catch the live
+// client's own `./competitions/…` folder.
 const noProblemsInTheClient = {
-  group: [
-    'relay-bot', 'relay-bot/*',
-    '**/packages/relay-bot/**',
-    '**/relay-bot/src/**', '**/relay-bot/dist/**',
-  ],
+  group: ['relay-bot', 'problem-bank'].flatMap(name => [
+    name, `${name}/**`,
+    `**/${name}`, `**/${name}/**`,
+  ]),
   message: noProblemsMessage,
 };
 
 // The same spellings for `import()`, which the core rule does not read at all —
 // see the note on noDynamicBotImport above.
 const noDynamicProblemsImport = {
-  selector: 'ImportExpression > Literal[value=/(^|\\/)relay-bot($|\\/)|packages\\/relay-bot\\//]',
+  selector: 'ImportExpression > Literal[value=/(^|\\/)(relay-bot|problem-bank)($|\\/)/]',
   message: noProblemsMessage,
 };
 
