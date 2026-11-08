@@ -37,6 +37,9 @@ export function adminTeamId(team: TeamModelDto): string {
 /// problem, `sev` and `value` index-aligned.
 export interface TeamImportResultDto {
   successful: number;
+  /// Rows naming a team that is already there, left as it is: re-running a
+  /// grown list is how late teams are added.
+  existing: number;
   failed: number;
   /// The teams that landed, in the import's column order, with the generated
   /// id, join code and credentials filled in.

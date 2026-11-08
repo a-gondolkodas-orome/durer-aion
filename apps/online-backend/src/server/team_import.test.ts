@@ -29,10 +29,14 @@ function tsv(...rows: string[][]) {
 describe('import_teams_from_tsv', () => {
   let teams: TeamsRepository;
   let create: MockInstance;
+  // The teams already there when the import reads them.
+  let live: TeamModel[];
 
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.spyOn(sequelize, 'sync').mockResolvedValue(sequelize);
+    live = [];
+    vi.spyOn(TeamModel, 'findAll').mockImplementation(async () => live);
     teams = new TeamsRepository({ sequelize } as unknown as PostgresStore);
     const names = new Set<string>();
     create = vi.spyOn(TeamModel, 'create').mockImplementation((async (values: TeamModel) => {
@@ -265,5 +269,90 @@ describe('import_teams_from_tsv', () => {
     expect(result.failed).toBe(1);
     expect(result.export_table.map(exported => exported[3])).toEqual(['first', 'third']);
     expect(result.logs.value).toEqual(['3. sor (Twice): már van ilyen nevű csapat.']);
+  });
+
+  // Re-running a grown registration list is how late teams are added. Each
+  // team already there used to fail its row, so one real problem in the file
+  // hid among a line per team that was fine.
+  describe('a team that is already there', () => {
+    let n = 0;
+    const liveTeam = (teamName: string, fields: Partial<TeamModel> = {}) => {
+      const k = String(++n).padStart(3, '0');
+      return TeamModel.build({
+        teamName, category: 'C', email: 'a@b.com', other: '', pageState: 'HOME',
+        teamId: `8eae8669-125c-42e5-8b49-89afbac31${k}`, joinCode: `111-2222-${k}`,
+        credentials: `67676767-6767-4767-a767-676767676${k}`, relayMatchID: null, strategyMatchID: null,
+        ...fields,
+      });
+    };
+
+    it('is left as it is, and all of them are one line, ahead of the real problems', async () => {
+      live = Array.from({ length: 12 }, (_, i) => liveTeam(`Old ${i + 1}`));
+      tsv(
+        ...live.map(team => [team.teamName, 'C', 'a@b.com', '', '', '', '']),
+        ['New', 'D', '', '', '', '', ''],
+        ['Bad', 'X', '', '', '', '', ''],
+      );
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 1, existing: 12, failed: 1 });
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(result.logs.value).toEqual([
+        '12 csapat már szerepelt, változatlanul hagytuk: '
+          + 'Old 1, Old 2, Old 3, Old 4, Old 5, Old 6, Old 7, Old 8, Old 9, Old 10 és még 2.',
+        '15. sor (Bad): a kategória nem C, D vagy E: „X”.',
+      ]);
+      expect(result.export_table.map(row => row[0])).toEqual(['New']);
+    });
+
+    it('is recognised from its own identifiers too, as an export fed back is', async () => {
+      const there = liveTeam('Alpha');
+      live = [there];
+      tsv(['Alpha', 'C', 'a@b.com', '', there.teamId, there.joinCode, there.credentials]);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
+    });
+
+    // The name says one team and the identifier another, which a re-run does
+    // not explain: this is a row to look at, so it stays on its own line.
+    it('fails a row whose identifiers are not that team\'s', async () => {
+      live = [liveTeam('Alpha')];
+      tsv(['Alpha', 'C', 'a@b.com', '', '', '999-9999-999', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 0, existing: 0, failed: 1 });
+      expect(result.logs.value).toEqual(['2. sor (Alpha): már van ilyen nevű csapat, de más belépőkód értékkel.']);
+    });
+
+    // The import never changes a team that is there, so a category fixed in the
+    // file would otherwise not land, and nothing would say so.
+    it('says when the file holds another category or email than the team has', async () => {
+      live = [liveTeam('Alpha')];
+      tsv(['Alpha', 'D', 'new@b.com', '', '', '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
+      expect(create).not.toHaveBeenCalled();
+      expect(result.logs.value).toEqual([
+        '1 csapat már szerepelt, változatlanul hagytuk: Alpha.',
+        '2. sor (Alpha): már szerepel, C kategóriával; a fájlbeli D nem került át.',
+        '2. sor (Alpha): már szerepel, más e-mail címmel; a fájlbeli nem került át.',
+      ]);
+    });
+
+    // Two rows of one file naming the same team are a mistake in the file,
+    // not a re-run, so the second still fails.
+    it('is not a team the same file added a line earlier', async () => {
+      tsv(['Twice', 'C', '', '', '', '', ''], ['Twice', 'D', '', '', '', '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 1, existing: 0, failed: 1 });
+    });
   });
 });

@@ -43,6 +43,10 @@ function readHeader(header: string[]):
   return { positions, unknown };
 }
 
+// How many of the teams already there the grouped line names before it only
+// counts the rest.
+const NAMED_EXISTING = 10;
+
 const CATEGORIES_TEXT = `${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} vagy `
   + COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1];
 
@@ -77,11 +81,11 @@ function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
 export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
-  const { successful, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
+  const { successful, existing, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
-  console.info(`Összesen ${successful} csapat került be, ${failed} sor hibás.`);
+  console.info(`Összesen ${successful} csapat került be, ${existing} már szerepelt, ${failed} sor hibás.`);
   export_table.unshift([...COLUMNS]);
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
@@ -116,7 +120,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (header.length === 1) {
       onerror('A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.');
     }
-    return { successful: 0, failed: 0, export_table, logs };
+    return { successful: 0, existing: 0, failed: 0, export_table, logs };
   }
   if (read.unknown.length > 0) {
     onwarn(`Ezeket az oszlopokat nem ismerjük, kimaradnak: ${read.unknown.join(', ')}`);
@@ -126,6 +130,11 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   let successful = 0;
   let failed = 0; // not counting blank lines
   await teams.connect();
+  // Re-running a grown registration list is how late teams are added, so a
+  // row naming a team that is already there is that team, not a clash — as
+  // long as the identifiers it supplies are that team's own.
+  const live = new Map((await teams.listTeams() ?? []).map(team => [team.teamName, team]));
+  const existing: string[] = [];
   for (const [index, row] of table.entries()) {
     // The file's own line number, header included, as an editor shows it.
     const line = index + 2;
@@ -159,6 +168,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     let teamId = cell("ID");
     let login_code = cell("Login Code");
     let credentials = cell("Credentials");
+    const there = live.get(teamname);
 
 
     if (teamname === "") {
@@ -176,6 +186,29 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (other.length > OTHER_IMPORT_MAX_LENGTH) {
       onerror(`${where}: az Other túl hosszú (${other.length} karakter, legfeljebb ${OTHER_IMPORT_MAX_LENGTH}).`);
       ok = false;
+    }
+
+    if (ok && there !== undefined) {
+      const differs = [
+        teamId !== '' && teamId !== there.teamId ? 'ID' : null,
+        login_code !== '' && login_code !== there.joinCode ? 'belépőkód' : null,
+        credentials !== '' && credentials !== there.credentials ? 'Credentials' : null,
+      ].filter(name => name !== null);
+      if (differs.length > 0) {
+        onerror(`${where}: már van ilyen nevű csapat, de más ${differs.join(', ')} értékkel.`);
+        failed++;
+        continue;
+      }
+      existing.push(teamname);
+      // Not applied: the import never changes a team that is already there.
+      // Said, since a fix made in the file would otherwise vanish in silence.
+      if (category !== there.category) {
+        onwarn(`${where}: már szerepel, ${there.category} kategóriával; a fájlbeli ${category} nem került át.`);
+      }
+      if (email !== '' && email !== (there.email ?? '')) {
+        onwarn(`${where}: már szerepel, más e-mail címmel; a fájlbeli nem került át.`);
+      }
+      continue;
     }
 
     if (teamId === "") {
@@ -215,5 +248,13 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     }
   }
 
-  return { successful, failed, export_table, logs };
+  if (existing.length > 0) {
+    const named = existing.slice(0, NAMED_EXISTING).join(', ');
+    const rest = existing.length > NAMED_EXISTING ? ` és még ${existing.length - NAMED_EXISTING}` : '';
+    // First, so the rows that did go wrong are not read as part of it.
+    logs.value.unshift(`${existing.length} csapat már szerepelt, változatlanul hagytuk: ${named}${rest}.`);
+    logs.sev.unshift('warn');
+  }
+
+  return { successful, existing: existing.length, failed, export_table, logs };
 }
