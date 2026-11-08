@@ -3,8 +3,10 @@ import {
   isEntityId,
   isLanguage,
   Language,
+  LocalizedLabel,
   Problem,
   ProblemId,
+  ROUNDS,
   StrategyGameId,
 } from './competition';
 
@@ -31,6 +33,22 @@ function parseInstant(value: string): number | undefined {
 
 function isPositiveInteger(value: number) {
   return Number.isSafeInteger(value) && value > 0;
+}
+
+function validateLabel(label: LocalizedLabel, where: string): string[] {
+  const errors: string[] = [];
+  const languages = Object.keys(label);
+  if (languages.length === 0) {
+    errors.push(`${where}: the label is in no language`);
+  }
+  for (const language of languages) {
+    if (!isLanguage(language)) {
+      errors.push(`${where}: the label is in the unknown language "${language}"`);
+    } else if (label[language]?.trim() === '') {
+      errors.push(`${where}: the ${language} label is empty`);
+    }
+  }
+  return errors;
 }
 
 /// Every way the problem breaks the rules `Problem` states, as messages; none
@@ -100,6 +118,24 @@ export function validateCompetition(competition: CompetitionConfig, references: 
         errors.push(`${where}: closesAt is not after opensAt`);
       }
     }
+  }
+
+  const { metadata } = competition;
+  if (metadata.kind === 'competition') {
+    if (!isPositiveInteger(metadata.edition)) {
+      errors.push(`${where}: the edition ${metadata.edition} is not a positive integer`);
+    }
+    if (!(ROUNDS as readonly string[]).includes(metadata.round)) {
+      errors.push(`${where}: the round "${metadata.round}" is not one of ${ROUNDS.join(', ')}`);
+    }
+    if (metadata.category.trim() === '') {
+      errors.push(`${where}: the category is empty`);
+    }
+    if (metadata.label !== undefined) {
+      errors.push(...validateLabel(metadata.label, where));
+    }
+  } else {
+    errors.push(...validateLabel(metadata.label, where));
   }
 
   if (competition.relay === undefined && competition.strategy === undefined) {
