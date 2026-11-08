@@ -8453,6 +8453,8 @@ export const problems: RelayProblems = {
       points: 6,
     },
   ],
+  // problem-bank-copy.test.ts holds these three to problem-bank until this site
+  // runs on competitions (#137).
   "20_O_C": [
     {
       problemText:

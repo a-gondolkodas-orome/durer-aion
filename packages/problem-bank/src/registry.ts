@@ -1,7 +1,9 @@
 import type {
   CompetitionConfig,
+  CompetitionId,
   CompetitionSource,
   Problem,
+  ProblemId,
   ProblemSource,
   StrategyGameId,
   StrategyGameInfo,
@@ -20,8 +22,8 @@ export interface Bank {
 
 /// The competitions and problems one app serves, with the sources over them.
 export interface Registry {
-  problems: readonly Problem[];
-  competitions: readonly CompetitionConfig[];
+  problems: ReadonlyMap<ProblemId, Problem>;
+  competitions: ReadonlyMap<CompetitionId, CompetitionConfig>;
   problemSource: ProblemSource;
   competitionSource: CompetitionSource;
 }
@@ -46,18 +48,17 @@ export function validateRegistry(
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
 ): string[] {
   const references = {
-    problems: new Map(registry.problems.map(problem => [problem.id, problem])),
+    problems: registry.problems,
     strategyGames: new Map(Object.entries(strategyGames)),
   };
   const errors = [
-    ...registry.problems.flatMap(validateProblem),
-    ...registry.competitions.flatMap(competition => validateCompetition(competition, references)),
+    ...[...registry.problems.values()].flatMap(validateProblem),
+    ...[...registry.competitions.values()].flatMap(competition => validateCompetition(competition, references)),
   ];
   // A problem and a competition never share an id either: the format is the
   // same, and an id names one thing wherever it is read.
-  const competitionIds = new Set(registry.competitions.map(({ id }) => id));
-  for (const { id } of registry.problems) {
-    if (competitionIds.has(id)) errors.push(`${id} names both a problem and a competition`);
+  for (const id of registry.problems.keys()) {
+    if (registry.competitions.has(id)) errors.push(`${id} names both a problem and a competition`);
   }
   return errors;
 }

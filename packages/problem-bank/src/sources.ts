@@ -15,34 +15,27 @@ export type ProblemBank = Record<ProblemId, Omit<Problem, 'id'>>;
 /// Competitions as the code holds them, keyed by id like `ProblemBank`.
 export type CompetitionBank = Record<CompetitionId, Omit<CompetitionConfig, 'id'>>;
 
-/// The entries of several banks with their ids put back. An id in two banks is
-/// an error, where spreading them into one object would keep the last silently.
-export function fromBanks<T>(banks: readonly Record<string, T>[]): (T & { id: string })[] {
-  const seen = new Set<string>();
-  return banks.flatMap(bank => Object.entries(bank).map(([id, entry]) => {
-    if (seen.has(id)) throw new Error(`Two banks hold the id ${id}`);
-    seen.add(id);
-    return { id, ...entry };
-  }));
-}
-
-function byId<T extends { id: string }>(items: readonly T[], kind: string): Map<string, T> {
-  const map = new Map<string, T>();
-  for (const item of items) {
-    if (map.has(item.id)) throw new Error(`Two ${kind}s share the id ${item.id}`);
-    map.set(item.id, item);
+/// The entries of several banks by id, with their ids put back. An id in two
+/// banks is an error, where spreading them into one object would keep the last
+/// silently.
+export function fromBanks<T>(banks: readonly Record<string, T>[]): Map<string, T & { id: string }> {
+  const all = new Map<string, T & { id: string }>();
+  for (const bank of banks) {
+    for (const [id, entry] of Object.entries(bank)) {
+      if (all.has(id)) throw new Error(`Two banks hold the id ${id}`);
+      all.set(id, { id, ...entry });
+    }
   }
-  return map;
+  return all;
 }
 
 /// A `ProblemSource` over problems held in code.
-export function inCodeProblemSource(problems: readonly Problem[]): ProblemSource {
-  const all = byId(problems, 'problem');
+export function inCodeProblemSource(problems: ReadonlyMap<ProblemId, Problem>): ProblemSource {
   return {
     getProblems(ids: readonly ProblemId[]) {
       const found = new Map<ProblemId, Problem>();
       for (const id of ids) {
-        const problem = all.get(id);
+        const problem = problems.get(id);
         if (problem !== undefined) found.set(id, problem);
       }
       return Promise.resolve(found);
@@ -51,14 +44,13 @@ export function inCodeProblemSource(problems: readonly Problem[]): ProblemSource
 }
 
 /// A `CompetitionSource` over competitions held in code.
-export function inCodeCompetitionSource(competitions: readonly CompetitionConfig[]): CompetitionSource {
-  const all = byId(competitions, 'competition');
+export function inCodeCompetitionSource(competitions: ReadonlyMap<CompetitionId, CompetitionConfig>): CompetitionSource {
   return {
     getCompetition(id: CompetitionId) {
-      return Promise.resolve(all.get(id));
+      return Promise.resolve(competitions.get(id));
     },
     listCompetitions() {
-      return Promise.resolve([...all.values()]);
+      return Promise.resolve([...competitions.values()]);
     },
   };
 }

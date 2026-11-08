@@ -16,7 +16,7 @@ export interface RelayProblems {
   E: Problem[];
 }
 
-// What the live round's judge reads. apps/online-backend's
+// What the live round's judge reads. apps/relay-practise-frontend's
 // problem-bank-copy.test.ts holds it to the problem bank until the round runs
 // on competitions (#137) and this copy goes.
 export const problems : RelayProblems = {
