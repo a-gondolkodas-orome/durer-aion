@@ -381,7 +381,7 @@ test('a single team\'s page has no tabs, not even while the list loads', async (
 });
 
 const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportResultDto => ({
-  successful: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
+  successful: 0, existing: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
 });
 
 const alphaCodes = ['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
@@ -427,13 +427,13 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
 });
 
-test('the import tab lists the server\'s errors and warnings, not its narration', async () => {
+test('the import tab lists the server\'s errors and warnings', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   vi.spyOn(repo, 'importTeams').mockResolvedValue(importAnswer({
     failed: 1,
     logs: {
-      sev: ['info', 'warn', 'error', 'error'],
-      value: ['Generating login code', 'WARNING: Header not exactly how we defined it.', 'Invalid category', '-'.repeat(52)],
+      sev: ['warn', 'error'],
+      value: ['Ezeket az oszlopokat nem ismerjük, kimaradnak: School', '2. sor (Bravo): a kategória nem C, D vagy E: „X”.'],
     },
   }));
   const saved = savedDownloads();
@@ -441,13 +441,28 @@ test('the import tab lists the server\'s errors and warnings, not its narration'
 
   await importFile();
 
-  expect(await screen.findByText('Invalid category')).toBeInTheDocument();
-  expect(screen.getByText('WARNING: Header not exactly how we defined it.')).toBeInTheDocument();
-  expect(screen.queryByText('Generating login code')).not.toBeInTheDocument();
-  expect(screen.getAllByRole('listitem').filter(item => item.textContent === '-'.repeat(52))).toEqual([]);
+  expect(await screen.findByText('2. sor (Bravo): a kategória nem C, D vagy E: „X”.')).toBeInTheDocument();
+  expect(screen.getByText('Ezeket az oszlopokat nem ismerjük, kimaradnak: School')).toBeInTheDocument();
   // Nothing went in, so there is nothing to save.
   expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
   expect(saved).toEqual([]);
+});
+
+// Re-running a grown registration list is how late teams are added, so a file
+// whose every team is already there is the ordinary answer, not a failure.
+test('the import tab calls a file of teams already there no failure', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importTeams').mockResolvedValue(importAnswer({
+    existing: 2,
+    logs: { sev: ['warn'], value: ['2 csapat már szerepelt, változatlanul hagytuk: Alpha, Bravo.'] },
+  }));
+  renderAdmin();
+
+  await importFile();
+
+  expect(await screen.findByText('Nem került be új csapat: mind a(z) 2 már szerepelt.')).toBeInTheDocument();
+  expect(screen.getByText('0 csapat importálva, 2 már szerepelt, 0 sor hibás.')).toBeInTheDocument();
+  expect(screen.queryByText('Egy csapat sem került be.')).not.toBeInTheDocument();
 });
 
 test('a second import keeps the codes of the first', async () => {

@@ -8,6 +8,11 @@ import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
+function summary(result: TeamImportResultDto): string {
+  const existing = result.existing > 0 ? `, ${result.existing} már szerepelt` : '';
+  return `${result.successful} csapat importálva${existing}, ${result.failed} sor hibás`;
+}
+
 /// Where teams come in and where their secrets go out. The import runs on the
 /// same route and the same importer as `npm run teams:import`, row by row, so
 /// a file with bad rows still loads the good ones. The export is every team
@@ -37,15 +42,17 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       setResult(answer);
       setFile(null);
       if (answer.successful === 0) {
-        enqueueSnackbar('Egy csapat sem került be.', { variant: 'error' });
+        // A file whose every team is already there is a re-run, not a failure.
+        if (answer.failed === 0 && answer.existing > 0) {
+          enqueueSnackbar(`Nem került be új csapat: mind a(z) ${answer.existing} már szerepelt.`, { variant: 'info' });
+        } else {
+          enqueueSnackbar('Egy csapat sem került be.', { variant: 'error' });
+        }
         return;
       }
       setCodes(held => [...held, ...answer.export_table]);
       props.onImported();
-      enqueueSnackbar(answer.failed === 0
-        ? `${answer.successful} csapat importálva`
-        : `${answer.successful} csapat importálva, ${answer.failed} sor hibás`,
-      { variant: answer.failed === 0 ? 'success' : 'warning' });
+      enqueueSnackbar(summary(answer), { variant: answer.failed === 0 ? 'success' : 'warning' });
     } catch (e: unknown) {
       enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
     } finally {
@@ -53,12 +60,8 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     }
   };
 
-  // The narration's per-row "Generating…" lines say nothing an organiser acts
-  // on, and the dashed lines it closes each failed row with are a terminal's
-  // separators, not messages.
   const messages = result === null ? [] : result.logs.value
-    .map((value, index) => ({ value, sev: result.logs.sev[index] }))
-    .filter(message => message.sev !== 'info' && !/^-+$/.test(message.value.trim()));
+    .map((value, index) => ({ value, sev: result.logs.sev[index] }));
 
   return (
     <Stack sx={{ gap: '16px', padding: '10px' }}>
@@ -93,12 +96,12 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       </Stack>
       {result !== null && (
         <Stack data-testid="importTeamsSummary">
-          {`${result.successful} csapat importálva, ${result.failed} sor hibás.`}
+          {`${summary(result)}.`}
         </Stack>
       )}
       {messages.length > 0 && (
         <Stack sx={{ gap: '4px' }}>
-          <Stack sx={{ fontSize: 14 }}>A szerver hibaüzenetei és figyelmeztetései (angolul):</Stack>
+          <Stack sx={{ fontSize: 14 }}>Hibák és figyelmeztetések:</Stack>
           <Stack
             component="ul"
             sx={{ margin: 0, maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 13 }}

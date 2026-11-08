@@ -13,7 +13,7 @@ it.each([
   ["teams.tsv", 200, 1],
   ["teams.csv", 400, 0],
 ])("PUT /team/admin/import of %s answers %i", async (filename, status, inserted) => {
-  const teams: Partial<TeamsRepository> = { connect: vi.fn(), insertTeam: vi.fn() };
+  const teams: Partial<TeamsRepository> = { connect: vi.fn(), listTeams: vi.fn().mockResolvedValue([]), insertTeam: vi.fn() };
   const app = new Koa<Koa.DefaultState, Server.AppCtx>();
   // The 400 is under test, and koa logs every error it writes.
   app.silent = true;
