@@ -6,7 +6,6 @@
 // contributor on a slightly different local patch is not blocked.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
 import { resolvedVersion } from '../dependency-report.mjs';
 
 // Every path here is repository-relative: Node is the whole repository's pin, and GitHub only

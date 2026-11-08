@@ -214,7 +214,16 @@ export default defineConfig(
       // `() => {}` as a prop or a stubbed DOM method is a test double saying "this
       // is never called, and if it is, do nothing" — which is the assertion. In
       // application code an empty function is a hole; here it is the point.
-      '@typescript-eslint/no-empty-function': 'off'
+      '@typescript-eslint/no-empty-function': 'off',
+      // vitest's test API is global (vite.config.js, tsconfig.json); only types,
+      // which have no global, are imported.
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        paths: [{
+          name: 'vitest',
+          allowTypeImports: true,
+          message: "vitest's test API is global here; import only types from 'vitest'."
+        }]
+      }]
     }
   },
   // This app's own JavaScript: the Vite config, this config, the repo scripts and

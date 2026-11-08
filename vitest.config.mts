@@ -37,9 +37,10 @@ export default defineConfig({
     ],
   },
   test: {
-    // The suites import from 'vitest' explicitly, so they typecheck without an
-    // ambient-types entry in every workspace tsconfig. Globals stay on because
-    // `@testing-library/jest-dom` extends the global `expect` when imported.
+    // The suites use `describe`, `it`, `expect`, `vi` and the hooks as globals,
+    // never importing them; every workspace tsconfig lists `vitest/globals` in
+    // its `types`, and ESLint forbids the import (eslint.config.mjs). Types such
+    // as `Mock` have no global and are still imported with `import type`.
     globals: true,
     // Most suites are plain Node. Component tests opt into a DOM per file with
     // a `// @vitest-environment jsdom` docblock.

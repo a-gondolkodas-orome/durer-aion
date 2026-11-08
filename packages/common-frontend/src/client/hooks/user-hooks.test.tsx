@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { act, render, renderHook } from '@testing-library/react';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';

@@ -59,6 +59,11 @@ export function relayProblemResults(G: Pick<MyGameState, "start" | "maxPointsLis
 
 const lengthOfCompetition = 60 * 60; // seconds
 
+// How many answers a problem takes at most. The game does not enforce it: the
+// judge does, by serving the next problem after the last wrong one, which is
+// also the only way to give a problem up.
+export const RELAY_MAX_TRIES = 3;
+
 // What the wrapper reports after each answered step and when the play phase
 // ends; hosts accept a superset of this shape (the offline frontend's
 // SendGameDataParams).

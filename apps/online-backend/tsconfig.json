@@ -36,6 +36,8 @@
       "schemas": ["../../packages/schemas/index.ts"],
       "relay-bot": ["../../packages/relay-bot/index.ts"]
     },
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // The suites use vitest's globals without importing them (tsconfig.base.json).
+    "types": ["vitest/globals"]
   }
 }

@@ -112,12 +112,24 @@ export function ChooserItem(props: {
             xs: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
             md: "0px",
           },
+          "& p": {
+            marginBlockEnd: 0,
+          },
         }}>
           <Stack sx={{ marginTop: {
             md: 0,
             xs: '10px'
           } }}>
-            {!props.hideDesc && t('chooser.relayDescription')}
+            {!props.hideDesc &&
+            <Trans
+              i18nKey='chooser.relayDescriptionHtml'
+              components={{
+                b: <b />,
+                p: <p />,
+                ul: <ul />,
+                li: <li />
+              }}
+            />}
           </Stack>
         </Stack>
       }

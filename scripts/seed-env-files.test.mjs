@@ -3,7 +3,6 @@
 // wrong here is reporting the wrong thing — a value difference a developer means to
 // have, or a key they added themselves — which is what would train someone to stop
 // reading the output.
-import { describe, expect, it } from 'vitest';
 import { missingKeys } from './seed-env-files.mjs';
 
 describe('missingKeys', () => {

@@ -6,7 +6,6 @@
 // reload is a second client built on a *different game object*: boardgame.io
 // keys its local masters by that object, so a new one is a fresh master reading
 // the storage the old one wrote — which is what a reload is.
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { Client } from 'boardgame.io/client';
 import { Bot } from 'boardgame.io/ai';
 import type { Ctx, Game, State } from 'boardgame.io';

@@ -4,7 +4,7 @@ import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH, TeamModel } from './model';
 import { import_teams_from_tsv } from './team_import';
 import { readFileSync } from 'fs';
-import { vi, describe, beforeEach, it, expect, type Mock, type MockInstance } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 
 vi.mock('fs');
 

@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { sample } from 'lodash';
 import { chooseRemoval, choosePointing } from './bot-strategy';
 import {

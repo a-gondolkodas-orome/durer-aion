@@ -16,6 +16,6 @@
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "target": "ESNext",
-    "types": ["vite/client"]
+    "types": ["vite/client", "vitest/globals"]
   }
 }

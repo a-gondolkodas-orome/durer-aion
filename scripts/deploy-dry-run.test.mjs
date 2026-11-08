@@ -7,7 +7,6 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, describe, expect, it } from 'vitest';
 import { COMMITTER, basePathFor, binOf, publish, repoNameFromRemote } from './deploy-dry-run.mjs';
 
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));

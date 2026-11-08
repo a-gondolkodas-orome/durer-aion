@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import source from './styles.css?raw';
 
 // A bare `:hover` sticks on a touch device: the tap that activates an element

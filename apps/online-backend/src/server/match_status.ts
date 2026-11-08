@@ -93,18 +93,27 @@ export async function teamMatches(
 }
 
 /** The admin routes' teams: each row, and both its matches as they stand, from
- *  one read of storage for the whole list. */
+ *  one read of storage for the whole list. A row naming a match storage does
+ *  not have is left out and logged, so it does not cost the organisers the rest
+ *  of the list (#706); any other error still fails the list. */
 export async function adminTeamViews(
   db: Storage,
   teams: TeamModel[],
 ): Promise<(ReturnType<TeamModel["toJSON"]> & TeamMatches)[]> {
   const states = await fetchMatchStates(db, teams.flatMap(matchIDs));
   const now = new Date();
-  return teams.map(team => ({ ...team.toJSON(), ...matchesOf(team, states, now) }));
+  return teams.flatMap(team => {
+    const missing = matchIDs(team).filter(id => !states.has(id));
+    if (missing.length > 0) {
+      console.error(`Team ${team.teamId} left out of the admin list: match ${missing.join(", ")} is not in storage.`);
+      return [];
+    }
+    return [{ ...team.toJSON(), ...matchesOf(team, states, now) }];
+  });
 }
 
-/** {@link adminTeamViews} for one team. */
+/** One team as the admin routes serve it. Unlike the list, a broken row
+ *  throws here: there is no other row to keep readable. */
 export async function adminTeamView(db: Storage, team: TeamModel) {
-  const [view] = await adminTeamViews(db, [team]);
-  return view;
+  return { ...team.toJSON(), ...await teamMatches(db, team) };
 }
