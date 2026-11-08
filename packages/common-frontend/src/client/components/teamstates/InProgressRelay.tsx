@@ -2,7 +2,7 @@ import { Stack } from '@mui/system';
 import { useEffect, useEffectEvent, useMemo } from 'react';
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from '../Countdown';
 import { BoardProps } from 'boardgame.io/react';
-import { GUESSER_PLAYER, MyGameState, relayProblemResults } from 'game';
+import { GUESSER_PLAYER, MyGameState, RELAY_MAX_TRIES, relayProblemResults } from 'game';
 import { useBackToHome, useLogout } from '../../hooks/user-hooks';
 import { ExerciseTask } from '../ExerciseTask';
 import { ExerciseForm } from '../ExerciseForm';
@@ -161,7 +161,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
           <ExerciseForm
             previousTries={G.previousAnswers[G.currentProblem].map(it => it.answer)}
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
-            attempt={(G.currentProblem + 1) * 3 + G.numberOfTry}
+            attempt={(G.currentProblem + 1) * RELAY_MAX_TRIES + G.numberOfTry}
             onSubmit={async (input: number) => relayMoves.submitAnswer(input)}
             awaitingJudge={awaitingJudge}
           />
