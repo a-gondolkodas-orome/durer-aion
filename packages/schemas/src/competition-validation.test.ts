@@ -1,4 +1,6 @@
-import { CompetitionConfig, isEntityId, localizeProblem, Problem, RelayConfig, StrategyConfig } from './competition';
+import {
+  CompetitionConfig, editionSchoolYear, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
+} from './competition';
 import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
 
 const bilingual: Problem = {
@@ -30,7 +32,7 @@ const strategy: StrategyConfig = { durationMinutes: 30, gameId: '19o-c' };
 const base: CompetitionConfig = {
   id: 'a1b2c3d4e5--online-c',
   languages: ['hu'],
-  metadata: { category: 'C', round: 'online' },
+  metadata: { kind: 'competition', edition: 19, round: 'online', category: 'C' },
 };
 
 const competition: CompetitionConfig = {
@@ -205,5 +207,43 @@ describe('validateCompetition', () => {
       `competition ${competition.id}: the strategy game 19o-c is in none of the competition's languages`,
     ]);
     expect(validateCompetition({ ...base, languages: ['hu', 'en'], strategy }, references)).toEqual([]);
+  });
+
+  it('accepts an `other` competition, listed by its label alone', () => {
+    const algebra: CompetitionConfig = { ...base, relay, metadata: { kind: 'other', label: { hu: 'Algebra 9. osztály' } } };
+    expect(validateCompetition(algebra, references)).toEqual([]);
+  });
+
+  it('refuses an edition that is not a positive integer, or an empty category', () => {
+    const metadata = { kind: 'competition', edition: 0, round: 'final', category: ' ' } as const;
+    expect(validateCompetition({ ...base, relay, metadata }, references)).toEqual([
+      `competition ${competition.id}: the edition 0 is not a positive integer`,
+      `competition ${competition.id}: the category is empty`,
+    ]);
+  });
+
+  it('refuses a label in no language, or an empty one', () => {
+    expect(validateCompetition({ ...base, relay, metadata: { kind: 'other', label: {} } }, references)).toEqual([
+      `competition ${competition.id}: the label is in no language`,
+    ]);
+    const metadata = { kind: 'competition', edition: 19, round: 'online', category: 'E+', label: { en: '' } } as const;
+    expect(validateCompetition({ ...base, relay, metadata }, references)).toEqual([
+      `competition ${competition.id}: the en label is empty`,
+    ]);
+  });
+});
+
+describe('localizeLabel', () => {
+  it('falls back to another language where the reader\'s is missing', () => {
+    expect(localizeLabel({ hu: 'Nemzetközi', en: 'International' }, 'en')).toBe('International');
+    expect(localizeLabel({ hu: 'Nemzetközi' }, 'en')).toBe('Nemzetközi');
+  });
+});
+
+describe('editionSchoolYear', () => {
+  it('names the school year as the strategy practice catalogue does', () => {
+    expect(editionSchoolYear(1)).toBe('07/08');
+    expect(editionSchoolYear(19)).toBe('25/26');
+    expect(editionSchoolYear(20)).toBe('26/27');
   });
 });

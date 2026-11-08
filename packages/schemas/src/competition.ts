@@ -92,12 +92,47 @@ export interface StartWindow {
   closesAt?: string;
 }
 
+export const ROUNDS = ['online', 'local', 'final'] as const;
+export type Round = typeof ROUNDS[number];
+
+/// A name in at least one language, shown in another one where the reader's
+/// is missing.
+export type LocalizedLabel = Partial<Record<Language, string>>;
+
+/// The label in the given language, else in the first of the others, in
+/// `LANGUAGES` order, that has it.
+export function localizeLabel(label: LocalizedLabel, language: Language): string | undefined {
+  return [language, ...LANGUAGES.filter(other => other !== language)]
+    .map(each => label[each])
+    .find(text => text !== undefined);
+}
+
 /// For teams and admins to orient themselves by. The platform decides nothing
-/// from it.
-export interface CompetitionMetadata {
-  category?: string;
-  label?: string;
-  round?: 'online' | 'local' | 'final';
+/// from it. A `competition` is one round of one edition of the Dürer, in one
+/// category; anything else, such as a practice set built around a topic, is
+/// `other`, and its label is all it is listed by.
+export type CompetitionMetadata =
+  | {
+    kind: 'competition';
+    /// The Dürer's number, e.g. 19; `editionSchoolYear` says when that was.
+    edition: number;
+    round: Round;
+    /// Free text, e.g. `C`, `E+`.
+    category: string;
+    label?: LocalizedLabel;
+  }
+  | {
+    kind: 'other';
+    label: LocalizedLabel;
+  };
+
+/// The school year an edition is held in, the way teachers and students name
+/// it and the strategy practice site's catalogue writes it: `07/08` for the
+/// first, `26/27` for the twentieth. All of an edition's rounds share it, the
+/// autumn ones and the final alike.
+export function editionSchoolYear(edition: number): string {
+  const twoDigits = (year: number) => String(year % 100).padStart(2, '0');
+  return `${twoDigits(edition + 2006)}/${twoDigits(edition + 2007)}`;
 }
 
 export interface CompetitionConfig {
