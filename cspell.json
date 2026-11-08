@@ -151,6 +151,9 @@
     "yearidx"
   ],
   "useGitignore": true,
+  "ignoreRegExpList": [
+    "/\\b[0-9a-z]{10}--[a-z0-9]+(-[a-z0-9]+)*/g"
+  ],
   "ignorePaths": [
     "node_modules",
     "dist",
@@ -174,7 +177,8 @@
     {
       "filename": [
         "apps/relay-practise-frontend/src/problems.ts",
-        "packages/relay-bot/src/games/relay/strategy.ts"
+        "packages/relay-bot/src/games/relay/strategy.ts",
+        "packages/competitions/src/problems/**"
       ],
       "ignoreRegExpList": [
         "/\\\\+[a-zA-Z]+/g",
