@@ -22,7 +22,7 @@ const play = vi.fn();
 const Board = boardWrapper<object>(() => <button data-testid="cell" onClick={play}>cell</button>, <p>the rules</p>);
 
 /// Only the fields the wrapper reads; boardgame.io hands a board plenty more.
-function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
+function boardProps(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
   const G: GameStateMixin = {
     millisecondsRemaining: 10 * 60 * 1000,
     start: new Date().toISOString(),
@@ -43,11 +43,14 @@ function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
     ctx: { numPlayers: 2, playOrder: ['0', '1'], playOrderPos: 0, activePlayers: null, turn: 1, ...ctx },
     moves,
   } as unknown as StrategyBoardProps<object>;
-  render(
-    <ClientRepoProvider value={new MockClientRepository()}>
-      <Board {...props} />
-    </ClientRepoProvider>
-  );
+  return { moves, element: <ClientRepoProvider value={clientRepo}><Board {...props} /></ClientRepoProvider> };
+}
+
+const clientRepo = new MockClientRepository();
+
+function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
+  const { moves, element } = boardProps(ctx, game);
+  render(element);
   return moves;
 }
 
@@ -56,6 +59,8 @@ const startButtons = () => [
   screen.getByRole('button', { name: 'strategy.chooser.liveButton' }),
 ];
 const boardArea = () => screen.getByTestId('strategyBoard');
+const turnStatus = () => screen.getByTestId('turnStatus');
+const result = () => screen.getByTestId('result');
 
 describe('between games', () => {
   // `startNewGame` with the team to move is the gap between games, never a
@@ -76,7 +81,8 @@ describe('between games', () => {
     for (const button of startButtons()) {
       expect(button).toBeEnabled();
     }
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('result')).not.toBeInTheDocument();
+    expect(turnStatus()).toBeEmptyDOMElement();
     // No game has been chosen, so there is no mode to frame it in.
     expect(screen.queryByText('strategy.mode.liveNumber')).not.toBeInTheDocument();
     expect(boardArea()).toHaveAttribute('data-state', 'empty');
@@ -100,7 +106,7 @@ describe('between games', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER },
       { winner: JUDGE_PLAYER, numberOfLoss: 1, liveResults: ['lost'] });
 
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.result.liveLost');
+    expect(result()).toHaveTextContent('strategy.result.liveLost');
     // The loss lowered the stake, so the bar says from what to what.
     expect(screen.getByText('strategy.result.liveLostDrop')).toBeInTheDocument();
     // The consequence takes the bar's second line, in place of the game's number.
@@ -108,7 +114,7 @@ describe('between games', () => {
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
     // The result labels the final position itself: red on the live bar's
     // orange read poorly, and a row of its own cost the board height.
-    expect(boardArea().parentElement).toContainElement(screen.getByRole('status'));
+    expect(boardArea().parentElement).toContainElement(result());
     expect(screen.queryByText('strategy.board.finalViewOnly')).not.toBeInTheDocument();
     // The lost game was played for the old stake; the new one is on the live card.
     expect(screen.queryByText('strategy.mode.stake')).not.toBeInTheDocument();
@@ -130,7 +136,7 @@ describe('between games', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER },
       { winner: GUESSER_PLAYER, winningStreak: 1, liveResults: ['won'] });
 
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.result.liveWon');
+    expect(result()).toHaveTextContent('strategy.result.liveWon');
     expect(screen.getByText('strategy.result.liveWonDetail')).toBeInTheDocument();
     expect(screen.getByText('1 / 2')).toBeInTheDocument();
     // After a game the cards are folded to their title and button, and open on demand.
@@ -148,12 +154,12 @@ describe('between games', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER },
       { difficulty: 'test', winner: GUESSER_PLAYER });
 
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.result.practiceWon');
+    expect(result()).toHaveTextContent('strategy.result.practiceWon');
     // The bar's "not counted" line says what the result bar used to repeat.
     expect(screen.getByText('strategy.mode.practiceSub', { selector: 'div' })).toBeInTheDocument();
     // Said once on the screen, on the practice card, not again in the bar;
     // the card is folded after a game, so it shows once that is opened.
-    expect(screen.getByRole('status')).not.toHaveTextContent('strategy.practiceWarning.title');
+    expect(result()).not.toHaveTextContent('strategy.practiceWarning.title');
     expect(screen.queryByText('strategy.practiceWarning.title')).not.toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'strategy.chooser.details' })[0]);
     expect(screen.getAllByText('strategy.practiceWarning.title')).toHaveLength(1);
@@ -191,8 +197,8 @@ describe('during a game', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
 
     // On the board's own edge, where the team looks to move.
-    expect(boardArea().parentElement).toContainElement(screen.getByRole('status'));
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.board.yourTurn');
+    expect(boardArea().parentElement).toContainElement(turnStatus());
+    expect(turnStatus()).toHaveTextContent('strategy.board.yourTurn');
     expect(boardArea()).toHaveAttribute('data-state', 'live');
     expect(boardArea()).toBeEnabled();
     fireEvent.click(screen.getByTestId('cell'));
@@ -203,8 +209,8 @@ describe('during a game', () => {
   test('ignores clicks on the bot\'s turn without fading', () => {
     renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER });
 
-    expect(screen.getByRole('status')).toHaveTextContent('strategy.board.botTurn');
-    expect(boardArea().parentElement).toContainElement(screen.getByRole('status'));
+    expect(turnStatus()).toHaveTextContent('strategy.board.botTurn');
+    expect(boardArea().parentElement).toContainElement(turnStatus());
     expect(boardArea()).toHaveAttribute('data-state', 'waiting');
     expect(boardArea()).toBeDisabled();
     play.mockClear();
@@ -220,6 +226,27 @@ describe('during a game', () => {
 
     expect(screen.getAllByRole('dialog')).toHaveLength(1);
     expect(screen.queryByText('strategy.rulesFirst.title')).not.toBeInTheDocument();
+  });
+
+  // A status element inserted already filled is often not announced, so the
+  // turn changes inside one that stays; and the board did not stay put
+  // either, its spacing changing with each phase.
+  test('keeps one status and one place for the board as the turn passes', () => {
+    const { element } = boardProps({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER });
+    const { rerender } = render(element);
+    const status = turnStatus();
+    const spacing = () => [getComputedStyle(boardArea()).paddingTop, getComputedStyle(boardArea().parentElement as HTMLElement).marginTop];
+    const atRoleChoice = spacing();
+    expect(atRoleChoice).toEqual(['30px', '24px']);
+    expect(status).toBeEmptyDOMElement();
+
+    rerender(boardProps({ phase: 'play', currentPlayer: JUDGE_PLAYER }).element);
+    expect(turnStatus()).toBe(status);
+    expect(status).toHaveTextContent('strategy.board.botTurn');
+    rerender(boardProps({ phase: 'play', currentPlayer: GUESSER_PLAYER }).element);
+    expect(turnStatus()).toBe(status);
+    expect(status).toHaveTextContent('strategy.board.yourTurn');
+    expect(spacing()).toEqual(atRoleChoice);
   });
 
   // Shown at once, the spinner would flash on every one of the bot's moves.
@@ -286,7 +313,7 @@ describe('the goal panel after the second win', () => {
       { winner: GUESSER_PLAYER, winningStreak: 2, points: 12, liveResults: ['won', 'won'] });
 
     // Behind the dialog, which hides the page from the accessibility tree.
-    expect(screen.getByRole('img', { name: 'strategy.goal.progress: 2 / 2', hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'strategy.goal.progressCount', hidden: true })).toHaveTextContent('2 / 2');
     expect(screen.queryByText(/strategy\.goal\.stake/)).not.toBeInTheDocument();
   });
 });

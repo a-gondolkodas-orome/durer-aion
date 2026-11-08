@@ -296,10 +296,11 @@ function GoalPanel(props: { G: GameStateMixin, practice: boolean, showStake: boo
       </Box>
       <Box sx={{ fontSize: '17px', fontWeight: 600, lineHeight: 1.35 }}>{t('strategy.goal.text')}</Box>
       {/* The sentence above says what is counted, so on screen the count
-          stands alone; its name is for a screen reader, and a hover or tap. */}
+          stands alone; its name is for a screen reader, and a hover, tap or
+          focus. */}
       <Tooltip title={t('strategy.goal.progress')} enterTouchDelay={0} placement="bottom-start">
-        <Stack role="img" aria-label={`${t('strategy.goal.progress')}: ${streak} / 2`}
-          sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', alignSelf: 'flex-start' }}>
+        <Stack role="img" tabIndex={0} aria-label={t('strategy.goal.progressCount', { n: streak })}
+          sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', alignSelf: 'flex-start', borderRadius: '6px' }}>
           {[0, 1].map(i => <Box key={i} sx={{
             width: '18px', height: '18px', borderRadius: '50%', boxSizing: 'border-box',
             ...(i < streak ? { backgroundColor: WIN } : { border: '2px solid #8c959f' }),
@@ -337,7 +338,7 @@ function ResultChip(props: { difficulty: Difficulty, result: 'won' | 'lost' }) {
     ? (result === 'won' ? t('strategy.result.liveWon') : t('strategy.result.liveLost'))
     : (result === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'));
   return (
-    <Stack role="status" sx={{
+    <Stack role="status" data-testid="result" sx={{
       flexDirection: 'row', alignItems: 'center', borderRadius: '999px', padding: '5px 14px',
       backgroundColor: result === 'won' ? WIN : LOSS, color: '#fff', fontSize: '15px', fontWeight: 700,
       // Lifts it off the dashed edge it sits on.
@@ -465,41 +466,44 @@ function RoleChooser(props: { moves: StrategyWrapperMoves, enabled: boolean }) {
 }
 
 /// Whose turn it is, on the board's top edge, where the team looks to move:
-/// the strongest signal on the screen while a game is on.
-function TurnLabel() {
-  const { t } = useTranslation();
-  return (
-    <Box role="status" sx={{
-      borderRadius: '999px', padding: '8px 22px', fontSize: '19px', fontWeight: 700,
-      backgroundColor: 'primary.main', color: 'primary.contrastText',
-      boxShadow: '0 0 0 4px #fff',
-    }}>
-      {t('strategy.board.yourTurn')}
-    </Box>
-  );
-}
-
-/// The bot's turn. The bot mostly answers within a state update or two, so the
+/// the strongest signal on the screen while a game is on. One status element
+/// for the whole match, empty between games, whose text changes: a screen
+/// reader announces a change inside a live region, but often not one that is
+/// inserted already filled.
+/// The bot mostly answers within a state update or two, so on its turn the
 /// spinner waits a moment before it shows: shown at once, it would flash on
 /// every move; it is there for a server that is slow to answer.
-function WaitLabel() {
+function TurnStatus(props: { turn: 'team' | 'bot' | null }) {
   const { t } = useTranslation();
+  const { turn } = props;
   const [slow, setSlow] = useState(false);
   useEffect(() => {
+    if (turn !== 'bot') return;
     const timer = setTimeout(() => setSlow(true), 300);
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      setSlow(false);
+    };
+  }, [turn]);
   return (
-    <Stack role="status" sx={{
-      flexDirection: 'row', alignItems: 'center', gap: '10px',
-      borderRadius: '999px', padding: '7px 20px', fontSize: '17px', fontWeight: 600,
-      backgroundColor: LOCKED, color: '#fff', boxShadow: '0 0 0 4px #fff',
-    }}>
-      <Box sx={{ width: '16px', height: '16px', display: 'flex' }}>
-        {slow && <CircularProgress data-testid="botThinking" size={16} thickness={5} color="inherit" />}
-      </Box>
-      {t('strategy.board.botTurn')}
-    </Stack>
+    <Box role="status" data-testid="turnStatus" sx={{ position: 'absolute', top: '-20px', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+      {turn === 'team' && <Box sx={{
+        borderRadius: '999px', padding: '8px 22px', fontSize: '19px', fontWeight: 700,
+        backgroundColor: 'primary.main', color: 'primary.contrastText', boxShadow: '0 0 0 4px #fff',
+      }}>
+        {t('strategy.board.yourTurn')}
+      </Box>}
+      {turn === 'bot' && <Stack sx={{
+        flexDirection: 'row', alignItems: 'center', gap: '10px',
+        borderRadius: '999px', padding: '7px 20px', fontSize: '17px', fontWeight: 600,
+        backgroundColor: LOCKED, color: '#fff', boxShadow: '0 0 0 4px #fff',
+      }}>
+        <Box sx={{ width: '16px', height: '16px', display: 'flex' }}>
+          {slow && <CircularProgress data-testid="botThinking" size={16} thickness={5} color="inherit" />}
+        </Box>
+        {t('strategy.board.botTurn')}
+      </Stack>}
+    </Box>
   );
 }
 
@@ -523,8 +527,9 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
     <Box sx={{
       position: 'relative', borderRadius: '14px', backgroundColor: '#fafaf7',
       // Room for the label that straddles the top edge, clear of whatever is
-      // above the board.
-      marginTop: props.result !== null ? '18px' : state === 'locked' ? '12px' : '24px',
+      // above the board. The same in every state, so the board does not move
+      // as a game goes from role choice to play to its final position.
+      marginTop: '24px',
     }}>
       <Box
         component="fieldset"
@@ -535,9 +540,9 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
         sx={{
           // A fieldset's own border, margin and min-content width reset.
           border: 0, margin: 0, minWidth: 0,
-          display: 'flex', padding: '15px', borderRadius: '14px',
-          // The turn labels sit centred, over the board's own first line.
-          ...((state === 'live' || state === 'waiting') && { paddingTop: '30px' }),
+          // The top padding keeps the centred turn label off the board's own
+          // first line; the same in every state, like the margin above.
+          display: 'flex', padding: '30px 15px 15px', borderRadius: '14px',
           ...(state !== 'live' && { '& *': { cursor: 'default' } }),
           ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
           ...(state === 'locked' && { outline: '2px dashed #8c959f', outlineOffset: '-2px' }),
@@ -548,10 +553,7 @@ function BoardArea(props: { state: BoardState, final: boolean, result: ReactNode
       </Box>
       {/* On the edge, like a label on a frame, so it takes no height of the
           board's: the result, whose turn, or that it is only to look at. */}
-      {(state === 'live' || state === 'waiting') &&
-        <Box sx={{ position: 'absolute', top: '-20px', left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
-          {state === 'live' ? <TurnLabel /> : <WaitLabel />}
-        </Box>}
+      <TurnStatus turn={state === 'live' ? 'team' : state === 'waiting' ? 'bot' : null} />
       {props.result !== null
         ? <Box sx={{ position: 'absolute', top: '-16px', right: '16px', left: '16px', display: 'flex', justifyContent: 'flex-end' }}>
           {props.result}
