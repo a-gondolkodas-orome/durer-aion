@@ -2,7 +2,7 @@
 // import this through the `game/client` entry; the server never does.
 import { MyBoard as Board20ocde } from "./20ocde/board";
 
-export { descriptionC, descriptionD, descriptionE } from "./20ocde/main";
+export { presentationC, presentationD, presentationE } from "./20ocde/main";
 
 const boards = {
   C: Board20ocde,

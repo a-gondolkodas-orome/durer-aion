@@ -1,6 +1,6 @@
 import { MyGameWrappers, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
-import { descriptionC, descriptionD, descriptionE, MyBoardWrapper } from "game/client";
+import { MyBoardWrapper, presentationC, presentationD, presentationE } from "game/client";
 import { RelayStrategy } from "relay-bot";
 import { InProgressRelay, type CompetitionCategory } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
@@ -13,9 +13,9 @@ const description = <p className="text-justify"></p>
 export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay("relay_c", InProgressRelay, RelayStrategy("C"), description);
 export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay("relay_d", InProgressRelay, RelayStrategy("D"), description);
 export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay("relay_e", InProgressRelay, RelayStrategy("E"), description);
-export const { ClientWithBot: StrategyClientWithBotC } = ClientFactory({ ...GameC, name: strategyNames.C }, MyBoardWrapper("C"), StrategyWrappers.C(), descriptionC);
-export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({ ...GameD, name: strategyNames.D }, MyBoardWrapper("D"), StrategyWrappers.D(), descriptionD);
-export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), StrategyWrappers.E(), descriptionE);
+export const { ClientWithBot: StrategyClientWithBotC } = ClientFactory({ ...GameC, name: strategyNames.C }, MyBoardWrapper("C"), StrategyWrappers.C(), presentationC);
+export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({ ...GameD, name: strategyNames.D }, MyBoardWrapper("D"), StrategyWrappers.D(), presentationD);
+export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), StrategyWrappers.E(), presentationE);
 
 
 // Only the competition's categories reach here: they are all `teamData.ts` holds.

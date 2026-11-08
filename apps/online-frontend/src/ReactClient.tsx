@@ -1,5 +1,5 @@
 import { GameRelay, MyGameWrappers, strategyNames } from "game";
-import { descriptionC, descriptionD, descriptionE, MyBoardWrapper } from "game/client";
+import { MyBoardWrapper, presentationC, presentationD, presentationE } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay, type CompetitionCategory } from "common-frontend";
 
 const GameC = MyGameWrappers.C();
@@ -12,9 +12,9 @@ const description = <p className="text-justify"></p>
 export const { Client: RelayClient_C, OnlineClient: RelayOnlineClient_C } = ClientFactoryRelay({ ...GameRelay, name: "relay_c" }, InProgressRelay, description);
 export const { Client: RelayClient_D, OnlineClient: RelayOnlineClient_D } = ClientFactoryRelay({ ...GameRelay, name: "relay_d" }, InProgressRelay, description);
 export const { Client: RelayClient_E, OnlineClient: RelayOnlineClient_E } = ClientFactoryRelay({ ...GameRelay, name: "relay_e" }, InProgressRelay, description);
-export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({ ...GameC, name: strategyNames.C }, MyBoardWrapper("C"), descriptionC);
-export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({ ...GameD, name: strategyNames.D }, MyBoardWrapper("D"), descriptionD);
-export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), descriptionE);
+export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({ ...GameC, name: strategyNames.C }, MyBoardWrapper("C"), presentationC);
+export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({ ...GameD, name: strategyNames.D }, MyBoardWrapper("D"), presentationD);
+export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames.E }, MyBoardWrapper("E"), presentationE);
 
 
 // Only the competition's categories reach here: the import admits no other.

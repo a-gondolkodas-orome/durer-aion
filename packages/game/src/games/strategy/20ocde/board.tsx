@@ -60,12 +60,10 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
     }
   };
 
-  // Whose turn it is, and who won, the wrapper says above the board for every
-  // game; these lines are only what this game's rules add to that.
+  // Whose turn it is, who won, and which mark each role plays (on the role
+  // buttons) the wrapper says for every game; these lines are only what this
+  // game's rules add to that.
   let instruction = '';
-  if (ctx.phase === 'chooseRole') instruction = G.category === 'C'
-    ? 'A kezdő X-eket, a második köröket tesz le.'
-    : 'A kezdő köröket, a második X-eket tesz le.';
   if (ctx.phase === 'play') {
     instruction = !active ? '' : mark === 'O'
       ? 'Tegyetek egy kört egy üres mezőre!'
@@ -74,7 +72,9 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
   }
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>
+    // The marks scale with the board, not the window, so a board narrowed to
+    // fit a short window keeps square cells.
+    <Box sx={{ width: '100%', maxWidth: 440, mx: 'auto', containerType: 'inline-size' }}>
       {ownMark !== null && <Typography sx={{ mb: 1 }}>Ti {ownMark === 'O' ? 'körökkel (○)' : 'X-ekkel'} játszotok.</Typography>}
       <Typography role="status" sx={{ mb: 2, minHeight: '3em' }}>{instruction}</Typography>
       <Box role="group" aria-label="5 × 5-ös játéktábla" sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0.5 }}>
@@ -87,7 +87,7 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
             aria-label={`${Math.floor(index / BOARD_SIZE) + 1}. sor, ${index % BOARD_SIZE + 1}. oszlop: ${cell === 'O' ? 'kör' : cell ?? (selected === index ? 'kijelölt X' : 'üres')}`}
             onClick={() => chooseCell(index)}
             sx={{
-              minWidth: 0, p: 0, aspectRatio: '1', fontSize: 'clamp(24px, 6vw, 40px)',
+              minWidth: 0, p: 0, aspectRatio: '1', fontSize: 'clamp(16px, 9cqi, 40px)', lineHeight: 1,
               borderWidth: 2, borderRadius: 1,
               ...(machineMove.includes(index) && {
                 bgcolor: 'color-mix(in srgb, currentColor 20%, transparent)',

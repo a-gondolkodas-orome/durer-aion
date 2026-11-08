@@ -62,7 +62,7 @@ kettőhatványt
 kilencszög
 kilencszöget
 kilencszögnek
-kipróbáljátok
+Kipróbálhatjátok
 kisháromszög
 kiskocka
 kiskockalapot
@@ -88,7 +88,6 @@ képpen
 köréírt
 Küng
 lapösszefüggőséget
-legyőzitek
 Ligety
 Lorenzkirche
 majlandi
@@ -107,6 +106,7 @@ nemtompa
 nemüres
 odik
 oldalközépső
+olvashatjátok
 osak
 osnak
 Pinturault
