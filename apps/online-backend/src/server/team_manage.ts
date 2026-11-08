@@ -1,7 +1,7 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
 import { getBotCredentials, relayNames } from "./common";
-import { AnyBgioGame, PlayerIDType, strategyNames } from "game";
+import { AnyBgioGame, PlayerIDType, strategyGameOfCategory, strategyNames } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
 import { CompetitionCategory, GameType } from "schemas";
 import { BOT_ID, fetch } from "../socketio_botmoves";
@@ -109,7 +109,11 @@ export function allowedToStart(
 
 const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
   RELAY: relayNames,
-  STRATEGY: strategyNames,
+  STRATEGY: {
+    C: strategyNames[strategyGameOfCategory.C],
+    D: strategyNames[strategyGameOfCategory.D],
+    E: strategyNames[strategyGameOfCategory.E],
+  },
 };
 
 export async function getNewGame(

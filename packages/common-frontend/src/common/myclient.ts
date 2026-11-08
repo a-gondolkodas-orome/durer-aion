@@ -5,7 +5,7 @@ import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
 import { withConnectionAlert } from '../client/components/ConnectionAlert';
 import { Loading } from '../client/components/Loading';
-import type { StrategyBoard } from './boardwrapper';
+import type { StrategyBoard, StrategyDescription } from './boardwrapper';
 import type { ComponentType, ReactNode } from 'react';
 import type { GameRelay, MyGameState as RelayGameState } from 'game';
 
@@ -16,7 +16,7 @@ export type RelayBoard = ComponentType<BoardProps<RelayGameState>>;
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  description: ReactNode
+  description: StrategyDescription
 ) {
   return Client({
     game: gameWrapper(game),
@@ -46,7 +46,7 @@ const socketOpts = { timeout: 5000 };
 export function MyOnlineClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  description: ReactNode,
+  description: StrategyDescription,
   serverUrl: string | undefined = undefined,
 ) {
   return Client({

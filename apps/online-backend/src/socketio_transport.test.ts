@@ -22,8 +22,8 @@ import { StrategyWrappers } from "game/bot";
 import botWrapper from "./botwrapper";
 import { BOT_ID, SocketIOButBotMoves } from "./socketio_botmoves";
 
-const GAME_NAME = strategyNames.E;
-const game = { ...gameWrapper(MyGameWrappers.E()), name: GAME_NAME };
+const GAME_NAME = strategyNames["20o-e"];
+const game = { ...gameWrapper(MyGameWrappers["20o-e"]()), name: GAME_NAME };
 const HUMAN_ID = "0";
 // Each test gets its own server and its own store, so one id is enough.
 const MATCH_ID = "match-under-test";
@@ -101,7 +101,7 @@ describe("the socket transport a browser talks to", () => {
       // is what this file is about, not what persists behind it.
       transport: new SocketIOButBotMoves(
         { https: undefined },
-        { [GAME_NAME]: new (botWrapper(StrategyWrappers.E()))({ enumerate: game.ai?.enumerate }) },
+        { [GAME_NAME]: new (botWrapper(StrategyWrappers["20o-e"]()))({ enumerate: game.ai?.enumerate }) },
       ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],

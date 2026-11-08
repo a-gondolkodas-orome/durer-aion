@@ -9,7 +9,7 @@ test("the relay game's own client has the relay moves", () => {
 });
 
 test("a wrapped strategy game's client has the wrapper's moves", () => {
-  const client = Client({ game: gameWrapper(MyGameWrappers.C()), numPlayers: 2 });
+  const client = Client({ game: gameWrapper(MyGameWrappers["20o-c"]()), numPlayers: 2 });
   expect(() => asStrategyWrapperMoves(client.moves)).not.toThrow();
 });
 

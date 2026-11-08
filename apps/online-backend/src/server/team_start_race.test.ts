@@ -30,7 +30,7 @@ beforeAll(async () => {
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
   configureTeamsRouter(router, database.teams, [
     { ...GameRelay, name: relayNames.C },
-    { ...gameWrapper(MyGameWrappers.C()), name: strategyNames.C },
+    { ...gameWrapper(MyGameWrappers["20o-c"]()), name: strategyNames["20o-c"] },
   ], requireAdmin("unused-here"));
   app.use(router.routes());
   const handle = app.callback();

@@ -13,14 +13,18 @@ import type { BoardProps } from "boardgame.io/react";
 import type { ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
+import { inLanguage, type Localized } from "schemas";
+import { useUiLanguage } from "../client/hooks/ui-language";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
 /// gameWrapper extends it, plus the client API. The wrapper passes its props
 /// through untouched, so a board may read anything bgio put there.
 export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
 export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
+/// A game's rules text in each of its languages; the board shows the page's.
+export type StrategyDescription = Localized<ReactNode>;
 
-export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode) {
+export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDescription) {
   return (props: StrategyBoardProps<G>) => {
     const { G, ctx } = props;
     const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
@@ -29,6 +33,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
+    const language = useUiLanguage();
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -98,7 +103,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: ReactNode)
             <Stack sx={{ fontWeight: 'bold', marginTop: '10px' }}>
               {t('strategy.description')}:
             </Stack>
-            {description}
+            {inLanguage(description, language)}
             <Stack sx={{ fontWeight: 'bold', marginTop: '10px' }}>
               {t('strategy.instructions')}:
             </Stack>
