@@ -10,13 +10,16 @@ export interface Problem {
   help2?: string;
 }
 
-interface RelayProblems {
+export interface RelayProblems {
   C: Problem[];
   D: Problem[];
   E: Problem[];
 }
 
-const problems : RelayProblems = {
+// What the live round's judge reads. apps/online-backend's
+// problem-bank-copy.test.ts holds it to the problem bank until the round runs
+// on competitions (#137) and this copy goes.
+export const problems : RelayProblems = {
   C: [
     {
       problemText: "Lili, a sarki kutató halkonzervből, kabátból és műszerből pakolt néhányat a hátizsákjába. Egy halkonzerv tömege 4 kilogramm, egy kabát tömege 7 kilogramm, míg egy műszer tömege 5 kilogramm. Hány halkonzervet rakott Lili a táskájába, ha a háromféle tárgyból összesen 29 kilogrammot pakolt be, és mindhárom tárgyból legalább egyet vitt magával?",

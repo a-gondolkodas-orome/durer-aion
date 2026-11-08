@@ -34,7 +34,9 @@
       "game/bot": ["../../packages/game/bot.ts"],
       "game/client": ["../../packages/game/client.ts"],
       "schemas": ["../../packages/schemas/index.ts"],
-      "relay-bot": ["../../packages/relay-bot/index.ts"]
+      "relay-bot": ["../../packages/relay-bot/index.ts"],
+      "problem-bank": ["../../packages/problem-bank/index.ts"],
+      "problem-bank/all": ["../../packages/problem-bank/all.ts"]
     },
     "skipLibCheck": true,
     // The suites use vitest's globals without importing them (tsconfig.base.json).

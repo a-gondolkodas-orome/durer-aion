@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // The server bundles these packages from source (tsdown.config.mts) and so
@@ -8,7 +8,7 @@ import { join } from "node:path";
 // in the source, and every entry the server reads from source (`game`,
 // `game/bot`) is a file the map names, so the two views of a package cannot
 // drift apart.
-const packages = ["game", "relay-bot", "schemas"] as const;
+const packages = ["game", "problem-bank", "relay-bot", "schemas"] as const;
 
 function packageDir(name: string) {
   return join(__dirname, "..", "..", "..", "packages", name);
@@ -43,6 +43,12 @@ describe.each(packages)("the %s package", (name) => {
 
   it("has a source entry for every subpath it exports", () => {
     for (const subpath of Object.keys(exports ?? {})) {
+      // A pattern, such as problem-bank's "./banks/*", is a folder of entries.
+      if (subpath.endsWith("/*")) {
+        const folder = join(packageDir(name), subpath.slice(2, -2));
+        expect(existsSync(folder) && readdirSync(folder).some(file => file.endsWith(".ts")), `${name}/${subpath.slice(2)} for export "${subpath}"`).toBe(true);
+        continue;
+      }
       // "." is index.ts; "./bot" is bot.ts — the file tsdown builds the subpath from.
       const entry = subpath === "." ? "index.ts" : `${subpath.slice(2)}.ts`;
       expect(existsSync(join(packageDir(name), entry)), `${name}/${entry} for export "${subpath}"`).toBe(true);

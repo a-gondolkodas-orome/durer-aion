@@ -1,5 +1,5 @@
 {
-  "name": "competitions",
+  "name": "problem-bank",
   "version": "0.0.0",
   "files": [
     "dist/**"
@@ -8,6 +8,14 @@
     ".": {
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
+    },
+    "./all": {
+      "types": "./dist/all.d.mts",
+      "default": "./dist/all.mjs"
+    },
+    "./banks/*": {
+      "types": "./dist/banks/*.d.mts",
+      "default": "./dist/banks/*.mjs"
     }
   },
   "main": "./dist/index.mjs",
@@ -19,7 +27,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "build": "npx tsdown",
-    "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt competitions\""
+    "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt problem-bank\""
   },
   "dependencies": {
     "schemas": "*"

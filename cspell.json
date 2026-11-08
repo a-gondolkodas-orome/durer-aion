@@ -178,7 +178,7 @@
       "filename": [
         "apps/relay-practise-frontend/src/problems.ts",
         "packages/relay-bot/src/games/relay/strategy.ts",
-        "packages/competitions/src/problems/**"
+        "packages/problem-bank/src/problems/**"
       ],
       "ignoreRegExpList": [
         "/\\\\+[a-zA-Z]+/g",
