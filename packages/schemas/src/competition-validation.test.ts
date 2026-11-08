@@ -1,5 +1,5 @@
 import {
-  CompetitionConfig, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, roundCalendarYear, StrategyConfig,
+  CompetitionConfig, editionSchoolYear, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
 } from './competition';
 import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
 
@@ -240,10 +240,10 @@ describe('localizeLabel', () => {
   });
 });
 
-describe('roundCalendarYear', () => {
-  it('puts the online and local rounds in the autumn, and the final in the next year', () => {
-    expect(roundCalendarYear(19, 'online')).toBe(2025);
-    expect(roundCalendarYear(10, 'local')).toBe(2016);
-    expect(roundCalendarYear(1, 'final')).toBe(2008);
+describe('editionSchoolYear', () => {
+  it('names the school year as the strategy practice catalogue does', () => {
+    expect(editionSchoolYear(1)).toBe('07/08');
+    expect(editionSchoolYear(19)).toBe('25/26');
+    expect(editionSchoolYear(20)).toBe('26/27');
   });
 });

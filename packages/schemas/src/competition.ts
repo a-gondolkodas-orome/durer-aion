@@ -114,7 +114,7 @@ export function localizeLabel(label: LocalizedLabel, language: Language): string
 export type CompetitionMetadata =
   | {
     kind: 'competition';
-    /// The Dürer's number, e.g. 19; `roundCalendarYear` says when that was.
+    /// The Dürer's number, e.g. 19; `editionSchoolYear` says when that was.
     edition: number;
     round: Round;
     /// Free text, e.g. `C`, `E+`.
@@ -126,13 +126,13 @@ export type CompetitionMetadata =
     label: LocalizedLabel;
   };
 
-/// The calendar year a round of an edition is held in. An edition spans a
-/// school year: its online and local rounds fall in the autumn of the first
-/// calendar year, its final in the next one. Anchored on the years the bundled
-/// problems mention — edition 1's final in 2008, edition 19's online round in
-/// 2025.
-export function roundCalendarYear(edition: number, round: Round): number {
-  return edition + (round === 'final' ? 2007 : 2006);
+/// The school year an edition is held in, the way teachers and students name
+/// it and the strategy practice site's catalogue writes it: `07/08` for the
+/// first, `26/27` for the twentieth. All of an edition's rounds share it, the
+/// autumn ones and the final alike.
+export function editionSchoolYear(edition: number): string {
+  const twoDigits = (year: number) => String(year % 100).padStart(2, '0');
+  return `${twoDigits(edition + 2006)}/${twoDigits(edition + 2007)}`;
 }
 
 export interface CompetitionConfig {
