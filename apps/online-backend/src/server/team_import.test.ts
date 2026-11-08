@@ -78,16 +78,24 @@ describe('import_teams_from_tsv', () => {
   // Tabs turned into spaces on the way, as a paste out of a web page or an
   // editor does. Each line then reads as one column, and was skipped as an
   // "empty row": nothing imported, and nothing counted as failed.
-  it('fails a row with no tab, saying the file must be tab-separated', async () => {
+  it('refuses a file with no tab, saying it must be tab-separated', async () => {
     (readFileSync as Mock).mockReturnValue('Teamname  Category\nimporttest  D\nsuper name  C\n');
 
     const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(0);
-    expect(result.failed).toBe(2);
     expect(create).not.toHaveBeenCalled();
     expect(result.logs.value).toContain('The header has no tab in it: the columns must be separated by tabs, not spaces.');
-    expect(result.logs.value).toContain('No tab in the row "super name  C": the columns must be separated by tabs, not spaces.');
+  });
+
+  it('fails a row with no tab under a header that has them', async () => {
+    (readFileSync as Mock).mockReturnValue('Teamname\tCategory\nimporttest  D\nGood\tC\n');
+
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+    expect(result.successful).toBe(1);
+    expect(result.failed).toBe(1);
+    expect(result.logs.value).toContain('No tab in the row "importtest  D": the columns must be separated by tabs, not spaces.');
   });
 
   it('passes over blank lines without a word', async () => {
@@ -100,17 +108,58 @@ describe('import_teams_from_tsv', () => {
     expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
   });
 
-  it('should log a warning if header does not match expected header', async () => {
-    (readFileSync as Mock).mockReturnValue(
-      'Teamname\tCategory\tOther\tEmail\tID\tLogin Code\tCredentials\nTest Team\tC\ttest@example.com\tSome Info\t\t\t',
-    );
+  describe('reads each column by its header', () => {
+    // Read by position, this file put every team's email in its notes and its
+    // notes in its email, with only a warning to say so.
+    it('whatever the order, and whatever the case', async () => {
+      (readFileSync as Mock).mockReturnValue(
+        'other\tTEAMNAME\tEmail\tcategory\nSome Info\tTest Team\ttest@example.com\tC\n',
+      );
 
-    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
-    expect(result.logs.value).toContain('WARNING: Header not exactly how we defined it. This is not always a problem.');
-    // What the file has to have, and what it may leave out.
-    expect(result.logs.value).toContain('Expected, in this order: Teamname (required), Category (required), '
-      + 'Email (optional), Other (optional), ID, Login Code, Credentials (optional: generated when left blank)');
+      expect(result.successful).toBe(1);
+      expect(create.mock.calls[0][0]).toMatchObject({
+        teamName: 'Test Team', category: 'C', email: 'test@example.com', other: 'Some Info',
+      });
+      expect(result.logs.sev.filter(sev => sev !== 'info')).toEqual([]);
+      // The export keeps the import's own order, so it goes back in as it is.
+      expect(result.export_table[0].slice(0, 4)).toEqual(['Test Team', 'C', 'test@example.com', 'Some Info']);
+    });
+
+    it('ignores a column it does not know, saying so once', async () => {
+      (readFileSync as Mock).mockReturnValue('Teamname\tSchool\tCategory\tPhone\nA\tRadnóti\tC\t1\nB\tPetőfi\tD\t2\n');
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result.successful).toBe(2);
+      expect(result.logs.value.filter((_, i) => result.logs.sev[i] === 'warn'))
+        .toEqual(['Ignoring the columns this import does not know: School, Phone']);
+    });
+
+    // Rows pasted out of a spreadsheet without the line above them: the first
+    // team was read as the header and dropped, with the rest imported.
+    it('refuses a file whose first line is a team rather than a header', async () => {
+      (readFileSync as Mock).mockReturnValue('Alpha\tC\ta@b.com\nBravo\tD\tb@b.com\n');
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result.successful).toBe(0);
+      expect(create).not.toHaveBeenCalled();
+      expect(result.logs.value[result.logs.sev.indexOf('error')]).toBe(
+        'Imported nothing. The first line must be the header, naming at least Teamname and Category; '
+        + 'it names no Teamname and no Category.');
+    });
+
+    it('refuses a header that names a column twice', async () => {
+      (readFileSync as Mock).mockReturnValue('Teamname\tCategory\tEmail\temail\nA\tC\ta@b.com\tx@y.com\n');
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result.successful).toBe(0);
+      expect(create).not.toHaveBeenCalled();
+      expect(result.logs.value).toContain('Imported nothing. The header names Email more than once.');
+    });
   });
 
   it('should fail if the category is invalid', async () => {

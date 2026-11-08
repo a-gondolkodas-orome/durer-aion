@@ -64,9 +64,10 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     <Stack sx={{ gap: '16px', padding: '10px' }}>
       <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
       <Stack sx={{ fontSize: 14 }}>
-        Tabulátorral elválasztott .tsv fájl, ebben az oszlopsorrendben: Teamname, Category, Email, Other, ID,
-        Login Code, Credentials. Az Email és az Other üresen hagyható, az utolsó hármat üresen hagyva a szerver
-        generálja őket. A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
+        Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Category;
+        az Email, az Other, az ID, a Login Code és a Credentials elhagyható vagy üresen hagyható, az utolsó hármat
+        ilyenkor a szerver generálja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok kimaradnak.
+        A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
         Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét lent az
         Exportálás rész.
       </Stack>
@@ -115,7 +116,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       )}
       <Stack component="h3" sx={{ margin: '16px 0 0', fontSize: 18, fontWeight: 500 }}>Exportálás</Stack>
       <Stack sx={{ fontSize: 14 }}>
-        Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopsorrendjében. A fájl titkos
+        Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopaival. A fájl titkos
         adatokat tartalmaz: aki egy csapat belépőkódját ismeri, beléphet a csapat nevében.
       </Stack>
       <Stack sx={{ flexDirection: 'row' }}>
