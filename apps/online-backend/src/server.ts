@@ -11,12 +11,13 @@ import { getDb } from './server/db';
 import { getAdminCredentials, getBotCredentials } from './server/common';
 import { requireAdmin } from './server/admin_session';
 
-const games = competitionGames.map(({ game }) => game);
-
 // CI validates the same registry (packages/problem-bank/src/registry.test.ts);
 // this catches one that reached a server without it, such as a private repo's
 // edit, before any team starts a match.
 assertValidRegistry(registry, strategyGames);
+
+const hosted = competitionGames(registry);
+const games = hosted.map(({ game }) => game);
 
 if (argv[2] === "sanity-check") {
   console.log("OK");
@@ -29,7 +30,7 @@ getAdminCredentials(); // give love if no creds are supplied
 const { db, teams } = getDb();
 
 const botSetup = Object.fromEntries(
-  competitionGames.map(({ game, bot }) =>
+  hosted.map(({ game, bot }) =>
     [game.name,
     new bot({
       enumerate: game.ai?.enumerate,

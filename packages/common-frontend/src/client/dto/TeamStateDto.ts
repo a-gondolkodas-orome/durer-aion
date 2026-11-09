@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { CompetitionMetadata, MatchStatus, PageState } from "schemas";
+import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition } from "schemas";
 
 export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
@@ -13,8 +13,11 @@ export interface TeamModelDto {
   teamId?: string;
   joinCode?: string;
   teamName: string;
-  /// Served by the admin routes only, for now.
+  /// Served by the admin routes only.
   competitionId?: string;
+  /// Served to the team by the online round, null for a competition the
+  /// server no longer has; the local apps have none.
+  competition?: PublicCompetition | null;
   category: string;
   credentials: string;
   email?: string;

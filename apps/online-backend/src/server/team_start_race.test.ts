@@ -3,8 +3,8 @@ import type { AddressInfo } from "node:net";
 import Koa from "koa";
 import Router from "@koa/router";
 import type { Server } from "boardgame.io";
-import { GameRelay, MyGameWrappers, gameWrapper, strategyNames } from "game";
-import { relayNames } from "./common";
+import { GameRelay, MyGameWrappers, gameWrapper } from "game";
+import { relayGameName, strategyGameName } from "schemas";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 import { TEAM_COOKIE } from "./team_session";
@@ -17,6 +17,7 @@ import { startTestDatabase } from "./test_database";
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
+const COMPETITION_ID = "mkhi1nnoim--20-online-c";
 let server: http.Server;
 let port: number;
 
@@ -29,8 +30,8 @@ beforeAll(async () => {
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
   configureTeamsRouter(router, database.teams, [
-    { ...GameRelay, name: relayNames.C },
-    { ...gameWrapper(MyGameWrappers["20o-c"]()), name: strategyNames["20o-c"] },
+    { ...GameRelay, name: relayGameName(COMPETITION_ID) },
+    { ...gameWrapper(MyGameWrappers["20o-c"]()), name: strategyGameName(COMPETITION_ID) },
   ], requireAdmin("unused-here"));
   app.use(router.routes());
   const handle = app.callback();
@@ -49,7 +50,7 @@ beforeEach(async () => {
   await database.reset();
   const team = await database.teams.insertTeam({
     teamname: "Alpha",
-    competitionId: "mkhi1nnoim--20-online-c",
+    competitionId: COMPETITION_ID,
     category: "C",
     email: "team@example.com",
     other: "",

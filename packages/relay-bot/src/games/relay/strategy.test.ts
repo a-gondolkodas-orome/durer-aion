@@ -1,7 +1,7 @@
 import { State } from "boardgame.io";
 import { Client } from "boardgame.io/client";
 import { GameRelay, MyGameState } from "game";
-import { relayStrategy, Problem } from "./strategy";
+import { judgeProblems, relayStrategy, Problem } from "./strategy";
 
 const problemList: Problem[] = [
   { problemText: "first", answer: 120, points: 2 },
@@ -150,5 +150,33 @@ describe("relay answers", () => {
     const client = startRound();
     client.moves.submitAnswer(9999);
     expect(client.getState()?.G.answer).toStrictEqual(9999);
+  });
+});
+
+describe("judgeProblems", () => {
+  const problems = new Map([
+    ["aaaaaaaaaa--both", { id: "aaaaaaaaaa--both", answer: 7, content: {
+      hu: { problemText: "Hány?", imageUrl: "hu.png" },
+      en: { problemText: "How many?" },
+    } }],
+    ["bbbbbbbbbb--hu-only", { id: "bbbbbbbbbb--hu-only", answer: 3, content: { hu: { problemText: "Mennyi?" } } }],
+  ]);
+  const relay = {
+    durationMinutes: 60,
+    problems: [{ problemId: "aaaaaaaaaa--both", points: 4 }, { problemId: "bbbbbbbbbb--hu-only", points: 5 }],
+  };
+
+  // The board picks the team's language and can switch mid-match; a field
+  // missing in a language comes from another one, as localizeProblem says.
+  it("serves each problem in every language of the competition, in play order", () => {
+    expect(judgeProblems(relay, ["hu", "en"], problems)).toEqual([
+      { problemText: { hu: "Hány?", en: "How many?" }, answer: 7, points: 4, url: { hu: "hu.png", en: "hu.png" } },
+      { problemText: { hu: "Mennyi?", en: "Mennyi?" }, answer: 3, points: 5, url: { hu: "", en: "" } },
+    ]);
+  });
+
+  it("refuses a relay naming a problem the bank does not have", () => {
+    expect(() => judgeProblems({ durationMinutes: 60, problems: [{ problemId: "gone", points: 1 }] }, ["hu"], problems))
+      .toThrow("gone");
   });
 });

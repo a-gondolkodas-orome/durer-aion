@@ -22,7 +22,8 @@
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt relay-bot\""
   },
   "dependencies": {
-    "game": "*"
+    "game": "*",
+    "schemas": "*"
   },
   "peerDependencies": {
     "boardgame.io": "0.50.*"

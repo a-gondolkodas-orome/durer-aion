@@ -44,9 +44,10 @@ export const strategyNames = {
   "20o-e": "20oe",
 } satisfies Record<StrategyGameKey, string>;
 
-// The game each category plays until teams belong to competitions (#137, step
-// 6), which name their game themselves. The problem bank's competitions say
-// the same, and a test holds the two together.
+// The game each category plays in the offline dry run, until it follows the
+// registry (#137, step 10); the live round plays its competition's own game.
+// The problem bank's competitions say the same, and a test holds the two
+// together.
 export const strategyGameOfCategory = {
   C: "20o-c",
   D: "20o-d",

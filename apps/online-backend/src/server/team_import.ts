@@ -3,10 +3,8 @@ import { randomInt, randomUUID } from 'crypto';
 import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
-import { COMPETITION_CATEGORIES, isCompetitionCategory } from 'schemas';
-import type { CompetitionCategory, CompetitionConfig } from 'schemas';
+import type { CompetitionConfig } from 'schemas';
 import { registry } from 'problem-bank/all';
-import { strategyGameOfCategory } from 'game';
 
 // The importer's columns, in the order the export writes them. A file may hold
 // them in any order: each is found by its header, whatever its case. Every row
@@ -17,33 +15,17 @@ const COLUMNS = ["Teamname", "Email", "Other", "ID", "Login Code", "Credentials"
 type Column = typeof COLUMNS[number];
 const REQUIRED: readonly Column[] = ["Teamname"];
 
-const CATEGORIES_TEXT = `${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} vagy `
-  + COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1];
-
 /** The registered competition an upload enters its teams into, with the
- * category its teams are stored with, or the reason it cannot take them.
- *
- * The live round still picks a team's games by its category, so until it
- * picks them from the competition (#137) a competition is refused unless its
- * category is one of those and its strategy game is the one the live round
- * plays in that category: anything else would be played with another
- * competition's games. */
+ * category its teams are stored with (its metadata's, shown and never acted
+ * on), or the reason it cannot take them. */
 export function competitionToImportInto(competitionId: string):
-  { competition: CompetitionConfig, category: CompetitionCategory } | { refused: string } {
+  { competition: CompetitionConfig, category: string } | { refused: string } {
   const competition = registry.competitions.get(competitionId.trim());
   if (competition === undefined) {
     return { refused: `Nincs ilyen verseny: „${competitionId}”.` };
   }
   const { metadata } = competition;
-  if (metadata.kind !== 'competition' || !isCompetitionCategory(metadata.category)) {
-    return { refused: `A(z) ${competition.id} verseny kategóriája nem ${CATEGORIES_TEXT}, `
-      + 'az élő forduló egyelőre csak ezeket tudja futtatni.' };
-  }
-  if (competition.strategy?.gameId !== strategyGameOfCategory[metadata.category]) {
-    return { refused: `A(z) ${competition.id} versenyt az élő forduló egyelőre nem tudja futtatni: `
-      + `${metadata.category} kategóriában a ${strategyGameOfCategory[metadata.category]} játékot játssza.` };
-  }
-  return { competition, category: metadata.category };
+  return { competition, category: metadata.kind === 'competition' ? metadata.category : '' };
 }
 
 const headerKey = (cell: string) => cell.trim().toLowerCase();

@@ -17,6 +17,7 @@ export function Strategy(props: { state: TeamModelDto }) {
          {StrategyClient ? <Suspense fallback={<Loading/>}>
             <StrategyClient
               category={props.state.category as CompetitionCategory}
+              competition={props.state.competition}
               credentials={props.state.credentials}
               matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
             />

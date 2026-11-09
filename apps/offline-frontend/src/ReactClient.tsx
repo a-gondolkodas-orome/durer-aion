@@ -1,7 +1,8 @@
 import { MyGameWrappers, strategyGameOfCategory, strategyNames } from "game";
 import { StrategyWrappers } from "game/bot";
 import { MyBoardWrapper, strategyDescriptions } from "game/client";
-import { RelayStrategy } from "relay-bot";
+import { relayStrategy } from "relay-bot";
+import { dryRunRelay } from "./dry-run-relays";
 import { InProgressRelay, type CompetitionCategory } from "common-frontend";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
 
@@ -11,9 +12,9 @@ const GameD = MyGameWrappers[gameD]();
 const GameE = MyGameWrappers[gameE]();
 
 const description = <p className="text-justify"></p>
-export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay("relay_c", InProgressRelay, RelayStrategy("C"), description);
-export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay("relay_d", InProgressRelay, RelayStrategy("D"), description);
-export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay("relay_e", InProgressRelay, RelayStrategy("E"), description);
+export const { ClientWithBot: RelayClientWithBotC } = ClientFactoryRelay("relay_c", InProgressRelay, relayStrategy(dryRunRelay("C")), description);
+export const { ClientWithBot: RelayClientWithBotD } = ClientFactoryRelay("relay_d", InProgressRelay, relayStrategy(dryRunRelay("D")), description);
+export const { ClientWithBot: RelayClientWithBotE } = ClientFactoryRelay("relay_e", InProgressRelay, relayStrategy(dryRunRelay("E")), description);
 export const { ClientWithBot: StrategyClientWithBotC } = ClientFactory({ ...GameC, name: strategyNames[gameC] }, MyBoardWrapper(gameC), StrategyWrappers[gameC](), strategyDescriptions[gameC]);
 export const { ClientWithBot: StrategyClientWithBotD } = ClientFactory({ ...GameD, name: strategyNames[gameD] }, MyBoardWrapper(gameD), StrategyWrappers[gameD](), strategyDescriptions[gameD]);
 export const { ClientWithBot: StrategyClientWithBotE } = ClientFactory({ ...GameE, name: strategyNames[gameE] }, MyBoardWrapper(gameE), StrategyWrappers[gameE](), strategyDescriptions[gameE]);

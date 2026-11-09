@@ -177,3 +177,38 @@ export interface CompetitionSource {
   getCompetition(id: CompetitionId): Promise<CompetitionConfig | undefined>;
   listCompetitions(): Promise<CompetitionConfig[]>;
 }
+
+/// The boardgame.io game a competition's relay is registered under, the same
+/// on the server and in the client that connects to it.
+export function relayGameName(competitionId: CompetitionId): string {
+  return `relay--${competitionId}`;
+}
+
+/// The strategy match's, as `relayGameName`.
+export function strategyGameName(competitionId: CompetitionId): string {
+  return `strategy--${competitionId}`;
+}
+
+/// What a team is served of its competition: everything but the relay's
+/// problems, whose answers the client must never see.
+export interface PublicCompetition {
+  id: CompetitionId;
+  languages: Language[];
+  relay?: { durationMinutes: number };
+  strategy?: StrategyConfig;
+  metadata: CompetitionMetadata;
+}
+
+/// Listed field by field rather than copied with the problems deleted, so a
+/// field added to the config later stays private until someone decides
+/// otherwise.
+export function publicCompetition(competition: CompetitionConfig): PublicCompetition {
+  const { id, languages, relay, strategy, metadata } = competition;
+  return {
+    id,
+    languages,
+    ...(relay !== undefined && { relay: { durationMinutes: relay.durationMinutes } }),
+    ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes, gameId: strategy.gameId } }),
+    metadata,
+  };
+}

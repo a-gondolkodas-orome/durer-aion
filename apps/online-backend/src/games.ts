@@ -1,25 +1,33 @@
-import {
-  GameRelay,
-  MyGameWrappers as strategyGameWrappers,
-  gameWrapper,
-  strategyGameOfCategory,
-  strategyNames,
-} from 'game';
+import { MyGameWrappers as strategyGameWrappers, RelayWrapper, gameWrapper } from 'game';
+import type { StrategyGameKey } from 'game';
 import { StrategyWrappers as StrategyStrategy } from 'game/bot';
-import { RelayStrategy } from 'relay-bot';
+import type { Registry } from 'problem-bank';
+import { judgeProblems, relayStrategy } from 'relay-bot';
+import { relayGameName, strategyGameName } from 'schemas';
 import botWrapper from './botwrapper';
-import { relayNames } from './server/common';
 
-const { C: gameC, D: gameD, E: gameE } = strategyGameOfCategory;
-
-/** Each game the server hosts, beside the bot that plays it. One entry holds
- *  both, so a game added, dropped or reordered cannot end up with another
- *  game's bot. */
-export const competitionGames = [
-  { game: { ...GameRelay, name: relayNames.C }, bot: botWrapper(RelayStrategy("C")) },
-  { game: { ...GameRelay, name: relayNames.D }, bot: botWrapper(RelayStrategy("D")) },
-  { game: { ...GameRelay, name: relayNames.E }, bot: botWrapper(RelayStrategy("E")) },
-  { game: { ...gameWrapper(strategyGameWrappers[gameC]()), name: strategyNames[gameC] }, bot: botWrapper(StrategyStrategy[gameC]()) },
-  { game: { ...gameWrapper(strategyGameWrappers[gameD]()), name: strategyNames[gameD] }, bot: botWrapper(StrategyStrategy[gameD]()) },
-  { game: { ...gameWrapper(strategyGameWrappers[gameE]()), name: strategyNames[gameE] }, bot: botWrapper(StrategyStrategy[gameE]()) },
-];
+/** Each game the server hosts, beside the bot that plays it: a relay and a
+ *  strategy match per competition that has one, under the names the client
+ *  connects by. One entry holds both, so a game cannot end up with another
+ *  game's bot.
+ *
+ *  The relay's judge is built from the bank here, once, so a relay that names
+ *  a missing problem fails the server's start rather than a team's match.
+ *  `assertValidRegistry` has checked by then that every strategy game id is
+ *  registered. */
+export function competitionGames({ competitions, problems }: Registry) {
+  return [...competitions.values()].flatMap(({ id, languages, relay, strategy }) => [
+    ...(relay === undefined ? [] : [{
+      game: { ...RelayWrapper(undefined, { durationMinutes: relay.durationMinutes }), name: relayGameName(id) },
+      bot: botWrapper(relayStrategy(judgeProblems(relay, languages, problems))),
+    }]),
+    ...(strategy === undefined ? [] : [{
+      game: {
+        ...gameWrapper(strategyGameWrappers[strategy.gameId as StrategyGameKey](), undefined,
+          { durationMinutes: strategy.durationMinutes }),
+        name: strategyGameName(id),
+      },
+      bot: botWrapper(StrategyStrategy[strategy.gameId as StrategyGameKey]()),
+    }]),
+  ]);
+}

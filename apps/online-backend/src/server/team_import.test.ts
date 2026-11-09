@@ -197,16 +197,19 @@ describe('import_teams_from_tsv', () => {
       expect(result.export_table.map(row => row[6])).toEqual(['u4lw7pcca1--20-online-d', 'u4lw7pcca1--20-online-d']);
     });
 
+    // Any registered competition, whatever its matches: a relay-only one
+    // simply has no strategy match to start.
+    it('takes a relay-only competition of any category', async () => {
+      tsv(['Alpha', '', '', '', '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'w2b34gqoin--01-final-b', 'dummy_file.tsv');
+
+      expect(result.successful).toBe(1);
+      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: 'w2b34gqoin--01-final-b', category: 'B' });
+    });
+
     it.each([
       ['one the registry does not have', 'nosuchcomp--x', 'Egy csapat sem került be. Nincs ilyen verseny: „nosuchcomp--x”.'],
-      // Until the live round picks its games from the competition (#137),
-      // anything else would be played with another competition's games.
-      ['one in a category the live round has no games for', 'w2b34gqoin--01-final-b',
-        'Egy csapat sem került be. A(z) w2b34gqoin--01-final-b verseny kategóriája nem C, D vagy E, '
-        + 'az élő forduló egyelőre csak ezeket tudja futtatni.'],
-      ['one whose strategy game the live round does not play', '6am5fsmne9--01-final-c',
-        'Egy csapat sem került be. A(z) 6am5fsmne9--01-final-c versenyt az élő forduló egyelőre nem tudja futtatni: '
-        + 'C kategóriában a 20o-c játékot játssza.'],
     ])('refuses %s, before reading the file', async (_, competitionId, message) => {
       tsv(['Alpha', '', '', '', '', '']);
 

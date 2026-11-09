@@ -6,6 +6,7 @@ const team = {
   teamId: "8eae8669-125c-42e5-8b49-89afbac31679",
   joinCode: "000-0000-000",
   teamName: "Csapat",
+  competitionId: "wkr6zml6mu--20-online-e",
   category: "E",
   credentials: "secret-token",
   email: "team@example.com",
@@ -35,10 +36,26 @@ describe("publicTeamView", () => {
     expect(publicTeamView(team, matches)).not.toHaveProperty("teamId");
   });
 
+  // The relay's problems carry their answers.
+  it("serves the competition without its problems", () => {
+    expect(JSON.stringify(publicTeamView(team, matches))).not.toContain("problemId");
+  });
+
+  it("serves no competition for a row naming one the server does not have", () => {
+    expect(publicTeamView({ ...team, competitionId: "gone" } as TeamModel, matches).competition).toBeNull();
+  });
+
   it("serves what the client plays with", () => {
     expect(publicTeamView(team, matches)).toStrictEqual({
       teamName: "Csapat",
       category: "E",
+      competition: {
+        id: "wkr6zml6mu--20-online-e",
+        languages: ["hu"],
+        relay: { durationMinutes: 60 },
+        strategy: { durationMinutes: 30, gameId: "20o-e" },
+        metadata: { kind: "competition", edition: 20, round: "online", category: "E" },
+      },
       credentials: "secret-token",
       pageState: "HOME",
       relayMatch: { state: "NOT STARTED" },

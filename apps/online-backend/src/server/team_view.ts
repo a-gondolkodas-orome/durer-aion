@@ -1,5 +1,7 @@
 import { TeamModel } from "./model";
-import { MatchStatus } from "schemas";
+import { MatchStatus, publicCompetition } from "schemas";
+import type { CompetitionConfig, PublicCompetition } from "schemas";
+import { registry } from "problem-bank/all";
 import type { TeamMatches } from "./match_status";
 
 /** What the playing client is served for its own team.
@@ -23,6 +25,10 @@ import type { TeamMatches } from "./match_status";
 export interface PublicTeamView {
   teamName: string;
   category: string;
+  /** What the client builds its boards from: which matches there are, how
+   *  long each runs and in which languages. Null for a row naming a
+   *  competition the server no longer has, which has nothing to play. */
+  competition: PublicCompetition | null;
   credentials: string;
   pageState: TeamModel["pageState"];
   relayMatch: MatchStatus;
@@ -35,10 +41,16 @@ export interface PublicTeamView {
  * column added to the model later stays out of the response until someone
  * decides it belongs here.
  */
-export function publicTeamView(team: TeamModel, matches: TeamMatches): PublicTeamView {
+export function publicTeamView(
+  team: TeamModel,
+  matches: TeamMatches,
+  competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
+): PublicTeamView {
+  const competition = competitions.get(team.competitionId);
   return {
     teamName: team.teamName,
     category: team.category,
+    competition: competition === undefined ? null : publicCompetition(competition),
     credentials: team.credentials,
     pageState: team.pageState,
     relayMatch: matches.relayMatch,
