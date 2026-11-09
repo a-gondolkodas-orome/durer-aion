@@ -20,9 +20,9 @@
       "practice": "<b>Practice game:</b> does not count towards your score; it is for trying the game out.",
       "practiceLabel": "Practice game",
       "practiceTip": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too; they do not affect your live series.",
-      "time": "<b>30 minutes</b> from the “Start” button.",
+      "time": "<b>You have 30 minutes:</b> the clock starts when you click “Start”.",
       "timeLabel": "Time",
-      "timeTip": "The 30 minutes start with the “Start” button, and practice games use them too."
+      "timeTip": "Practice games count towards the time too."
     }
   },
   "disclaimer": {

@@ -20,9 +20,9 @@
       "practice": "<b>Próbajáték:</b> nem számít a pontozásba; a játék kipróbálására való.",
       "practiceLabel": "Próbajáték",
       "practiceTip": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is; az éles sorozatotokat nem befolyásolja.",
-      "time": "<b>30 perc</b> a „Kezdjük” gombtól.",
+      "time": "<b>30 percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
       "timeLabel": "Idő",
-      "timeTip": "A 30 perc a „Kezdjük” gombbal indul, és a próbajátékok is ebből telnek."
+      "timeTip": "A próbajátékok is beleszámítanak az időbe."
     }
   },
   "disclaimer": {
