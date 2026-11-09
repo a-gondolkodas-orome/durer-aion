@@ -25,7 +25,7 @@ apps/
 packages/
   game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
   relay-bot/          # the relay game's opponent, and what each try is worth; holds the live round's own copy of its problems until it runs on problem-bank (#137)
-  problem-bank/       # the competitions held in code and the problems their relays refer to by id (#137), one bank per file under banks/; the server validates it at start, nothing else reads it yet
+  problem-bank/       # the competitions held in code and the problems their relays refer to by id (#137), one bank per file under banks/; the server validates it at start, and the relay practice site serves its relays
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types
   strategy-engine/    # the strategy practice site's game engine: rules, moves, bots, match state, no framework
