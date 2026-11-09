@@ -228,17 +228,18 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
 }
 
 /// One live game as the strategy screens show it: a ✓, ✗ or – square, or a
-/// dashed one for a game still to play. `label` names it for a screen reader.
-export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string }) {
+/// dashed one for a game still to play. Only a win that `scored` is coloured;
+/// every other game is a plain square, its glyph saying what it was. `label`
+/// names it for a screen reader.
+export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string, scored?: boolean }) {
   const { kind, n, label } = props;
   return (
     <Box role="img" aria-label={label} title={label} sx={{
       width: '28px', height: '28px', borderRadius: '7px', boxSizing: 'border-box', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700,
-      ...(kind === 'won' ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
-        : kind === 'lost' ? { backgroundColor: '#f6dcd8', color: '#8e1b10' }
-        : kind === 'unfinished' ? { backgroundColor: '#eaeef2', color: '#57606a' }
-        : { border: '2px dashed #8c959f', color: '#8c959f' }),
+      ...(props.scored ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
+        : kind === 'next' ? { border: '2px dashed #8c959f', color: '#8c959f' }
+        : { backgroundColor: '#fff', border: '1px solid #d0d7de', color: '#57606a' }),
     }}>
       {kind === 'won' ? '✓' : kind === 'lost' ? '✗' : kind === 'unfinished' ? '–' : `${n}.`}
     </Box>
@@ -293,7 +294,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[], points?: 
     unfinished: t('strategy.endTable.unfinished'),
   };
   const cell = (result: LiveGameResult, i: number) =>
-    <Numbered key={i} n={i + 1}><LiveGameCell kind={result} n={i + 1} label={label[result]} /></Numbered>;
+    <Numbered key={i} n={i + 1}><LiveGameCell kind={result} n={i + 1} label={label[result]} scored={i >= runStart && run > 0} /></Numbered>;
   return (
     <Box role="group" aria-label={t('strategy.series.label')} sx={{
       display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px',
