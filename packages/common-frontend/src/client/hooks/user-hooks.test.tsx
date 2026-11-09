@@ -109,3 +109,26 @@ test('going back home from a match shows home without reloading the page', async
   expect(result.current.team).toMatchObject({ pageState: 'HOME' });
   expect(reload).not.toHaveBeenCalled();
 });
+
+// The end dialog's onClose and its card's button are two hook instances, and
+// a team can trigger both before the first round trip answers.
+test('a second way home while the first is under way is ignored', async () => {
+  const { result } = renderHook(
+    () => ({ login: useLogin(), dialog: useBackToHome(), button: useBackToHome() }),
+    { wrapper },
+  );
+  await act(() => result.current.login('2'));
+  const toHome = vi.spyOn(repo, 'toHome');
+
+  await act(async () => {
+    result.current.dialog();
+    result.current.button();
+  });
+  expect(toHome).toHaveBeenCalledOnce();
+
+  // Once it has finished, the next one goes through.
+  await act(async () => {
+    result.current.button();
+  });
+  expect(toHome).toHaveBeenCalledTimes(2);
+});

@@ -122,12 +122,27 @@ export const useToHome = () => {
  * synchronous because React ignores what an event handler returns, so an async
  * one would leave its promise unhandled.
  */
+// Module state, not a ref: the end dialog's onClose and its card's button each
+// hold their own useBackToHome, and either may fire while the other's way home
+// is still under way.
+let goingHome = false;
+
 export const useBackToHome = (then?: () => Promise<void>) => {
   const toHome = useToHome();
-  return () => void (async () => {
-    await toHome();
-    await then?.();
-  })();
+  return () => {
+    if (goingHome) {
+      return;
+    }
+    goingHome = true;
+    void (async () => {
+      try {
+        await toHome();
+        await then?.();
+      } finally {
+        goingHome = false;
+      }
+    })();
+  };
 };
 
 export const useStartStrategy = () => {
