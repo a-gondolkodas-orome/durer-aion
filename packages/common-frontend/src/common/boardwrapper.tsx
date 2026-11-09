@@ -371,7 +371,9 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
   const runStart = open ? Math.max(0, results.length - streak) : results.length;
   const hidden = Math.max(0, runStart - SHOWN_BEFORE_RUN);
   const points = streak >= 2 ? G.points : strategyPoints(G.numberOfLoss);
-  const played = (result: LiveGameResult, i: number) => <SeriesCell key={i} kind={result} n={i + 1} scored={open && i >= runStart} />;
+  // Green means scored, as on the results: a run's wins colour only once it
+  // has the two, so no square turns back from green.
+  const played = (result: LiveGameResult, i: number) => <SeriesCell key={i} kind={result} n={i + 1} scored={streak >= 2 && i >= runStart} />;
   return (
     <Stack role="group" aria-label={t('strategy.series.label')}
       sx={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
@@ -396,7 +398,7 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
   );
 }
 
-/// `scored` for a win in the run the points stand beside, the only games coloured.
+/// `scored` for the two wins that earned the points, the only games coloured.
 function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: boolean }) {
   const { t } = useTranslation();
   const { kind, n } = props;
