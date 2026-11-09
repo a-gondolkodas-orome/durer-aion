@@ -1,3 +1,4 @@
+import type { UniqueConstraintError } from 'sequelize';
 import type { TeamsRepository } from './db';
 import { startTestDatabase } from './test_database';
 import { TeamModel } from './model';
@@ -26,6 +27,7 @@ function team(overrides: Partial<Parameters<TeamsRepository['insertTeam']>[0]> =
   const n = String(++teamNumber).padStart(3, '0');
   return {
     teamname: `Team ${n}`,
+    competitionId: 'mkhi1nnoim--20-online-c',
     category: 'C',
     email: 'team@example.com',
     other: '',
@@ -40,17 +42,25 @@ describe('the unique constraints sync() creates', () => {
   it.each([
     ['teamId', 'TeamId already exists.'],
     ['joinCode', 'JoinCode already exists.'],
-    ['teamname', 'Teamname already exists.'],
+    ['teamname', 'Teamname already exists in this competition.'],
     ['credentials', 'Credentials already exist.'],
   ] as const)('refuse a second team with the same %s', async (field, message) => {
     const first = team();
     await database.teams.insertTeam(first);
 
-    // The message is model.ts's.
-    await expect(database.teams.insertTeam(team({ [field]: first[field] })))
-      .rejects.toMatchObject({ name: 'SequelizeUniqueConstraintError', errors: [{ message }] });
+    // The message is model.ts's, on every column of the constraint.
+    const refusal = await database.teams.insertTeam(team({ [field]: first[field] })).catch((e: unknown) => e);
+    expect(refusal).toMatchObject({ name: 'SequelizeUniqueConstraintError' });
+    expect(new Set((refusal as UniqueConstraintError).errors.map(item => item.message))).toEqual(new Set([message]));
     expect(await TeamModel.count()).toBe(1);
   });
+});
+
+it('lets teams of two competitions share a name', async () => {
+  await database.teams.insertTeam(team({ teamname: 'Alpha' }));
+  await database.teams.insertTeam(team({ teamname: 'Alpha', competitionId: 'u4lw7pcca1--20-online-d' }));
+
+  expect(await TeamModel.count({ where: { teamName: 'Alpha' } })).toBe(2);
 });
 
 describe('TeamsRepository.goHome', () => {

@@ -4,12 +4,47 @@ import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
 import { COMPETITION_CATEGORIES, isCompetitionCategory } from 'schemas';
+import type { CompetitionCategory, CompetitionConfig } from 'schemas';
+import { registry } from 'problem-bank/all';
+import { strategyGameOfCategory } from 'game';
 
 // The importer's columns, in the order the export writes them. A file may hold
-// them in any order: each is found by its header, whatever its case.
-const COLUMNS = ["Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials"] as const;
+// them in any order: each is found by its header, whatever its case. Every row
+// of an upload enters the competition the upload names; `Competition` is
+// there for the export, whose file holds every competition's teams, and a row
+// naming another one than the upload's is refused rather than moved.
+const COLUMNS = ["Teamname", "Email", "Other", "ID", "Login Code", "Credentials", "Competition"] as const;
 type Column = typeof COLUMNS[number];
-const REQUIRED: readonly Column[] = ["Teamname", "Category"];
+const REQUIRED: readonly Column[] = ["Teamname"];
+
+const CATEGORIES_TEXT = `${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} vagy `
+  + COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1];
+
+/** The registered competition an upload enters its teams into, with the
+ * category its teams are stored with, or the reason it cannot take them.
+ *
+ * The live round still picks a team's games by its category, so until it
+ * picks them from the competition (#137) a competition is refused unless its
+ * category is one of those and its strategy game is the one the live round
+ * plays in that category: anything else would be played with another
+ * competition's games. */
+export function competitionToImportInto(competitionId: string):
+  { competition: CompetitionConfig, category: CompetitionCategory } | { refused: string } {
+  const competition = registry.competitions.get(competitionId.trim());
+  if (competition === undefined) {
+    return { refused: `Nincs ilyen verseny: „${competitionId}”.` };
+  }
+  const { metadata } = competition;
+  if (metadata.kind !== 'competition' || !isCompetitionCategory(metadata.category)) {
+    return { refused: `A(z) ${competition.id} verseny kategóriája nem ${CATEGORIES_TEXT}, `
+      + 'az élő forduló egyelőre csak ezeket tudja futtatni.' };
+  }
+  if (competition.strategy?.gameId !== strategyGameOfCategory[metadata.category]) {
+    return { refused: `A(z) ${competition.id} versenyt az élő forduló egyelőre nem tudja futtatni: `
+      + `${metadata.category} kategóriában a ${strategyGameOfCategory[metadata.category]} játékot játssza.` };
+  }
+  return { competition, category: metadata.category };
+}
 
 const headerKey = (cell: string) => cell.trim().toLowerCase();
 
@@ -47,14 +82,13 @@ function readHeader(header: string[]):
 // counts the rest.
 const NAMED_EXISTING = 10;
 
-const CATEGORIES_TEXT = `${COMPETITION_CATEGORIES.slice(0, -1).join(', ')} vagy `
-  + COMPETITION_CATEGORIES[COMPETITION_CATEGORIES.length - 1];
-
 // The model's own messages are English (model.ts), and the admin page is
 // Hungarian; each is worded here by the column it is about. One the table does
 // not know is quoted as it came.
 const UNIQUE_TEXT: Record<string, string> = {
-  teamName: 'már van ilyen nevű csapat',
+  teamName: 'már van ilyen nevű csapat ebben a versenyben',
+  // The other column of the same constraint, which postgres names too.
+  competitionId: 'már van ilyen nevű csapat ebben a versenyben',
   teamId: 'már van ilyen ID-jú csapat',
   joinCode: 'már van ilyen belépőkódú csapat',
   credentials: 'már van ilyen Credentials-ű csapat',
@@ -80,8 +114,8 @@ function randomDigits(numDigits: number) {
 function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
-export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
-  const { successful, existing, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
+export async function import_teams_from_tsv_locally(teams: TeamsRepository, competitionId: string, filename: string) {
+  const { successful, existing, failed, export_table, logs } = await import_teams_from_tsv(teams, competitionId, filename);
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
@@ -90,7 +124,7 @@ export async function import_teams_from_tsv_locally(teams: TeamsRepository, file
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
 
-export async function import_teams_from_tsv(teams: TeamsRepository, filename: string) {
+export async function import_teams_from_tsv(teams: TeamsRepository, competitionId: string, filename: string) {
   const logs: {
     sev: ('warn' | 'error')[];
     value: string[];
@@ -103,6 +137,14 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   function onerror(msg: string) { logs.value.push(msg); logs.sev.push('error') }
 
 
+  const export_table: string[][] = [];
+  const into = competitionToImportInto(competitionId);
+  if ('refused' in into) {
+    onerror(`Egy csapat sem került be. ${into.refused}`);
+    return { successful: 0, existing: 0, failed: 0, export_table, logs };
+  }
+  const { competition, category } = into;
+
   const untrimmed_rows = readFileSync(filename, 'utf-8').split('\n');
   const rows = untrimmed_rows;
   if (rows[rows.length - 1].trim() === "") {
@@ -110,11 +152,11 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   }
   const table = rows.map(row => row.split('\t'));
   const header = table.shift() ?? [];
-  const export_table: string[][] = [];
   const read = readHeader(header);
   // A header with no tab is one cell, so every column reads as missing even
-  // when the words are all there: that is the one thing to say about it.
-  if (header.length === 1 && header[0].trim() !== '') {
+  // when the words are all there: that is the one thing to say about it. A
+  // file of team names alone is one cell too, and is read.
+  if (header.length === 1 && header[0].trim() !== '' && 'refused' in read) {
     onerror('Egy csapat sem került be. A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, '
       + 'nem szóközzel.');
     onerror(`A fájl első sora: „${header[0].trim()}”`);
@@ -123,8 +165,9 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   if ('refused' in read) {
     onerror(`Egy csapat sem került be. ${read.refused}`);
     onerror(`A fájl első sora: ${header.map(cell => cell.trim()).join(', ')}`);
-    onerror('Oszlopok, tetszőleges sorrendben: Teamname és Category (kötelező); Email, Other, ID, Login Code és '
-      + 'Credentials (elhagyható, az utolsó hármat ilyenkor a szerver generálja).');
+    onerror('Oszlopok, tetszőleges sorrendben: Teamname (kötelező); Email, Other, ID, Login Code és '
+      + 'Credentials (elhagyható, az utolsó hármat ilyenkor a szerver generálja), és Competition (elhagyható, '
+      + 'ha szerepel, a feltöltés versenye kell legyen).');
     return { successful: 0, existing: 0, failed: 0, export_table, logs };
   }
   if (read.unknown.length > 0) {
@@ -136,9 +179,11 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   let failed = 0; // not counting blank lines
   await teams.connect();
   // Re-running a grown registration list is how late teams are added, so a
-  // row naming a team that is already there is that team, not a clash — as
-  // long as the identifiers it supplies are that team's own.
-  const live = new Map((await teams.listTeams() ?? []).map(team => [team.teamName, team]));
+  // row naming a team that is already in the competition is that team, not a
+  // clash — as long as the identifiers it supplies are that team's own.
+  const live = new Map((await teams.listTeams() ?? [])
+    .filter(team => team.competitionId === competition.id)
+    .map(team => [team.teamName, team]));
   const existing: string[] = [];
   for (const [index, row] of table.entries()) {
     // The file's own line number, header included, as an editor shows it.
@@ -150,7 +195,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     // A line with text and no tab is not a row with blank columns: it is a
     // file separated by spaces, which cannot be split safely — a team name
     // holds spaces of its own.
-    if (row.length === 1) {
+    if (row.length === 1 && header.length > 1) {
       onerror(`${line}. sor: nincs benne tabulátor („${row[0].trim()}”), az oszlopokat tabulátorral kell `
         + 'elválasztani, nem szóközzel.');
       failed++;
@@ -164,7 +209,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       return position === undefined ? '' : (row[position] ?? '').trim();
     };
     const teamname = cell("Teamname");
-    const category = cell("Category");
+    const rowCompetition = cell("Competition");
     const email = cell("Email");
     const other = cell("Other");
     // Every problem names the line and the team, so each stands on its own.
@@ -181,8 +226,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       ok = false;
     }
 
-    if (!isCompetitionCategory(category)) {
-      onerror(`${where}: a kategória nem ${CATEGORIES_TEXT}: „${category}”.`);
+    if (rowCompetition !== '' && rowCompetition !== competition.id) {
+      onerror(`${where}: a sor a(z) ${rowCompetition} versenyé, nem a feltöltésé (${competition.id}).`);
       ok = false;
     }
 
@@ -207,9 +252,6 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       existing.push(teamname);
       // Not applied: the import never changes a team that is already there.
       // Said, since a fix made in the file would otherwise vanish in silence.
-      if (category !== there.category) {
-        onwarn(`${where}: már szerepel, ${there.category} kategóriával; a fájlbeli ${category} nem került át.`);
-      }
       if (email !== '' && email !== (there.email ?? '')) {
         onwarn(`${where}: már szerepel, más e-mail címmel; a fájlbeli nem került át.`);
       }
@@ -230,11 +272,14 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
 
     if (ok) {
       try {
-        await teams.insertTeam({ teamname, category, email, other, teamId, joinCode: login_code, credentials });
+        await teams.insertTeam({
+          teamname, competitionId: competition.id, category, email, other, teamId, joinCode: login_code, credentials,
+        });
       } catch (err) {
         if (err instanceof ValidationError) {
           // A constraint the database refuses can come with no items at all.
-          const reasons = err.errors.length > 0 ? err.errors.map(databaseText).join('; ') : err.message;
+          // A constraint over two columns names both, with one reason.
+          const reasons = err.errors.length > 0 ? [...new Set(err.errors.map(databaseText))].join('; ') : err.message;
           onerror(`${where}: ${reasons}.`);
           ok = false;
         } else {
@@ -245,7 +290,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     }
 
     if (ok) {
-      const row_to_export = [teamname, category, email, other, teamId, login_code, credentials];
+      const row_to_export = [teamname, email, other, teamId, login_code, credentials, competition.id];
       export_table.push(row_to_export);
       successful++;
     } else {

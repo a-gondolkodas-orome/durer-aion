@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { MatchStatus, PageState } from "schemas";
+import type { CompetitionMetadata, MatchStatus, PageState } from "schemas";
 
 export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
@@ -13,6 +13,8 @@ export interface TeamModelDto {
   teamId?: string;
   joinCode?: string;
   teamName: string;
+  /// Served by the admin routes only, for now.
+  competitionId?: string;
   category: string;
   credentials: string;
   email?: string;
@@ -30,6 +32,13 @@ export function adminTeamId(team: TeamModelDto): string {
     throw new Error(`A(z) ${team.teamName} csapat azonosítója hiányzik.`);
   }
   return team.teamId;
+}
+
+/// A competition teams can be imported into, as `GET /team/admin/competitions`
+/// serves it.
+export interface CompetitionSummaryDto {
+  id: string;
+  metadata: CompetitionMetadata;
 }
 
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some

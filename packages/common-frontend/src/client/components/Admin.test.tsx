@@ -58,6 +58,7 @@ vi.mock('@mui/x-data-grid', () => {
 const team = (teamId: string, teamName: string): TeamModelDto => ({
   teamId,
   teamName,
+  competitionId: 'mkhi1nnoim--20-online-c',
   category: 'C',
   credentials: 'credentials',
   pageState: 'HOME',
@@ -72,8 +73,14 @@ const EARLIER = '2026-09-07T09:00:00.456Z';
 
 let repo: MockClientRepository;
 
+const COMPETITION_C = 'mkhi1nnoim--20-online-c';
+
 beforeEach(() => {
   repo = new MockClientRepository();
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' } },
+    { id: 'u4lw7pcca1--20-online-d', metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' } },
+  ]);
   // The open tab is read from the URL, which jsdom keeps between tests.
   window.history.replaceState(null, '', '/admin');
 });
@@ -384,12 +391,19 @@ const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportR
   successful: 0, existing: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
 });
 
-const alphaCodes = ['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
+const alphaCodes = ['Alpha', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a', COMPETITION_C];
 
-/** Picks a file on the import tab and starts the import. */
+/** Picks the competition the import enters its teams into. */
+const pickCompetition = async (label = `20. internetes C (${COMPETITION_C})`) => {
+  fireEvent.mouseDown(within(await screen.findByTestId('importCompetition')).getByRole('combobox'));
+  fireEvent.click(await screen.findByRole('option', { name: label }));
+};
+
+/** Picks a competition and a file on the import tab and starts the import. */
 const importFile = async (name = 'teams.tsv') => {
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  const file = new File(['Teamname\tCategory\n'], name);
+  await pickCompetition();
+  const file = new File(['Teamname\n'], name);
   fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
   fireEvent.click(screen.getByText('Importálás indítása'));
   return file;
@@ -416,7 +430,7 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   const file = await importFile();
 
   expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
-  expect(importTeams).toHaveBeenCalledWith(file);
+  expect(importTeams).toHaveBeenCalledWith(file, COMPETITION_C);
   await waitFor(() => { expect(getAll).toHaveBeenCalledTimes(2); });
   // A file of every team's secrets is not saved unasked.
   expect(saved).toEqual([]);
@@ -424,7 +438,19 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
-  expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
+  expect(saved[0]).toBe(`Teamname\tEmail\tOther\tID\tLogin Code\tCredentials\tCompetition\n${alphaCodes.join('\t')}\n`);
+});
+
+test('the import waits for a competition to be picked', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [new File(['Teamname\n'], 'teams.tsv')] } });
+  expect(screen.getByText('Importálás indítása')).toBeDisabled();
+
+  await pickCompetition();
+  expect(screen.getByText('Importálás indítása')).toBeEnabled();
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {
@@ -433,7 +459,7 @@ test('the import tab lists the server\'s errors and warnings', async () => {
     failed: 1,
     logs: {
       sev: ['warn', 'error'],
-      value: ['Ezeket az oszlopokat nem ismerjük, kimaradnak: School', '2. sor (Bravo): a kategória nem C, D vagy E: „X”.'],
+      value: ['Ezeket az oszlopokat nem ismerjük, kimaradnak: School', '2. sor (Bravo): hiányzik a csapatnév.'],
     },
   }));
   const saved = savedDownloads();
@@ -441,7 +467,7 @@ test('the import tab lists the server\'s errors and warnings', async () => {
 
   await importFile();
 
-  expect(await screen.findByText('2. sor (Bravo): a kategória nem C, D vagy E: „X”.')).toBeInTheDocument();
+  expect(await screen.findByText('2. sor (Bravo): hiányzik a csapatnév.')).toBeInTheDocument();
   expect(screen.getByText('Ezeket az oszlopokat nem ismerjük, kimaradnak: School')).toBeInTheDocument();
   // Nothing went in, so there is nothing to save.
   expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
@@ -467,7 +493,7 @@ test('the import tab calls a file of teams already there no failure', async () =
 
 test('a second import keeps the codes of the first', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  const bravoCodes = ['Bravo', 'D', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b'];
+  const bravoCodes = ['Bravo', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b', COMPETITION_C];
   vi.spyOn(repo, 'importTeams')
     .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [alphaCodes] }))
     .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [bravoCodes] }));
@@ -539,10 +565,10 @@ test('the list points to the export, which downloads every team with its join co
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe([
-    'Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials',
+    'Teamname\tEmail\tOther\tID\tLogin Code\tCredentials\tCompetition',
     // A tab in a cell would shift every column after it.
-    `Alpha\tC\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
-    'Bare\tC\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials',
+    `Alpha\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials\t${COMPETITION_C}`,
+    `Bare\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials\t${COMPETITION_C}`,
   ].join('\n') + '\n');
 });
 

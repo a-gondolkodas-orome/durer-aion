@@ -6,16 +6,17 @@ import { argv, exit } from 'process';
 import { getDb } from './server/db';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
-// node: argv[0] vs import_teams.js: argv[1]
-const filename = argv[2];
-if (filename === undefined) {
-  console.error('Usage: import_teams.js <teams.tsv>');
+// node: argv[0] vs import_teams.js: argv[1]. Every team of the file enters the
+// one competition named.
+const [competitionId, filename] = argv.slice(2);
+if (competitionId === undefined || filename === undefined) {
+  console.error('Usage: import_teams.js <competition id> <teams.tsv>');
   exit(2);
 }
 
 const { teams } = getDb();
 
-import_teams_from_tsv_locally(teams, filename).then(() => exit(0)).catch((e: unknown) => {
+import_teams_from_tsv_locally(teams, competitionId, filename).then(() => exit(0)).catch((e: unknown) => {
   console.error('team import failed', e);
   exit(1);
 });

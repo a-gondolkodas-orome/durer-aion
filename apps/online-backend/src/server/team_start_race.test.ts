@@ -49,6 +49,7 @@ beforeEach(async () => {
   await database.reset();
   const team = await database.teams.insertTeam({
     teamname: "Alpha",
+    competitionId: "mkhi1nnoim--20-online-c",
     category: "C",
     email: "team@example.com",
     other: "",

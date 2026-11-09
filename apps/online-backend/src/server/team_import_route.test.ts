@@ -24,7 +24,8 @@ it.each([
   await once(server, "listening");
   try {
     const body = new FormData();
-    body.append("file", new Blob(["Teamname\tCategory\tEmail\tOther\nAlpha\tC\ta@b.com\tx\n"]), filename);
+    body.append("file", new Blob(["Teamname\tEmail\tOther\nAlpha\ta@b.com\tx\n"]), filename);
+    body.append("competitionId", "mkhi1nnoim--20-online-c");
     const { port } = server.address() as AddressInfo;
     const response = await fetch(`http://127.0.0.1:${port}/team/admin/import`, {
       method: "PUT",

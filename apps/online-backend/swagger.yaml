@@ -178,11 +178,33 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TeamModel"
+  /team/admin/competitions:
+    get:
+      summary: The competitions teams can be imported into
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Each registered competition's id and metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    metadata:
+                      type: object
+                      description: The competition's metadata, as `schemas` types it
   /team/admin/import:
     put:
-      summary: Import teams from a TSV file
+      summary: Import teams from a TSV file into one competition
       description: |
-        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded and contain the following columns: "Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials".
+        This endpoint allows admins to upload a TSV file with team information. Every team in it enters the competition `competitionId` names. The file must be UTF-8 encoded, with a header naming its columns: "Teamname" (required), "Email", "Other", "ID", "Login Code", "Credentials" and "Competition" (optional; when given, it must be the upload's competition).
       security:
         - basicAdminAuth: []
       tags:
@@ -198,8 +220,12 @@ paths:
                   type: string
                   format: binary
                   description: The TSV file to be uploaded, its name ending in .tsv
+                competitionId:
+                  type: string
+                  description: The id of the competition every team of the file enters
               required:
                 - file
+                - competitionId
       responses:
         "200":
           description: Teams imported successfully
@@ -469,6 +495,8 @@ components:
         joinCode:
           type: string
         teamName:
+          type: string
+        competitionId:
           type: string
         category:
           type: string

@@ -31,7 +31,7 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
 
 1. **Import.** `team_import.ts`, from `npm run teams:import` or
    `PUT /team/admin/import`, creates each row in `DISCLAIMER` with both match
-   ids null.
+   ids null, in the one competition the upload names (`competitionId`).
 2. **Login.** `POST /team/join` swaps the join code for a session cookie;
    `team_session.ts` is what the cookie is and why. Every `/team/me` route but
    `logout` then loads the team through `requireTeam`.

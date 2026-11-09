@@ -157,5 +157,10 @@ export const useStartStrategy = () => {
 
 export const useImportTeams = () => {
   const repo = useAdminRepo();
-  return async (file: File) => await repo.importTeams(file);
+  return async (file: File, competitionId: string) => await repo.importTeams(file, competitionId);
+};
+
+export const useCompetitions = () => {
+  const repo = useAdminRepo();
+  return async () => await repo.getCompetitions();
 };

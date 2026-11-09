@@ -1,4 +1,4 @@
-import type { MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -36,5 +36,6 @@ export interface AdminClientRepository {
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
-  importTeams(file: File): Promise<TeamImportResultDto>
+  getCompetitions(): Promise<CompetitionSummaryDto[]>
+  importTeams(file: File, competitionId: string): Promise<TeamImportResultDto>
 }

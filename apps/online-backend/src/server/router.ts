@@ -10,6 +10,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
+import { registry } from 'problem-bank/all';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
@@ -244,13 +245,27 @@ export function configureTeamsRouter(
   })
 
   /**
-   * Import teams from an uploaded TSV, the way `npm run teams:import` does.
-   * formidable stores the upload under a random name, so the extension is
-   * checked on the name the client sent.
+   * The competitions the server knows, for the admin page to import teams
+   * into: each one's id and metadata, nothing of its problems.
+   */
+  router.get("/team/admin/competitions", adminAuth, (ctx) => {
+    ctx.body = [...registry.competitions.values()].map(({ id, metadata }) => ({ id, metadata }));
+  });
+
+  /**
+   * Import teams from an uploaded TSV into the competition the `competitionId`
+   * field names, the way `npm run teams:import` does. formidable stores the
+   * upload under a random name, so the extension is checked on the name the
+   * client sent.
    */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
     const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
     try {
+      const sent: unknown = (ctx.request.body as { competitionId?: unknown } | undefined)?.competitionId;
+      if (typeof sent !== 'string' || sent === '') {
+        ctx.throw(400, 'Expected a competitionId field.');
+        return;
+      }
       if (Array.isArray(file)) {
         ctx.throw(400, 'Multiple files are not supported.');
         return;
@@ -260,7 +275,7 @@ export function configureTeamsRouter(
         ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
         return;
       }
-      ctx.body = await import_teams_from_tsv(teams, file.filepath);
+      ctx.body = await import_teams_from_tsv(teams, sent, file.filepath);
     } finally {
       // Every field, not only `file`: formidable writes whatever is uploaded.
       const uploaded = Object.values(ctx.request.files ?? {}).flat();

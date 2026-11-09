@@ -110,15 +110,16 @@ describe("adding minutes to a match", () => {
 });
 
 describe("the team import", () => {
-  test("uploads the file as the route's one `file` field", async () => {
+  test("uploads the file and the competition it enters", async () => {
     const calls = fakeAxios(ok);
     const file = new File(["Teamname\n"], "teams.tsv");
 
-    await new RealClientRepository().importTeams(file);
+    await new RealClientRepository().importTeams(file, "mkhi1nnoim--20-online-c");
 
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({ method: "put", url: "/team/admin/import" });
     expect((calls[0].body as FormData).get("file")).toBe(file);
+    expect((calls[0].body as FormData).get("competitionId")).toBe("mkhi1nnoim--20-online-c");
   });
 
   // The answer is the only copy of the generated join codes, and nginx gives
@@ -127,7 +128,7 @@ describe("the team import", () => {
   test("waits longer than nginx does", async () => {
     fakeAxios(ok);
 
-    await new RealClientRepository().importTeams(new File([""], "teams.tsv"));
+    await new RealClientRepository().importTeams(new File([""], "teams.tsv"), "mkhi1nnoim--20-online-c");
 
     const created = vi.mocked(axios.create).mock.calls.at(-1)?.[0];
     expect(created?.timeout).toBeGreaterThan(60_000);
@@ -137,7 +138,7 @@ describe("the team import", () => {
     fakeAxios(() => status(400));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expect(new RealClientRepository().importTeams(new File([""], "teams.csv")))
+    await expect(new RealClientRepository().importTeams(new File([""], "teams.csv"), "mkhi1nnoim--20-online-c"))
       .rejects.toThrow("Csak .tsv kiterjesztésű fájlt lehet importálni.");
   });
 });
