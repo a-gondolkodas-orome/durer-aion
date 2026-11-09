@@ -8,11 +8,21 @@
       "title": "Vége a versenynek!"
     },
     "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
-    "relayDescriptionHtml": "<p>A váltófeladatok rövid szöveges feladatok, melyekre a válasz egy egész szám (legalább 0 és legfeljebb 9999).</p>\n<ul>\n  <li>Minden váltófeladatra legfeljebb 3 tippet adhattok le. Egy-egy rossz tipp után az adott feladatra megszerezhető pontszám 1-gyel csökken.</li>\n  <li>Helyes tipp vagy három rossz tipp után megkapjátok a következő feladatot.</li>\n  <li>Ha egy feladattal nem szeretnétek tovább foglalkozni, három különböző rossz tipp beküldésével továbbléphettek.</li>\n  <li><b>Egy korábbi feladathoz később nem lehet visszatérni.</b></li>\n  <li>A váltófeladatokra összesen 60 perc áll rendelkezésre, és összesen 40 pont szerezhető velük hibátlan teljesítés esetén. (Az egyes feladatokra kapható pontszám 3-tól 6-ig terjed.)</li>\n</ul>",
+    "relay": {
+      "intro": "Rövid szöveges feladatok egymás után. Mindegyikre egy 0 és 9999 közötti egész szám a válasz.",
+      "points": "<b>Pontozás:</b> összesen 40 pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot.",
+      "pointsLabel": "Pontozás",
+      "pointsTip": "Egy feladat 3–6 pontot ér. Ha a harmadik tipp is rossz, a feladatra 0 pontot kaptok.",
+      "tries": "<b>Feladatonként 3 tippetek van:</b> helyes tipp vagy három rossz tipp után jön a következő feladat.",
+      "triesLabel": "Tippek",
+      "triesTip": "Ha egy feladattal nem szeretnétek tovább foglalkozni, három különböző rossz tipp beküldésével továbbléphettek.",
+      "time": "<b>60 percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
+      "noReturn": "Egy korábbi feladathoz később nem lehet visszatérni."
+    },
     "start": "Kezdjük",
     "strategy": {
       "intro": "Kétszereplős stratégiás játék a gép ellen. A szabályokat a kezdés után olvashatjátok. Akkor kaptok pontot, ha sikerül éles játszmában kétszer egymás után legyőznötök a gépet.",
-      "live": "<b>Pontozás:</b> {{max}} pontot kaptok, ha kétszer egymás után legyőzitek éles játszmában a gépet vereség nélkül. Az elérhető pont minden éles vereséggel csökken: {{next}}, majd {{rest}}.",
+      "live": "<b>Pontozás:</b> {{max}} pontot kaptok, ha kétszer egymás után legyőzitek éles játszmában a gépet vereség nélkül. Az éles vereségek ezt {{next}}, majd {{rest}} pontra csökkentik.",
       "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
       "pointsLabel": "Pontozás",
       "practice": "<b>Próbajáték:</b> nem számít a pontozásba; a játék kipróbálására való.",
@@ -177,7 +187,7 @@
       "outcomeAfterLosses_other": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
       "outcomeClean": "Ti vereség nélkül nyertetek kétszer egymás után: {{points}}.",
       "outcomeNone": "Nektek nem lett meg a két egymás utáni éles győzelem, ezért 0 pontot kaptatok.",
-      "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; minden éles vereség csökkenti ({{scale}}), és utána újra két egymás utáni győzelem kell."
+      "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; az éles vereségek csökkentik ({{scale}}), de {{min}} pontnál kevesebb nem lesz. Egy vereség után újra két egymás utáni győzelem kell."
     },
     "result": {
       "liveLost": "A gép nyert.",

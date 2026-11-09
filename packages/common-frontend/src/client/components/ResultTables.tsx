@@ -319,7 +319,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[], points?: 
 export function StrategyPointsRule(props: { results?: LiveGameResult[], points?: number }) {
   const { t } = useTranslation();
   const [clean, afterOneLoss] = STRATEGY_POINTS_BY_LOSSES;
-  const rule = t('strategy.points.text', { max: clean, scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') });
+  const rule = t('strategy.points.text', { max: clean, min: STRATEGY_POINTS_BY_LOSSES.at(-1), scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') });
   if (props.results === undefined || props.points === undefined) {
     return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
       {rule}

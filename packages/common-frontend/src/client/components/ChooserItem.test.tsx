@@ -57,3 +57,13 @@ test('explains the strategy game in short lines, with the details behind an ⓘ 
   }
   expect(screen.getByText('chooser.strategy.noAbandon')).toBeInTheDocument();
 });
+
+test('explains the relay the same way', () => {
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} />);
+
+  expect(screen.getByText('chooser.relay.intro')).toBeInTheDocument();
+  for (const label of ['chooser.relay.pointsLabel', 'chooser.relay.triesLabel']) {
+    expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+  }
+  expect(screen.getByText('chooser.relay.noReturn')).toBeInTheDocument();
+});

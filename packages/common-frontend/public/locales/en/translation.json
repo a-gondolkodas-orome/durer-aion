@@ -8,11 +8,21 @@
       "title": "Competition ended!"
     },
     "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
-    "relayDescriptionHtml": "<p>Relay tasks are short text tasks where the answer is an integer (at least 0 and at most 9999).</p>\n<ul>\n  <li>You can make at most 3 guesses for each relay task. After each wrong guess, the points you can earn for that task decrease by 1.</li>\n  <li>After a correct guess or three wrong guesses, you will receive the next task.</li>\n  <li>If you would rather not spend more time on a task, you can move on by submitting three different wrong guesses.</li>\n  <li><b>You cannot return to an earlier task later.</b></li>\n  <li>You have a total of 60 minutes for the relay tasks, and you can earn a total of 40 points with error-free performance. (The points available for individual tasks range from 3 to 6.)</li>\n</ul>",
+    "relay": {
+      "intro": "Short word problems, one after the other. The answer to each is a whole number from 0 to 9999.",
+      "points": "<b>Points:</b> 40 in total. Each wrong guess lowers the points a problem is worth by 1.",
+      "pointsLabel": "Points",
+      "pointsTip": "A problem is worth 3 to 6 points. If your third guess is wrong too, it scores 0.",
+      "tries": "<b>You have 3 guesses per problem:</b> after a right guess or three wrong ones, the next problem comes.",
+      "triesLabel": "Guesses",
+      "triesTip": "If you would rather not spend more time on a problem, you can move on by submitting three different wrong guesses.",
+      "time": "<b>You have 60 minutes:</b> the clock starts when you click “Start”.",
+      "noReturn": "You cannot return to an earlier problem later."
+    },
     "start": "Start",
     "strategy": {
       "intro": "A two-player strategy game against the computer. You can read its rules once you start. You get points if you manage to beat the computer twice in a row in live games.",
-      "live": "<b>Points:</b> you get {{max}} points if you beat the computer twice in a row in live games with no loss. The points available drop with each live loss: {{next}}, then {{rest}}.",
+      "live": "<b>Points:</b> you get {{max}} points if you beat the computer twice in a row in live games with no loss. Live losses lower it to {{next}}, then {{rest}}.",
       "noAbandon": "A game, once started, has to be played to the end.",
       "pointsLabel": "Points",
       "practice": "<b>Practice game:</b> does not count towards your score; it is for trying the game out.",
@@ -181,7 +191,7 @@
       "outcomeAfterLosses_other": "You won twice in a row after {{count}} live losses: {{points}}.",
       "outcomeClean": "You won twice in a row with no loss: {{points}}.",
       "outcomeNone": "You did not get two live wins in a row, so you got 0 points.",
-      "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; each live loss lowers it ({{scale}}), and after it you need two wins in a row again."
+      "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; live losses lower it ({{scale}}), but never below {{min}}. After a loss you need two wins in a row again."
     },
     "result": {
       "liveLost": "The computer won.",
