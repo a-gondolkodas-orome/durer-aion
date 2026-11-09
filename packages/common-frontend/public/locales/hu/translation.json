@@ -142,13 +142,8 @@
   "strategy": {
     "description": "Feladat leírása",
     "endTable": {
-      "game": "Éles játszma",
-      "losses": "Vereség",
       "lost": "Vereség",
-      "points": "Pont",
       "reminder": "Ne feledkezzetek meg a váltóról sem!",
-      "result": "Eredmény",
-      "rules": "A gyakorló játszmák nem számítanak. Ha 30 perc alatt nem győzitek le kétszer egymás után a gépet, 0 pontot kaptok.",
       "title": "A stratégiás játék eredménye",
       "unfinished": "Befejezetlen: lejárt közben az idő",
       "won": "Győzelem"
@@ -177,10 +172,20 @@
     "testGameButton": "Új próbajáték kezdése",
     "twoWinsInARow": "Ha most kétszer egymás után nyertek éles játszmában: {{points}}",
     "points": {
-      "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; az éles vereségek csökkentik ({{scale}}), de {{min}} pontnál kevesebb nem lesz. Egy vereség után újra két egymás utáni győzelem kell.",
-      "examples": "Például:",
+      "afterLoss": "győzelem, vereség, győzelem, győzelem",
       "cleanRun": "győzelem, győzelem",
-      "afterLoss": "győzelem, vereség, győzelem, győzelem"
+      "examples": "Például:",
+      "outcomeAfterLosses_one": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
+      "outcomeAfterLosses_other": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
+      "outcomeClean": "Ti vereség nélkül nyertetek kétszer egymás után: {{points}}.",
+      "outcomeNone": "Nektek nem lett meg a két egymás utáni éles győzelem, ezért 0 pontot kaptatok.",
+      "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; az éles vereségek csökkentik ({{scale}}), de {{min}} pontnál kevesebb nem lesz. Egy vereség után újra két egymás utáni győzelem kell."
+    },
+    "series": {
+      "earlier_one": "{{count}} korábbi éles játszma",
+      "earlier_other": "{{count}} korábbi éles játszma",
+      "label": "Éles játszmák",
+      "total": "= {{points}}"
     }
   },
   "waitingRoom": {

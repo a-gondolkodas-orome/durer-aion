@@ -11,7 +11,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
-import { PointsScale, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
+import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
 
 /**
@@ -87,8 +87,12 @@ export function ChooserItem(props: {
             </>
             : <>
               <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>
-              {finished.strategyResults && <StrategyGamesTable results={finished.strategyResults}/>}
-              <PointsScale points={finished.score}/>
+              {finished.strategyResults && <>
+                <StrategyGamesTable results={finished.strategyResults} points={finished.score}/>
+                <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
+                  <StrategyPointsRule results={finished.strategyResults} points={finished.score}/>
+                </Box>
+              </>}
             </>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
             {t('chooser.filledAt')}: {formatTime(finished.startAt)} – {formatTime(finished.endAt)}
