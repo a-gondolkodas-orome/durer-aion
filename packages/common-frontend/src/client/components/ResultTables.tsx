@@ -246,15 +246,14 @@ export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, 
   );
 }
 
-/// The run of wins a strategy screen groups with its points, framed in green.
+/// The run of wins a strategy screen groups with its points.
 /// `numbered` when its games carry their numbers above them (`Numbered`), so
 /// the points line up with the squares, not the numbers.
 export function LiveGameRun(props: { points: string, numbered?: boolean, children: ReactNode }) {
   const points = <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>;
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
-      borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',
+      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px',
     }}>
       {props.children}
       {props.numbered ? <Numbered n={null}>{points}</Numbered> : points}
@@ -334,7 +333,8 @@ export function StrategyPointsRule(props: { results?: LiveGameResult[], points?:
   // the live losses before them left.
   const losses = props.results.filter(result => result === 'lost').length;
   const points = t('general.points', { count: props.points });
-  const outcome = props.points === 0 ? t('strategy.points.outcomeNone')
+  const outcome = props.results.length === 0 ? t('strategy.points.outcomeNoGames')
+    : props.points === 0 ? t('strategy.points.outcomeNone')
     : losses === 0 ? t('strategy.points.outcomeClean', { points })
     : t('strategy.points.outcomeAfterLosses', { count: losses, points });
   return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>

@@ -178,6 +178,7 @@
       "outcomeAfterLosses_one": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
       "outcomeAfterLosses_other": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
       "outcomeClean": "Ti vereség nélkül nyertetek kétszer egymás után: {{points}}.",
+      "outcomeNoGames": "Nem játszottatok éles játszmát, ezért 0 pontot kaptatok.",
       "outcomeNone": "Nektek nem lett meg a két egymás utáni éles győzelem, ezért 0 pontot kaptatok.",
       "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; az éles vereségek csökkentik ({{scale}}), de {{min}} pontnál kevesebb nem lesz. Egy vereség után újra két egymás utáni győzelem kell."
     },
