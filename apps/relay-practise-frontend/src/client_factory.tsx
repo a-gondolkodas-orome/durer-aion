@@ -9,8 +9,9 @@ export const ClientFactoryRelay = function (
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
   description: ReactNode,
+  durationMinutes?: number,
   ) {
-  const ClientWithBotComponent = ClientRelayWithBot(gameName, board, strategy, description);
+  const ClientWithBotComponent = ClientRelayWithBot(gameName, board, strategy, description, durationMinutes);
   return {
     ClientWithBot: function () {
       return (<>
