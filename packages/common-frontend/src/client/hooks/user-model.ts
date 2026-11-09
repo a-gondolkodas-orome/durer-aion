@@ -30,23 +30,11 @@ export class UserModel {
   }
 
   async startRelay(): Promise<void> {
-    try {
-      await this.repo.startRelay();
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.startRelay();
   }
 
   async starStrategy(): Promise<void> {
-    try {
-      await this.repo.startStrategy();
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.startStrategy();
   }
 
   // The saved match goes first, synchronously: it must not survive a logout
@@ -71,13 +59,7 @@ export class UserModel {
   }
 
   async toHome(): Promise<void> {
-    try {
-      await this.repo.toHome();
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.toHome();
   }
 
   // Returns the function that removes the listener again.

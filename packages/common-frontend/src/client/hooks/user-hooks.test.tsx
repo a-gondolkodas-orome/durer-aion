@@ -4,9 +4,15 @@ import { act, render, renderHook } from '@testing-library/react';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { setTeamState, useTeamStateValue } from './team-state-store';
-import { LoadTeamState, useBackToHome, useLogin, useLogout } from './user-hooks';
+import { LoadTeamState, useBackToHome, useLogin, useLogout, useStartRelay, useToHome } from './user-hooks';
 import { loginMarkerStorageKey } from '../utils/storage-keys';
 import type { TeamModelDto } from '../dto/TeamStateDto';
+// The snackbar's text comes from the i18next instance the apps initialise here.
+import '../../common/i18n';
+
+// A snackbar is the one way these hooks speak to the team.
+const enqueueSnackbar = vi.fn();
+vi.mock('notistack', () => ({ useSnackbar: () => ({ enqueueSnackbar }) }));
 
 // The session lives in the repository, so each test starts a fresh one.
 let repo: MockClientRepository;
@@ -17,6 +23,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 beforeEach(() => {
   localStorage.clear();
+  enqueueSnackbar.mockClear();
   repo = new MockClientRepository();
 });
 
@@ -131,4 +138,71 @@ test('a second way home while the first is under way is ignored', async () => {
     result.current.button();
   });
   expect(toHome).toHaveBeenCalledTimes(2);
+});
+
+// A refused start or go-home reloaded the page (#112): with the network down
+// that left the browser's own error page in place of the round. Each test below
+// replaces `location`, and fails on a reload.
+describe('a refused start or go-home', () => {
+  let reload: ReturnType<typeof vi.fn>;
+
+  // Logged in as the mock's team "2", mid-relay, with `request` about to be
+  // refused.
+  async function refused(request: 'startRelay' | 'toHome', error = new Error('refused')) {
+    const hooks = renderHook(
+      () => ({ login: useLogin(), startRelay: useStartRelay(), toHome: useToHome(), team: useTeamStateValue() }),
+      { wrapper },
+    );
+    await act(() => hooks.result.current.login('2'));
+    reload = vi.fn();
+    vi.stubGlobal('location', { ...window.location, reload });
+    vi.spyOn(repo, request).mockRejectedValue(error);
+    return hooks.result;
+  }
+
+  afterEach(() => {
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  // Another device started the match first: the refusal is its own answer.
+  test('shows the match another device started, and says nothing', async () => {
+    const result = await refused('startRelay');
+    const team = await repo.getTeamState() as TeamModelDto;
+    act(() => setTeamState({ ...team, pageState: 'HOME', relayMatch: { state: 'NOT STARTED' } }));
+
+    await act(() => result.current.startRelay());
+
+    expect(result.current.team).toMatchObject({ pageState: 'RELAY', relayMatch: { state: 'IN PROGRESS' } });
+    expect(enqueueSnackbar).not.toHaveBeenCalled();
+  });
+
+  test('to an ended session shows the login form, and says nothing', async () => {
+    const result = await refused('startRelay');
+    vi.spyOn(repo, 'getTeamState').mockResolvedValue(null);
+
+    await act(() => result.current.startRelay());
+
+    expect(result.current.team).toBeNull();
+    expect(enqueueSnackbar).not.toHaveBeenCalled();
+  });
+
+  test('that leaves the team where it was says so', async () => {
+    const result = await refused('toHome');
+
+    await act(() => result.current.toHome());
+
+    expect(result.current.team).toMatchObject({ pageState: 'RELAY' });
+    expect(enqueueSnackbar).toHaveBeenCalledExactlyOnceWith('Váratlan hiba történt', { variant: 'error' });
+  });
+
+  test('with the network down keeps the page, and says so', async () => {
+    const result = await refused('startRelay', new Error('Network Error'));
+    const before = result.current.team;
+    vi.spyOn(repo, 'getTeamState').mockRejectedValue(new Error('Network Error'));
+
+    await act(() => result.current.startRelay());
+
+    expect(result.current.team).toBe(before);
+    expect(enqueueSnackbar).toHaveBeenCalledExactlyOnceWith('Váratlan hiba történt', { variant: 'error' });
+  });
 });
