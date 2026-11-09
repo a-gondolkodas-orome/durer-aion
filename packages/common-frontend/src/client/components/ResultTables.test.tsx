@@ -33,6 +33,10 @@ test("a long run of live games shows only the latest ones, the earlier ones as a
 
   expect(screen.getAllByRole('img', { name: 'strategy.endTable.lost' })).toHaveLength(6);
   expect(screen.getByRole('img', { name: 'strategy.series.earlier' })).toBeInTheDocument();
+  // Numbered as played, so the hidden ones are not mistaken for none.
+  expect(screen.getByText('10.')).toBeInTheDocument();
+  expect(screen.getByText('15.')).toBeInTheDocument();
+  expect(screen.queryByText('9.')).not.toBeInTheDocument();
 });
 
 // As the strip during the game groups the run with what it is worth.
