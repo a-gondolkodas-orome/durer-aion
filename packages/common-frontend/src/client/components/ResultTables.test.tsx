@@ -112,3 +112,9 @@ test("a match without two wins in a row says why it scored nothing", () => {
 
   expect(screen.getByText('strategy.points.outcomeNone')).toBeInTheDocument();
 });
+
+test("a match without a live game says so", () => {
+  render(<StrategyPointsRule results={[]} points={0}/>);
+
+  expect(screen.getByText('strategy.points.outcomeNoGames')).toBeInTheDocument();
+});

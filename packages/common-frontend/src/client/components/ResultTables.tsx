@@ -228,32 +228,32 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
 }
 
 /// One live game as the strategy screens show it: a ✓, ✗ or – square, or a
-/// dashed one for a game still to play. `label` names it for a screen reader.
-export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string }) {
+/// dashed one for a game still to play. Only a win that `scored` is coloured;
+/// every other game is a plain square, its glyph saying what it was. `label`
+/// names it for a screen reader.
+export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string, scored?: boolean }) {
   const { kind, n, label } = props;
   return (
     <Box role="img" aria-label={label} title={label} sx={{
       width: '28px', height: '28px', borderRadius: '7px', boxSizing: 'border-box', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700,
-      ...(kind === 'won' ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
-        : kind === 'lost' ? { backgroundColor: '#f6dcd8', color: '#8e1b10' }
-        : kind === 'unfinished' ? { backgroundColor: '#eaeef2', color: '#57606a' }
-        : { border: '2px dashed #8c959f', color: '#8c959f' }),
+      ...(props.scored ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
+        : kind === 'next' ? { border: '2px dashed #8c959f', color: '#8c959f' }
+        : { backgroundColor: '#fff', border: '1px solid #d0d7de', color: '#57606a' }),
     }}>
       {kind === 'won' ? '✓' : kind === 'lost' ? '✗' : kind === 'unfinished' ? '–' : `${n}.`}
     </Box>
   );
 }
 
-/// The run of wins a strategy screen groups with its points, framed in green.
+/// The run of wins a strategy screen groups with its points.
 /// `numbered` when its games carry their numbers above them (`Numbered`), so
 /// the points line up with the squares, not the numbers.
 export function LiveGameRun(props: { points: string, numbered?: boolean, children: ReactNode }) {
   const points = <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>;
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
-      borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',
+      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px',
     }}>
       {props.children}
       {props.numbered ? <Numbered n={null}>{points}</Numbered> : points}
@@ -293,7 +293,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[], points?: 
     unfinished: t('strategy.endTable.unfinished'),
   };
   const cell = (result: LiveGameResult, i: number) =>
-    <Numbered key={i} n={i + 1}><LiveGameCell kind={result} n={i + 1} label={label[result]} /></Numbered>;
+    <Numbered key={i} n={i + 1}><LiveGameCell kind={result} n={i + 1} label={label[result]} scored={i >= runStart && run > 0} /></Numbered>;
   return (
     <Box role="group" aria-label={t('strategy.series.label')} sx={{
       display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px',
@@ -333,7 +333,8 @@ export function StrategyPointsRule(props: { results?: LiveGameResult[], points?:
   // the live losses before them left.
   const losses = props.results.filter(result => result === 'lost').length;
   const points = t('general.points', { count: props.points });
-  const outcome = props.points === 0 ? t('strategy.points.outcomeNone')
+  const outcome = props.results.length === 0 ? t('strategy.points.outcomeNoGames')
+    : props.points === 0 ? t('strategy.points.outcomeNone')
     : losses === 0 ? t('strategy.points.outcomeClean', { points })
     : t('strategy.points.outcomeAfterLosses', { count: losses, points });
   return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
