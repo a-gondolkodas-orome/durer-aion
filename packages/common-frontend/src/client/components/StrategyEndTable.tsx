@@ -3,10 +3,11 @@ import type { LiveGameResult } from 'schemas';
 import { useBackToHome, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { EndCard } from './EndCard';
-import { PointsScale, StrategyGamesTable } from './ResultTables';
+import { Box } from '@mui/material';
+import { StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 
 /**
- * The strategy match's end screen: its score, live games and points scale. Its
+ * The strategy match's end screen: its score, live games and how points follow. Its
  * button goes home, or with `onClose` just closes it, as on the home page.
  */
 export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[], onClose?: () => void }) {
@@ -23,7 +24,9 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       onBack={props.onClose ?? backToHome}
     >
       <StrategyGamesTable results={props.liveResults}/>
-      <PointsScale points={props.allPoints}/>
+      <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
+        <StrategyPointsRule/>
+      </Box>
     </EndCard>
   );
 }

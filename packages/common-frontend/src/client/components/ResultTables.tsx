@@ -268,25 +268,19 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
 }
 
 /**
- * How the strategy points follow from the losses, the team's own column
- * marked if it scored. Each column's points differ, so the points pick it out.
+ * How the strategy points follow from the live games, in words and two
+ * examples: the home card's tooltip and the end screen say it alike. The
+ * numbers come from the scale the game scores by.
  */
-export function PointsScale(props: { points: number }) {
+export function StrategyPointsRule() {
   const { t } = useTranslation();
-  const last = STRATEGY_POINTS_BY_LOSSES.length - 1;
-  const mark = (points: number) => points === props.points ? { backgroundColor: WON, fontWeight: 700 } : undefined;
-  return <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-    <ResultTable
-      centred
-      headerLabel={t('strategy.endTable.losses')}
-      columnLabels={STRATEGY_POINTS_BY_LOSSES.map((_, losses) => `${losses}${losses === last ? '+' : ''}`)}
-      rows={[{
-        label: t('strategy.endTable.points'),
-        cells: STRATEGY_POINTS_BY_LOSSES.map(points => ({ content: points, sx: mark(points) })),
-      }]}
-    />
-    <Box sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center' }}>
-      {t('strategy.endTable.rules')}
+  const [clean, afterOneLoss] = STRATEGY_POINTS_BY_LOSSES;
+  return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
+    {t('strategy.points.text', { max: clean, scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') })}
+    <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
+    <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
+      <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
+      <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
     </Box>
   </Box>;
 }

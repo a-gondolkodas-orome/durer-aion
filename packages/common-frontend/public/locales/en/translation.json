@@ -9,10 +9,21 @@
       "title": "Competition ended!"
     },
     "finished": "Finished",
-    "gameDescriptionHtml": "<p>In this task you play a two-player strategy game against the computer. You can read its rules once you start.</p>\n<ul>\n  <li><b>Live game:</b> beat the computer <b>twice in a row</b>. With no loss you get 12 points; after 1, 2, 3, 4, or at least 5 live losses, 9, 6, 4, 3, or 2 points.</li>\n  <li><b>Practice game:</b> does not count towards your score. Try out how the game goes, and check that you understand the rules. The computer may not play its best here.</li>\n  <li>If you do not beat the computer twice in a row within 30 minutes, you get 0 points.</li>\n  <li>A game, once started, has to be played to the end.</li>\n</ul>\n<p>When you are ready, click the button below; from then on you have 30 minutes.</p>",
     "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
     "relayDescriptionHtml": "<p>Relay tasks are short text tasks where the answer is an integer (at least 0 and at most 9999).</p>\n<ul>\n  <li>You can make at most 3 guesses for each relay task. After each wrong guess, the points you can earn for that task decrease by 1.</li>\n  <li>After a correct guess or three wrong guesses, you will receive the next task.</li>\n  <li>If you would rather not spend more time on a task, you can move on by submitting three different wrong guesses.</li>\n  <li><b>You cannot return to an earlier task later.</b></li>\n  <li>You have a total of 60 minutes for the relay tasks, and you can earn a total of 40 points with error-free performance. (The points available for individual tasks range from 3 to 6.)</li>\n</ul>",
-    "start": "Start"
+    "start": "Start",
+    "strategy": {
+      "intro": "A two-player strategy game against the computer. You can read its rules once you start.",
+      "live": "<b>Live game:</b> beat the computer <b>twice in a row</b>. 12 points with no loss, fewer after each live loss.",
+      "noAbandon": "A game, once started, has to be played to the end.",
+      "pointsLabel": "Points",
+      "practice": "<b>Practice game:</b> does not count towards your score; it is for trying the game out.",
+      "practiceLabel": "Practice game",
+      "practiceTip": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too; they do not affect your live series.",
+      "time": "<b>30 minutes</b> from the “Start” button; without two live wins in a row by then, 0 points.",
+      "timeLabel": "Time",
+      "timeTip": "The 30 minutes start with the “Start” button, and practice games use them too."
+    }
   },
   "disclaimer": {
     "category": "Your category: <b>{{category}}</b>",
@@ -126,12 +137,9 @@
   "strategy": {
     "endTable": {
       "game": "Live game",
-      "losses": "Losses",
       "lost": "Loss",
-      "points": "Points",
       "reminder": "Don't forget to do the relay too!",
       "result": "Result",
-      "rules": "Practice games do not count towards your score. If you do not beat the computer twice in a row within 30 minutes, you get 0 points.",
       "title": "Strategy game results",
       "unfinished": "Unfinished: the time ran out",
       "won": "Win"
@@ -171,6 +179,12 @@
       "practice": "New practice game"
     },
     "notSupported": "UNSUPPORTED GAME STATE",
+    "points": {
+      "afterLoss": "win, loss, win, win",
+      "cleanRun": "win, win",
+      "examples": "For example:",
+      "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; each live loss lowers it ({{scale}}), and after it you need two wins in a row again."
+    },
     "result": {
       "liveLost": "The computer won.",
       "liveWon": "You won!",

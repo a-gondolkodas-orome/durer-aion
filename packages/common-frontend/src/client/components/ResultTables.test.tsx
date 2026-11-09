@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { LiveGameResult } from 'schemas';
-import { RelayProgressTable, RelayResultsTable, StrategyGamesTable } from './ResultTables';
+import { RelayProgressTable, RelayResultsTable, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -76,4 +76,15 @@ test("a last try worth nothing is not called wrong, since a right answer would s
 
   expect(screen.getByLabelText('relay.endTable.pointsOf: relay.endTable.tries')).toBeInTheDocument();
   expect(screen.getByLabelText('relay.endTable.pointsOf: relay.endTable.wrongTries')).toBeInTheDocument();
+});
+
+// The losses-to-points table read as a puzzle; the rule is said in words,
+// with a run that has no loss and one that has.
+test("the strategy points are told in words, with two example runs", () => {
+  render(<StrategyPointsRule/>);
+
+  expect(screen.getByText('strategy.points.text')).toBeInTheDocument();
+  expect(screen.getByText(/strategy\.points\.cleanRun/)).toBeInTheDocument();
+  expect(screen.getByText(/strategy\.points\.afterLoss/)).toBeInTheDocument();
+  expect(screen.queryByRole('table')).not.toBeInTheDocument();
 });

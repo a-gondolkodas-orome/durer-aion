@@ -1,4 +1,6 @@
-import { Button } from '@mui/material';
+import { Box, Button, IconButton, Tooltip } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import type { ReactNode } from 'react';
 import { Stack, alpha } from '@mui/system';
 import { MatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
@@ -9,7 +11,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { strategyPoints } from 'game';
-import { RelayResultsTable, ScoreHeadline, StrategyGamesTable } from './ResultTables';
+import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
 import { EndDialog } from './EndCard';
 import { RelayEndTable } from './RelayEndTable';
@@ -150,16 +152,7 @@ export function ChooserItem(props: {
             marginBlockEnd: 0,
           },
         }}>
-          {!props.hideDesc &&
-          <Trans
-            i18nKey='chooser.gameDescriptionHtml'
-            components={{
-              b: <b />,
-              p: <p />,
-              ul: <ul />,
-              li: <li />
-            }}
-          />}
+          {!props.hideDesc && <StrategyDescription />}
         </Stack>
       }
       <Button sx={{
@@ -189,4 +182,42 @@ export function ChooserItem(props: {
       {details && <EndDialog open={detailsOpen} onClose={closeDetails}>{details}</EndDialog>}
     </Stack>
   )
+}
+
+/// The strategy game before it starts, the one place it is explained before
+/// the clock runs: a line per point, the details behind an ⓘ beside it.
+function StrategyDescription() {
+  const { t } = useTranslation();
+  const bold = { b: <b /> };
+  return (
+    <Box sx={{ '& li': { margin: '6px 0' } }}>
+      <p>{t('chooser.strategy.intro')}</p>
+      <ul>
+        <li>
+          <Trans i18nKey='chooser.strategy.live' components={bold} />
+          <InfoTip label={t('chooser.strategy.pointsLabel')}><StrategyPointsRule /></InfoTip>
+        </li>
+        <li>
+          <Trans i18nKey='chooser.strategy.practice' components={bold} />
+          <InfoTip label={t('chooser.strategy.practiceLabel')}>{t('chooser.strategy.practiceTip')}</InfoTip>
+        </li>
+        <li>
+          <Trans i18nKey='chooser.strategy.time' components={bold} />
+          <InfoTip label={t('chooser.strategy.timeLabel')}>{t('chooser.strategy.timeTip')}</InfoTip>
+        </li>
+        <li>{t('chooser.strategy.noAbandon')}</li>
+      </ul>
+    </Box>
+  );
+}
+
+function InfoTip(props: { label: string, children: ReactNode }) {
+  return (
+    <Tooltip arrow enterTouchDelay={0} leaveTouchDelay={10000}
+      title={<Box sx={{ fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>{props.children}</Box>}>
+      <IconButton size="small" aria-label={props.label} sx={{ padding: '2px', marginLeft: '4px', verticalAlign: '-4px', color: '#57606a' }}>
+        <InfoOutlinedIcon sx={{ fontSize: '18px' }} />
+      </IconButton>
+    </Tooltip>
+  );
 }

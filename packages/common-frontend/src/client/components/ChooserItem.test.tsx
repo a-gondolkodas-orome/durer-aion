@@ -30,3 +30,14 @@ test('sends one start for a double click, and enables Start again once it answer
   await act(async () => answer());
   expect(start).toBeEnabled();
 });
+
+// Before the clock runs, each point is a line, its details behind an ⓘ.
+test('explains the strategy game in short lines, with the details behind an ⓘ each', () => {
+  render(<ChooserItem type="strategy" status={{ state: 'NOT STARTED' }} />);
+
+  expect(screen.getByText('chooser.strategy.intro')).toBeInTheDocument();
+  for (const label of ['chooser.strategy.pointsLabel', 'chooser.strategy.practiceLabel', 'chooser.strategy.timeLabel']) {
+    expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+  }
+  expect(screen.getByText('chooser.strategy.noAbandon')).toBeInTheDocument();
+});
