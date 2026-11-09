@@ -371,7 +371,7 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
   const runStart = open ? Math.max(0, results.length - streak) : results.length;
   const hidden = Math.max(0, runStart - SHOWN_BEFORE_RUN);
   const points = streak >= 2 ? G.points : strategyPoints(G.numberOfLoss);
-  const played = (result: LiveGameResult, i: number) => <SeriesCell key={i} kind={result} n={i + 1} />;
+  const played = (result: LiveGameResult, i: number) => <SeriesCell key={i} kind={result} n={i + 1} scored={open && i >= runStart} />;
   return (
     <Stack role="group" aria-label={t('strategy.series.label')}
       sx={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
@@ -381,7 +381,7 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
       {hidden > 0 && <Box title={t('strategy.series.earlier', { count: hidden })} aria-label={t('strategy.series.earlier', { count: hidden })}
         role="img" sx={{ fontSize: '14px', fontWeight: 700, color: MUTED, padding: '0 4px' }}>…</Box>}
       {results.slice(hidden, runStart).map((result, i) => played(result, hidden + i))}
-      {open && <LiveGameRun points={t('strategy.series.total', { points: pointsText(t, points) })}>
+      {open && <LiveGameRun framed points={t('strategy.series.total', { points: pointsText(t, points) })}>
         {results.slice(runStart).map((result, i) => played(result, runStart + i))}
         {Array.from({ length: 2 - streak }, (_, k) => <SeriesCell key={`next${k}`} kind="next" n={results.length + k + 1} />)}
       </LiveGameRun>}
@@ -396,14 +396,15 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
   );
 }
 
-function SeriesCell(props: { kind: LiveGameResult | 'next', n: number }) {
+/// `scored` for a win in the run the points stand beside, the only games coloured.
+function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: boolean }) {
   const { t } = useTranslation();
   const { kind, n } = props;
   const label = kind === 'won' ? t('strategy.series.won', { n })
     : kind === 'lost' ? t('strategy.series.lost', { n })
     : kind === 'unfinished' ? t('strategy.series.unfinished', { n })
     : t('strategy.series.next', { n });
-  return <LiveGameCell kind={kind} n={n} label={label} />;
+  return <LiveGameCell kind={kind} n={n} label={label} scored={props.scored} />;
 }
 
 /// The one place that changes: a mode line, the status, a line under it, a row

@@ -246,14 +246,16 @@ export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, 
   );
 }
 
-/// The run of wins a strategy screen groups with its points.
+/// The run of wins a strategy screen groups with its points. `framed` in
+/// green during the game, where the run also holds the games still to play;
 /// `numbered` when its games carry their numbers above them (`Numbered`), so
 /// the points line up with the squares, not the numbers.
-export function LiveGameRun(props: { points: string, numbered?: boolean, children: ReactNode }) {
+export function LiveGameRun(props: { points: string, numbered?: boolean, framed?: boolean, children: ReactNode }) {
   const points = <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>;
   return (
     <Box sx={{
       display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px',
+      ...(props.framed && { padding: '3px 8px 3px 4px', borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6' }),
     }}>
       {props.children}
       {props.numbered ? <Numbered n={null}>{points}</Numbered> : points}
