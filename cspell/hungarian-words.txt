@@ -85,6 +85,7 @@ konstansszorosai
 kulccsomóval
 Kupidó
 képpen
+Kétszereplős
 köréírt
 Küng
 lapösszefüggőséget
