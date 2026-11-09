@@ -32,6 +32,11 @@ type TransportData = Parameters<TransportOpts['transportDataCallback']>[0];
 /// (the random plugin's drops its data), and `deltalog`, `_undo` and `_redo`
 /// are emptied. `G` and `ctx` are the master's, as no game here defines a
 /// `playerView`; a game that did would hand its bot the player's view of `G`.
+///
+/// The master outlives its client: boardgame.io keeps one per game object for
+/// the page's lifetime, and reads localStorage only when it creates it. A match
+/// remounted with the same game object comes back from memory even after its
+/// `bgio` keys are removed; only a reload or a new game object starts afresh.
 export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'storageKey'>) {
   const makeTransport = Local({ bots, persist: true, storageKey });
   return (transportOpts: TransportOpts) => {

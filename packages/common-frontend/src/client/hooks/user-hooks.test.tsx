@@ -4,8 +4,9 @@ import { act, render, renderHook } from '@testing-library/react';
 import { ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { setTeamState, useTeamStateValue } from './team-state-store';
-import { LoadTeamState, useLogin, useLogout } from './user-hooks';
+import { LoadTeamState, useBackToHome, useLogin, useLogout } from './user-hooks';
 import { loginMarkerStorageKey } from '../utils/storage-keys';
+import type { TeamModelDto } from '../dto/TeamStateDto';
 
 // The session lives in the repository, so each test starts a fresh one.
 let repo: MockClientRepository;
@@ -22,6 +23,7 @@ beforeEach(() => {
 // The store is module state — see the note atop team-state-store.ts.
 afterEach(() => {
   act(() => setTeamState(null));
+  vi.unstubAllGlobals();
 });
 
 // The console is where a browser shows anything a page cares to say, and the
@@ -81,4 +83,52 @@ test('a new repository takes over the cross-tab login listener', async () => {
 
   expect(firstCalls).not.toHaveBeenCalled();
   expect(secondCalls).toHaveBeenCalledOnce();
+});
+
+// Regression (#112): leaving a finished match reloaded the page, which flashed
+// white and fetched the whole app again.
+test('going back home from a match shows home without reloading the page', async () => {
+  const { result } = renderHook(
+    () => ({ login: useLogin(), backToHome: useBackToHome(), team: useTeamStateValue() }),
+    { wrapper },
+  );
+  await act(() => result.current.login('2'));
+  // jsdom's own `location` cannot be spied on, only replaced.
+  const reload = vi.fn();
+  vi.stubGlobal('location', { ...window.location, reload });
+  const toHome = vi.spyOn(repo, 'toHome');
+  // The mock's team stays mid-relay; the server would answer home by now.
+  const home = { ...await repo.getTeamState(), pageState: 'HOME' } as TeamModelDto;
+  vi.spyOn(repo, 'getTeamState').mockResolvedValue(home);
+
+  await act(async () => {
+    result.current.backToHome();
+  });
+
+  expect(toHome).toHaveBeenCalledOnce();
+  expect(result.current.team).toMatchObject({ pageState: 'HOME' });
+  expect(reload).not.toHaveBeenCalled();
+});
+
+// The end dialog's onClose and its card's button are two hook instances, and
+// a team can trigger both before the first round trip answers.
+test('a second way home while the first is under way is ignored', async () => {
+  const { result } = renderHook(
+    () => ({ login: useLogin(), dialog: useBackToHome(), button: useBackToHome() }),
+    { wrapper },
+  );
+  await act(() => result.current.login('2'));
+  const toHome = vi.spyOn(repo, 'toHome');
+
+  await act(async () => {
+    result.current.dialog();
+    result.current.button();
+  });
+  expect(toHome).toHaveBeenCalledOnce();
+
+  // Once it has finished, the next one goes through.
+  await act(async () => {
+    result.current.button();
+  });
+  expect(toHome).toHaveBeenCalledTimes(2);
 });

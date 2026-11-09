@@ -9,12 +9,18 @@ import { ClientRepoProvider } from '../client/client-repo-context';
 import { MockClientRepository } from '../client/mock-client-repository';
 import { MockTeamState } from '../client/hooks/mock-user-hooks';
 import { boardWrapper } from './boardwrapper';
-import type { StrategyBoardProps } from './boardwrapper';
+import type { StrategyBoardProps, StrategyPresentation } from './boardwrapper';
+
+const i18n = vi.hoisted(() => ({ language: 'hu' }));
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n }),
 }));
 vi.mock('../client/hooks/user-hooks', () => MockTeamState.mockHook);
+
+afterEach(() => {
+  i18n.language = 'hu';
+});
 
 const play = vi.fn();
 // A board with one control, to see whether a click on it gets through.
@@ -308,5 +314,41 @@ describe('after the second win', () => {
       .find(group => group.closest('[role="dialog"]') === null) as HTMLElement;
     expect(within(series).getAllByRole('img', { name: 'strategy.series.won', hidden: true })).toHaveLength(2);
     expect(within(series).queryByRole('img', { name: 'strategy.series.next', hidden: true })).not.toBeInTheDocument();
+  });
+});
+
+describe('the rules and role names', () => {
+  const firstVisit = { difficulty: null, numberOfTries: 0 };
+  const rulesOf = (rules: StrategyPresentation['rules']) => boardWrapper<object>(cellBoard, { rules });
+
+  test('are the ones given, whatever the page language, when given once', () => {
+    i18n.language = 'en';
+    renderBoard(betweenGames, firstVisit, rulesOf(<p>egyetlen szabály</p>));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('egyetlen szabály');
+  });
+
+  test('are in the page language', () => {
+    i18n.language = 'en';
+    renderBoard(betweenGames, firstVisit, rulesOf({ hu: 'magyar szabály', en: 'English rule' }));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('English rule');
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('magyar szabály');
+  });
+
+  test('are in another language where the game has none in the page\'s', () => {
+    i18n.language = 'en';
+    renderBoard(betweenGames, firstVisit, rulesOf({ hu: 'magyar szabály' }));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('magyar szabály');
+  });
+
+  test('name the roles in the page language', () => {
+    i18n.language = 'en';
+    renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, {}, boardWrapper<object>(cellBoard, {
+      rules: <p>the rules</p>, roleLabels: [{ hu: 'Kezdünk (1 O)', en: 'We start (1 O)' }, { hu: 'Másodikak leszünk (2 X)', en: 'We go second (2 X)' }],
+    }));
+
+    expect(button('We start (1 O)')).toBeInTheDocument();
   });
 });

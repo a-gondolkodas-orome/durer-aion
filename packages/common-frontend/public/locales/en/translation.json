@@ -1,6 +1,5 @@
 {
   "chooser": {
-    "detailedResults": "Detailed results",
     "filledAt": "Filled at",
     "finish": {
       "breakdown": "(relay {{relay}} + strategy game {{strategy}})",
@@ -8,7 +7,6 @@
       "final": "Final score",
       "title": "Competition ended!"
     },
-    "finished": "Finished",
     "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
     "relayDescriptionHtml": "<p>Relay tasks are short text tasks where the answer is an integer (at least 0 and at most 9999).</p>\n<ul>\n  <li>You can make at most 3 guesses for each relay task. After each wrong guess, the points you can earn for that task decrease by 1.</li>\n  <li>After a correct guess or three wrong guesses, you will receive the next task.</li>\n  <li>If you would rather not spend more time on a task, you can move on by submitting three different wrong guesses.</li>\n  <li><b>You cannot return to an earlier task later.</b></li>\n  <li>You have a total of 60 minutes for the relay tasks, and you can earn a total of 40 points with error-free performance. (The points available for individual tasks range from 3 to 6.)</li>\n</ul>",
     "start": "Start",

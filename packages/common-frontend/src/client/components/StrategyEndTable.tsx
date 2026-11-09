@@ -7,10 +7,10 @@ import { Box } from '@mui/material';
 import { StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 
 /**
- * The strategy match's end screen: its score, live games and how points follow. Its
- * button goes home, or with `onClose` just closes it, as on the home page.
+ * The strategy match's end screen: its score, live games and how points follow, and
+ * the way home.
  */
-export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[], onClose?: () => void }) {
+export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[] }) {
   const backToHome = useBackToHome();
   const team = useTeamState();
   const { t } = useTranslation();
@@ -20,8 +20,8 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       points={props.allPoints}
       max={strategyPoints(0)}
       reminder={team?.relayMatch.state === 'NOT STARTED' ? t('strategy.endTable.reminder') : undefined}
-      backLabel={props.onClose ? t('general.close') : t('general.backHome')}
-      onBack={props.onClose ?? backToHome}
+      backLabel={t('general.backHome')}
+      onBack={backToHome}
     >
       <StrategyGamesTable results={props.liveResults} points={props.allPoints}/>
       <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>

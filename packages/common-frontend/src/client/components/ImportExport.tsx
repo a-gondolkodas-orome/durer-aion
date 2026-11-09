@@ -8,6 +8,11 @@ import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
+function summary(result: TeamImportResultDto): string {
+  const existing = result.existing > 0 ? `, ${result.existing} már szerepelt` : '';
+  return `${result.successful} csapat importálva${existing}, ${result.failed} sor hibás`;
+}
+
 /// Where teams come in and where their secrets go out. The import runs on the
 /// same route and the same importer as `npm run teams:import`, row by row, so
 /// a file with bad rows still loads the good ones. The export is every team
@@ -37,15 +42,17 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       setResult(answer);
       setFile(null);
       if (answer.successful === 0) {
-        enqueueSnackbar('Egy csapat sem került be.', { variant: 'error' });
+        // A file whose every team is already there is a re-run, not a failure.
+        if (answer.failed === 0 && answer.existing > 0) {
+          enqueueSnackbar(`Nem került be új csapat: mind a(z) ${answer.existing} már szerepelt.`, { variant: 'info' });
+        } else {
+          enqueueSnackbar('Egy csapat sem került be.', { variant: 'error' });
+        }
         return;
       }
       setCodes(held => [...held, ...answer.export_table]);
       props.onImported();
-      enqueueSnackbar(answer.failed === 0
-        ? `${answer.successful} csapat importálva`
-        : `${answer.successful} csapat importálva, ${answer.failed} sor hibás`,
-      { variant: answer.failed === 0 ? 'success' : 'warning' });
+      enqueueSnackbar(summary(answer), { variant: answer.failed === 0 ? 'success' : 'warning' });
     } catch (e: unknown) {
       enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
     } finally {
@@ -53,20 +60,17 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     }
   };
 
-  // The narration's per-row "Generating…" lines say nothing an organiser acts
-  // on, and the dashed lines it closes each failed row with are a terminal's
-  // separators, not messages.
   const messages = result === null ? [] : result.logs.value
-    .map((value, index) => ({ value, sev: result.logs.sev[index] }))
-    .filter(message => message.sev !== 'info' && !/^-+$/.test(message.value.trim()));
+    .map((value, index) => ({ value, sev: result.logs.sev[index] }));
 
   return (
     <Stack sx={{ gap: '16px', padding: '10px' }}>
       <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
       <Stack sx={{ fontSize: 14 }}>
-        Tabulátorral elválasztott .tsv fájl, ebben az oszlopsorrendben: Teamname, Category, Email, Other, ID,
-        Login Code, Credentials. Az Email és az Other üresen hagyható, az utolsó hármat üresen hagyva a szerver
-        generálja őket. A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
+        Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Category;
+        az Email, az Other, az ID, a Login Code és a Credentials elhagyható vagy üresen hagyható, az utolsó hármat
+        ilyenkor a szerver generálja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok kimaradnak.
+        A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
         Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét lent az
         Exportálás rész.
       </Stack>
@@ -92,12 +96,12 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       </Stack>
       {result !== null && (
         <Stack data-testid="importTeamsSummary">
-          {`${result.successful} csapat importálva, ${result.failed} sor hibás.`}
+          {`${summary(result)}.`}
         </Stack>
       )}
       {messages.length > 0 && (
         <Stack sx={{ gap: '4px' }}>
-          <Stack sx={{ fontSize: 14 }}>A szerver hibaüzenetei és figyelmeztetései (angolul):</Stack>
+          <Stack sx={{ fontSize: 14 }}>Hibák és figyelmeztetések:</Stack>
           <Stack
             component="ul"
             sx={{ margin: 0, maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 13 }}
@@ -115,7 +119,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       )}
       <Stack component="h3" sx={{ margin: '16px 0 0', fontSize: 18, fontWeight: 500 }}>Exportálás</Stack>
       <Stack sx={{ fontSize: 14 }}>
-        Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopsorrendjében. A fájl titkos
+        Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopaival. A fájl titkos
         adatokat tartalmaz: aki egy csapat belépőkódját ismeri, beléphet a csapat nevében.
       </Stack>
       <Stack sx={{ flexDirection: 'row' }}>

@@ -26,6 +26,7 @@
     "dev:relay-practice": "npm run dev:relay-practise",
     "dev:strategy-practice": "npm run dev --workspace=strategy-practice",
     "setup": "node scripts/seed-env-files.mjs",
+    "new-id": "node scripts/new-id.mjs",
     "report:outdated": "node scripts/dependency-report.mjs",
     "update:minors": "node scripts/dependency-report.mjs --write",
     "stack:build": "docker compose --env-file=.env.docker build",

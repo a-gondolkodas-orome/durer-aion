@@ -13,33 +13,31 @@ import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
-import { EndDialog } from './EndCard';
-import { RelayEndTable } from './RelayEndTable';
-import { StrategyEndTable } from './StrategyEndTable';
 
+const DESCRIPTION_TAGS = { b: <b />, p: <p />, ul: <ul />, li: <li /> };
+
+/**
+ * One round on the home page: its rules and the button that starts it, or once
+ * it is over, its results in full and when it was filled in.
+ */
 export function ChooserItem(props: {
   status: MatchStatus,
   type: 'strategy' | 'relay',
-  hideDesc?: boolean
 }) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
 
-  const [mobileDescOpen, setMobileDescOpen] = useState(props.status.state !== "FINISHED");
+  const [mobileDescOpen, setMobileDescOpen] = useState(true);
   const theme = useTheme();
   const { t } = useTranslation();
-  const [detailsOpen, setDetailsOpen] = useState(false);
   // The status changes only once the start has answered; until then a second
   // click would send a second start.
   const [starting, setStarting] = useState(false);
-  const closeDetails = () => setDetailsOpen(false);
-  // The round's end screen, from the summary saved with the finished match. A
-  // match without one has nothing to show: for example a record from before the
-  // summary existed, or a local relay left to run out of time (#613).
+  // The summary saved with the finished match may be missing: for example a
+  // record from before the summary existed, or a local relay left to run out
+  // of time (#613). The score and the time are still known.
   const finished = props.status.state === "FINISHED" ? props.status : null;
-  const details = props.type === 'relay'
-    ? finished?.relayResults && <RelayEndTable allPoints={finished.score} problems={finished.relayResults} onClose={closeDetails}/>
-    : finished?.strategyResults && <StrategyEndTable allPoints={finished.score} liveResults={finished.strategyResults} onClose={closeDetails}/>;
+  const showDesc = !finished;
 
   return (
     <Stack sx={{
@@ -68,7 +66,7 @@ export function ChooserItem(props: {
           return !prev
         })
       }}>
-        <span>{props.type === 'relay' ? t('relay.name') : t('strategy.name')}  {!props.hideDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
+        <span>{props.type === 'relay' ? t('relay.name') : t('strategy.name')}  {showDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
           fontSize: 33,
           marginBottom: "-9px",
           display: {
@@ -83,103 +81,62 @@ export function ChooserItem(props: {
         }}/>)}</span>
       </Stack>
       {finished &&
-        <Stack sx={{ gap: '12px', marginBottom: { xs: '10px', md: '16px' } }}>
+        <Stack sx={{ gap: '16px' }}>
           {props.type === 'relay'
             ? <>
               <ScoreHeadline compact points={finished.score} max={finished.relayResults && relayMaxPoints(finished.relayResults)}/>
-              {finished.relayResults && <RelayResultsTable problems={finished.relayResults}/>}
+              {finished.relayResults && <RelayResultsTable problems={finished.relayResults} details transposeOnPhone/>}
             </>
             : <>
               <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>
-              {finished.strategyResults && <StrategyGamesTable results={finished.strategyResults} points={finished.score}/>}
+              {finished.strategyResults && <>
+                <StrategyGamesTable results={finished.strategyResults} points={finished.score}/>
+                <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
+                  <StrategyPointsRule results={finished.strategyResults} points={finished.score}/>
+                </Box>
+              </>}
             </>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
             {t('chooser.filledAt')}: {formatTime(finished.startAt)} – {formatTime(finished.endAt)}
           </Stack>
         </Stack>
       }
-      {props.type === 'relay' &&
+      {showDesc && <>
         <Stack sx={{
           fontSize: 14,
           height: {
-            xs: !props.hideDesc && mobileDescOpen ? "100%" : "0px",
+            xs: mobileDescOpen ? "100%" : "0px",
             md: "100%",
           },
           transition: "height 0.2s ease-in",
           overflow: 'hidden',
-          display: 'flex',
-          alignItems: "center",
-          flexDirection: 'row',
           paddingBottom: {
-            xs: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
+            xs: mobileDescOpen ? "10px" : "0px",
             md: "0px",
           },
           "& p": {
             marginBlockEnd: 0,
           },
         }}>
-          <Stack sx={{ marginTop: {
-            md: 0,
-            xs: '10px'
-          } }}>
-            {!props.hideDesc &&
-            <Trans
-              i18nKey='chooser.relayDescriptionHtml'
-              components={{
-                b: <b />,
-                p: <p />,
-                ul: <ul />,
-                li: <li />
-              }}
-            />}
-          </Stack>
+          {/* Spelled out key by key: the i18n check finds a key only as a literal. */}
+          {props.type === 'relay'
+            ? <Trans i18nKey='chooser.relayDescriptionHtml' components={DESCRIPTION_TAGS}/>
+            : <StrategyDescription />}
         </Stack>
-      }
-      {props.type === 'strategy' &&
-        <Stack sx={{
-          fontSize: 14,
-          height: {
-            xs: !props.hideDesc && mobileDescOpen ? "100%" : "0px",
-            md: "100%",
-          },
-          transition: "height 0.2s ease-in",
-          overflow: 'hidden',
-          paddingBottom: {
-            xs: !props.hideDesc && mobileDescOpen ? "10px" : "0px",
-            md: "0px",
-          },
-          "& p": {
-            marginBlockEnd: 0,
-          },
-        }}>
-          {!props.hideDesc && <StrategyDescription />}
-        </Stack>
-      }
-      <Button sx={{
-        width: '100%',
-        maxWidth: "600px",
-        height: '75px',
-        fontSize: '26px',
-        alignSelf: 'center',
-        textTransform: 'none',
-      }} variant='contained' color='primary' onClick={() => {
-        setStarting(true);
-        void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
-      }} disabled={starting || props.status.state !== "NOT STARTED"}>
-        {props.status.state === "FINISHED" ? t('chooser.finished') : t('chooser.start')}
-      </Button>
-      <Button sx={{
-        width: '70%',
-        maxWidth: "400px",
-        height: '50px',
-        fontSize: '16px',
-        alignSelf: 'center',
-        textTransform: 'none',
-        marginTop: '15px',
-      }} variant='contained' color='primary' onClick={() => setDetailsOpen(true)} disabled={!details}>
-        {t('chooser.detailedResults')}
-      </Button>
-      {details && <EndDialog open={detailsOpen} onClose={closeDetails}>{details}</EndDialog>}
+        <Button sx={{
+          width: '100%',
+          maxWidth: "600px",
+          height: '75px',
+          fontSize: '26px',
+          alignSelf: 'center',
+          textTransform: 'none',
+        }} variant='contained' color='primary' onClick={() => {
+          setStarting(true);
+          void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
+        }} disabled={starting || props.status.state !== "NOT STARTED"}>
+          {t('chooser.start')}
+        </Button>
+      </>}
     </Stack>
   )
 }

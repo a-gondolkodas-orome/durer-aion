@@ -14,6 +14,8 @@ import { asRelayMoves } from '../../match-moves';
 import { useTheme } from '@mui/material/styles';
 import { alpha } from "@mui/system/colorManipulator"
 import { useTranslation } from 'react-i18next';
+import { inLanguage } from 'schemas';
+import { useUiLanguage } from '../../hooks/ui-language';
 
 type MyGameProps = BoardProps<MyGameState>;
 
@@ -32,6 +34,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
   const backToHome = useBackToHome(selectRoundOnEnd ? logout : undefined);
   const theme = useTheme();
   const { t } = useTranslation();
+  const language = useUiLanguage();
   // A guess hands the turn to the judge until it rules; any move of the team's
   // in that gap is out of turn and boardgame.io rejects it. The client applies
   // a move at once but leaves the turn change to the server, so G.answer, set
@@ -132,10 +135,10 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
           padding: '30px',
         }}>
           <ExerciseTask
-            task={G.problemText}
+            task={inLanguage<string>(G.problemText, language) ?? ''}
             availablePoints={G.currentProblemAvailablePoints}
             serial={G.currentProblem + 1}
-            pictureUrl={G.url}
+            pictureUrl={inLanguage<string>(G.imageUrl, language) || null}
           />
         </Stack>
         <Stack sx={{

@@ -20,6 +20,8 @@ import type { MouseEvent, ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
+import { inLanguage, type Localizable } from "schemas";
+import { useUiLanguage } from "../client/hooks/ui-language";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
 /// gameWrapper extends it, plus the client API. The wrapper passes its props
@@ -27,13 +29,18 @@ import type { TFunction } from "i18next";
 export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
 export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
+/// A game's rules text, one for every language or one per language; the board
+/// shows the page's.
+export type StrategyDescription = Localizable<ReactNode>;
+
 /// What the wrapper shows around a game's board that only the game knows.
 export interface StrategyPresentation {
   /// The rules: in a dialog before the first game, behind a button after it.
-  rules: ReactNode,
-  /// The role buttons, the first player's first. Without them the buttons say
-  /// only who starts; a game names its sides here, the marks they play, say.
-  roleLabels?: readonly [string, string],
+  rules: StrategyDescription,
+  /// The role buttons, the first player's first, each one for every language
+  /// or one per language. Without them the buttons say only who starts; a game
+  /// names its sides here, the marks they play, say.
+  roleLabels?: readonly [Localizable<string>, Localizable<string>],
   /// Whether the opening position differs from game to game. Only then do the
   /// texts ask the team to look at it before choosing a role, and say that a
   /// live game may start from another one than practice did.
@@ -75,6 +82,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
+    const language = useUiLanguage();
+    const rules = inLanguage<ReactNode>(presentation.rules, language);
     // `noSsr` reads the width on the first render, so the rules do not show
     // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
@@ -194,7 +203,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     } else if (ctx.phase === 'chooseRole') {
       status = t('strategy.status.role');
       sub = startVaries ? t('strategy.status.lookAtPosition') : '';
-      const [first, second] = presentation.roleLabels ?? [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
+      const [first, second] = presentation.roleLabels
+        ? presentation.roleLabels.map(label => inLanguage<string>(label, language))
+        : [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
       actions = (
         <>
           <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(GUESSER_PLAYER)}>{first}</PairButton>
@@ -286,7 +297,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
                 <Box sx={{ fontSize: '18px', fontWeight: 700 }}>{t('strategy.rules')}</Box>
                 <IconButton aria-label={t('general.close')} onClick={() => setRulesOpen(false)}><CloseIcon /></IconButton>
               </Stack>
-              <Box sx={{ fontSize: '15px', lineHeight: 1.55 }}>{presentation.rules}</Box>
+              <Box sx={{ fontSize: '15px', lineHeight: 1.55 }}>{rules}</Box>
             </Stack>}
           </Box>
         </Stack>
@@ -297,7 +308,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         <Dialog open={rulesFirst} fullScreen={!wide} maxWidth="md" fullWidth
           transitionDuration={{ enter: 225, exit: 0 }} slotProps={{ paper: { ref: firstRulesRef } }}>
           <DialogTitle sx={{ fontWeight: 700 }}>{t('strategy.rulesFirst.title')}</DialogTitle>
-          <DialogContent sx={{ fontSize: { xs: '16px', md: '18px' }, lineHeight: 1.6 }}>{presentation.rules}</DialogContent>
+          <DialogContent sx={{ fontSize: { xs: '16px', md: '18px' }, lineHeight: 1.6 }}>{rules}</DialogContent>
           <DialogActions sx={{ padding: '16px 24px' }}>
             <Button variant="contained" fullWidth onClick={closeFirstRules}
               sx={{ minHeight: '48px', fontSize: '16px', fontWeight: 600, textTransform: 'none', borderRadius: '10px' }}>
@@ -307,7 +318,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         </Dialog>
         {!wide && <Dialog open={rulesOpen} fullScreen onClose={() => setRulesOpen(false)}>
           <DialogTitle>{t('strategy.rules')}</DialogTitle>
-          <DialogContent sx={{ fontSize: '16px', lineHeight: 1.6 }}>{presentation.rules}</DialogContent>
+          <DialogContent sx={{ fontSize: '16px', lineHeight: 1.6 }}>{rules}</DialogContent>
           <DialogActions>
             <Button onClick={() => setRulesOpen(false)}>{t('general.close')}</Button>
           </DialogActions>
