@@ -1,9 +1,9 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Grow, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
@@ -86,6 +86,30 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     // Once the first dialog closes, the button that brings the rules back
     // pulses, so the team sees where they went.
     const [pointToRules, setPointToRules] = useState(false);
+    const rulesButtonRef = useRef<HTMLButtonElement>(null);
+    const firstRulesRef = useRef<HTMLDivElement>(null);
+    // The first dialog flies into the button that brings the rules back, so
+    // the team sees where they went; then the button pulses. Where motion is
+    // turned down, or there is nothing to animate with, it just closes.
+    const closeFirstRules = () => {
+      const done = () => { setRulesRead(true); setPointToRules(true); };
+      const paper = firstRulesRef.current;
+      const target = rulesButtonRef.current;
+      const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (!paper || !target || reduced || typeof paper.animate !== 'function') {
+        done();
+        return;
+      }
+      const from = paper.getBoundingClientRect();
+      const to = target.getBoundingClientRect();
+      const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+      const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+      const scale = Math.max(to.width / from.width, 0.05);
+      paper.animate(
+        [{ transform: 'none', opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.4 }],
+        { duration: 550, easing: 'cubic-bezier(0.55, 0, 0.75, 0.2)', fill: 'forwards' },
+      ).finished.then(done, done);
+    };
 
     useEffect(() => {
       if (!ctx.gameover) {
@@ -186,7 +210,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
       : teamToMove ? 'live' : 'waiting';
 
     const rulesButton = (
-      <Button variant="outlined" color="inherit" size="small" onClick={() => setRulesOpen(!rulesOpen)}
+      <Button ref={rulesButtonRef} variant="outlined" color="inherit" size="small" onClick={() => setRulesOpen(!rulesOpen)}
         startIcon={<MenuBookOutlinedIcon />} aria-expanded={rulesOpen}
         onAnimationEnd={() => setPointToRules(false)}
         sx={{
@@ -235,7 +259,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
                     serverRemainingMs={G.millisecondsRemaining} />}
                 {isOffline && <OfflineClockNote />}
               </Stack>
-              {!rulesFirst && rulesButton}
+              {/* There from the start, under the first dialog, so the dialog
+                  has a place to fly into. */}
+              {rulesButton}
             </Stack>
           </Stack>
           <Box sx={{ position: 'relative' }}>
@@ -261,15 +287,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         </Stack>
         {/* No onClose: neither a click beside it nor Esc stands for having
             read the rules. Once the time is up there is nothing left to read
-            them for, and the end dialog must not sit under it. Closing, it
-            shrinks towards the top right, where the button that brings the
-            rules back is. */}
+            them for, and the end dialog must not sit under it. Its own exit is
+            instant: closing, it has already flown into the rules button. */}
         <Dialog open={rulesFirst} fullScreen={!wide} maxWidth="md" fullWidth
-          slots={{ transition: Grow }} slotProps={{ transition: { style: { transformOrigin: '100% 0' } } }}>
+          transitionDuration={{ enter: 225, exit: 0 }} slotProps={{ paper: { ref: firstRulesRef } }}>
           <DialogTitle sx={{ fontWeight: 700 }}>{t('strategy.rulesFirst.title')}</DialogTitle>
           <DialogContent sx={{ fontSize: { xs: '16px', md: '18px' }, lineHeight: 1.6 }}>{presentation.rules}</DialogContent>
           <DialogActions sx={{ padding: '16px 24px' }}>
-            <Button variant="contained" fullWidth onClick={() => { setRulesRead(true); setPointToRules(true); }}
+            <Button variant="contained" fullWidth onClick={closeFirstRules}
               sx={{ minHeight: '48px', fontSize: '16px', fontWeight: 600, textTransform: 'none', borderRadius: '10px' }}>
               {t('strategy.rulesFirst.button')}
             </Button>
