@@ -147,7 +147,6 @@
       "practiceTextVaries": "nem számít a pontozásba. A gép itt nem feltétlenül játszik a legjobban, és a kezdőállás is más lehet."
     },
     "intro": {
-      "footer": "Egy elkezdett játszmát végig kell játszani. Ezt a leírást később az ⓘ mögött találjátok.",
       "live": "Éles játszma",
       "liveText": "Győzzétek le a gépet kétszer egymás után. Elsőre {{first}} pontot érhettek el, minden éles vereség után kevesebbet ({{rest}}).",
       "practice": "Próbajáték",
@@ -162,7 +161,6 @@
     },
     "mode": {
       "live": "ÉLES · {{n}}. játszma",
-      "none": "Új játszma",
       "practice": "PRÓBAJÁTÉK"
     },
     "name": "Stratégiás játék",
@@ -201,7 +199,7 @@
     "series": {
       "earlier_one": "{{count}} korábbi éles játszma",
       "earlier_other": "{{count}} korábbi éles játszma",
-      "help": "✓ győzelem, ✗ vereség. A zöld keretben a mostani sorozatotok: az utolsó éles vereség óta megnyert játszmák és a még hiányzó győzelmek, mellettük a pont, amit két egymás utáni győzelemmel kaptok. Egy éles vereség után a sorozat újraindul, és kevesebb pont jár.",
+      "help": "✓ győzelem, ✗ vereség. A zöld keret a mostani sorozatotok: ha két egymás utáni győzelemre ér, megkapjátok a mellette álló pontot. Éles vereség után a sorozat újraindul, kevesebb pontért.",
       "helpLabel": "Mit jelent a sorozat?",
       "label": "Éles játszmák",
       "lost": "{{n}}. éles játszma: vereség",

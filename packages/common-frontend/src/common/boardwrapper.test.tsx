@@ -86,8 +86,10 @@ describe('before the first game', () => {
     expect(status()).toHaveTextContent('strategy.intro.title');
     expect(screen.getByText('strategy.intro.practiceText')).toBeInTheDocument();
     expect(screen.getByText('strategy.intro.liveText')).toBeInTheDocument();
-    // No game yet, so no board to look at.
+    // No game yet, so no board to look at; and the explanation is under each
+    // button, so no ⓘ to repeat it.
     expect(screen.queryByTestId('strategyBoard')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'strategy.info.label' })).not.toBeInTheDocument();
     fireEvent.click(button('strategy.intro.live'));
     expect(moves.chooseNewGameType).toHaveBeenCalledWith('live');
   });

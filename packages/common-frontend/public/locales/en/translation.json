@@ -151,7 +151,6 @@
       "practiceTextVaries": "does not count towards your score. The computer may not play its best here, and the starting position may differ."
     },
     "intro": {
-      "footer": "A game, once started, has to be played to the end. You can find this explanation later behind the ⓘ.",
       "live": "Live game",
       "liveText": "Beat the computer twice in a row. You can earn {{first}} points at first, and fewer after each live loss ({{rest}}).",
       "practice": "Practice game",
@@ -166,7 +165,6 @@
     },
     "mode": {
       "live": "LIVE · game {{n}}",
-      "none": "New game",
       "practice": "PRACTICE"
     },
     "name": "Strategy game",
@@ -205,7 +203,7 @@
     "series": {
       "earlier_one": "{{count}} earlier live game",
       "earlier_other": "{{count}} earlier live games",
-      "help": "✓ win, ✗ loss. The green frame is your current run: the live games won since your last live loss and the wins still needed, beside the points two wins in a row earn. After a live loss the run starts again, worth fewer points.",
+      "help": "✓ win, ✗ loss. The green frame is your current run: when it reaches two wins in a row, you get the points beside it. After a live loss the run starts again, for fewer points.",
       "helpLabel": "What does the series mean?",
       "label": "Live games",
       "lost": "Live game {{n}}: lost",

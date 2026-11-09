@@ -402,10 +402,13 @@ function GameArea(props: {
       borderTop: mode === 'live' ? `4px solid ${LIVE}` : mode === 'test' ? `4px dashed ${PRACTICE_BORDER}` : `4px solid ${LINE}`,
       padding: { xs: '10px 14px 16px', md: '12px 20px 18px' }, gap: '6px',
     }}>
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '28px' }}>
-        <ModeLine mode={mode} liveNumber={props.liveNumber} />
-        {!props.infoBeside && props.info}
-      </Stack>
+      {/* Before the first game the choice itself says it all: no mode yet,
+          and the explanation is under each button. */}
+      {props.intro === null &&
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '28px' }}>
+          <ModeLine mode={mode} liveNumber={props.liveNumber} />
+          {!props.infoBeside && props.info}
+        </Stack>}
       {/* The same element for the whole match: a screen reader announces a
           change inside a live region, but often not one inserted filled. */}
       <Box role="status" sx={{
@@ -431,7 +434,7 @@ function GameArea(props: {
 function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
   const { t } = useTranslation();
   const { mode } = props;
-  if (mode === null) return <Box sx={{ fontSize: '14px', fontWeight: 600, color: MUTED }}>{t('strategy.mode.none')}</Box>;
+  if (mode === null) return null;
   const live = mode === 'live';
   return (
     <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, color: live ? LIVE : PRACTICE }}>
@@ -504,7 +507,6 @@ function Intro(props: { enabled: boolean, startVaries: boolean, moves: StrategyW
           </Box>
         </Stack>
       </Box>
-      <Box sx={{ textAlign: 'center', fontSize: '14px', color: MUTED, marginTop: '14px' }}>{t('strategy.intro.footer')}</Box>
     </>
   );
 }
