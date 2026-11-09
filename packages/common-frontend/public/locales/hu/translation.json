@@ -185,8 +185,7 @@
     "series": {
       "earlier_one": "{{count}} korábbi éles játszma",
       "earlier_other": "{{count}} korábbi éles játszma",
-      "label": "Éles játszmák",
-      "total": "= {{points}}"
+      "label": "Éles játszmák"
     }
   },
   "waitingRoom": {

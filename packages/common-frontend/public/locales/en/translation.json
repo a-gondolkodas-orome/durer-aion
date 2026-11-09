@@ -189,8 +189,7 @@
     "series": {
       "earlier_one": "{{count}} earlier live game",
       "earlier_other": "{{count}} earlier live games",
-      "label": "Live games",
-      "total": "= {{points}}"
+      "label": "Live games"
     }
   },
   "waitingRoom": {

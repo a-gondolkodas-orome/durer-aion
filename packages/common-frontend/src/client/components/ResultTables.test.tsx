@@ -39,11 +39,12 @@ test("a long run of live games shows only the latest ones, the earlier ones as a
   expect(screen.queryByText('9.')).not.toBeInTheDocument();
 });
 
-// The two wins that scored stand out from the losses before them.
-test("a match that scored groups the two wins that earned it with the points", () => {
+// The headline has the points; the row only marks the wins that earned them.
+test("a match that scored shows every game, without repeating its points", () => {
   render(<StrategyGamesTable results={['won', 'lost', 'won', 'won']} points={9}/>);
 
-  expect(screen.getByText('strategy.series.total')).toBeInTheDocument();
+  expect(screen.getAllByRole('img')).toHaveLength(4);
+  expect(screen.queryByText(/pont/)).not.toBeInTheDocument();
 });
 
 test("the live progress shows only what is decided, and what the rest is worth", () => {
