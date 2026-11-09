@@ -246,19 +246,16 @@ export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, 
   );
 }
 
-/// The run of wins a strategy screen groups with its points. `framed` in
-/// green during the game, where the run also holds the games still to play;
-/// `numbered` when its games carry their numbers above them (`Numbered`), so
-/// the points line up with the squares, not the numbers.
-export function LiveGameRun(props: { points: string, numbered?: boolean, framed?: boolean, children: ReactNode }) {
-  const points = <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>;
+/// The run of wins the strip during the game groups with its points, framed
+/// in green, the games still to play in it too.
+export function LiveGameRun(props: { points: string, children: ReactNode }) {
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px',
-      ...(props.framed && { padding: '3px 8px 3px 4px', borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6' }),
+      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
+      borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',
     }}>
       {props.children}
-      {props.numbered ? <Numbered n={null}>{points}</Numbered> : points}
+      <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>
     </Box>
   );
 }
@@ -276,8 +273,9 @@ function Numbered(props: { n: number | null, children: ReactNode }) {
 
 /**
  * The latest live strategy games, in the order played, as a row of squares
- * each numbered above: earlier ones are counted behind a … marker, and with `points` a match that scored has the two wins that earned
- * them grouped with the points.
+ * each numbered above: earlier ones are counted behind a … marker. With
+ * `points`, a match that scored has the two wins that earned them coloured;
+ * the points themselves are the headline's.
  */
 export function StrategyGamesTable(props: { results: LiveGameResult[], points?: number }) {
   const { t } = useTranslation();
@@ -303,10 +301,7 @@ export function StrategyGamesTable(props: { results: LiveGameResult[], points?: 
       <Numbered n={null}><Box sx={{ fontSize: '13px', color: '#57606a', marginRight: '6px' }}>{t('strategy.series.label')}</Box></Numbered>
       {hidden > 0 && <Numbered n={null}><Box role="img" aria-label={t('strategy.series.earlier', { count: hidden })}
         title={t('strategy.series.earlier', { count: hidden })} sx={{ fontWeight: 700, color: '#57606a', padding: '0 4px' }}>…</Box></Numbered>}
-      {results.slice(hidden, runStart).map((result, i) => cell(result, hidden + i))}
-      {run > 0 && <LiveGameRun numbered points={t('strategy.series.total', { points: t('general.points', { count: props.points }) })}>
-        {results.slice(runStart).map((result, i) => cell(result, runStart + i))}
-      </LiveGameRun>}
+      {results.slice(hidden).map((result, i) => cell(result, hidden + i))}
     </Box>
   );
 }

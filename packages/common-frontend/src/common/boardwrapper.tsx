@@ -381,7 +381,7 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
       {hidden > 0 && <Box title={t('strategy.series.earlier', { count: hidden })} aria-label={t('strategy.series.earlier', { count: hidden })}
         role="img" sx={{ fontSize: '14px', fontWeight: 700, color: MUTED, padding: '0 4px' }}>…</Box>}
       {results.slice(hidden, runStart).map((result, i) => played(result, hidden + i))}
-      {open && <LiveGameRun framed points={t('strategy.series.total', { points: pointsText(t, points) })}>
+      {open && <LiveGameRun points={t('strategy.series.total', { points: pointsText(t, points) })}>
         {results.slice(runStart).map((result, i) => played(result, runStart + i))}
         {Array.from({ length: 2 - streak }, (_, k) => <SeriesCell key={`next${k}`} kind="next" n={results.length + k + 1} />)}
       </LiveGameRun>}

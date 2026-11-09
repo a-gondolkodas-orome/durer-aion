@@ -219,7 +219,7 @@
       "label": "Live games",
       "lost": "Live game {{n}}: lost",
       "next": "Live game {{n}}",
-      "total": "= {{points}}",
+      "total": "→ {{points}}",
       "unfinished": "Live game {{n}}: unfinished",
       "won": "Live game {{n}}: won"
     },

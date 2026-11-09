@@ -215,7 +215,7 @@
       "label": "Éles játszmák",
       "lost": "{{n}}. éles játszma: vereség",
       "next": "{{n}}. éles játszma",
-      "total": "= {{points}}",
+      "total": "→ {{points}}",
       "unfinished": "{{n}}. éles játszma: befejezetlen",
       "won": "{{n}}. éles játszma: győzelem"
     },
