@@ -9,6 +9,7 @@ Albrechtke
 Aromo
 Aromó
 Baldvin
+beleszámítanak
 Bendi
 Cila
 Ciprián
@@ -62,6 +63,7 @@ kettőhatványt
 kilencszög
 kilencszöget
 kilencszögnek
+Kipróbálhatjátok
 kisháromszög
 kiskocka
 kiskockalapot
@@ -84,9 +86,12 @@ konstansszorosai
 kulccsomóval
 Kupidó
 képpen
+Kétszereplős
 köréírt
 Küng
 lapösszefüggőséget
+legyőzitek
+legyőznötök
 Ligety
 Lorenzkirche
 majlandi
@@ -105,6 +110,7 @@ nemtompa
 nemüres
 odik
 oldalközépső
+olvashatjátok
 osak
 osnak
 Pinturault
