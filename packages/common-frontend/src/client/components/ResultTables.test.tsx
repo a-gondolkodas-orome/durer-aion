@@ -88,3 +88,18 @@ test("the strategy points are told in words, with two example runs", () => {
   expect(screen.getByText(/strategy\.points\.afterLoss/)).toBeInTheDocument();
   expect(screen.queryByRole('table')).not.toBeInTheDocument();
 });
+
+// After the match the examples meant nothing next to the team's own result:
+// the rule is shown on its run instead.
+test("after the match the strategy points are explained on the team's own run", () => {
+  render(<StrategyPointsRule results={['won', 'lost', 'won', 'won']} points={9}/>);
+
+  expect(screen.getByText('strategy.points.outcomeAfterLosses')).toBeInTheDocument();
+  expect(screen.queryByText('strategy.points.examples')).not.toBeInTheDocument();
+});
+
+test("a match without two wins in a row says why it scored nothing", () => {
+  render(<StrategyPointsRule results={['lost', 'unfinished']} points={0}/>);
+
+  expect(screen.getByText('strategy.points.outcomeNone')).toBeInTheDocument();
+});

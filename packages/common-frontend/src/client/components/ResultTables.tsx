@@ -268,20 +268,35 @@ export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
 }
 
 /**
- * How the strategy points follow from the live games, in words and two
- * examples: the home card's tooltip and the end screen say it alike. The
- * numbers come from the scale the game scores by.
+ * How the strategy points follow from the live games, in words: the home
+ * card's tooltip and the end screen say it alike. Before the match two example
+ * runs show it; after it, `results` and `points` show it on the team's own run
+ * instead. The numbers come from the scale the game scores by.
  */
-export function StrategyPointsRule() {
+export function StrategyPointsRule(props: { results?: LiveGameResult[], points?: number }) {
   const { t } = useTranslation();
   const [clean, afterOneLoss] = STRATEGY_POINTS_BY_LOSSES;
+  const rule = t('strategy.points.text', { max: clean, scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') });
+  if (props.results === undefined || props.points === undefined) {
+    return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
+      {rule}
+      <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
+      <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
+        <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
+        <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
+      </Box>
+    </Box>;
+  }
+  // Points come only with two live wins in a row, and then they are the ones
+  // the live losses before them left.
+  const losses = props.results.filter(result => result === 'lost').length;
+  const points = t('general.points', { count: props.points });
+  const outcome = props.points === 0 ? t('strategy.points.outcomeNone')
+    : losses === 0 ? t('strategy.points.outcomeClean', { points })
+    : t('strategy.points.outcomeAfterLosses', { count: losses, points });
   return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
-    {t('strategy.points.text', { max: clean, scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') })}
-    <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
-    <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
-      <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
-      <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
-    </Box>
+    {rule}
+    <Box sx={{ marginTop: '6px', fontWeight: 600 }}>{outcome}</Box>
   </Box>;
 }
 

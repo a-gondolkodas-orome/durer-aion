@@ -25,7 +25,7 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
     >
       <StrategyGamesTable results={props.liveResults}/>
       <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
-        <StrategyPointsRule/>
+        <StrategyPointsRule results={props.liveResults} points={props.allPoints}/>
       </Box>
     </EndCard>
   );

@@ -183,6 +183,10 @@
       "afterLoss": "win, loss, win, win",
       "cleanRun": "win, win",
       "examples": "For example:",
+      "outcomeAfterLosses_one": "You won twice in a row after {{count}} live loss: {{points}}.",
+      "outcomeAfterLosses_other": "You won twice in a row after {{count}} live losses: {{points}}.",
+      "outcomeClean": "You won twice in a row with no loss: {{points}}.",
+      "outcomeNone": "You did not get two live wins in a row, so you got 0 points.",
       "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; each live loss lowers it ({{scale}}), and after it you need two wins in a row again."
     },
     "result": {

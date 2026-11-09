@@ -179,6 +179,10 @@
       "afterLoss": "győzelem, vereség, győzelem, győzelem",
       "cleanRun": "győzelem, győzelem",
       "examples": "Például:",
+      "outcomeAfterLosses_one": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
+      "outcomeAfterLosses_other": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
+      "outcomeClean": "Ti vereség nélkül nyertetek kétszer egymás után: {{points}}.",
+      "outcomeNone": "Nektek nem lett meg a két egymás utáni éles győzelem, ezért 0 pontot kaptatok.",
       "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; minden éles vereség csökkenti ({{scale}}), és utána újra két egymás utáni győzelem kell."
     },
     "result": {
