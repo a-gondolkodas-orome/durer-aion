@@ -176,7 +176,6 @@
   "overrides": [
     {
       "filename": [
-        "apps/relay-practise-frontend/src/problems.ts",
         "packages/relay-bot/src/games/relay/strategy.ts",
         "packages/problem-bank/banks/**"
       ],

@@ -25,11 +25,14 @@ import { TeamModel } from './model';
  *   nginx the request only looks like HTTPS through `X-Forwarded-Proto`, which
  *   `nginx.conf` sets from its own scheme and `app.proxy = true` in `server.ts`
  *   honours.
- * - A week's lifetime, from the last request rather than from the login:
+ * - A day's lifetime, from the last request rather than from the login:
  *   `requireTeam` sets the cookie afresh on every request it admits. A team
  *   that logs in the evening before to read the disclaimer must still be
- *   logged in for the round, and one that logged in a week earlier must not
- *   find itself logged out mid-match.
+ *   logged in for the round, and one that is playing must never find itself
+ *   logged out mid-match. No longer than that, because teams play from shared
+ *   computers — a school's lab — and whoever sits down at the same browser
+ *   after a team left without logging out is that team, free to start its
+ *   matches.
  *
  * The GUID stays an opaque, unguessable value looked up in the database on
  * every request — no signing, no secret to configure.
@@ -44,7 +47,7 @@ import { TeamModel } from './model';
  */
 export const TEAM_COOKIE = 'durer_team';
 export const TEAM_COOKIE_PATH = '/team/me';
-export const TEAM_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+export const TEAM_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export function setTeamCookie(ctx: Server.AppCtx, teamId: string) {
   ctx.cookies.set(TEAM_COOKIE, teamId, {
@@ -71,10 +74,10 @@ export interface TeamState {
 
 /** Loads the team the cookie names into `ctx.state.team`, or answers 401.
  *
- * A team it admits gets its cookie set again, so the week runs from the
+ * A team it admits gets its cookie set again, so the day runs from the
  * last request (see above). The same header-stripping described below costs
  * that renewal whenever the route then throws — a `gohome` refused mid-match,
- * say — so the week runs from the last request that *answered*. Harmless:
+ * say — so the day runs from the last request that *answered*. Harmless:
  * the cookie keeps the life the previous answer gave it, and the client asks
  * `/team/me` often enough that a renewal is never far away.
  *

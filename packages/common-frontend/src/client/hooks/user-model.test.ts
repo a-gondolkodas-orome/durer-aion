@@ -85,17 +85,11 @@ describe("UserModel session", () => {
   });
 
   // Nothing client-side knows whether there is a session, so the refusal is
-  // the server's (a 401); the page reloads to show the login form.
+  // the server's (a 401), and the caller hears it: the hooks fetch the state,
+  // which then shows the login form (user-hooks.test.tsx).
   test("a logged-out browser cannot start a round", async () => {
-    const startRelay = vi.spyOn(repo, "startRelay");
-    const reload = vi.fn();
-    vi.stubGlobal("location", { reload });
-    vi.spyOn(console, "log").mockImplementation(() => undefined);
     const user = new UserModel(repo);
 
-    await user.startRelay();
-
-    expect(startRelay.mock.results[0].type).toBe("throw");
-    expect(reload).toHaveBeenCalledTimes(1);
+    await expect(user.startRelay()).rejects.toThrow("NOT LOGGED IN");
   });
 });
