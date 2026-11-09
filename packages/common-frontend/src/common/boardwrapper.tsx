@@ -176,12 +176,16 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         ? (lastResult === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'))
         : (lastResult === 'won' ? t('strategy.result.liveWon') : t('strategy.result.liveLost'));
       tone = lastResult;
-      sub = practice ? t('strategy.result.practiceNote') : '';
+      // A first live win is half the task; the strip has the points.
+      sub = practice ? t('strategy.result.practiceNote')
+        : lastResult === 'won' && G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '';
       actions = nextGame;
-      // Before the first live game the team is about to choose one, so what it
-      // asks of them comes once more, next to its button. After that, as
-      // anywhere else, it is behind the ⓘ.
-      if (practice && G.numberOfTries === 0) {
+      // Before the first live game the team is about to choose one, so how it
+      // may differ from practice comes once, next to its button: after a win,
+      // that the practice computer may not have played its best; after a
+      // loss that would read oddly, so only a varying start is worth saying.
+      // Otherwise, as anywhere else, it is behind the ⓘ.
+      if (practice && G.numberOfTries === 0 && (lastResult === 'won' || startVaries)) {
         callout = <LiveHint after={lastResult} startVaries={startVaries} />;
       } else {
         infoBeside = true;
@@ -339,6 +343,13 @@ function Series(props: { G: GameStateMixin }) {
           {t('strategy.series.total', { points: pointsText(t, points) })}
         </Box>
       </Stack>
+      {/* The cells and the grouped run read only once explained. */}
+      <Tooltip title={<Box sx={{ fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>{t('strategy.series.help')}</Box>}
+        enterTouchDelay={0} leaveTouchDelay={10000} arrow>
+        <IconButton size="small" aria-label={t('strategy.series.helpLabel')} sx={{ color: MUTED }}>
+          <InfoOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
     </Stack>
   );
 }
@@ -489,23 +500,21 @@ function Intro(props: { enabled: boolean, startVaries: boolean, moves: StrategyW
 }
 
 /// Under the live button after a practice game, until the first live one:
-/// what a live game asks, in facts only.
+/// how a live game may differ from practice, in facts only.
 function LiveHint(props: { after: 'won' | 'lost', startVaries: boolean }) {
   const { t } = useTranslation();
   const { after, startVaries } = props;
+  const text = after === 'won'
+    ? (startVaries ? t('strategy.liveHint.practiceBotVaries') : t('strategy.liveHint.practiceBot'))
+    : t('strategy.liveHint.startDiffers');
   return (
     <Box role="note" sx={{
       position: 'absolute', top: '56px', zIndex: 2,
-      left: { xs: 0, sm: 'calc(50% - 40px)' }, right: { xs: 0, sm: 'auto' }, width: { sm: '360px' },
+      left: { xs: 0, sm: 'calc(50% - 40px)' }, right: { xs: 0, sm: 'auto' }, width: { sm: '340px' },
       backgroundColor: '#fff', border: `1px solid ${LIVE}`, borderRadius: '12px', boxShadow: '0 10px 24px rgba(0,0,0,.14)',
       padding: '12px 14px', fontSize: '14px', lineHeight: 1.45, textAlign: 'left',
     }}>
-      {/* After a loss, that the practice computer may not have played its best
-          reads oddly, so only the goal is said. */}
-      {after === 'won'
-        ? <><Box component="b" sx={{ color: LIVE }}>{t('strategy.liveHint.goal')}</Box>{' '}
-          {startVaries ? t('strategy.liveHint.practiceBotVaries') : t('strategy.liveHint.practiceBot')}</>
-        : <Box component="b" sx={{ color: LIVE }}>{startVaries ? t('strategy.liveHint.goalVaries') : t('strategy.liveHint.goal')}</Box>}
+      {text}
     </Box>
   );
 }

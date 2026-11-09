@@ -156,10 +156,9 @@
       "title": "Which kind of game do you start with?"
     },
     "liveHint": {
-      "goal": "In live games you need two wins in a row.",
-      "goalVaries": "In live games you need two wins in a row, and the starting position may differ.",
       "practiceBot": "The practice computer may not play its best.",
-      "practiceBotVaries": "The practice computer may not play its best, and the live starting position may differ."
+      "practiceBotVaries": "The practice computer may not play its best, and the live starting position may differ.",
+      "startDiffers": "Live games may start from a different position than the practice game."
     },
     "mode": {
       "live": "LIVE · game {{n}}",
@@ -175,6 +174,7 @@
     "result": {
       "liveLost": "The computer won.",
       "liveWon": "You won!",
+      "liveWonFirst": "Win the next live game too, and the task is done.",
       "practiceLost": "The computer won the practice game.",
       "practiceNote": "This does not count towards your score.",
       "practiceWon": "You won the practice game.",
@@ -188,6 +188,8 @@
     },
     "secondPlayer": "We go second",
     "series": {
+      "help": "✓ win, ✗ loss. The green frame is your current run: the live games won since your last live loss and the wins still needed, beside the points two wins in a row earn. After a live loss the run starts again, worth fewer points.",
+      "helpLabel": "What does the series mean?",
       "label": "Live games",
       "lost": "Live game {{n}}: lost",
       "next": "Live game {{n}}",

@@ -110,6 +110,7 @@ describe('the header strip', () => {
     // One more win needed: one empty slot, then the points.
     expect(within(series).getAllByRole('img', { name: 'strategy.series.next' })).toHaveLength(1);
     expect(within(series).getByText('strategy.series.total')).toBeInTheDocument();
+    expect(within(series).getByRole('button', { name: 'strategy.series.helpLabel' })).toBeInTheDocument();
     // The game area does not repeat it.
     expect(within(screen.getByTestId('gameArea')).queryByText(/strategy\.series/)).not.toBeInTheDocument();
   });
@@ -140,20 +141,29 @@ describe('between games', () => {
   });
 
   // Before the first live game the team is about to choose one.
-  test('repeats what a live game asks after practice, until the first live game', () => {
+  test('says how live may differ after a practice win, until the first live game', () => {
     renderBoard(betweenGames, { difficulty: 'test', winner: GUESSER_PLAYER, numberOfTries: 0 });
 
     expect(status()).toHaveTextContent('strategy.result.practiceWon');
     expect(screen.getByText('strategy.result.practiceNote')).toBeInTheDocument();
-    expect(screen.getByRole('note')).toHaveTextContent('strategy.liveHint.goal');
     expect(screen.getByRole('note')).toHaveTextContent('strategy.liveHint.practiceBot');
   });
 
-  test('after a practice loss says only the goal', () => {
+  test('after a practice loss in a game whose start is fixed, adds no callout', () => {
     renderBoard(betweenGames, { difficulty: 'test', winner: JUDGE_PLAYER, numberOfTries: 0 });
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+  });
 
-    expect(screen.getByRole('note')).toHaveTextContent('strategy.liveHint.goal');
-    expect(screen.getByRole('note')).not.toHaveTextContent('strategy.liveHint.practiceBot');
+  test('after a practice loss in a game whose start varies, says so', () => {
+    renderBoard(betweenGames, { difficulty: 'test', winner: JUDGE_PLAYER, numberOfTries: 0 }, NamedBoard);
+    expect(screen.getByRole('note')).toHaveTextContent('strategy.liveHint.startDiffers');
+  });
+
+  test('says after the first live win that one more completes the task', () => {
+    renderBoard(betweenGames, { winner: GUESSER_PLAYER, winningStreak: 1, liveResults: ['won'] });
+
+    expect(status()).toHaveTextContent('strategy.result.liveWon');
+    expect(screen.getByText('strategy.result.liveWonFirst')).toBeInTheDocument();
   });
 
   test('leaves the explanation behind the ⓘ once a live game was played', () => {

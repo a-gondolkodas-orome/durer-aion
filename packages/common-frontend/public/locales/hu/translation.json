@@ -152,10 +152,9 @@
       "title": "Milyen játszmával kezdtek?"
     },
     "liveHint": {
-      "goal": "Élesben kétszer egymás után kell nyernetek.",
-      "goalVaries": "Élesben kétszer egymás után kell nyernetek, és a kezdőállás is más lehet.",
       "practiceBot": "A próbagép nem feltétlenül játszik a legjobban.",
-      "practiceBotVaries": "A próbagép nem feltétlenül játszik a legjobban, és az éles kezdőállás is más lehet."
+      "practiceBotVaries": "A próbagép nem feltétlenül játszik a legjobban, és az éles kezdőállás is más lehet.",
+      "startDiffers": "Az éles játszmák kezdőállása más lehet, mint a próbajátéké."
     },
     "mode": {
       "live": "ÉLES · {{n}}. játszma",
@@ -171,6 +170,7 @@
     "result": {
       "liveLost": "A gép nyert.",
       "liveWon": "Nyertetek!",
+      "liveWonFirst": "Ha a következő éles játszmát is megnyeritek, teljesítettétek a feladatot.",
       "practiceLost": "A gép nyert a próbajátékban.",
       "practiceNote": "Ez nem számít a pontozásba.",
       "practiceWon": "Nyertetek a próbajátékban.",
@@ -184,6 +184,8 @@
     },
     "secondPlayer": "Másodikak leszünk",
     "series": {
+      "help": "✓ győzelem, ✗ vereség. A zöld keretben a mostani sorozatotok: az utolsó éles vereség óta megnyert játszmák és a még hiányzó győzelmek, mellettük a pont, amit két egymás utáni győzelemmel kaptok. Egy éles vereség után a sorozat újraindul, és kevesebb pont jár.",
+      "helpLabel": "Mit jelent a sorozat?",
       "label": "Éles játszmák",
       "lost": "{{n}}. éles játszma: vereség",
       "next": "{{n}}. éles játszma",
