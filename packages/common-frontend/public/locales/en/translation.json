@@ -202,6 +202,8 @@
     },
     "secondPlayer": "We go second",
     "series": {
+      "earlier_one": "{{count}} earlier live game",
+      "earlier_other": "{{count}} earlier live games",
       "help": "✓ win, ✗ loss. The green frame is your current run: the live games won since your last live loss and the wins still needed, beside the points two wins in a row earn. After a live loss the run starts again, worth fewer points.",
       "helpLabel": "What does the series mean?",
       "label": "Live games",

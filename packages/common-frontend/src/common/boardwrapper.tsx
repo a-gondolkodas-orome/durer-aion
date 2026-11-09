@@ -316,6 +316,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
   };
 };
 
+/// How many games before the current run the strip shows.
+const SHOWN_BEFORE_RUN = 2;
+
 /** The live games so far, and what the current run of wins still needs and is worth. */
 /// Each played game is a ✓, ✗ or –; the run that counts, the wins since the
 /// last loss and the games it still needs, is grouped with its points. That
@@ -326,13 +329,18 @@ function Series(props: { G: GameStateMixin }) {
   const results = G.liveResults;
   const streak = Math.min(G.winningStreak, 2);
   const runStart = Math.max(0, results.length - streak);
+  const hidden = Math.max(0, runStart - SHOWN_BEFORE_RUN);
   const points = streak >= 2 ? G.points : strategyPoints(G.numberOfLoss);
   const played = (result: LiveGameResult, i: number) => <SeriesCell key={i} kind={result} n={i + 1} />;
   return (
     <Stack role="group" aria-label={t('strategy.series.label')}
       sx={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
       <Box sx={{ fontSize: '13px', color: MUTED, marginRight: '6px' }}>{t('strategy.series.label')}</Box>
-      {results.slice(0, runStart).map((result, i) => played(result, i))}
+      {/* Only the latest games before the run: the earlier ones are behind a
+          count, as the strip has a line to fit in. */}
+      {hidden > 0 && <Box title={t('strategy.series.earlier', { count: hidden })} aria-label={t('strategy.series.earlier', { count: hidden })}
+        role="img" sx={{ fontSize: '14px', fontWeight: 700, color: MUTED, padding: '0 4px' }}>…</Box>}
+      {results.slice(hidden, runStart).map((result, i) => played(result, hidden + i))}
       <Stack sx={{
         flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
         borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',

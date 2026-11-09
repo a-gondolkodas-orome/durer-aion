@@ -115,6 +115,17 @@ describe('the header strip', () => {
     expect(within(screen.getByTestId('gameArea')).queryByText(/strategy\.series/)).not.toBeInTheDocument();
   });
 
+  // Nine losses before a win filled the strip past its line.
+  test('shows only the two latest games before the run, the rest as a count', () => {
+    const liveResults = ['won', 'lost', 'lost', 'lost', 'lost', 'lost', 'lost', 'lost', 'lost'] as const;
+    renderBoard(betweenGames, { winner: JUDGE_PLAYER, liveResults: [...liveResults], numberOfLoss: 8, numberOfTries: 9 });
+
+    const series = screen.getByRole('group', { name: 'strategy.series.label' });
+    expect(within(series).getByRole('img', { name: 'strategy.series.earlier' })).toBeInTheDocument();
+    expect(within(series).getAllByRole('img', { name: 'strategy.series.lost' })).toHaveLength(2);
+    expect(within(series).queryByRole('img', { name: 'strategy.series.won' })).not.toBeInTheDocument();
+  });
+
   test('keeps the clock, and the rules behind a button', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
 

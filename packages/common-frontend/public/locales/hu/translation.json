@@ -198,6 +198,8 @@
     },
     "secondPlayer": "Másodikak leszünk",
     "series": {
+      "earlier_one": "{{count}} korábbi éles játszma",
+      "earlier_other": "{{count}} korábbi éles játszma",
       "help": "✓ győzelem, ✗ vereség. A zöld keretben a mostani sorozatotok: az utolsó éles vereség óta megnyert játszmák és a még hiányzó győzelmek, mellettük a pont, amit két egymás utáni győzelemmel kaptok. Egy éles vereség után a sorozat újraindul, és kevesebb pont jár.",
       "helpLabel": "Mit jelent a sorozat?",
       "label": "Éles játszmák",
