@@ -41,7 +41,7 @@ const G: MyGameState = {
 };
 
 // Relay practice's board: its way out logs out to the round selector, where
-// the dry run's reloads the page, which jsdom cannot.
+// the dry run's goes home to the Chooser.
 async function renderBoard(ctx: Partial<Ctx>, state: MyGameState = G) {
   const repo: ClientRepository = new MockClientRepository();
   // A team in the middle of a relay match.
