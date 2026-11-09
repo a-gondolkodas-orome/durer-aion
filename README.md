@@ -488,7 +488,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
   page's.
 
 A relay is not a new game but a problem list: `Problem[]` per category in
-`packages/relay-bot/src/games/relay/strategy.ts` for the competition, and per
-problem set in `apps/relay-practise-frontend/src/problems.ts` for the relay
-practice site. The same secrecy applies to an unreleased problem set as to a
+`packages/relay-bot/src/games/relay/strategy.ts` for the competition, and a
+competition's relay in `packages/problem-bank/banks/` for the relay practice
+site, which names the banks and competitions it serves in
+`apps/relay-practise-frontend/src/practice-sets.ts`. The same secrecy applies to an unreleased problem set as to a
 game.

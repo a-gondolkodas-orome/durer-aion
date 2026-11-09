@@ -10,7 +10,7 @@ import { useLogin } from 'common-frontend';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useStartRelay } from 'common-frontend';
-import { hasProblemSet } from './problems';
+import { hasProblemSet } from './practice-sets';
 
 export enum Category {
   A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Ep = 'E+', Cp = 'C+', Dp = 'D+'

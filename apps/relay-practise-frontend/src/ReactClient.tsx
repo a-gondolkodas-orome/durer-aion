@@ -1,9 +1,10 @@
-import { ComponentProps, useMemo } from "react";
+import { ComponentProps, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { relayStrategy, Problem } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
-import { loadProblemSet } from "./problems";
+import { isLanguage } from "schemas";
+import { loadProblemSet } from "./practice-sets";
 
 const description = <p></p>
 
@@ -14,7 +15,10 @@ export function RelayClient({ teamName }: {
   matchID?: string,
   credentials?: string,
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // The language the match is served in, read once: switching languages
+  // mid-match must not rebuild the client, which would restart its bot.
+  const [language] = useState(() => isLanguage(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'hu');
   const ClientWithBot = useMemo(() => {
     if (!teamName) {
       return null;
@@ -23,7 +27,7 @@ export function RelayClient({ teamName }: {
     // loadProblemSet throws on a code with no bundled set — reachable through a
     // stale stored teamState, never through the round selector.
     try {
-      problems = loadProblemSet(teamName);
+      problems = loadProblemSet(teamName, language);
     } catch {
       return null;
     }
@@ -38,7 +42,7 @@ export function RelayClient({ teamName }: {
       relayStrategy(problems),
       description,
     ).ClientWithBot;
-  }, [teamName]);
+  }, [teamName, language]);
 
   if (!ClientWithBot) {
     return <p>{t('relay.error.missingTest', { test: teamName })}</p>;

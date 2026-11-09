@@ -305,12 +305,10 @@ export default defineConfig(
     rules: quotesRule,
   },
   {
-    // The relay practice site's problem bank — 8,639 lines of past years' problems,
-    // hand-maintained rather than generated, so the formatting rules stay on for it.
-    // It is a single annotated literal; see typeAwareRulesOff for why the checker
-    // rules come off it. The practice site's generated tables are exempted in its
-    // own config, which lints them.
-    files: ['apps/relay-practise-frontend/src/problems.ts'],
+    // The problem banks — several thousand lines of past rounds' problems, each file
+    // a pair of annotated literals. The formatting rules stay on for them; see
+    // typeAwareRulesOff for why the checker rules come off.
+    files: ['packages/problem-bank/banks/*.ts'],
     rules: typeAwareRulesOff,
   },
   // The suites, but for the engine's, which the block above covers, and
