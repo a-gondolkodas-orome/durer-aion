@@ -196,6 +196,7 @@
       "unfinished": "This game was left unfinished."
     },
     "rules": "Rules",
+    "rulesCommon": "You decide whether to play as the first or the second player. Beat the computer twice in a row in this game!",
     "rulesFirst": {
       "button": "We have read and understood them",
       "title": "Read the rules first!"

@@ -83,7 +83,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     const theme = useTheme();
     const { t } = useTranslation();
     const language = useUiLanguage();
-    const rules = inLanguage<ReactNode>(presentation.rules, language);
+    // Every game's rules end with what is the same in all of them, set apart.
+    const rules = <>
+      {inLanguage<ReactNode>(presentation.rules, language)}
+      <Box component="p" sx={{ fontStyle: 'italic', marginTop: '12px', marginBottom: 0 }}>{t('strategy.rulesCommon')}</Box>
+    </>;
     // `noSsr` reads the width on the first render, so the rules do not show
     // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });

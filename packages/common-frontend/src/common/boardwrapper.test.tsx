@@ -75,6 +75,8 @@ describe('before the first game', () => {
 
     expect(screen.getByRole('dialog')).toHaveTextContent('strategy.rulesFirst.title');
     expect(screen.getByRole('dialog')).toHaveTextContent('the rules');
+    // What every game shares, after the game's own rules.
+    expect(screen.getByRole('dialog')).toHaveTextContent('strategy.rulesCommon');
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(button('strategy.rulesFirst.button'));

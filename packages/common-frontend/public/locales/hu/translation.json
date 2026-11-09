@@ -192,6 +192,7 @@
       "unfinished": "Ez a játszma befejezetlen maradt."
     },
     "rules": "Szabályok",
+    "rulesCommon": "Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni. Győzzétek le a gépet kétszer egymás után ebben a játékban!",
     "rulesFirst": {
       "button": "Elolvastuk, értjük",
       "title": "Először olvassátok el a szabályokat!"
