@@ -15,7 +15,7 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
-  presentation: StrategyPresentation,
+  presentation: StrategyPresentation<T_SpecificGameState>,
   ) {
   // The same key to both: what the transport persists the match log under is
   // what the step files report as the match's log.

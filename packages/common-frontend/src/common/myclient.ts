@@ -16,7 +16,7 @@ export type RelayBoard = ComponentType<BoardProps<RelayGameState>>;
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  presentation: StrategyPresentation,
+  presentation: StrategyPresentation<T_SpecificGameState>,
 ) {
   return Client({
     game: gameWrapper(game),
@@ -46,7 +46,7 @@ const socketOpts = { timeout: 5000 };
 export function MyOnlineClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  presentation: StrategyPresentation,
+  presentation: StrategyPresentation<T_SpecificGameState>,
   serverUrl: string | undefined = undefined,
 ) {
   return Client({

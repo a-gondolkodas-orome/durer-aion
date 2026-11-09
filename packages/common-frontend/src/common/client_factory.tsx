@@ -8,7 +8,7 @@ import type { GameRelay } from "game";
 export const ClientFactory = function<T_SpecificGameState> (
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  presentation: StrategyPresentation,
+  presentation: StrategyPresentation<T_SpecificGameState>,
   serverUrl: string | undefined = undefined,
   ) {
   const Client = MyClient(game, board, presentation);

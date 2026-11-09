@@ -359,3 +359,28 @@ describe('the rules and role names', () => {
     expect(button('We start (1 O)')).toBeInTheDocument();
   });
 });
+
+describe('the game\'s own words on the move', () => {
+  // A board that, like the 5×5 one, holds half a move before sending it.
+  const StepBoard = boardWrapper<object>(({ setTurnState }) =>
+    <button data-testid="cell" onClick={() => setTurnState?.({ picked: true })}>cell</button>, {
+    rules: <p>the rules</p>,
+    getPlayerStepDescription: ({ turnState }) => (turnState as { picked?: boolean } | null)?.picked ? 'second step' : 'first step',
+    getSideDescription: () => 'our side',
+  });
+
+  test('tell the team its next step under the status, as the board reports it', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, {}, StepBoard);
+
+    expect(screen.getByText('first step')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('cell'));
+    expect(screen.getByText('second step')).toBeInTheDocument();
+    expect(screen.getByText('· our side')).toBeInTheDocument();
+  });
+
+  test('say nothing of a step on the bot\'s turn', () => {
+    renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER }, {}, StepBoard);
+
+    expect(screen.queryByText(/step/)).not.toBeInTheDocument();
+  });
+});

@@ -25,16 +25,23 @@ import { useUiLanguage } from "../client/hooks/ui-language";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
 /// gameWrapper extends it, plus the client API. The wrapper passes its props
-/// through untouched, so a board may read anything bgio put there.
-export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
+/// through untouched, so a board may read anything bgio put there. It adds
+/// `setTurnState`, as the practice site's factory does: a board reports with
+/// it what it holds of the team's move before sending it (a first X picked,
+/// say), for the step description to read back as `turnState`.
+export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin> & {
+  setTurnState?: (turnState: unknown) => void,
+};
 export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
 /// A game's rules text, one for every language or one per language; the board
 /// shows the page's.
 export type StrategyDescription = Localizable<ReactNode>;
 
-/// What the wrapper shows around a game's board that only the game knows.
-export interface StrategyPresentation {
+/// What the wrapper shows around a game's board that only the game knows. The
+/// two functions are methods, not properties, so a game may type `turnState` as
+/// its own board reports it: method parameters are checked both ways.
+export interface StrategyPresentation<G = unknown> {
   /// The rules: in a dialog before the first game, behind a button after it.
   rules: StrategyDescription,
   /// The role buttons, the first player's first, each one for every language
@@ -45,6 +52,13 @@ export interface StrategyPresentation {
   /// texts ask the team to look at it before choosing a role, and say that a
   /// live game may start from another one than practice did.
   startVaries?: boolean,
+  /// What the team does next on its turn, under "Ti jöttök!": the practice
+  /// site's `getPlayerStepDescription`, with `turnState` as the board last set it.
+  getPlayerStepDescription?(args: {
+    G: G & GameStateMixin, ctx: StrategyBoardProps<G>['ctx'], playerID: string | null, turnState: unknown,
+  }): Localizable<string> | null,
+  /// Which side the team plays once the roles are chosen, beside the mode.
+  getSideDescription?(args: { G: G & GameStateMixin, playerID: string | null }): Localizable<string> | null,
 }
 
 // The screen has a fixed frame, the header strip, and one game area, which is
@@ -73,7 +87,7 @@ type Tone = 'plain' | 'go' | 'wait' | 'won' | 'lost';
 
 const pointsText = (t: TFunction, count: number) => t('general.points', { count });
 
-export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyPresentation) {
+export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyPresentation<G>) {
   return (props: StrategyBoardProps<G>) => {
     const { G, ctx } = props;
     const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
@@ -83,6 +97,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     const theme = useTheme();
     const { t } = useTranslation();
     const language = useUiLanguage();
+    const [turnState, setTurnState] = useState<unknown>(null);
     // Every game's rules end with what is the same in all of them, set apart.
     const rules = <>
       {inLanguage<ReactNode>(presentation.rules, language)}
@@ -217,7 +232,15 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     } else {
       status = teamToMove ? t('strategy.status.yourTurn') : t('strategy.status.botTurn');
       tone = teamToMove ? 'go' : 'wait';
+      // The game's own word on the move, in the line kept for it under the
+      // status, so the board above needs no lines of its own.
+      const step = teamToMove
+        ? presentation.getPlayerStepDescription?.({ G, ctx, playerID: props.playerID, turnState }) ?? null
+        : null;
+      sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
     }
+    const sideText = presentation.getSideDescription?.({ G, playerID: props.playerID }) ?? null;
+    const side = sideText === null ? null : inLanguage<string>(sideText, language) ?? null;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
 
@@ -283,10 +306,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
             </Stack>
           </Stack>
           <Box sx={{ position: 'relative' }}>
-            <GameArea mode={difficulty} liveNumber={G.numberOfTries}
+            <GameArea mode={difficulty} liveNumber={G.numberOfTries} side={side}
               status={status} tone={tone} sub={sub} actions={actions} callout={callout} intro={intro}
               info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
-              <BoardArea state={boardState}>{board(props)}</BoardArea>
+              <BoardArea state={boardState}>{board({ ...props, setTurnState })}</BoardArea>
             </GameArea>
             {/* Over the margin to the right of the game, which stays where it
                 is: the board stays to read and play while the rules are open. */}
@@ -387,7 +410,7 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number }) {
 /// of buttons, and the board. The rows keep their height when empty, so the
 /// board does not move from one state to the next.
 function GameArea(props: {
-  mode: Difficulty | null, liveNumber: number, status: string, tone: Tone, sub: string,
+  mode: Difficulty | null, liveNumber: number, side: string | null, status: string, tone: Tone, sub: string,
   actions: ReactNode, callout: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
   children: ReactNode,
 }) {
@@ -404,7 +427,7 @@ function GameArea(props: {
           and the explanation is under each button. */}
       {props.intro === null &&
         <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '28px' }}>
-          <ModeLine mode={mode} liveNumber={props.liveNumber} />
+          <ModeLine mode={mode} liveNumber={props.liveNumber} side={props.side} />
           {!props.infoBeside && props.info}
         </Stack>}
       {/* The same element for the whole match: a screen reader announces a
@@ -429,7 +452,7 @@ function GameArea(props: {
   );
 }
 
-function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
+function ModeLine(props: { mode: Difficulty | null, liveNumber: number, side: string | null }) {
   const { t } = useTranslation();
   const { mode } = props;
   if (mode === null) return null;
@@ -441,6 +464,7 @@ function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
         ...(live ? { backgroundColor: LIVE } : { border: `2px solid ${PRACTICE}` }),
       }} />
       {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
+      {props.side !== null && <Box component="span" sx={{ fontWeight: 600, color: MUTED }}>· {props.side}</Box>}
     </Stack>
   );
 }
@@ -576,9 +600,9 @@ function BoardArea(props: { state: BoardState, children: ReactNode }) {
         border: 0, margin: 0, padding: 0, minWidth: 0,
         display: 'flex', justifyContent: 'center',
         // On a laptop the window, not the column, is what runs short: what is
-        // above the board takes about 460px, so a board that scales with its
-        // width, as a square grid does, is narrowed to fit under it.
-        '& > *': { width: '100%', maxWidth: 'max(240px, min(440px, calc(100dvh - 460px)))' },
+        // above the board and below it takes about 380px, so a board that
+        // scales with its width, as a square grid does, is narrowed to fit.
+        '& > *': { width: '100%', maxWidth: 'max(240px, min(440px, calc(100dvh - 380px)))' },
         ...(state !== 'live' && { '& *': { cursor: 'default' } }),
         ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
         transition: 'opacity 0.3s',

@@ -1,6 +1,5 @@
-//cspell:ignore törölhetitek
-import { useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, Button } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
 import { JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
@@ -8,7 +7,16 @@ import { BOARD_SIZE, isLegalPlacement, markForPlayer, winningLine } from './game
 import type { MyGameState } from './game';
 
 
-type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
+/// What the board holds of the team's move before sending it: whether a first X
+/// is picked. It reports it with `setTurnState`, for the step description in
+/// main.tsx to read; the practice site's 5×5 game words its steps the same way.
+export interface TurnState {
+  xsPlaced: 0 | 1;
+}
+
+type MyGameProps = BoardProps<MyGameState & GameStateMixin> & {
+  setTurnState?: (turnState: TurnState) => void,
+};
 
 // Online state may come from a server without lastMachineMove. The move log
 // also survives board remounts and reconnects, unlike local cell comparisons.
@@ -38,12 +46,14 @@ export function MyBoard(props: MyGameProps) {
   return <BoardTurn key={positionKey} {...props} machineMove={lastMachineMove(props)} />;
 }
 
-function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGameProps & { machineMove: number[] }) {
+function BoardTurn({ G, ctx, moves, isActive, machineMove, setTurnState }: MyGameProps & { machineMove: number[] }) {
   const [selected, setSelected] = useState<number | null>(null);
+  useEffect(() => {
+    setTurnState?.({ xsPlaced: selected === null ? 0 : 1 });
+  }, [selected, setTurnState]);
   const active = isActive && ctx.phase === 'play' && !ctx.gameover && G.winner === null;
   const mark = markForPlayer(G, ctx.currentPlayer);
   const line = winningLine(G.cells);
-  const ownMark = G.firstPlayer === null || playerID === null ? null : markForPlayer(G, playerID);
 
   const chooseCell = (index: number) => {
     if (!active || G.cells[index] !== null) return;
@@ -60,23 +70,10 @@ function BoardTurn({ G, ctx, moves, isActive, playerID, machineMove }: MyGamePro
     }
   };
 
-  // Whose turn it is, who won, and which mark each role plays (on the role
-  // buttons) the wrapper says for every game; these lines are only what this
-  // game's rules add to that.
-  let instruction = '';
-  if (ctx.phase === 'play') {
-    instruction = !active ? '' : mark === 'O'
-      ? 'Tegyetek egy kört egy üres mezőre!'
-      : selected === null ? 'Jelöljétek ki az első X helyét!'
-        : 'Válasszátok ki a második X helyét! A kijelölt mezőre kattintva törölhetitek a kijelölést.';
-  }
-
   return (
     // The marks scale with the board, not the window, so a board narrowed to
     // fit a short window keeps square cells.
     <Box sx={{ width: '100%', maxWidth: 440, mx: 'auto', containerType: 'inline-size' }}>
-      {ownMark !== null && <Typography sx={{ mb: 1 }}>Ti {ownMark === 'O' ? 'körökkel (○)' : 'X-ekkel'} játszotok.</Typography>}
-      <Typography role="status" sx={{ mb: 2, minHeight: '3em' }}>{instruction}</Typography>
       <Box role="group" aria-label="5 × 5-ös játéktábla" sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0.5 }}>
         {G.cells.map((cell, index) => (
           <Button

@@ -12,7 +12,7 @@ T_SpecificGameState
   game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
-  presentation: StrategyPresentation,
+  presentation: StrategyPresentation<T_SpecificGameState>,
   ) {
   const ClientWithBotComponent = ClientWithBot(game, board, strategy, presentation);
   return {
