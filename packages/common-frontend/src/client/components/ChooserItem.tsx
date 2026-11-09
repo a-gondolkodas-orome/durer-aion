@@ -2,13 +2,16 @@ import { Box, Button, IconButton, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import type { ReactNode } from 'react';
 import { Stack, alpha } from '@mui/system';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
+import ExtensionOutlined from '@mui/icons-material/ExtensionOutlined';
+import FormatListNumberedRounded from '@mui/icons-material/FormatListNumberedRounded';
 import { MatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useTheme } from "@mui/material/styles";
+import { Theme, useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { PointsScale, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
@@ -39,44 +42,40 @@ export function ChooserItem(props: {
 
   return (
     <Stack sx={{
-      display: 'flex',
-      width: {
-        xs: '100%',
-        md: 'calc(50% - 50px)',
-      },
-      padding: {
-        xs: "10px",
-        md: "40px",
-      },
-      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
+      ...cardSx(theme),
+      flex: 1,
+      minWidth: 0,
+      gap: '16px',
     }}>
-      <Stack sx={{
-        fontWeight: 'bold',
-        fontSize: 24,
-        textAlign: 'center',
-        paddingBottom: {
-          xs: '10px',
-          md: 0,
-        }
+      <Stack direction="row" sx={{
+        alignItems: 'center',
+        gap: '12px',
+        cursor: { xs: showDesc ? 'pointer' : 'default', md: 'default' },
       }}
       onClick={() => {
         setMobileDescOpen((prev) => {
           return !prev
         })
       }}>
-        <span>{props.type === 'relay' ? t('relay.name') : t('strategy.name')}  {showDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
-          fontSize: 33,
-          marginBottom: "-9px",
-          display: {
-            md: 'none',
-          }
-        }}/> : <KeyboardArrowDownIcon sx={{
-          fontSize: 33,
-          marginBottom: "-9px",
-          display: {
-            md: 'none',
-          }
-        }}/>)}</span>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          width: 44,
+          height: 44,
+          borderRadius: '12px',
+          backgroundColor: alpha(theme.palette.primary.main, 0.12),
+          color: theme.palette.primary.main,
+        }}>
+          {props.type === 'relay' ? <FormatListNumberedRounded /> : <ExtensionOutlined />}
+        </Box>
+        <Box sx={{ flex: 1, fontWeight: 700, fontSize: 22, lineHeight: 1.2 }}>
+          {props.type === 'relay' ? t('relay.name') : t('strategy.name')}
+        </Box>
+        {showDesc && (mobileDescOpen
+          ? <KeyboardArrowUpIcon sx={{ fontSize: 30, display: { md: 'none' } }}/>
+          : <KeyboardArrowDownIcon sx={{ fontSize: 30, display: { md: 'none' } }}/>)}
       </Stack>
       {finished &&
         <Stack sx={{ gap: '16px' }}>
@@ -98,17 +97,16 @@ export function ChooserItem(props: {
       {showDesc && <>
         <Stack sx={{
           fontSize: 14,
+          color: '#3d4148',
           height: {
             xs: mobileDescOpen ? "100%" : "0px",
             md: "100%",
           },
           transition: "height 0.2s ease-in",
           overflow: 'hidden',
-          paddingBottom: {
-            xs: mobileDescOpen ? "10px" : "0px",
-            md: "0px",
-          },
+          marginTop: { xs: mobileDescOpen ? 0 : '-16px', md: 0 },
           "& p": {
+            marginBlockStart: 0,
             marginBlockEnd: 0,
           },
         }}>
@@ -117,11 +115,14 @@ export function ChooserItem(props: {
         <Button sx={{
           width: '100%',
           maxWidth: "600px",
-          height: '75px',
-          fontSize: '26px',
+          height: '56px',
+          marginTop: 'auto',
+          fontSize: '20px',
+          fontWeight: 600,
+          borderRadius: '12px',
           alignSelf: 'center',
           textTransform: 'none',
-        }} variant='contained' color='primary' onClick={() => {
+        }} variant='contained' color='primary' disableElevation endIcon={<ArrowForwardRounded />} onClick={() => {
           setStarting(true);
           void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
         }} disabled={starting || props.status.state !== "NOT STARTED"}>
@@ -131,6 +132,16 @@ export function ChooserItem(props: {
     </Stack>
   )
 }
+
+/// The home page's card: its two rounds, and the final score above them.
+export const cardSx = (theme: Theme) => ({
+  display: 'flex',
+  padding: { xs: '20px', md: '32px' },
+  borderRadius: '16px',
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06)',
+  backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
+});
 
 const BOLD = { b: <b /> };
 

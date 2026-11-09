@@ -1,6 +1,6 @@
-import { Stack, alpha } from "@mui/system";
+import { Stack } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
-import { ChooserItem } from "./ChooserItem";
+import { ChooserItem, cardSx } from "./ChooserItem";
 import { ScoreHeadline } from "./ResultTables";
 import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
@@ -23,10 +23,11 @@ export function Chooser(props: {
       sx={{
         display: "flex",
         width: "100%",
-        margin: {
-          xs: 0,
-          md: "40px",
+        padding: {
+          xs: "16px 12px",
+          md: "40px 24px",
         },
+        gap: "24px",
         flexDirection: "column",
       }}
       data-testid={"chooserRoot"}
@@ -34,17 +35,7 @@ export function Chooser(props: {
       {finished && (
         <Stack
           sx={{
-            display: "flex",
-            width: {
-              xs: "100%",
-              md: "calc(100% - 81px)",
-            },
-            padding: {
-              xs: "10px",
-              md: "40px",
-            },
-            backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
-            marginBottom: "20px",
+            ...cardSx(theme),
           }}
         >
           <p
@@ -71,6 +62,7 @@ export function Chooser(props: {
         sx={{
           display: "flex",
           width: "100%",
+          gap: { xs: "16px", md: "24px" },
           flexDirection: {
             xs: "column",
             md: "row",
@@ -81,10 +73,6 @@ export function Chooser(props: {
           status={props.state.relayMatch}
           type="relay"
         />
-        <Stack sx={{
-          width: "20px",
-          height: "20px"
-        }} />
         <ChooserItem
           status={props.state.strategyMatch}
           type="strategy"
