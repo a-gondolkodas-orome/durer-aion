@@ -10,7 +10,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
-import { strategyPoints } from 'game';
+import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
 import { EndDialog } from './EndCard';
@@ -91,7 +91,7 @@ export function ChooserItem(props: {
             </>
             : <>
               <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>
-              {finished.strategyResults && <StrategyGamesTable results={finished.strategyResults}/>}
+              {finished.strategyResults && <StrategyGamesTable results={finished.strategyResults} points={finished.score}/>}
             </>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
             {t('chooser.filledAt')}: {formatTime(finished.startAt)} – {formatTime(finished.endAt)}
@@ -194,7 +194,8 @@ function StrategyDescription() {
       <p>{t('chooser.strategy.intro')}</p>
       <ul>
         <li>
-          <Trans i18nKey='chooser.strategy.live' components={bold} />
+          <Trans i18nKey='chooser.strategy.live' components={bold}
+            values={{ max: STRATEGY_POINTS_BY_LOSSES[0], next: STRATEGY_POINTS_BY_LOSSES[1], rest: STRATEGY_POINTS_BY_LOSSES.slice(2).join(', ') }} />
           <InfoTip label={t('chooser.strategy.pointsLabel')}><StrategyPointsRule /></InfoTip>
         </li>
         <li>

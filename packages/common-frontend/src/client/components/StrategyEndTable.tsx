@@ -23,7 +23,7 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       backLabel={props.onClose ? t('general.close') : t('general.backHome')}
       onBack={props.onClose ?? backToHome}
     >
-      <StrategyGamesTable results={props.liveResults}/>
+      <StrategyGamesTable results={props.liveResults} points={props.allPoints}/>
       <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
         <StrategyPointsRule results={props.liveResults} points={props.allPoints}/>
       </Box>

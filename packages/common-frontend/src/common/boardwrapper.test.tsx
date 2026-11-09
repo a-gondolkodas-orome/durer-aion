@@ -293,7 +293,9 @@ describe('after the second win', () => {
     renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER, gameover: true },
       { winner: GUESSER_PLAYER, winningStreak: 2, points: 12, liveResults: ['won', 'won'] });
 
-    const series = screen.getByRole('group', { name: 'strategy.series.label', hidden: true });
+    // The strip, not the same row in the end dialog over it.
+    const series = screen.getAllByRole('group', { name: 'strategy.series.label', hidden: true })
+      .find(group => group.closest('[role="dialog"]') === null) as HTMLElement;
     expect(within(series).getAllByRole('img', { name: 'strategy.series.won', hidden: true })).toHaveLength(2);
     expect(within(series).queryByRole('img', { name: 'strategy.series.next', hidden: true })).not.toBeInTheDocument();
   });

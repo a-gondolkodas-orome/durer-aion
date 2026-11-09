@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
+import { LiveGameCell, LiveGameRun } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
@@ -341,16 +342,10 @@ function Series(props: { G: GameStateMixin }) {
       {hidden > 0 && <Box title={t('strategy.series.earlier', { count: hidden })} aria-label={t('strategy.series.earlier', { count: hidden })}
         role="img" sx={{ fontSize: '14px', fontWeight: 700, color: MUTED, padding: '0 4px' }}>…</Box>}
       {results.slice(hidden, runStart).map((result, i) => played(result, hidden + i))}
-      <Stack sx={{
-        flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
-        borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',
-      }}>
+      <LiveGameRun points={t('strategy.series.total', { points: pointsText(t, points) })}>
         {results.slice(runStart).map((result, i) => played(result, runStart + i))}
         {Array.from({ length: 2 - streak }, (_, k) => <SeriesCell key={`next${k}`} kind="next" n={results.length + k + 1} />)}
-        <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: WIN, whiteSpace: 'nowrap' }}>
-          {t('strategy.series.total', { points: pointsText(t, points) })}
-        </Box>
-      </Stack>
+      </LiveGameRun>
       {/* The cells and the grouped run read only once explained. */}
       <Tooltip title={<Box sx={{ fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>{t('strategy.series.help')}</Box>}
         enterTouchDelay={0} leaveTouchDelay={10000} arrow>
@@ -369,18 +364,7 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number }) {
     : kind === 'lost' ? t('strategy.series.lost', { n })
     : kind === 'unfinished' ? t('strategy.series.unfinished', { n })
     : t('strategy.series.next', { n });
-  return (
-    <Box role="img" aria-label={label} title={label} sx={{
-      width: '28px', height: '28px', borderRadius: '7px', boxSizing: 'border-box', flexShrink: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700,
-      ...(kind === 'won' ? { backgroundColor: '#dcefd6', color: WIN }
-        : kind === 'lost' ? { backgroundColor: '#f6dcd8', color: LOSS }
-        : kind === 'unfinished' ? { backgroundColor: '#eaeef2', color: MUTED }
-        : { border: '2px dashed #8c959f', color: '#8c959f' }),
-    }}>
-      {kind === 'won' ? '✓' : kind === 'lost' ? '✗' : kind === 'unfinished' ? '–' : `${n}.`}
-    </Box>
-  );
+  return <LiveGameCell kind={kind} n={n} label={label} />;
 }
 
 /// The one place that changes: a mode line, the status, a line under it, a row

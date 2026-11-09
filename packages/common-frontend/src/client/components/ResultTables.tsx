@@ -1,8 +1,5 @@
 import { Box, Tooltip } from '@mui/material';
 import type { SystemStyleObject, Theme } from '@mui/system';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES } from 'game';
@@ -23,7 +20,6 @@ const HEADER = '#eeeeee';
 // telling hues apart.
 export const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
 export const WRONG = '#f4b4ae';
-const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
 // ran out in, cannot be mistaken for a header cell.
 export const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
@@ -231,40 +227,72 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
   </Box>;
 }
 
-const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string }> = {
-  won: { icon: <CheckIcon fontSize="small" sx={{ color: '#1b5e20' }}/>, background: WON },
-  lost: { icon: <CloseIcon fontSize="small" sx={{ color: '#8e2b23' }}/>, background: WRONG },
-  unfinished: { icon: <HourglassEmptyIcon fontSize="small" sx={{ color: '#666' }}/>, background: UNANSWERED },
-};
+/// One live game as the strategy screens show it: a ✓, ✗ or – square, or a
+/// dashed one for a game still to play. `label` names it for a screen reader.
+export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string }) {
+  const { kind, n, label } = props;
+  return (
+    <Box role="img" aria-label={label} title={label} sx={{
+      width: '28px', height: '28px', borderRadius: '7px', boxSizing: 'border-box', flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700,
+      ...(kind === 'won' ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
+        : kind === 'lost' ? { backgroundColor: '#f6dcd8', color: '#8e1b10' }
+        : kind === 'unfinished' ? { backgroundColor: '#eaeef2', color: '#57606a' }
+        : { border: '2px dashed #8c959f', color: '#8c959f' }),
+    }}>
+      {kind === 'won' ? '✓' : kind === 'lost' ? '✗' : kind === 'unfinished' ? '–' : `${n}.`}
+    </Box>
+  );
+}
 
-/** The latest live strategy games' results, in the order played. */
-export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
+/// The run of wins a strategy screen groups with its points, framed in green.
+export function LiveGameRun(props: { points: string, children: ReactNode }) {
+  return (
+    <Box sx={{
+      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
+      borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',
+    }}>
+      {props.children}
+      <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>
+    </Box>
+  );
+}
+
+/**
+ * The latest live strategy games, in the order played, as the strip during the
+ * game shows them: earlier ones are counted behind a … marker, and with
+ * `points` a match that scored has the two wins that earned them grouped
+ * with the points.
+ */
+export function StrategyGamesTable(props: { results: LiveGameResult[], points?: number }) {
   const { t } = useTranslation();
-  if (props.results.length === 0) {
+  const { results } = props;
+  if (results.length === 0) {
     return null;
   }
-  const first = Math.max(0, props.results.length - SHOWN_GAMES);
-  const shown = props.results.slice(first);
+  const hidden = Math.max(0, results.length - SHOWN_GAMES);
+  const run = props.points !== undefined && props.points > 0 ? 2 : 0;
+  const runStart = Math.max(hidden, results.length - run);
   // Spelled out key by key: the i18n check finds a key only as a literal.
   const label: Record<LiveGameResult, string> = {
     won: t('strategy.endTable.won'),
     lost: t('strategy.endTable.lost'),
     unfinished: t('strategy.endTable.unfinished'),
   };
-  return <ResultTable
-    centred
-    headerLabel={t('strategy.endTable.game')}
-    columnLabels={shown.map((_, idx) => `${first + idx + 1}.`)}
-    rows={[{
-      label: t('strategy.endTable.result'),
-      cells: shown.map(result => ({
-        content: <Box component="span" role="img" aria-label={label[result]} title={label[result]} sx={{ display: 'flex' }}>
-          {RESULT_ICON[result].icon}
-        </Box>,
-        sx: { background: RESULT_ICON[result].background },
-      })),
-    }]}
-  />;
+  const cell = (result: LiveGameResult, i: number) => <LiveGameCell key={i} kind={result} n={i + 1} label={label[result]} />;
+  return (
+    <Box role="group" aria-label={t('strategy.series.label')} sx={{
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px',
+    }}>
+      <Box sx={{ fontSize: '13px', color: '#57606a', marginRight: '6px' }}>{t('strategy.series.label')}</Box>
+      {hidden > 0 && <Box role="img" aria-label={t('strategy.series.earlier', { count: hidden })}
+        title={t('strategy.series.earlier', { count: hidden })} sx={{ fontWeight: 700, color: '#57606a', padding: '0 4px' }}>…</Box>}
+      {results.slice(hidden, runStart).map((result, i) => cell(result, hidden + i))}
+      {run > 0 && <LiveGameRun points={t('strategy.series.total', { points: t('general.points', { count: props.points }) })}>
+        {results.slice(runStart).map((result, i) => cell(result, runStart + i))}
+      </LiveGameRun>}
+    </Box>
+  );
 }
 
 /**

@@ -28,13 +28,18 @@ test("a long problem set continues in a second row", () => {
   expect(screen.getByText('15.')).toBeInTheDocument();
 });
 
-test("a long run of live games shows only the latest ones, numbered as played", () => {
+test("a long run of live games shows only the latest ones, the earlier ones as a count", () => {
   render(<StrategyGamesTable results={Array.from({ length: 15 }, (): LiveGameResult => 'lost')}/>);
 
-  expect(screen.getAllByText('strategy.endTable.game')).toHaveLength(1);
-  expect(screen.getByText('10.')).toBeInTheDocument();
-  expect(screen.getByText('15.')).toBeInTheDocument();
-  expect(screen.queryByText('9.')).not.toBeInTheDocument();
+  expect(screen.getAllByRole('img', { name: 'strategy.endTable.lost' })).toHaveLength(6);
+  expect(screen.getByRole('img', { name: 'strategy.series.earlier' })).toBeInTheDocument();
+});
+
+// As the strip during the game groups the run with what it is worth.
+test("a match that scored groups the two wins that earned it with the points", () => {
+  render(<StrategyGamesTable results={['won', 'lost', 'won', 'won']} points={9}/>);
+
+  expect(screen.getByText('strategy.series.total')).toBeInTheDocument();
 });
 
 test("the live progress shows only what is decided, and what the rest is worth", () => {

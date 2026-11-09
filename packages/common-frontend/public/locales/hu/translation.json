@@ -14,12 +14,12 @@
     "start": "Kezdjük",
     "strategy": {
       "intro": "Kétszereplős stratégiás játék a gép ellen. A szabályokat a kezdés után olvashatjátok. Akkor kaptok pontot, ha sikerül éles játszmában kétszer egymás után legyőznötök a gépet.",
-      "live": "<b>Éles játszma:</b> vereség nélkül 12 pont, minden éles vereség után kevesebb.",
+      "live": "<b>Pontozás:</b> {{max}} pontot kaptok, ha kétszer egymás után legyőzitek éles játszmában a gépet vereség nélkül. Az elérhető pont minden éles vereséggel csökken: {{next}}, majd {{rest}}.",
       "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
       "pointsLabel": "Pontozás",
       "practice": "<b>Próbajáték:</b> nem számít a pontozásba; a játék kipróbálására való.",
       "practiceLabel": "Próbajáték",
-      "practiceTip": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is; az éles sorozatotokat nem befolyásolja.",
+      "practiceTip": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
       "time": "<b>30 percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
       "timeLabel": "Idő",
       "timeTip": "A próbajátékok is beleszámítanak az időbe."
@@ -132,10 +132,8 @@
   },
   "strategy": {
     "endTable": {
-      "game": "Éles játszma",
       "lost": "Vereség",
       "reminder": "Ne feledkezzetek meg a váltóról sem!",
-      "result": "Eredmény",
       "title": "A stratégiás játék eredménye",
       "unfinished": "Befejezetlen: lejárt közben az idő",
       "won": "Győzelem"
