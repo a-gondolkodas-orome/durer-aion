@@ -273,9 +273,8 @@ function Numbered(props: { n: number | null, children: ReactNode }) {
 }
 
 /**
- * The latest live strategy games, in the order played, as the strip during the
- * game shows them, each numbered above: earlier ones are counted behind a …
- * marker, and with `points` a match that scored has the two wins that earned
+ * The latest live strategy games, in the order played, as a row of squares
+ * each numbered above: earlier ones are counted behind a … marker, and with `points` a match that scored has the two wins that earned
  * them grouped with the points.
  */
 export function StrategyGamesTable(props: { results: LiveGameResult[], points?: number }) {
