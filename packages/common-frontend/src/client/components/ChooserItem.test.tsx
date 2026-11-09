@@ -35,8 +35,9 @@ test('a finished round shows its results and when it was filled in, and no butto
   render(<ChooserItem type="relay" status={{
     state: 'FINISHED',
     score: 4,
-    startAt: '2026-11-09T12:56:00Z',
-    endAt: '2026-11-09T13:56:00Z',
+    matchID: 'm',
+    startAt: new Date('2026-11-09T12:56:00Z'),
+    endAt: new Date('2026-11-09T13:56:00Z'),
     relayResults: [{ points: 4, maxPoints: 4, trySeconds: [90] }],
   }} />);
 
