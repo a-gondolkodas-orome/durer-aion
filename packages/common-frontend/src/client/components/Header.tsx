@@ -12,8 +12,10 @@ import { LanguageDropdown } from './Langswitcher';
 // titles[2] is an optional, already-translated text shown instead of the team name
 /// `languageSwitcher` is for the sites that are meant to be read in either
 /// language; the competition round and its admin pages are Hungarian only.
+/// `compact` is for the game pages, where the height goes to the game.
 export function Header(props: {
   teamName: string | null,
+  compact?: boolean,
   languageSwitcher?: boolean,
   titles?: string[],
   homeAddress?: string,
@@ -41,7 +43,7 @@ export function Header(props: {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       width: '100%',
-      height: 102,
+      height: props.compact ? 56 : 102,
     }}>
       {/* `maxWidth={false}`, as for the page's own Container in `Main`: otherwise
           MUI's 1280px lg width overrides the 1200px below. The padding is
@@ -59,12 +61,12 @@ export function Header(props: {
         alignItems: 'center'
       }}>
         <Stack sx={{
-          fontSize: {
+          fontSize: props.compact ? { xs: 20, md: 26 } : {
             xs: 25,
             md: 40
           },
           fontWeight: 'bold',
-          paddingTop: '20px',
+          paddingTop: props.compact ? 0 : '20px',
           whiteSpace: 'nowrap',
           cursor: props.homeAddress ? 'pointer' : 'default',
         }} onClick={() => {
@@ -81,7 +83,7 @@ export function Header(props: {
             },
             width: '100%',
             flex: 1,
-            paddingTop: '40px',
+            paddingTop: props.compact ? 0 : '40px',
             alignItems: 'center',
             overflow: 'hidden',
             paddingLeft: '10px',
@@ -93,14 +95,14 @@ export function Header(props: {
                   flex: 1
                 }}></Stack>
                 <Stack sx={{
-                  fontSize: 25,
+                  fontSize: props.compact ? 18 : 25,
                   display: 'block',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}>{props.titles?.[2] ?? props.teamName}</Stack>
                 <Stack onClick={onLogout} sx={{
-                  fontSize: 20,
+                  fontSize: props.compact ? 16 : 20,
                   margin: '0px 15px',
                   cursor: 'pointer',
                   "&:hover": {
@@ -129,9 +131,9 @@ export function Header(props: {
           fontSize: '35px'
         }} /></Stack>}
         <Stack sx={{
-          fontSize: 30,
+          fontSize: props.compact ? 20 : 30,
           fontWeight: 'bold',
-          paddingTop: '30px',
+          paddingTop: props.compact ? 0 : '30px',
           display: {
             xs: 'none',
             md: 'flex'
