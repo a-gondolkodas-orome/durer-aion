@@ -80,7 +80,6 @@ export function Chooser(props: {
         <ChooserItem
           status={props.state.relayMatch}
           type="relay"
-          hideDesc={finished}
         />
         <Stack sx={{
           width: "20px",
@@ -89,7 +88,6 @@ export function Chooser(props: {
         <ChooserItem
           status={props.state.strategyMatch}
           type="strategy"
-          hideDesc={finished}
         />
       </Stack>
     </Stack>

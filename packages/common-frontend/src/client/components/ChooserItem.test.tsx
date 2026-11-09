@@ -19,7 +19,7 @@ vi.mock('../hooks/user-hooks', () => ({
 test('sends one start for a double click, and enables Start again once it answered', async () => {
   let answer: () => void = () => undefined;
   startRelay.mockImplementation(() => new Promise<void>(resolve => { answer = resolve; }));
-  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} hideDesc />);
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} />);
   const start = screen.getByRole('button', { name: 'chooser.start' });
 
   fireEvent.click(start);
@@ -29,4 +29,20 @@ test('sends one start for a double click, and enables Start again once it answer
   expect(start).toBeDisabled();
   await act(async () => answer());
   expect(start).toBeEnabled();
+});
+
+test('a finished round shows its results and when it was filled in, and no button', () => {
+  render(<ChooserItem type="relay" status={{
+    state: 'FINISHED',
+    score: 4,
+    matchID: 'm',
+    startAt: new Date('2026-11-09T12:56:00Z'),
+    endAt: new Date('2026-11-09T13:56:00Z'),
+    relayResults: [{ points: 4, maxPoints: 4, trySeconds: [90] }],
+  }} />);
+
+  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  expect(screen.getByText(/chooser\.filledAt/)).toBeInTheDocument();
+  // The detailed table: the time row too.
+  expect(screen.getAllByText('relay.endTable.time').length).toBeGreaterThan(0);
 });
