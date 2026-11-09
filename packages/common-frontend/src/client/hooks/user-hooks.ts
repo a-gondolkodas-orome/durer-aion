@@ -116,23 +116,33 @@ export const useToHome = () => {
 };
 
 /**
- * A finished match's way back: home, then a reload, or `instead` of the reload
- * (the relay practice site logs out to its round selector). The handler is
+ * A finished match's way back: home, then `then` (the relay practice site logs
+ * out to its round selector). No reload: the new team state alone takes `Main`
+ * to the Chooser and unmounts the game client (#112). The handler is
  * synchronous because React ignores what an event handler returns, so an async
  * one would leave its promise unhandled.
  */
-export const useBackToHome = (instead?: () => Promise<void>) => {
-  const refreshState = useRefreshTeamState();
+// Module state, not a ref: the end dialog's onClose and its card's button each
+// hold their own useBackToHome, and either may fire while the other's way home
+// is still under way.
+let goingHome = false;
+
+export const useBackToHome = (then?: () => Promise<void>) => {
   const toHome = useToHome();
-  return () => void (async () => {
-    await refreshState();
-    await toHome();
-    if (instead) {
-      await instead();
-    } else {
-      window.location.reload();
+  return () => {
+    if (goingHome) {
+      return;
     }
-  })();
+    goingHome = true;
+    void (async () => {
+      try {
+        await toHome();
+        await then?.();
+      } finally {
+        goingHome = false;
+      }
+    })();
+  };
 };
 
 export const useStartStrategy = () => {
