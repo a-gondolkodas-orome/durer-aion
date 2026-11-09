@@ -38,7 +38,7 @@ function setStartingPosition({ G, playerID, events }: MoveContext, startingPosit
   Object.assign(G, startingPosition);
 };
 
-const lengthOfCompetition = 30 * 60; // seconds
+export const STRATEGY_DEFAULT_DURATION_MINUTES = 30;
 
 /// How long past its end a match stays open, in milliseconds, so that a team
 /// clicking as the clock hits zero does not lose the move to the round trip.
@@ -81,15 +81,21 @@ export interface StrategyReport<T_SpecificGameState> {
   ctx: Ctx;
 }
 
+export interface StrategyOptions {
+  durationMinutes?: number;
+}
+
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>,
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
+                                                 { durationMinutes = STRATEGY_DEFAULT_DURATION_MINUTES }: StrategyOptions = {},
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
+  const durationMs = durationMinutes * 60 * 1000;
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
     setup: () => ({
       ...game.setup(),
-      millisecondsRemaining: 1000 * lengthOfCompetition,
+      millisecondsRemaining: durationMs,
       start: new Date().toISOString(),
-      end: new Date(Date.now() + 1000 * lengthOfCompetition).toISOString(),
+      end: new Date(Date.now() + durationMs).toISOString(),
       firstPlayer: null,
       difficulty: null,
       winner: null,

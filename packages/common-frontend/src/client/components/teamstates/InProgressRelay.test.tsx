@@ -9,13 +9,16 @@ import { MockClientRepository } from '../../mock-client-repository';
 import type { ClientRepository } from '../../api-repository-interface';
 import { InProgressRelay } from './InProgressRelay';
 
+const i18n = vi.hoisted(() => ({ language: 'hu' }));
+
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n }),
   Trans: (props: { i18nKey: string }) => props.i18nKey,
 }));
 
 afterEach(() => {
   vi.restoreAllMocks();
+  i18n.language = 'hu';
 });
 
 // Five seconds past the end opens the end dialog; the game ends a relay only
@@ -34,12 +37,12 @@ const G: MyGameState = {
   millisecondsRemaining: -6000,
   start: '2026-10-10T10:00:00Z',
   end: '2026-10-10T11:00:00Z',
-  url: '',
+  imageUrl: '',
 };
 
 // Relay practice's board: its way out logs out to the round selector, where
 // the dry run's goes home to the Chooser.
-async function renderBoard(ctx: Partial<Ctx>) {
+async function renderBoard(ctx: Partial<Ctx>, state: MyGameState = G) {
   const repo: ClientRepository = new MockClientRepository();
   // A team in the middle of a relay match.
   await repo.joinWithCode('2');
@@ -47,7 +50,7 @@ async function renderBoard(ctx: Partial<Ctx>) {
   const keepRelayEnd = vi.fn();
   repo.keepRelayEnd = keepRelayEnd;
   const moves = { getTime: vi.fn(), startGame: vi.fn(), submitAnswer: vi.fn() };
-  const props = { G, ctx: { currentPlayer: GUESSER_PLAYER, ...ctx }, moves } as unknown as Parameters<typeof InProgressRelay>[0];
+  const props = { G: state, ctx: { currentPlayer: GUESSER_PLAYER, ...ctx }, moves } as unknown as Parameters<typeof InProgressRelay>[0];
   render(<ClientRepoProvider value={repo}><InProgressRelay {...props} selectRoundOnEnd/></ClientRepoProvider>);
   return keepRelayEnd;
 }
@@ -71,4 +74,22 @@ test('a relay the game ended reported its end itself', async () => {
 
   expect(screen.getByRole('dialog')).toBeInTheDocument();
   expect(keepRelayEnd).not.toHaveBeenCalled();
+});
+
+// A team can switch language mid-match, so the state holds every language the
+// problem has, and the board picks the page's, field by field.
+test('the board shows the problem in the page language, and an image from another one', async () => {
+  i18n.language = 'en';
+  const state = {
+    ...G,
+    millisecondsRemaining: 60 * 60 * 1000,
+    end: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    problemText: { hu: 'második feladat', en: 'second problem' },
+    imageUrl: { hu: 'https://example.com/abra.png' },
+  };
+  await renderBoard({}, state);
+
+  expect(document.body).toHaveTextContent('second problem');
+  expect(document.body).not.toHaveTextContent('második feladat');
+  expect(screen.getByRole('img', { name: 'relay.taskImage' })).toHaveAttribute('src', 'https://example.com/abra.png');
 });

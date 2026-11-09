@@ -45,8 +45,8 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
    `router.ts` and `team_manage.ts`:
    - `allowedToStart` — one attempt at each kind of match, never both at once,
      never from the disclaimer;
-   - `getNewGame` picks the game by the team's category (`relayNames`,
-     `strategyNames`);
+   - `getNewGame` picks the game by the team's category (`relayNames`, and
+     `strategyNames` through `strategyGameOfCategory`);
    - `createGame` creates an unlisted match under a fresh id;
    - `injectPlayer` seats the team as `'0'`, named by its `teamId` and holding
      its `credentials`, and `injectBot` seats the bot as `'1'`;

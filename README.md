@@ -447,6 +447,9 @@ that before a competition.
    `packages/game/src/games/strategy/`, one per package entry:
    `strategy-games.ts` (the game definition and its name — the `game` entry),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
+   Each is keyed by the game id a competition names (`StrategyConfig.gameId`),
+   one per game and variant, e.g. `20o-c`; `strategyGames` lists the ids and
+   the languages each one's board and description exist in.
    The server's `games.ts`, which lists each game beside its bot, imports `game`
    and `game/bot`; the live client `game` and `game/client`; the offline dry run
    all three.
@@ -456,8 +459,8 @@ game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and
 `gameWrapper` (`gamewrapper.ts`) adds everything the files below do not mention:
 the clock, the test/live choice, choosing who starts, tries and score.
 
-- **`game.ts`** exports `MyGameWrapper(category)`, returning
-  - `name`, equal to the category's entry in `strategyNames`
+- **`game.ts`** exports `MyGameWrapper(variant)`, returning
+  - `name`, equal to the game id's entry in `strategyNames`
     (`strategy-games.ts`); the server and the clients use that entry, so
     nothing catches a mismatch
   - `setup`, the game's own half of `G` only
@@ -470,7 +473,7 @@ the clock, the test/live choice, choosing who starts, tries and score.
 
   A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
   a "pick two values, then commit" turn.
-- **`strategy.ts`** exports `strategyWrapper(category)`, returning
+- **`strategy.ts`** exports `strategyWrapper(variant)`, returning
   `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
   with `startingPositionMove(position)` — the bot is the only source of the
   opening position, which may name the game's own keys only. `[undefined, moveName]`
@@ -479,8 +482,10 @@ the clock, the test/live choice, choosing who starts, tries and score.
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`
   (`packages/common-frontend/src/common/boardwrapper.tsx`).
-- **`main.tsx`** exports `description<Category>`, the rules text shown above the
-  board, one per category the game is played in.
+- **`main.tsx`** exports the rules text shown above the board, which
+  `strategyDescriptions` registers per game id: one element for every
+  language, or `{ hu, en }` for a game in both, of which the board shows the
+  page's.
 
 A relay is not a new game but a problem list: `Problem[]` per category in
 `packages/relay-bot/src/games/relay/strategy.ts` for the competition, and per

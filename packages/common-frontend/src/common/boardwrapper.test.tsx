@@ -11,15 +11,21 @@ import { MockTeamState } from '../client/hooks/mock-user-hooks';
 import { boardWrapper } from './boardwrapper';
 import type { StrategyBoardProps } from './boardwrapper';
 
+const i18n = vi.hoisted(() => ({ language: 'hu' }));
+
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n }),
 }));
 vi.mock('../client/hooks/user-hooks', () => MockTeamState.mockHook);
 
-const Board = boardWrapper<object>(() => <div />, null);
+afterEach(() => {
+  i18n.language = 'hu';
+});
+
+const DefaultBoard = boardWrapper<object>(() => <div />, {});
 
 /// Only the fields the wrapper reads; boardgame.io hands a board plenty more.
-function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
+function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}, Board = DefaultBoard) {
   const G: GameStateMixin = {
     millisecondsRemaining: 10 * 60 * 1000,
     start: new Date().toISOString(),
@@ -91,5 +97,29 @@ describe('the strategy board on the judge\'s turn', () => {
 
     expect(screen.getByText('strategy.guide.yourTurn')).toBeInTheDocument();
     expect(screen.queryByText('strategy.guide.waitingForServer')).not.toBeInTheDocument();
+  });
+});
+
+describe('the strategy board\'s description', () => {
+  test('is the one given, whatever the page language, when it is given once', () => {
+    i18n.language = 'en';
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, <p>egyetlen szabály</p>));
+
+    expect(screen.getByText('egyetlen szabály')).toBeInTheDocument();
+  });
+
+  test('is in the page language', () => {
+    i18n.language = 'en';
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { hu: 'magyar szabály', en: 'English rule' }));
+
+    expect(screen.getByText('English rule')).toBeInTheDocument();
+    expect(screen.queryByText('magyar szabály')).not.toBeInTheDocument();
+  });
+
+  test('is in another language where the game has none in the page\'s', () => {
+    i18n.language = 'en';
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { hu: 'magyar szabály' }));
+
+    expect(screen.getByText('magyar szabály')).toBeInTheDocument();
   });
 });

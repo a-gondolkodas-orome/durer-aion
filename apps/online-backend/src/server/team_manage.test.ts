@@ -1,6 +1,6 @@
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
-import { AnyBgioGame, strategyNames } from "game";
+import { AnyBgioGame, strategyGameOfCategory, strategyNames } from "game";
 import { Server } from "boardgame.io";
 import { allowedToStart, createGame, getNewGame } from "./team_manage";
 import type { TeamMatches } from "./match_status";
@@ -80,11 +80,12 @@ describe("allowedToStart", () => {
 
 describe("getNewGame", () => {
   it("finds the game registered for the team's category", async () => {
-    const games = [bgioGame({ name: strategyNames.D })];
+    const name = strategyNames[strategyGameOfCategory.D];
+    const games = [bgioGame({ name })];
 
     const { game } = await getNewGame(appCtx({ db: {} }), games, "STRATEGY", team({ category: "D" }));
 
-    expect(game.name).toBe(strategyNames.D);
+    expect(game.name).toBe(name);
   });
 });
 

@@ -1,5 +1,5 @@
 import {
-  CompetitionConfig, editionSchoolYear, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
+  CompetitionConfig, editionSchoolYear, inLanguage, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
 } from './competition';
 import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
 
@@ -237,6 +237,26 @@ describe('localizeLabel', () => {
   it('falls back to another language where the reader\'s is missing', () => {
     expect(localizeLabel({ hu: 'Nemzetközi', en: 'International' }, 'en')).toBe('International');
     expect(localizeLabel({ hu: 'Nemzetközi' }, 'en')).toBe('Nemzetközi');
+  });
+});
+
+describe('inLanguage', () => {
+  it('takes a plain value as the same in every language', () => {
+    expect(inLanguage('csak magyarul', 'en')).toBe('csak magyarul');
+    expect(inLanguage('', 'en')).toBe('');
+  });
+
+  it('picks from a per-language value, falling back to another language', () => {
+    expect(inLanguage({ hu: 'magyar', en: 'English' }, 'en')).toBe('English');
+    expect(inLanguage({ hu: 'magyar' }, 'en')).toBe('magyar');
+    expect(inLanguage({}, 'en')).toBeUndefined();
+  });
+
+  // A board's rules text is a React element, which is an object too.
+  it('takes an object keyed by anything but languages as a plain value', () => {
+    const element = { $$typeof: Symbol.for('react.transitional.element'), type: 'p', props: {} };
+    expect(inLanguage(element, 'en')).toBe(element);
+    expect(inLanguage(['a', 'b'], 'en')).toStrictEqual(['a', 'b']);
   });
 });
 

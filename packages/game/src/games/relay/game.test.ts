@@ -159,3 +159,22 @@ describe("relayProblemResults", () => {
     ]);
   });
 });
+
+describe("RelayWrapper duration", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test.each([
+    [undefined, 60],
+    [45, 45],
+  ])("a relay given %s minutes ends %s minutes after it starts", (durationMinutes, expectedMinutes) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-10T10:00:00Z"));
+    const client = Client({ game: RelayWrapper(undefined, { durationMinutes }), numPlayers: 2 });
+
+    const G = client.getState()?.G;
+    expect(G?.millisecondsRemaining).toStrictEqual(expectedMinutes * 60 * 1000);
+    expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toStrictEqual(expectedMinutes * 60 * 1000);
+  });
+});
