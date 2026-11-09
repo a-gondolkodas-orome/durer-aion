@@ -260,7 +260,10 @@ describe('during a game', () => {
     renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER });
 
     expect(screen.queryByTestId('botThinking')).not.toBeInTheDocument();
-    expect(await screen.findByTestId('botThinking')).toBeInTheDocument();
+    // Not during the bot's own 400 ms pause, which every move takes.
+    await new Promise(resolve => setTimeout(resolve, 500));
+    expect(screen.queryByTestId('botThinking')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('botThinking', {}, { timeout: 2500 })).toBeInTheDocument();
   });
 
   // A status element inserted already filled is often not announced, so the

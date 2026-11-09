@@ -447,13 +447,16 @@ function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
   );
 }
 
-/// The bot mostly answers within a state update or two, so the spinner waits
-/// a moment before it shows: shown at once, it would flash on every move; it
-/// is there for a server that is slow to answer.
+/// The bot pauses on purpose before each move (400 ms, botwrapper.ts in both
+/// apps), and "A gép lép…" already says it is its turn. The spinner is for a
+/// server slow to answer, so it waits well past that pause: shown any sooner,
+/// it would flash briefly on every one of the bot's moves.
+const BOT_SLOW_MS = 1500;
+
 function BotThinking() {
   const [slow, setSlow] = useState(false);
   useEffect(() => {
-    const timer = setTimeout(() => setSlow(true), 300);
+    const timer = setTimeout(() => setSlow(true), BOT_SLOW_MS);
     return () => clearTimeout(timer);
   }, []);
   return <Box sx={{ width: '22px', height: '22px', display: 'flex' }}>
