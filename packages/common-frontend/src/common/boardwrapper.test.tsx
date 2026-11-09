@@ -274,6 +274,16 @@ describe('during a game', () => {
     expect(screen.getByText('strategy.mode.practice')).toBeInTheDocument();
   });
 
+  test('leaves no empty slots in the strip once the time ran out', () => {
+    renderBoard(betweenGames, { winner: JUDGE_PLAYER, liveResults: ['lost'], numberOfLoss: 1, millisecondsRemaining: -6000 });
+
+    const series = screen.getAllByRole('group', { name: 'strategy.series.label', hidden: true })
+      .find(group => group.closest('[role="dialog"]') === null) as HTMLElement;
+    expect(within(series).getByRole('img', { name: 'strategy.series.lost', hidden: true })).toBeInTheDocument();
+    expect(within(series).queryByRole('img', { name: 'strategy.series.next', hidden: true })).not.toBeInTheDocument();
+    expect(within(series).queryByText('strategy.series.total')).not.toBeInTheDocument();
+  });
+
   test('locks the board and offers nothing once the time ran out', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { millisecondsRemaining: -6000 });
 

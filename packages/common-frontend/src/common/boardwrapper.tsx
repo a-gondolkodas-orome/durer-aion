@@ -249,7 +249,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
           }}>
             <Box sx={{ fontSize: '18px', fontWeight: 700 }}>{t('strategy.name')}</Box>
             <Box sx={{ order: { xs: 2, md: 0 }, width: { xs: '100%', md: 'auto' } }}>
-              <Series G={G} />
+              <Series G={G} ended={finished} />
             </Box>
             <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '14px' }}>
               <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: 600 }}>
@@ -324,12 +324,15 @@ const SHOWN_BEFORE_RUN = 2;
 /// Each played game is a ✓, ✗ or –; the run that counts, the wins since the
 /// last loss and the games it still needs, is grouped with its points. That
 /// is the one place the streak and the stake are shown.
-function Series(props: { G: GameStateMixin }) {
+function Series(props: { G: GameStateMixin, ended: boolean }) {
   const { t } = useTranslation();
   const { G } = props;
   const results = G.liveResults;
   const streak = Math.min(G.winningStreak, 2);
-  const runStart = Math.max(0, results.length - streak);
+  // A match over without two wins in a row has no run left to finish: only
+  // the games played show, with no empty slots and nothing at stake.
+  const open = !props.ended || streak >= 2;
+  const runStart = open ? Math.max(0, results.length - streak) : results.length;
   const hidden = Math.max(0, runStart - SHOWN_BEFORE_RUN);
   const points = streak >= 2 ? G.points : strategyPoints(G.numberOfLoss);
   const played = (result: LiveGameResult, i: number) => <SeriesCell key={i} kind={result} n={i + 1} />;
@@ -342,10 +345,10 @@ function Series(props: { G: GameStateMixin }) {
       {hidden > 0 && <Box title={t('strategy.series.earlier', { count: hidden })} aria-label={t('strategy.series.earlier', { count: hidden })}
         role="img" sx={{ fontSize: '14px', fontWeight: 700, color: MUTED, padding: '0 4px' }}>…</Box>}
       {results.slice(hidden, runStart).map((result, i) => played(result, hidden + i))}
-      <LiveGameRun points={t('strategy.series.total', { points: pointsText(t, points) })}>
+      {open && <LiveGameRun points={t('strategy.series.total', { points: pointsText(t, points) })}>
         {results.slice(runStart).map((result, i) => played(result, runStart + i))}
         {Array.from({ length: 2 - streak }, (_, k) => <SeriesCell key={`next${k}`} kind="next" n={results.length + k + 1} />)}
-      </LiveGameRun>
+      </LiveGameRun>}
       {/* The cells and the grouped run read only once explained. */}
       <Tooltip title={<Box sx={{ fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>{t('strategy.series.help')}</Box>}
         enterTouchDelay={0} leaveTouchDelay={10000} arrow>
