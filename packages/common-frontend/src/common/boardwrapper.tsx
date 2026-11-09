@@ -194,15 +194,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
       sub = practice ? t('strategy.result.practiceNote')
         : lastResult === 'won' && G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '';
       actions = nextGame;
+      infoBeside = true;
       // Before the first live game the team is about to choose one, so how it
-      // may differ from practice comes once, next to its button: after a win,
-      // that the practice computer may not have played its best; after a
+      // may differ from practice comes once more, under its button: after a
+      // win, that the practice computer may not have played its best; after a
       // loss that would read oddly, so only a varying start is worth saying.
-      // Otherwise, as anywhere else, it is behind the ⓘ.
       if (practice && G.numberOfTries === 0 && (lastResult === 'won' || startVaries)) {
         callout = <LiveHint after={lastResult} startVaries={startVaries} />;
-      } else {
-        infoBeside = true;
       }
     } else if (ctx.phase === 'chooseRole') {
       status = t('strategy.status.role');
