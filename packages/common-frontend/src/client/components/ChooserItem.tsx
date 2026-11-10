@@ -1,10 +1,8 @@
 import { Box, Button, IconButton, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import type { ReactNode } from 'react';
-import { Stack, alpha } from '@mui/system';
+import { Stack } from '@mui/system';
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
-import ExtensionOutlined from '@mui/icons-material/ExtensionOutlined';
-import FormatListNumberedRounded from '@mui/icons-material/FormatListNumberedRounded';
 import { MatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
@@ -59,19 +57,6 @@ export function ChooserItem(props: {
           return !prev
         })
       }}>
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          width: 44,
-          height: 44,
-          borderRadius: cardTokens(theme).controlRadius,
-          backgroundColor: alpha(theme.palette.primary.main, 0.12),
-          color: theme.palette.primary.main,
-        }}>
-          {props.type === 'relay' ? <FormatListNumberedRounded /> : <ExtensionOutlined />}
-        </Box>
         <Box sx={{ flex: 1, fontWeight: 700, fontSize: 22, lineHeight: 1.2 }}>
           {props.type === 'relay' ? t('relay.name') : t('strategy.name')}
         </Box>

@@ -5,7 +5,7 @@ import { alpha, Theme } from '@mui/material/styles';
 export interface CardTokens {
   /// The card's own corners.
   radius: string,
-  /// The corners of what sits on a card: its buttons, fields and icon tiles.
+  /// The corners of what sits on a card: its buttons and fields.
   controlRadius: string,
   shadow: string,
   /// A card's running text, a step softer than its headings.
