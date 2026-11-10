@@ -175,6 +175,7 @@
       "afterLoss": "győzelem, vereség, győzelem, győzelem",
       "cleanRun": "győzelem, győzelem",
       "examples": "Például:",
+      "label": "Pontozás",
       "outcomeAfterLosses_one": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
       "outcomeAfterLosses_other": "Ti {{count}} éles vereség után nyertetek kétszer egymás után: {{points}}.",
       "outcomeClean": "Ti vereség nélkül nyertetek kétszer egymás után: {{points}}.",

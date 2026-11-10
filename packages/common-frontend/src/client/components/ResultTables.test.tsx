@@ -2,7 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { LiveGameResult } from 'schemas';
-import { RelayProgressTable, RelayResultsTable, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
+import { RelayProgressTable, RelayResultsTable, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -100,22 +100,25 @@ test("the strategy points are told in words, with two example runs", () => {
 });
 
 // After the match the examples meant nothing next to the team's own result:
-// the rule is shown on its run instead.
+// the team's own case is told, the rule behind an ⓘ.
 test("after the match the strategy points are explained on the team's own run", () => {
-  render(<StrategyPointsRule results={['won', 'lost', 'won', 'won']} points={9}/>);
+  render(<StrategyOutcome results={['won', 'lost', 'won', 'won']} points={9}/>);
 
   expect(screen.getByText('strategy.points.outcomeAfterLosses')).toBeInTheDocument();
   expect(screen.queryByText('strategy.points.examples')).not.toBeInTheDocument();
+  // The rule itself is behind the ⓘ.
+  expect(screen.queryByText('strategy.points.text')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'strategy.points.label' })).toBeInTheDocument();
 });
 
 test("a match without two wins in a row says why it scored nothing", () => {
-  render(<StrategyPointsRule results={['lost', 'unfinished']} points={0}/>);
+  render(<StrategyOutcome results={['lost', 'unfinished']} points={0}/>);
 
   expect(screen.getByText('strategy.points.outcomeNone')).toBeInTheDocument();
 });
 
 test("a match without a live game says so", () => {
-  render(<StrategyPointsRule results={[]} points={0}/>);
+  render(<StrategyOutcome results={[]} points={0}/>);
 
   expect(screen.getByText('strategy.points.outcomeNoGames')).toBeInTheDocument();
 });

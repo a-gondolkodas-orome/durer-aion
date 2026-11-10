@@ -1,5 +1,4 @@
-import { Box, Button, IconButton, Tooltip } from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { Box, Button } from '@mui/material';
 import type { ReactNode } from 'react';
 import { Stack, alpha } from '@mui/system';
 import { MatchStatus } from '../dto/TeamStateDto';
@@ -11,7 +10,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
-import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
+import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
+import { InfoTip } from './InfoTip';
 import { relayMaxPoints } from './relay-results';
 
 /**
@@ -89,9 +89,7 @@ export function ChooserItem(props: {
               <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>
               {finished.strategyResults && <>
                 <StrategyGamesTable results={finished.strategyResults} points={finished.score}/>
-                <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
-                  <StrategyPointsRule results={finished.strategyResults} points={finished.score}/>
-                </Box>
+                <StrategyOutcome results={finished.strategyResults} points={finished.score}/>
               </>}
             </>}
           <Stack sx={{ fontSize: '13px', color: '#666', textAlign: 'center' }}>
@@ -189,18 +187,5 @@ function StrategyDescription() {
         <li>{t('chooser.strategy.noAbandon')}</li>
       </ul>
     </Description>
-  );
-}
-
-/// Details behind an ⓘ. A tap opens it on a phone, and keeps it open long
-/// enough to read.
-function InfoTip(props: { label: string, children: ReactNode }) {
-  return (
-    <Tooltip arrow enterTouchDelay={0} leaveTouchDelay={10000}
-      title={<Box sx={{ fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>{props.children}</Box>}>
-      <IconButton size="small" aria-label={props.label} sx={{ padding: '2px', marginLeft: '4px', verticalAlign: '-4px', color: '#57606a' }}>
-        <InfoOutlinedIcon sx={{ fontSize: '18px' }} />
-      </IconButton>
-    </Tooltip>
   );
 }

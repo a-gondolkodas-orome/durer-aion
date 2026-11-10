@@ -179,6 +179,7 @@
       "afterLoss": "win, loss, win, win",
       "cleanRun": "win, win",
       "examples": "For example:",
+      "label": "Points",
       "outcomeAfterLosses_one": "You won twice in a row after {{count}} live loss: {{points}}.",
       "outcomeAfterLosses_other": "You won twice in a row after {{count}} live losses: {{points}}.",
       "outcomeClean": "You won twice in a row with no loss: {{points}}.",
