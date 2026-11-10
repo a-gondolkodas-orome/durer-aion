@@ -46,3 +46,37 @@ test('a finished round shows its results and when it was filled in, and no butto
   // The detailed table: the time row too.
   expect(screen.getAllByText('relay.endTable.time').length).toBeGreaterThan(0);
 });
+
+// Before the clock runs, each point is a line, its details behind an ⓘ.
+test('explains the strategy game in short lines, with the details behind an ⓘ each', () => {
+  render(<ChooserItem type="strategy" status={{ state: 'NOT STARTED' }} />);
+
+  expect(screen.getByText('chooser.strategy.intro')).toBeInTheDocument();
+  for (const label of ['chooser.strategy.pointsLabel', 'chooser.strategy.practiceLabel', 'chooser.strategy.timeLabel']) {
+    expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+  }
+  expect(screen.getByText('chooser.strategy.noAbandon')).toBeInTheDocument();
+});
+
+test('explains the relay the same way', () => {
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} />);
+
+  expect(screen.getByText('chooser.relay.intro')).toBeInTheDocument();
+  for (const label of ['chooser.relay.pointsLabel', 'chooser.relay.triesLabel']) {
+    expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+  }
+  expect(screen.getByText('chooser.relay.noReturn')).toBeInTheDocument();
+});
+
+// The button's click bubbles to the row, which does the toggling: a handler on
+// the button as well would fold and unfold in one click.
+test('the fold button folds the description once per click', () => {
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} />);
+  const fold = screen.getByRole('button', { name: 'relay.name' });
+
+  expect(fold).toHaveAttribute('aria-expanded', 'true');
+  fireEvent.click(fold);
+  expect(fold).toHaveAttribute('aria-expanded', 'false');
+  fireEvent.click(fold);
+  expect(fold).toHaveAttribute('aria-expanded', 'true');
+});

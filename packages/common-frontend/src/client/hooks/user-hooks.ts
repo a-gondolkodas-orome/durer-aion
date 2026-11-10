@@ -1,7 +1,9 @@
 import { UserModel } from "./user-model";
-import { setTeamState, useTeamStateValue } from "./team-state-store";
+import { currentTeamState, setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
+import { useSnackbar } from "notistack";
+import i18next from "i18next";
 import { useAdminRepo, useClientRepo } from "../client-repo-context";
 
 export const useTeamState = (): TeamModelDto | null => {
@@ -95,25 +97,50 @@ export const useLogout = () => {
   };
 };
 
-export const useStartRelay = () => {
+// Where the team stands, as far as a refused request could have moved it: the
+// page, and whether each match has started or ended.
+const stage = (team: TeamModelDto | null) =>
+  team && [team.pageState, team.relayMatch.state, team.strategyMatch.state].join();
+
+/**
+ * Sends a request that changes the team's page, then shows the team's state as
+ * it now stands — refused or not, and never by reloading the page (#112). A
+ * refusal is often its own answer: another device started the match first, or
+ * the session ended, and the fetched state shows that. Only a refusal that
+ * leaves the team where it was, or a fetch that fails as well, is reported, and
+ * then the page stays as it is, for the team to try again.
+ */
+const useRequestThenRefetch = (request: (userModel: UserModel) => Promise<void>) => {
   const repo = useClientRepo();
+  const { enqueueSnackbar } = useSnackbar();
   return async () => {
     const userModel = new UserModel(repo);
-    await userModel.startRelay()
-    const state = await userModel.getTeamState();
+    const before = stage(currentTeamState());
+    let refused = false;
+    try {
+      await request(userModel);
+    } catch {
+      // Why it was refused is nothing the team can act on; where it left them,
+      // fetched next, is.
+      refused = true;
+    }
+    let state: TeamModelDto | null;
+    try {
+      state = await userModel.getTeamState();
+    } catch {
+      enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error' });
+      return;
+    }
     setTeamState(state);
+    if (refused && stage(state) === before) {
+      enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error' });
+    }
   };
 };
 
-export const useToHome = () => {
-  const repo = useClientRepo();
-  return async () => {
-    const userModel = new UserModel(repo);
-    await userModel.toHome()
-    const state = await userModel.getTeamState();
-    setTeamState(state);
-  };
-};
+export const useStartRelay = () => useRequestThenRefetch(userModel => userModel.startRelay());
+
+export const useToHome = () => useRequestThenRefetch(userModel => userModel.toHome());
 
 /**
  * A finished match's way back: home, then `then` (the relay practice site logs
@@ -145,15 +172,7 @@ export const useBackToHome = (then?: () => Promise<void>) => {
   };
 };
 
-export const useStartStrategy = () => {
-  const repo = useClientRepo();
-  return async () => {
-    const userModel = new UserModel(repo);
-    await userModel.starStrategy()
-    const state = await userModel.getTeamState();
-    setTeamState(state);
-  };
-};
+export const useStartStrategy = () => useRequestThenRefetch(userModel => userModel.starStrategy());
 
 export const useImportTeams = () => {
   const repo = useAdminRepo();

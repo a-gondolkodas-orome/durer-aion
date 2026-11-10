@@ -28,6 +28,9 @@ const subscribe = (listener: () => void) => {
 // would loop forever.
 const getSnapshot = () => teamState;
 
+/// The current value outside React, for a handler comparing it with a fresh one.
+export const currentTeamState = getSnapshot;
+
 export const setTeamState = (next: TeamModelDto | null) => {
   if (Object.is(next, teamState)) return;
   teamState = next;

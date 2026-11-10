@@ -1,15 +1,7 @@
 import type { ClientRepository } from "../api-repository-interface";
 import type { TeamModelDto } from "../dto/TeamStateDto";
-import { bgioStoragePrefix, loginMarkerStorageKey, relayPointsStorageKey, relayResultsStorageKey, strategyPointsStorageKey, strategyResultsStorageKey, teamStateStorageKey } from "../utils/storage-keys";
-
-function removeGameStateLocalStorage() {
-  // Collect first, remove after: removeItem inside a key(idx) loop shifts the
-  // remaining keys down, so every key right after a removed one is skipped.
-  const keys = [...Array(localStorage.length).keys()]
-    .map(idx => localStorage.key(idx))
-    .filter((key): key is string => key !== null && key.startsWith(bgioStoragePrefix()));
-  keys.forEach(key => localStorage.removeItem(key));
-}
+import { loginMarkerStorageKey } from "../utils/storage-keys";
+import { clearStoredSession } from "../utils/stored-session";
 
 export class UserModel {
 
@@ -30,23 +22,11 @@ export class UserModel {
   }
 
   async startRelay(): Promise<void> {
-    try {
-      await this.repo.startRelay();
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.startRelay();
   }
 
   async starStrategy(): Promise<void> {
-    try {
-      await this.repo.startStrategy();
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.startStrategy();
   }
 
   // The saved match goes first, synchronously: it must not survive a logout
@@ -55,12 +35,7 @@ export class UserModel {
   // the other tabs hear, and a key already removed by a failed attempt would
   // fire no `storage` event when the retry succeeds.
   async logout(): Promise<void> {
-    localStorage.removeItem(teamStateStorageKey());
-    localStorage.removeItem(relayPointsStorageKey());
-    localStorage.removeItem(strategyPointsStorageKey());
-    localStorage.removeItem(relayResultsStorageKey());
-    localStorage.removeItem(strategyResultsStorageKey());
-    removeGameStateLocalStorage();
+    clearStoredSession();
     await this.repo.logout();
     localStorage.removeItem(loginMarkerStorageKey());
   }
@@ -71,13 +46,7 @@ export class UserModel {
   }
 
   async toHome(): Promise<void> {
-    try {
-      await this.repo.toHome();
-    }
-    catch (e) {
-      console.log(e);
-      window.location.reload();
-    }
+    await this.repo.toHome();
   }
 
   // Returns the function that removes the listener again.

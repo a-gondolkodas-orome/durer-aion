@@ -1,6 +1,7 @@
 import { Dispatch, PropsWithoutRef, SetStateAction, useEffect, useEffectEvent, useState } from "react";
 import ReportIcon from '@mui/icons-material/Report';
-import { Tooltip } from "@mui/material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { IconButton, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 // The remaining time a board shows: counted down locally by Countdown, and reset
@@ -62,6 +63,22 @@ export function Countdown(
     </code></span>
     {(offset > 5000 || offset < -5000) && <Tooltip title={t('general.warning.timeNotMatch')}><ReportIcon color="warning"/></Tooltip>}</>);
 }
+
+/// The dry run's note that its clock is only the browser's, behind an icon
+/// beside the clock: in full it would take more of the screen than the clock.
+/// A tap keeps it open long enough to read its two sentences.
+export function OfflineClockNote() {
+    const { t } = useTranslation();
+    return <Tooltip title={t('general.warning.timeNotReal')} enterTouchDelay={0} leaveTouchDelay={10000} arrow>
+        <IconButton size="small" color="inherit" aria-label={t('general.warning.timeNotReal')} sx={{ padding: '2px' }}>
+            <InfoOutlinedIcon fontSize="small" />
+        </IconButton>
+    </Tooltip>;
+}
+
+/// What a clock reads once its match is over: the countdown itself would read
+/// XX:XX:XX from ten seconds past the end.
+export const ENDED_CLOCK = <code>00:00:00</code>;
 
 function measureClock(endMs: number, serverRemainingMs: number) {
     return { serverRemainingMs, offset: endMs - new Date().getTime() - serverRemainingMs };

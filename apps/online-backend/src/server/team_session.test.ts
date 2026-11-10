@@ -5,7 +5,7 @@ import Router from "@koa/router";
 import type { Server } from "boardgame.io";
 import type { TeamsRepository } from "./db";
 import type { TeamModel } from "./model";
-import { TEAM_COOKIE, TEAM_COOKIE_PATH, clearTeamCookie, requireTeam, setTeamCookie } from "./team_session";
+import { TEAM_COOKIE, TEAM_COOKIE_MAX_AGE_MS, TEAM_COOKIE_PATH, clearTeamCookie, requireTeam, setTeamCookie } from "./team_session";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 
@@ -39,7 +39,15 @@ describe("setTeamCookie", () => {
     expect(name).toBe(TEAM_COOKIE);
     expect(value).toBe(GUID);
     expect(options).toMatchObject({ httpOnly: true, sameSite: "lax", path: TEAM_COOKIE_PATH });
-    expect(options.maxAge).toBeGreaterThan(0);
+    expect(options.maxAge).toBe(TEAM_COOKIE_MAX_AGE_MS);
+  });
+
+  // Long enough for a team that logs in the evening before the round, short
+  // enough that a shared computer does not hand the team to the next person.
+  it("outlives a night but not a day", () => {
+    const HOUR_MS = 60 * 60 * 1000;
+    expect(TEAM_COOKIE_MAX_AGE_MS).toBeGreaterThanOrEqual(16 * HOUR_MS);
+    expect(TEAM_COOKIE_MAX_AGE_MS).toBeLessThanOrEqual(24 * HOUR_MS);
   });
 
   // Forcing `secure` throws over plain HTTP, and the docker stack is served
@@ -100,7 +108,7 @@ describe("requireTeam", () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  // The week runs from the last request, not from the login: a team that
+  // The day runs from the last request, not from the login: a team that
   // logged in early must not be logged out mid-match.
   it("sets the cookie afresh on every request it admits", async () => {
     const { ctx, set } = fakeCtx(GUID);

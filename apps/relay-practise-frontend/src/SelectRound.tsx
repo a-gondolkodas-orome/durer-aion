@@ -10,105 +10,49 @@ import { useLogin } from 'common-frontend';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useStartRelay } from 'common-frontend';
-import { hasProblemSet } from './practice-sets';
+import { editionSchoolYear, isLanguage } from 'schemas';
+import type { Round } from 'schemas';
+import { practiceSets } from './practice-sets';
+import { categoryOptionLabel, menuCategories, menuEditions, menuRounds, otherSets, pastRounds } from './menu';
 
-export enum Category {
-  A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', Ep = 'E+', Cp = 'C+', Dp = 'D+'
-}
-
-// C+ and D+ (years 9–11) match E and E+ in difficulty, so the selector lists
-// them under those; the join code and the header keep the real category.
-export const listedAs = (cat: Category): Category =>
-  cat === Category.Cp ? Category.E : cat === Category.Dp ? Category.Ep : cat;
-
-const categoryOptionLabel = (cat: Category) =>
-  cat === Category.E ? 'E / C+' : cat === Category.Ep ? 'E+ / D+' : cat;
-
-interface TestListElement {
-  local?: Category[],
-  final?: Category[],
-  online?: Category[]
-}
-export type RoundType = 'local' | 'final' | 'online';
-
-// Join code (= teamName) of a test, e.g. "12_D_C+": year, final(D)/local(H) round, category
-export const relayTestCode = (yearIdx: number, round: RoundType, category: Category | string) =>
-  `${yearIdx + 1}_${round === 'final' ? 'D' : (round === 'online' ? 'O' : 'H')}_${category}`;
-
-// The inverse of relayTestCode; `year` is the competition's number, i.e. yearIdx + 1.
-export const parseRelayTestCode = (code: string) => {
-  const [year, round, category] = code.split('_');
-  const roundType: RoundType = round === 'D' ? 'final' : round === 'O' ? 'online' : 'local';
-  return { year: Number(year), round: roundType, category };
-};
-
-export const availableRelayTests: TestListElement[] = [
-    { final: [Category.B, Category.C, Category.D] },
-    { final: [Category.B, Category.C, Category.D] },
-    { final: [Category.B, Category.C, Category.D] },
-    { final: [Category.B, Category.C, Category.D] },
-    { final: [Category.A, Category.B, Category.C, Category.D] },
-    { final: [Category.A, Category.B, Category.C, Category.D] },
-    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C] },
-    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D] },
-    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp] },
-    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp] },
-    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.Cp, Category.D, Category.Dp] },
-    { local: [Category.A, Category.B], final: [Category.A, Category.B, Category.C, Category.D, Category.E, Category.Ep] },
-    {},
-    {},
-    {},
-    {},
-    {},
-    {},
-    { online: [Category.C, Category.D, Category.E] },
-    { online: [Category.C, Category.D, Category.E] },
-]
-
-const roundTypes: RoundType[] = ['local', 'final', 'online'];
-
-interface PlayableTest {
-  yearIdx: number,
-  category: Category,
-}
-
-// The tests offered under a listed category in a round, one per year. A test is
-// only offered if its problem set is already bundled with the app.
-export const playableTests = (listed: Category, round: RoundType): PlayableTest[] =>
-  availableRelayTests.flatMap((test, yearIdx) =>
-    (test[round] ?? [])
-      .filter(cat => listedAs(cat) === listed && hasProblemSet(relayTestCode(yearIdx, round, cat)))
-      .map(cat => ({ yearIdx, category: cat }))
-  );
+const rounds = pastRounds(practiceSets);
+const categories = menuCategories(rounds);
 
 export default function SelectRelayRound() {
+  // `year` and `other` hold a competition id: the past round picked by its
+  // edition, or another set picked by its label. Picking one clears the other.
   const [year, setYear] = useState('');
   const [round, setRound] = useState('');
   const [category, setCategory] = useState('');
+  const [other, setOther] = useState('');
   const { enqueueSnackbar } = useSnackbar();
   const login = useLogin();
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const startRelay = useStartRelay();
 
-  const availableCategories: Category[] = Object.values(Category).filter(cat =>
-    listedAs(cat) === cat && roundTypes.some(roundType => playableTests(cat, roundType).length > 0)
-  );
+  const language = isLanguage(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'hu';
+  const others = otherSets(practiceSets, language);
 
-  const availableRounds: RoundType[] =
-    category === ''
-      ? []
-      : roundTypes.filter(roundType => playableTests(category as Category, roundType).length > 0);
+  const availableRounds: Round[] = category === '' ? [] : menuRounds(rounds, category);
 
-  const availableYears: PlayableTest[] =
+  const availableYears =
     category === '' || round === ''
       ? []
-      : playableTests(category as Category, round as RoundType);
+      : menuEditions(rounds, category, round as Round);
+
+  // An edition twice under one listed category (C+ and E, say) is told apart
+  // by its real category.
+  const yearOptionLabel = ({ edition, category: real }: { edition: number, category: string }) => {
+    const label = t('login.yearOption', { num: edition, schoolYear: editionSchoolYear(edition) });
+    return availableYears.filter(each => each.edition === edition).length > 1 ? `${label} (${real})` : label;
+  };
 
   const handleCategoryChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value);
     setRound('');
     setYear('');
+    setOther('');
   };
 
   const handleRoundChange = (event: SelectChangeEvent) => {
@@ -120,27 +64,30 @@ export default function SelectRelayRound() {
     setYear(event.target.value);
   };
 
+  const handleOtherChange = (event: SelectChangeEvent) => {
+    setOther(event.target.value);
+    setCategory('');
+    setRound('');
+    setYear('');
+  };
+
   // t('login.roundType.local'), t('login.roundType.final'), t('login.roundType.online');
   const categoryLabel = t('login.categorySelector');
   const roundLabel = t('login.roundTypeSelector');
   const yearLabel = t('login.yearSelector');
+  const otherLabel = t('login.otherSetSelector');
 
   // Fit width to absolutely positioned input label
   const minWidthForLabel = (label: string) => `calc(${label.length}ch + 3em)`;
 
   const handleProceed = async () => {
-    if (year === '' || round === '' || category === '') {
+    const id = other !== '' ? other : year;
+    if (id === '') {
       enqueueSnackbar(t('login.error.noRound'), { variant: 'error' });
       return;
     }
-    const test = availableYears.find(({ yearIdx }) => String(yearIdx) === year);
-    if (!test) {
-      enqueueSnackbar(t('login.error.noRound'), { variant: 'error' });
-      return;
-    }
-    const code = relayTestCode(test.yearIdx, round as RoundType, test.category);
     try {
-      await login(code);
+      await login(id);
       await startRelay();
     } catch (err) {
       enqueueSnackbar((err as Error)?.message, { variant: 'error' });
@@ -164,7 +111,7 @@ export default function SelectRelayRound() {
             label={t('login.categorySelector')}
             onChange={handleCategoryChange}
           >
-            {availableCategories.map(cat =>
+            {categories.map(cat =>
               <MenuItem key={cat} value={cat}>
                 {categoryOptionLabel(cat)}
               </MenuItem>
@@ -198,14 +145,33 @@ export default function SelectRelayRound() {
             label={t('login.yearSelector')}
             onChange={handleYearChange}
           >
-            {availableYears.map(({ yearIdx }) =>
-              <MenuItem key={yearIdx} value={String(yearIdx)}>
-                {t('login.yearOption', { num: yearIdx + 1 })}
+            {availableYears.map(each =>
+              <MenuItem key={each.id} value={each.id}>
+                {yearOptionLabel(each)}
               </MenuItem>
             )}
           </Select>
         </FormControl>
       </Stack>
+
+      {others.length > 0 &&
+        <FormControl fullWidth sx={{ marginTop: "15px", minWidth: minWidthForLabel(otherLabel) }}>
+          <InputLabel id="other-select-label">{otherLabel}</InputLabel>
+          <Select
+            labelId="other-select-label"
+            id="other-select"
+            value={other}
+            label={otherLabel}
+            onChange={handleOtherChange}
+          >
+            {others.map(({ id, label }) =>
+              <MenuItem key={id} value={id}>
+                {label}
+              </MenuItem>
+            )}
+          </Select>
+        </FormControl>
+      }
 
       <Button type="submit" variant="contained" sx={{
                 marginTop: "20px",
