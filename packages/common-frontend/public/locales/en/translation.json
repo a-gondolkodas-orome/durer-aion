@@ -134,7 +134,7 @@
       "type": "Answer must be a number"
     },
     "goodGuess": "Your answer is correct",
-    "guess": "Guess: ({{try}}/{{max}})",
+    "guess": "Guess: ({{try}}/{{max}}) – {{points}}",
     "guessNum": "Guess #{{guessnum}}:",
     "name": "Relay tasks",
     "progress": "So far: {{points}}",

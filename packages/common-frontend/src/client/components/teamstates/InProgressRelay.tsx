@@ -165,6 +165,7 @@ export function InProgressRelay({ G, ctx, moves, selectRoundOnEnd }: MyGameProps
             previousTries={G.previousAnswers[G.currentProblem].map(it => it.answer)}
             previousCorrectness={!finished ? G.correctnessPreviousAnswer : null}
             attempt={(G.currentProblem + 1) * RELAY_MAX_TRIES + G.numberOfTry}
+            availablePoints={G.currentProblemAvailablePoints}
             onSubmit={async (input: number) => relayMoves.submitAnswer(input)}
             awaitingJudge={awaitingJudge}
           />
