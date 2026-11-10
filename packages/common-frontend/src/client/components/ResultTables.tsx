@@ -223,7 +223,10 @@ export function RelayResultsTable(props: {
 export function RelayKey(props: { centred?: boolean }) {
   const { t } = useTranslation();
   const items: { label: string, sx: SystemStyleObject<Theme> }[] = [
-    ...SOLVED_ON_TRY.map((backgroundColor, idx) => ({ label: t('relay.key.onTry', { try: idx + 1 }), sx: { backgroundColor } })),
+    // A key per try, since a Hungarian suffix depends on the number. Spelled
+    // out key by key: the i18n check finds a key only as a literal.
+    ...[t('relay.key.try1'), t('relay.key.try2'), t('relay.key.try3')]
+      .map((label, idx) => ({ label, sx: { backgroundColor: SOLVED_ON_TRY[idx] } })),
     { label: t('relay.key.wrong'), sx: { backgroundColor: WRONG } },
     { label: t('relay.key.unanswered'), sx: unansweredSx },
   ];

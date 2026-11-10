@@ -147,7 +147,9 @@
     "zoomImage": "Click the image to enlarge it",
     "key": {
       "label": "Colour key",
-      "onTry": "on attempt {{try}}",
+      "try1": "1st try",
+      "try2": "2nd try",
+      "try3": "3rd try",
       "wrong": "wrong",
       "unanswered": "no answer"
     }

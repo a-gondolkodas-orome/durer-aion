@@ -143,7 +143,9 @@
     "zoomImage": "Kattints a képre a nagyításhoz",
     "key": {
       "label": "Jelmagyarázat",
-      "onTry": "{{try}}. próbára",
+      "try1": "1.-re",
+      "try2": "2.-ra",
+      "try3": "3.-ra",
       "wrong": "hibás",
       "unanswered": "nincs válasz"
     }
