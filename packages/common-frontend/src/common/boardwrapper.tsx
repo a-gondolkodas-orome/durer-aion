@@ -255,21 +255,27 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
       : ctx.phase === 'chooseRole' ? 'locked'
       : teamToMove ? 'live' : 'waiting';
 
-    const rulesButton = (
-      <Button ref={rulesButtonRef} variant="outlined" color="inherit" size="small" onClick={() => setRulesOpen(!rulesOpen)}
+    const pulse = {
+      '@keyframes pointToRules': {
+        '0%': { boxShadow: `0 0 0 0 ${alpha(theme.palette.primary.main, 0.5)}` },
+        '100%': { boxShadow: `0 0 0 14px ${alpha(theme.palette.primary.main, 0)}` },
+      },
+      ...(pointToRules && { animation: 'pointToRules 0.9s ease-out 2' }),
+    };
+    // On a phone only its icon, so the name, the clock and it share a row.
+    const rulesButton = wide
+      ? <Button ref={rulesButtonRef} variant="outlined" color="inherit" size="small" onClick={() => setRulesOpen(!rulesOpen)}
         startIcon={<MenuBookOutlinedIcon />} aria-expanded={rulesOpen}
         onAnimationEnd={() => setPointToRules(false)}
-        sx={{
-          textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: LINE, backgroundColor: '#fff',
-          '@keyframes pointToRules': {
-            '0%': { boxShadow: `0 0 0 0 ${alpha(theme.palette.primary.main, 0.5)}` },
-            '100%': { boxShadow: `0 0 0 14px ${alpha(theme.palette.primary.main, 0)}` },
-          },
-          ...(pointToRules && { animation: 'pointToRules 0.9s ease-out 2' }),
-        }}>
+        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: LINE, backgroundColor: '#fff', ...pulse }}>
         {t('strategy.rules')}
       </Button>
-    );
+      : <IconButton ref={rulesButtonRef} size="small" onClick={() => setRulesOpen(!rulesOpen)}
+        aria-label={t('strategy.rules')} aria-expanded={rulesOpen} title={t('strategy.rules')}
+        onAnimationEnd={() => setPointToRules(false)}
+        sx={{ border: `1px solid ${LINE}`, borderRadius: '8px', backgroundColor: '#fff', color: 'text.primary', ...pulse }}>
+        <MenuBookOutlinedIcon fontSize="small" />
+      </IconButton>;
 
     return (
       <>
@@ -292,7 +298,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
             <Box sx={{ order: { xs: 2, md: 0 }, width: { xs: '100%', md: 'auto' } }}>
               <Series G={G} ended={finished} />
             </Box>
-            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '14px' }}>
+            <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: { xs: '8px', md: '14px' } }}>
               <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: 600 }}>
                 <TimerOutlinedIcon fontSize="small" titleAccess={t('general.remainingTime')} sx={{ color: MUTED }} />
                 {finished
@@ -347,10 +353,16 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
           </DialogActions>
         </Dialog>
         {!wide && <Dialog open={rulesOpen} fullScreen onClose={() => setRulesOpen(false)}>
-          <DialogTitle>{t('strategy.rules')}</DialogTitle>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 700 }}>
+            {t('strategy.rules')}
+            <IconButton aria-label={t('general.close')} onClick={() => setRulesOpen(false)}><CloseIcon /></IconButton>
+          </DialogTitle>
           <DialogContent sx={{ fontSize: '16px', lineHeight: 1.6 }}>{rules}</DialogContent>
-          <DialogActions>
-            <Button onClick={() => setRulesOpen(false)}>{t('general.close')}</Button>
+          <DialogActions sx={{ padding: '16px 24px' }}>
+            <Button variant="outlined" color="inherit" fullWidth onClick={() => setRulesOpen(false)}
+              sx={{ minHeight: '48px', fontSize: '16px', fontWeight: 600, textTransform: 'none', borderRadius: '10px', borderColor: LINE }}>
+              {t('general.close')}
+            </Button>
           </DialogActions>
         </Dialog>}
       </>
@@ -454,8 +466,9 @@ function GameArea(props: {
             <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{props.subWide}</Box>
           </>}
         </Box>
-        <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-          {props.actions}
+        <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Stretched, so a pair whose one label wraps keeps one height. */}
+          <Stack sx={{ flexDirection: 'row', alignItems: 'stretch', justifyContent: 'center', gap: '12px', width: '100%' }}>{props.actions}</Stack>
           {props.infoBeside && <Box sx={{ position: 'absolute', left: 'calc(50% + 244px)' }}>{props.info}</Box>}
         </Stack>
         {props.children}
@@ -470,13 +483,17 @@ function ModeLine(props: { mode: Difficulty | null, liveNumber: number, side: st
   if (mode === null) return null;
   const live = mode === 'live';
   return (
-    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, color: live ? LIVE : PRACTICE }}>
-      <Box aria-hidden sx={{
-        width: '10px', height: '10px', borderRadius: '50%', boxSizing: 'border-box',
-        ...(live ? { backgroundColor: LIVE } : { border: `2px solid ${PRACTICE}` }),
-      }} />
-      {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
-      {props.side !== null && <Box component="span" sx={{ fontWeight: 600, color: MUTED }}>· {props.side}</Box>}
+    // Each part keeps to one line: on a phone the side moves under the mode
+    // whole, rather than both breaking mid-phrase.
+    <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: '8px', rowGap: '2px', fontSize: '14px', fontWeight: 700, color: live ? LIVE : PRACTICE }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+        <Box aria-hidden sx={{
+          width: '10px', height: '10px', borderRadius: '50%', boxSizing: 'border-box',
+          ...(live ? { backgroundColor: LIVE } : { border: `2px solid ${PRACTICE}` }),
+        }} />
+        {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
+      </Stack>
+      {props.side !== null && <Box component="span" sx={{ fontWeight: 600, color: MUTED, whiteSpace: 'nowrap' }}>· {props.side}</Box>}
     </Stack>
   );
 }
