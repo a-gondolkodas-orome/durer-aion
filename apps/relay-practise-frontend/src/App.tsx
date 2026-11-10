@@ -68,6 +68,7 @@ function App() {
             <LoadTeamState />
             <Header
               teamName={teamState?.teamName ?? null}
+              leaveLabel={t('relay.endTable.selectOtherRound')}
               languageSwitcher
               titles={titles}
               homeAddress='/..'

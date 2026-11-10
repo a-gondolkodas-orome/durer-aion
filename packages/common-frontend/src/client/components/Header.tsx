@@ -1,7 +1,7 @@
-import { Box, Button, Container, Dialog, IconButton, Stack } from '@mui/material';
+import { Box, Button, Container, Dialog, IconButton, Stack, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import { AccountCircleOutlined, Logout } from '@mui/icons-material';
+import { AccountCircleOutlined, ArrowBackRounded, Logout } from '@mui/icons-material';
 import { useClientRepo } from '../client-repo-context';
 import { alpha, useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -13,8 +13,13 @@ import { LanguageDropdown } from './Langswitcher';
 /// `languageSwitcher` is for the sites that are meant to be read in either
 /// language; the competition round and its admin pages are Hungarian only.
 /// `compact` is for the game pages, where the height goes to the game.
+/// `leaveLabel` names the logout button for a site where logging out is not
+/// leaving, such as the relay practice, where it goes back to the round
+/// selector; the button then shows a back arrow instead of the exit icon. On
+/// a wide screen the button is the icon alone, the label its tooltip.
 export function Header(props: {
   teamName: string | null,
+  leaveLabel?: string,
   compact?: boolean,
   languageSwitcher?: boolean,
   titles?: string[],
@@ -39,6 +44,8 @@ export function Header(props: {
       });
   };
   const teamLabel = props.titles?.[2] ?? props.teamName;
+  const leaveLabel = props.leaveLabel ?? t('header.logout');
+  const LeaveIcon = props.leaveLabel ? ArrowBackRounded : Logout;
   const title = props.titles ? t(props.titles[0]) : t('header.title');
   const subtitle = props.titles ? t(props.titles[1]) : t('header.subtitle');
   return (
@@ -76,22 +83,21 @@ export function Header(props: {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
             }}>{teamLabel}</Box>
-            <Button onClick={onLogout} size="small" variant="outlined" color="inherit"
-              startIcon={<Logout sx={{ fontSize: '16px !important' }} />}
-              sx={{
-                display: { xs: 'none', md: 'inline-flex' },
-                flexShrink: 0,
-                borderRadius: '999px',
-                borderColor: alpha(theme.palette.primary.contrastText, 0.5),
-                padding: '1px 10px',
-                fontSize: 13,
-                lineHeight: 1.6,
-                textTransform: 'none',
-                '&:hover': {
-                  borderColor: theme.palette.primary.contrastText,
-                  backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
-                },
-              }}>{t('header.logout')}</Button>
+            <Tooltip title={leaveLabel}>
+              <IconButton onClick={onLogout} size="small" color="inherit" aria-label={leaveLabel}
+                sx={{
+                  display: { xs: 'none', md: 'inline-flex' },
+                  flexShrink: 0,
+                  border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.5)}`,
+                  padding: '4px',
+                  '&:hover': {
+                    borderColor: theme.palette.primary.contrastText,
+                    backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
+                  },
+                }}>
+                <LeaveIcon sx={{ fontSize: '18px' }} />
+              </IconButton>
+            </Tooltip>
           </>}
           {props.teamName &&
             <IconButton color="inherit" aria-label={t('header.menu')} onClick={() => setMobileMenuOpen(true)}
@@ -164,13 +170,13 @@ export function Header(props: {
             <Button onClick={() => {
               setMobileMenuOpen(false);
               onLogout();
-            }} variant='outlined' startIcon={<Logout />}
+            }} variant='outlined' startIcon={<LeaveIcon />}
               sx={{
                 fontSize: 18,
                 borderRadius: '999px',
                 textTransform: 'none',
               }}
-            >{t('header.logout')}</Button>
+            >{leaveLabel}</Button>
           </>}
         </Dialog>
       </Container>
