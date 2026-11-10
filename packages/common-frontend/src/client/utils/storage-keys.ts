@@ -24,6 +24,9 @@ export const teamStateStorageKey = () => namespace + LOCAL_STORAGE_TEAMSTATE;
 // event tells it to look again.
 export const loginMarkerStorageKey = () => namespace + "loggedIn";
 export const bgioStoragePrefix = () => namespace + BGIO_LOCALSTORAGE_PREFIX;
+// When a local client last found its team logged in: what makes its stored
+// login expire, as the live site's cookie does.
+export const lastActiveStorageKey = () => namespace + "LastActive";
 export const relayPointsStorageKey = () => namespace + "RelayPoints";
 export const strategyPointsStorageKey = () => namespace + "StrategyPoints";
 // The local clients' copy of what the home page summarises, beside the score:
