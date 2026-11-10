@@ -440,6 +440,7 @@ function GameArea(props: {
   subWide: string | null, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
   children: ReactNode,
 }) {
+  const { t } = useTranslation();
   const { mode, tone } = props;
   const toneColour = tone === 'go' ? 'primary.main' : tone === 'wait' ? MUTED : tone === 'won' ? WIN : tone === 'lost' ? LOSS : 'text.primary';
   return (
@@ -453,7 +454,7 @@ function GameArea(props: {
           and the explanation is under each button. */}
       {props.intro === null &&
         <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '28px' }}>
-          <ModeLine mode={mode} liveNumber={props.liveNumber} role={props.role} />
+          <ModeLine mode={mode} liveNumber={props.liveNumber} />
           {!props.infoBeside && props.info}
         </Stack>}
       {/* The same element for the whole match: a screen reader announces a
@@ -475,6 +476,21 @@ function GameArea(props: {
         <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {/* Stretched, so a pair whose one label wraps keeps one height. */}
           <Stack sx={{ flexDirection: 'row', alignItems: 'stretch', justifyContent: 'center', gap: '12px', width: '100%' }}>{props.actions}</Stack>
+          {/* During play the row is free: the role the team chose sits on the
+              board's left edge, as its caption, for a team that looks at the
+              board and wonders which side is theirs. Muted: a reminder, not
+              something to look at. */}
+          {props.actions === null && props.role !== null && <Box sx={{
+            position: 'absolute', inset: 0, marginX: 'auto', maxWidth: BOARD_MAX_WIDTH,
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start', paddingBottom: '6px',
+          }}>
+            <Box component="span" sx={{
+              padding: '0 9px', borderRadius: '999px', whiteSpace: 'nowrap',
+              border: `1px solid ${LINE}`, color: MUTED, fontSize: '13px', fontWeight: 500,
+            }}>
+              {t('strategy.mode.you')} <span>{props.role}</span>
+            </Box>
+          </Box>}
           {props.infoBeside && <Box sx={{ position: 'absolute', left: 'calc(50% + 244px)' }}>{props.info}</Box>}
         </Stack>
         {props.children}
@@ -483,29 +499,18 @@ function GameArea(props: {
   );
 }
 
-function ModeLine(props: { mode: Difficulty | null, liveNumber: number, role: string | null }) {
+function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
   const { t } = useTranslation();
   const { mode } = props;
   if (mode === null) return null;
   const live = mode === 'live';
   return (
-    // Each part keeps to one line: on a phone the role moves under the mode
-    // whole, rather than both breaking mid-phrase.
-    <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: '8px', rowGap: '2px', fontSize: '14px', fontWeight: 700, color: live ? LIVE : PRACTICE }}>
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-        <Box aria-hidden sx={{
-          width: '10px', height: '10px', borderRadius: '50%', boxSizing: 'border-box',
-          ...(live ? { backgroundColor: LIVE } : { border: `2px solid ${PRACTICE}` }),
-        }} />
-        {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
-      </Stack>
-      {/* Muted: a reminder of what the team chose, not something to look at. */}
-      {props.role !== null && <Box component="span" sx={{
-        display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '0 9px', borderRadius: '999px', whiteSpace: 'nowrap',
-        border: `1px solid ${LINE}`, color: MUTED, fontSize: '13px', fontWeight: 500,
-      }}>
-        {t('strategy.mode.you')} <span>{props.role}</span>
-      </Box>}
+    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', fontSize: '14px', fontWeight: 700, color: live ? LIVE : PRACTICE }}>
+      <Box aria-hidden sx={{
+        width: '10px', height: '10px', borderRadius: '50%', boxSizing: 'border-box',
+        ...(live ? { backgroundColor: LIVE } : { border: `2px solid ${PRACTICE}` }),
+      }} />
+      {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
     </Stack>
   );
 }
@@ -608,6 +613,11 @@ function swallowClick(event: MouseEvent) {
 /// and the click capture covers what a board makes clickable without being a
 /// control. Not `inert`: that would also hide the position from a screen
 /// reader, and the team is to read it before choosing a role.
+// On a laptop the window, not the column, is what runs short: what is above
+// the board and below it takes about 380px, so a board that scales with its
+// width, as a square grid does, is narrowed to fit.
+const BOARD_MAX_WIDTH = 'max(240px, min(440px, calc(100dvh - 380px)))';
+
 function BoardArea(props: { state: BoardState, children: ReactNode }) {
   const { state } = props;
   return (
@@ -621,10 +631,7 @@ function BoardArea(props: { state: BoardState, children: ReactNode }) {
         // A fieldset's own border, margin, padding and min-content width reset.
         border: 0, margin: 0, padding: 0, minWidth: 0,
         display: 'flex', justifyContent: 'center',
-        // On a laptop the window, not the column, is what runs short: what is
-        // above the board and below it takes about 380px, so a board that
-        // scales with its width, as a square grid does, is narrowed to fit.
-        '& > *': { width: '100%', maxWidth: 'max(240px, min(440px, calc(100dvh - 380px)))' },
+        '& > *': { width: '100%', maxWidth: BOARD_MAX_WIDTH },
         ...(state !== 'live' && { '& *': { cursor: 'default' } }),
         ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
         transition: 'opacity 0.3s',
