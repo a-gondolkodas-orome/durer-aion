@@ -130,7 +130,7 @@
       "type": "Számot kell írnod"
     },
     "goodGuess": "A válasz helyes volt",
-    "guess": "Tipp: ({{try}}/{{max}})",
+    "guess": "Tipp: ({{try}}/{{max}}) – {{points}}",
     "guessNum": "{{guessnum}}. próba:",
     "name": "Váltófeladatok",
     "progress": "Eddig {{points}}",
