@@ -6,6 +6,7 @@ import Form from './form';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
 import * as reactTextMask from "react-text-mask";
+import { cardTokens } from './card';
 
 // react-text-mask's 2018 UMD build assigns __esModule at runtime, where
 // Vite 8's rolldown prebundle cannot see it, so a plain default import hands
@@ -96,7 +97,7 @@ export function Login() {
                 padding: '0 14px',
                 borderWidth: '2px',
                 borderStyle: 'solid',
-                borderRadius: '12px',
+                borderRadius: cardTokens(theme).controlRadius,
                 outlineColor: theme.palette.primary.main,
                 borderColor: theme.palette.primary.main,
                 fontSize: '18px',
@@ -112,7 +113,7 @@ export function Login() {
                 flex: '1 1 250px',
                 maxWidth: '300px',
                 height: '48px',
-                borderRadius: '12px',
+                borderRadius: cardTokens(theme).controlRadius,
                 fontSize: '18px',
                 fontWeight: 600,
                 textTransform: 'none',

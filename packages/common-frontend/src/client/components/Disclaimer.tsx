@@ -127,7 +127,7 @@ export function Disclaimer(props: { teamName: string, category: string }) {
             xs: "100%",
             sm: "350px",
           },
-          ...cardButtonSx,
+          ...cardButtonSx(theme),
           alignSelf: "center",
         }}
         variant="contained"

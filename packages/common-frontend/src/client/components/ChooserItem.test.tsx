@@ -67,3 +67,16 @@ test('explains the relay the same way', () => {
   }
   expect(screen.getByText('chooser.relay.noReturn')).toBeInTheDocument();
 });
+
+// The button's click bubbles to the row, which does the toggling: a handler on
+// the button as well would fold and unfold in one click.
+test('the fold button folds the description once per click', () => {
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} />);
+  const fold = screen.getByRole('button', { name: 'relay.name' });
+
+  expect(fold).toHaveAttribute('aria-expanded', 'true');
+  fireEvent.click(fold);
+  expect(fold).toHaveAttribute('aria-expanded', 'false');
+  fireEvent.click(fold);
+  expect(fold).toHaveAttribute('aria-expanded', 'true');
+});

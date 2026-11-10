@@ -8,7 +8,7 @@ import FormatListNumberedRounded from '@mui/icons-material/FormatListNumberedRou
 import { MatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
@@ -16,7 +16,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { PointsScale, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
-import { cardButtonSx, cardSx } from './card';
+import { cardButtonSx, cardSx, cardTokens } from './card';
 
 /**
  * One round on the home page: its rules and the button that starts it, or once
@@ -30,6 +30,7 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(true);
+  const descId = useId();
   const theme = useTheme();
   const { t } = useTranslation();
   // The status changes only once the start has answered; until then a second
@@ -65,7 +66,7 @@ export function ChooserItem(props: {
           flexShrink: 0,
           width: 44,
           height: 44,
-          borderRadius: '12px',
+          borderRadius: cardTokens(theme).controlRadius,
           backgroundColor: alpha(theme.palette.primary.main, 0.12),
           color: theme.palette.primary.main,
         }}>
@@ -74,9 +75,15 @@ export function ChooserItem(props: {
         <Box sx={{ flex: 1, fontWeight: 700, fontSize: 22, lineHeight: 1.2 }}>
           {props.type === 'relay' ? t('relay.name') : t('strategy.name')}
         </Box>
-        {showDesc && (mobileDescOpen
-          ? <KeyboardArrowUpIcon sx={{ fontSize: 30, display: { md: 'none' } }}/>
-          : <KeyboardArrowDownIcon sx={{ fontSize: 30, display: { md: 'none' } }}/>)}
+        {/* The row takes a tap anywhere; this is the same toggle for a keyboard
+            and a screen reader. It has no handler of its own: its click bubbles
+            to the row's. */}
+        {showDesc &&
+          <IconButton aria-expanded={mobileDescOpen} aria-controls={descId}
+            aria-label={props.type === 'relay' ? t('relay.name') : t('strategy.name')}
+            sx={{ display: { md: 'none' }, color: 'inherit', marginRight: '-8px' }}>
+            {mobileDescOpen ? <KeyboardArrowUpIcon sx={{ fontSize: 30 }}/> : <KeyboardArrowDownIcon sx={{ fontSize: 30 }}/>}
+          </IconButton>}
       </Stack>
       {finished &&
         <Stack sx={{ gap: '16px' }}>
@@ -96,9 +103,11 @@ export function ChooserItem(props: {
         </Stack>
       }
       {showDesc && <>
-        <Stack sx={{
+        <Stack id={descId} sx={{
           fontSize: 14,
-          color: '#3d4148',
+          color: cardTokens(theme).bodyText,
+          // Folded away, its ⓘ buttons leave the tab order as well.
+          visibility: { xs: mobileDescOpen ? 'visible' : 'hidden', md: 'visible' },
           height: {
             xs: mobileDescOpen ? "100%" : "0px",
             md: "100%",
@@ -116,7 +125,7 @@ export function ChooserItem(props: {
         <Button sx={{
           width: '100%',
           maxWidth: "600px",
-          ...cardButtonSx,
+          ...cardButtonSx(theme),
           marginTop: 'auto',
           alignSelf: 'center',
         }} variant='contained' color='primary' disableElevation endIcon={<ArrowForwardRounded />} onClick={() => {
