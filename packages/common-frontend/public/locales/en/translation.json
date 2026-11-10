@@ -74,6 +74,7 @@
   "login": {
     "afterTitle": ".",
     "beforeTitle": "Welcome to the online round interface of the ",
+    "codeLabel": "Login code",
     "error": {
       "empty": "You didn't give any code!",
       "wrongid": "Incorrect log-in code.",

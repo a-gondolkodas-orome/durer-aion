@@ -72,6 +72,7 @@
   "login": {
     "afterTitle": " online fordulójának felületén.",
     "beforeTitle": "Üdvözlünk a ",
+    "codeLabel": "Belépési kód",
     "error": {
       "empty": "Nem adtál meg kódot!",
       "wrongid": "Rossz belépési kód!",
