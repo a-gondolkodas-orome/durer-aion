@@ -77,7 +77,11 @@ function useLanguages() {
 // `onChoose` hears only the visitor's pick, not switches made in code. It is
 // the items' click, not the select's change, so a pick of the language already
 // showing counts too: a `?lang=` link can switch the page without storing it.
-export function LanguageDropdown({ fontColor, onChoose } : { fontColor?: string, onChoose?: (language: string) => void }) {
+const NoIcon = () => null;
+
+/// `compact` shows only the globe, for a phone's header; the open list still
+/// names each language.
+export function LanguageDropdown({ fontColor, onChoose, compact } : { fontColor?: string, onChoose?: (language: string) => void, compact?: boolean }) {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const languages = useLanguages();
@@ -87,11 +91,19 @@ export function LanguageDropdown({ fontColor, onChoose } : { fontColor?: string,
       value={i18n.language}
       variant="standard"
       onChange={(e) => { void i18n.changeLanguage(e.target.value); }}
-      sx={selectSx(theme, fontColor)}
+      // The globe alone is the button: no arrow, and no room kept for one.
+      sx={compact ? {
+        ...selectSx(theme, fontColor),
+        minWidth: 0,
+        margin: 0,
+        "& .MuiSelect-select.MuiInput-input": { padding: "6px", paddingRight: "6px" },
+      } : selectSx(theme, fontColor)}
+      IconComponent={compact ? NoIcon : undefined}
+      SelectDisplayProps={compact ? { 'aria-label': languages.find(({ code }) => code === i18n.language)?.label } : undefined}
       renderValue={(value) => (
         <Stack sx={{ display: "flex", alignItems: "center", gap: "8px", flexDirection: "row" }}>
           <LanguageIcon />
-          {languages.find(({ code }) => code === value)?.label}
+          {!compact && languages.find(({ code }) => code === value)?.label}
         </Stack>
       )}
     >

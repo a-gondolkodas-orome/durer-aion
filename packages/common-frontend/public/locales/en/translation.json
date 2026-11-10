@@ -65,6 +65,7 @@
   },
   "header": {
     "logout": "logout",
+    "menu": "menu",
     "subtitle": "Online round",
     "title": "XX. Dürer Competition",
     "titlePlain": "Dürer Competition",
@@ -73,6 +74,7 @@
   "login": {
     "afterTitle": ".",
     "beforeTitle": "Welcome to the online round interface of the ",
+    "codeLabel": "Login code",
     "error": {
       "empty": "You didn't give any code!",
       "wrongid": "Incorrect log-in code.",
@@ -94,7 +96,8 @@
     "yearSelector": "Competition number:",
     "roundTypeSelector": "Round type:",
     "categorySelector": "Category:",
-    "yearOption": "#{{num}}",
+    "otherSetSelector": "Other problem set:",
+    "yearOption": "#{{num}} ({{schoolYear}})",
     "roundType": {
       "local": "Local",
       "final": "Final",

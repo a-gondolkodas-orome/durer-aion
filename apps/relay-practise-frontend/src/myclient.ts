@@ -16,9 +16,10 @@ export function ClientRelayWithBot(
   gameName: string,
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
-  _description: ReactNode) {
+  _description: ReactNode,
+  durationMinutes?: number) {
   return Client({
-    game: RelayWrapper(handleGameReport),
+    game: RelayWrapper(handleGameReport, { durationMinutes }),
     board: board,
     multiplayer: localWithBots(
       {
