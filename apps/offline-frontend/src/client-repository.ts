@@ -1,10 +1,12 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
+import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { handleGameReport } from "./game-report";
 import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
 import i18n from "i18next";
+
+export const STORED_LOGIN_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export class OfflineClientRepository implements ClientRepository {
 
@@ -82,9 +84,24 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve();
   }
 
-  // The stored team state is the session here: UserModel.logout removes it.
+  // The stored team state is the session here: UserModel.logout removes it,
+  // and so does a day without the app finding the team logged in — the live
+  // site's cookie lifetime (team_session.ts), for the same reason: a team that
+  // leaves a shared computer without logging out must not stay logged in for
+  // the next person. A login stored without the time, by a version before
+  // the limit, starts its day now.
   getTeamState(): Promise<TeamModelDto | null> {
-    return Promise.resolve(readStoredTeamState());
+    const now = Date.now();
+    const lastActive = Number(localStorage.getItem(lastActiveStorageKey()));
+    if (lastActive > 0 && now - lastActive > STORED_LOGIN_MAX_AGE_MS) {
+      clearStoredSession();
+      return Promise.resolve(null);
+    }
+    const teamState = readStoredTeamState();
+    if (teamState !== null) {
+      localStorage.setItem(lastActiveStorageKey(), String(now));
+    }
+    return Promise.resolve(teamState);
   }
 
   logout(): Promise<void> {
@@ -123,6 +140,7 @@ export class OfflineClientRepository implements ClientRepository {
       localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
         JSON.stringify(teamState)
       );
+      localStorage.setItem(lastActiveStorageKey(), String(Date.now()));
       return Promise.resolve();
     }
 

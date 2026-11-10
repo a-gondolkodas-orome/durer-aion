@@ -62,6 +62,7 @@
   },
   "header": {
     "logout": "kilépés",
+    "menu": "menü",
     "subtitle": "Online forduló",
     "title": "XX. Dürer Verseny",
     "titlePlain": "Dürer Verseny",
@@ -70,6 +71,7 @@
   "login": {
     "afterTitle": " online fordulójának felületén.",
     "beforeTitle": "Üdvözlünk a ",
+    "codeLabel": "Belépési kód",
     "error": {
       "empty": "Nem adtál meg kódot!",
       "wrongid": "Rossz belépési kód!",
@@ -91,7 +93,8 @@
     "yearSelector": "Verseny sorszáma:",
     "roundTypeSelector": "Forduló típusa:",
     "categorySelector": "Kategória:",
-    "yearOption": "{{num}}.",
+    "otherSetSelector": "Egyéb feladatsor:",
+    "yearOption": "{{num}}. ({{schoolYear}})",
     "roundType": {
       "local": "Helyi",
       "final": "Döntő",

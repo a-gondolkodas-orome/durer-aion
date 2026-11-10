@@ -1,10 +1,11 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
 import type { ReactNode } from 'react';
-import { Stack, alpha } from '@mui/system';
+import { Stack } from '@mui/system';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { MatchStatus } from '../dto/TeamStateDto';
 import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
@@ -13,6 +14,7 @@ import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
 import { InfoTip } from './InfoTip';
 import { relayMaxPoints } from './relay-results';
+import { cardButtonSx, cardSx, cardTokens } from './card';
 
 /**
  * One round on the home page: its rules and the button that starts it, or once
@@ -26,6 +28,7 @@ export function ChooserItem(props: {
   const startStrategy = useStartStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(true);
+  const descId = useId();
   const theme = useTheme();
   const { t } = useTranslation();
   // The status changes only once the start has answered; until then a second
@@ -39,44 +42,33 @@ export function ChooserItem(props: {
 
   return (
     <Stack sx={{
-      display: 'flex',
-      width: {
-        xs: '100%',
-        md: 'calc(50% - 50px)',
-      },
-      padding: {
-        xs: "10px",
-        md: "40px",
-      },
-      backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
+      ...cardSx(theme),
+      flex: 1,
+      minWidth: 0,
+      gap: '16px',
     }}>
-      <Stack sx={{
-        fontWeight: 'bold',
-        fontSize: 24,
-        textAlign: 'center',
-        paddingBottom: {
-          xs: '10px',
-          md: 0,
-        }
+      <Stack direction="row" sx={{
+        alignItems: 'center',
+        gap: '12px',
+        cursor: { xs: showDesc ? 'pointer' : 'default', md: 'default' },
       }}
       onClick={() => {
         setMobileDescOpen((prev) => {
           return !prev
         })
       }}>
-        <span>{props.type === 'relay' ? t('relay.name') : t('strategy.name')}  {showDesc && (mobileDescOpen ? <KeyboardArrowUpIcon sx={{
-          fontSize: 33,
-          marginBottom: "-9px",
-          display: {
-            md: 'none',
-          }
-        }}/> : <KeyboardArrowDownIcon sx={{
-          fontSize: 33,
-          marginBottom: "-9px",
-          display: {
-            md: 'none',
-          }
-        }}/>)}</span>
+        <Box sx={{ flex: 1, fontWeight: 700, fontSize: 22, lineHeight: 1.2 }}>
+          {props.type === 'relay' ? t('relay.name') : t('strategy.name')}
+        </Box>
+        {/* The row takes a tap anywhere; this is the same toggle for a keyboard
+            and a screen reader. It has no handler of its own: its click bubbles
+            to the row's. */}
+        {showDesc &&
+          <IconButton aria-expanded={mobileDescOpen} aria-controls={descId}
+            aria-label={props.type === 'relay' ? t('relay.name') : t('strategy.name')}
+            sx={{ display: { md: 'none' }, color: 'inherit', marginRight: '-8px' }}>
+            {mobileDescOpen ? <KeyboardArrowUpIcon sx={{ fontSize: 30 }}/> : <KeyboardArrowDownIcon sx={{ fontSize: 30 }}/>}
+          </IconButton>}
       </Stack>
       {finished &&
         <Stack sx={{ gap: '16px' }}>
@@ -98,19 +90,20 @@ export function ChooserItem(props: {
         </Stack>
       }
       {showDesc && <>
-        <Stack sx={{
+        <Stack id={descId} sx={{
           fontSize: 14,
+          color: cardTokens(theme).bodyText,
+          // Folded away, its ⓘ buttons leave the tab order as well.
+          visibility: { xs: mobileDescOpen ? 'visible' : 'hidden', md: 'visible' },
           height: {
             xs: mobileDescOpen ? "100%" : "0px",
             md: "100%",
           },
           transition: "height 0.2s ease-in",
           overflow: 'hidden',
-          paddingBottom: {
-            xs: mobileDescOpen ? "10px" : "0px",
-            md: "0px",
-          },
+          marginTop: { xs: mobileDescOpen ? 0 : '-16px', md: 0 },
           "& p": {
+            marginBlockStart: 0,
             marginBlockEnd: 0,
           },
         }}>
@@ -119,11 +112,10 @@ export function ChooserItem(props: {
         <Button sx={{
           width: '100%',
           maxWidth: "600px",
-          height: '75px',
-          fontSize: '26px',
+          ...cardButtonSx(theme),
+          marginTop: 'auto',
           alignSelf: 'center',
-          textTransform: 'none',
-        }} variant='contained' color='primary' onClick={() => {
+        }} variant='contained' color='primary' disableElevation endIcon={<ArrowForwardRounded />} onClick={() => {
           setStarting(true);
           void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
         }} disabled={starting || props.status.state !== "NOT STARTED"}>

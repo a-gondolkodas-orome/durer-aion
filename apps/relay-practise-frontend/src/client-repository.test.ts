@@ -3,7 +3,7 @@ import { relayPointsStorageKey } from "common-frontend/core";
 
 import { OfflineClientRepository } from "./client-repository";
 import { handleGameReport } from "./game-report";
-import { teamData } from "./teamData";
+import { practiceSets } from "./practice-sets";
 
 let track: ReturnType<typeof vi.fn>;
 
@@ -22,7 +22,7 @@ afterEach(() => {
 test("a round started over an earlier round's score counts its own finish", async () => {
   localStorage.setItem(relayPointsStorageKey(), "12");
   const repo = new OfflineClientRepository();
-  await repo.joinWithCode(teamData[0].join_code);
+  await repo.joinWithCode(practiceSets[0].id);
   await repo.startRelay();
 
   handleGameReport({ component: "relay", phase: "end", G: { points: 5 } });
