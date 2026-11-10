@@ -2,12 +2,10 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { LiveGameResult } from 'schemas';
-import { RelayOutcome, RelayProgressTable, RelayResultsTable, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
+import { RelayProgressTable, RelayResultsTable, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
 
 vi.mock('react-i18next', () => ({
-  // A count out of a total is spelled out, so a test can check the numbers.
-  useTranslation: () => ({ t: (key: string, opts?: { solved?: number, total?: number }) =>
-    opts?.total === undefined ? key : `${key} ${opts.solved}/${opts.total}` }),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 test("a relay's table shows each problem's points out of its max, and a dash for a time never spent", () => {
@@ -20,16 +18,6 @@ test("a relay's table shows each problem's points out of its max, and a dash for
   expect(screen.getByText('0/6')).toBeInTheDocument();
   expect(screen.getByText('4:30')).toBeInTheDocument();
   expect(screen.getByText('–')).toBeInTheDocument();
-});
-
-test("a relay's outcome counts the problems that scored, not those only tried", () => {
-  render(<RelayOutcome problems={[
-    { maxPoints: 3, points: 2, trySeconds: [180, 90] },
-    { maxPoints: 4, points: 0, trySeconds: [60, 60, 60] },
-    { maxPoints: 6, points: 0, trySeconds: [] },
-  ]}/>);
-
-  expect(screen.getByText('relay.endTable.solved 1/3')).toBeInTheDocument();
 });
 
 test("a long problem set continues in a second row", () => {

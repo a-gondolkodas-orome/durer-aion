@@ -118,8 +118,7 @@
       "wrongTries": "{{count}} hibás válasz",
       "unanswered": "Erre a feladatra nem adtatok be választ",
       "taskNumber": "{{num}}. feladat",
-      "tryTime": "{{try}}. próba: {{time}}",
-      "solved": "Megoldott feladatok: {{solved}} / {{total}}"
+      "tryTime": "{{try}}. próba: {{time}}"
     },
     "error": {
       "badCategory": "ROSSZ KATEGÓRIA",

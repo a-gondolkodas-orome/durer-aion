@@ -229,15 +229,6 @@ export function RelayKey(props: { centred?: boolean }) {
   </Box>;
 }
 
-/** A finished relay told in one line: how many problems it solved. */
-export function RelayOutcome(props: { problems: RelayProblemResult[] }) {
-  const { t } = useTranslation();
-  const solved = props.problems.filter(problem => problem.points > 0).length;
-  return <Box sx={{ fontSize: '15px', lineHeight: 1.45, textAlign: 'center' }}>
-    {t('relay.endTable.solved', { solved, total: props.problems.length })}
-  </Box>;
-}
-
 /**
  * The relay's progress while it runs: deliberately plain, beside the problem
  * that holds the team's attention. Problems not reached show what they are worth.

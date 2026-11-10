@@ -122,8 +122,7 @@
       "wrongTries_other": "{{count}} wrong answers",
       "unanswered": "You gave no answer to this task",
       "taskNumber": "Task {{num}}",
-      "tryTime": "attempt {{try}}: {{time}}",
-      "solved": "Problems solved: {{solved}} of {{total}}"
+      "tryTime": "attempt {{try}}: {{time}}"
     },
     "error": {
       "badCategory": "WRONG CATEGORY",
