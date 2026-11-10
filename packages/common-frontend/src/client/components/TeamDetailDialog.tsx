@@ -330,7 +330,7 @@ function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
       <RelayResultsTable problems={relayProblemResults(relayG)} details transposeOnPhone
         answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}
         current={inProgress ? relayG.currentProblem : undefined}/>
-      <Box sx={{ fontSize: 12, color: MUTED }}><RelayKey/></Box>
+      <RelayKey/>
     </Stack>}
     {strategyG && (strategyG.liveResults.length > 0 || gameInPlay) && <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
       <StrategyGamesTable results={strategyG.liveResults} points={strategyG.points}/>

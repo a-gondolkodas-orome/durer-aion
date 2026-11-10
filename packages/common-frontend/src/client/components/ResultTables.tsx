@@ -208,10 +208,10 @@ export function RelayResultsTable(props: {
 }
 
 /**
- * What the colours of RelayResultsTable mean, one swatch each. It takes the
- * colour of the text around it, so it reads in a tooltip as well as on a page.
+ * What the colours of RelayResultsTable mean, one swatch each, in a small grey
+ * line to go right under the table.
  */
-export function RelayKey() {
+export function RelayKey(props: { centred?: boolean }) {
   const { t } = useTranslation();
   const items: { label: string, sx: SystemStyleObject<Theme> }[] = [
     ...SOLVED_ON_TRY.map((backgroundColor, idx) => ({ label: t('relay.key.onTry', { try: idx + 1 }), sx: { backgroundColor } })),
@@ -220,24 +220,21 @@ export function RelayKey() {
   ];
   return <Box component="ul" aria-label={t('relay.key.label')} sx={{
     display: 'flex', flexWrap: 'wrap', gap: '6px 14px', margin: 0, padding: 0, listStyle: 'none',
+    justifyContent: props.centred ? 'center' : 'flex-start', fontSize: '12px', color: MUTED,
   }}>
-    {items.map(it => <Box component="li" key={it.label} sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-      <Box sx={[{ width: '14px', height: '14px', borderRadius: '4px' }, it.sx, { margin: 0 }]}/>
+    {items.map((it, idx) => <Box component="li" key={idx} sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <Box sx={[{ width: '14px', height: '14px' }, it.sx, { margin: 0, borderRadius: '4px' }]}/>
       {it.label}
     </Box>)}
   </Box>;
 }
 
-/**
- * A finished relay told in one line, how many problems it solved, with the
- * table's colour key behind an ⓘ: the team sees the colours with no other key.
- */
+/** A finished relay told in one line: how many problems it solved. */
 export function RelayOutcome(props: { problems: RelayProblemResult[] }) {
   const { t } = useTranslation();
   const solved = props.problems.filter(problem => problem.points > 0).length;
   return <Box sx={{ fontSize: '15px', lineHeight: 1.45, textAlign: 'center' }}>
     {t('relay.endTable.solved', { solved, total: props.problems.length })}
-    <InfoTip label={t('relay.key.label')}><RelayKey /></InfoTip>
   </Box>;
 }
 
