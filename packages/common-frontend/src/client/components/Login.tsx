@@ -6,6 +6,7 @@ import Form from './form';
 import { useTheme } from '@mui/material/styles';
 import { Button } from '@mui/material';
 import * as reactTextMask from "react-text-mask";
+import { cardTokens } from './card';
 
 // react-text-mask's 2018 UMD build assigns __esModule at runtime, where
 // Vite 8's rolldown prebundle cannot see it, so a plain default import hands
@@ -92,9 +93,12 @@ export function Login() {
                 // The card is narrower than this on the smallest phones.
                 maxWidth: '100%',
                 boxSizing: 'border-box',
-                height: '40px',
+                height: '48px',
+                padding: '0 14px',
                 borderWidth: '2px',
-                borderRadius: '5px',
+                borderStyle: 'solid',
+                borderRadius: cardTokens(theme).controlRadius,
+                outlineColor: theme.palette.primary.main,
                 borderColor: theme.palette.primary.main,
                 fontSize: '18px',
               }}
@@ -108,10 +112,13 @@ export function Login() {
               sx={{
                 flex: '1 1 250px',
                 maxWidth: '300px',
-                height: '40px',
-                borderRadius: '5px',
+                height: '48px',
+                borderRadius: cardTokens(theme).controlRadius,
                 fontSize: '18px',
+                fontWeight: 600,
+                textTransform: 'none',
               }}
+              disableElevation
             >
               {t('login.loginButton')}
             </Button>
