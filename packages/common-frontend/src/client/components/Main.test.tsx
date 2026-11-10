@@ -61,8 +61,10 @@ test('renders', () => {
 });
 
 test('main renders login if team is not logged in', () => {
-  const { getByTestId } = renderMain();
+  const { getByTestId, getByRole } = renderMain();
   expect(getByTestId("loginRoot")).toBeInTheDocument();
+  // The code field is named by its label, not only by the example inside it.
+  expect(getByRole('textbox')).toHaveAccessibleName();
 });
 
 test('main renders chooser if team is in HOME state', () => {

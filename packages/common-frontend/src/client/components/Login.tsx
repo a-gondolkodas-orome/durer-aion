@@ -25,6 +25,7 @@ const unwrapDefault = (mod: unknown): unknown => {
 };
 const MaskedInput = unwrapDefault(reactTextMask) as typeof reactTextMask.default;
 import { useTranslation } from 'react-i18next';
+import { useId } from 'react';
 
 const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
@@ -33,31 +34,37 @@ export function Login() {
   const { enqueueSnackbar } = useSnackbar();
   const login = useLogin();
   const { t } = useTranslation();
+  const codeId = useId();
 
   return (
     <Stack data-testid="loginRoot">
+      {/* The greeting a small line over the title, and the instruction plain
+          text: what the page asks of a team is the field below them. */}
       <Stack sx={{
-        fontSize: {
-          xs: "25px",
-          sm: "40px",
-        }
+        fontSize: { xs: 14, sm: 16 },
+        fontWeight: 600,
+        color: theme.palette.primary.main,
       }}>
-        {t('login.greeting')}<br/>
+        {t('login.greeting')}
+      </Stack>
+      <Stack component="h1" sx={{
+        margin: '6px 0 0',
+        fontSize: { xs: 22, sm: 30 },
+        fontWeight: 700,
+        lineHeight: 1.2,
+        letterSpacing: '-0.01em',
+      }}>
         {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
       </Stack>
       <Stack sx={{
-        marginTop: {
-          xs: "7px",
-          sm: "15px",
-        },
-        fontSize: {
-          xs: "15px",
-          sm: "30px",
-        }
+        marginTop: '12px',
+        fontSize: { xs: 15, sm: 17 },
+        lineHeight: 1.5,
+        color: cardTokens(theme).bodyText,
       }}>
         {t('login.loginInstruction')}
       </Stack>
-      <Stack sx={{ mt: 2 }}>
+      <Stack sx={{ mt: 3 }}>
         <Form initialValues={{ joinCode: '' }}
           onSubmit={(values) => {
             if (!values.joinCode) {
@@ -71,8 +78,13 @@ export function Login() {
             });
           }}>
           {/* Wrapped, the button goes under the field at the field's width;
-              side by side, it takes what the card has left. */}
-          <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '10px' }}>
+              side by side, it takes what the card has left, level with the
+              field rather than its label. */}
+          <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '10px', alignItems: 'flex-end' }}>
+            <Stack sx={{ gap: '6px', width: '300px', maxWidth: '100%' }}>
+            <Stack component="label" htmlFor={codeId} sx={{ fontSize: 14, fontWeight: 600 }}>
+              {t('login.codeLabel')}
+            </Stack>
             <Field
               name="joinCode"
               type="text"
@@ -84,14 +96,13 @@ export function Login() {
             form: { handleChange },
           }: FieldProps) => <MaskedInput
             {...field}
+            id={codeId}
             mask={idMask}
             onChange={handleChange}
             className="text-input"
               placeholder="111-2222-333"
               style={{
-                width: '300px',
-                // The card is narrower than this on the smallest phones.
-                maxWidth: '100%',
+                width: '100%',
                 boxSizing: 'border-box',
                 height: '48px',
                 padding: '0 14px',
@@ -101,10 +112,15 @@ export function Login() {
                 outlineColor: theme.palette.primary.main,
                 borderColor: theme.palette.primary.main,
                 fontSize: '18px',
+                // The code is read off an email: each digit apart, and the
+                // same width, so a mistyped one shows.
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+                letterSpacing: '0.08em',
               }}
           />
         }
             </Field>
+            </Stack>
             <Button
               type="submit"
               color='primary'
