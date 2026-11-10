@@ -1,7 +1,7 @@
 import { Box, Button, Container, Dialog, IconButton, Stack } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import { AccountCircleOutlined, Logout, MoreVert } from '@mui/icons-material';
+import { AccountCircleOutlined, Logout } from '@mui/icons-material';
 import { useClientRepo } from '../client-repo-context';
 import { alpha, useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -93,10 +93,10 @@ export function Header(props: {
                 },
               }}>{t('header.logout')}</Button>
           </>}
-          {(props.teamName || props.languageSwitcher) &&
+          {props.teamName &&
             <IconButton color="inherit" aria-label={t('header.menu')} onClick={() => setMobileMenuOpen(true)}
               sx={{ display: { xs: 'inline-flex', md: 'none' }, marginLeft: '-8px' }}>
-              {props.teamName ? <AccountCircleOutlined sx={{ fontSize: '30px' }} /> : <MoreVert sx={{ fontSize: '30px' }} />}
+              <AccountCircleOutlined sx={{ fontSize: '30px' }} />
             </IconButton>}
         </Stack>
         <Stack sx={{
@@ -125,10 +125,15 @@ export function Header(props: {
             whiteSpace: 'nowrap',
           }}>{subtitle}</Box>}
         </Stack>
-        <Stack direction="row" sx={{ justifyContent: 'flex-end', display: { xs: 'none', md: 'flex' } }}>
-          {props.languageSwitcher &&
-            <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
-          }
+        <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
+          {props.languageSwitcher && <>
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
+            </Box>
+            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+              <LanguageDropdown compact fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
+            </Box>
+          </>}
         </Stack>
         <Dialog
           open={mobileMenuOpen}
@@ -167,7 +172,6 @@ export function Header(props: {
               }}
             >{t('header.logout')}</Button>
           </>}
-          {props.languageSwitcher && <LanguageDropdown onChoose={props.onChooseLanguage} />}
         </Dialog>
       </Container>
     </Box>
