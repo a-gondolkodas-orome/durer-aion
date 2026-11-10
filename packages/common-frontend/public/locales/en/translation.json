@@ -96,7 +96,8 @@
     "yearSelector": "Competition number:",
     "roundTypeSelector": "Round type:",
     "categorySelector": "Category:",
-    "yearOption": "#{{num}}",
+    "otherSetSelector": "Other problem set:",
+    "yearOption": "#{{num}} ({{schoolYear}})",
     "roundType": {
       "local": "Local",
       "final": "Final",

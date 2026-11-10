@@ -5,7 +5,8 @@ import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
 import { LoginToRelay } from './LoginToRelay';
-import { parseRelayTestCode } from './SelectRound';
+import { isLanguage, localizeLabel } from 'schemas';
+import { findPracticeSet } from './practice-sets';
 import { rememberChosenLanguage } from './language';
 
 
@@ -33,8 +34,8 @@ function App() {
   // There is no real login here: the round selector stores the chosen test as
   // the "logged in team", which is what drives the header title below and the
   // switch between the selector and the game.
-  const teamState = useTeamState();
-  const { t } = useTranslation();
+  const storedTeamState = useTeamState();
+  const { t, i18n } = useTranslation();
 
   // The language dropdown is open to everyone here, so the tab title follows it.
   // `t` changes identity with the language.
@@ -42,18 +43,27 @@ function App() {
     document.title = `${t('header.relayPractise')} – ${t('header.titlePlain')}`;
   }, [t]);
 
-  // The teamName is the join code of the selected test (`<num>_<H|D|O>_<category>`),
-  // shown in the header as a translated round name instead of the raw code
-  const testTitle = (code: string) => {
-    const { year, round, category } = parseRelayTestCode(code);
+  // A stored test the site no longer lists, such as one saved under an
+  // earlier version's codes, reads as none: the selector shows again.
+  const practiceSet = storedTeamState ? findPracticeSet(storedTeamState.teamName) : undefined;
+  const teamState = practiceSet ? storedTeamState : null;
+
+  // Shown in the header instead of the set's id.
+  const setTitle = () => {
+    if (!practiceSet) return undefined;
+    const { metadata } = practiceSet;
+    if (metadata.kind === 'other') {
+      return localizeLabel(metadata.label, isLanguage(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'hu');
+    }
     // t('login.competitionType.local'), t('login.competitionType.final'), t('login.competitionType.online');
-    return t(`login.competitionType.${round}`, { num: year, category });
+    return t(`login.competitionType.${metadata.round}`, { num: metadata.edition, category: metadata.category });
   };
 
   // t('header.titlePlain'), t('header.relayPractise');
   const titles = ['header.titlePlain', 'header.relayPractise'];
-  if (teamState?.teamName) {
-    titles.push(testTitle(teamState.teamName));
+  const title = setTitle();
+  if (title !== undefined) {
+    titles.push(title);
   }
 
   return (

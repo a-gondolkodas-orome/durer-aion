@@ -94,7 +94,8 @@
     "yearSelector": "Verseny sorszáma:",
     "roundTypeSelector": "Forduló típusa:",
     "categorySelector": "Kategória:",
-    "yearOption": "{{num}}.",
+    "otherSetSelector": "Egyéb feladatsor:",
+    "yearOption": "{{num}}. ({{schoolYear}})",
     "roundType": {
       "local": "Helyi",
       "final": "Döntő",

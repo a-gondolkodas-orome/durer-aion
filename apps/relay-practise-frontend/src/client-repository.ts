@@ -1,5 +1,5 @@
 import { ClientRepository, relayPointsStorageKey, teamStateStorageKey, TeamModelDto } from "common-frontend/core";
-import { teamData } from "./teamData";
+import { findPracticeSet } from "./practice-sets";
 import type { RelayEndReport } from "game";
 import { handleGameReport } from "./game-report";
 import { readStoredTeamState } from "./stored-team-state";
@@ -15,13 +15,17 @@ export class OfflineClientRepository implements ClientRepository {
     if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
       throw new Error(i18n.t('error.unexpected'));
     }
+    const practiceSet = findPracticeSet(teamState.teamName);
+    if (practiceSet === undefined) {
+      throw new Error(i18n.t('error.unexpected'));
+    }
     const newState = {
       ...teamState,
       pageState: 'RELAY',
       relayMatch: {
         state: 'IN PROGRESS',
         startAt: new Date(),
-        endAt: addMin(new Date(), 60),
+        endAt: addMin(new Date(), practiceSet.relay.durationMinutes),
         matchID: "",
       },
     }
@@ -70,19 +74,20 @@ export class OfflineClientRepository implements ClientRepository {
     handleGameReport(report);
   }
 
+  // The code is the id of the practice set the selector picked.
   joinWithCode(joinCode: string): Promise<void> {
-    const i = teamData.findIndex(e => e.join_code === joinCode);
+    const practiceSet = findPracticeSet(joinCode);
 
-    if (i > -1) {
-      const currentTeamData = teamData[i];
+    if (practiceSet !== undefined) {
+      const { metadata } = practiceSet;
       // There is no disclaimer/home page in this app: logging in to a test
       // always starts from HOME so that startRelay() can run right away.
       const pageState = "HOME";
       const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
-        teamName: currentTeamData.teamname,
-        category: currentTeamData.category,
+        teamName: joinCode,
+        category: metadata.kind === 'competition' ? metadata.category : '',
         credentials: "credentials",
         email: "asd@asd.asd",
         pageState: pageState,
