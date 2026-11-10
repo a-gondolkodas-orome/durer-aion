@@ -23,6 +23,8 @@ export interface MyProps {
   previousCorrectness: boolean | null;
   onSubmit: (result: number) => Promise<void>;
   attempt: number;
+  // What a right answer on this try is worth; each wrong try lowers it.
+  availablePoints: number;
   // Whether the previous guess is still waiting for the judge's ruling.
   awaitingJudge: boolean;
 }
@@ -76,7 +78,11 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
       fontStyle: 'italic',
       marginBottom: '5px',
     }}>
-      {t('relay.guess', { try: tryNumber, max: RELAY_MAX_TRIES })}
+      {t('relay.guess', {
+        try: tryNumber,
+        max: RELAY_MAX_TRIES,
+        points: t('general.points', { count: props.availablePoints }),
+      })}
     </Stack>
     {/* Running out of tries is also the only way to give a problem up, so once
         a try has gone wrong the form says where the last one leads. */}
