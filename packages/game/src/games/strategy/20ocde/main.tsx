@@ -19,15 +19,8 @@ export function getPlayerStepDescription({ G, ctx, turnState }: Args): string {
     : 'Jelöljétek ki az első X helyét!';
 }
 
-/// The mark the team plays, once the roles are chosen.
-export function getSideDescription({ G, playerID }: Pick<Args, 'G' | 'playerID'>): string | null {
-  if (G.firstPlayer === null || playerID === null) return null;
-  return `Ti ${markForPlayer(G, playerID) === 'O' ? 'körökkel (○)' : 'X-ekkel'} játszotok`;
-}
-
-// The role buttons name each side's mark, which the first player's depends on
-// by category. The board always starts empty, so the start does not vary.
-const shared = { getPlayerStepDescription, getSideDescription };
-export const presentationC = { rules: rulesC, roleLabels: ['Kezdünk (2 X)', 'Másodikak leszünk (1 O)'], ...shared } as const;
-export const presentationD = { rules, roleLabels: ['Kezdünk (1 O)', 'Másodikak leszünk (2 X)'], ...shared } as const;
+// The roles name each side's mark, which the first player's depends on by
+// category. The board always starts empty, so the start does not vary.
+export const presentationC = { rules: rulesC, roleLabels: ['Kezdő (2 X)', 'Második (1 O)'], getPlayerStepDescription } as const;
+export const presentationD = { rules, roleLabels: ['Kezdő (1 O)', 'Második (2 X)'], getPlayerStepDescription } as const;
 export const presentationE = presentationD;

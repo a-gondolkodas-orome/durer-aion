@@ -44,9 +44,11 @@ export type StrategyDescription = Localizable<ReactNode>;
 export interface StrategyPresentation<G = unknown> {
   /// The rules: in a dialog before the first game, behind a button after it.
   rules: StrategyDescription,
-  /// The role buttons, the first player's first, each one for every language
-  /// or one per language. Without them the buttons say only who starts; a game
-  /// names its sides here, the marks they play, say.
+  /// The two roles, the first player's first, each one for every language or
+  /// one per language: on the buttons the team chooses with, and on the chip
+  /// that says during the game which one it chose. So each is a short noun
+  /// phrase naming the role ("Kezdő (2 X)", "Cápa"), not a sentence about the
+  /// choice. Without them the roles are only who starts, worded by the wrapper.
   roleLabels?: readonly [Localizable<string>, Localizable<string>],
   /// Whether the opening position differs from game to game. Only then do the
   /// texts ask the team to look at it before choosing a role, and say that a
@@ -57,8 +59,6 @@ export interface StrategyPresentation<G = unknown> {
   getPlayerStepDescription?(args: {
     G: G & GameStateMixin, ctx: StrategyBoardProps<G>['ctx'], playerID: string | null, turnState: unknown,
   }): Localizable<string> | null,
-  /// Which side the team plays once the roles are chosen, beside the mode.
-  getSideDescription?(args: { G: G & GameStateMixin, playerID: string | null }): Localizable<string> | null,
 }
 
 // The screen has a fixed frame, the header strip, and one game area, which is
@@ -183,6 +183,15 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     let intro: ReactNode = null;
     // The explanation of practice against live sits next to the next-game
     // buttons when they are there, in the corner otherwise.
+    // A game's own role labels name the roles on the buttons and on the chip
+    // alike. Without them the wrapper has a phrase for each: on the buttons
+    // what the team says choosing, on the chip the role it chose.
+    const [first, second] = presentation.roleLabels
+      ? presentation.roleLabels.map(label => inLanguage<string>(label, language) ?? '')
+      : [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
+    const [firstRole, secondRole] = presentation.roleLabels
+      ? [first, second]
+      : [t('strategy.mode.first'), t('strategy.mode.second')];
     let infoBeside = false;
     if (finished) {
       // Two live wins in a row end the match; anything else ending it is the clock.
@@ -225,9 +234,6 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     } else if (ctx.phase === 'chooseRole') {
       status = t('strategy.status.role');
       sub = startVaries ? t('strategy.status.lookAtPosition') : '';
-      const [first, second] = presentation.roleLabels
-        ? presentation.roleLabels.map(label => inLanguage<string>(label, language))
-        : [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
       actions = (
         <>
           <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(GUESSER_PLAYER)}>{first}</PairButton>
@@ -244,8 +250,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         : null;
       sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
     }
-    const sideText = presentation.getSideDescription?.({ G, playerID: props.playerID }) ?? null;
-    const side = sideText === null ? null : inLanguage<string>(sideText, language) ?? null;
+    // The role the team chose, once it has, on the chip beside the mode.
+    const role = G.firstPlayer == null ? null : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
 
@@ -317,7 +323,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
             </Stack>
           </Stack>
           <Box sx={{ position: 'relative' }}>
-            <GameArea mode={difficulty} liveNumber={G.numberOfTries} side={side}
+            <GameArea mode={difficulty} liveNumber={G.numberOfTries} role={role}
               status={status} tone={tone} sub={sub} subWide={subWide} actions={actions} intro={intro}
               info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
               <BoardArea state={boardState}>{board({ ...props, setTurnState })}</BoardArea>
@@ -430,7 +436,7 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: 
 /// of buttons, and the board. The rows keep their height when empty, so the
 /// board does not move from one state to the next.
 function GameArea(props: {
-  mode: Difficulty | null, liveNumber: number, side: string | null, status: string, tone: Tone, sub: string,
+  mode: Difficulty | null, liveNumber: number, role: string | null, status: string, tone: Tone, sub: string,
   subWide: string | null, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
   children: ReactNode,
 }) {
@@ -447,7 +453,7 @@ function GameArea(props: {
           and the explanation is under each button. */}
       {props.intro === null &&
         <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '28px' }}>
-          <ModeLine mode={mode} liveNumber={props.liveNumber} side={props.side} />
+          <ModeLine mode={mode} liveNumber={props.liveNumber} role={props.role} />
           {!props.infoBeside && props.info}
         </Stack>}
       {/* The same element for the whole match: a screen reader announces a
@@ -477,13 +483,13 @@ function GameArea(props: {
   );
 }
 
-function ModeLine(props: { mode: Difficulty | null, liveNumber: number, side: string | null }) {
+function ModeLine(props: { mode: Difficulty | null, liveNumber: number, role: string | null }) {
   const { t } = useTranslation();
   const { mode } = props;
   if (mode === null) return null;
   const live = mode === 'live';
   return (
-    // Each part keeps to one line: on a phone the side moves under the mode
+    // Each part keeps to one line: on a phone the role moves under the mode
     // whole, rather than both breaking mid-phrase.
     <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: '8px', rowGap: '2px', fontSize: '14px', fontWeight: 700, color: live ? LIVE : PRACTICE }}>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
@@ -493,7 +499,13 @@ function ModeLine(props: { mode: Difficulty | null, liveNumber: number, side: st
         }} />
         {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
       </Stack>
-      {props.side !== null && <Box component="span" sx={{ fontWeight: 600, color: MUTED, whiteSpace: 'nowrap' }}>· {props.side}</Box>}
+      {/* Muted: a reminder of what the team chose, not something to look at. */}
+      {props.role !== null && <Box component="span" sx={{
+        display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '0 9px', borderRadius: '999px', whiteSpace: 'nowrap',
+        border: `1px solid ${LINE}`, color: MUTED, fontSize: '13px', fontWeight: 500,
+      }}>
+        {t('strategy.mode.you')} <span>{props.role}</span>
+      </Box>}
     </Stack>
   );
 }

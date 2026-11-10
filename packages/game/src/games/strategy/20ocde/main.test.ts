@@ -1,7 +1,7 @@
 import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import type { MyGameState } from './game';
-import { getPlayerStepDescription, getSideDescription } from './main';
+import { getPlayerStepDescription } from './main';
 
 // Category E: the first player plays O, one at a time; the second X, two at a time.
 const G = { category: 'E', firstPlayer: GUESSER_PLAYER } as unknown as MyGameState & GameStateMixin;
@@ -16,12 +16,5 @@ describe('the 5×5 game\'s step description', () => {
     const asX = { G: { ...G, firstPlayer: JUDGE_PLAYER }, ctx: { currentPlayer: GUESSER_PLAYER }, playerID: GUESSER_PLAYER };
     expect(getPlayerStepDescription({ ...asX, turnState: { xsPlaced: 0 } })).toBe('Jelöljétek ki az első X helyét!');
     expect(getPlayerStepDescription({ ...asX, turnState: { xsPlaced: 1 } })).toMatch(/^Válasszátok ki a második X helyét!/);
-  });
-});
-
-describe('the 5×5 game\'s side description', () => {
-  test('names the team\'s mark once the roles are chosen, and nothing before', () => {
-    expect(getSideDescription({ G, playerID: GUESSER_PLAYER })).toBe('Ti körökkel (○) játszotok');
-    expect(getSideDescription({ G: { ...G, firstPlayer: null }, playerID: GUESSER_PLAYER })).toBeNull();
   });
 });

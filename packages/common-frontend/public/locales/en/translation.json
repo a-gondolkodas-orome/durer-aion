@@ -172,8 +172,11 @@
       "title": "Which kind of game do you start with?"
     },
     "mode": {
+      "first": "First",
       "live": "LIVE · game {{n}}",
-      "practice": "PRACTICE"
+      "practice": "PRACTICE",
+      "second": "Second",
+      "you": "You:"
     },
     "name": "Strategy game",
     "next": {

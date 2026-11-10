@@ -168,8 +168,11 @@
       "title": "Milyen játszmával kezdtek?"
     },
     "mode": {
+      "first": "Kezdő",
       "live": "ÉLES · {{n}}. játszma",
-      "practice": "PRÓBAJÁTÉK"
+      "practice": "PRÓBAJÁTÉK",
+      "second": "Második",
+      "you": "Ti:"
     },
     "name": "Stratégiás játék",
     "next": {

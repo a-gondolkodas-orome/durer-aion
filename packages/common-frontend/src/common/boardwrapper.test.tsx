@@ -352,10 +352,26 @@ describe('the rules and role names', () => {
   test('name the roles in the page language', () => {
     i18n.language = 'en';
     renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, {}, boardWrapper<object>(cellBoard, {
-      rules: <p>the rules</p>, roleLabels: [{ hu: 'Kezdünk (1 O)', en: 'We start (1 O)' }, { hu: 'Másodikak leszünk (2 X)', en: 'We go second (2 X)' }],
+      rules: <p>the rules</p>, roleLabels: [{ hu: 'Kezdő (1 O)', en: 'First (1 O)' }, { hu: 'Második (2 X)', en: 'Second (2 X)' }],
     }));
 
-    expect(button('We start (1 O)')).toBeInTheDocument();
+    expect(button('First (1 O)')).toBeInTheDocument();
+  });
+
+  // The same label names the role on the chip once it is chosen, so a game
+  // writes its roles once.
+  test('show the chosen role beside the mode during the game', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: JUDGE_PLAYER }, boardWrapper<object>(cellBoard, {
+      rules: <p>the rules</p>, roleLabels: ['Kezdő (1 O)', 'Második (2 X)'],
+    }));
+
+    expect(screen.getByText('Második (2 X)')).toBeInTheDocument();
+  });
+
+  test('show who starts as the role of a game that names none', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: GUESSER_PLAYER });
+
+    expect(screen.getByText('strategy.mode.first')).toBeInTheDocument();
   });
 });
 
@@ -365,7 +381,6 @@ describe('the game\'s own words on the move', () => {
     <button data-testid="cell" onClick={() => setTurnState?.({ picked: true })}>cell</button>, {
     rules: <p>the rules</p>,
     getPlayerStepDescription: ({ turnState }) => (turnState as { picked?: boolean } | null)?.picked ? 'second step' : 'first step',
-    getSideDescription: () => 'our side',
   });
 
   test('tell the team its next step under the status, as the board reports it', () => {
@@ -374,7 +389,6 @@ describe('the game\'s own words on the move', () => {
     expect(screen.getByText('first step')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('cell'));
     expect(screen.getByText('second step')).toBeInTheDocument();
-    expect(screen.getByText('· our side')).toBeInTheDocument();
   });
 
   test('say nothing of a step on the bot\'s turn', () => {
