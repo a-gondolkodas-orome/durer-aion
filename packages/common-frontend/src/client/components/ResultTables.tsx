@@ -25,6 +25,8 @@ const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
 const WRONG = '#f4b4ae';
 // A problem's points as a tile, set off from the plain cells around it. A
 // problem never answered is an empty tile: outlined, so it still reads as one.
+// Times are the detail of a row of points, so they are set smaller.
+const timeSx = { fontSize: '0.8em' };
 const tileSx = { borderRadius: '6px', margin: '2px' };
 const unansweredSx = { ...tileSx, backgroundColor: '#fff', boxShadow: `inset 0 0 0 1px ${TILE_BORDER}`, color: '#888' };
 
@@ -139,6 +141,12 @@ function ResultTable(props: {
   </>;
 }
 
+// A problem's points out of its max, the max smaller: in a narrow card a row
+// of full-size fractions crowds the colours that matter.
+function PointsOf(props: { points: ReactNode, max: number }) {
+  return <span>{props.points}<Box component="span" sx={{ fontSize: '0.75em' }}>/{props.max}</Box></span>;
+}
+
 /**
  * A relay's points per problem, coloured by how each problem ended. With
  * `details` it also has a time row and the details on hover, and with
@@ -159,12 +167,12 @@ export function RelayResultsTable(props: {
     const tries = problem.trySeconds.length;
     if (props.current !== undefined && idx >= props.current) {
       return idx === props.current
-        ? { content: `–/${problem.maxPoints}`, sx: { fontWeight: 700 }, details: props.details ? t('relay.endTable.inProgress') : undefined }
-        : { content: `–/${problem.maxPoints}`, sx: { color: '#aaa' } };
+        ? { content: <PointsOf points="–" max={problem.maxPoints}/>, sx: { fontWeight: 700 }, details: props.details ? t('relay.endTable.inProgress') : undefined }
+        : { content: <PointsOf points="–" max={problem.maxPoints}/>, sx: { color: '#aaa' } };
     }
     if (tries === 0) {
       return {
-        content: `0/${problem.maxPoints}`,
+        content: <PointsOf points={0} max={problem.maxPoints}/>,
         sx: unansweredSx,
         details: props.details ? t('relay.endTable.unanswered') : undefined,
       };
@@ -178,7 +186,7 @@ export function RelayResultsTable(props: {
         ? t('relay.endTable.tries', { count: tries })
         : t('relay.endTable.wrongTries', { count: tries });
     return {
-      content: <span><b>{problem.points}</b>/{problem.maxPoints}</span>,
+      content: <PointsOf points={<b>{problem.points}</b>} max={problem.maxPoints}/>,
       sx: { ...tileSx, backgroundColor: solved ? SOLVED_ON_TRY[tries - 1] : WRONG },
       details: props.details
         ? `${t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints })}: ${outcome}`
@@ -186,9 +194,10 @@ export function RelayResultsTable(props: {
     };
   };
   const timeCell = (problem: RelayProblemResult, idx: number): Cell => problem.trySeconds.length === 0
-    ? { content: '–', sx: { color: '#888' } }
+    ? { content: '–', sx: { ...timeSx, color: '#888' } }
     : {
       content: formatDuration(problem.trySeconds.reduce((sum, it) => sum + it, 0)),
+      sx: timeSx,
       details: `${t('relay.endTable.taskNumber', { num: idx + 1 })}: ${problem.trySeconds
         .map((seconds, tryIdx) => t('relay.endTable.tryTime', { try: tryIdx + 1, time: formatDuration(seconds) }))
         .join(' · ')}`,
