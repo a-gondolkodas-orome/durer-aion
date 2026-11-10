@@ -11,7 +11,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
-import { RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
+import { RelayOutcome, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
 import { InfoTip } from './InfoTip';
 import { relayMaxPoints } from './relay-results';
 import { cardButtonSx, cardSx, cardTokens } from './card';
@@ -75,7 +75,10 @@ export function ChooserItem(props: {
           {props.type === 'relay'
             ? <>
               <ScoreHeadline compact points={finished.score} max={finished.relayResults && relayMaxPoints(finished.relayResults)}/>
-              {finished.relayResults && <RelayResultsTable problems={finished.relayResults} details transposeOnPhone/>}
+              {finished.relayResults && <>
+                <RelayResultsTable problems={finished.relayResults} details transposeOnPhone/>
+                <RelayOutcome problems={finished.relayResults}/>
+              </>}
             </>
             : <>
               <ScoreHeadline compact points={finished.score} max={strategyPoints(0)}/>

@@ -31,7 +31,7 @@ test('sends one start for a double click, and enables Start again once it answer
   expect(start).toBeEnabled();
 });
 
-test('a finished round shows its results and when it was filled in, and no button', () => {
+test('a finished round shows its results and when it was filled in, and no start button', () => {
   render(<ChooserItem type="relay" status={{
     state: 'FINISHED',
     score: 4,
@@ -41,7 +41,8 @@ test('a finished round shows its results and when it was filled in, and no butto
     relayResults: [{ points: 4, maxPoints: 4, trySeconds: [90] }],
   }} />);
 
-  expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  // The only button left is the ⓘ of the colour key.
+  expect(screen.getAllByRole('button').map(it => it.getAttribute('aria-label'))).toEqual(['relay.key.label']);
   expect(screen.getByText(/chooser\.filledAt/)).toBeInTheDocument();
   // The detailed table: the time row too.
   expect(screen.getAllByText('relay.endTable.time').length).toBeGreaterThan(0);

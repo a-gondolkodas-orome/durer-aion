@@ -122,7 +122,8 @@
       "wrongTries_other": "{{count}} wrong answers",
       "unanswered": "You gave no answer to this task",
       "taskNumber": "Task {{num}}",
-      "tryTime": "attempt {{try}}: {{time}}"
+      "tryTime": "attempt {{try}}: {{time}}",
+      "solved": "Problems solved: {{solved}} of {{total}}"
     },
     "error": {
       "badCategory": "WRONG CATEGORY",
@@ -144,7 +145,13 @@
     "tryHint": "After {{max}} wrong guesses, the next task follows. You cannot return to this task afterwards.",
     "tryHintLast": "If this guess is wrong too, the next task follows. You cannot return to this task afterwards.",
     "wrongGuess": "Your guess is sadly wrong",
-    "zoomImage": "Click the image to enlarge it"
+    "zoomImage": "Click the image to enlarge it",
+    "key": {
+      "label": "Colour key",
+      "onTry": "on attempt {{try}}",
+      "wrong": "wrong",
+      "unanswered": "no answer"
+    }
   },
   "strategy": {
     "description": "Description",

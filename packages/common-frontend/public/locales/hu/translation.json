@@ -118,7 +118,8 @@
       "wrongTries": "{{count}} hibás válasz",
       "unanswered": "Erre a feladatra nem adtatok be választ",
       "taskNumber": "{{num}}. feladat",
-      "tryTime": "{{try}}. próba: {{time}}"
+      "tryTime": "{{try}}. próba: {{time}}",
+      "solved": "Megoldott feladatok: {{solved}} / {{total}}"
     },
     "error": {
       "badCategory": "ROSSZ KATEGÓRIA",
@@ -140,7 +141,13 @@
     "tryHint": "{{max}} rossz tipp után a következő feladat jön. Ehhez a feladathoz utána nem lehet visszatérni.",
     "tryHintLast": "Ha ez a tipp sem jó, a következő feladat jön. Ehhez a feladathoz utána nem lehet visszatérni.",
     "wrongGuess": "A válasz sajnos nem volt jó",
-    "zoomImage": "Kattints a képre a nagyításhoz"
+    "zoomImage": "Kattints a képre a nagyításhoz",
+    "key": {
+      "label": "Jelmagyarázat",
+      "onTry": "{{try}}. próbára",
+      "wrong": "hibás",
+      "unanswered": "nincs válasz"
+    }
   },
   "strategy": {
     "description": "Feladat leírása",

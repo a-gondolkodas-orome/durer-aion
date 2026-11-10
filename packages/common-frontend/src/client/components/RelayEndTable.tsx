@@ -1,7 +1,7 @@
 import { useBackToHome, useLogout, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { EndCard } from './EndCard';
-import { RelayResultsTable } from './ResultTables';
+import { RelayOutcome, RelayResultsTable } from './ResultTables';
 import type { RelayProblemResult } from 'schemas';
 import { relayMaxPoints } from './relay-results';
 
@@ -26,6 +26,7 @@ export function RelayEndTable(props: { allPoints: number, problems: RelayProblem
       onBack={backToHome}
     >
       <RelayResultsTable problems={props.problems} details transposeOnPhone/>
+      <RelayOutcome problems={props.problems}/>
     </EndCard>
   );
 }

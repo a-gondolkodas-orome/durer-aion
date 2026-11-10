@@ -16,14 +16,17 @@ const COLUMNS_PER_ROW = 10;
 const SHOWN_GAMES = 6;
 
 const LINE = '#cccccc';
-const HEADER = '#eeeeee';
+const MUTED = '#57606a';
+const RULE = '#eaeef2';
+const TILE_BORDER = '#d0d7de';
 // Paler with each try, so the order reads by lightness alone, without
 // telling hues apart.
-export const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
-export const WRONG = '#f4b4ae';
-// Striped rather than grey, so a problem never answered, or a game the time
-// ran out in, cannot be mistaken for a header cell.
-export const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
+const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
+const WRONG = '#f4b4ae';
+// A problem's points as a tile, set off from the plain cells around it. A
+// problem never answered is an empty tile: outlined, so it still reads as one.
+const tileSx = { borderRadius: '6px', margin: '2px' };
+const unansweredSx = { ...tileSx, backgroundColor: '#fff', boxShadow: `inset 0 0 0 1px ${TILE_BORDER}`, color: '#888' };
 
 interface Cell {
   content: ReactNode;
@@ -37,12 +40,14 @@ interface Row {
   cells: Cell[];
 }
 
-const headerSx = { backgroundColor: HEADER, fontWeight: 600 };
+// Headers are told apart by colour and size alone: the tables draw no lines
+// between cells and fill no header.
+const headerSx = { color: MUTED, fontSize: '0.8em' };
 
 function CellBox(props: { cell: Cell }) {
   const { cell } = props;
   const box = <Box sx={[
-    { padding: '6px 2px', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    { padding: '6px 2px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     cell.sx ?? {},
     cell.details !== undefined && { cursor: 'help' },
   ]}>
@@ -53,14 +58,14 @@ function CellBox(props: { cell: Cell }) {
   return cell.details === undefined ? box : <Tooltip title={cell.details} enterTouchDelay={0} arrow>{box}</Tooltip>;
 }
 
-// The frame the result tables share: thin lines drawn by the gaps.
 const gridFrameSx = {
   display: 'grid',
-  gap: '1px',
-  border: `1px solid ${LINE}`,
-  backgroundColor: LINE,
   textAlign: 'center',
 } as const;
+
+// A hairline above every row after the first under the header, so a time or
+// an answer is not read as belonging to the points above it.
+const ruledSx = { borderTop: `1px solid ${RULE}` };
 
 const labelSx = { ...headerSx, justifyContent: 'flex-start', paddingX: '8px' };
 
@@ -112,8 +117,9 @@ function ResultTable(props: {
           '@supports not (grid-template-columns: subgrid)': { gridTemplateColumns: template(cells) },
         }}>
           {rows.map((row, rowIdx) => <Fragment key={rowIdx}>
-            <CellBox cell={{ content: row.label, sx: labelSx }}/>
-            {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) => <CellBox key={idx} cell={cell}/>)}
+            <CellBox cell={{ content: row.label, sx: rowIdx < 2 ? labelSx : { ...labelSx, ...ruledSx } }}/>
+            {row.cells.slice(start, start + COLUMNS_PER_ROW).map((cell, idx) =>
+              <CellBox key={idx} cell={rowIdx < 2 ? cell : { ...cell, sx: { ...ruledSx, ...cell.sx } }}/>)}
           </Fragment>)}
         </Box>;
       })}
@@ -159,7 +165,7 @@ export function RelayResultsTable(props: {
     if (tries === 0) {
       return {
         content: `0/${problem.maxPoints}`,
-        sx: { background: UNANSWERED, color: '#888' },
+        sx: unansweredSx,
         details: props.details ? t('relay.endTable.unanswered') : undefined,
       };
     }
@@ -173,7 +179,7 @@ export function RelayResultsTable(props: {
         : t('relay.endTable.wrongTries', { count: tries });
     return {
       content: <span><b>{problem.points}</b>/{problem.maxPoints}</span>,
-      sx: { backgroundColor: solved ? SOLVED_ON_TRY[tries - 1] : WRONG },
+      sx: { ...tileSx, backgroundColor: solved ? SOLVED_ON_TRY[tries - 1] : WRONG },
       details: props.details
         ? `${t('relay.endTable.pointsOf', { points: problem.points, max: problem.maxPoints })}: ${outcome}`
         : undefined,
@@ -199,6 +205,40 @@ export function RelayResultsTable(props: {
     });
   }
   return <ResultTable headerLabel={t('relay.endTable.task')} rows={rows} transposeOnPhone={props.transposeOnPhone}/>;
+}
+
+/**
+ * What the colours of RelayResultsTable mean, one swatch each. It takes the
+ * colour of the text around it, so it reads in a tooltip as well as on a page.
+ */
+export function RelayKey() {
+  const { t } = useTranslation();
+  const items: { label: string, sx: SystemStyleObject<Theme> }[] = [
+    ...SOLVED_ON_TRY.map((backgroundColor, idx) => ({ label: t('relay.key.onTry', { try: idx + 1 }), sx: { backgroundColor } })),
+    { label: t('relay.key.wrong'), sx: { backgroundColor: WRONG } },
+    { label: t('relay.key.unanswered'), sx: unansweredSx },
+  ];
+  return <Box component="ul" aria-label={t('relay.key.label')} sx={{
+    display: 'flex', flexWrap: 'wrap', gap: '6px 14px', margin: 0, padding: 0, listStyle: 'none',
+  }}>
+    {items.map(it => <Box component="li" key={it.label} sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <Box sx={[{ width: '14px', height: '14px', borderRadius: '4px' }, it.sx, { margin: 0 }]}/>
+      {it.label}
+    </Box>)}
+  </Box>;
+}
+
+/**
+ * A finished relay told in one line, how many problems it solved, with the
+ * table's colour key behind an ⓘ: the team sees the colours with no other key.
+ */
+export function RelayOutcome(props: { problems: RelayProblemResult[] }) {
+  const { t } = useTranslation();
+  const solved = props.problems.filter(problem => problem.points > 0).length;
+  return <Box sx={{ fontSize: '15px', lineHeight: 1.45, textAlign: 'center' }}>
+    {t('relay.endTable.solved', { solved, total: props.problems.length })}
+    <InfoTip label={t('relay.key.label')}><RelayKey /></InfoTip>
+  </Box>;
 }
 
 /**
