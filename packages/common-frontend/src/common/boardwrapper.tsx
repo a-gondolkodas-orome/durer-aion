@@ -163,7 +163,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                       gap: '8px',
                     }}
                   >
-                    <StrategyGamesTable results={G.liveResults}/>
+                    <StrategyGamesTable results={G.liveResults} points={G.points}/>
                     {/* What winning the match is worth now: two live wins in a
                         row earn the points the losses so far leave. */}
                     <Stack sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>

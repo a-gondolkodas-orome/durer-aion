@@ -351,7 +351,7 @@ function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
       <RelayLegend/>
     </Stack>}
     {strategyG && (strategyG.liveResults.length > 0 || gameInPlay) && <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
-      <StrategyGamesTable results={strategyG.liveResults}/>
+      <StrategyGamesTable results={strategyG.liveResults} points={strategyG.points}/>
       {gameInPlay && <Box sx={{ fontSize: 13, color: MUTED }}>
         A {strategyG.numberOfTries}. játszma most tart, a táblázatba a végén kerül be.
       </Box>}
