@@ -1,13 +1,11 @@
 import { Box, Tooltip } from '@mui/material';
 import type { SystemStyleObject, Theme } from '@mui/system';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES } from 'game';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
 import { formatDuration } from './relay-results';
+import { InfoTip } from './InfoTip';
 
 // A long problem set continues in further rows of this many columns, each
 // column under the one above it.
@@ -23,7 +21,6 @@ const HEADER = '#eeeeee';
 // telling hues apart.
 export const SOLVED_ON_TRY = ['#4caf50', '#a5d6a7', '#d0ebcb'];
 export const WRONG = '#f4b4ae';
-const WON = '#c9efb8';
 // Striped rather than grey, so a problem never answered, or a game the time
 // ran out in, cannot be mistaken for a header cell.
 export const UNANSWERED = `repeating-linear-gradient(135deg, #fff 0px, #fff 6px, #e4e4e4 6px, #e4e4e4 8px)`;
@@ -231,80 +228,111 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
   </Box>;
 }
 
-const RESULT_ICON: Record<LiveGameResult, { icon: ReactNode, background: string }> = {
-  won: { icon: <CheckIcon fontSize="small" sx={{ color: '#1b5e20' }}/>, background: WON },
-  lost: { icon: <CloseIcon fontSize="small" sx={{ color: '#8e2b23' }}/>, background: WRONG },
-  unfinished: { icon: <HourglassEmptyIcon fontSize="small" sx={{ color: '#666' }}/>, background: UNANSWERED },
-};
+/// One live game as the strategy screens show it: a ✓, ✗ or – square, or a
+/// dashed one for a game still to play. Only a win that `scored` is coloured;
+/// every other game is a plain square, its glyph saying what it was. `label`
+/// names it for a screen reader.
+export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string, scored?: boolean }) {
+  const { kind, n, label } = props;
+  return (
+    <Box role="img" aria-label={label} title={label} sx={{
+      width: '28px', height: '28px', borderRadius: '7px', boxSizing: 'border-box', flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700,
+      ...(props.scored ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
+        : kind === 'next' ? { border: '2px dashed #8c959f', color: '#8c959f' }
+        : { backgroundColor: '#fff', border: '1px solid #d0d7de', color: '#57606a' }),
+    }}>
+      {kind === 'won' ? '✓' : kind === 'lost' ? '✗' : kind === 'unfinished' ? '–' : `${n}.`}
+    </Box>
+  );
+}
 
-/** The latest live strategy games' results, in the order played. */
-export function StrategyGamesTable(props: { results: LiveGameResult[] }) {
+/// A game's number over its square, or with `n` null the same room left empty,
+/// so what stands beside the squares lines up with them.
+function Numbered(props: { n: number | null, children: ReactNode }) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+      <Box aria-hidden sx={{ height: '14px', fontSize: '11px', lineHeight: '14px', color: '#57606a' }}>{props.n === null ? '' : `${props.n}.`}</Box>
+      <Box sx={{ minHeight: '28px', display: 'flex', alignItems: 'center' }}>{props.children}</Box>
+    </Box>
+  );
+}
+
+/**
+ * The latest live strategy games, in the order played, as a row of squares
+ * each numbered above: earlier ones are counted behind a … marker. With
+ * `points`, a match that scored has the two wins that earned them coloured;
+ * the points themselves are the headline's.
+ */
+export function StrategyGamesTable(props: { results: LiveGameResult[], points?: number }) {
   const { t } = useTranslation();
-  if (props.results.length === 0) {
+  const { results } = props;
+  if (results.length === 0) {
     return null;
   }
-  const first = Math.max(0, props.results.length - SHOWN_GAMES);
-  const shown = props.results.slice(first);
+  const hidden = Math.max(0, results.length - SHOWN_GAMES);
+  const run = props.points !== undefined && props.points > 0 ? 2 : 0;
+  const runStart = Math.max(hidden, results.length - run);
   // Spelled out key by key: the i18n check finds a key only as a literal.
   const label: Record<LiveGameResult, string> = {
     won: t('strategy.endTable.won'),
     lost: t('strategy.endTable.lost'),
     unfinished: t('strategy.endTable.unfinished'),
   };
-  return <ResultTable
-    centred
-    headerLabel={t('strategy.endTable.game')}
-    columnLabels={shown.map((_, idx) => `${first + idx + 1}.`)}
-    rows={[{
-      label: t('strategy.endTable.result'),
-      cells: shown.map(result => ({
-        content: <Box component="span" role="img" aria-label={label[result]} title={label[result]} sx={{ display: 'flex' }}>
-          {RESULT_ICON[result].icon}
-        </Box>,
-        sx: { background: RESULT_ICON[result].background },
-      })),
-    }]}
-  />;
-}
-
-/**
- * How the strategy points follow from the losses, the team's own column
- * marked if it scored. Each column's points differ, so the points pick it out.
- */
-export function PointsScale(props: { points: number }) {
-  const { t } = useTranslation();
-  const last = STRATEGY_POINTS_BY_LOSSES.length - 1;
-  const mark = (points: number) => points === props.points ? { backgroundColor: WON, fontWeight: 700 } : undefined;
-  return <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-    <ResultTable
-      centred
-      headerLabel={t('strategy.endTable.losses')}
-      columnLabels={STRATEGY_POINTS_BY_LOSSES.map((_, losses) => `${losses}${losses === last ? '+' : ''}`)}
-      rows={[{
-        label: t('strategy.endTable.points'),
-        cells: STRATEGY_POINTS_BY_LOSSES.map(points => ({ content: points, sx: mark(points) })),
-      }]}
-    />
-    <Box sx={{ fontSize: '13px', color: '#666', lineHeight: 1.6, textAlign: 'center' }}>
-      {t('strategy.endTable.rules')}
+  const cell = (result: LiveGameResult, i: number) =>
+    <Numbered key={i} n={i + 1}><LiveGameCell kind={result} n={i + 1} label={label[result]} scored={i >= runStart && run > 0} /></Numbered>;
+  return (
+    <Box role="group" aria-label={t('strategy.series.label')} sx={{
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px',
+    }}>
+      <Numbered n={null}><Box sx={{ fontSize: '13px', color: '#57606a', marginRight: '6px' }}>{t('strategy.series.label')}</Box></Numbered>
+      {hidden > 0 && <Numbered n={null}><Box role="img" aria-label={t('strategy.series.earlier', { count: hidden })}
+        title={t('strategy.series.earlier', { count: hidden })} sx={{ fontWeight: 700, color: '#57606a', padding: '0 4px' }}>…</Box></Numbered>}
+      {results.slice(hidden).map((result, i) => cell(result, hidden + i))}
     </Box>
-  </Box>;
+  );
 }
 
 /**
  * How the strategy points follow from the live games, in words, with two
- * example runs. The numbers come from the scale the game scores by.
+ * example runs: the home card's tooltip. The numbers come from the scale the
+ * game scores by.
  */
 export function StrategyPointsRule() {
   const { t } = useTranslation();
   const [clean, afterOneLoss] = STRATEGY_POINTS_BY_LOSSES;
   return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
-    {t('strategy.points.text', { max: clean, min: STRATEGY_POINTS_BY_LOSSES.at(-1), scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') })}
+    <PointsRuleText />
     <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
     <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
       <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
       <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
     </Box>
+  </Box>;
+}
+
+function PointsRuleText() {
+  const { t } = useTranslation();
+  return <>{t('strategy.points.text', { max: STRATEGY_POINTS_BY_LOSSES[0], min: STRATEGY_POINTS_BY_LOSSES.at(-1), scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') })}</>;
+}
+
+/**
+ * A finished match's points told on its own run, in one sentence, with the
+ * rule behind an ⓘ: after the match the team's own case is what it reads.
+ */
+export function StrategyOutcome(props: { results: LiveGameResult[], points: number }) {
+  const { t } = useTranslation();
+  // Points come only with two live wins in a row, and then they are the ones
+  // the live losses before them left.
+  const losses = props.results.filter(result => result === 'lost').length;
+  const points = t('general.points', { count: props.points });
+  const outcome = props.results.length === 0 ? t('strategy.points.outcomeNoGames')
+    : props.points === 0 ? t('strategy.points.outcomeNone')
+    : losses === 0 ? t('strategy.points.outcomeClean', { points })
+    : t('strategy.points.outcomeAfterLosses', { count: losses, points });
+  return <Box sx={{ fontSize: '15px', lineHeight: 1.45, textAlign: 'center' }}>
+    {outcome}
+    <InfoTip label={t('strategy.points.label')}><PointsRuleText /></InfoTip>
   </Box>;
 }
 
