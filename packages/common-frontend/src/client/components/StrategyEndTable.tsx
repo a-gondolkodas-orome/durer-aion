@@ -3,8 +3,7 @@ import type { LiveGameResult } from 'schemas';
 import { useBackToHome, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { EndCard } from './EndCard';
-import { Box } from '@mui/material';
-import { StrategyGamesTable, StrategyPointsRule } from './ResultTables';
+import { StrategyGamesTable, StrategyOutcome } from './ResultTables';
 
 /**
  * The strategy match's end screen: its score, live games and how points follow, and
@@ -24,9 +23,7 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       onBack={backToHome}
     >
       <StrategyGamesTable results={props.liveResults} points={props.allPoints}/>
-      <Box sx={{ backgroundColor: '#f6f8fa', borderRadius: '10px', padding: '10px 14px' }}>
-        <StrategyPointsRule results={props.liveResults} points={props.allPoints}/>
-      </Box>
+      <StrategyOutcome results={props.liveResults} points={props.allPoints}/>
     </EndCard>
   );
 }

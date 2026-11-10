@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES } from 'game';
 import type { LiveGameResult, RelayProblemResult } from 'schemas';
 import { formatDuration } from './relay-results';
+import { InfoTip } from './InfoTip';
 
 // A long problem set continues in further rows of this many columns, each
 // column under the one above it.
@@ -307,25 +308,34 @@ export function StrategyGamesTable(props: { results: LiveGameResult[], points?: 
 }
 
 /**
- * How the strategy points follow from the live games, in words: the home
- * card's tooltip and the end screen say it alike. Before the match two example
- * runs show it; after it, `results` and `points` show it on the team's own run
- * instead. The numbers come from the scale the game scores by.
+ * How the strategy points follow from the live games, in words, with two
+ * example runs: the home card's tooltip. The numbers come from the scale the
+ * game scores by.
  */
-export function StrategyPointsRule(props: { results?: LiveGameResult[], points?: number }) {
+export function StrategyPointsRule() {
   const { t } = useTranslation();
   const [clean, afterOneLoss] = STRATEGY_POINTS_BY_LOSSES;
-  const rule = t('strategy.points.text', { max: clean, min: STRATEGY_POINTS_BY_LOSSES.at(-1), scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') });
-  if (props.results === undefined || props.points === undefined) {
-    return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
-      {rule}
-      <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
-      <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
-        <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
-        <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
-      </Box>
-    </Box>;
-  }
+  return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
+    <PointsRuleText />
+    <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
+    <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
+      <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
+      <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
+    </Box>
+  </Box>;
+}
+
+function PointsRuleText() {
+  const { t } = useTranslation();
+  return <>{t('strategy.points.text', { max: STRATEGY_POINTS_BY_LOSSES[0], min: STRATEGY_POINTS_BY_LOSSES.at(-1), scale: STRATEGY_POINTS_BY_LOSSES.join(' → ') })}</>;
+}
+
+/**
+ * A finished match's points told on its own run, in one sentence, with the
+ * rule behind an ⓘ: after the match the team's own case is what it reads.
+ */
+export function StrategyOutcome(props: { results: LiveGameResult[], points: number }) {
+  const { t } = useTranslation();
   // Points come only with two live wins in a row, and then they are the ones
   // the live losses before them left.
   const losses = props.results.filter(result => result === 'lost').length;
@@ -334,9 +344,9 @@ export function StrategyPointsRule(props: { results?: LiveGameResult[], points?:
     : props.points === 0 ? t('strategy.points.outcomeNone')
     : losses === 0 ? t('strategy.points.outcomeClean', { points })
     : t('strategy.points.outcomeAfterLosses', { count: losses, points });
-  return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
-    {rule}
-    <Box sx={{ marginTop: '6px', fontWeight: 600 }}>{outcome}</Box>
+  return <Box sx={{ fontSize: '15px', lineHeight: 1.45, textAlign: 'center' }}>
+    {outcome}
+    <InfoTip label={t('strategy.points.label')}><PointsRuleText /></InfoTip>
   </Box>;
 }
 
