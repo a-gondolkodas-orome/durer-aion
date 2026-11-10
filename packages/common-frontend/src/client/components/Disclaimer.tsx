@@ -1,5 +1,7 @@
 import { Button } from "@mui/material";
-import { Stack, alpha } from "@mui/system";
+import { Stack } from "@mui/system";
+import ArrowForwardRounded from "@mui/icons-material/ArrowForwardRounded";
+import { cardButtonSx, cardSx } from "./card";
 import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
@@ -14,28 +16,12 @@ export function Disclaimer(props: { teamName: string, category: string }) {
   return (
     <Stack
       sx={{
-        display: "flex",
-        height: {
-          xs: "100%",
-          md: "auto",
-        },
-        width: {
-          xs: "100%",
-          md: "calc(100% - 80px)",
-        },
-        padding: {
-          xs: "10px",
-          md: "40px"
-        },
+        ...cardSx(theme),
+        flexDirection: "column",
         margin: {
-          xs: 0,
-          md: "40px"
+          xs: "16px 12px",
+          md: "40px 24px",
         },
-        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
-        borderRadius: {
-          xs: 0,
-          md: "30px",
-        }
       }}
       data-testid={"disclaimerRoot"}
     >
@@ -141,13 +127,13 @@ export function Disclaimer(props: { teamName: string, category: string }) {
             xs: "100%",
             sm: "350px",
           },
-          height: "60px",
-          fontSize: "26px",
+          ...cardButtonSx,
           alignSelf: "center",
-          textTransform: "none",
         }}
         variant="contained"
         color="primary"
+        disableElevation
+        endIcon={<ArrowForwardRounded />}
         onClick={() => {
           void goHome();
         }}

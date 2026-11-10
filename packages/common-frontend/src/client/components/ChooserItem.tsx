@@ -11,11 +11,12 @@ import { formatTime } from '../utils/DateFormatter';
 import { useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { Theme, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { PointsScale, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyPointsRule } from './ResultTables';
 import { relayMaxPoints } from './relay-results';
+import { cardButtonSx, cardSx } from './card';
 
 /**
  * One round on the home page: its rules and the button that starts it, or once
@@ -115,13 +116,9 @@ export function ChooserItem(props: {
         <Button sx={{
           width: '100%',
           maxWidth: "600px",
-          height: '56px',
+          ...cardButtonSx,
           marginTop: 'auto',
-          fontSize: '20px',
-          fontWeight: 600,
-          borderRadius: '12px',
           alignSelf: 'center',
-          textTransform: 'none',
         }} variant='contained' color='primary' disableElevation endIcon={<ArrowForwardRounded />} onClick={() => {
           setStarting(true);
           void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
@@ -132,16 +129,6 @@ export function ChooserItem(props: {
     </Stack>
   )
 }
-
-/// The home page's card: its two rounds, and the final score above them.
-export const cardSx = (theme: Theme) => ({
-  display: 'flex',
-  padding: { xs: '20px', md: '32px' },
-  borderRadius: '16px',
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06)',
-  backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
-});
 
 const BOLD = { b: <b /> };
 

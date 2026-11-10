@@ -92,9 +92,12 @@ export function Login() {
                 // The card is narrower than this on the smallest phones.
                 maxWidth: '100%',
                 boxSizing: 'border-box',
-                height: '40px',
+                height: '48px',
+                padding: '0 14px',
                 borderWidth: '2px',
-                borderRadius: '5px',
+                borderStyle: 'solid',
+                borderRadius: '12px',
+                outlineColor: theme.palette.primary.main,
                 borderColor: theme.palette.primary.main,
                 fontSize: '18px',
               }}
@@ -108,10 +111,13 @@ export function Login() {
               sx={{
                 flex: '1 1 250px',
                 maxWidth: '300px',
-                height: '40px',
-                borderRadius: '5px',
+                height: '48px',
+                borderRadius: '12px',
                 fontSize: '18px',
+                fontWeight: 600,
+                textTransform: 'none',
               }}
+              disableElevation
             >
               {t('login.loginButton')}
             </Button>

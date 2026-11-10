@@ -1,6 +1,7 @@
 import { Stack } from "@mui/system";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
-import { ChooserItem, cardSx } from "./ChooserItem";
+import { ChooserItem } from "./ChooserItem";
+import { cardSx } from "./card";
 import { ScoreHeadline } from "./ResultTables";
 import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
