@@ -178,7 +178,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     let tone: Tone = 'plain';
     let sub = '';
     let actions: ReactNode = null;
-    let callout: ReactNode = null;
+    // On wider screens, a fuller line in place of `sub`.
+    let subWide: string | null = null;
     let intro: ReactNode = null;
     // The explanation of practice against live sits next to the next-game
     // buttons when they are there, in the corner otherwise.
@@ -211,11 +212,15 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
       actions = nextGame;
       infoBeside = true;
       // Before the first live game the team is about to choose one, so how it
-      // may differ from practice comes once more, under its button: after a
-      // win, that the practice computer may not have played its best; after a
-      // loss that would read oddly, so only a varying start is worth saying.
-      if (practice && G.numberOfTries === 0 && (lastResult === 'won' || startVaries)) {
-        callout = <LiveHint after={lastResult} startVaries={startVaries} />;
+      // may differ from practice comes once more, in the line under the result:
+      // after a win, that the practice computer may not have played its best;
+      // after a loss that would read oddly, so only a varying start is worth
+      // saying. Phones keep the short line, as the longer one would wrap and
+      // move the board; the ⓘ beside the buttons says it there.
+      if (practice && G.numberOfTries === 0) {
+        subWide = lastResult === 'won'
+          ? (startVaries ? t('strategy.result.practiceNoteBotVaries') : t('strategy.result.practiceNoteBot'))
+          : startVaries ? t('strategy.result.practiceNoteStart') : null;
       }
     } else if (ctx.phase === 'chooseRole') {
       status = t('strategy.status.role');
@@ -307,7 +312,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
           </Stack>
           <Box sx={{ position: 'relative' }}>
             <GameArea mode={difficulty} liveNumber={G.numberOfTries} side={side}
-              status={status} tone={tone} sub={sub} actions={actions} callout={callout} intro={intro}
+              status={status} tone={tone} sub={sub} subWide={subWide} actions={actions} intro={intro}
               info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
               <BoardArea state={boardState}>{board({ ...props, setTurnState })}</BoardArea>
             </GameArea>
@@ -414,7 +419,7 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: 
 /// board does not move from one state to the next.
 function GameArea(props: {
   mode: Difficulty | null, liveNumber: number, side: string | null, status: string, tone: Tone, sub: string,
-  actions: ReactNode, callout: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
+  subWide: string | null, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
   children: ReactNode,
 }) {
   const { mode, tone } = props;
@@ -443,11 +448,15 @@ function GameArea(props: {
         {props.status}
       </Box>
       {props.intro ?? <>
-        <Box sx={{ minHeight: '22px', textAlign: 'center', fontSize: '15px', color: MUTED }}>{props.sub}</Box>
+        <Box sx={{ minHeight: '22px', textAlign: 'center', fontSize: '15px', color: MUTED }}>
+          {props.subWide === null ? props.sub : <>
+            <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{props.sub}</Box>
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{props.subWide}</Box>
+          </>}
+        </Box>
         <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
           {props.actions}
           {props.infoBeside && <Box sx={{ position: 'absolute', left: 'calc(50% + 244px)' }}>{props.info}</Box>}
-          {props.callout}
         </Stack>
         {props.children}
       </>}
@@ -540,25 +549,6 @@ function Intro(props: { enabled: boolean, startVaries: boolean, moves: StrategyW
 }
 
 /// Under the live button after a practice game, until the first live one:
-/// how a live game may differ from practice, in facts only.
-function LiveHint(props: { after: 'won' | 'lost', startVaries: boolean }) {
-  const { t } = useTranslation();
-  const { after, startVaries } = props;
-  const text = after === 'won'
-    ? (startVaries ? t('strategy.liveHint.practiceBotVaries') : t('strategy.liveHint.practiceBot'))
-    : t('strategy.liveHint.startDiffers');
-  return (
-    <Box role="note" sx={{
-      position: 'absolute', top: '56px', zIndex: 2,
-      left: { xs: 0, sm: 'calc(50% - 40px)' }, right: { xs: 0, sm: 'auto' }, width: { sm: '340px' },
-      backgroundColor: '#fff', border: `1px solid ${LIVE}`, borderRadius: '12px', boxShadow: '0 10px 24px rgba(0,0,0,.14)',
-      padding: '12px 14px', fontSize: '14px', lineHeight: 1.45, textAlign: 'left',
-    }}>
-      {text}
-    </Box>
-  );
-}
-
 /// Practice against live, behind an ⓘ: the explanation the first choice gave.
 function InfoButton(props: { startVaries: boolean }) {
   const { t } = useTranslation();

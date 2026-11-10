@@ -164,11 +164,6 @@
       "practiceTextVaries": "Nem számít a pontozásba. Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban, és a kezdőállás is más lehet.",
       "title": "Milyen játszmával kezdtek?"
     },
-    "liveHint": {
-      "practiceBot": "A próbagép nem feltétlenül játszik a legjobban.",
-      "practiceBotVaries": "A próbagép nem feltétlenül játszik a legjobban, és az éles kezdőállás is más lehet.",
-      "startDiffers": "Az éles játszmák kezdőállása más lehet, mint a próbajátéké."
-    },
     "mode": {
       "live": "ÉLES · {{n}}. játszma",
       "practice": "PRÓBAJÁTÉK"
@@ -196,6 +191,9 @@
       "liveWonFirst": "Ha a következő éles játszmát is megnyeritek, teljesítettétek a feladatot.",
       "practiceLost": "A gép nyert a próbajátékban.",
       "practiceNote": "Ez nem számít a pontozásba.",
+      "practiceNoteBot": "Ez nem számít a pontozásba, és a próbagép nem feltétlenül játszik a legjobban.",
+      "practiceNoteBotVaries": "Ez nem számít a pontozásba; a próbagép nem feltétlenül játszik a legjobban, és az éles kezdőállás is más lehet.",
+      "practiceNoteStart": "Ez nem számít a pontozásba, és az éles játszmák kezdőállása más lehet.",
       "practiceWon": "Nyertetek a próbajátékban.",
       "timeUp": "Lejárt az idő.",
       "unfinished": "Ez a játszma befejezetlen maradt."

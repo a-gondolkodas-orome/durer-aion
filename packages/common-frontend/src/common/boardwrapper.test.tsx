@@ -154,7 +154,6 @@ describe('between games', () => {
     expect(status()).toHaveTextContent('strategy.result.liveLost');
     expect(button('strategy.next.practice')).toBeEnabled();
     expect(button('strategy.next.live')).toBeEnabled();
-    expect(screen.queryByRole('note')).not.toBeInTheDocument();
     expect(button('strategy.info.label')).toBeInTheDocument();
     // The final position stays to read, but not to play.
     expect(boardArea()).toHaveAttribute('data-state', 'locked');
@@ -167,17 +166,17 @@ describe('between games', () => {
 
     expect(status()).toHaveTextContent('strategy.result.practiceWon');
     expect(screen.getByText('strategy.result.practiceNote')).toBeInTheDocument();
-    expect(screen.getByRole('note')).toHaveTextContent('strategy.liveHint.practiceBot');
+    expect(screen.getByText('strategy.result.practiceNoteBot')).toBeInTheDocument();
   });
 
-  test('after a practice loss in a game whose start is fixed, adds no callout', () => {
+  test('after a practice loss in a game whose start is fixed, adds nothing', () => {
     renderBoard(betweenGames, { difficulty: 'test', winner: JUDGE_PLAYER, numberOfTries: 0 });
-    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(screen.queryByText('strategy.result.practiceNoteStart')).not.toBeInTheDocument();
   });
 
   test('after a practice loss in a game whose start varies, says so', () => {
     renderBoard(betweenGames, { difficulty: 'test', winner: JUDGE_PLAYER, numberOfTries: 0 }, NamedBoard);
-    expect(screen.getByRole('note')).toHaveTextContent('strategy.liveHint.startDiffers');
+    expect(screen.getByText('strategy.result.practiceNoteStart')).toBeInTheDocument();
   });
 
   test('says after the first live win that one more completes the task', () => {
@@ -190,7 +189,7 @@ describe('between games', () => {
   test('leaves the explanation behind the ⓘ once a live game was played', () => {
     renderBoard(betweenGames, { difficulty: 'test', winner: GUESSER_PLAYER, numberOfTries: 1, liveResults: ['lost'] });
 
-    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    expect(screen.queryByText('strategy.result.practiceNoteBot')).not.toBeInTheDocument();
     expect(button('strategy.info.label')).toBeInTheDocument();
   });
 

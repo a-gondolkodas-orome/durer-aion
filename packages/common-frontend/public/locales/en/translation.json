@@ -168,11 +168,6 @@
       "practiceTextVaries": "Does not count towards your score. Try out how the game goes, and check that you understand the rules. The computer may not play its best here, and the starting position may differ.",
       "title": "Which kind of game do you start with?"
     },
-    "liveHint": {
-      "practiceBot": "The practice computer may not play its best.",
-      "practiceBotVaries": "The practice computer may not play its best, and the live starting position may differ.",
-      "startDiffers": "Live games may start from a different position than the practice game."
-    },
     "mode": {
       "live": "LIVE · game {{n}}",
       "practice": "PRACTICE"
@@ -200,6 +195,9 @@
       "liveWonFirst": "Win the next live game too, and the task is done.",
       "practiceLost": "The computer won the practice game.",
       "practiceNote": "This does not count towards your score.",
+      "practiceNoteBot": "This does not count towards your score, and the practice computer may not play its best.",
+      "practiceNoteBotVaries": "This does not count towards your score; the practice computer may not play its best, and the live starting position may differ.",
+      "practiceNoteStart": "This does not count towards your score, and live games may start from a different position.",
       "practiceWon": "You won the practice game.",
       "timeUp": "Time is up.",
       "unfinished": "This game was left unfinished."
