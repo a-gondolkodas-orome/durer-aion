@@ -198,6 +198,11 @@
       "outcomeNone": "You did not get two live wins in a row, so you got 0 points.",
       "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; live losses lower it ({{scale}}), but never below {{min}}. After a loss you need two wins in a row again."
     },
+    "role": {
+      "first": "First",
+      "second": "Second",
+      "you": "You:"
+    },
     "series": {
       "earlier_one": "{{count}} earlier live game",
       "earlier_other": "{{count}} earlier live games",

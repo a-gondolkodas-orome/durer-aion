@@ -20,7 +20,7 @@ export function MyClient<T_SpecificGameState>(
 ) {
   return Client({
     game: gameWrapper(game),
-    board: boardWrapper(board, description),
+    board: boardWrapper(board, description, game),
     numPlayers: 2,
   });
 }
@@ -51,7 +51,7 @@ export function MyOnlineClient<T_SpecificGameState>(
 ) {
   return Client({
     game: gameWrapper(game),
-    board: withConnectionAlert(boardWrapper(board, description)),
+    board: withConnectionAlert(boardWrapper(board, description, game)),
     multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
