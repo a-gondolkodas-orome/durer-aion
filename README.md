@@ -434,7 +434,10 @@ that before a competition.
    - `game.ts` — the boardgame.io game definition
    - `strategy.ts` — the server bot, plus any lookup tables it imports
    - `board.tsx` — the React component for the game board
-   - `main.tsx` — the game description shown to players
+   - `main.tsx` — the game description shown to players: the game's own rules
+     only. The board wrapper ends every description with what all the games
+     share, the choice of role and the two wins in a row (`strategy.rulesCommon`),
+     so a description that says it too shows it twice
 
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are

@@ -60,6 +60,13 @@ type Tone = 'plain' | 'wait' | 'won' | 'lost';
 
 const pointsText = (t: TFunction, count: number) => t('general.points', { count });
 
+// A pair of buttons above the board: each button's width from `sm` up, and
+// the gap between them. The ⓘ beside the pair is placed from the two, so the
+// pair itself stays centred over the board.
+const PAIR_BUTTON_WIDTH = 230;
+const PAIR_GAP = 12;
+const INFO_BESIDE_LEFT = `calc(50% + ${PAIR_BUTTON_WIDTH + PAIR_GAP / 2 + 8}px)`;
+
 /// The rules are in a dialog before the first game, behind a button after it.
 /// The game's own `presentation` words its roles and the team's next step; the
 /// wrapper decides where and when they show.
@@ -438,7 +445,9 @@ function GameArea(props: {
       {/* Before the first game the choice itself says it all: no mode yet,
           and the explanation is under each button. */}
       {props.intro === null &&
-        <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: '28px' }}>
+        // A fixed height, not a minimum: the ⓘ is taller than the mode line and
+        // is in this row only in some states, so the board would move with it.
+        <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: '28px' }}>
           <ModeLine mode={mode} liveNumber={props.liveNumber} />
           {!props.infoBeside && props.info}
         </Stack>}
@@ -452,7 +461,9 @@ function GameArea(props: {
         {props.status}
       </Box>
       {props.intro ?? <>
-        <Box sx={{ minHeight: '22px', textAlign: 'center', fontSize: '15px', color: MUTED }}>
+        {/* One line of text is as tall as the empty line, so the board stays
+            put; only a line that wraps on a phone moves it. */}
+        <Box sx={{ minHeight: '22px', lineHeight: '22px', textAlign: 'center', fontSize: '15px', color: MUTED }}>
           {props.subWide === null ? props.sub : <>
             <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{props.sub}</Box>
             <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{props.subWide}</Box>
@@ -460,7 +471,7 @@ function GameArea(props: {
         </Box>
         <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {/* Stretched, so a pair whose one label wraps keeps one height. */}
-          <Stack sx={{ flexDirection: 'row', alignItems: 'stretch', justifyContent: 'center', gap: '12px', width: '100%' }}>{props.actions}</Stack>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'stretch', justifyContent: 'center', gap: `${PAIR_GAP}px`, width: '100%' }}>{props.actions}</Stack>
           {/* During play the row is free: the role the team chose sits on the
               board's left edge, as its caption, for a team that looks at the
               board and wonders which side is theirs. Muted: a reminder, not
@@ -476,7 +487,7 @@ function GameArea(props: {
               {t('strategy.role.you')} <span>{props.role}</span>
             </Box>
           </Box>}
-          {props.infoBeside && <Box sx={{ position: 'absolute', left: 'calc(50% + 244px)' }}>{props.info}</Box>}
+          {props.infoBeside && <Box sx={{ position: 'absolute', left: INFO_BESIDE_LEFT }}>{props.info}</Box>}
         </Stack>
         {props.children}
       </>}
@@ -527,7 +538,7 @@ function PairButton(props: { variant: 'role' | 'practice' | 'live', enabled: boo
       disabled={!props.enabled}
       onClick={props.onClick}
       sx={{
-        width: { xs: 'calc(50% - 6px)', sm: '230px' }, minHeight: '44px', fontSize: '16px', fontWeight: 600,
+        width: { xs: `calc(50% - ${PAIR_GAP / 2}px)`, sm: `${PAIR_BUTTON_WIDTH}px` }, minHeight: '44px', fontSize: '16px', fontWeight: 600,
         textTransform: 'none', borderRadius: '10px',
         ...(variant === 'live' && { backgroundColor: LIVE, '&:hover': { backgroundColor: LIVE_DARK } }),
         ...(variant === 'practice' && { borderWidth: '2px', borderColor: '#8c959f', color: 'text.primary', '&:hover': { borderWidth: '2px' } }),
