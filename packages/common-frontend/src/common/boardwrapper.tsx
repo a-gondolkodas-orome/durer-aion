@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
-import { LiveGameCell, LiveGameRun } from "../client/components/ResultTables";
+import { LIVE_COLOUR, LiveGameCell, LiveGameRun } from "../client/components/ResultTables";
 import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
@@ -37,7 +37,7 @@ export type StrategyDescription = Localizable<ReactNode>;
 // all that changes from state to state. The mode's colour is kept to the game
 // area's top edge and its mode line; solid against dashed, a filled dot
 // against a hollow one, so the mode reads without telling colours apart.
-const LIVE = '#c2410c';
+const LIVE = LIVE_COLOUR;
 const LIVE_DARK = '#9a3412';
 const PRACTICE = '#475569';
 const PRACTICE_BORDER = '#64748b';
@@ -283,7 +283,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
           }}>
             <Box sx={{ fontSize: '18px', fontWeight: 700 }}>{t('strategy.name')}</Box>
             <Box sx={{ order: { xs: 2, md: 0 }, width: { xs: '100%', md: 'auto' } }}>
-              <Series G={G} ended={finished} />
+              <Series G={G} ended={finished} playing={difficulty === 'live' && !betweenGames && !finished} />
             </Box>
             <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: { xs: '8px', md: '14px' } }}>
               <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: 600 }}>
@@ -364,7 +364,9 @@ const SHOWN_BEFORE_RUN = 2;
 /// Each played game is a ✓, ✗ or –; the run that counts, the wins since the
 /// last loss and the games it still needs, is grouped with its points. That
 /// is the one place the streak and the stake are shown.
-function Series(props: { G: GameStateMixin, ended: boolean }) {
+/// `playing` while a live game is under way: the first empty slot is that
+/// game's, as `liveResults` gets a game only once it is over.
+function Series(props: { G: GameStateMixin, ended: boolean, playing: boolean }) {
   const { t } = useTranslation();
   const { G } = props;
   const results = G.liveResults;
@@ -387,9 +389,10 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
       {hidden > 0 && <Box title={t('strategy.series.earlier', { count: hidden })} aria-label={t('strategy.series.earlier', { count: hidden })}
         role="img" sx={{ fontSize: '14px', fontWeight: 700, color: MUTED, padding: '0 4px' }}>…</Box>}
       {results.slice(hidden, runStart).map((result, i) => played(result, hidden + i))}
-      {open && <LiveGameRun points={t('strategy.series.total', { points: pointsText(t, points) })}>
+      {open && <LiveGameRun scored={streak >= 2} points={t('strategy.series.total', { points: pointsText(t, points) })}>
         {results.slice(runStart).map((result, i) => played(result, runStart + i))}
-        {Array.from({ length: 2 - streak }, (_, k) => <SeriesCell key={`next${k}`} kind="next" n={results.length + k + 1} />)}
+        {Array.from({ length: 2 - streak }, (_, k) =>
+          <SeriesCell key={`next${k}`} kind="next" n={results.length + k + 1} current={props.playing && k === 0} />)}
       </LiveGameRun>}
       {/* The cells and the grouped run read only once explained. */}
       <Tooltip title={<Box sx={{ fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>{t('strategy.series.help')}</Box>}
@@ -403,14 +406,15 @@ function Series(props: { G: GameStateMixin, ended: boolean }) {
 }
 
 /// `scored` for the two wins that earned the points, the only games coloured.
-function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: boolean }) {
+function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: boolean, current?: boolean }) {
   const { t } = useTranslation();
   const { kind, n } = props;
   const label = kind === 'won' ? t('strategy.series.won', { n })
     : kind === 'lost' ? t('strategy.series.lost', { n })
     : kind === 'unfinished' ? t('strategy.series.unfinished', { n })
+    : props.current ? t('strategy.series.current', { n })
     : t('strategy.series.next', { n });
-  return <LiveGameCell kind={kind} n={n} label={label} scored={props.scored} />;
+  return <LiveGameCell kind={kind} n={n} label={label} scored={props.scored} current={props.current} />;
 }
 
 /// The one place that changes: a mode line, the status, a line under it, a row

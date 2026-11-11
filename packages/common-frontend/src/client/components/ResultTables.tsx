@@ -268,17 +268,24 @@ export function RelayProgressTable(props: { problems: RelayProblemResult[], curr
   </Box>;
 }
 
+/// The colour that marks a live game, on the game screen's mode line and on
+/// the square of the live game being played.
+export const LIVE_COLOUR = '#c2410c';
+
 /// One live game as the strategy screens show it: a ✓, ✗ or – square, or a
-/// dashed one for a game still to play. Only a win that `scored` is coloured;
-/// every other game is a plain square, its glyph saying what it was. `label`
-/// names it for a screen reader.
-export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string, scored?: boolean }) {
+/// dashed one for a game still to play, outlined in the live colour if it is
+/// the one being played. A win is green only once it has `scored`, so no square
+/// turns back from green; a loss is always a muted red, an unfinished game
+/// plain. `label` names it for a screen reader.
+export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, label: string, scored?: boolean, current?: boolean }) {
   const { kind, n, label } = props;
   return (
     <Box role="img" aria-label={label} title={label} sx={{
       width: '28px', height: '28px', borderRadius: '7px', boxSizing: 'border-box', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700,
       ...(props.scored ? { backgroundColor: '#dcefd6', color: '#1b5e20' }
+        : kind === 'lost' ? { backgroundColor: '#fbeae8', border: '1px solid #ecc5bf', color: '#8e1b10' }
+        : props.current ? { border: `2px solid ${LIVE_COLOUR}`, color: LIVE_COLOUR }
         : kind === 'next' ? { border: '2px dashed #8c959f', color: '#8c959f' }
         : { backgroundColor: '#fff', border: '1px solid #d0d7de', color: '#57606a' }),
     }}>
@@ -287,16 +294,18 @@ export function LiveGameCell(props: { kind: LiveGameResult | 'next', n: number, 
   );
 }
 
-/// The run of wins the strip during the game groups with its points, framed
-/// in green, the games still to play in it too.
-export function LiveGameRun(props: { points: string, children: ReactNode }) {
+/// The run of wins the strip during the game groups with its points, the
+/// games still to play in it too. Its frame is plain until the run has
+/// `scored`, then green, as green means scored on every strategy screen.
+export function LiveGameRun(props: { points: string, scored: boolean, children: ReactNode }) {
+  const { scored } = props;
   return (
     <Box sx={{
-      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px',
-      borderRadius: '10px', backgroundColor: '#eef6ea', border: '1px solid #cfe3c6',
+      display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 4px', borderRadius: '10px',
+      ...(scored ? { backgroundColor: '#eef6ea', border: '1px solid #cfe3c6' } : { backgroundColor: '#f6f8fa', border: '1px solid #d0d7de' }),
     }}>
       {props.children}
-      <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: '#1b5e20', whiteSpace: 'nowrap' }}>{props.points}</Box>
+      <Box sx={{ marginLeft: '6px', fontSize: '15px', fontWeight: 700, color: scored ? '#1b5e20' : '#24292f', whiteSpace: 'nowrap' }}>{props.points}</Box>
     </Box>
   );
 }

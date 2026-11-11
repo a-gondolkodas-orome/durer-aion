@@ -224,9 +224,10 @@
     },
     "secondPlayer": "Másodikak leszünk",
     "series": {
+      "current": "{{n}}. éles játszma: folyamatban",
       "earlier_one": "{{count}} korábbi éles játszma",
       "earlier_other": "{{count}} korábbi éles játszma",
-      "help": "✓ győzelem, ✗ vereség. A zöld keret a mostani sorozatotok: ha két egymás utáni győzelemre ér, megkapjátok a mellette álló pontot. Éles vereség után a sorozat újraindul, kevesebb pontért.",
+      "help": "✓ győzelem, ✗ vereség. A keretben a mostani sorozatotok, a narancs szélű négyzet a most folyó éles játszma. Ha a sorozat két egymás utáni győzelemre ér, kizöldül, és megkapjátok a mellette álló pontot. Éles vereség után a sorozat újraindul, kevesebb pontért.",
       "helpLabel": "Mit jelent a sorozat?",
       "label": "Éles játszmák",
       "lost": "{{n}}. éles játszma: vereség",

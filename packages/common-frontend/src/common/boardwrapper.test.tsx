@@ -136,6 +136,22 @@ describe('the header strip', () => {
     expect(within(series).queryByRole('img', { name: 'strategy.series.won' })).not.toBeInTheDocument();
   });
 
+  test('marks the slot of the live game being played, and only during a live game', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { difficulty: 'live', liveResults: ['lost'], numberOfLoss: 1, numberOfTries: 2 });
+
+    const series = screen.getByRole('group', { name: 'strategy.series.label' });
+    expect(within(series).getByRole('img', { name: 'strategy.series.current' })).toBeInTheDocument();
+    expect(within(series).getAllByRole('img', { name: 'strategy.series.next' })).toHaveLength(1);
+  });
+
+  test('marks no slot during a practice game', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { difficulty: 'test', liveResults: ['lost'], numberOfLoss: 1, numberOfTries: 1 });
+
+    const series = screen.getByRole('group', { name: 'strategy.series.label' });
+    expect(within(series).queryByRole('img', { name: 'strategy.series.current' })).not.toBeInTheDocument();
+    expect(within(series).getAllByRole('img', { name: 'strategy.series.next' })).toHaveLength(2);
+  });
+
   test('keeps the clock, and the rules behind a button', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
 
