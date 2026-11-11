@@ -1,10 +1,8 @@
 import type { TeamModelDto } from '../dto/TeamStateDto';
 
 // The importer's columns, in its order (`COLUMNS` in the backend's
-// team_import.ts), so a file written here goes back in through the import,
-// one competition at a time: the importer refuses a row of another
-// competition than the upload's.
-const TEAM_TSV_HEADER = ['Teamname', 'Email', 'Other', 'ID', 'Login Code', 'Credentials', 'Competition'];
+// team_import.ts), so a file written here goes back in through the import.
+const TEAM_TSV_HEADER = ['Teamname', 'Competition', 'Email', 'Other', 'ID', 'Login Code', 'Credentials'];
 
 // The importer splits on tabs and newlines and quotes nothing, so a cell may
 // carry neither: one in a team name would shift every column after it.
@@ -19,7 +17,7 @@ export function teamsTsv(rows: readonly (readonly (string | null | undefined)[])
  * and notes can be empty, or null on a database loaded before the import
  * stored empty strings. */
 export function teamTsvRow(team: TeamModelDto & { other?: string | null }): (string | null | undefined)[] {
-  return [team.teamName, team.email, team.other, team.teamId, team.joinCode, team.credentials, team.competitionId];
+  return [team.teamName, team.competitionId, team.email, team.other, team.teamId, team.joinCode, team.credentials];
 }
 
 /** Every file of join codes the admin page hands out is named the same way. */

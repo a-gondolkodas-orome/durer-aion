@@ -391,19 +391,12 @@ const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportR
   successful: 0, existing: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
 });
 
-const alphaCodes = ['Alpha', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a', COMPETITION_C];
+const alphaCodes = ['Alpha', COMPETITION_C, 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
 
-/** Picks the competition the import enters its teams into. */
-const pickCompetition = async (label = `20. internetes C (${COMPETITION_C})`) => {
-  fireEvent.mouseDown(within(await screen.findByTestId('importCompetition')).getByRole('combobox'));
-  fireEvent.click(await screen.findByRole('option', { name: label }));
-};
-
-/** Picks a competition and a file on the import tab and starts the import. */
+/** Picks a file on the import tab and starts the import. */
 const importFile = async (name = 'teams.tsv') => {
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  await pickCompetition();
-  const file = new File(['Teamname\n'], name);
+  const file = new File(['Teamname\tCompetition\n'], name);
   fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
   fireEvent.click(screen.getByText('Importálás indítása'));
   return file;
@@ -430,7 +423,7 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   const file = await importFile();
 
   expect(await screen.findByText('1 csapat importálva, 0 sor hibás.')).toBeInTheDocument();
-  expect(importTeams).toHaveBeenCalledWith(file, COMPETITION_C);
+  expect(importTeams).toHaveBeenCalledWith(file);
   await waitFor(() => { expect(getAll).toHaveBeenCalledTimes(2); });
   // A file of every team's secrets is not saved unasked.
   expect(saved).toEqual([]);
@@ -438,19 +431,25 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
-  expect(saved[0]).toBe(`Teamname\tEmail\tOther\tID\tLogin Code\tCredentials\tCompetition\n${alphaCodes.join('\t')}\n`);
+  expect(saved[0]).toBe(`Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
 });
 
-test('the import waits for a competition to be picked', async () => {
+// The Competition column takes ids, so the page lists them to copy from.
+test('the import tab lists the competitions with ids to copy', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
   renderAdmin();
 
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [new File(['Teamname\n'], 'teams.tsv')] } });
-  expect(screen.getByText('Importálás indítása')).toBeDisabled();
+  const list = await screen.findByTestId('competitionList');
+  const item = (await within(list).findByText(`20. internetes C (${COMPETITION_C})`)).closest('li');
+  expect(within(list).getByText('20. internetes D (u4lw7pcca1--20-online-d)')).toBeInTheDocument();
+  if (item === null) throw new Error('no list item');
+  fireEvent.click(within(item).getByRole('button', { name: 'Másolás' }));
 
-  await pickCompetition();
-  expect(screen.getByText('Importálás indítása')).toBeEnabled();
+  await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
+  expect(await screen.findByText(`Vágólapra másolva: ${COMPETITION_C}`)).toBeInTheDocument();
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {
@@ -493,7 +492,7 @@ test('the import tab calls a file of teams already there no failure', async () =
 
 test('a second import keeps the codes of the first', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  const bravoCodes = ['Bravo', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b', COMPETITION_C];
+  const bravoCodes = ['Bravo', 'u4lw7pcca1--20-online-d', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b'];
   vi.spyOn(repo, 'importTeams')
     .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [alphaCodes] }))
     .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [bravoCodes] }));
@@ -565,10 +564,10 @@ test('the list points to the export, which downloads every team with its join co
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe([
-    'Teamname\tEmail\tOther\tID\tLogin Code\tCredentials\tCompetition',
+    'Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials',
     // A tab in a cell would shift every column after it.
-    `Alpha\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials\t${COMPETITION_C}`,
-    `Bare\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials\t${COMPETITION_C}`,
+    `Alpha\t${COMPETITION_C}\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
+    `Bare\t${COMPETITION_C}\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials`,
   ].join('\n') + '\n');
 });
 

@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { Stack } from '@mui/system';
-import { Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import useSWR from 'swr';
@@ -22,7 +22,7 @@ const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>[
 };
 
 /// A competition as the organisers name it, with its id, which is what the
-/// command-line import takes.
+/// import's Competition column takes.
 export function competitionOptionLabel({ id, metadata }: CompetitionSummaryDto): string {
   const name = metadata.kind === 'competition'
     ? `${metadata.edition}. ${ROUND_NAMES[metadata.round]} ${metadata.category}`
@@ -32,8 +32,9 @@ export function competitionOptionLabel({ id, metadata }: CompetitionSummaryDto):
 
 /// Where teams come in and where their secrets go out. The import runs on the
 /// same route and the same importer as `npm run teams:import`, row by row, so
-/// a file with bad rows still loads the good ones. Every team of a file enters
-/// the one competition picked for it. The export is every team
+/// a file with bad rows still loads the good ones. Each row names its team's
+/// competition by id, so one file can fill the C, D and E competitions of a
+/// round at once; the list on the page gives the ids to copy. The export is every team
 /// with its join code and credentials, in the import's own format: the one
 /// download on the admin page that carries a login secret.
 export function ImportExport(props: { teams: TeamModelDto[], onImported: () => void }) {
@@ -41,7 +42,6 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
   const importTeams = useImportTeams();
   const getCompetitions = useCompetitions();
   const { data: competitions } = useSWR('team/admin/competitions', getCompetitions);
-  const [competitionId, setCompetitionId] = useState('');
   const { enqueueSnackbar } = useSnackbar();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -56,10 +56,10 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     event.target.value = '';
   };
 
-  const runImport = async (picked: File, into: string) => {
+  const runImport = async (picked: File) => {
     setBusy(true);
     try {
-      const answer = await importTeams(picked, into);
+      const answer = await importTeams(picked);
       setResult(answer);
       setFile(null);
       if (answer.successful === 0) {
@@ -81,6 +81,15 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     }
   };
 
+  const copyId = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(id);
+      enqueueSnackbar(`Vágólapra másolva: ${id}`, { variant: 'info' });
+    } catch {
+      enqueueSnackbar('A másolás nem sikerült, jelöld ki kézzel az azonosítót.', { variant: 'error' });
+    }
+  };
+
   const messages = result === null ? [] : result.logs.value
     .map((value, index) => ({ value, sev: result.logs.sev[index] }));
 
@@ -88,30 +97,32 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     <Stack sx={{ gap: '16px', padding: '10px' }}>
       <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
       <Stack sx={{ fontSize: 14 }}>
-        Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. A fájl összes csapata a kiválasztott versenybe
-        kerül. Kötelező oszlop a Teamname; az Email, az Other, az ID, a Login Code és a Credentials elhagyható vagy
-        üresen hagyható, az utolsó hármat ilyenkor a szerver generálja. A Competition oszlop is elhagyható, de ha
-        szerepel, a kiválasztott verseny azonosítója kell legyen. Az oszlopok sorrendje tetszőleges, az ismeretlen
-        oszlopok kimaradnak.
+        Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Competition:
+        ez utóbbi a csapat versenyének azonosítója a lenti listából, így egy fájlban több verseny csapatai is
+        lehetnek. Az Email, az Other, az ID, a Login Code és a Credentials elhagyható vagy üresen hagyható, az
+        utolsó hármat ilyenkor a szerver generálja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok
+        kimaradnak.
         A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
         Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét lent az
         Exportálás rész.
       </Stack>
-      <FormControl sx={{ maxWidth: '600px' }}>
-        <InputLabel id="import-competition-label">Verseny</InputLabel>
-        <Select
-          labelId="import-competition-label"
-          data-testid="importCompetition"
-          value={competitionId}
-          label="Verseny"
-          disabled={busy}
-          onChange={event => { setCompetitionId(event.target.value); }}
-        >
+      <Stack data-testid="competitionList" sx={{ gap: '4px' }}>
+        <Stack sx={{ fontSize: 14 }}>A versenyek (az azonosító a zárójelben):</Stack>
+        <Stack component="ul" sx={{ margin: 0, fontSize: 14 }}>
           {(competitions ?? []).map(competition => (
-            <MenuItem key={competition.id} value={competition.id}>{competitionOptionLabel(competition)}</MenuItem>
+            <li key={competition.id}>
+              {competitionOptionLabel(competition)}
+              <Button
+                size="small"
+                sx={{ marginLeft: '8px' }}
+                onClick={() => { void copyId(competition.id); }}
+              >
+                Másolás
+              </Button>
+            </li>
           ))}
-        </Select>
-      </FormControl>
+        </Stack>
+      </Stack>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Button variant="outlined" color="primary" component="label" disabled={busy}>
           Fájl kiválasztása
@@ -121,8 +132,8 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
         <Button
           variant="contained"
           color="primary"
-          disabled={busy || file === null || competitionId === ''}
-          onClick={() => { if (file !== null && competitionId !== '') void runImport(file, competitionId); }}
+          disabled={busy || file === null}
+          onClick={() => { if (file !== null) void runImport(file); }}
         >
           {busy ? 'Importálás…' : 'Importálás indítása'}
         </Button>

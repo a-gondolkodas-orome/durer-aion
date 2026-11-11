@@ -20,8 +20,10 @@ const TEAM_ID = '8eae8669-125c-42e5-8b49-89afbac31679';
 const JOIN_CODE = '111-2222-333';
 const CREDENTIALS = '67676767-6767-4767-a767-676767676768';
 
-const HEADER = 'Teamname\tEmail\tOther\tID\tLogin Code\tCredentials';
-const COMPETITION = 'mkhi1nnoim--20-online-c';
+const HEADER = 'Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials';
+const C = 'mkhi1nnoim--20-online-c';
+const D = 'u4lw7pcca1--20-online-d';
+const E = 'wkr6zml6mu--20-online-e';
 
 function tsv(...rows: string[][]) {
   (readFileSync as Mock).mockReturnValue([HEADER, ...rows.map(row => row.join('\t'))].join('\n'));
@@ -42,22 +44,24 @@ describe('import_teams_from_tsv', () => {
     const names = new Set<string>();
     create = vi.spyOn(TeamModel, 'create').mockImplementation((async (values: TeamModel) => {
       const team = await TeamModel.build(values).validate();
-      if (names.has(values.teamName)) {
+      // Unique per competition, as the real constraint is.
+      const key = JSON.stringify([values.competitionId, values.teamName]);
+      if (names.has(key)) {
         throw new UniqueConstraintError({
           // What postgres' refusal carries through sequelize: the column, and
           // the key a unique violation has.
           errors: [{ message: 'Teamname already exists.', path: 'teamName', validatorKey: 'not_unique' } as ValidationErrorItem],
         });
       }
-      names.add(values.teamName);
+      names.add(key);
       return team;
     }) as unknown as typeof TeamModel.create);
   });
 
   it('should handle a proper header with valid data correctly', async () => {
-    tsv(['Test Team', 'test@example.com', 'Some Info', '', '', '']);
+    tsv(['Test Team', C, 'test@example.com', 'Some Info', '', '', '']);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(create).toHaveBeenCalledTimes(1);
     expect(result.successful).toBe(1);
@@ -66,20 +70,20 @@ describe('import_teams_from_tsv', () => {
 
   describe('takes Email and Other as optional', () => {
     it.each([
-      ['left blank', `${HEADER}\nTest Team\t\t\t\t\t\n`],
-      ['left out, the row ending after Email', `${HEADER}\nTest Team\ta@b.com\n`],
-      ['left out of the file, which names teams alone', 'Teamname\nTest Team\n'],
+      ['left blank', `${HEADER}\nTest Team\t${C}\t\t\t\t\t\n`],
+      ['left out, the row ending after Competition', `${HEADER}\nTest Team\t${C}\n`],
+      ['left out of the file, which names teams and competitions alone', `Teamname\tCompetition\nTest Team\t${C}\n`],
     ])('%s', async (_, file) => {
       (readFileSync as Mock).mockReturnValue(file);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.successful).toBe(1);
       expect(create.mock.calls[0][0]).toMatchObject({ other: '' });
       // An organiser acts on these, and a warning per team for a column the
       // file need not fill would bury them.
       expect(result.logs.value).toEqual([]);
-      expect(result.export_table[0][2]).toBe('');
+      expect(result.export_table[0].slice(0, 4)).toEqual(['Test Team', C, '', '']);
     });
   });
 
@@ -87,9 +91,9 @@ describe('import_teams_from_tsv', () => {
   // editor does. Each line then reads as one column, and was skipped as an
   // "empty row": nothing imported, and nothing counted as failed.
   it('refuses a file with no tab, saying it must be tab-separated', async () => {
-    (readFileSync as Mock).mockReturnValue('Teamname  Email\nimporttest  a@b.com\nsuper name  c@d.com\n');
+    (readFileSync as Mock).mockReturnValue('Teamname  Competition\nimporttest  x\nsuper name  y\n');
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(0);
     expect(create).not.toHaveBeenCalled();
@@ -97,23 +101,23 @@ describe('import_teams_from_tsv', () => {
     // columns it plainly names.
     expect(result.logs.value).toEqual([
       'Egy csapat sem került be. A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, nem szóközzel.',
-      'A fájl első sora: „Teamname  Email”',
+      'A fájl első sora: „Teamname  Competition”',
     ]);
   });
 
   it('does not take an empty first line for a header without tabs', async () => {
     (readFileSync as Mock).mockReturnValue('\nAlpha\ta@b.com\n');
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(0);
     expect(result.logs.value[0]).toMatch(/^Egy csapat sem került be\. Az első sornak a fejlécnek kell lennie/);
   });
 
   it('fails a row with no tab under a header that has them', async () => {
-    (readFileSync as Mock).mockReturnValue('Teamname\tEmail\nimporttest  D\nGood\ta@b.com\n');
+    (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\nimporttest  D\nGood\t${C}\n`);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(1);
     expect(result.failed).toBe(1);
@@ -121,9 +125,9 @@ describe('import_teams_from_tsv', () => {
   });
 
   it('passes over blank lines without a word', async () => {
-    (readFileSync as Mock).mockReturnValue(`${HEADER}\n\nTest Team\tC\n   \n\r\n`);
+    (readFileSync as Mock).mockReturnValue(`${HEADER}\n\nTest Team\t${C}\n   \n\r\n`);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(1);
     expect(result.failed).toBe(0);
@@ -135,24 +139,24 @@ describe('import_teams_from_tsv', () => {
     // notes in its email, with only a warning to say so.
     it('whatever the order, and whatever the case', async () => {
       (readFileSync as Mock).mockReturnValue(
-        'other\tTEAMNAME\tEmail\nSome Info\tTest Team\ttest@example.com\n',
+        `other\tTEAMNAME\tEmail\tcompetition\nSome Info\tTest Team\ttest@example.com\t${C}\n`,
       );
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.successful).toBe(1);
       expect(create.mock.calls[0][0]).toMatchObject({
-        teamName: 'Test Team', competitionId: COMPETITION, category: 'C', email: 'test@example.com', other: 'Some Info',
+        teamName: 'Test Team', competitionId: C, category: 'C', email: 'test@example.com', other: 'Some Info',
       });
       expect(result.logs.value).toEqual([]);
       // The export keeps the import's own order, so it goes back in as it is.
-      expect(result.export_table[0].slice(0, 3)).toEqual(['Test Team', 'test@example.com', 'Some Info']);
+      expect(result.export_table[0].slice(0, 4)).toEqual(['Test Team', C, 'test@example.com', 'Some Info']);
     });
 
     it('ignores a column it does not know, saying so once', async () => {
-      (readFileSync as Mock).mockReturnValue('Teamname\tSchool\tCategory\tPhone\nA\tRadnóti\tC\t1\nB\tPetőfi\tD\t2\n');
+      (readFileSync as Mock).mockReturnValue(`Teamname\tSchool\tCompetition\tCategory\tPhone\nA\tRadnóti\t${C}\tC\t1\nB\tPetőfi\t${D}\tD\t2\n`);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.successful).toBe(2);
       expect(result.logs.value.filter((_, i) => result.logs.sev[i] === 'warn'))
@@ -164,18 +168,18 @@ describe('import_teams_from_tsv', () => {
     it('refuses a file whose first line is a team rather than a header', async () => {
       (readFileSync as Mock).mockReturnValue('Alpha\ta@b.com\nBravo\tb@b.com\n');
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.successful).toBe(0);
       expect(create).not.toHaveBeenCalled();
       expect(result.logs.value[0]).toBe('Egy csapat sem került be. Az első sornak a fejlécnek kell lennie, '
-        + 'benne legalább a Teamname oszloppal; ebből hiányzik: Teamname.');
+        + 'benne legalább a Teamname és a Competition oszloppal; ebből hiányzik: Teamname, Competition.');
     });
 
     it('refuses a header that names a column twice', async () => {
-      (readFileSync as Mock).mockReturnValue('Teamname\tEmail\temail\nA\ta@b.com\tx@y.com\n');
+      (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\tEmail\temail\nA\t${C}\ta@b.com\tx@y.com\n`);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.successful).toBe(0);
       expect(create).not.toHaveBeenCalled();
@@ -183,101 +187,102 @@ describe('import_teams_from_tsv', () => {
     });
   });
 
-  describe('the competition the upload enters', () => {
-    it('stores every team with it, and the category its metadata names', async () => {
-      tsv(['Alpha', '', '', '', '', ''], ['Bravo', '', '', '', '', '']);
+  describe('the competition each row names', () => {
+    // The online round is the C, D and E competitions at once, from one
+    // registration list.
+    it('stores each team with its own, and the category its metadata names', async () => {
+      tsv(['Alpha', C, '', '', '', '', ''], ['Bravo', D, '', '', '', '', ''], ['Charlie', ` ${E} `, '', '', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, 'u4lw7pcca1--20-online-d', 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
-      expect(result.successful).toBe(2);
+      expect(result).toMatchObject({ successful: 3, failed: 0 });
       expect(create.mock.calls.map(([values]) => [values.competitionId, values.category])).toEqual([
-        ['u4lw7pcca1--20-online-d', 'D'],
-        ['u4lw7pcca1--20-online-d', 'D'],
+        [C, 'C'],
+        [D, 'D'],
+        [E, 'E'],
       ]);
-      expect(result.export_table.map(row => row[6])).toEqual(['u4lw7pcca1--20-online-d', 'u4lw7pcca1--20-online-d']);
+      expect(result.export_table.map(row => row[1])).toEqual([C, D, E]);
     });
 
     it.each([
-      ['one the registry does not have', 'nosuchcomp--x', 'Egy csapat sem került be. Nincs ilyen verseny: „nosuchcomp--x”.'],
+      ['none', '', '2. sor (Alpha): hiányzik a verseny azonosítója (Competition).'],
+      ['one the registry does not have', 'nosuchcomp--x', '2. sor (Alpha): Nincs ilyen verseny: „nosuchcomp--x”.'],
       // Until the live round picks its games from the competition (#137),
       // anything else would be played with another competition's games.
       ['one in a category the live round has no games for', 'w2b34gqoin--01-final-b',
-        'Egy csapat sem került be. A(z) w2b34gqoin--01-final-b verseny kategóriája nem C, D vagy E, '
+        '2. sor (Alpha): A(z) w2b34gqoin--01-final-b verseny kategóriája nem C, D vagy E, '
         + 'az élő forduló egyelőre csak ezeket tudja futtatni.'],
       ['one whose strategy game the live round does not play', '6am5fsmne9--01-final-c',
-        'Egy csapat sem került be. A(z) 6am5fsmne9--01-final-c versenyt az élő forduló egyelőre nem tudja futtatni: '
+        '2. sor (Alpha): A(z) 6am5fsmne9--01-final-c versenyt az élő forduló egyelőre nem tudja futtatni: '
         + 'C kategóriában a 20o-c játékot játssza.'],
-    ])('refuses %s, before reading the file', async (_, competitionId, message) => {
-      tsv(['Alpha', '', '', '', '', '']);
+    ])('fails a row naming %s, and goes on', async (_, competitionId, message) => {
+      tsv(['Alpha', competitionId, '', '', '', '', ''], ['Bravo', C, '', '', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, competitionId, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
-      expect(result).toMatchObject({ successful: 0, existing: 0, failed: 0 });
-      expect(readFileSync).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ successful: 1, existing: 0, failed: 1 });
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(result.export_table.map(row => row[0])).toEqual(['Bravo']);
       expect(result.logs.value).toEqual([message]);
     });
 
-    // An export holds every competition's teams, each row naming its own.
-    it('refuses a row naming another competition, and takes one naming its own', async () => {
-      (readFileSync as Mock).mockReturnValue(
-        `Teamname\tCompetition\nOurs\t${COMPETITION}\nTheirs\t${'u4lw7pcca1--20-online-d'}\nUnsaid\t\n`);
+    // A team name is unique within its competition only.
+    it('takes the same team name in two competitions', async () => {
+      tsv(['Twin', C, '', '', '', '', ''], ['Twin', D, '', '', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
-      expect(result).toMatchObject({ successful: 2, failed: 1 });
-      expect(result.export_table.map(row => row[0])).toEqual(['Ours', 'Unsaid']);
-      expect(result.logs.value).toEqual(
-        [`3. sor (Theirs): a sor a(z) u4lw7pcca1--20-online-d versenyé, nem a feltöltésé (${COMPETITION}).`]);
+      expect(result).toMatchObject({ successful: 2, failed: 0 });
     });
   });
 
   it('should generate default teamId if missing', async () => {
-    tsv(['Test Team', 'test@example.com', 'Some Info', '', JOIN_CODE, CREDENTIALS]);
+    tsv(['Test Team', C, 'test@example.com', 'Some Info', '', JOIN_CODE, CREDENTIALS]);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(1);
-    expect(result.export_table[0][3]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(result.export_table[0][4]).toMatch(/^[0-9a-f-]{36}$/);
   });
 
   it('should generate default login_code if missing', async () => {
-    tsv(['Test Team', 'test@example.com', 'Some Info', TEAM_ID, '', CREDENTIALS]);
+    tsv(['Test Team', C, 'test@example.com', 'Some Info', TEAM_ID, '', CREDENTIALS]);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(1);
-    expect(result.export_table[0][4]).toMatch(/^[0-9]{3}-[0-9]{4}-[0-9]{3}$/);
+    expect(result.export_table[0][5]).toMatch(/^[0-9]{3}-[0-9]{4}-[0-9]{3}$/);
   });
 
   it('should generate default credentials if missing', async () => {
-    tsv(['Test Team', 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, '']);
+    tsv(['Test Team', C, 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, '']);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(1);
-    expect(result.export_table[0][5]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(result.export_table[0][6]).toMatch(/^[0-9a-f-]{36}$/);
   });
 
   it('keeps the values a row supplies', async () => {
-    tsv(['Test Team', 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, CREDENTIALS]);
+    tsv(['Test Team', C, 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, CREDENTIALS]);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.export_table)
-      .toEqual([['Test Team', 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, CREDENTIALS, COMPETITION]]);
+      .toEqual([['Test Team', C, 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, CREDENTIALS]]);
   });
 
   describe('refuses a row the model refuses, and goes on', () => {
     it.each([
-      ['a login code in the wrong format', ['Bad', '', 'x', '', 'ABC-123-XYZ', ''], '2. sor (Bad): a belépőkód nem 111-2222-333 alakú.'],
-      ['a team id that is not a UUID', ['Bad', '', 'x', 'custom-id', '', ''], '2. sor (Bad): az ID nem érvényes UUIDv4.'],
-      ['credentials that are not a UUID', ['Bad', '', 'x', '', '', 'not-a-uuid'], '2. sor (Bad): a Credentials nem érvényes UUID.'],
-      ['a team name over 255 characters', ['B'.repeat(256), '', 'x', '', '', ''], `2. sor (${'B'.repeat(256)}): a csapatnév túl hosszú (legfeljebb 255 karakter).`],
-      ['an email over 255 characters', ['Bad', 'e'.repeat(256), 'x', '', '', ''], '2. sor (Bad): az Email túl hosszú (legfeljebb 255 karakter).'],
+      ['a login code in the wrong format', ['Bad', C, '', 'x', '', 'ABC-123-XYZ', ''], '2. sor (Bad): a belépőkód nem 111-2222-333 alakú.'],
+      ['a team id that is not a UUID', ['Bad', C, '', 'x', 'custom-id', '', ''], '2. sor (Bad): az ID nem érvényes UUIDv4.'],
+      ['credentials that are not a UUID', ['Bad', C, '', 'x', '', '', 'not-a-uuid'], '2. sor (Bad): a Credentials nem érvényes UUID.'],
+      ['a team name over 255 characters', ['B'.repeat(256), C, '', 'x', '', '', ''], `2. sor (${'B'.repeat(256)}): a csapatnév túl hosszú (legfeljebb 255 karakter).`],
+      ['an email over 255 characters', ['Bad', C, 'e'.repeat(256), 'x', '', '', ''], '2. sor (Bad): az Email túl hosszú (legfeljebb 255 karakter).'],
     ])('%s', async (_, row, message) => {
-      tsv(row, ['Good', '', 'x', '', '', '']);
+      tsv(row, ['Good', C, '', 'x', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.failed).toBe(1);
       expect(result.successful).toBe(1);
@@ -287,9 +292,9 @@ describe('import_teams_from_tsv', () => {
   });
 
   it('refuses an other field over the import limit before reaching the model', async () => {
-    tsv(['Test Team', '', 'o'.repeat(OTHER_IMPORT_MAX_LENGTH + 1), '', '', '']);
+    tsv(['Test Team', C, '', 'o'.repeat(OTHER_IMPORT_MAX_LENGTH + 1), '', '', '']);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.failed).toBe(1);
     expect(create).not.toHaveBeenCalled();
@@ -300,9 +305,9 @@ describe('import_teams_from_tsv', () => {
   // One line per problem, each naming where it is: the admin page lists them
   // as they come, so a line that only says "see above" is no use there.
   it('names the line and the team in each problem, and nothing else', async () => {
-    tsv(['Alpha', '', '', '', '', ''], ['Bravo', '', '', '', 'ABC', ''], ['', 'c@d.com', '', '', '', '']);
+    tsv(['Alpha', C, '', '', '', '', ''], ['Bravo', C, '', '', '', 'ABC', ''], ['', C, 'c@d.com', '', '', '', '']);
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.logs.value).toEqual([
       '3. sor (Bravo): a belépőkód nem 111-2222-333 alakú.',
@@ -313,16 +318,16 @@ describe('import_teams_from_tsv', () => {
 
   it('reports a team name the table already has, and goes on', async () => {
     tsv(
-      ['Twice', '', 'first', '', '', ''],
-      ['Twice', '', 'second', '', '', ''],
-      ['Once', '', 'third', '', '', ''],
+      ['Twice', C, '', 'first', '', '', ''],
+      ['Twice', C, '', 'second', '', '', ''],
+      ['Once', C, '', 'third', '', '', ''],
     );
 
-    const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+    const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.successful).toBe(2);
     expect(result.failed).toBe(1);
-    expect(result.export_table.map(exported => exported[2])).toEqual(['first', 'third']);
+    expect(result.export_table.map(exported => exported[3])).toEqual(['first', 'third']);
     expect(result.logs.value).toEqual(['3. sor (Twice): már van ilyen nevű csapat ebben a versenyben.']);
   });
 
@@ -334,7 +339,7 @@ describe('import_teams_from_tsv', () => {
     const liveTeam = (teamName: string, fields: Partial<TeamModel> = {}) => {
       const k = String(++n).padStart(3, '0');
       return TeamModel.build({
-        teamName, competitionId: COMPETITION, category: 'C', email: 'a@b.com', other: '', pageState: 'HOME',
+        teamName, competitionId: C, category: 'C', email: 'a@b.com', other: '', pageState: 'HOME',
         teamId: `8eae8669-125c-42e5-8b49-89afbac31${k}`, joinCode: `111-2222-${k}`,
         credentials: `67676767-6767-4767-a767-676767676${k}`, relayMatchID: null, strategyMatchID: null,
         ...fields,
@@ -344,12 +349,12 @@ describe('import_teams_from_tsv', () => {
     it('is left as it is, and all of them are one line, ahead of the real problems', async () => {
       live = Array.from({ length: 12 }, (_, i) => liveTeam(`Old ${i + 1}`));
       tsv(
-        ...live.map(team => [team.teamName, 'a@b.com', '', '', '', '']),
-        ['New', '', '', '', '', ''],
-        ['Bad', '', '', '', 'ABC', ''],
+        ...live.map(team => [team.teamName, C, 'a@b.com', '', '', '', '']),
+        ['New', C, '', '', '', '', ''],
+        ['Bad', C, '', '', '', 'ABC', ''],
       );
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 1, existing: 12, failed: 1 });
       // New, and Bad, which the model refuses.
@@ -365,9 +370,9 @@ describe('import_teams_from_tsv', () => {
     it('is recognised from its own identifiers too, as an export fed back is', async () => {
       const there = liveTeam('Alpha');
       live = [there];
-      tsv(['Alpha', 'a@b.com', '', there.teamId, there.joinCode, there.credentials]);
+      tsv(['Alpha', C, 'a@b.com', '', there.teamId, there.joinCode, there.credentials]);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
     });
@@ -376,9 +381,9 @@ describe('import_teams_from_tsv', () => {
     // not explain: this is a row to look at, so it stays on its own line.
     it('fails a row whose identifiers are not that team\'s', async () => {
       live = [liveTeam('Alpha')];
-      tsv(['Alpha', 'a@b.com', '', '', '999-9999-999', '']);
+      tsv(['Alpha', C, 'a@b.com', '', '', '999-9999-999', '']);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 0, existing: 0, failed: 1 });
       expect(result.logs.value).toEqual(['2. sor (Alpha): már van ilyen nevű csapat, de más belépőkód értékkel.']);
@@ -388,9 +393,9 @@ describe('import_teams_from_tsv', () => {
     // file would otherwise not land, and nothing would say so.
     it('says when the file holds another email than the team has', async () => {
       live = [liveTeam('Alpha')];
-      tsv(['Alpha', 'new@b.com', '', '', '', '']);
+      tsv(['Alpha', C, 'new@b.com', '', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
       expect(create).not.toHaveBeenCalled();
@@ -404,20 +409,20 @@ describe('import_teams_from_tsv', () => {
     // linked across competitions.
     it('is not a team of the same name in another competition', async () => {
       live = [liveTeam('Alpha', { competitionId: 'u4lw7pcca1--20-online-d' })];
-      tsv(['Alpha', 'a@b.com', '', '', '', '']);
+      tsv(['Alpha', C, 'a@b.com', '', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 1, existing: 0, failed: 0 });
-      expect(create.mock.calls[0][0]).toMatchObject({ teamName: 'Alpha', competitionId: COMPETITION });
+      expect(create.mock.calls[0][0]).toMatchObject({ teamName: 'Alpha', competitionId: C });
     });
 
     // Two rows of one file naming the same team are a mistake in the file,
     // not a re-run, so the second still fails.
     it('is not a team the same file added a line earlier', async () => {
-      tsv(['Twice', '', '', '', '', ''], ['Twice', '', '', '', '', '']);
+      tsv(['Twice', C, '', '', '', '', ''], ['Twice', C, '', '', '', '', '']);
 
-      const result = await import_teams_from_tsv(teams, COMPETITION, 'dummy_file.tsv');
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 1, existing: 0, failed: 1 });
     });

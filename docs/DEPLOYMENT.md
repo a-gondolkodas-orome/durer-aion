@@ -36,7 +36,7 @@ machine, follow the same steps with the right-hand values — each is repeated a
 | code from | the year's private repo, deploy key | the public repo, HTTPS clone |
 | domain | the real subdomain, static IP | a subdomain of one you already own |
 | `.env.docker` | real secrets, rotated afterwards | throwaway values, still off the samples |
-| teams | the real TSV per competition; the `.export` goes back to the organisers | `scripts/test-c.tsv` and the like |
+| teams | the real TSV; the `.export` goes back to the organisers | `scripts/test.tsv` |
 | database | must survive until results are exported; there are no backups | expendable |
 | HTTP→HTTPS redirect | wanted; goes in the untracked `nginx-tls.conf` | optional |
 | certificate renewal | set up the cron | skip |
@@ -271,15 +271,18 @@ npm run stack:logs   # Ctrl-C stops following, not the stack
 ## 7. Import the teams
 
 Drop the TSV into `scripts/` on the host — that directory is bind-mounted into the
-container — and name it, after the id of the competition its teams enter. A
-file holds one competition's teams:
+container — and name it:
 
 ```bash
-docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh <competition id> scripts/<file>.tsv
+docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scripts/<file>.tsv
 ```
 
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
+
+Each row's `Competition` column names its team's competition by id, so one file
+holds every category of the round. The admin page's **Import/export** tab lists
+the competitions with their ids.
 
 Teams cannot be deleted. A bad import is undone by dropping the volume
 (`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
@@ -289,11 +292,10 @@ the original would generate new ones.
 You can also run the importer as a one-off container without the stack:
 
 ```bash
-docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh <competition id> scripts/<file>.tsv
+docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh scripts/<file>.tsv
 ```
 
-> **Test drive:** `npm run teams:import` runs the same thing against `scripts/test-c.tsv`,
-> `test-d.tsv` and `test-e.tsv`, into edition XX's online C, D and E.
+> **Test drive:** `npm run teams:import` runs the same thing against `scripts/test.tsv`.
 
 ## 8. A domain and HTTPS
 

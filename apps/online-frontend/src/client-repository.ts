@@ -204,10 +204,9 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return result.data as CompetitionSummaryDto[];
   }
 
-  async importTeams(file: File, competitionId: string): Promise<TeamImportResultDto> {
+  async importTeams(file: File): Promise<TeamImportResultDto> {
     const body = new FormData();
     body.append('file', file);
-    body.append('competitionId', competitionId);
     try {
       const result = await apiAxiosInstance(IMPORT_TIMEOUT_MS).put('/team/admin/import', body);
       return result.data as TeamImportResultDto;

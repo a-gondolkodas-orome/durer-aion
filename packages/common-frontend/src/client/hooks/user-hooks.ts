@@ -176,7 +176,7 @@ export const useStartStrategy = () => useRequestThenRefetch(userModel => userMod
 
 export const useImportTeams = () => {
   const repo = useAdminRepo();
-  return async (file: File, competitionId: string) => await repo.importTeams(file, competitionId);
+  return async (file: File) => await repo.importTeams(file);
 };
 
 export const useCompetitions = () => {
