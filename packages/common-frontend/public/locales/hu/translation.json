@@ -139,7 +139,15 @@
     "tryHint": "{{max}} rossz tipp után a következő feladat jön. Ehhez a feladathoz utána nem lehet visszatérni.",
     "tryHintLast": "Ha ez a tipp sem jó, a következő feladat jön. Ehhez a feladathoz utána nem lehet visszatérni.",
     "wrongGuess": "A válasz sajnos nem volt jó",
-    "zoomImage": "Kattints a képre a nagyításhoz"
+    "zoomImage": "Kattints a képre a nagyításhoz",
+    "key": {
+      "label": "Jelmagyarázat",
+      "try1": "1.-re",
+      "try2": "2.-ra",
+      "try3": "3.-ra",
+      "wrong": "hibás",
+      "unanswered": "nincs válasz"
+    }
   },
   "strategy": {
     "endTable": {
