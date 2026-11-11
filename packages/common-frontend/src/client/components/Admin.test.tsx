@@ -58,6 +58,7 @@ vi.mock('@mui/x-data-grid', () => {
 const team = (teamId: string, teamName: string): TeamModelDto => ({
   teamId,
   teamName,
+  competitionId: 'mkhi1nnoim--20-online-c',
   category: 'C',
   credentials: 'credentials',
   pageState: 'HOME',
@@ -72,8 +73,14 @@ const EARLIER = '2026-09-07T09:00:00.456Z';
 
 let repo: MockClientRepository;
 
+const COMPETITION_C = 'mkhi1nnoim--20-online-c';
+
 beforeEach(() => {
   repo = new MockClientRepository();
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' } },
+    { id: 'u4lw7pcca1--20-online-d', metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' } },
+  ]);
   // The open tab is read from the URL, which jsdom keeps between tests.
   window.history.replaceState(null, '', '/admin');
 });
@@ -384,12 +391,12 @@ const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportR
   successful: 0, existing: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
 });
 
-const alphaCodes = ['Alpha', 'C', 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
+const alphaCodes = ['Alpha', COMPETITION_C, 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
 
 /** Picks a file on the import tab and starts the import. */
 const importFile = async (name = 'teams.tsv') => {
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  const file = new File(['Teamname\tCategory\n'], name);
+  const file = new File(['Teamname\tCompetition\n'], name);
   fireEvent.change(screen.getByTestId('importTeamsFile'), { target: { files: [file] } });
   fireEvent.click(screen.getByText('Importálás indítása'));
   return file;
@@ -424,7 +431,30 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
-  expect(saved[0]).toBe(`Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
+  expect(saved[0]).toBe(`Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
+});
+
+// The Competition column takes a name or an id, so the page lists what to
+// write for each competition, to copy.
+test('the import tab lists the competitions newest first, with what to import them as', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  const table = await screen.findByTestId('competitionTable');
+  const row = (await within(table).findByText('20 online C')).closest('li');
+  expect(within(table).getByText('20 online D')).toBeInTheDocument();
+  expect(grids.columns.at(-1)?.map(column => column.field))
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label']);
+  if (row === null) throw new Error('no table row');
+  fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
+  await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
+  expect(await screen.findByText('Vágólapra másolva: 20 online C')).toBeInTheDocument();
+
+  fireEvent.click(within(row).getByRole('button', { name: `Másolás: ${COMPETITION_C}` }));
+  await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {
@@ -433,7 +463,7 @@ test('the import tab lists the server\'s errors and warnings', async () => {
     failed: 1,
     logs: {
       sev: ['warn', 'error'],
-      value: ['Ezeket az oszlopokat nem ismerjük, kimaradnak: School', '2. sor (Bravo): a kategória nem C, D vagy E: „X”.'],
+      value: ['Ezeket az oszlopokat nem ismerjük, kimaradnak: School', '2. sor (Bravo): hiányzik a csapatnév.'],
     },
   }));
   const saved = savedDownloads();
@@ -441,7 +471,7 @@ test('the import tab lists the server\'s errors and warnings', async () => {
 
   await importFile();
 
-  expect(await screen.findByText('2. sor (Bravo): a kategória nem C, D vagy E: „X”.')).toBeInTheDocument();
+  expect(await screen.findByText('2. sor (Bravo): hiányzik a csapatnév.')).toBeInTheDocument();
   expect(screen.getByText('Ezeket az oszlopokat nem ismerjük, kimaradnak: School')).toBeInTheDocument();
   // Nothing went in, so there is nothing to save.
   expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
@@ -467,7 +497,7 @@ test('the import tab calls a file of teams already there no failure', async () =
 
 test('a second import keeps the codes of the first', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  const bravoCodes = ['Bravo', 'D', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b'];
+  const bravoCodes = ['Bravo', 'u4lw7pcca1--20-online-d', 'b@b.com', 'y', 'id-b', '444-5555-666', 'creds-b'];
   vi.spyOn(repo, 'importTeams')
     .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [alphaCodes] }))
     .mockResolvedValueOnce(importAnswer({ successful: 1, export_table: [bravoCodes] }));
@@ -539,10 +569,10 @@ test('the list points to the export, which downloads every team with its join co
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe([
-    'Teamname\tCategory\tEmail\tOther\tID\tLogin Code\tCredentials',
+    'Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials',
     // A tab in a cell would shift every column after it.
-    `Alpha\tC\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
-    'Bare\tC\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials',
+    `Alpha\t${COMPETITION_C}\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
+    `Bare\t${COMPETITION_C}\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials`,
   ].join('\n') + '\n');
 });
 
@@ -554,7 +584,9 @@ test('the team list\'s CSV holds no login secret', async () => {
   renderAdmin();
   await screen.findByText('Alpha');
 
-  const exported = (grids.columns.at(-1) ?? []).filter(column => column.disableExport !== true).map(column => column.field);
+  // The team list's grid, not the import tab's table of competitions.
+  const teamGrid = [...grids.columns].reverse().find(columns => columns.some(column => column.field === 'teamName'));
+  const exported = (teamGrid ?? []).filter(column => column.disableExport !== true).map(column => column.field);
 
   expect(exported).not.toHaveLength(0);
   for (const secret of ['id', 'teamId', 'joinCode', 'credentials', 'email']) {

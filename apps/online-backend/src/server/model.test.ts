@@ -12,6 +12,7 @@ const team = (other: string) => TeamModel.build({
   teamId: '8eae8669-125c-42e5-8b49-89afbac31679',
   joinCode: '000-0000-000',
   teamName: 'Alpha',
+  competitionId: 'mkhi1nnoim--20-online-c',
   category: 'C',
   credentials: '4f1d3d3c-6d2a-4f5b-9c8d-0e1f2a3b4c5d',
   email: 'team@example.com',
@@ -93,7 +94,12 @@ describe('appendOtherNote', () => {
 describe('the Teams table', () => {
   const uniqueKeys = (TeamModel as unknown as { uniqueKeys: Record<string, { fields: string[] }> }).uniqueKeys;
 
-  it.each(['teamId', 'joinCode', 'teamName', 'credentials'])('makes %s unique', (column) => {
+  it.each(['teamId', 'joinCode', 'credentials'])('makes %s unique', (column) => {
     expect(Object.values(uniqueKeys).map(key => key.fields)).toContainEqual([column]);
+  });
+
+  // Teams entering two competitions are two rows, which may share a name.
+  it('makes teamName unique within its competition', () => {
+    expect(Object.values(uniqueKeys).map(key => key.fields)).toContainEqual(['competitionId', 'teamName']);
   });
 });

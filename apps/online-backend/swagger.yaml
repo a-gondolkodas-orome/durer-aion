@@ -178,11 +178,33 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TeamModel"
+  /team/admin/competitions:
+    get:
+      summary: The competitions teams can be imported into, whose ids the import's Competition column takes
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Each registered competition's id and metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    metadata:
+                      type: object
+                      description: The competition's metadata, as `schemas` types it
   /team/admin/import:
     put:
       summary: Import teams from a TSV file
       description: |
-        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded and contain the following columns: "Teamname", "Category", "Email", "Other", "ID", "Login Code", "Credentials".
+        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded, with a header naming its columns: "Teamname" and "Competition" (required; the competition the row's team enters, by its id or by edition, round and category such as "20 online C"), "Email", "Other", "ID", "Login Code" and "Credentials" (optional).
       security:
         - basicAdminAuth: []
       tags:
@@ -469,6 +491,8 @@ components:
         joinCode:
           type: string
         teamName:
+          type: string
+        competitionId:
           type: string
         category:
           type: string

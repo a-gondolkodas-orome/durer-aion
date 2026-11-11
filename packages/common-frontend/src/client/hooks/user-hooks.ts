@@ -178,3 +178,8 @@ export const useImportTeams = () => {
   const repo = useAdminRepo();
   return async (file: File) => await repo.importTeams(file);
 };
+
+export const useCompetitions = () => {
+  const repo = useAdminRepo();
+  return async () => await repo.getCompetitions();
+};

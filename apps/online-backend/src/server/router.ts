@@ -10,6 +10,7 @@ import { getFilterPlayerView } from "boardgame.io/internal";
 import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
+import { registry } from 'problem-bank/all';
 import { publicTeamView } from './team_view';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
@@ -242,6 +243,15 @@ export function configureTeamsRouter(
   router.get("/team/admin/all", adminAuth, koaBody(), async (ctx) => {
     ctx.body = await adminTeamViews(ctx.db, await teams.listTeams() ?? []);
   })
+
+  /**
+   * The competitions the server knows, for the admin page to list with the
+   * ids the import's Competition column takes: each one's id and metadata,
+   * nothing of its problems.
+   */
+  router.get("/team/admin/competitions", adminAuth, (ctx) => {
+    ctx.body = [...registry.competitions.values()].map(({ id, metadata }) => ({ id, metadata }));
+  });
 
   /**
    * Import teams from an uploaded TSV, the way `npm run teams:import` does.

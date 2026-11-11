@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
-import type { AdminClientRepository, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto } from "common-frontend";
+import type { AdminClientRepository, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto } from "common-frontend";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -190,6 +190,18 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data;
+  }
+
+  async getCompetitions(): Promise<CompetitionSummaryDto[]> {
+    let result;
+    try {
+      result = await apiAxiosInstance().get('/team/admin/competitions');
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+    return result.data as CompetitionSummaryDto[];
   }
 
   async importTeams(file: File): Promise<TeamImportResultDto> {

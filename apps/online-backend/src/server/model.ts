@@ -21,6 +21,9 @@ export class TeamModel extends Model<
   declare teamId: string;
   declare joinCode: string;
   declare teamName: string;
+  /// The competition the team entered. A team entering two competitions is two
+  /// rows, with nothing linking them.
+  declare competitionId: string;
   declare category: string;
   declare credentials: string;
   declare email: string;
@@ -90,6 +93,12 @@ export const teamAttributes: ModelAttributes<
       }
     }
   },
+  competitionId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    // With teamName's: a name is unique within its competition only.
+    unique: "teamName",
+  },
   category: {
     type: DataTypes.STRING,
   },
@@ -119,7 +128,7 @@ export const teamAttributes: ModelAttributes<
     type: DataTypes.STRING,
     unique: {
       name: "teamName",
-      msg: 'Teamname already exists.'
+      msg: 'Teamname already exists in this competition.'
     },
     validate: {
       len: {
