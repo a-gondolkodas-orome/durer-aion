@@ -16,7 +16,7 @@ import { GUESSER_PLAYER, JUDGE_PLAYER, STRATEGY_POINTS_BY_LOSSES, strategyPoints
 import type { Difficulty, GameStateMixin } from "game";
 import type { LiveGameResult } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
-import type { MouseEvent, ReactNode } from "react";
+import type { AnimationEvent, MouseEvent, ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -39,8 +39,9 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 export type StrategyDescription = Localizable<ReactNode>;
 
 /// What the wrapper shows around a game's board that only the game knows. The
-/// two functions are methods, not properties, so a game may type `turnState` as
-/// its own board reports it: method parameters are checked both ways.
+/// step description is a method, not a property, so a game may type
+/// `turnState` as its own board reports it: method parameters are checked both
+/// ways.
 export interface StrategyPresentation<G = unknown> {
   /// The rules: in a dialog before the first game, behind a button after it.
   rules: StrategyDescription,
@@ -181,17 +182,14 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     // On wider screens, a fuller line in place of `sub`.
     let subWide: string | null = null;
     let intro: ReactNode = null;
-    // The explanation of practice against live sits next to the next-game
-    // buttons when they are there, in the corner otherwise.
     // A game's own role labels name the roles on the buttons and on the chip
     // alike. Without them the wrapper has a phrase for each: on the buttons
     // what the team says choosing, on the chip the role it chose.
-    const [first, second] = presentation.roleLabels
-      ? presentation.roleLabels.map(label => inLanguage<string>(label, language) ?? '')
-      : [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
-    const [firstRole, secondRole] = presentation.roleLabels
-      ? [first, second]
-      : [t('strategy.mode.first'), t('strategy.mode.second')];
+    const labels = presentation.roleLabels?.map(label => inLanguage<string>(label, language) ?? '');
+    const [first, second] = labels ?? [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
+    const [firstRole, secondRole] = labels ?? [t('strategy.role.first'), t('strategy.role.second')];
+    // The explanation of practice against live sits next to the next-game
+    // buttons when they are there, in the corner otherwise.
     let infoBeside = false;
     if (finished) {
       // Two live wins in a row end the match; anything else ending it is the clock.
@@ -250,8 +248,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         : null;
       sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
     }
-    // The role the team chose, once it has, on the chip beside the mode.
-    const role = G.firstPlayer == null ? null : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
+    // The role the team chose, on the chip at the board's edge: only while a
+    // game is played, when the board is what the team reads.
+    const role = ctx.phase !== 'play' || finished || G.firstPlayer == null ? null
+      : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
 
@@ -268,17 +268,21 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
       },
       ...(pointToRules && { animation: 'pointToRules 0.9s ease-out 2' }),
     };
+    // The button's own pulse, not a press's ripple inside it, which ends too.
+    const stopPulse = (event: AnimationEvent) => {
+      if (event.target === event.currentTarget) setPointToRules(false);
+    };
     // On a phone only its icon, so the name, the clock and it share a row.
     const rulesButton = wide
       ? <Button ref={rulesButtonRef} variant="outlined" color="inherit" size="small" onClick={() => setRulesOpen(!rulesOpen)}
         startIcon={<MenuBookOutlinedIcon />} aria-expanded={rulesOpen}
-        onAnimationEnd={() => setPointToRules(false)}
+        onAnimationEnd={stopPulse}
         sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: LINE, backgroundColor: '#fff', ...pulse }}>
         {t('strategy.rules')}
       </Button>
       : <IconButton ref={rulesButtonRef} size="small" onClick={() => setRulesOpen(!rulesOpen)}
         aria-label={t('strategy.rules')} aria-expanded={rulesOpen} title={t('strategy.rules')}
-        onAnimationEnd={() => setPointToRules(false)}
+        onAnimationEnd={stopPulse}
         sx={{ border: `1px solid ${LINE}`, borderRadius: '8px', backgroundColor: '#fff', color: 'text.primary', ...pulse }}>
         <MenuBookOutlinedIcon fontSize="small" />
       </IconButton>;
@@ -480,7 +484,7 @@ function GameArea(props: {
               board's left edge, as its caption, for a team that looks at the
               board and wonders which side is theirs. Muted: a reminder, not
               something to look at. */}
-          {props.actions === null && props.role !== null && <Box sx={{
+          {props.role !== null && <Box sx={{
             position: 'absolute', inset: 0, marginX: 'auto', maxWidth: BOARD_MAX_WIDTH,
             display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start', paddingBottom: '6px',
           }}>
@@ -488,7 +492,7 @@ function GameArea(props: {
               padding: '0 9px', borderRadius: '999px', whiteSpace: 'nowrap',
               border: `1px solid ${LINE}`, color: MUTED, fontSize: '13px', fontWeight: 500,
             }}>
-              {t('strategy.mode.you')} <span>{props.role}</span>
+              {t('strategy.role.you')} <span>{props.role}</span>
             </Box>
           </Box>}
           {props.infoBeside && <Box sx={{ position: 'absolute', left: 'calc(50% + 244px)' }}>{props.info}</Box>}
@@ -582,7 +586,6 @@ function Intro(props: { enabled: boolean, startVaries: boolean, moves: StrategyW
   );
 }
 
-/// Under the live button after a practice game, until the first live one:
 /// Practice against live, behind an ⓘ: the explanation the first choice gave.
 function InfoButton(props: { startVaries: boolean }) {
   const { t } = useTranslation();
@@ -607,17 +610,17 @@ function swallowClick(event: MouseEvent) {
   event.preventDefault();
 }
 
+// On a laptop the window, not the column, is what runs short: what is above
+// the board and below it takes about 380px, so a board that scales with its
+// width, as a square grid does, is narrowed to fit.
+const BOARD_MAX_WIDTH = 'max(240px, min(440px, calc(100dvh - 380px)))';
+
 /// The game's own board, faded, locked or live as `BoardState` says. Out of
 /// `live` no move reaches the server to be refused: the disabled fieldset
 /// disables every control inside, focus and keys included, and announces it,
 /// and the click capture covers what a board makes clickable without being a
 /// control. Not `inert`: that would also hide the position from a screen
 /// reader, and the team is to read it before choosing a role.
-// On a laptop the window, not the column, is what runs short: what is above
-// the board and below it takes about 380px, so a board that scales with its
-// width, as a square grid does, is narrowed to fit.
-const BOARD_MAX_WIDTH = 'max(240px, min(440px, calc(100dvh - 380px)))';
-
 function BoardArea(props: { state: BoardState, children: ReactNode }) {
   const { state } = props;
   return (

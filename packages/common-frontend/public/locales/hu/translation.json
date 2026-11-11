@@ -176,11 +176,8 @@
       "title": "Milyen játszmával kezdtek?"
     },
     "mode": {
-      "first": "Kezdő",
       "live": "ÉLES · {{n}}. játszma",
-      "practice": "PRÓBAJÁTÉK",
-      "second": "Második",
-      "you": "Ti:"
+      "practice": "PRÓBAJÁTÉK"
     },
     "name": "Stratégiás játék",
     "next": {
@@ -212,6 +209,11 @@
       "practiceWon": "Nyertetek a próbajátékban.",
       "timeUp": "Lejárt az idő.",
       "unfinished": "Ez a játszma befejezetlen maradt."
+    },
+    "role": {
+      "first": "Kezdő",
+      "second": "Második",
+      "you": "Ti:"
     },
     "rules": "Szabályok",
     "rulesCommon": "Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni. Győzzétek le a gépet kétszer egymás után ebben a játékban!",

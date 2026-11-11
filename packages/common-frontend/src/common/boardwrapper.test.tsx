@@ -371,7 +371,14 @@ describe('the rules and role names', () => {
   test('show who starts as the role of a game that names none', () => {
     renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: GUESSER_PLAYER });
 
-    expect(screen.getByText('strategy.mode.first')).toBeInTheDocument();
+    expect(screen.getByText('strategy.role.first')).toBeInTheDocument();
+  });
+
+  // The chip is for reading the board while a game is played, not the end.
+  test('show no role once the time is up', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: GUESSER_PLAYER, millisecondsRemaining: -6000 });
+
+    expect(screen.queryByText('strategy.role.first')).not.toBeInTheDocument();
   });
 });
 

@@ -180,11 +180,8 @@
       "title": "Which kind of game do you start with?"
     },
     "mode": {
-      "first": "First",
       "live": "LIVE · game {{n}}",
-      "practice": "PRACTICE",
-      "second": "Second",
-      "you": "You:"
+      "practice": "PRACTICE"
     },
     "name": "Strategy game",
     "next": {
@@ -216,6 +213,11 @@
       "practiceWon": "You won the practice game.",
       "timeUp": "Time is up.",
       "unfinished": "This game was left unfinished."
+    },
+    "role": {
+      "first": "First",
+      "second": "Second",
+      "you": "You:"
     },
     "rules": "Rules",
     "rulesCommon": "You decide whether to play as the first or the second player. Beat the computer twice in a row in this game!",
