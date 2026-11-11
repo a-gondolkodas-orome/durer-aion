@@ -4,12 +4,12 @@ import { relayStrategy, Problem } from "relay-bot";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
 import { isLanguage } from "schemas";
-import { loadProblemSet } from "./practice-sets";
+import { findPracticeSet, loadProblemSet } from "./practice-sets";
 
 const description = <p></p>
 
-// The teamName is the join code of the selected test (`<year>_<H|D>_<category>`,
-// e.g. "12_D_C+"), so it identifies which problem set to load.
+// The teamName is the id of the practice set the selector picked, so it
+// identifies which problem set to load.
 export function RelayClient({ teamName }: {
   teamName?: string,
   matchID?: string,
@@ -24,15 +24,15 @@ export function RelayClient({ teamName }: {
       return null;
     }
     let problems: Problem[];
-    // loadProblemSet throws on a code with no bundled set — reachable through a
-    // stale stored teamState, never through the round selector.
+    // loadProblemSet throws on an id the site does not list — reachable through
+    // a stale stored teamState, never through the round selector.
     try {
       problems = loadProblemSet(teamName, language);
     } catch {
       return null;
     }
     // The game name ends up in the localStorage key, so every test keeps its own saved match
-    const gameName = `relay_${teamName.replace(/\+/g, 'p').toLowerCase()}`;
+    const gameName = `relay_${teamName}`;
     // The board gets a button leading back to the round selector
     const Board = (props: ComponentProps<typeof InProgressRelay>) =>
       <InProgressRelay {...props} selectRoundOnEnd />;
@@ -41,6 +41,7 @@ export function RelayClient({ teamName }: {
       Board,
       relayStrategy(problems),
       description,
+      findPracticeSet(teamName)?.relay.durationMinutes,
     ).ClientWithBot;
   }, [teamName, language]);
 

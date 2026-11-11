@@ -85,7 +85,7 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
   getCompetitions(): Promise<CompetitionSummaryDto[]> {
     return Promise.resolve([]);
   }
-  importTeams(_file: File, _competitionId: string): Promise<TeamImportResultDto> {
+  importTeams(_file: File): Promise<TeamImportResultDto> {
     throw Error("NOT call this");
   }
 }

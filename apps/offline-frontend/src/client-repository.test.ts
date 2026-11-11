@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
-import { LOCAL_STORAGE_TEAMSTATE } from "common-frontend/core";
+import { LOCAL_STORAGE_TEAMSTATE, lastActiveStorageKey, matchStorageKey, relayPointsStorageKey } from "common-frontend/core";
 import type { RelayEndReport } from "game";
 
 const { sendGameData } = vi.hoisted(() => ({ sendGameData: vi.fn() }));
 vi.mock("./sendData", () => ({ sendGameData, sendDataLogin: vi.fn() }));
 
-import { OfflineClientRepository } from "./client-repository";
+import { OfflineClientRepository, STORED_LOGIN_MAX_AGE_MS } from "./client-repository";
 import { readStoredTeamState } from "./stored-team-state";
+import { teamData } from "./teamData";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -35,4 +36,58 @@ test("a relay whose time ran out goes home with the score its board kept", async
   expect(relay).toMatchObject({ state: "FINISHED", score: 5 });
   expect(relay && "relayResults" in relay && relay.relayResults).toHaveLength(2);
   expect(sendGameData).toHaveBeenCalledExactlyOnceWith({ component: "relay", phase: "end", G: { points: 5 } });
+});
+
+// Teams rehearse on shared computers: a login left behind must not hand the
+// team, and its match, to whoever sits down a day later.
+describe("the stored login", () => {
+  const NOW = new Date("2026-10-11T09:00:00Z").getTime();
+  const HOUR_MS = 60 * 60 * 1000;
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(NOW);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("expires with everything saved beside it a day after the app last found it", async () => {
+    localStorage.setItem(lastActiveStorageKey(), String(NOW - STORED_LOGIN_MAX_AGE_MS - 1));
+    localStorage.setItem(matchStorageKey("relay_c"), '{"G":{}}');
+    localStorage.setItem(relayPointsStorageKey(), "12");
+
+    expect(await new OfflineClientRepository().getTeamState()).toBeNull();
+
+    expect(localStorage.getItem(LOCAL_STORAGE_TEAMSTATE)).toBeNull();
+    expect(localStorage.getItem(matchStorageKey("relay_c"))).toBeNull();
+    expect(localStorage.getItem(relayPointsStorageKey())).toBeNull();
+    expect(localStorage.getItem(lastActiveStorageKey())).toBeNull();
+  });
+
+  // The day runs from the last look, not from the login: a team that logged
+  // in the evening before is still playing the next morning.
+  test("lasts as long as the app keeps finding it", async () => {
+    localStorage.setItem(lastActiveStorageKey(), String(NOW - 23 * HOUR_MS));
+
+    expect(await new OfflineClientRepository().getTeamState()).toMatchObject({ teamName: "Csapat" });
+
+    expect(localStorage.getItem(lastActiveStorageKey())).toBe(String(NOW));
+  });
+
+  test("stored before the limit existed starts its day now", async () => {
+    expect(await new OfflineClientRepository().getTeamState()).toMatchObject({ teamName: "Csapat" });
+
+    expect(localStorage.getItem(lastActiveStorageKey())).toBe(String(NOW));
+  });
+
+  test("starts its day at the login", async () => {
+    localStorage.clear();
+    const repo = new OfflineClientRepository();
+
+    await repo.joinWithCode(teamData[0].join_code);
+
+    expect(localStorage.getItem(lastActiveStorageKey())).toBe(String(NOW));
+  });
 });

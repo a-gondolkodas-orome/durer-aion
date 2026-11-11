@@ -1,9 +1,9 @@
-import { Container, Dialog, Stack, Button } from '@mui/material';
+import { Box, Button, Container, Dialog, IconButton, Stack, Tooltip } from '@mui/material';
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
-import { MoreVert } from '@mui/icons-material';
+import { AccountCircleOutlined, ArrowBackRounded, Logout } from '@mui/icons-material';
 import { useClientRepo } from '../client-repo-context';
-import { useTheme } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 import { LanguageDropdown } from './Langswitcher';
@@ -12,8 +12,15 @@ import { LanguageDropdown } from './Langswitcher';
 // titles[2] is an optional, already-translated text shown instead of the team name
 /// `languageSwitcher` is for the sites that are meant to be read in either
 /// language; the competition round and its admin pages are Hungarian only.
+/// `compact` is for the game pages, where the height goes to the game.
+/// `leaveLabel` names the logout button for a site where logging out is not
+/// leaving, such as the relay practice, where it goes back to the round
+/// selector; the button then shows a back arrow instead of the exit icon. On
+/// a wide screen the button is the icon alone, the label its tooltip.
 export function Header(props: {
   teamName: string | null,
+  leaveLabel?: string,
+  compact?: boolean,
   languageSwitcher?: boolean,
   titles?: string[],
   homeAddress?: string,
@@ -36,108 +43,104 @@ export function Header(props: {
         enqueueSnackbar(t('error.unexpected'), { variant: 'error' });
       });
   };
+  const teamLabel = props.titles?.[2] ?? props.teamName;
+  const leaveLabel = props.leaveLabel ?? t('header.logout');
+  const LeaveIcon = props.leaveLabel ? ArrowBackRounded : Logout;
+  const title = props.titles ? t(props.titles[0]) : t('header.title');
+  const subtitle = props.titles ? t(props.titles[1]) : t('header.subtitle');
   return (
-    <Stack sx={{
+    <Box component="header" sx={{
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       width: '100%',
-      height: 102,
+      boxShadow: '0 2px 12px rgba(0, 0, 0, 0.15)',
+      position: 'relative',
+      zIndex: 1,
     }}>
       {/* `maxWidth={false}`, as for the page's own Container in `Main`: otherwise
           MUI's 1280px lg width overrides the 1200px below. The padding is
           responsive for the same reason: MUI's own, 24px from sm up, overrides a
-          plain value. The home pages' gutter is the same, so they line up. */}
+          plain value. The home pages' gutter is the same, so they line up.
+          Equal side columns keep the title centred whatever the team's name. */}
       <Container maxWidth={false} sx={{
         paddingLeft: { xs: '10px', sm: '24px' },
         paddingRight: { xs: '10px', sm: '24px' },
-        position: 'relative',
         maxWidth: '1200px',
-        flexDirection: 'row',
-        display: 'flex',
-        justifyContent: 'space-between',
-        height: '100%',
-        alignItems: 'center'
+        height: props.compact ? 56 : { xs: 64, md: 84 },
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
+        alignItems: 'center',
+        columnGap: '12px',
+        '& > *': { minWidth: 0 },
       }}>
+        <Stack direction="row" sx={{ alignItems: 'center', gap: '10px' }}>
+          {props.teamName && <>
+            <Box sx={{
+              display: { xs: 'none', md: 'block' },
+              fontSize: props.compact ? 15 : 17,
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>{teamLabel}</Box>
+            <Tooltip title={leaveLabel}>
+              <IconButton onClick={onLogout} size="small" color="inherit" aria-label={leaveLabel}
+                sx={{
+                  display: { xs: 'none', md: 'inline-flex' },
+                  flexShrink: 0,
+                  border: `1px solid ${alpha(theme.palette.primary.contrastText, 0.5)}`,
+                  padding: '4px',
+                  '&:hover': {
+                    borderColor: theme.palette.primary.contrastText,
+                    backgroundColor: alpha(theme.palette.primary.contrastText, 0.12),
+                  },
+                }}>
+                <LeaveIcon sx={{ fontSize: '18px' }} />
+              </IconButton>
+            </Tooltip>
+          </>}
+          {props.teamName &&
+            <IconButton color="inherit" aria-label={t('header.menu')} onClick={() => setMobileMenuOpen(true)}
+              sx={{ display: { xs: 'inline-flex', md: 'none' }, marginLeft: '-8px' }}>
+              <AccountCircleOutlined sx={{ fontSize: '30px' }} />
+            </IconButton>}
+        </Stack>
         <Stack sx={{
-          fontSize: {
-            xs: 25,
-            md: 40
-          },
-          fontWeight: 'bold',
-          paddingTop: '20px',
-          whiteSpace: 'nowrap',
+          alignItems: 'center',
+          textAlign: 'center',
           cursor: props.homeAddress ? 'pointer' : 'default',
         }} onClick={() => {
           if (props.homeAddress) {
             window.location.href = props.homeAddress;
           }
-        }}>{(props.titles) ? t(props.titles[0]) : t('header.title')}</Stack>
-        {
-          <Stack sx={{
-            flexDirection: 'row',
-            display: {
-              xs: 'none',
-              md: 'flex'
-            },
-            width: '100%',
-            flex: 1,
-            paddingTop: '40px',
-            alignItems: 'center',
-            overflow: 'hidden',
-            paddingLeft: '10px',
-            paddingRight: '10px',
-          }}>
-            {props.teamName &&
-              <>
-                <Stack sx={{
-                  flex: 1
-                }}></Stack>
-                <Stack sx={{
-                  fontSize: 25,
-                  display: 'block',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}>{props.titles?.[2] ?? props.teamName}</Stack>
-                <Stack onClick={onLogout} sx={{
-                  fontSize: 20,
-                  margin: '0px 15px',
-                  cursor: 'pointer',
-                  "&:hover": {
-                    opacity: '0.8',
-                  }
-                }}>{t('header.logout')}</Stack>
-              </>
-            }
-            <Stack sx={{
-              flex: 1
-            }}>
-            </Stack>
-            {props.languageSwitcher &&
+        }}>
+          <Box sx={{
+            fontSize: props.compact ? { xs: 18, md: 22 } : { xs: 20, md: 30 },
+            fontWeight: 700,
+            lineHeight: 1.15,
+            letterSpacing: '-0.01em',
+            whiteSpace: 'nowrap',
+          }}>{title}</Box>
+          {!props.compact && <Box sx={{
+            fontSize: { xs: 10, md: 12 },
+            fontWeight: 600,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            opacity: 0.85,
+            marginTop: '2px',
+            whiteSpace: 'nowrap',
+          }}>{subtitle}</Box>}
+        </Stack>
+        <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
+          {props.languageSwitcher && <>
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
-            }
-          </Stack>
-        }
-        {(props.teamName || props.languageSwitcher) && <Stack sx={{
-          display: {
-            xs: 'flex',
-            md: 'none'
-          },
-        }}><MoreVert onClick={() => {
-          setMobileMenuOpen(true)
-        }} sx={{
-          fontSize: '35px'
-        }} /></Stack>}
-        <Stack sx={{
-          fontSize: 30,
-          fontWeight: 'bold',
-          paddingTop: '30px',
-          display: {
-            xs: 'none',
-            md: 'flex'
-          },
-          whiteSpace: 'nowrap',
-        }}>{(props.titles) ? t(props.titles[1]) : t('header.subtitle')}</Stack>
+            </Box>
+            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+              <LanguageDropdown compact fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
+            </Box>
+          </>}
+        </Stack>
         <Dialog
           open={mobileMenuOpen}
           onClose={() => {
@@ -149,32 +152,34 @@ export function Header(props: {
                 width: '100%',
                 textAlign: 'center',
                 padding: '30px',
-                top: 0
+                top: 0,
+                borderRadius: '16px',
               }
             }
           }}
         >
           {props.teamName && <>
             <Stack sx={{
-              fontSize: 30,
+              fontSize: 24,
+              fontWeight: 600,
               paddingTop: '10px',
               paddingBottom: '20px',
               display: 'flex',
               alignItems: 'center'
-            }}>{props.titles?.[2] ?? props.teamName}</Stack>
+            }}>{teamLabel}</Stack>
             <Button onClick={() => {
               setMobileMenuOpen(false);
               onLogout();
-            }} variant='outlined'
+            }} variant='outlined' startIcon={<LeaveIcon />}
               sx={{
-                fontSize: 20,
-                textTransform: 'capitalize'
+                fontSize: 18,
+                borderRadius: '999px',
+                textTransform: 'none',
               }}
-            >{t('header.logout')}</Button>
+            >{leaveLabel}</Button>
           </>}
-          {props.languageSwitcher && <LanguageDropdown onChoose={props.onChooseLanguage} />}
         </Dialog>
       </Container>
-    </Stack>
+    </Box>
   )
 }

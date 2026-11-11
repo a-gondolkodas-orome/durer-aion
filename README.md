@@ -26,7 +26,7 @@ New here? [`CONTRIBUTING.md`](CONTRIBUTING.md) is the shorter way in.
 npm ci
 npm run setup         # creates the gitignored .env files from their samples
 npm run stack:up      # builds the site, then starts nginx + backend + postgres
-npm run teams:import  # loads scripts/test-{c,d,e}.tsv into edition XX's online C, D and E
+npm run teams:import  # loads scripts/test.tsv
 ```
 
 Coming back to a checkout you already have — switching to a branch to review it,
@@ -160,18 +160,17 @@ whenever the codes are to be mailed out: the one download on the admin page that
 carries a login secret. The team list's CSV leaves out the ID too, since a team's
 GUID is its session cookie's value.
 
-Each upload enters every team of its file into one competition, given by its
-id: the script's first argument (`import_teams.sh <competition id> <file>.tsv`),
-or the competition picked on the tab. A team name is unique within its
-competition only, and a team plays the matches its competition has.
-
 Both read the TSV's columns by their header, in any order and any case:
-`Teamname` is required, `Email`, `Other`, `ID`, `Login Code`, `Credentials` and
-`Competition` may be left out, and a column the import does not know is ignored.
-A row whose `Competition` names another competition than the upload's is
-refused, so the export, which holds every competition's teams, goes back in one
-competition at a time. A file whose first line is not such a header is refused
-whole.
+`Teamname` and `Competition` are required, `Email`, `Other`, `ID`, `Login Code`
+and `Credentials` may be left out, and a column the import does not know is
+ignored. A file whose first line is not such a header is refused whole.
+
+`Competition` is the id of the competition the row's team enters, so one file
+holds a whole round's registrations, the online round's C, D and E competitions
+at once; the tab lists every competition with its id to copy. A row naming no
+competition, or one the registry lacks, fails on its own and the rest go in. A
+team name is unique within its competition only, and a team plays the matches
+its competition has.
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
@@ -336,7 +335,7 @@ TypeScript, `.js`/`.mjs`/`.cjs`, Python and markdown — along with the
 translation JSONs, the files under dot directories included: hence the three
 globs in the script over one shared extension list, since `**/*` alone skips
 `.github/` and friends. The data files are ignored outright in `cspell.json`:
-`teamData.ts` for its arbitrary team names and `scripts/test-*.tsv` for the same
+`teamData.ts` for its arbitrary team names and `scripts/test.tsv` for the same
 reason.
 
 Vocabulary the dictionaries lack lives in three places: technical identifiers in

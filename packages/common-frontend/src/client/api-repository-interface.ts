@@ -37,5 +37,5 @@ export interface AdminClientRepository {
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   getCompetitions(): Promise<CompetitionSummaryDto[]>
-  importTeams(file: File, competitionId: string): Promise<TeamImportResultDto>
+  importTeams(file: File): Promise<TeamImportResultDto>
 }

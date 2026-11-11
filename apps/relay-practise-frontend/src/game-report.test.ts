@@ -16,6 +16,9 @@ vi.mock("boardgame.io/react", () => ({ Client }));
 
 import { handleGameReport } from "./game-report";
 
+// Edition 11's final, category C+: a listed set, which the event names by its parts.
+const CP11 = "ggzlsmnq3h--11-final-c-plus";
+
 // As index.tsx sets it: the namespaced key, spelled out, pins that the handler
 // reaches for it rather than writing a bare one.
 setLocalStorageNamespace("relay-practise");
@@ -46,16 +49,16 @@ describe("handleGameReport", () => {
     });
 
     test("names the round by its parts, with the score", () => {
-      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      readStoredTeamState.mockReturnValue({ teamName: CP11 });
       handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
 
-      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: "12", round: "final", category: "C+", points: 17 });
+      expect(track).toHaveBeenCalledExactlyOnceWith("relay-finished", { year: "11", round: "final", category: "C+", points: 17 });
     });
 
     // A round can report its end more than once (see
     // ClientRepository.keepRelayEnd); the later score is the one kept.
     test("is sent once for a round that reports its end twice, which keeps the later score", () => {
-      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      readStoredTeamState.mockReturnValue({ teamName: CP11 });
       handleGameReport({ component: "relay", phase: "end", G: { points: 17 } });
       handleGameReport({ component: "relay", phase: "end", G: { points: 20 } });
 
@@ -64,7 +67,7 @@ describe("handleGameReport", () => {
     });
 
     test("is not sent for a step report", () => {
-      readStoredTeamState.mockReturnValue({ teamName: "12_D_C+" });
+      readStoredTeamState.mockReturnValue({ teamName: CP11 });
       handleGameReport({ component: "relay", phase: "step", G: { points: 3 } });
 
       expect(track).not.toHaveBeenCalled();

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import { SuperPicture } from './picture-component';
+import { cardSx } from './card';
 
 // The login pages' layout: the content on a card, and the logo beside it. Both
 // share one grid cell, the logo pinned to the right and the card on top of it,
@@ -17,7 +17,7 @@ export function LoginLayout(props: { children: React.ReactNode }) {
       gridTemplateColumns: 'minmax(0, 1fr)',
       alignItems: 'start',
       // The page's Container has no padding, so this is the gutter at every
-      // width: the header's, so the card lines up with its title.
+      // width: the header's, so the card lines up with its left edge.
       px: { xs: '10px', sm: '24px' },
       py: { xs: 3, md: 5 },
     }}>
@@ -40,11 +40,10 @@ export function LoginLayout(props: { children: React.ReactNode }) {
         boxSizing: 'border-box',
         width: '100%',
         maxWidth: 680,
-        borderRadius: 5,
+        ...cardSx(theme),
+        display: 'block',
         px: { xs: 3, sm: 5 },
         py: { xs: 4, sm: 5 },
-        backgroundColor: alpha(theme.palette.background.paper, theme.palette.background.paperOpacity),
-        boxShadow: '0 24px 60px rgba(36, 52, 112, 0.14)',
         backdropFilter: 'blur(10px)',
       })}>
         {props.children}
