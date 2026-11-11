@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { Localizable } from "schemas";
 import { MyBoard as Board20ocde } from "./20ocde/board";
-import { descriptionC as description20oc, descriptionD as description20od, descriptionE as description20oe } from "./20ocde/main";
+import { presentationC as presentation20oc, presentationD as presentation20od, presentationE as presentation20oe } from "./20ocde/main";
 import type { StrategyGameKey } from "./strategy-games";
 
 const boards = {
@@ -12,13 +12,14 @@ const boards = {
   "20o-e": Board20ocde,
 } satisfies Record<StrategyGameKey, unknown>;
 
-// The rules text shown above the board: one for every language, or one per
-// language the game lists (`strategyGames`).
-export const strategyDescriptions = {
-  "20o-c": description20oc,
-  "20o-d": description20od,
-  "20o-e": description20oe,
-} satisfies Record<StrategyGameKey, Localizable<ReactNode>>;
+// What the strategy wrapper shows around each board that only the game knows:
+// its rules, one for every language or one per language the game lists
+// (`strategyGames`), its role names and whether its opening position varies.
+export const strategyPresentations = {
+  "20o-c": presentation20oc,
+  "20o-d": presentation20od,
+  "20o-e": presentation20oe,
+} satisfies Record<StrategyGameKey, { rules: Localizable<ReactNode> }>;
 
 // Generic over the game so the caller keeps the board's own state type: a
 // plain StrategyGameKey parameter would widen the result to a union of boards,

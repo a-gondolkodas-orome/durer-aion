@@ -194,6 +194,11 @@
       "outcomeNone": "Nektek nem lett meg a két egymás utáni éles győzelem, ezért 0 pontot kaptatok.",
       "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; az éles vereségek csökkentik ({{scale}}), de {{min}} pontnál kevesebb nem lesz. Egy vereség után újra két egymás utáni győzelem kell."
     },
+    "role": {
+      "first": "Kezdő",
+      "second": "Második",
+      "you": "Ti:"
+    },
     "series": {
       "earlier_one": "{{count}} korábbi éles játszma",
       "earlier_other": "{{count}} korábbi éles játszma",

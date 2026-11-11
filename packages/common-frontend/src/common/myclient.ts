@@ -5,7 +5,7 @@ import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
 import { withConnectionAlert } from '../client/components/ConnectionAlert';
 import { Loading } from '../client/components/Loading';
-import type { StrategyBoard, StrategyDescription } from './boardwrapper';
+import type { StrategyBoard, StrategyPresentation } from './boardwrapper';
 import type { ComponentType, ReactNode } from 'react';
 import type { GameRelay, MyGameState as RelayGameState } from 'game';
 
@@ -16,11 +16,11 @@ export type RelayBoard = ComponentType<BoardProps<RelayGameState>>;
 export function MyClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  description: StrategyDescription
+  presentation: StrategyPresentation<T_SpecificGameState>,
 ) {
   return Client({
     game: gameWrapper(game),
-    board: boardWrapper(board, description),
+    board: boardWrapper(board, presentation),
     numPlayers: 2,
   });
 }
@@ -46,12 +46,12 @@ const socketOpts = { timeout: 5000 };
 export function MyOnlineClient<T_SpecificGameState>(
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  description: StrategyDescription,
+  presentation: StrategyPresentation<T_SpecificGameState>,
   serverUrl: string | undefined = undefined,
 ) {
   return Client({
     game: gameWrapper(game),
-    board: withConnectionAlert(boardWrapper(board, description)),
+    board: withConnectionAlert(boardWrapper(board, presentation)),
     multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
