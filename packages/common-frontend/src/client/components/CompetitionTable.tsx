@@ -1,4 +1,5 @@
-import { Button } from '@mui/material';
+import { IconButton } from '@mui/material';
+import ContentCopy from '@mui/icons-material/ContentCopy';
 import { Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
@@ -46,6 +47,16 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[] 
     }
   };
 
+  // The value with a button that copies it, named for screen readers.
+  const withCopy = (text: string) => (
+    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
+      <span>{text}</span>
+      <IconButton size="small" aria-label={`Másolás: ${text}`} title="Másolás" onClick={() => { void copy(text); }}>
+        <ContentCopy fontSize="inherit"/>
+      </IconButton>
+    </Stack>
+  );
+
   return (
     <Stack sx={{ height: '600px' }} data-testid="competitionTable">
       <DataGrid
@@ -56,12 +67,13 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[] 
             headerName: 'Competition oszlopba',
             description: 'Ezt kell a csapat sorában a Competition oszlopba írni. Az azonosító is jó.',
             width: 230,
-            renderCell: ({ row }: { row: CompetitionRow }) => (
-              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                <span>{row.importAs}</span>
-                <Button size="small" onClick={() => { void copy(row.importAs); }}>Másolás</Button>
-              </Stack>
-            ),
+            renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.importAs),
+          },
+          {
+            field: 'id',
+            headerName: 'Azonosító',
+            width: 270,
+            renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.id),
           },
           {
             field: 'edition',
@@ -73,7 +85,6 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[] 
           { field: 'round', headerName: 'Forduló', width: 100 },
           { field: 'category', headerName: 'Kategória', width: 90 },
           { field: 'label', headerName: 'Név', width: 160 },
-          { field: 'id', headerName: 'Azonosító', width: 230 },
         ]}
         initialState={{
           sorting: { sortModel: [{ field: 'edition', sort: 'desc' }] },

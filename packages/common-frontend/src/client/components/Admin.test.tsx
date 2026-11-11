@@ -447,12 +447,14 @@ test('the import tab lists the competitions newest first, with what to import th
   const row = (await within(table).findByText('20 online C')).closest('li');
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect(grids.columns.at(-1)?.map(column => column.field))
-    .toEqual(['importAs', 'edition', 'round', 'category', 'label', 'id']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label']);
   if (row === null) throw new Error('no table row');
-  fireEvent.click(within(row).getByRole('button', { name: 'Másolás' }));
-
+  fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
   expect(await screen.findByText('Vágólapra másolva: 20 online C')).toBeInTheDocument();
+
+  fireEvent.click(within(row).getByRole('button', { name: `Másolás: ${COMPETITION_C}` }));
+  await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {
