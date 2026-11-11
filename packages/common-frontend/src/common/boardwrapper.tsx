@@ -213,9 +213,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
         ? (lastResult === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'))
         : (lastResult === 'won' ? t('strategy.result.liveWon') : t('strategy.result.liveLost'));
       tone = lastResult;
-      // A first live win is half the task; the strip has the points.
+      // A first live win is half the task. A live loss is the one moment the
+      // stake changes: fewer points, and the run starts over, so it is said
+      // here as well as in the strip.
       sub = practice ? t('strategy.result.practiceNote')
-        : lastResult === 'won' && G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '';
+        : lastResult === 'won' ? (G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '')
+        : t('strategy.result.liveLostNext', { points: strategyPoints(G.numberOfLoss) });
       actions = nextGame;
       infoBeside = true;
       // Before the first live game the team is about to choose one, so how it

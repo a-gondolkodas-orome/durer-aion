@@ -203,6 +203,7 @@
     },
     "result": {
       "liveLost": "The computer won.",
+      "liveLostNext": "Two wins in a row now earn you {{points}} points.",
       "liveWon": "You won!",
       "liveWonFirst": "Win the next live game too, and the task is done.",
       "practiceLost": "The computer won the practice game.",

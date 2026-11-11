@@ -152,6 +152,8 @@ describe('between games', () => {
     renderBoard(betweenGames, { winner: JUDGE_PLAYER, numberOfLoss: 1, liveResults: ['lost'] });
 
     expect(status()).toHaveTextContent('strategy.result.liveLost');
+    // The loss lowered the stake and restarted the run, so the line says so.
+    expect(screen.getByText('strategy.result.liveLostNext')).toBeInTheDocument();
     expect(button('strategy.next.practice')).toBeEnabled();
     expect(button('strategy.next.live')).toBeEnabled();
     expect(button('strategy.info.label')).toBeInTheDocument();

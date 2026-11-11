@@ -199,6 +199,7 @@
     },
     "result": {
       "liveLost": "A gép nyert.",
+      "liveLostNext": "Két egymás utáni győzelemmel most {{points}} pontot szerezhettek.",
       "liveWon": "Nyertetek!",
       "liveWonFirst": "Ha a következő éles játszmát is megnyeritek, teljesítettétek a feladatot.",
       "practiceLost": "A gép nyert a próbajátékban.",
