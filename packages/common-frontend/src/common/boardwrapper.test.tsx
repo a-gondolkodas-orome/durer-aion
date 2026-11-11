@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { Ctx } from 'boardgame.io';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from 'game';
@@ -22,10 +22,10 @@ afterEach(() => {
   i18n.language = 'hu';
 });
 
-const DefaultBoard = boardWrapper<object>(() => <div />, { rules: {} });
+const DefaultBoard = boardWrapper<object>(() => <div />, {}, {});
 
 /// Only the fields the wrapper reads; boardgame.io hands a board plenty more.
-function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}, Board = DefaultBoard) {
+function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> & Record<string, unknown> = {}, Board = DefaultBoard) {
   const G: GameStateMixin = {
     millisecondsRemaining: 10 * 60 * 1000,
     start: new Date().toISOString(),
@@ -103,14 +103,14 @@ describe('the strategy board on the judge\'s turn', () => {
 describe('the strategy board\'s description', () => {
   test('is the one given, whatever the page language, when it is given once', () => {
     i18n.language = 'en';
-    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { rules: <p>egyetlen szabály</p> }));
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, <p>egyetlen szabály</p>, {}));
 
     expect(screen.getByText('egyetlen szabály')).toBeInTheDocument();
   });
 
   test('is in the page language', () => {
     i18n.language = 'en';
-    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { rules: { hu: 'magyar szabály', en: 'English rule' } }));
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { hu: 'magyar szabály', en: 'English rule' }, {}));
 
     expect(screen.getByText('English rule')).toBeInTheDocument();
     expect(screen.queryByText('magyar szabály')).not.toBeInTheDocument();
@@ -118,19 +118,18 @@ describe('the strategy board\'s description', () => {
 
   test('is in another language where the game has none in the page\'s', () => {
     i18n.language = 'en';
-    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { rules: { hu: 'magyar szabály' } }));
+    renderBoard({ phase: 'play', currentPlayer: '0' }, {}, boardWrapper<object>(() => <div />, { hu: 'magyar szabály' }, {}));
 
     expect(screen.getByText('magyar szabály')).toBeInTheDocument();
   });
 });
 
 describe('the game\'s own words on its roles and moves', () => {
-  // A board that, like the 5×5 one, holds half a move before sending it.
-  const StepBoard = boardWrapper<object>(({ setTurnState }) =>
-    <button data-testid="cell" onClick={() => setTurnState?.({ picked: true })}>cell</button>, {
-    rules: {},
+  // A game whose step depends on part of a move already in its state, as the
+  // 5×5 game's second X does.
+  const StepBoard = boardWrapper<{ halfMove?: boolean }>(() => <div />, {}, {
     roleLabels: [{ hu: 'Kezdő (1 O)', en: 'First (1 O)' }, { hu: 'Második (2 X)', en: 'Second (2 X)' }],
-    getPlayerStepDescription: ({ turnState }) => (turnState as { picked?: boolean } | null)?.picked ? 'second step' : 'first step',
+    getPlayerStepDescription: ({ G }) => G.halfMove ? 'second step' : 'first step',
   });
 
   test('name the role buttons in the page language', () => {
@@ -141,11 +140,9 @@ describe('the game\'s own words on its roles and moves', () => {
     expect(screen.queryByText('strategy.firstPlayer')).not.toBeInTheDocument();
   });
 
-  test('tell the team its next step, as the board reports it, and the role it chose', () => {
-    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: JUDGE_PLAYER }, StepBoard);
+  test('tell the team its next step, as the game state has it, and the role it chose', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: JUDGE_PLAYER, halfMove: true }, StepBoard);
 
-    expect(screen.getByText('first step')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('cell'));
     expect(screen.getByText('second step')).toBeInTheDocument();
     expect(screen.getByText(/Második \(2 X\)/)).toBeInTheDocument();
   });
@@ -154,6 +151,13 @@ describe('the game\'s own words on its roles and moves', () => {
     renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER }, { firstPlayer: JUDGE_PLAYER }, StepBoard);
 
     expect(screen.queryByText('first step')).not.toBeInTheDocument();
+  });
+
+  test('say nothing of a step or a role once the time is up', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: GUESSER_PLAYER, millisecondsRemaining: -6000 }, StepBoard);
+
+    expect(screen.queryByText('first step')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Kezdő \(1 O\)/)).not.toBeInTheDocument();
   });
 
   test('call the roles of a game that names none by who starts', () => {

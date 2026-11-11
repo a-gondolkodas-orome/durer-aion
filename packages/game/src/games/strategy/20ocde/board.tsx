@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
 import { JUDGE_PLAYER } from '../../../common/types';
@@ -7,16 +6,7 @@ import { BOARD_SIZE, isLegalPlacement, markForPlayer, winningLine } from './game
 import type { MyGameState } from './game';
 
 
-/// What the board holds of the team's move before sending it: whether a first X
-/// is picked. It reports it with `setTurnState`, for the step description in
-/// main.tsx to read; the practice site's 5×5 game words its steps the same way.
-export interface TurnState {
-  xsPlaced: 0 | 1;
-}
-
-type MyGameProps = BoardProps<MyGameState & GameStateMixin> & {
-  setTurnState?: (turnState: TurnState) => void,
-};
+type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 
 // Online state may come from a server without lastMachineMove. The move log
 // also survives board remounts and reconnects, unlike local cell comparisons.
@@ -39,35 +29,16 @@ function lastMachineMove({ G, log }: MyGameProps): number[] {
   return G.lastMachineMove ?? [];
 }
 
-// Remount a pending selection after a move, reload, role choice or new round.
 export function MyBoard(props: MyGameProps) {
-  const { G, ctx, matchID } = props;
-  const positionKey = `${matchID}:${ctx.turn}:${ctx.phase}:${G.firstPlayer}:${G.numberOfTries}:${G.cells.join('-')}`;
-  return <BoardTurn key={positionKey} {...props} machineMove={lastMachineMove(props)} />;
-}
-
-function BoardTurn({ G, ctx, moves, isActive, machineMove, setTurnState }: MyGameProps & { machineMove: number[] }) {
-  const [selected, setSelected] = useState<number | null>(null);
-  useEffect(() => {
-    setTurnState?.({ xsPlaced: selected === null ? 0 : 1 });
-  }, [selected, setTurnState]);
+  const { G, ctx, moves, isActive } = props;
+  const machineMove = lastMachineMove(props);
   const active = isActive && ctx.phase === 'play' && !ctx.gameover && G.winner === null;
-  const mark = markForPlayer(G, ctx.currentPlayer);
   const line = winningLine(G.cells);
+  // The team's first X of a turn stands out until the second ends the turn.
+  const xsThisTurn = ctx.currentPlayer === JUDGE_PLAYER ? [] : G.xsThisTurn ?? [];
 
   const chooseCell = (index: number) => {
-    if (!active || G.cells[index] !== null) return;
-    if (selected === index) {
-      setSelected(null);
-      return;
-    }
-    const indices = selected === null ? [index] : [selected, index];
-    if (isLegalPlacement(G, ctx, indices)) {
-      moves.placeMarks(indices);
-      setSelected(null);
-    } else if (mark === 'X') {
-      setSelected(index);
-    }
+    if (active && isLegalPlacement(G, ctx, [index])) moves.placeMarks([index]);
   };
 
   return (
@@ -78,10 +49,9 @@ function BoardTurn({ G, ctx, moves, isActive, machineMove, setTurnState }: MyGam
         {G.cells.map((cell, index) => (
           <Button
             key={index}
-            variant={selected === index ? 'contained' : 'outlined'}
+            variant='outlined'
             disabled={!active || cell !== null}
-            aria-pressed={selected === index}
-            aria-label={`${Math.floor(index / BOARD_SIZE) + 1}. sor, ${index % BOARD_SIZE + 1}. oszlop: ${cell === 'O' ? 'kör' : cell ?? (selected === index ? 'kijelölt X' : 'üres')}`}
+            aria-label={`${Math.floor(index / BOARD_SIZE) + 1}. sor, ${index % BOARD_SIZE + 1}. oszlop: ${cell === 'O' ? 'kör' : cell === 'X' ? (xsThisTurn.includes(index) ? 'az imént letett X' : 'X') : 'üres'}`}
             onClick={() => chooseCell(index)}
             sx={{
               minWidth: 0, p: 0, aspectRatio: '1', fontSize: 'clamp(16px, 9cqi, 40px)', lineHeight: 1,
@@ -89,14 +59,14 @@ function BoardTurn({ G, ctx, moves, isActive, machineMove, setTurnState }: MyGam
               ...(machineMove.includes(index) && {
                 bgcolor: 'color-mix(in srgb, currentColor 20%, transparent)',
               }),
-              '&.Mui-disabled': { color: 'primary.main', borderColor: 'divider' },
+              '&.Mui-disabled': { color: 'primary.main', borderColor: xsThisTurn.includes(index) ? 'primary.main' : 'divider' },
               ...(line.includes(index) && {
                 bgcolor: 'primary.main',
                 '&.Mui-disabled': { color: 'primary.contrastText', borderColor: 'primary.main' },
               }),
             }}
           >
-            {cell ?? (selected === index ? 'X' : '\u00a0')}
+            {cell ?? '\u00a0'}
           </Button>
         ))}
       </Box>
