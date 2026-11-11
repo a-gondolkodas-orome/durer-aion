@@ -59,7 +59,11 @@ export function MyBoard(props: MyGameProps) {
               ...(machineMove.includes(index) && {
                 bgcolor: 'color-mix(in srgb, currentColor 20%, transparent)',
               }),
-              '&.Mui-disabled': { color: 'primary.main', borderColor: xsThisTurn.includes(index) ? 'primary.main' : 'divider' },
+              '&.Mui-disabled': { color: 'primary.main', borderColor: 'divider' },
+              // MUI's own disabled style sets the border's width, so this does too.
+              ...(xsThisTurn.includes(index) && {
+                '&.Mui-disabled': { color: 'primary.main', borderColor: 'primary.main', borderWidth: 3 },
+              }),
               ...(line.includes(index) && {
                 bgcolor: 'primary.main',
                 '&.Mui-disabled': { color: 'primary.contrastText', borderColor: 'primary.main' },
