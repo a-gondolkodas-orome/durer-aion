@@ -61,16 +61,20 @@ type Tone = 'plain' | 'wait' | 'won' | 'lost';
 const pointsText = (t: TFunction, count: number) => t('general.points', { count });
 
 // A pair of buttons above the board: each button's width from `sm` up, and
-// the gap between them.
+// the gap between them. The ⓘ beside the pair is placed from the two, so the
+// pair itself stays centred over the board.
 const PAIR_BUTTON_WIDTH = 230;
 const PAIR_GAP = 12;
+const INFO_BESIDE_LEFT = `calc(50% + ${PAIR_BUTTON_WIDTH + PAIR_GAP / 2 + 8}px)`;
 
 // The game card's width where the rules have a column of their own: the pair
-// of buttons and the widest board, with the card's padding, and room for the
-// longest line under the status that is shown there to stay on one line. The
-// columns either side of it share what is left, so the card stays centred
-// with the rules open or closed.
-const GAME_COLUMN_WIDTH = 560;
+// of buttons with the ⓘ beside it, and the line under a practice result, with
+// the card's padding. The columns either side of it share what is left, so
+// the card stays centred with the rules open or closed.
+const GAME_COLUMN_WIDTH = 620;
+// Where those side columns are wide enough for the rules: below it, a third
+// of what is left beside a card this wide would cramp them.
+const RULES_BESIDE_FROM = 1280;
 const COLUMN_GAP = 16;
 // The rules' column where there is no room for one either side of the card.
 const RULES_COLUMN_WIDTH = 330;
@@ -96,12 +100,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // `noSsr` reads the width on the first render, so the rules do not show
     // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
-    // From `lg` the rules have a column of their own beside the game card,
-    // with an empty one as wide on its other side, so the card does not move
-    // when they open. Between `md` and `lg` there is no room for both: the
-    // rules, once open, take a column from the card's side, and the card moves
-    // over, rather than covering a board the team may be playing on.
-    const rulesBeside = useMediaQuery(theme.breakpoints.up('lg'), { noSsr: true });
+    // From RULES_BESIDE_FROM the rules have a column of their own beside the
+    // game card, with an empty one as wide on its other side, so the card does
+    // not move when they open. Between `md` and that there is no room for
+    // both: the rules, once open, take a column from the card's side, and the
+    // card moves over, rather than covering a board the team may be playing on.
+    const rulesBeside = useMediaQuery(`(min-width: ${RULES_BESIDE_FROM}px)`, { noSsr: true });
     // Before the first game the rules open in a dialog of their own, which
     // only the team's word that it has read them closes. Once a game has been
     // chosen that has happened, so nothing needs to remember it across a
@@ -186,6 +190,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     const labels = presentation.roleLabels?.map(label => inLanguage<string>(label, language) ?? '');
     const [first, second] = labels ?? [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
     const [firstRole, secondRole] = labels ?? [t('strategy.role.first'), t('strategy.role.second')];
+    // The explanation of practice against live sits next to the next-game
+    // buttons when they are there, in the corner otherwise.
+    let infoBeside = false;
     if (finished) {
       // Two live wins in a row end the match; anything else ending it is the clock.
       if (G.winningStreak >= 2) {
@@ -201,6 +208,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     } else if (betweenGames && (judgeToMove || lastResult === null)) {
       status = judgeToMove ? t('strategy.status.starting') : t('strategy.intro.title');
       actions = nextGame;
+      infoBeside = true;
     } else if (betweenGames && lastResult !== null) {
       const practice = difficulty === 'test';
       status = practice
@@ -214,14 +222,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         : lastResult === 'won' ? (G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '')
         : t('strategy.result.liveLostNext', { points: strategyPoints(G.numberOfLoss) });
       actions = nextGame;
+      infoBeside = true;
       // Before the first live game the team is about to choose one, so how it
       // may differ from practice comes once more, in the line under the result:
       // after a win, that the practice computer may not have played its best;
       // after a loss that would read oddly, so only a varying start is worth
-      // saying. Only a card as wide as the screen, from `sm` to `lg`, has
-      // room for the longer line: on a phone, and in the narrower card that
-      // sits beside the rules from `lg`, it would wrap and move the board, so
-      // those keep the short line and the ⓘ says the rest.
+      // saying. Phones keep the short line, as the longer one would wrap and
+      // move the board; the ⓘ says the rest there.
       if (practice && G.numberOfTries === 0) {
         subWide = lastResult === 'won'
           ? (startVaries ? t('strategy.result.practiceNoteBotVaries') : t('strategy.result.practiceNoteBot'))
@@ -250,6 +257,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // game is played, when the board is what the team reads.
     const role = ctx.phase !== 'play' || finished || G.firstPlayer == null ? null
       : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
+    // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
+    infoBeside = infoBeside && wide;
 
     const boardState: BoardState =
       finished ? 'locked'
@@ -332,7 +341,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
             <Box sx={{ minWidth: 0 }}>
               <GameArea mode={difficulty} liveNumber={G.numberOfTries} role={role}
                 status={status} tone={tone} sub={sub} subWide={subWide} actions={actions} intro={intro}
-                info={<InfoButton startVaries={startVaries} />}>
+                info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
                 <BoardArea state={boardState}>{board(props)}</BoardArea>
               </GameArea>
             </Box>
@@ -447,7 +456,7 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: 
 /// board does not move from one state to the next.
 function GameArea(props: {
   mode: Difficulty | null, liveNumber: number, role: string | null, status: string, tone: Tone, sub: string,
-  subWide: string | null, actions: ReactNode, intro: ReactNode, info: ReactNode,
+  subWide: string | null, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
   children: ReactNode,
 }) {
   const { t } = useTranslation();
@@ -463,11 +472,11 @@ function GameArea(props: {
       {/* Before the first game the choice itself says it all: no mode yet,
           and the explanation is under each button. */}
       {props.intro === null &&
-        // A fixed height, not a minimum: the ⓘ is taller than the mode line,
-        // and the row must be as tall without a mode line as with one.
+        // A fixed height, not a minimum: the ⓘ is taller than the mode line and
+        // is in this row only in some states, so the board would move with it.
         <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: '28px' }}>
           <ModeLine mode={mode} liveNumber={props.liveNumber} />
-          {props.info}
+          {!props.infoBeside && props.info}
         </Stack>}
       {/* The same element for the whole match: a screen reader announces a
           change inside a live region, but often not one inserted filled. */}
@@ -483,8 +492,8 @@ function GameArea(props: {
             put; only a line that wraps on a phone moves it. */}
         <Box sx={{ minHeight: '22px', lineHeight: '22px', textAlign: 'center', fontSize: '15px', color: MUTED }}>
           {props.subWide === null ? props.sub : <>
-            <Box component="span" sx={{ display: { xs: 'inline', sm: 'none', lg: 'inline' } }}>{props.sub}</Box>
-            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline', lg: 'none' } }}>{props.subWide}</Box>
+            <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{props.sub}</Box>
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{props.subWide}</Box>
           </>}
         </Box>
         <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -505,6 +514,7 @@ function GameArea(props: {
               {t('strategy.role.you')} <span>{props.role}</span>
             </Box>
           </Box>}
+          {props.infoBeside && <Box sx={{ position: 'absolute', left: INFO_BESIDE_LEFT }}>{props.info}</Box>}
         </Stack>
         {props.children}
       </>}
