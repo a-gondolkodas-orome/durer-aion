@@ -134,7 +134,7 @@
       "type": "Answer must be a number"
     },
     "goodGuess": "Your answer is correct",
-    "guess": "Guess: ({{try}}/{{max}})",
+    "guess": "Guess: ({{try}}/{{max}}) – {{points}}",
     "guessNum": "Guess #{{guessnum}}:",
     "name": "Relay tasks",
     "progress": "So far: {{points}}",
@@ -144,18 +144,21 @@
     "tryHint": "After {{max}} wrong guesses, the next task follows. You cannot return to this task afterwards.",
     "tryHintLast": "If this guess is wrong too, the next task follows. You cannot return to this task afterwards.",
     "wrongGuess": "Your guess is sadly wrong",
-    "zoomImage": "Click the image to enlarge it"
+    "zoomImage": "Click the image to enlarge it",
+    "key": {
+      "label": "Colour key",
+      "try1": "1st try",
+      "try2": "2nd try",
+      "try3": "3rd try",
+      "wrong": "wrong",
+      "unanswered": "no answer"
+    }
   },
   "strategy": {
     "description": "Description",
     "endTable": {
-      "game": "Live game",
-      "losses": "Losses",
       "lost": "Loss",
-      "points": "Points",
       "reminder": "Don't forget to do the relay too!",
-      "result": "Result",
-      "rules": "Practice games do not count. If you do not beat the computer twice in a row within 30 minutes, you get 0 points.",
       "title": "Strategy game results",
       "unfinished": "Unfinished: the time ran out",
       "won": "Win"
@@ -184,10 +187,26 @@
     "testGameButton": "Start a new test game",
     "twoWinsInARow": "Win two live games in a row now: {{points}}",
     "points": {
-      "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; live losses lower it ({{scale}}), but never below {{min}}. After a loss you need two wins in a row again.",
-      "examples": "For example:",
+      "afterLoss": "win, loss, win, win",
       "cleanRun": "win, win",
-      "afterLoss": "win, loss, win, win"
+      "examples": "For example:",
+      "label": "Points",
+      "outcomeAfterLosses_one": "You won twice in a row after {{count}} live loss: {{points}}.",
+      "outcomeAfterLosses_other": "You won twice in a row after {{count}} live losses: {{points}}.",
+      "outcomeClean": "You won twice in a row with no loss: {{points}}.",
+      "outcomeNoGames": "You played no live game, so you got 0 points.",
+      "outcomeNone": "You did not get two live wins in a row, so you got 0 points.",
+      "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; live losses lower it ({{scale}}), but never below {{min}}. After a loss you need two wins in a row again."
+    },
+    "role": {
+      "first": "First",
+      "second": "Second",
+      "you": "You:"
+    },
+    "series": {
+      "earlier_one": "{{count}} earlier live game",
+      "earlier_other": "{{count}} earlier live games",
+      "label": "Live games"
     }
   },
   "waitingRoom": {

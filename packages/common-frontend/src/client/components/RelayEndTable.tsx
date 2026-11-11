@@ -1,7 +1,8 @@
 import { useBackToHome, useLogout, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { EndCard } from './EndCard';
-import { RelayResultsTable } from './ResultTables';
+import { Stack } from '@mui/system';
+import { RelayKey, RelayResultsTable } from './ResultTables';
 import type { RelayProblemResult } from 'schemas';
 import { relayMaxPoints } from './relay-results';
 
@@ -25,7 +26,10 @@ export function RelayEndTable(props: { allPoints: number, problems: RelayProblem
       backLabel={props.selectRound ? t('relay.endTable.selectOtherRound') : t('general.backHome')}
       onBack={backToHome}
     >
-      <RelayResultsTable problems={props.problems} details transposeOnPhone/>
+      <Stack sx={{ gap: '10px' }}>
+        <RelayResultsTable problems={props.problems} details transposeOnPhone/>
+        <RelayKey centred/>
+      </Stack>
     </EndCard>
   );
 }

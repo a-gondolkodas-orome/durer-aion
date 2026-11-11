@@ -26,6 +26,7 @@ function renderForm(awaitingJudge: boolean, onSubmit = vi.fn((_result: number) =
         previousTries={[]}
         previousCorrectness={null}
         attempt={attempt}
+        availablePoints={3}
         onSubmit={onSubmit}
         awaitingJudge={awaitingJudge}
       />
@@ -91,6 +92,7 @@ function renderWithTries(previousTries: number[]) {
         previousTries={previousTries}
         previousCorrectness={previousTries.length > 0 ? false : null}
         attempt={4 + previousTries.length}
+        availablePoints={3 - previousTries.length}
         onSubmit={vi.fn(() => Promise.resolve())}
         awaitingJudge={false}
       />

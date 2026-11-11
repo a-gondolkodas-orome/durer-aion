@@ -216,8 +216,11 @@ describe('import_teams_from_tsv', () => {
     });
 
     it.each([
-      ['none', '', '2. sor (Alpha): hiányzik a verseny azonosítója (Competition).'],
-      ['one the registry does not have', 'nosuchcomp--x', '2. sor (Alpha): Nincs ilyen verseny: „nosuchcomp--x”.'],
+      ['none', '', '2. sor (Alpha): hiányzik a verseny (Competition): az azonosítója vagy a neve, például 20 online C.'],
+      ['one the registry does not have', 'nosuchcomp--x',
+        '2. sor (Alpha): Nincs ilyen verseny: „nosuchcomp--x”. Az azonosítója vagy a neve kell, például: 20 online C.'],
+      ['a name no competition has', '20 online B',
+        '2. sor (Alpha): Nincs ilyen verseny: „20 online B”. Az azonosítója vagy a neve kell, például: 20 online C.'],
     ])('fails a row naming %s, and goes on', async (_, competitionId, message) => {
       tsv(['Alpha', competitionId, '', '', '', '', ''], ['Bravo', C, '', '', '', '', '']);
 
@@ -227,6 +230,30 @@ describe('import_teams_from_tsv', () => {
       expect(create).toHaveBeenCalledTimes(1);
       expect(result.export_table.map(row => row[0])).toEqual(['Bravo']);
       expect(result.logs.value).toEqual([message]);
+    });
+
+    // Organisers know a round by its edition, round and category, not by
+    // an id; the export writes the id, which stays put.
+    it('takes a competition by its name too', async () => {
+      tsv(['Alpha', '20 online C', '', '', '', '', ''], ['Bravo', '20. internetes d', '', '', '', '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 2, failed: 0 });
+      expect(create.mock.calls.map(([values]) => values.competitionId)).toEqual([C, D]);
+      expect(result.export_table.map(row => row[1])).toEqual([C, D]);
+    });
+
+    it('knows a team already there when the row names its competition by name', async () => {
+      live = [TeamModel.build({
+        teamName: 'Alpha', competitionId: C, category: 'C', email: '', other: '', pageState: 'HOME',
+        teamId: TEAM_ID, joinCode: JOIN_CODE, credentials: CREDENTIALS, relayMatchID: null, strategyMatchID: null,
+      })];
+      tsv(['Alpha', '20 online C', '', '', '', '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
     });
 
     // A team name is unique within its competition only.

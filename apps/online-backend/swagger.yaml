@@ -180,7 +180,7 @@ paths:
                   $ref: "#/components/schemas/TeamModel"
   /team/admin/competitions:
     get:
-      summary: The competitions teams can be imported into, with the ids the import's Competition column takes
+      summary: The competitions teams can be imported into, whose ids the import's Competition column takes
       security:
       - basicAdminAuth: []
       tags:
@@ -204,7 +204,7 @@ paths:
     put:
       summary: Import teams from a TSV file
       description: |
-        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded, with a header naming its columns: "Teamname" and "Competition" (required; the id of the competition the row's team enters), "Email", "Other", "ID", "Login Code" and "Credentials" (optional).
+        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded, with a header naming its columns: "Teamname" and "Competition" (required; the competition the row's team enters, by its id or by edition, round and category such as "20 online C"), "Email", "Other", "ID", "Login Code" and "Credentials" (optional).
       security:
         - basicAdminAuth: []
       tags:

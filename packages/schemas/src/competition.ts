@@ -155,6 +155,35 @@ export function editionSchoolYear(edition: number): string {
   return `${twoDigits(edition + 2006)}/${twoDigits(edition + 2007)}`;
 }
 
+// The words a round goes by in a competition's name: its own, and the admin
+// page's Hungarian one.
+const ROUND_WORDS: Record<string, Round> = {
+  online: 'online', internetes: 'online',
+  local: 'local', helyi: 'local',
+  final: 'final', 'döntő': 'final', donto: 'final',
+};
+
+/// How people name one round of one edition in one category, e.g.
+/// `20 online C`: the team import takes it in place of the id. Only a
+/// `competition` has one; anything else goes by its id.
+export function competitionName(metadata: CompetitionMetadata): string | undefined {
+  return metadata.kind === 'competition' ? `${metadata.edition} ${metadata.round} ${metadata.category}` : undefined;
+}
+
+/// Whether `text` names the competition with this metadata, the way
+/// `competitionName` writes it or close to it: any case and spacing, a dot
+/// after the edition (`20.`), and the round in Hungarian too (`internetes`,
+/// `helyi`, `döntő`).
+export function namesCompetition(text: string, metadata: CompetitionMetadata): boolean {
+  if (metadata.kind !== 'competition') return false;
+  const match = /^(\d+)\.?\s+(\S+)\s+(.+)$/u.exec(text.trim().toLowerCase());
+  if (match === null) return false;
+  const [, edition, round, category] = match;
+  return Number(edition) === metadata.edition
+    && ROUND_WORDS[round] === metadata.round
+    && category.replace(/\s+/gu, ' ') === metadata.category.trim().toLowerCase();
+}
+
 export interface CompetitionConfig {
   id: CompetitionId;
   /// One language is fixed; with both, the team chooses and can switch at any

@@ -434,22 +434,27 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   expect(saved[0]).toBe(`Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
 });
 
-// The Competition column takes ids, so the page lists them to copy from.
-test('the import tab lists the competitions with ids to copy', async () => {
+// The Competition column takes a name or an id, so the page lists what to
+// write for each competition, to copy.
+test('the import tab lists the competitions newest first, with what to import them as', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const writeText = vi.fn().mockResolvedValue(undefined);
   Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
   renderAdmin();
 
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  const list = await screen.findByTestId('competitionList');
-  const item = (await within(list).findByText(`20. internetes C (${COMPETITION_C})`)).closest('li');
-  expect(within(list).getByText('20. internetes D (u4lw7pcca1--20-online-d)')).toBeInTheDocument();
-  if (item === null) throw new Error('no list item');
-  fireEvent.click(within(item).getByRole('button', { name: 'Másolás' }));
+  const table = await screen.findByTestId('competitionTable');
+  const row = (await within(table).findByText('20 online C')).closest('li');
+  expect(within(table).getByText('20 online D')).toBeInTheDocument();
+  expect(grids.columns.at(-1)?.map(column => column.field))
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label']);
+  if (row === null) throw new Error('no table row');
+  fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
+  await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
+  expect(await screen.findByText('Vágólapra másolva: 20 online C')).toBeInTheDocument();
 
+  fireEvent.click(within(row).getByRole('button', { name: `Másolás: ${COMPETITION_C}` }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
-  expect(await screen.findByText(`Vágólapra másolva: ${COMPETITION_C}`)).toBeInTheDocument();
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {
@@ -579,7 +584,9 @@ test('the team list\'s CSV holds no login secret', async () => {
   renderAdmin();
   await screen.findByText('Alpha');
 
-  const exported = (grids.columns.at(-1) ?? []).filter(column => column.disableExport !== true).map(column => column.field);
+  // The team list's grid, not the import tab's table of competitions.
+  const teamGrid = [...grids.columns].reverse().find(columns => columns.some(column => column.field === 'teamName'));
+  const exported = (teamGrid ?? []).filter(column => column.disableExport !== true).map(column => column.field);
 
   expect(exported).not.toHaveLength(0);
   for (const secret of ['id', 'teamId', 'joinCode', 'credentials', 'email']) {

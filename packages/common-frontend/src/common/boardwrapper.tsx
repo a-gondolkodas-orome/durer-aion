@@ -8,7 +8,7 @@ import { useBackToHome } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, strategyPoints } from "game";
-import type { GameStateMixin } from "game";
+import type { GamePresentation, GameStateMixin } from "game";
 import type { BoardProps } from "boardgame.io/react";
 import type { ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
@@ -25,7 +25,9 @@ export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 /// shows the page's.
 export type StrategyDescription = Localizable<ReactNode>;
 
-export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDescription) {
+/// The game's own `presentation` words its roles and the team's next step; the
+/// wrapper decides where and when they show.
+export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDescription, presentation: GamePresentation<G>) {
   return (props: StrategyBoardProps<G>) => {
     const { G, ctx } = props;
     const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
@@ -49,6 +51,17 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // It takes one outside `play` too: it sets the opening position of each
     // new game.
     const judgeToMove = ctx.currentPlayer === JUDGE_PLAYER;
+    // A game's own role labels name the roles on the buttons and in the line
+    // that says which one the team chose. Without them the wrapper has a
+    // phrase for each.
+    const labels = presentation.roleLabels?.map(label => inLanguage<string>(label, language) ?? '');
+    const [first, second] = labels ?? [t('strategy.firstPlayer'), t('strategy.secondPlayer')];
+    const [firstRole, secondRole] = labels ?? [t('strategy.role.first'), t('strategy.role.second')];
+    const playing = ctx.phase === 'play' && !finished && G.winner === null;
+    const role = !playing || G.firstPlayer == null ? null
+      : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
+    // The game's own word on the team's move, after "your turn".
+    const step = playing && !judgeToMove ? presentation.getPlayerStepDescription?.({ G, ctx }) ?? null : null;
     return (
       <>
         <EndDialog open={finished} onClose={backToHome}>
@@ -163,7 +176,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                       gap: '8px',
                     }}
                   >
-                    <StrategyGamesTable results={G.liveResults}/>
+                    <StrategyGamesTable results={G.liveResults} points={G.points}/>
                     {/* What winning the match is worth now: two live wins in a
                         row earn the points the losses so far leave. */}
                     <Stack sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
@@ -224,7 +237,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                         textTransform: 'none',
                         borderRadius: '10px',
                       }} variant='contained' color='primary' onClick={() => moves.chooseRole(GUESSER_PLAYER)}>
-                      {t('strategy.firstPlayer')}
+                      {first}
                       </Button>
                       <Stack sx={{ width: '4%' }} />
                       <Button sx={{
@@ -234,7 +247,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                         textTransform: 'none',
                         borderRadius: '10px',
                       }} variant='contained' color='primary' onClick={() => moves.chooseRole(JUDGE_PLAYER)}>
-                      {t('strategy.secondPlayer')}
+                      {second}
                       </Button>
                     </Stack>
                     )}
@@ -257,8 +270,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                   </Stack>
 
                   <Stack component="tr">
+                  {/* Announced as it changes: it is where the team's next step is said. */}
                   <Stack
                     component="td"
+                    aria-live="polite"
                     sx={{
                     p: '12px',
                     color: theme.palette.primary.main,
@@ -269,6 +284,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                     {ctx.phase === 'startNewGame' && !judgeToMove && G.winner === null && t('strategy.guide.newGame')}
                     {ctx.phase === 'chooseRole' && t('strategy.guide.ifFirstPlayer')}
                     {ctx.phase === 'play' && !judgeToMove && t('strategy.guide.yourTurn')}
+                    {step !== null && <Stack component="span" sx={{ color: 'text.primary' }}>{inLanguage<string>(step, language)}</Stack>}
+                    {role !== null && <Stack component="span" sx={{ color: 'text.secondary', fontSize: '14px' }}>{t('strategy.role.you')} {role}</Stack>}
                     {judgeToMove && t('strategy.guide.waitingForServer')}
                     {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "live" && t('strategy.guide.realGameWin')}
                     {ctx.phase === 'startNewGame' && G.winner === "0" && G.difficulty === "test" && t('strategy.guide.testGameWin')}

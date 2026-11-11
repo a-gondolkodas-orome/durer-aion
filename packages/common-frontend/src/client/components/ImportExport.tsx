@@ -4,10 +4,10 @@ import { Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import useSWR from 'swr';
-import type { CompetitionMetadata } from 'schemas';
-import { CompetitionSummaryDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
+import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useCompetitions, useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
+import { CompetitionTable } from './CompetitionTable';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
 function summary(result: TeamImportResultDto): string {
@@ -15,27 +15,12 @@ function summary(result: TeamImportResultDto): string {
   return `${result.successful} csapat importálva${existing}, ${result.failed} sor hibás`;
 }
 
-const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
-  online: 'internetes',
-  local: 'helyi',
-  final: 'döntő',
-};
-
-/// A competition as the organisers name it, with its id, which is what the
-/// import's Competition column takes.
-export function competitionOptionLabel({ id, metadata }: CompetitionSummaryDto): string {
-  const name = metadata.kind === 'competition'
-    ? `${metadata.edition}. ${ROUND_NAMES[metadata.round]} ${metadata.category}`
-    : metadata.label.hu ?? metadata.label.en ?? '';
-  return `${name} (${id})`;
-}
-
 /// Where teams come in and where their secrets go out. The import runs on the
 /// same route and the same importer as `npm run teams:import`, row by row, so
 /// a file with bad rows still loads the good ones. Each row names its team's
-/// competition by id, so one file can fill the C, D and E competitions of a
-/// round at once; the list on the page gives the ids to copy. The export is every team
-/// with its join code and credentials, in the import's own format: the one
+/// competition, so one file can fill the C, D and E competitions of a round at
+/// once; the table beside it says what to write for each. The export is every
+/// team with its join code and credentials, in the import's own format: the one
 /// download on the admin page that carries a login secret.
 export function ImportExport(props: { teams: TeamModelDto[], onImported: () => void }) {
   const theme = useTheme();
@@ -81,105 +66,89 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
     }
   };
 
-  const copyId = async (id: string) => {
-    try {
-      await navigator.clipboard.writeText(id);
-      enqueueSnackbar(`Vágólapra másolva: ${id}`, { variant: 'info' });
-    } catch {
-      enqueueSnackbar('A másolás nem sikerült, jelöld ki kézzel az azonosítót.', { variant: 'error' });
-    }
-  };
-
   const messages = result === null ? [] : result.logs.value
     .map((value, index) => ({ value, sev: result.logs.sev[index] }));
 
   return (
-    <Stack sx={{ gap: '16px', padding: '10px' }}>
-      <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
-      <Stack sx={{ fontSize: 14 }}>
-        Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Competition:
-        ez utóbbi a csapat versenyének azonosítója a lenti listából, így egy fájlban több verseny csapatai is
-        lehetnek. Az Email, az Other, az ID, a Login Code és a Credentials elhagyható vagy üresen hagyható, az
-        utolsó hármat ilyenkor a szerver generálja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok
-        kimaradnak.
-        A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
-        Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét lent az
-        Exportálás rész.
-      </Stack>
-      <Stack data-testid="competitionList" sx={{ gap: '4px' }}>
-        <Stack sx={{ fontSize: 14 }}>A versenyek (az azonosító a zárójelben):</Stack>
-        <Stack component="ul" sx={{ margin: 0, fontSize: 14 }}>
-          {(competitions ?? []).map(competition => (
-            <li key={competition.id}>
-              {competitionOptionLabel(competition)}
-              <Button
-                size="small"
-                sx={{ marginLeft: '8px' }}
-                onClick={() => { void copyId(competition.id); }}
-              >
-                Másolás
+    <Stack sx={{ gap: '32px', padding: '10px' }}>
+      <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '32px' }}>
+        <Stack sx={{ gap: '16px', flex: '1 1 0', minWidth: 0 }}>
+          <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
+          <Stack sx={{ fontSize: 14 }}>
+            Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Competition:
+            ez utóbbi a csapat versenye, a lenti táblázat szerint, például 20 online C, vagy a verseny
+            azonosítója. Így egy fájlban több verseny csapatai is lehetnek. Az Email, az Other, az ID, a Login Code
+            és a Credentials elhagyható vagy üresen hagyható, az utolsó hármat ilyenkor a szerver generálja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok
+            kimaradnak.
+            A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
+            Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét az
+            Exportálás rész.
+          </Stack>
+          <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <Button variant="outlined" color="primary" component="label" disabled={busy}>
+              Fájl kiválasztása
+              <input type="file" accept=".tsv" hidden data-testid="importTeamsFile" onChange={onPick}/>
+            </Button>
+            <Stack>{file?.name ?? 'Nincs kiválasztott fájl.'}</Stack>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={busy || file === null}
+              onClick={() => { if (file !== null) void runImport(file); }}
+            >
+              {busy ? 'Importálás…' : 'Importálás indítása'}
+            </Button>
+            {codes.length > 0 && (
+              <Button variant="contained" color="primary" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(codes)); }}>
+                Az importáltak belépőkódjainak letöltése
               </Button>
-            </li>
-          ))}
-        </Stack>
-      </Stack>
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-        <Button variant="outlined" color="primary" component="label" disabled={busy}>
-          Fájl kiválasztása
-          <input type="file" accept=".tsv" hidden data-testid="importTeamsFile" onChange={onPick}/>
-        </Button>
-        <Stack>{file?.name ?? 'Nincs kiválasztott fájl.'}</Stack>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={busy || file === null}
-          onClick={() => { if (file !== null) void runImport(file); }}
-        >
-          {busy ? 'Importálás…' : 'Importálás indítása'}
-        </Button>
-        {codes.length > 0 && (
-          <Button variant="contained" color="primary" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(codes)); }}>
-            Az importáltak belépőkódjainak letöltése
-          </Button>
-        )}
-      </Stack>
-      {result !== null && (
-        <Stack data-testid="importTeamsSummary">
-          {`${summary(result)}.`}
-        </Stack>
-      )}
-      {messages.length > 0 && (
-        <Stack sx={{ gap: '4px' }}>
-          <Stack sx={{ fontSize: 14 }}>Hibák és figyelmeztetések:</Stack>
-          <Stack
-            component="ul"
-            sx={{ margin: 0, maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 13 }}
-          >
-            {messages.map((message, index) => (
-              <li
-                key={index}
-                style={{ color: message.sev === 'error' ? theme.palette.error.main : theme.palette.text.primary }}
+            )}
+          </Stack>
+          {result !== null && (
+            <Stack data-testid="importTeamsSummary">
+              {`${summary(result)}.`}
+            </Stack>
+          )}
+          {messages.length > 0 && (
+            <Stack sx={{ gap: '4px' }}>
+              <Stack sx={{ fontSize: 14 }}>Hibák és figyelmeztetések:</Stack>
+              <Stack
+                component="ul"
+                sx={{ margin: 0, maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 13 }}
               >
-                {message.value}
-              </li>
-            ))}
+                {messages.map((message, index) => (
+                  <li
+                    key={index}
+                    style={{ color: message.sev === 'error' ? theme.palette.error.main : theme.palette.text.primary }}
+                  >
+                    {message.value}
+                  </li>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+        </Stack>
+        <Stack sx={{ gap: '16px', flex: '1 1 0', minWidth: 0 }}>
+          <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Exportálás</Stack>
+          <Stack sx={{ fontSize: 14 }}>
+            Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopaival. A fájl titkos
+            adatokat tartalmaz: aki egy csapat belépőkódját ismeri, beléphet a csapat nevében.
+          </Stack>
+          <Stack sx={{ flexDirection: 'row' }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              disabled={props.teams.length === 0}
+              onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow))); }}
+            >
+              {`Mind a(z) ${props.teams.length} csapat letöltése belépőkódokkal`}
+            </Button>
           </Stack>
         </Stack>
-      )}
-      <Stack component="h3" sx={{ margin: '16px 0 0', fontSize: 18, fontWeight: 500 }}>Exportálás</Stack>
-      <Stack sx={{ fontSize: 14 }}>
-        Az összes csapat a belépőkódjával és a credentials-szel, az importálás oszlopaival. A fájl titkos
-        adatokat tartalmaz: aki egy csapat belépőkódját ismeri, beléphet a csapat nevében.
       </Stack>
-      <Stack sx={{ flexDirection: 'row' }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          disabled={props.teams.length === 0}
-          onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow))); }}
-        >
-          {`Mind a(z) ${props.teams.length} csapat letöltése belépőkódokkal`}
-        </Button>
+      <Stack sx={{ gap: '16px', minWidth: 0 }}>
+        <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Versenyek</Stack>
+        <CompetitionTable competitions={competitions ?? []}/>
       </Stack>
     </Stack>
   );

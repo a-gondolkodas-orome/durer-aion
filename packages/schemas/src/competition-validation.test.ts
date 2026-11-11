@@ -1,5 +1,5 @@
 import {
-  CompetitionConfig, editionSchoolYear, inLanguage, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
+  CompetitionConfig, competitionName, editionSchoolYear, namesCompetition, inLanguage, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
 } from './competition';
 import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
 
@@ -265,5 +265,30 @@ describe('editionSchoolYear', () => {
     expect(editionSchoolYear(1)).toBe('07/08');
     expect(editionSchoolYear(19)).toBe('25/26');
     expect(editionSchoolYear(20)).toBe('26/27');
+  });
+});
+
+describe('competition names', () => {
+  const online = { kind: 'competition', edition: 20, round: 'online', category: 'C' } as const;
+
+  it('writes edition, round and category', () => {
+    expect(competitionName(online)).toBe('20 online C');
+    expect(competitionName({ kind: 'other', label: { hu: 'Algebra' } })).toBeUndefined();
+  });
+
+  it.each(['20 online C', '20. internetes c', '  20  ONLINE   C '])('reads %j', text => {
+    expect(namesCompetition(text, online)).toBe(true);
+  });
+
+  it.each(['20 online D', '19 online C', '20 final C', '20 online', 'online C', '20 online C+'])('does not read %j', text => {
+    expect(namesCompetition(text, online)).toBe(false);
+  });
+
+  it('reads a category with a sign, and a Hungarian final', () => {
+    expect(namesCompetition('9. döntő C+', { kind: 'competition', edition: 9, round: 'final', category: 'C+' })).toBe(true);
+  });
+
+  it('names nothing but a competition', () => {
+    expect(namesCompetition('20 online C', { kind: 'other', label: { hu: '20 online C' } })).toBe(false);
   });
 });

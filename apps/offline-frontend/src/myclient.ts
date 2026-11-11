@@ -22,7 +22,7 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   const storageKey = matchStorageKey(game.name);
   return Client({
     game: gameWrapper(game, (report) => handleGameReport(report, storageKey)),
-    board: boardWrapper(board, description),
+    board: boardWrapper(board, description, game),
     multiplayer: localWithBots(
       {
         bots: { '1': botWrapper(strategy) },

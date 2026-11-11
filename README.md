@@ -165,12 +165,13 @@ Both read the TSV's columns by their header, in any order and any case:
 and `Credentials` may be left out, and a column the import does not know is
 ignored. A file whose first line is not such a header is refused whole.
 
-`Competition` is the id of the competition the row's team enters, so one file
+`Competition` is the competition the row's team enters, by edition, round and
+category (`20 online C`; `20. internetes C` works too) or by its id, so one file
 holds a whole round's registrations, the online round's C, D and E competitions
-at once; the tab lists every competition with its id to copy. A row naming no
-competition, or one the registry lacks, fails on its own and the rest go in. A
-team name is unique within its competition only, and a team plays the matches
-its competition has.
+at once. The tab's table of competitions, newest first, gives what to write for
+each, and the export writes the id. A row naming no competition, or one the
+registry lacks, fails on its own and the rest go in. A team name is unique
+within its competition only, and a team plays the matches its competition has.
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition

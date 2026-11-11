@@ -3,10 +3,10 @@ import type { LiveGameResult } from 'schemas';
 import { useBackToHome, useTeamState } from '../hooks/user-hooks';
 import { useTranslation } from 'react-i18next';
 import { EndCard } from './EndCard';
-import { PointsScale, StrategyGamesTable } from './ResultTables';
+import { StrategyGamesTable, StrategyOutcome } from './ResultTables';
 
 /**
- * The strategy match's end screen: its score, live games and points scale, and
+ * The strategy match's end screen: its score, live games and how points follow, and
  * the way home.
  */
 export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGameResult[] }) {
@@ -22,8 +22,8 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       backLabel={t('general.backHome')}
       onBack={backToHome}
     >
-      <StrategyGamesTable results={props.liveResults}/>
-      <PointsScale points={props.allPoints}/>
+      <StrategyGamesTable results={props.liveResults} points={props.allPoints}/>
+      <StrategyOutcome results={props.liveResults} points={props.allPoints}/>
     </EndCard>
   );
 }

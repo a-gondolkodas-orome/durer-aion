@@ -16,7 +16,7 @@ import { ConfirmDialogInterface, formatMinutes } from './ConfirmDialog';
 import { BORDER, DANGER, DANGER_BORDER, DANGER_DIVIDER, DIALOG_BACKGROUND, DIVIDER, FOOTER_BACKGROUND, MUTED } from './adminStyles';
 import { Countdown } from './Countdown';
 import { relayProblemResults, STRATEGY_POINTS_BY_LOSSES } from 'game';
-import { RelayResultsTable, SOLVED_ON_TRY, StrategyGamesTable, UNANSWERED, WRONG } from './ResultTables';
+import { RelayKey, RelayResultsTable, StrategyGamesTable } from './ResultTables';
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -299,24 +299,6 @@ function Fact(props: { label: string, help?: string, children: ReactNode }) {
   );
 }
 
-const LEGEND: { label: string, background: string }[] = [
-  ...SOLVED_ON_TRY.map((background, idx) => ({ label: `${idx + 1}. próbára`, background })),
-  { label: 'hibás', background: WRONG },
-  { label: 'nincs válasz', background: UNANSWERED },
-];
-
-/// The colours of RelayResultsTable, which teams see without a key.
-function RelayLegend() {
-  return (
-    <Stack component="ul" aria-label="Jelmagyarázat" sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '6px 18px', margin: 0, padding: 0, listStyle: 'none', fontSize: 12, color: MUTED }}>
-      {LEGEND.map(it => <Stack component="li" key={it.label} sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
-        <Box sx={{ width: 14, height: 14, border: '1px solid #bdbdbd', borderRadius: '3px', background: it.background }}/>
-        {it.label}
-      </Stack>)}
-    </Stack>
-  );
-}
-
 function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { state: 'NOT STARTED' }> }) {
   const { status } = props;
   const inProgress = status.state === 'IN PROGRESS';
@@ -348,10 +330,10 @@ function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
       <RelayResultsTable problems={relayProblemResults(relayG)} details transposeOnPhone
         answers={relayG.previousAnswers.map(answers => answers.map(it => it.answer))}
         current={inProgress ? relayG.currentProblem : undefined}/>
-      <RelayLegend/>
+      <RelayKey/>
     </Stack>}
     {strategyG && (strategyG.liveResults.length > 0 || gameInPlay) && <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
-      <StrategyGamesTable results={strategyG.liveResults}/>
+      <StrategyGamesTable results={strategyG.liveResults} points={strategyG.points}/>
       {gameInPlay && <Box sx={{ fontSize: 13, color: MUTED }}>
         A {strategyG.numberOfTries}. játszma most tart, a táblázatba a végén kerül be.
       </Box>}
