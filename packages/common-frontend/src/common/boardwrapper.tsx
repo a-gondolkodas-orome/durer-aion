@@ -54,8 +54,9 @@ const LINE = '#d0d7de';
 /// board on each of its moves would flash it every turn.
 type BoardState = 'empty' | 'locked' | 'live' | 'waiting';
 
-/// The status line's colour: the team's turn, a wait, a result, or neither.
-type Tone = 'plain' | 'go' | 'wait' | 'won' | 'lost';
+/// The status line's colour: a wait, a result, or neither. Green is kept for
+/// a win, so the team's turn is in the plain colour like any other step.
+type Tone = 'plain' | 'wait' | 'won' | 'lost';
 
 const pointsText = (t: TFunction, count: number) => t('general.points', { count });
 
@@ -216,7 +217,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
       );
     } else {
       status = teamToMove ? t('strategy.status.yourTurn') : t('strategy.status.botTurn');
-      tone = teamToMove ? 'go' : 'wait';
+      tone = teamToMove ? 'plain' : 'wait';
       // The game's own word on the move, in the line kept for it under the
       // status, so the board above needs no lines of its own.
       const step = teamToMove
@@ -422,7 +423,7 @@ function GameArea(props: {
 }) {
   const { t } = useTranslation();
   const { mode, tone } = props;
-  const toneColour = tone === 'go' ? 'primary.main' : tone === 'wait' ? MUTED : tone === 'won' ? WIN : tone === 'lost' ? LOSS : 'text.primary';
+  const toneColour = tone === 'wait' ? MUTED : tone === 'won' ? WIN : tone === 'lost' ? LOSS : 'text.primary';
   return (
     <Stack data-testid="gameArea" data-mode={mode ?? 'none'} sx={{
       minWidth: 0, maxWidth: '900px', marginX: 'auto',
