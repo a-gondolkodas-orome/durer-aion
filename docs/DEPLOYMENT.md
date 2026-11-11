@@ -280,9 +280,9 @@ docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scr
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
 The admin page's TSV upload does the same job through the browser.
 
-Each row's `Competition` column names its team's competition by id, so one file
-holds every category of the round. The admin page's **Import/export** tab lists
-the competitions with their ids.
+Each row's `Competition` column names its team's competition, such as
+`20 online C`, or its id, so one file holds every category of the round. The
+admin page's **Import/export** tab lists the competitions with what to write.
 
 Teams cannot be deleted. A bad import is undone by dropping the volume
 (`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
