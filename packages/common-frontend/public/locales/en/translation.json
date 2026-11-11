@@ -144,7 +144,15 @@
     "tryHint": "After {{max}} wrong guesses, the next task follows. You cannot return to this task afterwards.",
     "tryHintLast": "If this guess is wrong too, the next task follows. You cannot return to this task afterwards.",
     "wrongGuess": "Your guess is sadly wrong",
-    "zoomImage": "Click the image to enlarge it"
+    "zoomImage": "Click the image to enlarge it",
+    "key": {
+      "label": "Colour key",
+      "try1": "1st try",
+      "try2": "2nd try",
+      "try3": "3rd try",
+      "wrong": "wrong",
+      "unanswered": "no answer"
+    }
   },
   "strategy": {
     "description": "Description",

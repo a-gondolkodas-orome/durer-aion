@@ -8,6 +8,11 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+// A cell's text, which the smaller max splits across elements: the innermost
+// element holding all of it.
+const cellsWith = (text: string) => screen.queryAllByText((_, el) =>
+  el?.textContent === text && ![...el.children].some(child => child.textContent === text));
+
 test("a relay's table shows each problem's points out of its max, and a dash for a time never spent", () => {
   render(<RelayResultsTable details problems={[
     { maxPoints: 3, points: 2, trySeconds: [180, 90] },
@@ -15,7 +20,7 @@ test("a relay's table shows each problem's points out of its max, and a dash for
   ]}/>);
 
   expect(screen.getByText('2', { selector: 'b' }).parentElement).toHaveTextContent('2/3');
-  expect(screen.getByText('0/6')).toBeInTheDocument();
+  expect(cellsWith('0/6')).toHaveLength(1);
   expect(screen.getByText('4:30')).toBeInTheDocument();
   expect(screen.getByText('–')).toBeInTheDocument();
 });
@@ -73,9 +78,9 @@ test("a running relay shows its current problem and the ones after it as not end
     { maxPoints: 5, points: 0, trySeconds: [] },
   ]}/>);
 
-  expect(screen.getByText('–/4')).toBeInTheDocument();
-  expect(screen.getByText('–/5')).toBeInTheDocument();
-  expect(screen.queryByText('0/5')).not.toBeInTheDocument();
+  expect(cellsWith('–/4')).toHaveLength(1);
+  expect(cellsWith('–/5')).toHaveLength(1);
+  expect(cellsWith('0/5')).toHaveLength(0);
 });
 
 test("a last try worth nothing is not called wrong, since a right answer would score 0 too", () => {
