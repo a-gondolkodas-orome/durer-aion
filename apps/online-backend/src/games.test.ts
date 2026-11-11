@@ -22,7 +22,11 @@ describe("competitionGames", () => {
     expect([...names].sort()).toEqual(expected.sort());
   });
 
+  // The setup reads the clock twice, for the start and for the end, so a
+  // millisecond ticking between the two reads would add to the duration.
   it("gives each match its competition's duration", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    onTestFinished(() => { vi.useRealTimers(); });
     const competition = registry.competitions.get("mkhi1nnoim--20-online-c");
     if (competition === undefined) throw new Error("edition XX's online C is not registered");
     const { id, relay, strategy } = competition;
