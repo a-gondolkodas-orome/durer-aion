@@ -1,5 +1,5 @@
 import { Ctx, DefaultPluginAPIs, Game, MoveMap, TurnConfig } from "boardgame.io";
-import type { LiveGameResult } from "schemas";
+import type { LiveGameResult, Localizable } from "schemas";
 
 // boardgame.io does not export its plugin APIs by name. Taking them off the
 // context type it does export keeps this out of the package's build layout,
@@ -101,9 +101,31 @@ export function startingPositionMove<G>(position: G): StartingPositionMove<G> {
   return [[position], 'setStartingPosition'];
 }
 
+/// What the strategy wrapper says around a game's board that only the game
+/// knows. It sits with the rules rather than the board, so the server and the
+/// bot read the same game the screen describes; a step that depends on part of
+/// a move is a move of its own, kept in `G`, for the description to read. Each
+/// text is one for every language or one per language the game lists
+/// (`strategyGames`).
+export interface GamePresentation<G> {
+  /// The two roles, the first player's first: on the buttons the team chooses
+  /// with, and wherever the screen says which one it chose. So each is a short
+  /// noun phrase naming the role ("Kezdő (2 X)", "Cápa"), not a sentence about
+  /// the choice. Without them the roles are only who starts, worded by the
+  /// wrapper.
+  roleLabels?: readonly [Localizable<string>, Localizable<string>];
+  /// Whether the opening position the bot sends differs from game to game.
+  /// Only then do the texts ask the team to look at it before choosing a role,
+  /// and say that a live game may start from another one than practice did.
+  startVaries?: boolean;
+  /// What the team does next on its turn in `play`, under "Ti jöttök!", as the
+  /// practice site's game of the same name says it.
+  getPlayerStepDescription?: (args: { G: G & GameStateMixin, ctx: Ctx }) => Localizable<string>;
+}
+
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState
-interface GameMixin<G> {
+interface GameMixin<G> extends GamePresentation<G> {
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
 }

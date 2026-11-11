@@ -1,6 +1,6 @@
 import { MyClient, MyClientRelay, MyOnlineClient, MyOnlineRelayClient } from "./myclient";
 import type { RelayBoard } from "./myclient";
-import type { StrategyBoard, StrategyPresentation } from "./boardwrapper";
+import type { StrategyBoard, StrategyDescription } from "./boardwrapper";
 import type { ReactNode } from "react";
 import { GameType } from "game";
 import type { GameRelay } from "game";
@@ -8,11 +8,11 @@ import type { GameRelay } from "game";
 export const ClientFactory = function<T_SpecificGameState> (
   game: GameType<T_SpecificGameState>,
   board: StrategyBoard<T_SpecificGameState>,
-  presentation: StrategyPresentation<T_SpecificGameState>,
+  description: StrategyDescription,
   serverUrl: string | undefined = undefined,
   ) {
-  const Client = MyClient(game, board, presentation);
-  const OnlineClient = MyOnlineClient(game, board, presentation, serverUrl);
+  const Client = MyClient(game, board, description);
+  const OnlineClient = MyOnlineClient(game, board, description, serverUrl);
   return {
     Client: function () {
       return (<>

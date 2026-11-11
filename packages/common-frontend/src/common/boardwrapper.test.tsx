@@ -9,7 +9,7 @@ import { ClientRepoProvider } from '../client/client-repo-context';
 import { MockClientRepository } from '../client/mock-client-repository';
 import { MockTeamState } from '../client/hooks/mock-user-hooks';
 import { boardWrapper } from './boardwrapper';
-import type { StrategyBoardProps, StrategyPresentation } from './boardwrapper';
+import type { StrategyBoardProps, StrategyDescription } from './boardwrapper';
 
 const i18n = vi.hoisted(() => ({ language: 'hu' }));
 
@@ -25,16 +25,16 @@ afterEach(() => {
 const play = vi.fn();
 // A board with one control, to see whether a click on it gets through.
 const cellBoard = () => <button data-testid="cell" onClick={play}>cell</button>;
-const Board = boardWrapper<object>(cellBoard, { rules: <p>the rules</p> });
+const Board = boardWrapper<object>(cellBoard, <p>the rules</p>, {});
 // A game that names its roles, and whose opening position varies.
-const NamedBoard = boardWrapper<object>(cellBoard, {
-  rules: <p>the rules</p>, roleLabels: ['Kezdünk (1 O)', 'Másodikak leszünk (2 X)'], startVaries: true,
+const NamedBoard = boardWrapper<object>(cellBoard, <p>the rules</p>, {
+  roleLabels: ['Kezdünk (1 O)', 'Másodikak leszünk (2 X)'], startVaries: true,
 });
 
 const clientRepo = new MockClientRepository();
 
 /// Only the fields the wrapper reads; boardgame.io hands a board plenty more.
-function boardElement(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}, Wrapped = Board) {
+function boardElement(ctx: Partial<Ctx>, game: Partial<GameStateMixin> & Record<string, unknown> = {}, Wrapped = Board) {
   const G: GameStateMixin = {
     millisecondsRemaining: 10 * 60 * 1000,
     start: new Date().toISOString(),
@@ -58,7 +58,7 @@ function boardElement(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}, Wra
   return { moves, element: <ClientRepoProvider value={clientRepo}><Wrapped {...props} /></ClientRepoProvider> };
 }
 
-function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}, Wrapped = Board) {
+function renderBoard(ctx: Partial<Ctx>, game: Partial<GameStateMixin> & Record<string, unknown> = {}, Wrapped = Board) {
   const { moves, element } = boardElement(ctx, game, Wrapped);
   render(element);
   return moves;
@@ -327,7 +327,7 @@ describe('after the second win', () => {
 
 describe('the rules and role names', () => {
   const firstVisit = { difficulty: null, numberOfTries: 0 };
-  const rulesOf = (rules: StrategyPresentation['rules']) => boardWrapper<object>(cellBoard, { rules });
+  const rulesOf = (rules: StrategyDescription) => boardWrapper<object>(cellBoard, rules, {});
 
   test('are the ones given, whatever the page language, when given once', () => {
     i18n.language = 'en';
@@ -353,8 +353,8 @@ describe('the rules and role names', () => {
 
   test('name the roles in the page language', () => {
     i18n.language = 'en';
-    renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, {}, boardWrapper<object>(cellBoard, {
-      rules: <p>the rules</p>, roleLabels: [{ hu: 'Kezdő (1 O)', en: 'First (1 O)' }, { hu: 'Második (2 X)', en: 'Second (2 X)' }],
+    renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, {}, boardWrapper<object>(cellBoard, <p>the rules</p>, {
+      roleLabels: [{ hu: 'Kezdő (1 O)', en: 'First (1 O)' }, { hu: 'Második (2 X)', en: 'Second (2 X)' }],
     }));
 
     expect(button('First (1 O)')).toBeInTheDocument();
@@ -363,8 +363,8 @@ describe('the rules and role names', () => {
   // The same label names the role on the chip once it is chosen, so a game
   // writes its roles once.
   test('show the chosen role beside the mode during the game', () => {
-    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: JUDGE_PLAYER }, boardWrapper<object>(cellBoard, {
-      rules: <p>the rules</p>, roleLabels: ['Kezdő (1 O)', 'Második (2 X)'],
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { firstPlayer: JUDGE_PLAYER }, boardWrapper<object>(cellBoard, <p>the rules</p>, {
+      roleLabels: ['Kezdő (1 O)', 'Második (2 X)'],
     }));
 
     expect(screen.getByText('Második (2 X)')).toBeInTheDocument();
@@ -385,18 +385,15 @@ describe('the rules and role names', () => {
 });
 
 describe('the game\'s own words on the move', () => {
-  // A board that, like the 5×5 one, holds half a move before sending it.
-  const StepBoard = boardWrapper<object>(({ setTurnState }) =>
-    <button data-testid="cell" onClick={() => setTurnState?.({ picked: true })}>cell</button>, {
-    rules: <p>the rules</p>,
-    getPlayerStepDescription: ({ turnState }) => (turnState as { picked?: boolean } | null)?.picked ? 'second step' : 'first step',
+  // A game whose step depends on part of a move already in its state, as the
+  // 5×5 game's second X does.
+  const StepBoard = boardWrapper<{ halfMove?: boolean }>(cellBoard, <p>the rules</p>, {
+    getPlayerStepDescription: ({ G }) => G.halfMove ? 'second step' : 'first step',
   });
 
-  test('tell the team its next step under the status, as the board reports it', () => {
-    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, {}, StepBoard);
+  test('tell the team its next step under the status, as the game state has it', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, { halfMove: true }, StepBoard);
 
-    expect(screen.getByText('first step')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('cell'));
     expect(screen.getByText('second step')).toBeInTheDocument();
   });
 

@@ -1,5 +1,5 @@
 import { GameRelay, MyGameWrappers, strategyGameOfCategory, strategyNames } from "game";
-import { MyBoardWrapper, strategyPresentations } from "game/client";
+import { MyBoardWrapper, strategyDescriptions } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay, type CompetitionCategory } from "common-frontend";
 
 const { C: gameC, D: gameD, E: gameE } = strategyGameOfCategory;
@@ -13,9 +13,9 @@ const description = <p className="text-justify"></p>
 export const { Client: RelayClient_C, OnlineClient: RelayOnlineClient_C } = ClientFactoryRelay({ ...GameRelay, name: "relay_c" }, InProgressRelay, description);
 export const { Client: RelayClient_D, OnlineClient: RelayOnlineClient_D } = ClientFactoryRelay({ ...GameRelay, name: "relay_d" }, InProgressRelay, description);
 export const { Client: RelayClient_E, OnlineClient: RelayOnlineClient_E } = ClientFactoryRelay({ ...GameRelay, name: "relay_e" }, InProgressRelay, description);
-export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({ ...GameC, name: strategyNames[gameC] }, MyBoardWrapper(gameC), strategyPresentations[gameC]);
-export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({ ...GameD, name: strategyNames[gameD] }, MyBoardWrapper(gameD), strategyPresentations[gameD]);
-export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames[gameE] }, MyBoardWrapper(gameE), strategyPresentations[gameE]);
+export const { Client: Client_C, OnlineClient: StrategyOnlineClient_C } = ClientFactory({ ...GameC, name: strategyNames[gameC] }, MyBoardWrapper(gameC), strategyDescriptions[gameC]);
+export const { Client: Client_D, OnlineClient: StrategyOnlineClient_D } = ClientFactory({ ...GameD, name: strategyNames[gameD] }, MyBoardWrapper(gameD), strategyDescriptions[gameD]);
+export const { Client: Client_E, OnlineClient: StrategyOnlineClient_E } = ClientFactory({ ...GameE, name: strategyNames[gameE] }, MyBoardWrapper(gameE), strategyDescriptions[gameE]);
 
 
 // Only the competition's categories reach here: the import admits no other.

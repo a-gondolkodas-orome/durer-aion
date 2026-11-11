@@ -13,7 +13,7 @@ import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
-import type { Difficulty, GameStateMixin } from "game";
+import type { Difficulty, GamePresentation, GameStateMixin } from "game";
 import type { LiveGameResult } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
 import type { AnimationEvent, MouseEvent, ReactNode } from "react";
@@ -25,42 +25,13 @@ import { useUiLanguage } from "../client/hooks/ui-language";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
 /// gameWrapper extends it, plus the client API. The wrapper passes its props
-/// through untouched, so a board may read anything bgio put there. It adds
-/// `setTurnState`, as the practice site's factory does: a board reports with
-/// it what it holds of the team's move before sending it (a first X picked,
-/// say), for the step description to read back as `turnState`.
-export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin> & {
-  setTurnState?: (turnState: unknown) => void,
-};
+/// through untouched, so a board may read anything bgio put there.
+export type StrategyBoardProps<G> = BoardProps<G & GameStateMixin>;
 export type StrategyBoard<G> = (props: StrategyBoardProps<G>) => ReactNode;
 
 /// A game's rules text, one for every language or one per language; the board
 /// shows the page's.
 export type StrategyDescription = Localizable<ReactNode>;
-
-/// What the wrapper shows around a game's board that only the game knows. The
-/// step description is a method, not a property, so a game may type
-/// `turnState` as its own board reports it: method parameters are checked both
-/// ways.
-export interface StrategyPresentation<G = unknown> {
-  /// The rules: in a dialog before the first game, behind a button after it.
-  rules: StrategyDescription,
-  /// The two roles, the first player's first, each one for every language or
-  /// one per language: on the buttons the team chooses with, and on the chip
-  /// that says during the game which one it chose. So each is a short noun
-  /// phrase naming the role ("Kezdő (2 X)", "Cápa"), not a sentence about the
-  /// choice. Without them the roles are only who starts, worded by the wrapper.
-  roleLabels?: readonly [Localizable<string>, Localizable<string>],
-  /// Whether the opening position differs from game to game. Only then do the
-  /// texts ask the team to look at it before choosing a role, and say that a
-  /// live game may start from another one than practice did.
-  startVaries?: boolean,
-  /// What the team does next on its turn, under "Ti jöttök!": the practice
-  /// site's `getPlayerStepDescription`, with `turnState` as the board last set it.
-  getPlayerStepDescription?(args: {
-    G: G & GameStateMixin, ctx: StrategyBoardProps<G>['ctx'], playerID: string | null, turnState: unknown,
-  }): Localizable<string> | null,
-}
 
 // The screen has a fixed frame, the header strip, and one game area, which is
 // all that changes from state to state. The mode's colour is kept to the game
@@ -88,7 +59,10 @@ type Tone = 'plain' | 'go' | 'wait' | 'won' | 'lost';
 
 const pointsText = (t: TFunction, count: number) => t('general.points', { count });
 
-export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyPresentation<G>) {
+/// The rules are in a dialog before the first game, behind a button after it.
+/// The game's own `presentation` words its roles and the team's next step; the
+/// wrapper decides where and when they show.
+export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDescription, presentation: GamePresentation<G>) {
   return (props: StrategyBoardProps<G>) => {
     const { G, ctx } = props;
     const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
@@ -98,10 +72,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
     const theme = useTheme();
     const { t } = useTranslation();
     const language = useUiLanguage();
-    const [turnState, setTurnState] = useState<unknown>(null);
     // Every game's rules end with what is the same in all of them, set apart.
     const rules = <>
-      {inLanguage<ReactNode>(presentation.rules, language)}
+      {inLanguage<ReactNode>(description, language)}
       <Box component="p" sx={{ fontStyle: 'italic', marginTop: '12px', marginBottom: 0 }}>{t('strategy.rulesCommon')}</Box>
     </>;
     // `noSsr` reads the width on the first render, so the rules do not show
@@ -247,7 +220,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
       // The game's own word on the move, in the line kept for it under the
       // status, so the board above needs no lines of its own.
       const step = teamToMove
-        ? presentation.getPlayerStepDescription?.({ G, ctx, playerID: props.playerID, turnState }) ?? null
+        ? presentation.getPlayerStepDescription?.({ G, ctx }) ?? null
         : null;
       sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
     }
@@ -333,7 +306,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, presentation: StrategyP
             <GameArea mode={difficulty} liveNumber={G.numberOfTries} role={role}
               status={status} tone={tone} sub={sub} subWide={subWide} actions={actions} intro={intro}
               info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
-              <BoardArea state={boardState}>{board({ ...props, setTurnState })}</BoardArea>
+              <BoardArea state={boardState}>{board(props)}</BoardArea>
             </GameArea>
             {/* Over the margin to the right of the game, which stays where it
                 is: the board stays to read and play while the rules are open. */}
