@@ -3,7 +3,7 @@ import { useAddMinutes, useAll } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, QuickFilter, QuickFilterControl, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
@@ -39,6 +39,9 @@ function TeamsToolbar(props: { onOpenExport?: () => void }) {
       <Button size="small" onClick={props.onOpenExport}>
         Belépőkódokkal: Import/export fül
       </Button>
+      <QuickFilter>
+        <QuickFilterControl placeholder="Keresés (pl. csapatnév)" size="small"/>
+      </QuickFilter>
     </Toolbar>
   );
 }
