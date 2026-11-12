@@ -163,6 +163,29 @@ describe('the header strip', () => {
   });
 });
 
+describe('on a screen wide enough for the rules beside the board', () => {
+  beforeEach(() => {
+    // Every query matches: the widths, and a turned-down motion, which closes
+    // the first dialog without its flight.
+    vi.stubGlobal('matchMedia', (media: string) => ({
+      matches: true, media, onchange: null,
+      addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(),
+      dispatchEvent: () => false,
+    }));
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test('keeps the rules beside the board, with nothing to open or close them', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
+
+    expect(screen.getByRole('complementary', { name: 'strategy.rules' })).toHaveTextContent('the rules');
+    expect(screen.queryByRole('button', { name: 'strategy.rules' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'general.close' })).not.toBeInTheDocument();
+  });
+});
+
 describe('between games', () => {
   test('shows a live loss in the middle, with the next game and the ⓘ beside it', () => {
     renderBoard(betweenGames, { winner: JUDGE_PLAYER, numberOfLoss: 1, liveResults: ['lost'] });

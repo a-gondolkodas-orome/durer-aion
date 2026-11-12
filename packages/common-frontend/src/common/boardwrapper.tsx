@@ -67,19 +67,22 @@ const PAIR_BUTTON_WIDTH = 230;
 const PAIR_GAP = 12;
 const INFO_BESIDE_LEFT = `calc(50% + ${PAIR_BUTTON_WIDTH + PAIR_GAP / 2 + 8}px)`;
 
-// The game card's width where the rules have a column of their own: the pair
-// of buttons with the ⓘ beside it, and the line under a practice result, with
-// the card's padding. The columns either side of it share what is left, so
-// the card stays centred with the rules open or closed.
+// The game card's width where the rules are always beside it: the pair of
+// buttons with the ⓘ beside it, and the line under a practice result, with
+// the card's padding.
 const GAME_COLUMN_WIDTH = 620;
-// Where those side columns are wide enough for the rules: below it, a third
-// of what is left beside a card this wide would cramp them.
+// From here the rules are always on screen, beside the card at full width:
+// it takes in a 16:9 laptop at the scaling Windows sets for it (1920×1080 at
+// 150% is 1280 wide).
 const RULES_BESIDE_FROM = 1280;
 const COLUMN_GAP = 16;
-// The rules' column where there is no room for one either side of the card.
+// The rules' column: its narrowest, which is all it gets below
+// RULES_BESIDE_FROM, and its widest, beyond which lines get long to read.
 const RULES_COLUMN_WIDTH = 330;
+const RULES_COLUMN_MAX_WIDTH = 420;
 
-/// The rules are in a dialog before the first game, behind a button after it.
+/// The rules are in a dialog before the first game; after it, beside the board
+/// where there is room, and behind a button where there is not.
 /// The game's own `presentation` words its roles and the team's next step; the
 /// wrapper decides where and when they show.
 export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDescription, presentation: GamePresentation<G>) {
@@ -100,11 +103,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // `noSsr` reads the width on the first render, so the rules do not show
     // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
-    // From RULES_BESIDE_FROM the rules have a column of their own beside the
-    // game card, with an empty one as wide on its other side, so the card does
-    // not move when they open. Between `md` and that there is no room for
-    // both: the rules, once open, take a column from the card's side, and the
-    // card moves over, rather than covering a board the team may be playing on.
+    // From RULES_BESIDE_FROM the rules are always beside the game card, the
+    // two centred together, with nothing to open or close: there is room for
+    // both. Between `md` and that the rules open on demand, and take a column
+    // from the card's side, rather than covering a board the team may be
+    // playing on.
     const rulesBeside = useMediaQuery(`(min-width: ${RULES_BESIDE_FROM}px)`, { noSsr: true });
     // Before the first game the rules open in a dialog of their own, which
     // only the team's word that it has read them closes. Once a game has been
@@ -112,21 +115,23 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // reload.
     const [rulesRead, setRulesRead] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
-    const rulesColumns = rulesBeside ? `1fr ${GAME_COLUMN_WIDTH}px 1fr`
+    const rulesColumns = rulesBeside ? `${GAME_COLUMN_WIDTH}px minmax(${RULES_COLUMN_WIDTH}px, ${RULES_COLUMN_MAX_WIDTH}px)`
       : wide && rulesOpen ? `minmax(0, 1fr) ${RULES_COLUMN_WIDTH}px`
       : null;
     // Once the first dialog closes, the button that brings the rules back
     // pulses, so the team sees where they went.
     const [pointToRules, setPointToRules] = useState(false);
     const rulesButtonRef = useRef<HTMLButtonElement>(null);
+    const rulesColumnRef = useRef<HTMLDivElement>(null);
     const firstRulesRef = useRef<HTMLDivElement>(null);
-    // The first dialog flies into the button that brings the rules back, so
-    // the team sees where they went; then the button pulses. Where motion is
-    // turned down, or there is nothing to animate with, it just closes.
+    // The first dialog flies to where the rules stay, so the team sees where
+    // they went: into their column, or into the button that brings them back,
+    // which then pulses. Where motion is turned down, or there is nothing to
+    // animate with, it just closes.
     const closeFirstRules = () => {
-      const done = () => { setRulesRead(true); setPointToRules(true); };
+      const done = () => { setRulesRead(true); setPointToRules(!rulesBeside); };
       const paper = firstRulesRef.current;
-      const target = rulesButtonRef.current;
+      const target = rulesBeside ? rulesColumnRef.current : rulesButtonRef.current;
       const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       if (!paper || !target || reduced || typeof paper.animate !== 'function') {
         done();
@@ -328,14 +333,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
               </Stack>
               {/* There from the start, under the first dialog, so the dialog
                   has a place to fly into. */}
-              {rulesButton}
+              {!rulesBeside && rulesButton}
             </Stack>
           </Stack>
           <Box sx={{
-            ...(rulesColumns !== null && { display: 'grid', gridTemplateColumns: rulesColumns, gap: `${COLUMN_GAP}px`, alignItems: 'start' }),
+            ...(rulesColumns !== null && { display: 'grid', gridTemplateColumns: rulesColumns, justifyContent: 'center', gap: `${COLUMN_GAP}px`, alignItems: 'start' }),
           }}>
-            {/* The left column stays empty, as wide as the rules' column. */}
-            {rulesBeside && <Box />}
             {/* A block around the card: the card's own auto margins would
                 shrink it, as a grid item, to its content. */}
             <Box sx={{ minWidth: 0 }}>
@@ -346,13 +349,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
               </GameArea>
             </Box>
             {/* The board stays to read and play while the rules are open. */}
-            {wide && rulesOpen && <Stack component="aside" aria-label={t('strategy.rules')} sx={{
-              minWidth: 0, maxWidth: '360px',
+            {(rulesBeside || (wide && rulesOpen)) && <Stack ref={rulesColumnRef} component="aside" aria-label={t('strategy.rules')} sx={{
+              minWidth: 0,
               backgroundColor: '#fff', border: `1px solid ${LINE}`, borderRadius: '16px', padding: '14px 18px', gap: '8px',
             }}>
               <Stack sx={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box sx={{ fontSize: '18px', fontWeight: 700 }}>{t('strategy.rules')}</Box>
-                <IconButton aria-label={t('general.close')} onClick={() => setRulesOpen(false)}><CloseIcon /></IconButton>
+                {!rulesBeside && <IconButton aria-label={t('general.close')} onClick={() => setRulesOpen(false)}><CloseIcon /></IconButton>}
               </Stack>
               <Box sx={{ fontSize: '15px', lineHeight: 1.55 }}>{rules}</Box>
             </Stack>}
