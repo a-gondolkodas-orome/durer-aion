@@ -11,7 +11,7 @@ const { readStoredTeamState, RelayWrapper, Client } = vi.hoisted(() => ({
 vi.mock("./stored-team-state", () => ({ readStoredTeamState }));
 // The wiring test reads the callback the app hands the reducer; building a real
 // boardgame.io client around it is not what is under test here.
-vi.mock("game", () => ({ RelayWrapper }));
+vi.mock("game", async (importOriginal) => ({ ...await importOriginal<typeof import("game")>(), RelayWrapper }));
 vi.mock("boardgame.io/react", () => ({ Client }));
 
 import { handleGameReport } from "./game-report";

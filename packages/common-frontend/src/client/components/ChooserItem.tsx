@@ -10,10 +10,12 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
-import { STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
+import { RELAY_MAX_TRIES, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
 import { RelayKey, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
 import { InfoTip } from './InfoTip';
+import type { PublicCompetition } from 'schemas';
 import { relayMaxPoints } from './relay-results';
+import { relayNumbers, strategyMinutes } from './round-numbers';
 import { cardButtonSx, cardSx, cardTokens } from './card';
 
 /**
@@ -23,6 +25,8 @@ import { cardButtonSx, cardSx, cardTokens } from './card';
 export function ChooserItem(props: {
   status: MatchStatus,
   type: 'strategy' | 'relay',
+  /// The numbers its rules tell come from here; the local apps have none.
+  competition?: PublicCompetition | null,
 }) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
@@ -112,7 +116,9 @@ export function ChooserItem(props: {
             marginBlockEnd: 0,
           },
         }}>
-          {props.type === 'relay' ? <RelayDescription /> : <StrategyDescription />}
+          {props.type === 'relay'
+            ? <RelayDescription competition={props.competition} />
+            : <StrategyDescription competition={props.competition} />}
         </Stack>
         <Button sx={{
           width: '100%',
@@ -141,29 +147,33 @@ function Description(props: { children: ReactNode }) {
 }
 
 // Spelled out key by key in both: the i18n check finds a key only as a literal.
-function RelayDescription() {
+// The wording and the lines are the translations'; these only fill in numbers.
+function RelayDescription(props: { competition?: PublicCompetition | null }) {
   const { t } = useTranslation();
+  const { minutes, total, min, max } = relayNumbers(props.competition);
+  const tries = RELAY_MAX_TRIES;
   return (
     <Description>
       <p>{t('chooser.relay.intro')}</p>
       <ul>
         <li>
-          <Trans i18nKey='chooser.relay.points' components={BOLD} />
-          <InfoTip label={t('chooser.relay.pointsLabel')}>{t('chooser.relay.pointsTip')}</InfoTip>
+          <Trans i18nKey='chooser.relay.points' components={BOLD} values={{ total }} />
+          <InfoTip label={t('chooser.relay.pointsLabel')}>{t('chooser.relay.pointsTip', { min, max })}</InfoTip>
         </li>
         <li>
-          <Trans i18nKey='chooser.relay.tries' components={BOLD} />
-          <InfoTip label={t('chooser.relay.triesLabel')}>{t('chooser.relay.triesTip')}</InfoTip>
+          <Trans i18nKey='chooser.relay.tries' components={BOLD} values={{ tries }} />
+          <InfoTip label={t('chooser.relay.triesLabel')}>{t('chooser.relay.triesTip', { tries })}</InfoTip>
         </li>
-        <li><Trans i18nKey='chooser.relay.time' components={BOLD} /></li>
+        <li><Trans i18nKey='chooser.relay.time' components={BOLD} values={{ minutes }} /></li>
         <li>{t('chooser.relay.noReturn')}</li>
       </ul>
     </Description>
   );
 }
 
-function StrategyDescription() {
+function StrategyDescription(props: { competition?: PublicCompetition | null }) {
   const { t } = useTranslation();
+  const minutes = strategyMinutes(props.competition);
   return (
     <Description>
       <p>{t('chooser.strategy.intro')}</p>
@@ -178,7 +188,7 @@ function StrategyDescription() {
           <InfoTip label={t('chooser.strategy.practiceLabel')}>{t('chooser.strategy.practiceTip')}</InfoTip>
         </li>
         <li>
-          <Trans i18nKey='chooser.strategy.time' components={BOLD} />
+          <Trans i18nKey='chooser.strategy.time' components={BOLD} values={{ minutes }} />
           <InfoTip label={t('chooser.strategy.timeLabel')}>{t('chooser.strategy.timeTip')}</InfoTip>
         </li>
         <li>{t('chooser.strategy.noAbandon')}</li>

@@ -10,13 +10,13 @@
     "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
     "relay": {
       "intro": "Short word problems, one after the other. The answer to each is a whole number from 0 to 9999.",
-      "points": "<b>Points:</b> 40 in total. Each wrong guess lowers the points a problem is worth by 1.",
+      "points": "<b>Points:</b> {{total}} in total. Each wrong guess lowers the points a problem is worth by 1.",
       "pointsLabel": "Points",
-      "pointsTip": "A problem is worth 3 to 6 points. If your third guess is wrong too, it scores 0.",
-      "tries": "<b>You have 3 guesses per problem:</b> after a right guess or three wrong ones, the next problem comes.",
+      "pointsTip": "A problem is worth {{min}} to {{max}} points. If your last guess is wrong too, it scores 0.",
+      "tries": "<b>You have {{tries}} guesses per problem:</b> after a right guess or {{tries}} wrong ones, the next problem comes.",
       "triesLabel": "Guesses",
-      "triesTip": "If you would rather not spend more time on a problem, you can move on by submitting three different wrong guesses.",
-      "time": "<b>You have 60 minutes:</b> the clock starts when you click “Start”.",
+      "triesTip": "If you would rather not spend more time on a problem, you can move on by submitting {{tries}} different wrong guesses.",
+      "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”.",
       "noReturn": "You cannot return to an earlier problem later."
     },
     "start": "Start",
@@ -28,7 +28,7 @@
       "practice": "<b>Practice game:</b> does not count towards your score; it is for trying the game out.",
       "practiceLabel": "Practice game",
       "practiceTip": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too.",
-      "time": "<b>You have 30 minutes:</b> the clock starts when you click “Start”.",
+      "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”.",
       "timeLabel": "Time",
       "timeTip": "Practice games count towards the time too."
     }

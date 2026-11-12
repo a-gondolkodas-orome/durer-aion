@@ -52,7 +52,7 @@ describe("publicTeamView", () => {
       competition: {
         id: "wkr6zml6mu--20-online-e",
         languages: ["hu"],
-        relay: { durationMinutes: 60 },
+        relay: { durationMinutes: 60, problemPoints: [3, 3, 4, 4, 4, 5, 5, 6, 6] },
         strategy: { durationMinutes: 30, gameId: "20o-e" },
         metadata: { kind: "competition", edition: 20, round: "online", category: "E" },
       },

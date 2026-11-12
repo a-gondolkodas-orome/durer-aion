@@ -5,8 +5,8 @@ import '@testing-library/jest-dom';
 import { ChooserItem } from './ChooserItem';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-  Trans: () => null,
+  useTranslation: () => ({ t: (key: string, values?: object) => values ? `${key} ${JSON.stringify(values)}` : key }),
+  Trans: (props: { i18nKey: string, values?: object }) => props.values ? `${props.i18nKey} ${JSON.stringify(props.values)}` : null,
 }));
 
 const startRelay = vi.fn<() => Promise<void>>();
@@ -79,4 +79,29 @@ test('the fold button folds the description once per click', () => {
   expect(fold).toHaveAttribute('aria-expanded', 'false');
   fireEvent.click(fold);
   expect(fold).toHaveAttribute('aria-expanded', 'true');
+});
+
+// The wording is the translations'; the numbers are the team's competition's.
+test("fills the relay's rules in with the team's competition's numbers", () => {
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} competition={{
+    id: 'aaaaaaaaaa--short',
+    languages: ['hu'],
+    relay: { durationMinutes: 45, problemPoints: [2, 5, 3] },
+    metadata: { kind: 'other', label: { hu: 'Rövid' } },
+  }} />);
+
+  expect(screen.getByText('chooser.relay.points {"total":10}')).toBeInTheDocument();
+  expect(screen.getByText('chooser.relay.tries {"tries":3}')).toBeInTheDocument();
+  expect(screen.getByText('chooser.relay.time {"minutes":45}')).toBeInTheDocument();
+});
+
+test("fills the strategy game's time in from the team's competition", () => {
+  render(<ChooserItem type="strategy" status={{ state: 'NOT STARTED' }} competition={{
+    id: 'aaaaaaaaaa--short',
+    languages: ['hu'],
+    strategy: { durationMinutes: 20, gameId: '20o-e' },
+    metadata: { kind: 'other', label: { hu: 'Rövid' } },
+  }} />);
+
+  expect(screen.getByText('chooser.strategy.time {"minutes":20}')).toBeInTheDocument();
 });

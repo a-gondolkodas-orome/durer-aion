@@ -219,11 +219,16 @@ export function strategyGameName(competitionId: CompetitionId): string {
 }
 
 /// What a team is served of its competition: everything but the relay's
-/// problems, whose answers the client must never see.
+/// problems, whose answers the client must never see. Their points are not
+/// secret, and the home screen tells them.
 export interface PublicCompetition {
   id: CompetitionId;
   languages: Language[];
-  relay?: { durationMinutes: number };
+  relay?: {
+    durationMinutes: number;
+    /// Each problem's points, in play order; so its length is the number of problems.
+    problemPoints: number[];
+  };
   strategy?: StrategyConfig;
   metadata: CompetitionMetadata;
 }
@@ -236,7 +241,9 @@ export function publicCompetition(competition: CompetitionConfig): PublicCompeti
   return {
     id,
     languages,
-    ...(relay !== undefined && { relay: { durationMinutes: relay.durationMinutes } }),
+    ...(relay !== undefined && {
+      relay: { durationMinutes: relay.durationMinutes, problemPoints: relay.problems.map(problem => problem.points) },
+    }),
     ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes, gameId: strategy.gameId } }),
     metadata,
   };
