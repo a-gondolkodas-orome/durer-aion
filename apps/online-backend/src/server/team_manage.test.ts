@@ -1,6 +1,8 @@
 import { MatchStatus } from "schemas";
 import { TeamModel } from "./model";
-import { AnyBgioGame, strategyGameOfCategory, strategyNames } from "game";
+import { AnyBgioGame } from "game";
+import { relayGameName, strategyGameName } from "schemas";
+import type { CompetitionConfig } from "schemas";
 import { Server } from "boardgame.io";
 import { allowedToStart, createGame, getNewGame } from "./team_manage";
 import type { TeamMatches } from "./match_status";
@@ -79,13 +81,25 @@ describe("allowedToStart", () => {
 });
 
 describe("getNewGame", () => {
-  it("finds the game registered for the team's category", async () => {
-    const name = strategyNames[strategyGameOfCategory.D];
-    const games = [bgioGame({ name })];
+  const relayOnly: CompetitionConfig = {
+    id: "aaaaaaaaaa--relay-only",
+    languages: ["hu"],
+    relay: { durationMinutes: 60, problems: [] },
+    metadata: { kind: "other", label: { hu: "Csak váltó" } },
+  };
+  const competitions = new Map([[relayOnly.id, relayOnly]]);
+  const games = [bgioGame({ name: relayGameName(relayOnly.id) }), bgioGame({ name: strategyGameName("other") })];
 
-    const { game } = await getNewGame(appCtx({ db: {} }), games, "STRATEGY", team({ category: "D" }));
+  it("finds the game registered for the team's competition", async () => {
+    const { game } = await getNewGame(
+      appCtx({ db: {} }), games, "RELAY", team({ competitionId: relayOnly.id }), competitions);
 
-    expect(game.name).toBe(name);
+    expect(game.name).toBe(relayGameName(relayOnly.id));
+  });
+
+  it("refuses with 403 a match the team's competition does not have", async () => {
+    await expect(getNewGame(appCtx({ db: {} }), games, "STRATEGY", team({ competitionId: relayOnly.id }), competitions))
+      .rejects.toMatchObject({ status: 403 });
   });
 });
 

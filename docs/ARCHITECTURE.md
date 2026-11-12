@@ -37,7 +37,9 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
    `team_session.ts` is what the cookie is and why. Every `/team/me` route but
    `logout` then loads the team through `requireTeam`.
 3. **The team's view.** `GET /team/me` answers `publicTeamView` (`team_view.ts`)
-   with both matches' status. The frontend keeps that one object in
+   with both matches' status and the team's competition without its
+   problems, from which the client builds its boards and the chooser shows
+   only the matches the competition has. The frontend keeps that one object in
    `team-state-store.ts`, and `Main.tsx` picks the screen from its `pageState`.
 4. **Disclaimer and home.** `POST /team/me/gohome` moves the team to `HOME`,
    from the disclaimer or after a match. It is refused while a match is in
@@ -46,8 +48,9 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
    `router.ts` and `team_manage.ts`:
    - `allowedToStart` — one attempt at each kind of match, never both at once,
      never from the disclaimer;
-   - `getNewGame` picks the game by the team's category (`relayNames`, and
-     `strategyNames` through `strategyGameOfCategory`);
+   - `getNewGame` picks the game of the team's competition
+     (`relay--<id>` or `strategy--<id>`, hosted from the registry by
+     `games.ts`), and answers 403 for a match the competition does not have;
    - `createGame` creates an unlisted match under a fresh id;
    - `injectPlayer` seats the team as `'0'`, named by its `teamId` and holding
      its `credentials`, and `injectBot` seats the bot as `'1'`;

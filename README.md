@@ -169,11 +169,9 @@ ignored. A file whose first line is not such a header is refused whole.
 category (`20 online C`; `20. internetes C` works too) or by its id, so one file
 holds a whole round's registrations, the online round's C, D and E competitions
 at once. The tab's table of competitions, newest first, gives what to write for
-each, and the export writes the id. A row naming no
-competition, or one the registry lacks, fails on its own and the rest go in. A
-team name is unique within its competition only. Until the live round picks its
-games from the competition (#137), the import takes only a competition whose
-category and strategy game are the ones the live round plays.
+each, and the export writes the id. A row naming no competition, or one the
+registry lacks, fails on its own and the rest go in. A team name is unique
+within its competition only, and a team plays the matches its competition has.
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
@@ -474,8 +472,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
 
 - **`game.ts`** exports `MyGameWrapper(variant)`, returning
   - `name`, equal to the game id's entry in `strategyNames`
-    (`strategy-games.ts`); the server and the clients use that entry, so
-    nothing catches a mismatch
+    (`strategy-games.ts`), which the offline dry run registers it under; the
+    live round registers each competition's game as `strategy--<id>`
   - `setup`, the game's own half of `G` only
   - `moves`: a move sets `G.winner` when it decides a sub-game and ends with
     `events.endTurn()`. Each live game also scores the sub-game in its move
@@ -500,9 +498,11 @@ the clock, the test/live choice, choosing who starts, tries and score.
   language, or `{ hu, en }` for a game in both, of which the board shows the
   page's.
 
-A relay is not a new game but a problem list: `Problem[]` per category in
-`packages/relay-bot/src/games/relay/strategy.ts` for the competition, and a
-competition's relay in `packages/problem-bank/banks/` for the relay practice
-site, which names the banks and competitions it serves in
+A relay is not a new game but a problem list: a competition's relay in
+`packages/problem-bank/banks/`, which the live round's judge reads (the
+server hosts every registered competition's matches as `relay--<id>` and
+`strategy--<id>`), the offline dry run reads through
+`apps/offline-frontend/src/dry-run-relays.ts`, and the relay practice site
+serves from the banks it names in
 `apps/relay-practise-frontend/src/practice-sets.ts`. The same secrecy applies to an unreleased problem set as to a
 game.

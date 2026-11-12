@@ -12,9 +12,14 @@ export function Chooser(props: {
 }) {
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score ?? 0;
   const strategyScore = (props.state.strategyMatch as FinishedMatchStatus).score ?? 0;
-  const finished =
-    props.state.relayMatch.state === "FINISHED" &&
-    props.state.strategyMatch.state === "FINISHED";
+  // The online round shows the matches the team's competition has; the local
+  // apps serve no competition, and have both.
+  const { competition } = props.state;
+  const hasRelay = competition === undefined || competition?.relay !== undefined;
+  const hasStrategy = competition === undefined || competition?.strategy !== undefined;
+  const finished = (hasRelay || hasStrategy) &&
+    (!hasRelay || props.state.relayMatch.state === "FINISHED") &&
+    (!hasStrategy || props.state.strategyMatch.state === "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
   const theme = useTheme();
   const { t } = useTranslation();
@@ -52,9 +57,9 @@ export function Chooser(props: {
           <Stack sx={{ alignItems: "center", gap: "4px", marginY: "16px" }}>
             <span style={{ fontSize: "20px" }}>{t('chooser.finish.final')}</span>
             <ScoreHeadline points={relayScore + strategyScore}/>
-            <span style={{ fontSize: "18px" }}>
+            {hasRelay && hasStrategy && <span style={{ fontSize: "18px" }}>
               {t('chooser.finish.breakdown', { relay: relayScore, strategy: strategyScore })}
-            </span>
+            </span>}
           </Stack>
           { isOffline && <span style={{ textAlign: "center" }}>{t('chooser.pointsNotSettled')}</span>}
         </Stack>
@@ -70,14 +75,14 @@ export function Chooser(props: {
           }
         }}
       >
-        <ChooserItem
+        {hasRelay && <ChooserItem
           status={props.state.relayMatch}
           type="relay"
-        />
-        <ChooserItem
+        />}
+        {hasStrategy && <ChooserItem
           status={props.state.strategyMatch}
           type="strategy"
-        />
+        />}
       </Stack>
     </Stack>
   );

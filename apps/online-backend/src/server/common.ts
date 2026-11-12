@@ -1,4 +1,3 @@
-import type { CompetitionCategory } from 'schemas';
 import { env } from 'process';
 
 export function getBotCredentials() {
@@ -14,9 +13,3 @@ export function getAdminCredentials() {
   }
   return env.ADMIN_CREDENTIALS;
 }
-
-export const relayNames = {
-  C: 'relay_c',
-  D: 'relay_d',
-  E: 'relay_e',
-} satisfies Record<CompetitionCategory, string>;

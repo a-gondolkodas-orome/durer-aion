@@ -1,9 +1,11 @@
 import { createMatch } from "boardgame.io/internal";
 import { nanoid } from "nanoid";
-import { getBotCredentials, relayNames } from "./common";
-import { AnyBgioGame, PlayerIDType, strategyGameOfCategory, strategyNames } from "game";
+import { getBotCredentials } from "./common";
+import { AnyBgioGame, PlayerIDType } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
-import { CompetitionCategory, GameType } from "schemas";
+import { GameType, relayGameName, strategyGameName } from "schemas";
+import type { CompetitionConfig } from "schemas";
+import { registry } from "problem-bank/all";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
 import { teamMatches, type TeamMatches } from "./match_status";
@@ -107,26 +109,24 @@ export function allowedToStart(
   return own.state === "NOT STARTED";
 }
 
-const gameNames: Record<GameType, Record<CompetitionCategory, string>> = {
-  RELAY: relayNames,
-  STRATEGY: {
-    C: strategyNames[strategyGameOfCategory.C],
-    D: strategyNames[strategyGameOfCategory.D],
-    E: strategyNames[strategyGameOfCategory.E],
-  },
-};
-
+/** The game of the team's competition the team asks to start. A competition
+ *  without that match answers 403, as any start the team may not make does. */
 export async function getNewGame(
   ctx: Server.AppCtx,
   games: AnyBgioGame[],
   gameType: GameType,
-  team: TeamModel
+  team: TeamModel,
+  competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
 ) {
   if (!allowedToStart(team, await teamMatches(ctx.db, team), gameType)) {
     ctx.throw(403, "Team is not allowed to start game.");
   }
-  // The import admits only the competition's categories.
-  const gameName = gameNames[gameType][team.category as CompetitionCategory];
+  const competition = competitions.get(team.competitionId)
+    ?? ctx.throw(404, "Competition " + team.competitionId + " not found");
+  if ((gameType === "RELAY" ? competition.relay : competition.strategy) === undefined) {
+    ctx.throw(403, "The team's competition has no such match.");
+  }
+  const gameName = gameType === "RELAY" ? relayGameName(competition.id) : strategyGameName(competition.id);
 
   const game: AnyBgioGame = games.find(
     (g) => g.name === gameName

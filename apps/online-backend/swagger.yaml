@@ -473,6 +473,13 @@ components:
           type: string
         category:
           type: string
+        competition:
+          type: object
+          nullable: true
+          description: >
+            The team's competition without its relay's problems: id, languages,
+            the relay's duration, the strategy game and its duration, and
+            metadata. Null for a competition the server no longer has.
         credentials:
           type: string
         pageState:
