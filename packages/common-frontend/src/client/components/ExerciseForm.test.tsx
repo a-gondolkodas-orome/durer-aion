@@ -59,6 +59,12 @@ test('blocks sending and typing while the judge has the turn', () => {
   expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
 });
 
+// #732: a phone opens its digits keyboard for the answer.
+test('asks phones for a numeric keyboard', () => {
+  renderForm(false);
+  expect(screen.getByRole('textbox')).toHaveAttribute('inputmode', 'numeric');
+});
+
 test('focuses the input on the attempt after a guess from this screen', async () => {
   const { onSubmit, moveToAttempt } = renderForm(false);
   await sendGuess();

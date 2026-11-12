@@ -128,6 +128,9 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
             // while waiting for it.
             readOnly={props.awaitingJudge}
             autoComplete="off"
+            // A digits-only keyboard on phones; not type="number", which
+            // would accept "e" and "-" past the sanitizer below.
+            inputMode="numeric"
             {...field}
             onChange={(e) => {
                 e.preventDefault();
