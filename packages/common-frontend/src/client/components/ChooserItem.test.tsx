@@ -47,14 +47,16 @@ test('a finished round shows its results and when it was filled in, and no butto
   expect(screen.getAllByText('relay.endTable.time').length).toBeGreaterThan(0);
 });
 
-// Before the clock runs, each point is a line, its details behind an ⓘ.
-test('explains the strategy game in short lines, with the details behind an ⓘ each', () => {
+// Before the clock runs, each point is a line, with a quieter line under the
+// ones that need explaining; nothing is behind a tooltip (#769).
+test('explains the strategy game in short lines, the details in sight', () => {
   render(<ChooserItem type="strategy" status={{ state: 'NOT STARTED' }} />);
 
   expect(screen.getByText('chooser.strategy.intro')).toBeInTheDocument();
-  for (const label of ['chooser.strategy.pointsLabel', 'chooser.strategy.practiceLabel', 'chooser.strategy.timeLabel']) {
-    expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
-  }
+  expect(screen.getByText(/strategy\.points\.cleanRun/)).toBeInTheDocument();
+  expect(screen.getByText('chooser.strategy.practiceHint')).toBeInTheDocument();
+  // No ⓘ: the card's buttons are the fold toggle and the start.
+  expect(screen.getAllByRole('button')).toHaveLength(2);
   expect(screen.getByText('chooser.strategy.noAbandon')).toBeInTheDocument();
 });
 
@@ -62,9 +64,7 @@ test('explains the relay the same way', () => {
   render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} />);
 
   expect(screen.getByText('chooser.relay.intro')).toBeInTheDocument();
-  for (const label of ['chooser.relay.pointsLabel', 'chooser.relay.triesLabel']) {
-    expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
-  }
+  expect(screen.getByText('chooser.relay.triesHint')).toBeInTheDocument();
   expect(screen.getByText('chooser.relay.noReturn')).toBeInTheDocument();
 });
 
