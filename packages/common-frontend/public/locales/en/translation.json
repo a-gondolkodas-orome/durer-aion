@@ -231,7 +231,7 @@
       "current": "Live game {{n}}: in progress",
       "earlier_one": "{{count}} earlier live game",
       "earlier_other": "{{count}} earlier live games",
-      "help": "✓ win, ✗ loss. The frame holds your current run, and the orange-edged square is the live game being played. When the run reaches two wins in a row, it turns green and you get the points beside it. After a live loss the run starts again, for fewer points.",
+      "help": "✓ win, ✗ loss. Two live wins in a row earn you the points in the frame; after a loss you start again, for fewer points.",
       "helpLabel": "What does the series mean?",
       "label": "Live games",
       "lost": "Live game {{n}}: lost",
