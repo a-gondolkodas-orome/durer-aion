@@ -31,11 +31,11 @@ export function useStartWindowState(startWindow: StartWindow | null | undefined)
   return startWindowState(startWindow ?? undefined, now);
 }
 
-/// A time of the start window as the team reads it: its date and its time, in
-/// the browser's time zone.
+/// A time of the start window as the team reads it: its date, year included,
+/// and its time, in the browser's time zone. English is British, as elsewhere.
 function windowTime(time: string, language: Language): string {
-  return new Intl.DateTimeFormat(language, {
-    month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
+  return new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : language, {
+    year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
   }).format(new Date(time));
 }
 
