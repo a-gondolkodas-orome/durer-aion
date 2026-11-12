@@ -161,9 +161,16 @@ carries a login secret. The team list's CSV leaves out the ID too, since a team'
 GUID is its session cookie's value.
 
 Both read the TSV's columns by their header, in any order and any case:
-`Teamname` and `Competition` are required, `Email`, `Other`, `ID`, `Login Code`
-and `Credentials` may be left out, and a column the import does not know is
-ignored. A file whose first line is not such a header is refused whole.
+`Teamname` and `Competition` are required, `Email`, `Other`, `ID`, `Login Code`,
+`Credentials`, `Opens At` and `Closes At` may be left out, and a column the import
+does not know is ignored. A file whose first line is not such a header is refused
+whole.
+
+`Opens At` and `Closes At` give a team a start window of its own, in place of its
+competition's: ISO 8601 with an offset, such as `2026-11-20T15:00+01:00`, with
+`Closes At` optional. A testing code gets a wide one, such as 2001 to 2099, and
+a team writing the round late gets its own day. The window decides only when a
+match may start: a match started inside it runs its full time.
 
 `Competition` is the competition the row's team enters, by edition, round and
 category (`20 online C`; `20. internetes C` works too) or by its id, so one file

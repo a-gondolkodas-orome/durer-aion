@@ -3,8 +3,8 @@ import { randomInt, randomUUID } from 'crypto';
 import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH } from './model';
-import { namesCompetition } from 'schemas';
-import type { CompetitionConfig } from 'schemas';
+import { namesCompetition, validateStartWindow } from 'schemas';
+import type { CompetitionConfig, StartWindow } from 'schemas';
 import { registry } from 'problem-bank/all';
 
 // The importer's columns, in the order the export writes them. A file may hold
@@ -12,7 +12,7 @@ import { registry } from 'problem-bank/all';
 // names the competition its team enters, by id or by edition, round and
 // category (`20 online C`), so one file holds a whole round's teams, every
 // category's competition at once.
-const COLUMNS = ["Teamname", "Competition", "Email", "Other", "ID", "Login Code", "Credentials"] as const;
+const COLUMNS = ["Teamname", "Competition", "Email", "Other", "ID", "Login Code", "Credentials", "Opens At", "Closes At"] as const;
 type Column = typeof COLUMNS[number];
 const REQUIRED: readonly Column[] = ["Teamname", "Competition"];
 
@@ -41,6 +41,21 @@ export function competitionToImportInto(competitionId: string):
   }
   const { metadata } = competition;
   return { competition, category: metadata.kind === 'competition' ? metadata.category : '' };
+}
+
+/** The team's own start window from a row's `Opens At` and `Closes At`
+ * cells: none when both are blank, else the window or the reason it is not one. */
+export function readStartWindow(opensAt: string, closesAt: string): StartWindow | undefined | { refused: string } {
+  if (opensAt === '' && closesAt === '') return undefined;
+  if (opensAt === '') {
+    return { refused: 'a Closes At csak Opens At-tel együtt adható meg.' };
+  }
+  const window: StartWindow = { opensAt, ...(closesAt !== '' && { closesAt }) };
+  if (validateStartWindow(window).length > 0) {
+    return { refused: `az Opens At („${opensAt}”) és a Closes At („${closesAt}”) időpont kell legyen időzónával, `
+      + 'például 2026-11-20T15:00+01:00, és a Closes At az Opens At után.' };
+  }
+  return window;
 }
 
 const headerKey = (cell: string) => cell.trim().toLowerCase();
@@ -155,8 +170,9 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     onerror(`Egy csapat sem került be. ${read.refused}`);
     onerror(`A fájl első sora: ${header.map(cell => cell.trim()).join(', ')}`);
     onerror('Oszlopok, tetszőleges sorrendben: Teamname és Competition (kötelező, a Competition a verseny '
-      + 'neve, például 20 online C, vagy az azonosítója); Email, Other, ID, Login Code és Credentials (elhagyható, az utolsó hármat ilyenkor a szerver '
-      + 'generálja).');
+      + 'neve, például 20 online C, vagy az azonosítója); Email, Other, ID, Login Code, Credentials, Opens At és Closes At (elhagyható; '
+      + 'az ID-t, a Login Code-ot és a Credentials-t ilyenkor a szerver generálja, az Opens At és a Closes At a csapat '
+      + 'saját indítási ablaka a versenyé helyett).');
     return { successful: 0, existing: 0, failed: 0, export_table, logs };
   }
   if (read.unknown.length > 0) {
@@ -201,6 +217,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     const competitionId = cell("Competition");
     const email = cell("Email");
     const other = cell("Other");
+    const readWindow = readStartWindow(cell("Opens At"), cell("Closes At"));
+    const startWindow = readWindow !== undefined && 'refused' in readWindow ? undefined : readWindow;
     // Every problem names the line and the team, so each stands on its own.
     const where = teamname === '' ? `${line}. sor` : `${line}. sor (${teamname})`;
     let ok = true;
@@ -222,6 +240,11 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
         onerror(`${where}: ${into.refused}`);
         ok = false;
       }
+    }
+
+    if (readWindow !== undefined && 'refused' in readWindow) {
+      onerror(`${where}: ${readWindow.refused}`);
+      ok = false;
     }
 
     // Stricter than the column, on purpose: the admin routes append an audit
@@ -252,6 +275,13 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       if (email !== '' && email !== (there.email ?? '')) {
         onwarn(`${where}: már szerepel, más e-mail címmel; a fájlbeli nem került át.`);
       }
+      // Only from a file that has the columns: one without them says nothing
+      // about a window the admin page set.
+      if ((positions["Opens At"] !== undefined || positions["Closes At"] !== undefined)
+        && ((startWindow?.opensAt ?? null) !== there.startOpensAt
+          || (startWindow?.closesAt ?? null) !== there.startClosesAt)) {
+        onwarn(`${where}: már szerepel, más Opens At vagy Closes At értékkel; a fájlbeli nem került át.`);
+      }
       continue;
     }
 
@@ -270,7 +300,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (ok && into !== null && !('refused' in into)) {
       try {
         await teams.insertTeam({
-          teamname, competitionId: into.competition.id, category: into.category, email, other, teamId,
+          teamname, competitionId: into.competition.id, category: into.category, email, other,
+          startWindow, teamId,
           joinCode: login_code, credentials,
         });
       } catch (err) {
@@ -290,7 +321,8 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (ok) {
       // The id, however the row named the competition: it stays the same when
       // a competition with the same name is registered later.
-      const row_to_export = [teamname, into !== null && !('refused' in into) ? into.competition.id : competitionId, email, other, teamId, login_code, credentials];
+      const row_to_export = [teamname, into !== null && !('refused' in into) ? into.competition.id : competitionId, email, other,
+        teamId, login_code, credentials, startWindow?.opensAt ?? '', startWindow?.closesAt ?? ''];
       export_table.push(row_to_export);
       successful++;
     } else {

@@ -78,7 +78,10 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
             Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Competition:
             ez utóbbi a csapat versenye, a lenti táblázat szerint, például 20 online C, vagy a verseny
             azonosítója. Így egy fájlban több verseny csapatai is lehetnek. Az Email, az Other, az ID, a Login Code
-            és a Credentials elhagyható vagy üresen hagyható, az utolsó hármat ilyenkor a szerver generálja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok
+            és a Credentials elhagyható vagy üresen hagyható, az utolsó hármat ilyenkor a szerver generálja. Az Opens At
+            és a Closes At, szintén elhagyható, a csapat saját indítási ablaka a versenyé helyett, időzónával, például
+            2026-11-20T15:00+01:00: tesztkódnak egy tág ablak, például 2001-től 2099-ig, egy később író csapatnak a
+            saját napja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok
             kimaradnak.
             A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
             Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét az

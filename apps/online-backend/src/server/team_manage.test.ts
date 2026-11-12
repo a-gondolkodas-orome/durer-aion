@@ -28,6 +28,8 @@ const team = (fields: Partial<TeamModel>): TeamModel =>
     pageState: "HOME",
     relayMatchID: null,
     strategyMatchID: null,
+    startOpensAt: null,
+    startClosesAt: null,
     ...fields,
   }) as TeamModel;
 
@@ -100,6 +102,43 @@ describe("getNewGame", () => {
   it("refuses with 403 a match the team's competition does not have", async () => {
     await expect(getNewGame(appCtx({ db: {} }), games, "STRATEGY", team({ competitionId: relayOnly.id }), competitions))
       .rejects.toMatchObject({ status: 403 });
+  });
+
+  describe("in a competition with a start window", () => {
+    const windowed: CompetitionConfig = {
+      ...relayOnly,
+      startWindow: { opensAt: "2026-10-20T15:00:00+02:00", closesAt: "2026-10-20T21:30:00+02:00" },
+    };
+    const windowedCompetitions = new Map([[windowed.id, windowed]]);
+    const start = (now: string, own: Partial<TeamModel> = {}) => getNewGame(
+      appCtx({ db: {} }), games, "RELAY", team({ competitionId: windowed.id, ...own }),
+      windowedCompetitions, new Date(now));
+
+    it("lets a team start while the window is open", async () => {
+      await expect(start("2026-10-20T13:00:00Z")).resolves.toBeDefined();
+    });
+
+    it("refuses with 403 a start before the window opens", async () => {
+      await expect(start("2026-10-20T12:59:00Z"))
+        .rejects.toMatchObject({ status: 403, message: "The competition has not started yet." });
+    });
+
+    it("refuses with 403 a start after the window closes", async () => {
+      await expect(start("2026-10-20T19:30:00Z"))
+        .rejects.toMatchObject({ status: 403, message: "The competition is over." });
+    });
+
+    // A team writing the round the day after.
+    it("holds a team with a window of its own to that one instead", async () => {
+      const late = { startOpensAt: "2026-10-21T15:00:00+02:00", startClosesAt: "2026-10-21T21:30:00+02:00" };
+      await expect(start("2026-10-20T13:00:00Z", late))
+        .rejects.toMatchObject({ status: 403, message: "The competition has not started yet." });
+      await expect(start("2026-10-21T13:00:00Z", late)).resolves.toBeDefined();
+    });
+
+    it("leaves a team's own window open-ended without a closesAt", async () => {
+      await expect(start("2099-01-01T00:00:00Z", { startOpensAt: "2001-01-01T00:00:00Z" })).resolves.toBeDefined();
+    });
   });
 });
 

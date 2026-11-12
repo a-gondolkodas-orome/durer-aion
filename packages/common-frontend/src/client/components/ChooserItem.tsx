@@ -27,6 +27,8 @@ export function ChooserItem(props: {
   type: 'strategy' | 'relay',
   /// The numbers its rules tell come from here; the local apps have none.
   competition?: PublicCompetition | null,
+  /// False outside the team's start window, when the server refuses a start.
+  canStart?: boolean,
 }) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
@@ -129,7 +131,7 @@ export function ChooserItem(props: {
         }} variant='contained' color='primary' disableElevation endIcon={<ArrowForwardRounded />} onClick={() => {
           setStarting(true);
           void (props.type === "relay" ? startRelay() : startStrategy()).finally(() => setStarting(false));
-        }} disabled={starting || props.status.state !== "NOT STARTED"}>
+        }} disabled={starting || props.status.state !== "NOT STARTED" || props.canStart === false}>
           {t('chooser.start')}
         </Button>
       </>}

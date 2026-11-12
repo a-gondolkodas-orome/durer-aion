@@ -24,6 +24,12 @@ export class TeamModel extends Model<
   /// The competition the team entered. A team entering two competitions is two
   /// rows, with nothing linking them.
   declare competitionId: string;
+  /// The team's own start window, in place of its competition's: for a
+  /// testing code, or a team writing the round late. Both null without one;
+  /// `startClosesAt` is set only with `startOpensAt`. ISO 8601 with an offset,
+  /// as `StartWindow` is.
+  declare startOpensAt: string | null;
+  declare startClosesAt: string | null;
   declare category: string;
   declare credentials: string;
   declare email: string;
@@ -98,6 +104,16 @@ export const teamAttributes: ModelAttributes<
     allowNull: false,
     // With teamName's: a name is unique within its competition only.
     unique: "teamName",
+  },
+  startOpensAt: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+  startClosesAt: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
   },
   category: {
     type: DataTypes.STRING,

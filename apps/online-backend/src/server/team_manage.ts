@@ -3,12 +3,13 @@ import { nanoid } from "nanoid";
 import { getBotCredentials } from "./common";
 import { AnyBgioGame, PlayerIDType } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
-import { GameType, relayGameName, strategyGameName } from "schemas";
+import { GameType, relayGameName, startWindowState, strategyGameName } from "schemas";
 import type { CompetitionConfig } from "schemas";
 import { registry } from "problem-bank/all";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
 import { teamMatches, type TeamMatches } from "./match_status";
+import { teamStartWindow } from "./start_window";
 
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
@@ -110,13 +111,16 @@ export function allowedToStart(
 }
 
 /** The game of the team's competition the team asks to start. A competition
- *  without that match answers 403, as any start the team may not make does. */
+ *  without that match answers 403, as any start the team may not make does,
+ *  and so does a start outside the team's start window. Only the start is checked: a match started in the window
+ *  runs its full time, and add-minutes may carry it past `closesAt`. */
 export async function getNewGame(
   ctx: Server.AppCtx,
   games: AnyBgioGame[],
   gameType: GameType,
   team: TeamModel,
   competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
+  now: Date = new Date(),
 ) {
   if (!allowedToStart(team, await teamMatches(ctx.db, team), gameType)) {
     ctx.throw(403, "Team is not allowed to start game.");
@@ -125,6 +129,10 @@ export async function getNewGame(
     ?? ctx.throw(404, "Competition " + team.competitionId + " not found");
   if ((gameType === "RELAY" ? competition.relay : competition.strategy) === undefined) {
     ctx.throw(403, "The team's competition has no such match.");
+  }
+  const state = startWindowState(teamStartWindow(team, competition), now);
+  if (state !== "open") {
+    ctx.throw(403, state === "closed" ? "The competition is over." : "The competition has not started yet.");
   }
   const gameName = gameType === "RELAY" ? relayGameName(competition.id) : strategyGameName(competition.id);
 

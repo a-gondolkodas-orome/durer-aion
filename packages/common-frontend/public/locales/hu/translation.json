@@ -31,6 +31,11 @@
       "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
       "timeLabel": "Idő",
       "timeTip": "A próbajátékok is beleszámítanak az időbe."
+    },
+    "window": {
+      "notOpenYet": "A fordulókat ekkortól lehet elkezdeni: {{time}}.",
+      "closed": "A verseny véget ért, új fordulót már nem lehet elkezdeni.",
+      "openUntil": "A fordulókat eddig lehet elkezdeni: {{time}}."
     }
   },
   "disclaimer": {

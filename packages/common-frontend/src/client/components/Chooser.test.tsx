@@ -8,13 +8,14 @@ import type { TeamModelDto } from '../dto/TeamStateDto';
 import { Chooser } from './Chooser';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'hu' } }),
 }));
 vi.mock('../client-repo-context', () => ({
   useClientRepo: () => ({ version: 'ONLINE' }),
 }));
 vi.mock('./ChooserItem', () => ({
-  ChooserItem: (props: { type: string }) => <div>{`item:${props.type}`}</div>,
+  ChooserItem: (props: { type: string, canStart?: boolean }) =>
+    <div>{`item:${props.type}${props.canStart === false ? ':closed' : ''}`}</div>,
 }));
 
 const relayOnly: PublicCompetition = {
@@ -69,4 +70,47 @@ test('is not finished while one of two matches is left', () => {
   renderChooser(team({ relayMatch: finished }));
 
   expect(screen.queryByText('chooser.finish.title')).not.toBeInTheDocument();
+});
+
+describe('the start window', () => {
+  afterEach(() => { vi.useRealTimers(); });
+  const startWindow = { opensAt: '2026-10-20T15:00:00+02:00', closesAt: '2026-10-20T21:30:00+02:00' };
+
+  test('says when the rounds open, and keeps them closed till then', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T12:00:00Z') });
+    renderChooser(team({ competition: relayOnly, startWindow }));
+
+    expect(screen.getByText('chooser.window.notOpenYet')).toBeInTheDocument();
+    expect(screen.getByText('item:relay:closed')).toBeInTheDocument();
+  });
+
+  test('says until when they open, while it is open', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T14:00:00Z') });
+    renderChooser(team({ competition: relayOnly, startWindow }));
+
+    expect(screen.getByText('chooser.window.openUntil')).toBeInTheDocument();
+    expect(screen.getByText('item:relay')).toBeInTheDocument();
+  });
+
+  test('says the competition is over once it closes', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T20:00:00Z') });
+    renderChooser(team({ competition: relayOnly, startWindow }));
+
+    expect(screen.getByText('chooser.window.closed')).toBeInTheDocument();
+    expect(screen.getByText('item:relay:closed')).toBeInTheDocument();
+  });
+
+  // Its results are what it comes back for.
+  test('says nothing to a team with no round left to start', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T20:00:00Z') });
+    renderChooser(team({ competition: relayOnly, startWindow, relayMatch: finished }));
+
+    expect(screen.queryByTestId('startWindowNote')).not.toBeInTheDocument();
+  });
+
+  test('says nothing without a window', () => {
+    renderChooser(team({ competition: relayOnly, startWindow: null }));
+
+    expect(screen.queryByTestId('startWindowNote')).not.toBeInTheDocument();
+  });
 });

@@ -299,7 +299,43 @@ describe('import_teams_from_tsv', () => {
     const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
     expect(result.export_table)
-      .toEqual([['Test Team', C, 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, CREDENTIALS]]);
+      .toEqual([['Test Team', C, 'test@example.com', 'Some Info', TEAM_ID, JOIN_CODE, CREDENTIALS, '', '']]);
+  });
+
+  describe('reads a team\'s own start window', () => {
+    const withWindow = (...rows: string[][]) => (readFileSync as Mock)
+      .mockReturnValue([`Teamname\tCompetition\tOpens At\tCloses At`, ...rows.map(row => row.join('\t'))].join('\n'));
+    const OPENS = '2026-11-21T15:00+01:00';
+    const CLOSES = '2026-11-21T21:30+01:00';
+
+    it('from Opens At and Closes At, either of them blank meaning no end, both no window, and writes it back',
+      async () => {
+        withWindow(['A', C, OPENS, CLOSES], ['B', C, OPENS, ''], ['C', C, '', '']);
+
+        const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(result.logs.value).toEqual([]);
+        expect(create.mock.calls.map(([values]) => [values.startOpensAt, values.startClosesAt]))
+          .toEqual([[OPENS, CLOSES], [OPENS, null], [null, null]]);
+        expect(result.export_table.map(row => row.slice(7))).toEqual([[OPENS, CLOSES], [OPENS, ''], ['', '']]);
+      });
+
+    it.each([
+      ['a Closes At alone', ['A', C, '', CLOSES], '2. sor (A): a Closes At csak Opens At-tel együtt adható meg.'],
+      ['a time with no offset', ['A', C, '2026-11-21T15:00', ''],
+        '2. sor (A): az Opens At („2026-11-21T15:00”) és a Closes At („”) időpont kell legyen időzónával, '
+          + 'például 2026-11-20T15:00+01:00, és a Closes At az Opens At után.'],
+      ['a window closing before it opens', ['A', C, CLOSES, OPENS],
+        `2. sor (A): az Opens At („${CLOSES}”) és a Closes At („${OPENS}”) időpont kell legyen időzónával, `
+          + 'például 2026-11-20T15:00+01:00, és a Closes At az Opens At után.'],
+    ])('fails a row with %s, and goes on', async (_, row, message) => {
+      withWindow(row, ['B', C, '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 1, failed: 1 });
+      expect(result.logs.value).toEqual([message]);
+    });
   });
 
   describe('refuses a row the model refuses, and goes on', () => {
@@ -433,6 +469,28 @@ describe('import_teams_from_tsv', () => {
         '1 csapat már szerepelt, változatlanul hagytuk: Alpha.',
         '2. sor (Alpha): már szerepel, más e-mail címmel; a fájlbeli nem került át.',
       ]);
+    });
+
+    it('says when the file holds another start window than the team has', async () => {
+      live = [liveTeam('Alpha')];
+      (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\tOpens At\nAlpha\t${C}\t2026-11-21T15:00+01:00\n`);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
+      expect(result.logs.value).toEqual([
+        '1 csapat már szerepelt, változatlanul hagytuk: Alpha.',
+        '2. sor (Alpha): már szerepel, más Opens At vagy Closes At értékkel; a fájlbeli nem került át.',
+      ]);
+    });
+
+    it('says nothing of a window a file without the columns leaves out', async () => {
+      live = [liveTeam('Alpha', { startOpensAt: '2001-01-01T00:00Z' })];
+      tsv(['Alpha', C, 'a@b.com', '', '', '', '']);
+
+      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+      expect(result.logs.value).toEqual(['1 csapat már szerepelt, változatlanul hagytuk: Alpha.']);
     });
 
     // A team name is unique within its competition only, and teams are not

@@ -1,6 +1,6 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { GameType } from 'schemas';
+import type { GameType, StartWindow } from 'schemas';
 import { teamAttributes, TeamModel } from './model';
 import { Sequelize, WhereOptions } from 'sequelize';
 
@@ -58,12 +58,14 @@ export class TeamsRepository {
   }
 
   async insertTeam(
-      { teamname, competitionId, category, email, other, teamId, joinCode, credentials } :
-      { teamname: string, competitionId: string, category: string, email: string, other: string, teamId: string,
-        joinCode: string, credentials: string }) {
+      { teamname, competitionId, category, email, other, startWindow, teamId, joinCode, credentials } :
+      { teamname: string, competitionId: string, category: string, email: string, other: string,
+        startWindow?: StartWindow, teamId: string, joinCode: string, credentials: string }) {
     return await TeamModel.create({
       teamId, joinCode, other,
       competitionId,
+      startOpensAt: startWindow?.opensAt ?? null,
+      startClosesAt: startWindow?.closesAt ?? null,
       category,
       email,
       credentials,

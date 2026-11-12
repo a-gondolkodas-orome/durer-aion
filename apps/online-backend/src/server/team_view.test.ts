@@ -7,6 +7,8 @@ const team = {
   joinCode: "000-0000-000",
   teamName: "Csapat",
   competitionId: "wkr6zml6mu--20-online-e",
+  startOpensAt: null,
+  startClosesAt: null,
   category: "E",
   credentials: "secret-token",
   email: "team@example.com",
@@ -45,6 +47,11 @@ describe("publicTeamView", () => {
     expect(publicTeamView({ ...team, competitionId: "gone" } as TeamModel, matches).competition).toBeNull();
   });
 
+  it("serves the team's own start window over its competition's", () => {
+    const own = { ...team, startOpensAt: "2026-10-21T15:00:00+02:00", startClosesAt: null } as TeamModel;
+    expect(publicTeamView(own, matches).startWindow).toStrictEqual({ opensAt: "2026-10-21T15:00:00+02:00" });
+  });
+
   it("serves what the client plays with", () => {
     expect(publicTeamView(team, matches)).toStrictEqual({
       teamName: "Csapat",
@@ -56,6 +63,7 @@ describe("publicTeamView", () => {
         strategy: { durationMinutes: 30, gameId: "20o-e" },
         metadata: { kind: "competition", edition: 20, round: "online", category: "E" },
       },
+      startWindow: null,
       credentials: "secret-token",
       pageState: "HOME",
       relayMatch: { state: "NOT STARTED" },

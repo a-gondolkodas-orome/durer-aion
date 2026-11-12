@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition } from "schemas";
+import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartWindow } from "schemas";
 
 export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
@@ -18,6 +18,13 @@ export interface TeamModelDto {
   /// Served to the team by the online round, null for a competition the
   /// server no longer has; the local apps have none.
   competition?: PublicCompetition | null;
+  /// When the team may start its matches, its own window or its competition's;
+  /// null for any time. The local apps serve none, and have no window.
+  startWindow?: StartWindow | null;
+  /// The team's own window, in place of its competition's, which the admin
+  /// routes serve as the row holds it.
+  startOpensAt?: string | null;
+  startClosesAt?: string | null;
   category: string;
   credentials: string;
   email?: string;
