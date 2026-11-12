@@ -8,6 +8,7 @@ import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useCompetitions, useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { CompetitionTable } from './CompetitionTable';
+import { InfoTip } from './InfoTip';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
 function summary(result: TeamImportResultDto): string {
@@ -74,19 +75,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '32px' }}>
         <Stack sx={{ gap: '16px', flex: '1 1 0', minWidth: 0 }}>
           <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
-          <Stack sx={{ fontSize: 14 }}>
-            Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Kötelező oszlop a Teamname és a Competition:
-            ez utóbbi a csapat versenye, a lenti táblázat szerint, például 20 online C, vagy a verseny
-            azonosítója. Így egy fájlban több verseny csapatai is lehetnek. Az Email, az Other, az ID, a Login Code
-            és a Credentials elhagyható vagy üresen hagyható, az utolsó hármat ilyenkor a szerver generálja. Az Opens At
-            és a Closes At, szintén elhagyható, a csapat saját indítási ablaka a versenyé helyett, időzónával, például
-            2026-11-20T15:00+01:00: tesztkódnak egy tág ablak, például 2001-től 2099-ig, egy később író csapatnak a
-            saját napja. Az oszlopok sorrendje tetszőleges, az ismeretlen oszlopok
-            kimaradnak.
-            A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül.
-            Az itt importált csapatok belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét az
-            Exportálás rész.
-          </Stack>
+          <ImportHelp/>
           <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <Button variant="outlined" color="primary" component="label" disabled={busy}>
               Fájl kiválasztása
@@ -153,6 +142,48 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
         <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Versenyek</Stack>
         <CompetitionTable competitions={competitions ?? []}/>
       </Stack>
+    </Stack>
+  );
+}
+
+/// What the import takes, column by column: what an organiser needs at a
+/// glance is in sight, the rest behind an ⓘ beside its column.
+function ImportHelp() {
+  return (
+    <Stack sx={{ fontSize: 14, gap: '8px', '& ul': { margin: 0, paddingLeft: '20px' }, '& li': { margin: '4px 0' } }}>
+      <span>
+        Tabulátorral elválasztott .tsv fájl, az első sora a fejléc. Az oszlopok sorrendje tetszőleges, az ismeretlenek
+        kimaradnak.
+      </span>
+      <span>Kötelező oszlopok:</span>
+      <ul>
+        <li><b>Teamname</b></li>
+        <li>
+          <b>Competition</b>: a csapat versenye, a lenti táblázat szerint, például 20 online C
+          <InfoTip label="Competition">
+            A verseny neve vagy azonosítója. Soronként más lehet, így egy fájlban több verseny csapatai is lehetnek.
+          </InfoTip>
+        </li>
+      </ul>
+      <span>Elhagyható vagy üresen hagyható oszlopok:</span>
+      <ul>
+        <li><b>Email</b>, <b>Other</b></li>
+        <li>
+          <b>ID</b>, <b>Login Code</b>, <b>Credentials</b>: üresen a szerver generálja
+        </li>
+        <li>
+          <b>Opens At</b>, <b>Closes At</b>: a csapat saját indítási ablaka a versenyé helyett
+          <InfoTip label="Opens At, Closes At">
+            Időzónás időpont, például 2026-11-20T15:00+01:00; a Closes At elhagyható. Tesztkódnak tág ablak való, például
+            2001-től 2099-ig, egy később író csapatnak a saját napja. Csak azt korlátozza, mikor kezdhet játékot: az elkezdett játék
+            végig fut.
+          </InfoTip>
+        </li>
+      </ul>
+      <span>
+        A csapatok egyenként kerülnek be: a hibás sorok kimaradnak, a többi bekerül. Az itt importált csapatok
+        belépőkódjait az importálás után megjelenő gomb adja, az összes csapatét az Exportálás rész.
+      </span>
     </Stack>
   );
 }
