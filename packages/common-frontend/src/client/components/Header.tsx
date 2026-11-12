@@ -2,7 +2,6 @@ import { Box, Button, Container, Dialog, IconButton, Stack, Tooltip } from '@mui
 import { useState } from 'react';
 import { useLogout } from '../hooks/user-hooks';
 import { AccountCircleOutlined, ArrowBackRounded, Logout } from '@mui/icons-material';
-import { useClientRepo } from '../client-repo-context';
 import { alpha, useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
@@ -38,14 +37,8 @@ export function Header(props: {
   const logout = useLogout();
   const { enqueueSnackbar } = useSnackbar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const clientRepository = useClientRepo();
   const onLogout = () => {
     logout()
-      .then(() => {
-        if (clientRepository.version === "OFFLINE") {
-          window.location.reload();
-        }
-      })
       .catch(() => {
         enqueueSnackbar(t('error.unexpected'), { variant: 'error' });
       });
