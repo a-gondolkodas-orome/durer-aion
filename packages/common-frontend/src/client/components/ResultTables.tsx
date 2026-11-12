@@ -357,21 +357,18 @@ export function StrategyGamesTable(props: { results: LiveGameResult[], points?: 
 }
 
 /**
- * How the strategy points follow from the live games, in words, with two
- * example runs: the home card's tooltip. The numbers come from the scale the
- * game scores by.
+ * Two example runs and what each scores, in one line: the strategy card's
+ * hint under its points rule. The numbers come from the scale the game scores
+ * by.
  */
-export function StrategyPointsRule() {
+export function StrategyPointsExamples() {
   const { t } = useTranslation();
   const [clean, afterOneLoss] = STRATEGY_POINTS_BY_LOSSES;
-  return <Box sx={{ fontSize: '14px', lineHeight: 1.45, textAlign: 'left' }}>
-    <PointsRuleText />
-    <Box sx={{ marginTop: '6px' }}>{t('strategy.points.examples')}</Box>
-    <Box component="ul" sx={{ margin: '2px 0 0', paddingLeft: '18px' }}>
-      <li>{t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b></li>
-      <li>{t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b></li>
-    </Box>
-  </Box>;
+  return <>
+    {t('strategy.points.examples')}{' '}
+    {t('strategy.points.cleanRun')}: <b>{t('general.points', { count: clean })}</b>;{' '}
+    {t('strategy.points.afterLoss')}: <b>{t('general.points', { count: afterOneLoss })}</b>.
+  </>;
 }
 
 function PointsRuleText() {

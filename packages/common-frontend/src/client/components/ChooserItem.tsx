@@ -11,8 +11,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { RELAY_MAX_TRIES, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
-import { RelayKey, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsRule } from './ResultTables';
-import { InfoTip } from './InfoTip';
+import { RelayKey, RelayResultsTable, ScoreHeadline, StrategyGamesTable, StrategyOutcome, StrategyPointsExamples } from './ResultTables';
 import type { PublicCompetition } from 'schemas';
 import { relayMaxPoints } from './relay-results';
 import { relayNumbers, strategyMinutes } from './round-numbers';
@@ -104,7 +103,6 @@ export function ChooserItem(props: {
         <Stack id={descId} sx={{
           fontSize: 14,
           color: cardTokens(theme).bodyText,
-          // Folded away, its ⓘ buttons leave the tab order as well.
           visibility: { xs: mobileDescOpen ? 'visible' : 'hidden', md: 'visible' },
           height: {
             xs: mobileDescOpen ? "100%" : "0px",
@@ -142,10 +140,18 @@ export function ChooserItem(props: {
 const BOLD = { b: <b /> };
 
 /// A round before it starts, the one place it is explained before the clock
-/// runs: a line per point, the details behind an ⓘ beside it. Both rounds are
-/// told alike, so a team reading one knows where to look in the other.
+/// runs: a line per point, and under a point that needs one, a quieter line
+/// explaining it. Nothing is behind a tooltip: every rule here is one a team
+/// has to know before it starts. Both rounds are told alike, so a team
+/// reading one knows where to look in the other.
 function Description(props: { children: ReactNode }) {
   return <Box sx={{ '& li': { margin: '6px 0' } }}>{props.children}</Box>;
+}
+
+function Hint(props: { children: ReactNode }) {
+  return <Box component="span" sx={{ display: 'block', marginTop: '3px', fontSize: '12.5px', fontStyle: 'italic', lineHeight: 1.45, color: '#6e7781' }}>
+    {props.children}
+  </Box>;
 }
 
 // Spelled out key by key in both: the i18n check finds a key only as a literal.
@@ -158,13 +164,10 @@ function RelayDescription(props: { competition?: PublicCompetition | null }) {
     <Description>
       <p>{t('chooser.relay.intro')}</p>
       <ul>
-        <li>
-          <Trans i18nKey='chooser.relay.points' components={BOLD} values={{ total }} />
-          <InfoTip label={t('chooser.relay.pointsLabel')}>{t('chooser.relay.pointsTip', { min, max })}</InfoTip>
-        </li>
+        <li><Trans i18nKey='chooser.relay.points' components={BOLD} values={{ total, min, max }} /></li>
         <li>
           <Trans i18nKey='chooser.relay.tries' components={BOLD} values={{ tries }} />
-          <InfoTip label={t('chooser.relay.triesLabel')}>{t('chooser.relay.triesTip', { tries })}</InfoTip>
+          <Hint>{t('chooser.relay.triesHint', { tries })}</Hint>
         </li>
         <li><Trans i18nKey='chooser.relay.time' components={BOLD} values={{ minutes }} /></li>
         <li>{t('chooser.relay.noReturn')}</li>
@@ -183,16 +186,13 @@ function StrategyDescription(props: { competition?: PublicCompetition | null }) 
         <li>
           <Trans i18nKey='chooser.strategy.live' components={BOLD}
             values={{ max: STRATEGY_POINTS_BY_LOSSES[0], next: STRATEGY_POINTS_BY_LOSSES[1], rest: STRATEGY_POINTS_BY_LOSSES.slice(2).join(', ') }} />
-          <InfoTip label={t('chooser.strategy.pointsLabel')}><StrategyPointsRule /></InfoTip>
+          <Hint><StrategyPointsExamples /></Hint>
         </li>
         <li>
           <Trans i18nKey='chooser.strategy.practice' components={BOLD} />
-          <InfoTip label={t('chooser.strategy.practiceLabel')}>{t('chooser.strategy.practiceTip')}</InfoTip>
+          <Hint>{t('chooser.strategy.practiceHint')}</Hint>
         </li>
-        <li>
-          <Trans i18nKey='chooser.strategy.time' components={BOLD} values={{ minutes }} />
-          <InfoTip label={t('chooser.strategy.timeLabel')}>{t('chooser.strategy.timeTip')}</InfoTip>
-        </li>
+        <li><Trans i18nKey='chooser.strategy.time' components={BOLD} values={{ minutes }} /></li>
         <li>{t('chooser.strategy.noAbandon')}</li>
       </ul>
     </Description>
