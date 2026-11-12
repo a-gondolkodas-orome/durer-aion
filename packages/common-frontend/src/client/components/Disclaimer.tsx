@@ -6,12 +6,17 @@ import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
+import type { StartWindow } from 'schemas';
+import { useStartWindowNote } from '../hooks/start-window';
 
-export function Disclaimer(props: { teamName: string, category: string }) {
+export function Disclaimer(props: { teamName: string, category: string, startWindow?: StartWindow | null }) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
   const { t } = useTranslation();
+  // Reading on is allowed at any time, the rules included; only the start
+  // waits for the window, and this says so before the team clicks through.
+  const { note: windowNote } = useStartWindowNote(props.startWindow);
 
   return (
     <Stack
@@ -121,6 +126,12 @@ export function Disclaimer(props: { teamName: string, category: string }) {
       </Stack>
 
 
+      {windowNote !== undefined && (
+        <Stack sx={{ textAlign: "center", fontSize: "18px", fontWeight: 500, marginBottom: "20px" }}
+          data-testid="startWindowNote">
+          {windowNote}
+        </Stack>
+      )}
       <Button
         sx={{
           width: {
