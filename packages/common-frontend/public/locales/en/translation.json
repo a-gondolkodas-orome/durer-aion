@@ -21,7 +21,7 @@
       "intro": "A two-player strategy game against the computer. You can read its rules once you start. You get points if you manage to beat the computer twice in a row in live games.",
       "live": "<b>Points:</b> you get {{max}} points if you beat the computer twice in a row in live games with no loss. Live losses lower it to {{next}}, then {{rest}}.",
       "noAbandon": "A game, once started, has to be played to the end.",
-      "practice": "<b>Practice game:</b> does not count towards your score; it is for trying the game out.",
+      "practice": "<b>Practice game:</b> does not count towards your score.",
       "practiceHint": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too.",
       "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”. Practice games count towards the time too."
     }

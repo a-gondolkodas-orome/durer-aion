@@ -147,7 +147,7 @@ function Description(props: { children: ReactNode }) {
 }
 
 function Hint(props: { children: ReactNode }) {
-  return <Box component="span" sx={{ display: 'block', marginTop: '2px', fontSize: '14px', lineHeight: 1.45, color: '#57606a' }}>
+  return <Box component="span" sx={{ display: 'block', marginTop: '3px', fontSize: '12.5px', fontStyle: 'italic', lineHeight: 1.45, color: '#6e7781' }}>
     {props.children}
   </Box>;
 }

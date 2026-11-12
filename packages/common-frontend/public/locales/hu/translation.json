@@ -21,7 +21,7 @@
       "intro": "Kétszereplős stratégiás játék a gép ellen. A szabályokat a kezdés után olvashatjátok. Akkor kaptok pontot, ha sikerül éles játszmában kétszer egymás után legyőznötök a gépet.",
       "live": "<b>Pontozás:</b> {{max}} pontot kaptok, ha kétszer egymás után legyőzitek éles játszmában a gépet vereség nélkül. Az éles vereségek ezt {{next}}, majd {{rest}} pontra csökkentik.",
       "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
-      "practice": "<b>Próbajáték:</b> nem számít a pontozásba; a játék kipróbálására való.",
+      "practice": "<b>Próbajáték:</b> nem számít a pontozásba.",
       "practiceHint": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
       "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok. A próbajátékok is beleszámítanak az időbe."
     }
