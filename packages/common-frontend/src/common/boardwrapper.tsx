@@ -67,9 +67,9 @@ const PAIR_BUTTON_WIDTH = 230;
 const PAIR_GAP = 12;
 const INFO_BESIDE_LEFT = `calc(50% + ${PAIR_BUTTON_WIDTH + PAIR_GAP / 2 + 8}px)`;
 
-// The game card's width where the rules are always beside it: the pair of
+// The game card's narrowest where the rules are always beside it: the pair of
 // buttons with the ⓘ beside it, and the line under a practice result, with
-// the card's padding.
+// the card's padding. Wider screens give the card the rest.
 const GAME_COLUMN_WIDTH = 620;
 // From here the rules are always on screen, beside the card at full width:
 // it takes in a 16:9 laptop at the scaling Windows sets for it (1920×1080 at
@@ -104,8 +104,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
     // From RULES_BESIDE_FROM the rules are always beside the game card, the
-    // two centred together, with nothing to open or close: there is room for
-    // both. Between `md` and that the rules open on demand, and take a column
+    // two as wide as the bar above them, with nothing to open or close: there
+    // is room for both. Between `md` and that the rules open on demand, and take a column
     // from the card's side, rather than covering a board the team may be
     // playing on.
     const rulesBeside = useMediaQuery(`(min-width: ${RULES_BESIDE_FROM}px)`, { noSsr: true });
@@ -115,25 +115,24 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // reload.
     const [rulesRead, setRulesRead] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
-    const rulesColumns = rulesBeside ? `${GAME_COLUMN_WIDTH}px minmax(${RULES_COLUMN_WIDTH}px, ${RULES_COLUMN_MAX_WIDTH}px)`
+    const rulesColumns = rulesBeside ? `minmax(${GAME_COLUMN_WIDTH}px, 1fr) minmax(${RULES_COLUMN_WIDTH}px, ${RULES_COLUMN_MAX_WIDTH}px)`
       : wide && rulesOpen ? `minmax(0, 1fr) ${RULES_COLUMN_WIDTH}px`
       : null;
-    // Once the first dialog closes, the button that brings the rules back
-    // pulses, so the team sees where they went.
+    // Where the rules are behind a button, it pulses once the first dialog
+    // closes, so the team sees where they went.
     const [pointToRules, setPointToRules] = useState(false);
     const rulesButtonRef = useRef<HTMLButtonElement>(null);
-    const rulesColumnRef = useRef<HTMLDivElement>(null);
     const firstRulesRef = useRef<HTMLDivElement>(null);
-    // The first dialog flies to where the rules stay, so the team sees where
-    // they went: into their column, or into the button that brings them back,
-    // which then pulses. Where motion is turned down, or there is nothing to
-    // animate with, it just closes.
+    // Where the rules are behind a button, the first dialog flies into it, so
+    // the team sees where they went; then the button pulses. Where the rules
+    // stay on screen, motion is turned down, or there is nothing to animate
+    // with, it just closes.
     const closeFirstRules = () => {
       const done = () => { setRulesRead(true); setPointToRules(!rulesBeside); };
       const paper = firstRulesRef.current;
-      const target = rulesBeside ? rulesColumnRef.current : rulesButtonRef.current;
+      const target = rulesButtonRef.current;
       const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      if (!paper || !target || reduced || typeof paper.animate !== 'function') {
+      if (rulesBeside || !paper || !target || reduced || typeof paper.animate !== 'function') {
         done();
         return;
       }
@@ -337,7 +336,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
             </Stack>
           </Stack>
           <Box sx={{
-            ...(rulesColumns !== null && { display: 'grid', gridTemplateColumns: rulesColumns, justifyContent: 'center', gap: `${COLUMN_GAP}px`, alignItems: 'start' }),
+            ...(rulesColumns !== null && { display: 'grid', gridTemplateColumns: rulesColumns, gap: `${COLUMN_GAP}px`, alignItems: 'start' }),
           }}>
             {/* A block around the card: the card's own auto margins would
                 shrink it, as a grid item, to its content. */}
@@ -349,7 +348,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
               </GameArea>
             </Box>
             {/* The board stays to read and play while the rules are open. */}
-            {(rulesBeside || (wide && rulesOpen)) && <Stack ref={rulesColumnRef} component="aside" aria-label={t('strategy.rules')} sx={{
+            {(rulesBeside || (wide && rulesOpen)) && <Stack component="aside" aria-label={t('strategy.rules')} sx={{
               minWidth: 0,
               backgroundColor: '#fff', border: `1px solid ${LINE}`, borderRadius: '16px', padding: '14px 18px', gap: '8px',
             }}>
@@ -363,10 +362,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         </Stack>
         {/* No onClose: neither a click beside it nor Esc stands for having
             read the rules. Once the time is up there is nothing left to read
-            them for, and the end dialog must not sit under it. Its own exit is
-            instant: closing, it has already flown into the rules button. */}
+            them for, and the end dialog must not sit under it. Where it flies
+            into the rules button, its own exit is instant: closing, it is
+            already there. */}
         <Dialog open={rulesFirst} fullScreen={!wide} maxWidth="md" fullWidth
-          transitionDuration={{ enter: 225, exit: 0 }} slotProps={{ paper: { ref: firstRulesRef } }}>
+          transitionDuration={{ enter: 225, exit: rulesBeside ? 195 : 0 }} slotProps={{ paper: { ref: firstRulesRef } }}>
           <DialogTitle sx={{ fontWeight: 700 }}>{t('strategy.rulesFirst.title')}</DialogTitle>
           <DialogContent sx={{ fontSize: { xs: '16px', md: '18px' }, lineHeight: 1.6 }}>{rules}</DialogContent>
           <DialogActions sx={{ padding: '16px 24px' }}>
