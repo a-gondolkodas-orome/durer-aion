@@ -162,7 +162,7 @@ function RelayDescription(props: { competition?: PublicCompetition | null }) {
     <Description>
       <p>{t('chooser.relay.intro')}</p>
       <ul>
-        <li><Trans i18nKey='chooser.relay.points' components={BOLD} values={{ total, min, max, tries }} /></li>
+        <li><Trans i18nKey='chooser.relay.points' components={BOLD} values={{ total, min, max }} /></li>
         <li>
           <Trans i18nKey='chooser.relay.tries' components={BOLD} values={{ tries }} />
           <Hint>{t('chooser.relay.triesHint', { tries })}</Hint>

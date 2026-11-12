@@ -90,7 +90,7 @@ test("fills the relay's rules in with the team's competition's numbers", () => {
     metadata: { kind: 'other', label: { hu: 'Rövid' } },
   }} />);
 
-  expect(screen.getByText('chooser.relay.points {"total":10,"min":2,"max":5,"tries":3}')).toBeInTheDocument();
+  expect(screen.getByText('chooser.relay.points {"total":10,"min":2,"max":5}')).toBeInTheDocument();
   expect(screen.getByText('chooser.relay.tries {"tries":3}')).toBeInTheDocument();
   expect(screen.getByText('chooser.relay.time {"minutes":45}')).toBeInTheDocument();
 });

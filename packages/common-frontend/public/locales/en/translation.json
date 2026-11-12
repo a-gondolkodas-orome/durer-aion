@@ -10,7 +10,7 @@
     "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
     "relay": {
       "intro": "Short word problems, one after the other. The answer to each is a whole number from 0 to 9999.",
-      "points": "<b>Points:</b> a problem is worth {{min}} to {{max}} points, {{total}} in total. Each wrong guess lowers the points a problem is worth by 1. After {{tries}} wrong guesses the problem scores no points, and you move on to the next one.",
+      "points": "<b>Points:</b> a problem is worth {{min}} to {{max}} points, {{total}} in total. Each wrong guess lowers the points a problem is worth by 1.",
       "tries": "<b>You have {{tries}} guesses per problem:</b> after a right guess or {{tries}} wrong ones, the next problem comes.",
       "triesHint": "If you would rather not spend more time on a problem, you can move on by submitting {{tries}} different wrong guesses.",
       "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”.",

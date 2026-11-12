@@ -10,7 +10,7 @@
     "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
     "relay": {
       "intro": "Rövid szöveges feladatok egymás után. Mindegyikre egy 0 és 9999 közötti egész szám a válasz.",
-      "points": "<b>Pontozás:</b> egy feladat {{min}}–{{max}} pontot ér, összesen {{total}} pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot. {{tries}} rossz tipp esetén a feladatra nem kaptok pontot, és a következő feladatra ugrotok.",
+      "points": "<b>Pontozás:</b> egy feladat {{min}}–{{max}} pontot ér, összesen {{total}} pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot.",
       "tries": "<b>Feladatonként {{tries}} tippetek van:</b> helyes tipp vagy {{tries}} rossz tipp után jön a következő feladat.",
       "triesHint": "Ha egy feladattal nem szeretnétek tovább foglalkozni, {{tries}} különböző rossz tipp beküldésével továbbléphettek.",
       "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
