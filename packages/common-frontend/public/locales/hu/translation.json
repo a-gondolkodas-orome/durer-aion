@@ -1,4 +1,4 @@
-{   
+{
   "chooser": {
     "filledAt": "Kitöltve ekkor",
     "finish": {
@@ -19,7 +19,6 @@
       "time": "<b>60 percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
       "noReturn": "Egy korábbi feladathoz később nem lehet visszatérni."
     },
-    "result": "Eredmények",
     "start": "Kezdjük",
     "strategy": {
       "intro": "Kétszereplős stratégiás játék a gép ellen. A szabályokat a kezdés után olvashatjátok. Akkor kaptok pontot, ha sikerül éles játszmában kétszer egymás után legyőznötök a gépet.",
@@ -151,7 +150,6 @@
     }
   },
   "strategy": {
-    "description": "Feladat leírása",
     "endTable": {
       "lost": "Vereség",
       "reminder": "Ne feledkezzetek meg a váltóról sem!",
@@ -159,29 +157,34 @@
       "unfinished": "Befejezetlen: lejárt közben az idő",
       "won": "Győzelem"
     },
-    "firstPlayer": "Kezdő leszek",
-    "guide": {
-      "actions": "Akciók",
-      "botWins": "Sajnos a gép nyert.",
-      "endOfGame": "A játék végetért.",
-      "ifFirstPlayer": "Válaszd ki, hogy első vagy második játékos akarsz-e lenni.",
-      "liveStarted": "Éles játék elindítva.",
-      "newGame": "Kezdj új játékot!",
-      "realGameWin": "Gratulálok, nyertetek! Verjétek meg még következőleg is a gépet a teljes győzelemhez!",
-      "testGameWin": "Gratulálok, a próbajátékban nyertetek!",
-      "testStarted": "Próbajáték elindítva.",
-      "waitingForServer": "Várakozás a szerverre...",
-      "yourTurn": "Most Te jössz!"
+    "firstPlayer": "Kezdünk",
+    "info": {
+      "label": "Próba vagy éles?",
+      "liveLabel": "Éles játszma:",
+      "liveText": "ez számít. Győzzétek le a gépet kétszer egymás után; minden éles vereség csökkenti az elérhető pontot.",
+      "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
+      "practiceLabel": "Próbajáték:",
+      "practiceText": "nem számít a pontozásba. A gép itt nem feltétlenül játszik a legjobban.",
+      "practiceTextVaries": "nem számít a pontozásba. A gép itt nem feltétlenül játszik a legjobban, és a kezdőállás is más lehet."
     },
-    "instructionDescription": "Az „Új próbajáték kezdése” gombra kattintva próbajáték indul, ami a pontozásba nem számít bele. Bátran kérjetek próbajátékot, hiszen ezzel tudjátok tesztelni, hogy jól értitek-e a játék működését. Az „Új éles játék kezdése” gombra kattintva indul a valódi játék, ami már pontért megy.",
-    "instructions": "Tudnivalók",
+    "intro": {
+      "live": "Éles játszma",
+      "liveText": "Győzzétek le a gépet kétszer egymás után. Elsőre {{first}} pontot érhettek el, minden éles vereség után kevesebbet ({{rest}}).",
+      "practice": "Próbajáték",
+      "practiceText": "Nem számít a pontozásba. Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban.",
+      "practiceTextVaries": "Nem számít a pontozásba. Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban, és a kezdőállás is más lehet.",
+      "title": "Milyen játszmával kezdtek?"
+    },
+    "mode": {
+      "live": "ÉLES · {{n}}. játszma",
+      "practice": "PRÓBAJÁTÉK"
+    },
     "name": "Stratégiás játék",
+    "next": {
+      "live": "Új éles játszma",
+      "practice": "Új próbajáték"
+    },
     "notSupported": "NEM TÁMOGATOTT JÁTÉKÁLLAPOT",
-    "oneMoreWin": "Még egy győzelem éles játszmában: {{points}}",
-    "realGameButton": "Új éles játék kezdése",
-    "secondPlayer": "Második leszek",
-    "testGameButton": "Új próbajáték kezdése",
-    "twoWinsInARow": "Ha most kétszer egymás után nyertek éles játszmában: {{points}}",
     "points": {
       "afterLoss": "győzelem, vereség, győzelem, győzelem",
       "cleanRun": "győzelem, győzelem",
@@ -194,15 +197,51 @@
       "outcomeNone": "Nektek nem lett meg a két egymás utáni éles győzelem, ezért 0 pontot kaptatok.",
       "text": "Pontot akkor kaptok, amikor kétszer egymás után legyőzitek a gépet élesben. Vereség nélkül ez {{max}} pont; az éles vereségek csökkentik ({{scale}}), de {{min}} pontnál kevesebb nem lesz. Egy vereség után újra két egymás utáni győzelem kell."
     },
+    "result": {
+      "liveLost": "A gép nyert.",
+      "liveLostNext": "Két egymás utáni győzelemmel most {{points}} pontot szerezhettek.",
+      "liveWon": "Nyertetek!",
+      "liveWonFirst": "Ha a következő éles játszmát is megnyeritek, teljesítettétek a feladatot.",
+      "practiceLost": "A gép nyert a próbajátékban.",
+      "practiceNote": "Ez nem számít a pontozásba.",
+      "practiceNoteBot": "Ez nem számít a pontozásba, és a próbagép nem feltétlenül játszik a legjobban.",
+      "practiceNoteBotVaries": "Ez nem számít a pontozásba; a próbagép nem feltétlenül játszik a legjobban, és az éles kezdőállás is más lehet.",
+      "practiceNoteStart": "Ez nem számít a pontozásba, és az éles játszmák kezdőállása más lehet.",
+      "practiceWon": "Nyertetek a próbajátékban.",
+      "timeUp": "Lejárt az idő.",
+      "unfinished": "Ez a játszma befejezetlen maradt."
+    },
     "role": {
       "first": "Kezdő",
       "second": "Második",
       "you": "Ti:"
     },
+    "rules": "Szabályok",
+    "rulesCommon": "Ti dönthetitek el, hogy a kezdő vagy a második játékos bőrébe szeretnétek bújni. Győzzétek le a gépet kétszer egymás után ebben a játékban!",
+    "rulesFirst": {
+      "button": "Elolvastuk, értjük",
+      "title": "Először olvassátok el a szabályokat!"
+    },
+    "secondPlayer": "Másodikak leszünk",
     "series": {
+      "current": "{{n}}. éles játszma: folyamatban",
       "earlier_one": "{{count}} korábbi éles játszma",
       "earlier_other": "{{count}} korábbi éles játszma",
-      "label": "Éles játszmák"
+      "help": "✓ győzelem, ✗ vereség. Két egymás utáni éles győzelemért megkapjátok a keretben álló pontot; vereség után újrakezditek, kevesebb pontért.",
+      "helpLabel": "Mit jelent a sorozat?",
+      "label": "Éles játszmák",
+      "lost": "{{n}}. éles játszma: vereség",
+      "next": "{{n}}. éles játszma",
+      "total": "→ {{points}}",
+      "unfinished": "{{n}}. éles játszma: befejezetlen",
+      "won": "{{n}}. éles játszma: győzelem"
+    },
+    "status": {
+      "botTurn": "A gép lép…",
+      "lookAtPosition": "Nézzétek meg az állást!",
+      "role": "Válasszatok szerepet!",
+      "starting": "Indul a játszma…",
+      "yourTurn": "Ti jöttök!"
     }
   },
   "waitingRoom": {

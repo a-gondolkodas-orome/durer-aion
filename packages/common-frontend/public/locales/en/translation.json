@@ -19,7 +19,6 @@
       "time": "<b>You have 60 minutes:</b> the clock starts when you click “Start”.",
       "noReturn": "You cannot return to an earlier problem later."
     },
-    "result": "Results",
     "start": "Start",
     "strategy": {
       "intro": "A two-player strategy game against the computer. You can read its rules once you start. You get points if you manage to beat the computer twice in a row in live games.",
@@ -155,7 +154,6 @@
     }
   },
   "strategy": {
-    "description": "Description",
     "endTable": {
       "lost": "Loss",
       "reminder": "Don't forget to do the relay too!",
@@ -163,29 +161,34 @@
       "unfinished": "Unfinished: the time ran out",
       "won": "Win"
     },
-    "firstPlayer": "I will be the first",
-    "guide": {
-      "actions": "Actions",
-      "botWins": "Unfortunately the computer won.",
-      "endOfGame": "The game has ended.",
-      "ifFirstPlayer": "Choose whether you want to be the first or second player.",
-      "liveStarted": "Live game started.",
-      "newGame": "Start a new game!",
-      "realGameWin": "Congratulations, you won! Defeat the computer next time as well to achieve full victory!",
-      "testGameWin": "Congratulations, you won the test game!",
-      "testStarted": "Test game started.",
-      "waitingForServer": "Waiting for server...",
-      "yourTurn": "Your turn now!"
+    "firstPlayer": "We go first",
+    "info": {
+      "label": "Practice or live?",
+      "liveLabel": "Live game:",
+      "liveText": "this counts. Beat the computer twice in a row; each live loss lowers the points you can earn.",
+      "noAbandon": "A game, once started, has to be played to the end.",
+      "practiceLabel": "Practice game:",
+      "practiceText": "does not count towards your score. The computer may not play its best here.",
+      "practiceTextVaries": "does not count towards your score. The computer may not play its best here, and the starting position may differ."
     },
-    "instructionDescription": "Clicking on the button “Start a new test game” starts a test game, which is not counted in the scoring. Feel free to play some test games before playing a real round in order to test your understanding of the game's logic. The latter mode can be initialised by clicking “Start a new live game”, which will start a game which now counts for points.",
-    "instructions": "Further instructions",
+    "intro": {
+      "live": "Live game",
+      "liveText": "Beat the computer twice in a row. You can earn {{first}} points at first, and fewer after each live loss ({{rest}}).",
+      "practice": "Practice game",
+      "practiceText": "Does not count towards your score. Try out how the game goes, and check that you understand the rules. The computer may not play its best here.",
+      "practiceTextVaries": "Does not count towards your score. Try out how the game goes, and check that you understand the rules. The computer may not play its best here, and the starting position may differ.",
+      "title": "Which kind of game do you start with?"
+    },
+    "mode": {
+      "live": "LIVE · game {{n}}",
+      "practice": "PRACTICE"
+    },
     "name": "Strategy game",
+    "next": {
+      "live": "New live game",
+      "practice": "New practice game"
+    },
     "notSupported": "UNSUPPORTED GAME STATE",
-    "oneMoreWin": "One more live win: {{points}}",
-    "realGameButton": "Start a new live game",
-    "secondPlayer": "I will be the second",
-    "testGameButton": "Start a new test game",
-    "twoWinsInARow": "Win two live games in a row now: {{points}}",
     "points": {
       "afterLoss": "win, loss, win, win",
       "cleanRun": "win, win",
@@ -198,15 +201,51 @@
       "outcomeNone": "You did not get two live wins in a row, so you got 0 points.",
       "text": "You get points when you beat the computer twice in a row in live games. With no loss that is {{max}} points; live losses lower it ({{scale}}), but never below {{min}}. After a loss you need two wins in a row again."
     },
+    "result": {
+      "liveLost": "The computer won.",
+      "liveLostNext": "Two wins in a row now earn you {{points}} points.",
+      "liveWon": "You won!",
+      "liveWonFirst": "Win the next live game too, and the task is done.",
+      "practiceLost": "The computer won the practice game.",
+      "practiceNote": "This does not count towards your score.",
+      "practiceNoteBot": "This does not count towards your score, and the practice computer may not play its best.",
+      "practiceNoteBotVaries": "This does not count towards your score; the practice computer may not play its best, and the live starting position may differ.",
+      "practiceNoteStart": "This does not count towards your score, and live games may start from a different position.",
+      "practiceWon": "You won the practice game.",
+      "timeUp": "Time is up.",
+      "unfinished": "This game was left unfinished."
+    },
     "role": {
       "first": "First",
       "second": "Second",
       "you": "You:"
     },
+    "rules": "Rules",
+    "rulesCommon": "You decide whether to play as the first or the second player. Beat the computer twice in a row in this game!",
+    "rulesFirst": {
+      "button": "We have read and understood them",
+      "title": "Read the rules first!"
+    },
+    "secondPlayer": "We go second",
     "series": {
+      "current": "Live game {{n}}: in progress",
       "earlier_one": "{{count}} earlier live game",
       "earlier_other": "{{count}} earlier live games",
-      "label": "Live games"
+      "help": "✓ win, ✗ loss. Two live wins in a row earn you the points in the frame; after a loss you start again, for fewer points.",
+      "helpLabel": "What does the series mean?",
+      "label": "Live games",
+      "lost": "Live game {{n}}: lost",
+      "next": "Live game {{n}}",
+      "total": "→ {{points}}",
+      "unfinished": "Live game {{n}}: unfinished",
+      "won": "Live game {{n}}: won"
+    },
+    "status": {
+      "botTurn": "The computer is moving…",
+      "lookAtPosition": "Look at the position!",
+      "role": "Choose your role!",
+      "starting": "The game is starting…",
+      "yourTurn": "Your turn!"
     }
   },
   "waitingRoom": {

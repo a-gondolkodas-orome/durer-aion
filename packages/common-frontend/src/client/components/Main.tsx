@@ -1,7 +1,7 @@
 import { Container } from "@mui/material";
 import React, { useEffect } from "react";
 import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
-import { Header } from "./Header";
+import { Header, PAGE_MAX_WIDTH, STRATEGY_PAGE_MAX_WIDTH } from "./Header";
 import { Layout } from "./Layout";
 import { Login } from "./Login";
 import { LoginLayout } from "./LoginLayout";
@@ -20,6 +20,8 @@ export function Main(props: { language: string, gitCommitHash: string }) {
   // just a path, and the team's own pages answer it.
   const admin = useOptionalAdminRepo() !== null && window.location.pathname.includes('/admin');
 
+  const maxWidth = !admin && teamState?.pageState === "STRATEGY" ? STRATEGY_PAGE_MAX_WIDTH : PAGE_MAX_WIDTH;
+
   useEffect(() => {
     void i18next.changeLanguage(props.language);
   }, [props.language])
@@ -28,7 +30,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
     <Layout>
       <LoadTeamState />
       <Header teamName={teamState?.teamName ?? null}
-        compact={teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY"}/>
+        compact={teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY"} maxWidth={maxWidth}/>
       {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
           breakpoint, 1280px, at that width and up, overriding the sx below */}
       <Container
@@ -46,7 +48,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
           },
           position: "relative",
           paddingBottom: "50px",
-          maxWidth: "1200px",
+          maxWidth: `${maxWidth}px`,
         }}
         data-testid="mainRoot"
       >

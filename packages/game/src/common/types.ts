@@ -114,8 +114,12 @@ export interface GamePresentation<G> {
   /// the choice. Without them the roles are only who starts, worded by the
   /// wrapper.
   roleLabels?: readonly [Localizable<string>, Localizable<string>];
-  /// What the team does next on its turn in `play`, as the practice site's
-  /// game of the same name says it.
+  /// Whether the opening position the bot sends differs from game to game.
+  /// Only then do the texts ask the team to look at it before choosing a role,
+  /// and say that a live game may start from another one than practice did.
+  startVaries?: boolean;
+  /// What the team does next on its turn in `play`, under "Ti jöttök!", as the
+  /// practice site's game of the same name says it.
   getPlayerStepDescription?: (args: { G: G & GameStateMixin, ctx: Ctx }) => Localizable<string>;
 }
 

@@ -8,11 +8,17 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 import { LanguageDropdown } from './Langswitcher';
 
+/// How wide a page gets. The strategy page is wider, as the game's rules sit
+/// beside its board.
+export const PAGE_MAX_WIDTH = 1200;
+export const STRATEGY_PAGE_MAX_WIDTH = 1320;
+
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
 /// `languageSwitcher` is for the sites that are meant to be read in either
 /// language; the competition round and its admin pages are Hungarian only.
 /// `compact` is for the game pages, where the height goes to the game.
+/// `maxWidth` is the page's own, so the header's edges line up with it.
 /// `leaveLabel` names the logout button for a site where logging out is not
 /// leaving, such as the relay practice, where it goes back to the round
 /// selector; the button then shows a back arrow instead of the exit icon. On
@@ -21,6 +27,7 @@ export function Header(props: {
   teamName: string | null,
   leaveLabel?: string,
   compact?: boolean,
+  maxWidth?: number,
   languageSwitcher?: boolean,
   titles?: string[],
   homeAddress?: string,
@@ -65,7 +72,7 @@ export function Header(props: {
       <Container maxWidth={false} sx={{
         paddingLeft: { xs: '10px', sm: '24px' },
         paddingRight: { xs: '10px', sm: '24px' },
-        maxWidth: '1200px',
+        maxWidth: `${props.maxWidth ?? PAGE_MAX_WIDTH}px`,
         height: props.compact ? 56 : { xs: 64, md: 84 },
         display: 'grid',
         gridTemplateColumns: '1fr auto 1fr',

@@ -127,6 +127,7 @@ sorbaírjuk
 Sperner
 Svindal
 Szemerédi
+szerezhettek
 szjö
 szöröse
 tizenkétszöget
@@ -149,3 +150,4 @@ Viète
 összkora
 összéletkor
 összéletkora
+újrakezditek
