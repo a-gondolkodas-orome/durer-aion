@@ -10,12 +10,9 @@
     "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
     "relay": {
       "intro": "Rövid szöveges feladatok egymás után. Mindegyikre egy 0 és 9999 közötti egész szám a válasz.",
-      "points": "<b>Pontozás:</b> összesen {{total}} pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot.",
-      "pointsLabel": "Pontozás",
-      "pointsTip": "Egy feladat {{min}}–{{max}} pontot ér. Ha az utolsó tipp is rossz, a feladatra 0 pontot kaptok.",
+      "points": "<b>Pontozás:</b> egy feladat {{min}}–{{max}} pontot ér, összesen {{total}} pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot.",
       "tries": "<b>Feladatonként {{tries}} tippetek van:</b> helyes tipp vagy {{tries}} rossz tipp után jön a következő feladat.",
-      "triesLabel": "Tippek",
-      "triesTip": "Ha egy feladattal nem szeretnétek tovább foglalkozni, {{tries}} különböző rossz tipp beküldésével továbbléphettek.",
+      "triesHint": "Ha egy feladattal nem szeretnétek tovább foglalkozni, {{tries}} különböző rossz tipp beküldésével továbbléphettek.",
       "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
       "noReturn": "Egy korábbi feladathoz később nem lehet visszatérni."
     },
@@ -24,13 +21,9 @@
       "intro": "Kétszereplős stratégiás játék a gép ellen. A szabályokat a kezdés után olvashatjátok. Akkor kaptok pontot, ha sikerül éles játszmában kétszer egymás után legyőznötök a gépet.",
       "live": "<b>Pontozás:</b> {{max}} pontot kaptok, ha kétszer egymás után legyőzitek éles játszmában a gépet vereség nélkül. Az éles vereségek ezt {{next}}, majd {{rest}} pontra csökkentik.",
       "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
-      "pointsLabel": "Pontozás",
-      "practice": "<b>Próbajáték:</b> nem számít a pontozásba; a játék kipróbálására való.",
-      "practiceLabel": "Próbajáték",
-      "practiceTip": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
-      "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
-      "timeLabel": "Idő",
-      "timeTip": "A próbajátékok is beleszámítanak az időbe."
+      "practice": "<b>Próbajáték:</b> nem számít a pontozásba.",
+      "practiceHint": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
+      "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok. A próbajátékok is beleszámítanak az időbe."
     }
   },
   "disclaimer": {
