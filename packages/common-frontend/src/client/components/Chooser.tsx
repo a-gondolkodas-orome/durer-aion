@@ -1,6 +1,4 @@
 import { Stack } from "@mui/system";
-import type { TFunction } from "i18next";
-import type { Language, StartWindow, StartWindowState } from "schemas";
 import { FinishedMatchStatus, TeamModelDto } from "../dto/TeamStateDto";
 import { ChooserItem } from "./ChooserItem";
 import { cardSx } from "./card";
@@ -8,8 +6,7 @@ import { ScoreHeadline } from "./ResultTables";
 import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import { useStartWindowState } from "../hooks/start-window";
-import { useUiLanguage } from "../hooks/ui-language";
+import { useStartWindowNote } from "../hooks/start-window";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -25,15 +22,13 @@ export function Chooser(props: {
     (!hasRelay || props.state.relayMatch.state === "FINISHED") &&
     (!hasStrategy || props.state.strategyMatch.state === "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
-  const windowState = useStartWindowState(props.state.startWindow);
-  const language = useUiLanguage();
+  const { state: windowState, note: windowNote } = useStartWindowNote(props.state.startWindow);
   // Only while there is a round left to start: a team that is done sees its
   // results, and nothing about starting.
   const roundLeft = (hasRelay && props.state.relayMatch.state === "NOT STARTED")
     || (hasStrategy && props.state.strategyMatch.state === "NOT STARTED");
   const theme = useTheme();
   const { t } = useTranslation();
-  const windowNote = windowNoteFor(windowState, props.state.startWindow, language, t);
 
   return (
     <Stack
@@ -108,22 +103,3 @@ export function Chooser(props: {
   );
 }
 
-/// A time of the start window as the team reads it: its date and its time, in
-/// the browser's time zone.
-function windowTime(time: string, language: Language): string {
-  return new Intl.DateTimeFormat(language, {
-    month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
-  }).format(new Date(time));
-}
-
-/// What the home screen says about when the rounds may start, if anything.
-function windowNoteFor(
-  state: StartWindowState, startWindow: StartWindow | null | undefined, language: Language, t: TFunction,
-): string | undefined {
-  if (startWindow === null || startWindow === undefined) return undefined;
-  if (state === "not-open-yet") return t("chooser.window.notOpenYet", { time: windowTime(startWindow.opensAt, language) });
-  if (state === "closed") return t("chooser.window.closed");
-  return startWindow.closesAt === undefined
-    ? undefined
-    : t("chooser.window.openUntil", { time: windowTime(startWindow.closesAt, language) });
-}
