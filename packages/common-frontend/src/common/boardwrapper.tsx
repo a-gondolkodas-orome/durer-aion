@@ -71,13 +71,9 @@ const INFO_BESIDE_LEFT = `calc(50% + ${PAIR_BUTTON_WIDTH + PAIR_GAP / 2 + 8}px)`
 // buttons with the ⓘ beside it, and the line under a practice result, with
 // the card's padding. Wider screens give the card the rest.
 const GAME_COLUMN_WIDTH = 620;
-// From here the rules are always on screen, beside the card at full width:
-// it takes in a 16:9 laptop at the scaling Windows sets for it (1920×1080 at
-// 150% is 1280 wide).
-const RULES_BESIDE_FROM = 1280;
 const COLUMN_GAP = 16;
-// The rules' column: its narrowest, which is all it gets below
-// RULES_BESIDE_FROM, and its widest, beyond which lines get long to read.
+// The rules' column: its narrowest, which is all it gets below `lg`, and its
+// widest, beyond which lines get long to read.
 const RULES_COLUMN_WIDTH = 330;
 const RULES_COLUMN_MAX_WIDTH = 420;
 
@@ -103,12 +99,13 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // `noSsr` reads the width on the first render, so the rules do not show
     // in one place and then jump to the other.
     const wide = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
-    // From RULES_BESIDE_FROM the rules are always beside the game card, the
-    // two as wide as the bar above them, with nothing to open or close: there
-    // is room for both. Between `md` and that the rules open on demand, and take a column
-    // from the card's side, rather than covering a board the team may be
-    // playing on.
-    const rulesBeside = useMediaQuery(`(min-width: ${RULES_BESIDE_FROM}px)`, { noSsr: true });
+    // From `lg` the rules are always beside the game card, the two as wide as
+    // the bar above them, with nothing to open or close: there is room for
+    // both. `lg` takes in a 16:9 laptop at the scaling Windows sets for it
+    // (1920×1080 at 150% is 1280 wide). Between `md` and `lg` the rules open on
+    // demand, and take a column from the card's side, rather than covering a
+    // board the team may be playing on.
+    const rulesBeside = useMediaQuery(theme.breakpoints.up('lg'), { noSsr: true });
     // Before the first game the rules open in a dialog of their own, which
     // only the team's word that it has read them closes. Once a game has been
     // chosen that has happened, so nothing needs to remember it across a
@@ -231,9 +228,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
       // may differ from practice comes once more, in the line under the result:
       // after a win, that the practice computer may not have played its best;
       // after a loss that would read oddly, so only a varying start is worth
-      // saying. Phones keep the short line, as the longer one would wrap and
-      // move the board; the ⓘ says the rest there.
-      if (practice && G.numberOfTries === 0) {
+      // saying. Phones, and a card the open rules narrow, keep the short line,
+      // as the longer one would wrap and move the board; the ⓘ says the rest.
+      if (practice && G.numberOfTries === 0 && !(wide && !rulesBeside && rulesOpen)) {
         subWide = lastResult === 'won'
           ? (startVaries ? t('strategy.result.practiceNoteBotVaries') : t('strategy.result.practiceNoteBot'))
           : startVaries ? t('strategy.result.practiceNoteStart') : null;

@@ -8,6 +8,11 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 import { LanguageDropdown } from './Langswitcher';
 
+/// How wide a page gets. The strategy page is wider, as the game's rules sit
+/// beside its board.
+export const PAGE_MAX_WIDTH = 1200;
+export const STRATEGY_PAGE_MAX_WIDTH = 1320;
+
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
 /// `languageSwitcher` is for the sites that are meant to be read in either
@@ -18,11 +23,6 @@ import { LanguageDropdown } from './Langswitcher';
 /// leaving, such as the relay practice, where it goes back to the round
 /// selector; the button then shows a back arrow instead of the exit icon. On
 /// a wide screen the button is the icon alone, the label its tooltip.
-/// How wide a page gets. The strategy page is wider, so the rules have a
-/// column of their own beside a centred game on a laptop's screen.
-export const PAGE_MAX_WIDTH = 1200;
-export const STRATEGY_PAGE_MAX_WIDTH = 1320;
-
 export function Header(props: {
   teamName: string | null,
   leaveLabel?: string,
