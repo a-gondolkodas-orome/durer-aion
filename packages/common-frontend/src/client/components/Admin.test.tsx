@@ -51,6 +51,8 @@ vi.mock('@mui/x-data-grid', () => {
       </ul>
     </>); },
     ExportCsv: () => null,
+    QuickFilter: () => null,
+    QuickFilterControl: () => null,
     Toolbar: (props: { children: React.ReactNode }) => <div>{props.children}</div>,
   };
 });

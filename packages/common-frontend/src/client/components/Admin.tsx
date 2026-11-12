@@ -3,7 +3,7 @@ import { useAddMinutes, useAll } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
-import { DataGrid, ExportCsv, Toolbar } from '@mui/x-data-grid';
+import { DataGrid, ExportCsv, QuickFilter, QuickFilterControl, Toolbar } from '@mui/x-data-grid';
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
@@ -29,6 +29,9 @@ declare module '@mui/x-data-grid' {
 function TeamsToolbar(props: { onOpenExport?: () => void }) {
   return (
     <Toolbar>
+      <QuickFilter>
+        <QuickFilterControl placeholder="Keresés (pl. csapatnév)" size="small"/>
+      </QuickFilter>
       <ExportCsv
         // allColumns so a column hidden by default is still in the file; the
         // button columns opt out with disableExport.
