@@ -29,6 +29,9 @@ declare module '@mui/x-data-grid' {
 function TeamsToolbar(props: { onOpenExport?: () => void }) {
   return (
     <Toolbar>
+      <QuickFilter>
+        <QuickFilterControl placeholder="Keresés (pl. csapatnév)" size="small"/>
+      </QuickFilter>
       <ExportCsv
         // allColumns so a column hidden by default is still in the file; the
         // button columns opt out with disableExport.
@@ -39,9 +42,6 @@ function TeamsToolbar(props: { onOpenExport?: () => void }) {
       <Button size="small" onClick={props.onOpenExport}>
         Belépőkódokkal: Import/export fül
       </Button>
-      <QuickFilter>
-        <QuickFilterControl placeholder="Keresés (pl. csapatnév)" size="small"/>
-      </QuickFilter>
     </Toolbar>
   );
 }
