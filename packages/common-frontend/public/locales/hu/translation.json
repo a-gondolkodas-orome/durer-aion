@@ -10,10 +10,10 @@
     "pointsNotSettled": "A pontszámotok csak tájékoztató jellegű, a végleges pontszámotokat a beküldött válaszok alapján újraértékeljük.",
     "relay": {
       "intro": "Rövid szöveges feladatok egymás után. Mindegyikre egy 0 és 9999 közötti egész szám a válasz.",
-      "points": "<b>Pontozás:</b> egy feladat 3–6 pontot ér, összesen 40 pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot. 3 rossz tipp esetén a feladatra nem kaptok pontot, és a következő feladatra ugrotok.",
-      "tries": "<b>Feladatonként 3 tippetek van:</b> helyes tipp vagy három rossz tipp után jön a következő feladat.",
-      "triesHint": "Ha egy feladattal nem szeretnétek tovább foglalkozni, három különböző rossz tipp beküldésével továbbléphettek.",
-      "time": "<b>60 percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
+      "points": "<b>Pontozás:</b> egy feladat {{min}}–{{max}} pontot ér, összesen {{total}} pont szerezhető. Minden rossz tipp eggyel csökkenti a feladatra kapható pontot. {{tries}} rossz tipp esetén a feladatra nem kaptok pontot, és a következő feladatra ugrotok.",
+      "tries": "<b>Feladatonként {{tries}} tippetek van:</b> helyes tipp vagy {{tries}} rossz tipp után jön a következő feladat.",
+      "triesHint": "Ha egy feladattal nem szeretnétek tovább foglalkozni, {{tries}} különböző rossz tipp beküldésével továbbléphettek.",
+      "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok.",
       "noReturn": "Egy korábbi feladathoz később nem lehet visszatérni."
     },
     "start": "Kezdjük",
@@ -23,7 +23,7 @@
       "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
       "practice": "<b>Próbajáték:</b> nem számít a pontozásba; a játék kipróbálására való.",
       "practiceHint": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
-      "time": "<b>30 percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok. A próbajátékok is beleszámítanak az időbe."
+      "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok. A próbajátékok is beleszámítanak az időbe."
     }
   },
   "disclaimer": {

@@ -10,10 +10,10 @@
     "pointsNotSettled": "Your final points are only here for informational purposes, these will be reevaluated based on all the submissions we get.",
     "relay": {
       "intro": "Short word problems, one after the other. The answer to each is a whole number from 0 to 9999.",
-      "points": "<b>Points:</b> a problem is worth 3 to 6 points, 40 in total. Each wrong guess lowers the points a problem is worth by 1. After 3 wrong guesses the problem scores no points, and you move on to the next one.",
-      "tries": "<b>You have 3 guesses per problem:</b> after a right guess or three wrong ones, the next problem comes.",
-      "triesHint": "If you would rather not spend more time on a problem, you can move on by submitting three different wrong guesses.",
-      "time": "<b>You have 60 minutes:</b> the clock starts when you click “Start”.",
+      "points": "<b>Points:</b> a problem is worth {{min}} to {{max}} points, {{total}} in total. Each wrong guess lowers the points a problem is worth by 1. After {{tries}} wrong guesses the problem scores no points, and you move on to the next one.",
+      "tries": "<b>You have {{tries}} guesses per problem:</b> after a right guess or {{tries}} wrong ones, the next problem comes.",
+      "triesHint": "If you would rather not spend more time on a problem, you can move on by submitting {{tries}} different wrong guesses.",
+      "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”.",
       "noReturn": "You cannot return to an earlier problem later."
     },
     "start": "Start",
@@ -23,7 +23,7 @@
       "noAbandon": "A game, once started, has to be played to the end.",
       "practice": "<b>Practice game:</b> does not count towards your score; it is for trying the game out.",
       "practiceHint": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too.",
-      "time": "<b>You have 30 minutes:</b> the clock starts when you click “Start”. Practice games count towards the time too."
+      "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”. Practice games count towards the time too."
     }
   },
   "disclaimer": {

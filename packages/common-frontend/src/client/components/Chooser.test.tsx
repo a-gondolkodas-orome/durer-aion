@@ -20,7 +20,7 @@ vi.mock('./ChooserItem', () => ({
 const relayOnly: PublicCompetition = {
   id: 'aaaaaaaaaa--relay-only',
   languages: ['hu'],
-  relay: { durationMinutes: 60 },
+  relay: { durationMinutes: 60, problemPoints: [3, 4] },
   metadata: { kind: 'other', label: { hu: 'Csak váltó' } },
 };
 

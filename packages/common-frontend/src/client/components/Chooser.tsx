@@ -78,10 +78,12 @@ export function Chooser(props: {
         {hasRelay && <ChooserItem
           status={props.state.relayMatch}
           type="relay"
+          competition={competition}
         />}
         {hasStrategy && <ChooserItem
           status={props.state.strategyMatch}
           type="strategy"
+          competition={competition}
         />}
       </Stack>
     </Stack>
