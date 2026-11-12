@@ -135,3 +135,59 @@ describe("POST /team/admin/:teamID/reset/:game", () => {
     expect(team.other).toBe(full);
   });
 });
+
+describe("PUT /team/admin/:teamID/start-window", () => {
+  const servers: http.Server[] = [];
+
+  afterEach(async () => {
+    await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
+  });
+
+  async function serve(team: TeamModel | null) {
+    const teams = { getTeam: vi.fn().mockResolvedValue(team) } as unknown as TeamsRepository;
+    const app = new Koa<Koa.DefaultState, Server.AppCtx>();
+    app.silent = true;
+    const running = { G: { start: new Date().toISOString(), end: "2099-01-01T00:00:00Z", points: 0 }, ctx: {} };
+    app.context.db = { fetch: () => ({ state: running }) } as unknown as Server.AppCtx["db"];
+    const router = new Router<Koa.DefaultState, Server.AppCtx>();
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    app.use(router.routes());
+    const handle = app.callback();
+    const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
+    servers.push(server);
+    await new Promise(resolve => server.once("listening", resolve));
+    const { port } = server.address() as AddressInfo;
+    return (body: object) => fetch(
+      `http://127.0.0.1:${port}/team/admin/${TEAM_ID}/start-window`,
+      { method: "PUT", headers: { authorization: CREDENTIALS, "content-type": "application/json" }, body: JSON.stringify(body) },
+    );
+  }
+
+  it("gives the team a window of its own, and takes it away", async () => {
+    const team = teamRow("");
+    const put = await serve(team);
+
+    const given = await put({ opensAt: "2026-10-21T15:00+02:00", closesAt: "2026-10-21T21:00+02:00" });
+    expect(given.status).toBe(200);
+    expect(await given.json()).toMatchObject({ startOpensAt: "2026-10-21T15:00+02:00", startClosesAt: "2026-10-21T21:00+02:00" });
+
+    const cleared = await put({ opensAt: null });
+    expect(cleared.status).toBe(200);
+    expect(team.startOpensAt).toBeNull();
+    expect(team.startClosesAt).toBeNull();
+  });
+
+  it("refuses a window that is not one with 400, and leaves the team as it is", async () => {
+    const team = teamRow("");
+    const put = await serve(team);
+
+    expect((await put({ opensAt: "2026-10-21T15:00" })).status).toBe(400);
+    expect(team.startOpensAt).toBeNull();
+  });
+
+  it("answers 404 for a team the repository does not have", async () => {
+    const put = await serve(null);
+
+    expect((await put({ opensAt: null })).status).toBe(404);
+  });
+});

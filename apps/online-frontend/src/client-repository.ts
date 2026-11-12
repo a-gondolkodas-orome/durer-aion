@@ -172,6 +172,21 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return result.data as TeamModelDto;
   }
 
+  async setStartWindow(teamId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto> {
+    const url = urlcat('/team/admin/:teamId/start-window', {
+      teamId,
+    });
+    let result;
+    try {
+      result = await apiAxiosInstance().put(url, window);
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+    return result.data as TeamModelDto;
+  }
+
   async addMinutes(matchId: string, minutes: number): Promise<string> {
     const url = urlcat('/game/admin/:matchId/addminutes/:minutes', {
       matchId,

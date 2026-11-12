@@ -35,6 +35,9 @@ export interface AdminClientRepository {
   getMatchLogs(matchId: string): Promise<MatchStateDto>
   resetRelay(teamId: string): Promise<TeamModelDto>
   resetStrategy(teamId: string): Promise<TeamModelDto>
+  /** Gives the team a start window of its own, in place of its competition's;
+   *  a null `opensAt` takes it away. */
+  setStartWindow(teamId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   getCompetitions(): Promise<CompetitionSummaryDto[]>
   importTeams(file: File): Promise<TeamImportResultDto>

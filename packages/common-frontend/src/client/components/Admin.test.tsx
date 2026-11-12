@@ -249,6 +249,38 @@ test('the team dialog names the page the team is on', async () => {
   expect(label.parentElement).toHaveTextContent(/^Most: Tájékoztató oldalon \(DISCLAIMER\) · még nem indíthat játékot$/);
 });
 
+test('the team dialog gives the team a start window of its own, and takes it away', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  const setStartWindow = vi.spyOn(repo, 'setStartWindow')
+    .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('Nincs saját ablaka: a versenye ablakában indíthat.')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Kezdete'), { target: { value: '2026-11-21T15:00+01:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('startWindowSummary')).toHaveTextContent('Saját ablaka van, a versenyé helyett: 2026-11-21T15:00+01:00 után bármikor.');
+  });
+  expect(setStartWindow).toHaveBeenCalledWith(alpha.teamId, { opensAt: '2026-11-21T15:00+01:00', closesAt: null });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Saját ablak törlése' }));
+  expect(await screen.findByText('Nincs saját ablaka: a versenye ablakában indíthat.')).toBeInTheDocument();
+  expect(setStartWindow).toHaveBeenLastCalledWith(alpha.teamId, { opensAt: null, closesAt: null });
+});
+
+test('the team dialog refuses a start window that is not one, without asking the server', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  const setStartWindow = vi.spyOn(repo, 'setStartWindow');
+  renderAdmin(alpha.teamId);
+
+  fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-21 15:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  expect(await screen.findByText(/^A kezdet kötelező/)).toBeInTheDocument();
+  expect(setStartWindow).not.toHaveBeenCalled();
+});
+
 test('a match that has not started cannot be reset', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 7 });

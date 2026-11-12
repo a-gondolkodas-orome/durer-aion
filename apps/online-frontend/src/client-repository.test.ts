@@ -141,3 +141,16 @@ describe("the team import", () => {
       .rejects.toThrow("Csak .tsv kiterjesztésű fájlt lehet importálni.");
   });
 });
+
+describe("the admin routes", () => {
+  test("a team's own start window is a PUT of the window as JSON", async () => {
+    const calls = fakeAxios(ok);
+    const window = { opensAt: "2026-11-21T15:00+01:00", closesAt: null };
+
+    await new RealClientRepository().setStartWindow("8eae8669-125c-42e5-8b49-89afbac31679", window);
+
+    expect(calls).toStrictEqual([
+      { method: "put", url: "/team/admin/8eae8669-125c-42e5-8b49-89afbac31679/start-window", body: window },
+    ]);
+  });
+});

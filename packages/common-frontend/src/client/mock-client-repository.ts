@@ -79,6 +79,9 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
   resetStrategy(_teamId: string): Promise<TeamModelDto> {
     throw Error("NOT call this");
   }
+  setStartWindow(_teamId: string, _window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {
     return Promise.resolve("OK");
   }
