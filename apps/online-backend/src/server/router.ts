@@ -7,7 +7,7 @@ import { TeamsRepository } from './db';
 import { GameType } from 'schemas';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
-import { getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
+import { allowedToViewStrategy, getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { registry } from 'problem-bank/all';
@@ -349,6 +349,23 @@ export function configureTeamsRouter(
 
     await claimStart(ctx, team, "STRATEGY", body.matchID);
     ctx.body = body;
+  });
+
+  /**
+   * Take the logged-in team back to its finished STRATEGY match, to look at
+   * the board as it ended (#728).
+   */
+  router.post<TeamState>("/team/me/strategy/view", requireTeam(teams), async (ctx) => {
+    const team = ctx.state.team;
+    const matches = await teamMatches(ctx.db, team);
+    if (!allowedToViewStrategy(team, matches))
+      ctx.throw(403, "Team is not allowed to view the strategy match.")
+    // A start landing after this read changes a match id, and the write refuses.
+    if (!(await teams.viewStrategy(team)))
+      ctx.throw(403, "Team is not allowed to view the strategy match.")
+
+    team.set({ pageState: "STRATEGY" });
+    ctx.body = publicTeamView(team, matches);
   });
 
   /**

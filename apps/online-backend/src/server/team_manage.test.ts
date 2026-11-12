@@ -4,7 +4,7 @@ import { AnyBgioGame } from "game";
 import { relayGameName, strategyGameName } from "schemas";
 import type { CompetitionConfig } from "schemas";
 import { Server } from "boardgame.io";
-import { allowedToStart, createGame, getNewGame } from "./team_manage";
+import { allowedToStart, allowedToViewStrategy, createGame, getNewGame } from "./team_manage";
 import type { TeamMatches } from "./match_status";
 
 const running: MatchStatus = {
@@ -77,6 +77,23 @@ describe("allowedToStart", () => {
 
   it("still lets a team start the round it has not played", () => {
     expect(allowedToStart(team({}), matches({ relayMatch: finished }), "STRATEGY")).toBe(true);
+  });
+});
+
+describe("allowedToViewStrategy", () => {
+  it("lets a team at the chooser go back to its finished strategy match", () => {
+    expect(allowedToViewStrategy(team({}), matches({ strategyMatch: finished }))).toBe(true);
+    expect(allowedToViewStrategy(team({}), matches({ strategyMatch: finished, relayMatch: finished }))).toBe(true);
+  });
+
+  it("refuses a strategy match that has not ended", () => {
+    expect(allowedToViewStrategy(team({}), matches())).toBe(false);
+    expect(allowedToViewStrategy(team({ pageState: "STRATEGY" }), matches({ strategyMatch: running }))).toBe(false);
+  });
+
+  it("refuses while the relay runs, or from anywhere but the chooser", () => {
+    expect(allowedToViewStrategy(team({ pageState: "RELAY" }), matches({ strategyMatch: finished, relayMatch: running }))).toBe(false);
+    expect(allowedToViewStrategy(team({ pageState: "DISCLAIMER" }), matches({ strategyMatch: finished }))).toBe(false);
   });
 });
 

@@ -20,6 +20,7 @@ vi.mock('../client/hooks/user-hooks', () => MockTeamState.mockHook);
 
 afterEach(() => {
   i18n.language = 'hu';
+  MockTeamState.mockLoggedOut();
 });
 
 const play = vi.fn();
@@ -347,6 +348,51 @@ describe('during a game', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     // The countdown would show XX:XX:XX ten seconds past the end.
     expect(screen.getByText('00:00:00')).toBeInTheDocument();
+  });
+});
+
+describe('once the match is over', () => {
+  const timeUp = { millisecondsRemaining: -6000 };
+  const ribbon = () => screen.queryByText('strategy.ended.title');
+
+  test('the result closes onto the board, with the ribbon already under it, and opens again from there', async () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, timeUp);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    // Under the dialog from the start, so closing it moves nothing.
+    expect(ribbon()).toBeInTheDocument();
+    fireEvent.click(button('strategy.viewBoard'));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(boardArea()).toHaveAttribute('data-state', 'locked');
+
+    fireEvent.click(button('strategy.ended.result'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  test('the result closes as any dialog does: its corner, Esc', async () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER }, timeUp);
+
+    fireEvent.click(button('general.close'));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+    fireEvent.click(button('strategy.ended.result'));
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  test('a team that comes back to it finds the board, and the result behind the ribbon', () => {
+    MockTeamState.mockFinishedStrategy();
+    renderBoard({ phase: 'startNewGame', currentPlayer: GUESSER_PLAYER, gameover: true },
+      { winner: GUESSER_PLAYER, winningStreak: 2, points: 12, liveResults: ['won', 'won'] });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(ribbon()).toBeInTheDocument();
+  });
+
+  test('shows no ribbon while the match runs', () => {
+    renderBoard({ phase: 'play', currentPlayer: GUESSER_PLAYER });
+
+    expect(ribbon()).not.toBeInTheDocument();
   });
 });
 

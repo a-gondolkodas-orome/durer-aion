@@ -57,6 +57,23 @@ export class TeamsRepository {
     return updated > 0;
   }
 
+  /**
+   * Shows the team its finished strategy match again, but only while it is
+   * still home and holds the matches the caller read, as goHome does. Returns
+   * whether the row was written.
+   */
+  async viewStrategy(team: TeamModel): Promise<boolean> {
+    const [updated] = await TeamModel.update({ pageState: "STRATEGY" }, {
+      where: {
+        teamId: team.teamId,
+        pageState: "HOME",
+        relayMatchID: team.relayMatchID,
+        strategyMatchID: team.strategyMatchID,
+      },
+    });
+    return updated > 0;
+  }
+
   async insertTeam(
       { teamname, competitionId, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, competitionId: string, category: string, email: string, other: string, teamId: string,

@@ -57,6 +57,16 @@ export class OfflineClientRepository implements ClientRepository {
     return Promise.resolve();
   }
 
+  // The persisted match is still in localStorage, so the board reopens as it ended.
+  viewStrategy(): Promise<void> {
+    const teamState = getTeamStateFromLocal();
+    if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'FINISHED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
+      throw new Error(i18n.t('error.unexpected'));
+    }
+    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({ ...teamState, pageState: 'STRATEGY' }));
+    return Promise.resolve();
+  }
+
   toHome(): Promise<void> {
     const teamState = getTeamStateFromLocal();
     const newState = { ...teamState, pageState: 'HOME' }

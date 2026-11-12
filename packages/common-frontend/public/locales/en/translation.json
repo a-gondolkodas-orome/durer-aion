@@ -154,6 +154,11 @@
       "unfinished": "Unfinished: the time ran out",
       "won": "Win"
     },
+    "ended": {
+      "result": "Result",
+      "text": "You can still look at the board, but no longer move.",
+      "title": "The round is over."
+    },
     "firstPlayer": "We go first",
     "info": {
       "label": "Practice or live?",
@@ -239,7 +244,8 @@
       "role": "Choose your role!",
       "starting": "The game is starting…",
       "yourTurn": "Your turn!"
-    }
+    },
+    "viewBoard": "View the board"
   },
   "waitingRoom": {
     "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",

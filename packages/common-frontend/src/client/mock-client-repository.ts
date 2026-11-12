@@ -50,6 +50,10 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
     this.requireSession();
     return Promise.resolve();
   }
+  viewStrategy(): Promise<void> {
+    this.requireSession();
+    return Promise.resolve();
+  }
   logout(): Promise<void> {
     this.session = null;
     return Promise.resolve();
