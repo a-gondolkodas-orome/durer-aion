@@ -171,6 +171,9 @@ competition's: ISO 8601 with an offset, such as `2026-11-20T15:00+01:00`, with
 `Closes At` optional. A testing code gets a wide one, such as 2001 to 2099, and
 a team writing the round late gets its own day. The window decides only when a
 match may start: a match started inside it runs its full time.
+In `scripts/test.tsv`, the teams logging in with `000-0000-000`, `001-0000-000` and
+`002-0000-000` have a window that has not opened yet, one that has closed, and
+one that is open, in that order; the rest have none.
 
 `Competition` is the competition the row's team enters, by edition, round and
 category (`20 online C`; `20. internetes C` works too) or by its id, so one file
