@@ -85,6 +85,21 @@ describe("the team routes", () => {
     expect(calls).toStrictEqual([{ method: "post", url: "team/me/logout", body: {} }]);
   });
 
+  // A school computer's clock can be off by hours; the page reads the start
+  // window by the server's.
+  test("the team's state carries how far the server's clock is from the browser's", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-20T12:00:00Z") });
+    fakeAxios(() => Promise.resolve({ data: {
+      relayMatch: { state: "NOT STARTED" }, strategyMatch: { state: "NOT STARTED" },
+      serverTime: "2026-10-20T13:00:00.000Z",
+    } }));
+
+    const state = await new RealClientRepository().getTeamState();
+
+    vi.useRealTimers();
+    expect(state?.clockOffsetMs).toBe(3600_000);
+  });
+
   test("a browser with no session has no team", async () => {
     fakeAxios(() => status(401));
 

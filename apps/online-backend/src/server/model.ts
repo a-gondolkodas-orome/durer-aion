@@ -24,6 +24,12 @@ export class TeamModel extends Model<
   /// The competition the team entered. A team entering two competitions is two
   /// rows, with nothing linking them.
   declare competitionId: string;
+  /// The team's own start window, in place of its competition's: for a
+  /// testing code, or a team writing the round late. Both null without one;
+  /// `startClosesAt` is set only with `startOpensAt`. ISO 8601 with an offset,
+  /// as `StartWindow` is.
+  declare startOpensAt: string | null;
+  declare startClosesAt: string | null;
   declare category: string;
   declare credentials: string;
   declare email: string;
@@ -99,6 +105,16 @@ export const teamAttributes: ModelAttributes<
     // With teamName's: a name is unique within its competition only.
     unique: "teamName",
   },
+  startOpensAt: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+  startClosesAt: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
   category: {
     type: DataTypes.STRING,
   },
@@ -169,5 +185,40 @@ export const teamAttributes: ModelAttributes<
         msg: `Other field must be between 0 and ${OTHER_MAX_LENGTH} characters.`
       },
     }
+  },
+};
+
+/** A competition's start window as an organiser set it on the admin page, in
+ *  place of the one its config in code gives (`startWindow`): one row per
+ *  competition that has one, none for a competition that follows its config.
+ *  ISO 8601 with an offset, as `StartWindow` is. */
+export class CompetitionWindowModel extends Model<
+  InferAttributes<CompetitionWindowModel, OmitTimestamps>,
+  InferCreationAttributes<CompetitionWindowModel, OmitTimestamps>
+> {
+  declare competitionId: string;
+  declare opensAt: string;
+  declare closesAt: string | null;
+
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+}
+
+export const competitionWindowAttributes: ModelAttributes<
+  CompetitionWindowModel,
+  InferAttributes<CompetitionWindowModel, OmitTimestamps>
+> = {
+  competitionId: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+  },
+  opensAt: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  closesAt: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
   },
 };

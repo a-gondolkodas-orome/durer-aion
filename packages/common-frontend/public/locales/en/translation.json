@@ -24,6 +24,11 @@
       "practice": "<b>Practice game:</b> does not count towards your score.",
       "practiceHint": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too.",
       "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”. Practice games count towards the time too."
+    },
+    "window": {
+      "notOpenYet": "The rounds can be started from {{time}}.",
+      "closed": "The competition is over: no round can be started any more.",
+      "openUntil": "The rounds can be started until {{time}}."
     }
   },
   "disclaimer": {

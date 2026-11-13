@@ -161,9 +161,28 @@ carries a login secret. The team list's CSV leaves out the ID too, since a team'
 GUID is its session cookie's value.
 
 Both read the TSV's columns by their header, in any order and any case:
-`Teamname` and `Competition` are required, `Email`, `Other`, `ID`, `Login Code`
-and `Credentials` may be left out, and a column the import does not know is
-ignored. A file whose first line is not such a header is refused whole.
+`Teamname` and `Competition` are required, `Email`, `Other`, `ID`, `Login Code`,
+`Credentials`, `Opens At` and `Closes At` may be left out, and a column the import
+does not know is ignored. A file whose first line is not such a header is refused
+whole.
+
+`Opens At` and `Closes At` give a team a start window of its own, in place of its
+competition's: ISO 8601 with an offset, such as `2026-11-20T15:00+01:00`, with
+`Closes At` optional. A testing code gets a wide one, such as 2001 to 2099, and
+a team writing the round late gets its own day. The window decides only when a
+match may start: a match started inside it runs its full time.
+In `scripts/test.tsv`, the teams logging in with `006-0000-000`, `007-0000-000` and
+`008-0000-000` (C, D and E) have a window that has not opened yet, one that has
+closed, and one that is open, in that order; the rest have none, so `000` to
+`002` can start at any time.
+
+A competition's own window, which every team without one of its own follows, is
+the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set
+on the **Import/export** tab: the table of competitions shows each one's window,
+and its edit button sets one in place of the config's, or returns it to the
+config's. Neither the team's window nor the competition's means any time. The
+server decides a start by its own clock, and the team's page reads the window by
+the server's clock too, not the browser's.
 
 `Competition` is the competition the row's team enters, by edition, round and
 category (`20 online C`; `20. internetes C` works too) or by its id, so one file
@@ -175,8 +194,10 @@ within its competition only, and a team plays the matches its competition has.
 
 A row naming a team that is already in its competition is that team: re-running
 a grown list adds the late teams, and re-running a corrected one fixes a bad
-import, since the file's `Email` wins, a blank cell clearing it. A file without
-the column leaves it as it is. `Other` is never overwritten, as the admin page's
+import, since the file's `Email`, `Opens At` and `Closes At` win, a blank cell
+clearing them. A file without a column leaves its field as it is; the two window
+columns are one window, so a file with either sets both. `Other` is never
+overwritten, as the admin page's
 resets note the replaced match there, and a row whose `ID`, `Login Code` or
 `Credentials` is not that team's fails.
 

@@ -84,12 +84,25 @@ export interface StrategyConfig {
   gameId: StrategyGameId;
 }
 
-/// When a team may start either match; teams can be exempt from it one by one.
+/// When a team may start either match. A team can have a window of its own in
+/// place of its competition's, for a testing code or a team writing late.
 /// Without a `closesAt` it stays open from `opensAt` on. ISO 8601 with an
 /// explicit offset, since the server and the dry run need not share a time zone.
 export interface StartWindow {
   opensAt: string;
   closesAt?: string;
+}
+
+/// Where `now` falls against a start window: before it opens, while a match
+/// may start, or after it has closed. `closesAt` is the first moment no match
+/// may start. Without a window a match may start at any time.
+export type StartWindowState = 'not-open-yet' | 'open' | 'closed';
+
+export function startWindowState(window: StartWindow | undefined, now: Date): StartWindowState {
+  if (window === undefined) return 'open';
+  if (now.getTime() < Date.parse(window.opensAt)) return 'not-open-yet';
+  if (window.closesAt !== undefined && now.getTime() >= Date.parse(window.closesAt)) return 'closed';
+  return 'open';
 }
 
 export const ROUNDS = ['online', 'local', 'final'] as const;

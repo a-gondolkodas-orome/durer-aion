@@ -1,7 +1,7 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
-import { GameType } from 'schemas';
-import { teamAttributes, TeamModel } from './model';
+import type { GameType, StartWindow } from 'schemas';
+import { CompetitionWindowModel, competitionWindowAttributes, teamAttributes, TeamModel } from './model';
 import { Sequelize, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
@@ -12,12 +12,34 @@ export class TeamsRepository {
       sequelize: db.sequelize,
       tableName: "Teams",
     });
+    CompetitionWindowModel.init(competitionWindowAttributes, {
+      sequelize: db.sequelize,
+      tableName: "CompetitionWindows",
+    });
   }
   async connect() {
     await this.sequelize.sync();
   }
   async listTeams(): Promise<TeamModel[] | null> {
     return await TeamModel.findAll();
+  }
+
+  /** The start windows organisers set on the admin page, by competition id:
+   *  each replaces the window its competition's config gives. */
+  async competitionWindows(): Promise<Map<string, StartWindow>> {
+    const rows = await CompetitionWindowModel.findAll();
+    return new Map(rows.map(({ competitionId, opensAt, closesAt }) =>
+      [competitionId, { opensAt, ...(closesAt !== null && { closesAt }) }]));
+  }
+
+  /** Sets the competition's window in place of its config's, or, with null,
+   *  returns it to its config's. */
+  async setCompetitionWindow(competitionId: string, window: StartWindow | null): Promise<void> {
+    if (window === null) {
+      await CompetitionWindowModel.destroy({ where: { competitionId } });
+      return;
+    }
+    await CompetitionWindowModel.upsert({ competitionId, opensAt: window.opensAt, closesAt: window.closesAt ?? null });
   }
 
   async getTeam(searchCondition: WhereOptions<Pick<TeamModel, "joinCode" | "teamId">>) : Promise<TeamModel | null> {
@@ -75,17 +97,19 @@ export class TeamsRepository {
   }
 
   /** Sets fields of a team that is already there, validated as an insert is. */
-  async updateTeam(team: TeamModel, changes: Partial<Pick<TeamModel, "email">>) {
+  async updateTeam(team: TeamModel, changes: Partial<Pick<TeamModel, "email" | "startOpensAt" | "startClosesAt">>) {
     await team.update(changes);
   }
 
   async insertTeam(
-      { teamname, competitionId, category, email, other, teamId, joinCode, credentials } :
-      { teamname: string, competitionId: string, category: string, email: string, other: string, teamId: string,
-        joinCode: string, credentials: string }) {
+      { teamname, competitionId, category, email, other, startWindow, teamId, joinCode, credentials } :
+      { teamname: string, competitionId: string, category: string, email: string, other: string,
+        startWindow?: StartWindow, teamId: string, joinCode: string, credentials: string }) {
     return await TeamModel.create({
       teamId, joinCode, other,
       competitionId,
+      startOpensAt: startWindow?.opensAt ?? null,
+      startClosesAt: startWindow?.closesAt ?? null,
       category,
       email,
       credentials,

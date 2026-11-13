@@ -284,6 +284,14 @@ Each row's `Competition` column names its team's competition, such as
 `20 online C`, or its id, so one file holds every category of the round. The
 admin page's **Import/export** tab lists the competitions with what to write.
 
+**Start windows.** Before codes go out, check on the same tab when each
+competition's teams may start their matches (*Indítási ablak*), and set the
+round's window there if its config in code gives none: without one, a team can
+start at any time. Give a testing code a wide window of its own, such as 2001
+to 2099, in the TSV's `Opens At` and `Closes At` columns, so it can play before
+and after the round; a team writing the round late gets its own day the same
+way. README § *Admin* says how the windows combine.
+
 Teams cannot be deleted. A bad import is undone by dropping the volume
 (`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
 out, import the `.export` rather than the original TSV: it carries the codes, where

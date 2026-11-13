@@ -39,5 +39,8 @@ export interface AdminClientRepository {
   resetStrategy(teamId: string): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   getCompetitions(): Promise<CompetitionSummaryDto[]>
+  /** Sets the competition's start window in place of its config's; a null
+   *  `opensAt` returns it to its config's. */
+  setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void>
   importTeams(file: File): Promise<TeamImportResultDto>
 }

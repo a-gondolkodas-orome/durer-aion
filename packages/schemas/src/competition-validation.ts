@@ -7,6 +7,7 @@ import {
   Problem,
   ProblemId,
   ROUNDS,
+  StartWindow,
   StrategyGameId,
 } from './competition';
 
@@ -29,6 +30,25 @@ function parseInstant(value: string): number | undefined {
   if (!ISO_WITH_OFFSET.test(value)) return undefined;
   const time = Date.parse(value);
   return Number.isNaN(time) ? undefined : time;
+}
+
+/// Every way the window breaks the rules `StartWindow` states, as messages;
+/// none means it is valid. A team's own window is held to the same rules.
+export function validateStartWindow({ opensAt, closesAt }: StartWindow): string[] {
+  const errors: string[] = [];
+  const opens = parseInstant(opensAt);
+  if (opens === undefined) {
+    errors.push(`opensAt "${opensAt}" is not an ISO 8601 time with an offset`);
+  }
+  if (closesAt !== undefined) {
+    const closes = parseInstant(closesAt);
+    if (closes === undefined) {
+      errors.push(`closesAt "${closesAt}" is not an ISO 8601 time with an offset`);
+    } else if (opens !== undefined && closes <= opens) {
+      errors.push('closesAt is not after opensAt');
+    }
+  }
+  return errors;
 }
 
 function isPositiveInteger(value: number) {
@@ -105,19 +125,7 @@ export function validateCompetition(competition: CompetitionConfig, references: 
   }
 
   if (competition.startWindow !== undefined) {
-    const { opensAt, closesAt } = competition.startWindow;
-    const opens = parseInstant(opensAt);
-    if (opens === undefined) {
-      errors.push(`${where}: opensAt "${opensAt}" is not an ISO 8601 time with an offset`);
-    }
-    if (closesAt !== undefined) {
-      const closes = parseInstant(closesAt);
-      if (closes === undefined) {
-        errors.push(`${where}: closesAt "${closesAt}" is not an ISO 8601 time with an offset`);
-      } else if (opens !== undefined && closes <= opens) {
-        errors.push(`${where}: closesAt is not after opensAt`);
-      }
-    }
+    errors.push(...validateStartWindow(competition.startWindow).map(error => `${where}: ${error}`));
   }
 
   const { metadata } = competition;

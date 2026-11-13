@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition } from "schemas";
+import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartWindow } from "schemas";
 
 export { isPageState, type CompetitionCategory, type PageState } from "schemas";
 
@@ -18,6 +18,17 @@ export interface TeamModelDto {
   /// Served to the team by the online round, null for a competition the
   /// server no longer has; the local apps have none.
   competition?: PublicCompetition | null;
+  /// When the team may start its matches, its own window or its competition's;
+  /// null for any time. The local apps serve none, and have no window.
+  startWindow?: StartWindow | null;
+  /// The server's clock less the browser's, in milliseconds, taken when the
+  /// state arrived: the page judges the start window by the server's clock,
+  /// since a school computer's may be off by hours. The local apps have none.
+  clockOffsetMs?: number;
+  /// The team's own window, in place of its competition's, which the admin
+  /// routes serve as the row holds it.
+  startOpensAt?: string | null;
+  startClosesAt?: string | null;
   category: string;
   credentials: string;
   email?: string;
@@ -42,6 +53,12 @@ export function adminTeamId(team: TeamModelDto): string {
 export interface CompetitionSummaryDto {
   id: string;
   metadata: CompetitionMetadata;
+  /// The start window in force: the one set on the admin page, else the one
+  /// the competition's config gives; null for any time.
+  startWindow?: StartWindow | null;
+  /// The one the competition's config gives, which a window set on the admin
+  /// page replaces.
+  configStartWindow?: StartWindow | null;
 }
 
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some

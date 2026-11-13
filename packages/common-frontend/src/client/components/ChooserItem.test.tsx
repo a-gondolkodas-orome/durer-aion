@@ -33,6 +33,13 @@ test('sends one start for a double click, and enables Start again once it answer
   expect(start).toBeEnabled();
 });
 
+// The server refuses a start outside the team's start window.
+test('keeps Start disabled while the round may not start', () => {
+  render(<ChooserItem type="relay" status={{ state: 'NOT STARTED' }} canStart={false} />);
+
+  expect(screen.getByRole('button', { name: 'chooser.start' })).toBeDisabled();
+});
+
 test('a finished round shows its results and when it was filled in, and no button', () => {
   render(<ChooserItem type="relay" status={{
     state: 'FINISHED',

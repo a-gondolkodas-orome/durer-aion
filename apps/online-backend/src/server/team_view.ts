@@ -1,6 +1,7 @@
 import { TeamModel } from "./model";
 import { MatchStatus, publicCompetition } from "schemas";
-import type { CompetitionConfig, PublicCompetition } from "schemas";
+import type { CompetitionConfig, PublicCompetition, StartWindow } from "schemas";
+import { teamStartWindow } from "./start_window";
 import { registry } from "problem-bank/all";
 import type { TeamMatches } from "./match_status";
 
@@ -29,6 +30,12 @@ export interface PublicTeamView {
    *  long each runs and in which languages. Null for a row naming a
    *  competition the server no longer has, which has nothing to play. */
   competition: PublicCompetition | null;
+  /** When the team may start its matches: its own window or its
+   *  competition's. Null when it may start at any time. */
+  startWindow: StartWindow | null;
+  /** The server's clock as it answers, ISO 8601: the page judges the start
+   *  window by it rather than by the browser's clock, which may be off. */
+  serverTime: string;
   credentials: string;
   pageState: TeamModel["pageState"];
   relayMatch: MatchStatus;
@@ -45,12 +52,15 @@ export function publicTeamView(
   team: TeamModel,
   matches: TeamMatches,
   competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
+  now: Date = new Date(),
 ): PublicTeamView {
   const competition = competitions.get(team.competitionId);
   return {
     teamName: team.teamName,
     category: team.category,
     competition: competition === undefined ? null : publicCompetition(competition),
+    startWindow: teamStartWindow(team, competition) ?? null,
+    serverTime: now.toISOString(),
     credentials: team.credentials,
     pageState: team.pageState,
     relayMatch: matches.relayMatch,

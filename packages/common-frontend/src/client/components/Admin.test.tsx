@@ -393,7 +393,7 @@ const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportR
   successful: 0, existing: 0, updated: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
 });
 
-const alphaCodes = ['Alpha', COMPETITION_C, 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];
+const alphaCodes = ['Alpha', COMPETITION_C, 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a', '', ''];
 
 /** Picks a file on the import tab and starts the import. */
 const importFile = async (name = 'teams.tsv') => {
@@ -433,7 +433,7 @@ test('the import tab uploads the picked file, and saves the join codes when aske
   fireEvent.click(screen.getByText('Az importáltak belépőkódjainak letöltése'));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
-  expect(saved[0]).toBe(`Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials\n${alphaCodes.join('\t')}\n`);
+  expect(saved[0]).toBe(`Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials\tOpens At\tCloses At\n${alphaCodes.join('\t')}\n`);
 });
 
 // The Competition column takes a name or an id, so the page lists what to
@@ -449,7 +449,7 @@ test('the import tab lists the competitions newest first, with what to import th
   const row = (await within(table).findByText('20 online C')).closest('li');
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect(grids.columns.at(-1)?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'startWindow']);
   if (row === null) throw new Error('no table row');
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
@@ -457,6 +457,44 @@ test('the import tab lists the competitions newest first, with what to import th
 
   fireEvent.click(within(row).getByRole('button', { name: `Másolás: ${COMPETITION_C}` }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
+});
+
+// A competition's window is set on the page, not only in its config in code.
+test('the import tab sets a competition\'s start window, and lists it as set', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const setWindow = vi.spyOn(repo, 'setCompetitionWindow').mockResolvedValue();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  const table = await screen.findByTestId('competitionTable');
+  expect(within(table).getAllByText('bármikor')).toHaveLength(2);
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00' }, configStartWindow: null },
+  ]);
+  fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
+  fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00+01:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  await waitFor(() => {
+    expect(setWindow).toHaveBeenCalledWith(COMPETITION_C, { opensAt: '2026-11-20T15:00+01:00', closesAt: null });
+  });
+  expect(await within(table).findByText('2026-11-20T15:00+01:00 után (itt megadva)')).toBeInTheDocument();
+});
+
+test('the import tab refuses a start window with no offset before sending it', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const setWindow = vi.spyOn(repo, 'setCompetitionWindow').mockResolvedValue();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  const table = await screen.findByTestId('competitionTable');
+  fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
+  fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  expect(await screen.findByText(/időzónás időpont/)).toBeInTheDocument();
+  expect(setWindow).not.toHaveBeenCalled();
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {
@@ -571,10 +609,10 @@ test('the list points to the export, which downloads every team with its join co
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(saved[0]).toBe([
-    'Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials',
+    'Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials\tOpens At\tCloses At',
     // A tab in a cell would shift every column after it.
-    `Alpha\t${COMPETITION_C}\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials`,
-    `Bare\t${COMPETITION_C}\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials`,
+    `Alpha\t${COMPETITION_C}\ta@b.com\tRadnóti Budapest\t${alpha.teamId}\t111-2222-333\tcredentials\t\t`,
+    `Bare\t${COMPETITION_C}\t\t\t2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b\t444-5555-666\tcredentials\t\t`,
   ].join('\n') + '\n');
 });
 

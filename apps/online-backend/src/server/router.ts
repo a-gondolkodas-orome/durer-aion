@@ -12,6 +12,7 @@ import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from '.
 import { import_teams_from_tsv } from './team_import';
 import { registry } from 'problem-bank/all';
 import { publicTeamView } from './team_view';
+import { readStartWindowBody, withCompetitionWindows } from './start_window';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
@@ -40,6 +41,12 @@ export function configureTeamsRouter(
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
+
+  // The competitions with the windows set on the admin page in force: read
+  // per request, since an organiser may change one mid-round.
+  async function competitionsNow() {
+    return withCompetitionWindows(registry.competitions, await teams.competitionWindows());
+  }
 
   // Overlapping starts can both pass `allowedToStart`; the conditional write
   // picks one, and the loser's match, which no team points at, is wiped.
@@ -247,10 +254,39 @@ export function configureTeamsRouter(
   /**
    * The competitions the server knows, for the admin page to list with the
    * ids the import's Competition column takes: each one's id and metadata,
-   * nothing of its problems.
+   * nothing of its problems, and its start window — the one in force, and
+   * the one its config gives, which the admin page's replaces.
    */
-  router.get("/team/admin/competitions", adminAuth, (ctx) => {
-    ctx.body = [...registry.competitions.values()].map(({ id, metadata }) => ({ id, metadata }));
+  router.get("/team/admin/competitions", adminAuth, async (ctx) => {
+    const windows = await teams.competitionWindows();
+    ctx.body = [...registry.competitions.values()].map(({ id, metadata, startWindow }) => ({
+      id, metadata,
+      startWindow: windows.get(id) ?? startWindow ?? null,
+      configStartWindow: startWindow ?? null,
+    }));
+  });
+
+  /**
+   * Set a competition's start window in place of the one its config gives: a
+   * body of `{ opensAt, closesAt }`, ISO 8601 with an offset, `closesAt`
+   * optional. `{ opensAt: null }` returns it to its config's. A team with a
+   * window of its own keeps that one.
+   *
+   * @param {string} competitionId - The id of the competition.
+   */
+  router.put("/team/admin/competitions/:competitionId/start-window", adminAuth, requireJson, koaBody(), async (ctx) => {
+    const { competitionId } = ctx.params;
+    if (!registry.competitions.has(competitionId)) {
+      ctx.throw(404, `No competition with id ${competitionId}.`);
+      return;
+    }
+    const window = readStartWindowBody(ctx.request.body);
+    if (window !== null && 'refused' in window) {
+      ctx.throw(400, window.refused);
+      return;
+    }
+    await teams.setCompetitionWindow(competitionId, window);
+    ctx.status = 204;
   });
 
   /**
@@ -320,14 +356,14 @@ export function configureTeamsRouter(
    */
   router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team));
+    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team), await competitionsNow());
   });
 
   /**
    * Let the logged-in team start a RELAY match.
    */
   router.post<TeamState>("/team/me/relay/play", requireTeam(teams), async (ctx) => {
-    const { game, team } = await getNewGame(ctx, games, "RELAY", ctx.state.team);
+    const { game, team } = await getNewGame(ctx, games, "RELAY", ctx.state.team, await competitionsNow());
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
@@ -341,7 +377,7 @@ export function configureTeamsRouter(
    * Let the logged-in team start a STRATEGY match.
    */
   router.post<TeamState>("/team/me/strategy/play", requireTeam(teams), async (ctx) => {
-    const { game, team } = await getNewGame(ctx, games, "STRATEGY", ctx.state.team);
+    const { game, team } = await getNewGame(ctx, games, "STRATEGY", ctx.state.team, await competitionsNow());
 
     const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
@@ -381,6 +417,6 @@ export function configureTeamsRouter(
       ctx.throw(403, "Not allowed, match in progress.")
 
     team.set({ pageState: "HOME" });
-    ctx.body = publicTeamView(team, matches);
+    ctx.body = publicTeamView(team, matches, await competitionsNow());
   });
 }

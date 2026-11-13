@@ -24,6 +24,11 @@
       "practice": "<b>Próbajáték:</b> nem számít a pontozásba.",
       "practiceHint": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
       "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok. A próbajátékok is beleszámítanak az időbe."
+    },
+    "window": {
+      "notOpenYet": "A fordulókat ekkortól lehet elkezdeni: {{time}}.",
+      "closed": "A verseny véget ért, új fordulót már nem lehet elkezdeni.",
+      "openUntil": "A fordulókat eddig lehet elkezdeni: {{time}}."
     }
   },
   "disclaimer": {
