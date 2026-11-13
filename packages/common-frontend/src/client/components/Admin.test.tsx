@@ -10,6 +10,7 @@ import { MockClientRepository } from '../mock-client-repository';
 import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
+import { windowTimeNow } from '../utils/window-time';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -267,6 +268,18 @@ test('the team dialog gives the team a start window of its own, and takes it awa
   fireEvent.click(screen.getByRole('button', { name: 'Saját ablak törlése' }));
   expect(await screen.findByText('Nincs saját ablaka: a versenye ablakában indíthat.')).toBeInTheDocument();
   expect(setStartWindow).toHaveBeenLastCalledWith(alpha.teamId, { opensAt: null, closesAt: null });
+});
+
+// The placeholder shows the format, but goes as soon as typing starts.
+test('the team dialog fills a start window field with the current time, to edit from', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin(alpha.teamId);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Kezdete: most' }));
+
+  // Read again here, it may have turned the minute since the click.
+  const filled = screen.getByLabelText<HTMLInputElement>('Kezdete').value;
+  expect(Math.abs(Date.parse(filled) - Date.parse(windowTimeNow()))).toBeLessThanOrEqual(60_000);
 });
 
 test('the team dialog refuses a start window that is not one, without asking the server', async () => {

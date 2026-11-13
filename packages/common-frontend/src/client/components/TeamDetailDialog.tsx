@@ -1,6 +1,7 @@
 import { Box, Stack } from '@mui/system';
 import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useSetStartWindow } from '../hooks/user-hooks';
 import { validateStartWindow } from 'schemas';
+import { windowTimeNow } from '../utils/window-time';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import Refresh from '@mui/icons-material/Refresh';
@@ -447,7 +448,6 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
   );
 }
 
-const WINDOW_EXAMPLE = '2026-11-20T15:00+01:00';
 
 /// The team's own start window, which replaces its competition's: for a team
 /// writing the round late, or a testing code, which gets a wide one such as
@@ -461,6 +461,10 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
   const [closesAt, setClosesAt] = useState(team.startClosesAt ?? '');
   const [error, setError] = useState<string | null>(null);
   const own = team.startOpensAt !== null && team.startOpensAt !== undefined;
+  // The current time, in the format the fields take: a placeholder to read and,
+  // through "Most", a value to start from, since the placeholder goes once
+  // typing starts.
+  const example = windowTimeNow();
 
   const save = async (window: { opensAt: string | null, closesAt: string | null }) => {
     try {
@@ -478,7 +482,7 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
     const opens = opensAt.trim();
     const closes = closesAt.trim();
     if (opens === '' || validateStartWindow({ opensAt: opens, ...(closes !== '' && { closesAt: closes }) }).length > 0) {
-      setError(`A kezdet kötelező, a vége elhagyható. Mindkettő időzónás időpont, például ${WINDOW_EXAMPLE}, `
+      setError(`A kezdet kötelező, a vége elhagyható. Mindkettő időzónás időpont, például ${example}, `
         + 'és a vége a kezdete után van.');
       return;
     }
@@ -503,13 +507,17 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
       <Stack component="form" sx={{ ...cardFooterSx, justifyContent: 'flex-start' }}
         onSubmit={(event) => { event.preventDefault(); submit(); }}>
         <Box component="label" htmlFor="start-opens" sx={{ fontWeight: 500 }}>Kezdete</Box>
-        <Box component="input" id="start-opens" value={opensAt} placeholder={WINDOW_EXAMPLE} sx={inputSx}
+        <Box component="input" id="start-opens" value={opensAt} placeholder={example} sx={inputSx}
           aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
           onChange={(event: ChangeEvent<HTMLInputElement>) => setOpensAt(event.target.value)}/>
-        <Box component="label" htmlFor="start-closes" sx={{ fontWeight: 500 }}>Vége</Box>
-        <Box component="input" id="start-closes" value={closesAt} placeholder="elhagyható" sx={inputSx}
+        <Button size="small" aria-label="Kezdete: most" sx={{ textTransform: 'none' }}
+          onClick={() => { setOpensAt(windowTimeNow()); }}>Most</Button>
+        <Box component="label" htmlFor="start-closes" sx={{ fontWeight: 500 }}>Vége (elhagyható)</Box>
+        <Box component="input" id="start-closes" value={closesAt} placeholder={example} sx={inputSx}
           aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
           onChange={(event: ChangeEvent<HTMLInputElement>) => setClosesAt(event.target.value)}/>
+        <Button size="small" aria-label="Vége: most" sx={{ textTransform: 'none' }}
+          onClick={() => { setClosesAt(windowTimeNow()); }}>Most</Button>
         <Button variant="contained" color="primary" type="submit" sx={{ textTransform: 'none', height: 40 }}>
           Mentés
         </Button>
