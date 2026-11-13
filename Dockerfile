@@ -56,9 +56,12 @@ RUN npx turbo build --filter=online-backend
 # lockfile. The workspace packages it depends on (`game`, `schemas`, …) are
 # inlined into the bundle from source (tsdown.config.mts), so they are dropped
 # from its manifest first: left in, npm would install them and theirs, which for
-# `game` means MUI and React. npm ci takes the trimmed manifest, since every
-# dependency left still matches the lockfile; the other workspaces' manifests
-# are copied only because the lockfile names them.
+# `game` means MUI and React. Listing them as devDependencies instead does not
+# help: `--omit=dev` still installs a workspace and its dependencies. A workspace
+# is whatever the lockfile records as a link, in any dependency field. npm ci
+# takes the trimmed manifest, since every dependency left still matches the
+# lockfile; the other workspaces' manifests are copied only because the lockfile
+# names them.
 FROM node:26.13.0 AS prod-deps
 
 WORKDIR /usr/src/app
@@ -70,8 +73,10 @@ RUN node -e " \
       const fs = require('fs'); \
       const file = 'apps/online-backend/package.json'; \
       const manifest = JSON.parse(fs.readFileSync(file)); \
-      const ws = n => fs.existsSync('packages/' + n + '/package.json'); \
-      for (const name of Object.keys(manifest.dependencies)) if (ws(name)) delete manifest.dependencies[name]; \
+      const lock = JSON.parse(fs.readFileSync('package-lock.json')).packages; \
+      for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies']) \
+        for (const name of Object.keys(manifest[field] ?? {})) \
+          if (lock['node_modules/' + name]?.link) delete manifest[field][name]; \
       fs.writeFileSync(file, JSON.stringify(manifest, null, 2)); \
     "
 RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace=online-backend
@@ -95,6 +100,12 @@ COPY --from=build /usr/src/app/apps/online-backend/dist ./apps/online-backend/di
 # docker-compose.yml bind-mounts ./scripts over this, so this copy is what a
 # container started without that mount has for `teams:import`.
 COPY scripts/import_teams.sh ./scripts/
+
+# The bundle keeps every npm dependency an external require(), including those
+# only a workspace package declares, which the trim above leaves uninstalled.
+# The server's sanity-check mode loads every module both entries require and
+# exits, so a missing one fails this build rather than the deployed server.
+RUN node apps/online-backend/dist/server.js sanity-check
 
 EXPOSE 8000
 

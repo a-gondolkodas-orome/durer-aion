@@ -23,6 +23,10 @@ services:
   backend:
     build: .
     restart: unless-stopped
+    # The image runs node as PID 1, which ignores SIGTERM unless the program
+    # handles it, and the server does not: without an init in front, every
+    # stop and restart waits out the timeout and ends in SIGKILL.
+    init: true
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRESQL_PASSWORD}@postgres/postgres
       - PORT=8000
