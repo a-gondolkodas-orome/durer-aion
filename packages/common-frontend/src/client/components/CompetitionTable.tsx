@@ -90,7 +90,7 @@ export function CompetitionTable(props: {
         columns={[
           {
             field: 'importAs',
-            headerName: 'Competition oszlopba',
+            headerName: 'Competition',
             description: 'Ezt kell a csapat sorában a Competition oszlopba írni. Az azonosító is jó.',
             width: 230,
             renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.importAs),
@@ -110,7 +110,7 @@ export function CompetitionTable(props: {
           },
           { field: 'round', headerName: 'Forduló', width: 100 },
           { field: 'category', headerName: 'Kategória', width: 90 },
-          { field: 'label', headerName: 'Név', width: 160 },
+          { field: 'label', headerName: 'Címke', width: 160 },
           { field: 'teams', headerName: 'Csapatok', width: 90, type: 'number' },
           {
             field: 'startWindow',
