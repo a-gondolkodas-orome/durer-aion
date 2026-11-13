@@ -221,9 +221,9 @@ py -m venv .venv
 $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scripts\admin.py
 ```
 
-It writes the match data (`match_data_*.json`) and the results
-(`durer-results-<year>.tsv`) to `scripts/admin-output/`, wherever it is run
-from.
+It writes the match data (`match_data_*.json`) and the results, one file per
+competition (`durer-results-<year>-<competition id>.tsv`), to
+`scripts/admin-output/`, wherever it is run from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
   no credential of its own. Unset it prompts, and with no terminal to prompt on
@@ -232,6 +232,10 @@ from.
   `dev:server`, for trying the script on local data. Against the docker stack it
   must be `http://localhost`: port 8000 is not published, nginx proxies `/team`
   and `/game`.
+- `DURER_COMPETITIONS` — the competitions to export, their ids separated by
+  commas, as the admin page's **Versenyek** tab lists them; unset, every
+  competition. An id the server does not have stops the script before it
+  downloads anything.
 
 Whether the browser's password prompt appears for the admin pages' XHRs under
 the `dev:online` proxy has not been walked, so check them against `stack:up`.
