@@ -100,11 +100,57 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+const LOGGED_ID_LENGTH = 64;
+
+/** A client-supplied match id as a log can carry it: quoted, so a newline in it
+ *  cannot start a line of its own, and cut short, so its length is not the
+ *  client's to choose. */
+export function describeMatchID(matchID: unknown): string {
+  if (typeof matchID !== "string") {
+    return `<${matchID === null ? "null" : typeof matchID}>`;
+  }
+  const quoted = JSON.stringify(matchID.slice(0, LOGGED_ID_LENGTH));
+  return matchID.length > LOGGED_ID_LENGTH ? `${quoted}…` : quoted;
+}
+
 /** socket.io does not await a listener, and an unhandled rejection ends the
  *  process with every match on it. */
 const logListenerFailure = (event: string, matchID: unknown) => (error: unknown) => {
-  console.error(`Reacting to a ${event} for match ${String(matchID)} failed:`, error);
+  console.error(`Reacting to a ${event} for match ${describeMatchID(matchID)} failed:`, error);
 };
+
+/** Writes at most `limit` warnings per window, across every socket: a limit per
+ *  socket alone is reset by opening another one. What it holds back is counted,
+ *  and the count is written with the first warning of a later window. */
+export class WarningBudget {
+  private windowStart = -Infinity;
+  private written = 0;
+  private withheld = 0;
+
+  constructor(
+    private readonly limit: number,
+    private readonly windowMs: number,
+    private readonly now: () => number = Date.now
+  ) {}
+
+  warn(line: string): void {
+    const now = this.now();
+    if (now - this.windowStart >= this.windowMs) {
+      if (this.withheld > 0) {
+        console.warn(`Withheld ${this.withheld} more such warnings`);
+      }
+      this.windowStart = now;
+      this.written = 0;
+      this.withheld = 0;
+    }
+    if (this.written < this.limit) {
+      this.written++;
+      console.warn(line);
+    } else {
+      this.withheld++;
+    }
+  }
+}
 
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
@@ -115,6 +161,7 @@ const logListenerFailure = (event: string, matchID: unknown) => (error: unknown)
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, Bot>;
+  private readonly refusals = new WarningBudget(20, 60_000);
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, Bot>,
@@ -164,7 +211,7 @@ export class SocketIOButBotMoves extends SocketIO {
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
-        // Logged once per socket, so a client cannot fill the log.
+        // Logged once per socket, so one socket cannot spend the whole budget.
         let reported = false;
         socket.use(([event, matchID]: IOTypes.Event, next) => {
           if (event !== "sync") {
@@ -174,7 +221,7 @@ export class SocketIOButBotMoves extends SocketIO {
           const refuse = (reason: string) => {
             if (!reported) {
               reported = true;
-              console.warn(`Refused a packet on socket ${socket.id}: ${reason}`);
+              this.refusals.warn(`Refused a packet on socket ${socket.id}: ${reason}`);
             }
             next(new Error(reason));
           };
@@ -185,21 +232,24 @@ export class SocketIOButBotMoves extends SocketIO {
           void fetch(app.context.db, matchID, { metadata: true } as const).then(
             ({ metadata }) => {
               if (metadata === undefined) {
-                refuse(`sync for unknown match ${matchID}`);
+                refuse(`sync for unknown match ${describeMatchID(matchID)}`);
                 return;
               }
               next();
             },
             (error: unknown) => {
               // Not the client's doing, so not under the once-per-socket limit.
-              console.error(`Storage could not be read for a sync of match ${matchID}:`, error);
+              console.error(`Storage could not be read for a sync of match ${describeMatchID(matchID)}:`, error);
               next(error instanceof Error ? error : new Error(String(error)));
             }
           );
         });
 
         socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
-          void this.onPlayerUpdate(app.context, game, bot, args).catch(logListenerFailure("update", args[2]));
+          const matchID: unknown = args[2];
+          void this.onPlayerUpdate(app.context, game, bot, args)
+            .catch(logListenerFailure("update", matchID))
+            .then(() => this.releaseUnjoinedQueue(matchID));
         });
 
         /* A player's move is the only other thing that asks the bot to play,
@@ -262,6 +312,29 @@ export class SocketIOButBotMoves extends SocketIO {
     // in a push of its own, or the move and its reply land as one
     // update. See #346.
     await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, bot, matchID));
+  }
+
+  /** Drops the queue an `update` made for a match no socket has joined.
+   *
+   *  boardgame.io's own `update` listener makes a queue for whatever match id
+   *  the packet names, and deletes one only when the last client of a joined
+   *  match leaves, so an id nobody syncs to keeps its queue for the life of
+   *  the process — one per made-up id an anonymous client cares to send. Its
+   *  listener registered first, so the queue exists by the time this runs.
+   *
+   *  Only an idle queue is dropped, and the next task for the match gets a new
+   *  one: no two queues ever hold work for the same match at once. */
+  private async releaseUnjoinedQueue(matchID: unknown): Promise<void> {
+    // Keyed by whatever the client sent, not only by strings.
+    const key = matchID as string;
+    const queue = this.perMatchQueue.get(key);
+    if (queue === undefined) {
+      return;
+    }
+    await queue.onIdle();
+    if (queue.size === 0 && queue.pending === 0 && !this.roomInfo.has(key) && this.perMatchQueue.get(key) === queue) {
+      this.deleteMatchQueue(key);
+    }
   }
 
   /** Plays the bot's turn if the match is waiting on one. Callers run it on
