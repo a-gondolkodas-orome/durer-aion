@@ -1,3 +1,4 @@
+import { dryRunCompetition } from "./rehearsed-round";
 import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, RelayProblemResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend/core";
 
 // The one place the stored team state is parsed (#367): every read goes through
@@ -100,6 +101,14 @@ export function readStoredTeamState(): TeamModelDto | null {
   ) {
     return null;
   }
+  // Only the competition's id is taken from storage: the rest is the round's
+  // as the code holds it now. A competition the round no longer has, or a
+  // login stored before teams had one, reads as no login.
+  const competition = isRecord(parsed.competition) && typeof parsed.competition.id === 'string'
+    ? dryRunCompetition(parsed.competition.id) : undefined;
+  if (competition === undefined) {
+    return null;
+  }
   const relayMatch = parseMatchStatus(parsed.relayMatch);
   const strategyMatch = parseMatchStatus(parsed.strategyMatch);
   if (relayMatch === null || strategyMatch === null) {
@@ -109,6 +118,7 @@ export function readStoredTeamState(): TeamModelDto | null {
     teamId,
     joinCode,
     teamName,
+    competition,
     category,
     credentials,
     email,
