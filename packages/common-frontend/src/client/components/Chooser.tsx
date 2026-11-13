@@ -22,7 +22,7 @@ export function Chooser(props: {
     (!hasRelay || props.state.relayMatch.state === "FINISHED") &&
     (!hasStrategy || props.state.strategyMatch.state === "FINISHED");
   const isOffline = useClientRepo().version === "OFFLINE";
-  const { state: windowState, note: windowNote } = useStartWindowNote(props.state.startWindow);
+  const { state: windowState, note: windowNote } = useStartWindowNote(props.state.startWindow, props.state.clockOffsetMs);
   // Only while there is a round left to start: a team that is done sees its
   // results, and nothing about starting.
   const roundLeft = (hasRelay && props.state.relayMatch.state === "NOT STARTED")
@@ -102,4 +102,3 @@ export function Chooser(props: {
     </Stack>
   );
 }
-

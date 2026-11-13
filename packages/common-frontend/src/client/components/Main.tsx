@@ -62,7 +62,7 @@ export function Main(props: { language: string, gitCommitHash: string }) {
             {!teamState && <LoginLayout><Login /></LoginLayout>}
             {teamState && teamState.pageState === "DISCLAIMER" && (
               <Disclaimer teamName={teamState.teamName} category={teamState.category}
-                startWindow={teamState.startWindow}/>
+                startWindow={teamState.startWindow} clockOffsetMs={teamState.clockOffsetMs}/>
             )}
             {teamState && teamState.pageState === "HOME" && (
               <Chooser state={teamState}/>

@@ -21,6 +21,10 @@ export interface TeamModelDto {
   /// When the team may start its matches, its own window or its competition's;
   /// null for any time. The local apps serve none, and have no window.
   startWindow?: StartWindow | null;
+  /// The server's clock less the browser's, in milliseconds, taken when the
+  /// state arrived: the page judges the start window by the server's clock,
+  /// since a school computer's may be off by hours. The local apps have none.
+  clockOffsetMs?: number;
   /// The team's own window, in place of its competition's, which the admin
   /// routes serve as the row holds it.
   startOpensAt?: string | null;

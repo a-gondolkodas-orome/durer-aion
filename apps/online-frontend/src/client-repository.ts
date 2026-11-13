@@ -62,6 +62,11 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     if (result.data.strategyMatch.endAt) {
       result.data.strategyMatch.endAt = new Date(result.data.strategyMatch.endAt);
     }
+    // Taken on arrival, not when a page reads it: the state can be held for
+    // hours, and the browser's clock is what the offset corrects.
+    if (typeof result.data.serverTime === 'string') {
+      result.data.clockOffsetMs = Date.parse(result.data.serverTime) - Date.now();
+    }
     return result.data as TeamModelDto;
   }
 

@@ -33,4 +33,13 @@ describe('useStartWindowState', () => {
     act(() => { vi.advanceTimersByTime(6.5 * 3600_000); });
     expect(result.current).toBe('closed');
   });
+
+  it('follows the server\'s clock, the browser\'s plus the offset', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T11:59:00Z') });
+    const { result } = renderHook(() => useStartWindowState(startWindow, 3600_000));
+    expect(result.current).toBe('not-open-yet');
+
+    act(() => { vi.advanceTimersByTime(60_000); });
+    expect(result.current).toBe('open');
+  });
 });
