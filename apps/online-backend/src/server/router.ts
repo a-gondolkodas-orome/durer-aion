@@ -244,6 +244,33 @@ export function configureTeamsRouter(
   });
 
   /**
+   * Give a team a start window of its own, in place of its competition's, or
+   * take it away: a body of `{ opensAt, closesAt }`, ISO 8601 with an offset,
+   * `closesAt` optional; `{ opensAt: null }` takes it away. For a team writing
+   * the round late, or a testing code.
+   *
+   * @param {string} teamID - The ID of the team.
+   * @returns {TeamModel} - Returns the modified team model.
+   */
+  router.put("/team/admin/:teamID/start-window", adminAuth, requireJson, koaBody(), async (ctx) => {
+    const teamId = ctx.params.teamID;
+    const window = readStartWindowBody(ctx.request.body);
+    if (window !== null && 'refused' in window) {
+      ctx.throw(400, window.refused);
+      return;
+    }
+    const team = await teams.getTeam({ teamId });
+    if (!team) {
+      ctx.throw(404, `Team not found with teamID ${teamId}.`);
+      return;
+    }
+    team.startOpensAt = window?.opensAt ?? null;
+    team.startClosesAt = window?.closesAt ?? null;
+    await team.save();
+    ctx.body = await adminTeamView(ctx.db, team);
+  });
+
+  /**
    * Get all teams as a full object
    * @returns {TeamModel[]} - List of the selected teams
    */

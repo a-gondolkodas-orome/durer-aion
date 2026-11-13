@@ -69,6 +69,12 @@ export const useResetStrategy = () => {
   return async (teamId: string) => await repo.resetStrategy(teamId);
 };
 
+export const useSetStartWindow = () => {
+  const repo = useAdminRepo();
+  return async (teamId: string, window: { opensAt: string | null, closesAt: string | null }) =>
+    await repo.setStartWindow(teamId, window);
+};
+
 export const useAddMinutes = () => {
   const repo = useAdminRepo();
   return async (matchId: string, minutes: number) => { await repo.addMinutes(matchId, minutes); };

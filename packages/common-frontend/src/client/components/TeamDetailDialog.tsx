@@ -1,11 +1,13 @@
 import { Box, Stack } from '@mui/system';
-import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy } from '../hooks/user-hooks';
+import { useAddMinutes, useCompetitions, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useSetStartWindow } from '../hooks/user-hooks';
+import { validateStartWindow } from 'schemas';
+import { windowText, windowTimeNow } from '../utils/window-time';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import Refresh from '@mui/icons-material/Refresh';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
-import { Dispatch, ReactNode, useState } from 'react';
+import { ChangeEvent, Dispatch, ReactNode, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { TeamModelDto, MatchStatus, PageState, adminTeamId } from '../dto/TeamStateDto';
 import { formatTime } from '../utils/DateFormatter';
@@ -49,6 +51,7 @@ export function TeamDetailDialog(props: {
       <Stack sx={{ gap: '20px', padding: { xs: '16px 12px 24px', md: '24px 32px 32px' } }}>
         <MatchCard kind="relay" heading={heading} teamName={teamState.teamName} status={teamState.relayMatch} setConfirmDialog={props.setConfirmDialog}/>
         <MatchCard kind="strategy" heading={heading} teamName={teamState.teamName} status={teamState.strategyMatch} setConfirmDialog={props.setConfirmDialog}/>
+        <StartWindowCard heading={heading} team={teamState} setTeamState={setTeamState}/>
         <DangerZone heading={heading} team={teamState} setTeamState={setTeamState} setConfirmDialog={props.setConfirmDialog}/>
       </Stack>
     </Stack>
@@ -441,6 +444,107 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
           {JSON.stringify(matchLogs, null, 2)}
         </SyntaxHighlighter>
       </Box>}
+    </Stack>
+  );
+}
+
+
+/// The team's own start window, which replaces its competition's: for a team
+/// writing the round late, or a testing code, which gets a wide one such as
+/// 2001 to 2099. The server refuses a start outside it; a match already
+/// started runs on.
+function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void }) {
+  const { team } = props;
+  const setStartWindow = useSetStartWindow();
+  const { enqueueSnackbar } = useSnackbar();
+  const [opensAt, setOpensAt] = useState(team.startOpensAt ?? '');
+  const [closesAt, setClosesAt] = useState(team.startClosesAt ?? '');
+  const [error, setError] = useState<string | null>(null);
+  const own = team.startOpensAt !== null && team.startOpensAt !== undefined;
+  // The competition's window in force, which the team's own replaces; the
+  // same request as the Import/export tab's table, so the two share it.
+  const getCompetitions = useCompetitions();
+  const { data: competitions } = useSWR('team/admin/competitions', getCompetitions);
+  const competitionWindow = competitions?.find(competition => competition.id === team.competitionId)?.startWindow;
+  const competitionDescribed = competitionWindow === undefined ? undefined : windowText(competitionWindow);
+  // The current time, in the format the fields take: a placeholder to read and,
+  // through "Most", a value to start from, since the placeholder goes once
+  // typing starts.
+  const example = windowTimeNow();
+
+  const save = async (window: { opensAt: string | null, closesAt: string | null }) => {
+    try {
+      const saved = await setStartWindow(adminTeamId(team), window);
+      props.setTeamState(saved);
+      setOpensAt(saved.startOpensAt ?? '');
+      setClosesAt(saved.startClosesAt ?? '');
+      enqueueSnackbar("Sikeres művelet", { variant: 'success' });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  };
+  const submit = () => {
+    const opens = opensAt.trim();
+    const closes = closesAt.trim();
+    if (opens === '' || validateStartWindow({ opensAt: opens, ...(closes !== '' && { closesAt: closes }) }).length > 0) {
+      setError(`A kezdet kötelező, a vége elhagyható. Mindkettő időzónás időpont, például ${example}, `
+        + 'és a vége a kezdete után van.');
+      return;
+    }
+    setError(null);
+    void save({ opensAt: opens, closesAt: closes === '' ? null : closes });
+  };
+  // "Most" sits inside the field's right end, as on the competitions table.
+  const fieldSx = { position: 'relative', display: 'inline-flex', alignItems: 'center' } as const;
+  const inputSx = { font: 'inherit', height: 40, boxSizing: 'border-box', width: 260, padding: '0 56px 0 12px', border: '1px solid #9e9e9e', borderRadius: '8px' } as const;
+  const nowSx = { position: 'absolute', right: 4, minWidth: 0, textTransform: 'none' } as const;
+
+  return (
+    <Stack component="section" aria-label="Indítási ablak" sx={cardSx}>
+      <Stack sx={{ ...cardHeaderSx, borderBottom: `1px solid ${DIVIDER}` }}>
+        <Box component={props.heading} sx={cardTitleSx}>Indítási ablak</Box>
+      </Stack>
+      <Stack sx={{ gap: '8px', padding: { xs: '16px', md: '20px 24px' } }} data-testid="startWindowSummary">
+        {own
+          ? <span>
+            Saját ablaka van, a versenyé helyett: {windowText({ opensAt: team.startOpensAt ?? '', ...(team.startClosesAt != null && { closesAt: team.startClosesAt }) })}.
+            {competitionDescribed !== undefined && ` A verseny ablaka, amit felülír: ${competitionDescribed}.`}
+          </span>
+          : <span>
+            Nincs saját ablaka: a versenye ablakában indíthat{competitionDescribed !== undefined && `, ${competitionDescribed}`}.
+          </span>}
+        <Box sx={{ fontSize: 13, color: MUTED }}>
+          Csak azt korlátozza, mikor kezdhet játékot: az elkezdett játék végig fut. Tesztkódnak tág ablak való, például 2001-től 2099-ig.
+        </Box>
+      </Stack>
+      <Stack component="form" sx={{ ...cardFooterSx, justifyContent: 'flex-start' }}
+        onSubmit={(event) => { event.preventDefault(); submit(); }}>
+        <Box component="label" htmlFor="start-opens" sx={{ fontWeight: 500 }}>Kezdete</Box>
+        <Box sx={fieldSx}>
+          <Box component="input" id="start-opens" value={opensAt} placeholder={example} sx={inputSx}
+            aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setOpensAt(event.target.value)}/>
+          <Button size="small" aria-label="Kezdete: most" sx={nowSx}
+            onClick={() => { setOpensAt(windowTimeNow()); }}>Most</Button>
+        </Box>
+        <Box component="label" htmlFor="start-closes" sx={{ fontWeight: 500 }}>Vége (elhagyható)</Box>
+        <Box sx={fieldSx}>
+          <Box component="input" id="start-closes" value={closesAt} placeholder={example} sx={inputSx}
+            aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setClosesAt(event.target.value)}/>
+          <Button size="small" aria-label="Vége: most" sx={nowSx}
+            onClick={() => { setClosesAt(windowTimeNow()); }}>Most</Button>
+        </Box>
+        <Button variant="contained" color="primary" type="submit" sx={{ textTransform: 'none', height: 40 }}>
+          Mentés
+        </Button>
+        {own && <Button variant="outlined" color="primary" sx={{ textTransform: 'none', height: 40 }}
+          onClick={() => { setError(null); void save({ opensAt: null, closesAt: null }); }}>
+          Saját ablak törlése
+        </Button>}
+        {error !== null && <Box id="start-window-error" sx={{ width: '100%', color: 'error.main', fontSize: '0.875rem' }}>{error}</Box>}
+      </Stack>
     </Stack>
   );
 }

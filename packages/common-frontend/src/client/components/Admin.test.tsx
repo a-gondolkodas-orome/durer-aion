@@ -10,6 +10,7 @@ import { MockClientRepository } from '../mock-client-repository';
 import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
+import { windowTimeNow, windowTimeText } from '../utils/window-time';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -249,6 +250,76 @@ test('the team dialog names the page the team is on', async () => {
   expect(label.parentElement).toHaveTextContent(/^Most: Tájékoztató oldalon \(DISCLAIMER\) · még nem indíthat játékot$/);
 });
 
+test('the team dialog gives the team a start window of its own, and takes it away', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  const setStartWindow = vi.spyOn(repo, 'setStartWindow')
+    .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
+  renderAdmin(alpha.teamId);
+
+  expect(await screen.findByText('Nincs saját ablaka: a versenye ablakában indíthat.')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Kezdete'), { target: { value: '2026-11-21T15:00+01:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('startWindowSummary')).toHaveTextContent(`Saját ablaka van, a versenyé helyett: ${windowTimeText('2026-11-21T15:00+01:00')} után.`);
+  });
+  expect(setStartWindow).toHaveBeenCalledWith(alpha.teamId, { opensAt: '2026-11-21T15:00+01:00', closesAt: null });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Saját ablak törlése' }));
+  expect(await screen.findByText('Nincs saját ablaka: a versenye ablakában indíthat.')).toBeInTheDocument();
+  expect(setStartWindow).toHaveBeenLastCalledWith(alpha.teamId, { opensAt: null, closesAt: null });
+});
+
+// The team's own window replaces its competition's, so the card names that one too.
+test('the team dialog names the competition window a team\'s own replaces', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00', closesAt: '2026-11-20T21:30+01:00' }, configStartWindow: null },
+  ]);
+  vi.spyOn(repo, 'setStartWindow')
+    .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
+  renderAdmin(alpha.teamId);
+
+  // Read out in the browser's time zone, then as stored.
+  const competitionWindow = `${windowTimeText('2026-11-20T15:00+01:00')} – ${windowTimeText('2026-11-20T21:30+01:00')}`;
+  const summary = await screen.findByTestId('startWindowSummary');
+  await waitFor(() => {
+    expect(summary).toHaveTextContent(`Nincs saját ablaka: a versenye ablakában indíthat, ${competitionWindow}.`);
+  });
+  fireEvent.change(screen.getByLabelText('Kezdete'), { target: { value: '2026-11-21T15:00+01:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  await waitFor(() => {
+    expect(summary).toHaveTextContent(`Saját ablaka van, a versenyé helyett: ${windowTimeText('2026-11-21T15:00+01:00')} után. `
+      + `A verseny ablaka, amit felülír: ${competitionWindow}.`);
+  });
+});
+
+// The placeholder shows the format, but goes as soon as typing starts.
+test('the team dialog fills a start window field with the current time, to edit from', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  renderAdmin(alpha.teamId);
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Kezdete: most' }));
+
+  // Read again here, it may have turned the minute since the click.
+  const filled = screen.getByLabelText<HTMLInputElement>('Kezdete').value;
+  expect(Math.abs(Date.parse(filled) - Date.parse(windowTimeNow()))).toBeLessThanOrEqual(60_000);
+});
+
+test('the team dialog refuses a start window that is not one, without asking the server', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  const setStartWindow = vi.spyOn(repo, 'setStartWindow');
+  renderAdmin(alpha.teamId);
+
+  fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-21 15:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  expect(await screen.findByText(/^A kezdet kötelező/)).toBeInTheDocument();
+  expect(setStartWindow).not.toHaveBeenCalled();
+});
+
 test('a match that has not started cannot be reset', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
   openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 7 });
@@ -479,7 +550,7 @@ test('the import tab sets a competition\'s start window, and lists it as set', a
   await waitFor(() => {
     expect(setWindow).toHaveBeenCalledWith(COMPETITION_C, { opensAt: '2026-11-20T15:00+01:00', closesAt: null });
   });
-  expect(await within(table).findByText('2026-11-20T15:00+01:00 után (itt megadva)')).toBeInTheDocument();
+  expect(await within(table).findByText(`${windowTimeText('2026-11-20T15:00+01:00')} után (itt megadva)`)).toBeInTheDocument();
 });
 
 test('the import tab refuses a start window with no offset before sending it', async () => {

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
 import { Box, Stack } from '@mui/system';
@@ -9,6 +9,7 @@ import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
 import { useSetCompetitionWindow } from '../hooks/user-hooks';
+import { windowText, windowTimeNow } from '../utils/window-time';
 
 const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
   online: 'internetes',
@@ -43,13 +44,6 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
     id, importAs: id, edition: null, round: '', category: '', label: metadata.label.hu ?? metadata.label.en ?? '',
     ...window,
   };
-}
-
-/// A start window as the admin page shows it: as stored, ISO 8601 with its
-/// offset, so what is shown is what was typed.
-function windowText(window: StartWindow | null): string {
-  if (window === null) return 'bármikor';
-  return window.closesAt === undefined ? `${window.opensAt} után` : `${window.opensAt} – ${window.closesAt}`;
 }
 
 /// Every registered competition, newest edition first, with what the import's
@@ -140,7 +134,6 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[],
   );
 }
 
-const WINDOW_EXAMPLE = '2026-11-20T15:00+01:00';
 
 /// Sets a competition's start window in place of its config's, or returns it
 /// to its config's. A team with a window of its own keeps that one.
@@ -151,6 +144,14 @@ function CompetitionWindowDialog(props: { competition: CompetitionRow, onClose: 
   const [opensAt, setOpensAt] = useState(competition.startWindow?.opensAt ?? '');
   const [closesAt, setClosesAt] = useState(competition.startWindow?.closesAt ?? '');
   const [error, setError] = useState<string | null>(null);
+  // The current time, in the format the fields take: a placeholder to read and
+  // a value to start from, since the placeholder goes once typing starts.
+  const example = windowTimeNow();
+  const fillNow = (field: string, set: (value: string) => void) => (
+    <InputAdornment position="end">
+      <Button size="small" aria-label={`${field}: most`} onClick={() => { set(windowTimeNow()); }} sx={{ textTransform: 'none' }}>Most</Button>
+    </InputAdornment>
+  );
 
   const save = async (window: { opensAt: string | null, closesAt: string | null }) => {
     try {
@@ -165,7 +166,7 @@ function CompetitionWindowDialog(props: { competition: CompetitionRow, onClose: 
     const opens = opensAt.trim();
     const closes = closesAt.trim();
     if (opens === '' || validateStartWindow({ opensAt: opens, ...(closes !== '' && { closesAt: closes }) }).length > 0) {
-      setError(`A kezdet kötelező, a vége elhagyható. Mindkettő időzónás időpont, például ${WINDOW_EXAMPLE}, `
+      setError(`A kezdet kötelező, a vége elhagyható. Mindkettő időzónás időpont, például ${example}, `
         + 'és a vége a kezdete után van.');
       return;
     }
@@ -183,9 +184,11 @@ function CompetitionWindowDialog(props: { competition: CompetitionRow, onClose: 
             Ebben kezdhet játékot a verseny egy csapata, ha nincs saját ablaka. Csak azt korlátozza, mikor kezdhet
             játékot: az elkezdett játék végig fut.
           </span>
-          <TextField label="Kezdete" value={opensAt} placeholder={WINDOW_EXAMPLE} error={error !== null}
+          <TextField label="Kezdete" value={opensAt} placeholder={example} error={error !== null}
+            slotProps={{ input: { endAdornment: fillNow('Kezdete', setOpensAt) } }}
             onChange={(event) => { setOpensAt(event.target.value); }}/>
-          <TextField label="Vége (elhagyható)" value={closesAt} placeholder={WINDOW_EXAMPLE} error={error !== null}
+          <TextField label="Vége (elhagyható)" value={closesAt} placeholder={example} error={error !== null}
+            slotProps={{ input: { endAdornment: fillNow('Vége', setClosesAt) } }}
             helperText={error} onChange={(event) => { setClosesAt(event.target.value); }}/>
         </Stack>
       </DialogContent>

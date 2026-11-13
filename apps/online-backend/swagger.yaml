@@ -162,6 +162,47 @@ paths:
         "404":
           description: Team not found
 
+  /team/admin/{teamID}/start-window:
+    put:
+      summary: Give a team a start window of its own, or take it away
+      description: The team's window replaces its competition's. A null opensAt takes it away. ISO 8601 with an offset.
+      parameters:
+        - name: teamID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/GUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                opensAt:
+                  type: string
+                  nullable: true
+                  example: "2026-11-21T15:00+01:00"
+                closesAt:
+                  type: string
+                  nullable: true
+                  example: "2026-11-21T21:30+01:00"
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamModel"
+        "400":
+          description: Not a start window
+        "404":
+          description: Team not found
+
   /team/admin/all:
     get:
       summary: Get all teams as full objects
