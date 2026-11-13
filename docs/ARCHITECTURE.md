@@ -27,7 +27,8 @@ entry. The server and the dry run import both; the relay practice site imports
 
 The team's row (the backend's `model.ts`) carries a `pageState` and the ids of its two
 matches, `relayMatchID` and `strategyMatchID`. The page states
-(`PAGE_STATES` in `schemas`) are `DISCLAIMER → HOME → RELAY | STRATEGY → HOME`.
+(`PAGE_STATES` in `schemas`) are `DISCLAIMER → HOME → RELAY | STRATEGY → HOME`,
+and from `HOME` back to a finished `STRATEGY` (step 7).
 
 1. **Import.** `team_import.ts`, from `npm run teams:import` or
    `PUT /team/admin/import`, creates each row in `DISCLAIMER` with both match
@@ -61,6 +62,14 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
    — `ReactClient.tsx` in `online-frontend`, built by `client_factory.tsx` in
    `common-frontend` — and from here on every move is boardgame.io traffic, not
    REST.
+7. **Looking back.** `POST /team/me/strategy/view` takes the team from `HOME`
+   back to its finished strategy match, where the board shows it locked, as it
+   ended. `allowedToViewStrategy` (`team_manage.ts`) allows it only
+   for a finished strategy match while the relay is not running, and
+   `TeamsRepository.viewStrategy` writes the page only if the row is still
+   `HOME` with the match ids that were read, so a start landing in between
+   wins. The relay has no such way back: its page would show only its last
+   problem.
 
 ## How the bot gets its turn
 
@@ -136,7 +145,8 @@ worth.
 Nothing about a match is stored on the team row except its id.
 `deriveMatchStatus` (`match_status.ts`) reads `NOT STARTED`, `IN PROGRESS` or
 `FINISHED`, with the score, off the match's own game state, every time it is
-asked. `/team/me`, `allowedToStart`, `gohome` and every admin view use it.
+asked. `/team/me`, `allowedToStart`, `allowedToViewStrategy`, `gohome` and
+every admin view use it.
 
 ## What the organisers can do
 

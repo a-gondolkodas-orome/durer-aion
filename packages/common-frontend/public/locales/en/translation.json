@@ -157,7 +157,7 @@
     "ended": {
       "result": "Result",
       "text": "You can still look at the board, but no longer move.",
-      "title": "The round is over."
+      "title": "The strategy game is over."
     },
     "firstPlayer": "We go first",
     "info": {
