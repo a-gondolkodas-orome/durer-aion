@@ -1,6 +1,7 @@
 import { Alert, Button } from "@mui/material";
 import React from "react";
 import { Translation } from "react-i18next";
+import { reportUsage } from "../utils/usage-report";
 
 // Since React 19 an error thrown while rendering unmounts the whole root, so
 // without a boundary any crash leaves a blank page. React has no hook for this.
@@ -14,6 +15,14 @@ export class ErrorBoundary extends React.Component<
 
   static getDerivedStateFromError() {
     return { hasError: true };
+  }
+
+  // The error's name and message only: the stack would be the bundle's
+  // minified one.
+  componentDidCatch(error: unknown) {
+    reportUsage('crash', error instanceof Error
+      ? { error: error.name, message: error.message.slice(0, 200) }
+      : { error: String(error).slice(0, 200) });
   }
 
   componentDidUpdate(prevProps: { resetKeys?: unknown[] }) {

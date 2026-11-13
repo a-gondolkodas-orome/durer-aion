@@ -2,7 +2,8 @@
 import { act, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SnackbarProvider } from 'notistack';
-import '../../common/i18n';
+import i18n from '../../common/i18n';
+import { setUsageReporter } from '../utils/usage-report';
 import { CONNECTION_LOST_DELAY_MS, withConnectionAlert } from './ConnectionAlert';
 
 const Board = withConnectionAlert((_: { isConnected: boolean }) => <button>Lépés</button>);
@@ -33,4 +34,26 @@ test('disables the board and says why only once a drop outlasts the delay', asyn
 
   rerender(board(false));
   expect(isInert()).toBe(false);
+});
+
+test('reports each drop that outlasts the delay once, however the page changes meanwhile', async () => {
+  const report = vi.fn();
+  setUsageReporter(report);
+  const { rerender } = render(board(true));
+  rerender(board(false));
+  rerender(board(true));
+  await waitOutDelay();
+  expect(report).not.toHaveBeenCalled();
+
+  rerender(board(false));
+  await waitOutDelay();
+  await act(async () => { await i18n.changeLanguage('en'); });
+  await act(async () => { await i18n.changeLanguage('hu'); });
+  expect(report.mock.calls).toStrictEqual([['connection-lost', undefined]]);
+
+  rerender(board(true));
+  rerender(board(false));
+  await waitOutDelay();
+  expect(report).toHaveBeenCalledTimes(2);
+  setUsageReporter(() => undefined);
 });

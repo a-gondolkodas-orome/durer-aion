@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import type { TeamModelDto } from "common-frontend";
+import i18next from "i18next";
+import { reportUsage } from "common-frontend/core";
 import { Tracker } from "./tracking";
 
 type MatchStatus = TeamModelDto["relayMatch"];
@@ -25,6 +27,10 @@ let identify: ReturnType<typeof vi.fn>;
 
 const events = () => track.mock.calls;
 
+beforeAll(async () => {
+  await i18next.init({ lng: 'hu', resources: {} });
+});
+
 beforeEach(() => {
   localStorage.clear();
   track = vi.fn();
@@ -36,6 +42,7 @@ beforeEach(() => {
 
 afterEach(() => {
   delete window.umami;
+  document.head.innerHTML = '';
 });
 
 describe('the match events', () => {
@@ -104,13 +111,35 @@ describe('the session data', () => {
       pointer: 'fine',
       category: 'C',
       year: '20',
+      language: 'hu',
     }]]);
+  });
+
+  test('is sent again when the team switches language', async () => {
+    const tracker = new Tracker();
+    tracker.load();
+    tracker.observe(team(notStarted));
+    await i18next.changeLanguage('en');
+
+    expect(identify.mock.calls.at(-1)?.[0]).toMatchObject({ category: 'C', language: 'en' });
+    await i18next.changeLanguage('hu');
+  });
+});
+
+describe('the shared screens\' reports', () => {
+  test('go with the team\'s category and page', () => {
+    const tracker = new Tracker();
+    tracker.load();
+    tracker.observe({ ...team(inProgress('m1')), pageState: 'RELAY' });
+
+    reportUsage('connection-lost');
+
+    expect(events().at(-1)).toStrictEqual(['connection-lost', { category: 'C', year: '20', page: 'RELAY' }]);
   });
 });
 
 describe('the tracker tag', () => {
   afterEach(() => {
-    document.head.innerHTML = '';
     window.history.replaceState(null, '', '/');
   });
 

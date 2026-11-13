@@ -2,6 +2,7 @@ import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
+import { reportUsage } from "../utils/usage-report";
 
 export const CONNECTION_LOST_DELAY_MS = 2000;
 
@@ -20,6 +21,13 @@ export function withConnectionAlert<P extends { isConnected: boolean }>(Board: C
     const down = useLongDisconnect(props.isConnected);
     const { t } = useTranslation();
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+    // Apart from the snackbar's, which a language switch runs again.
+    useEffect(() => {
+      if (down) {
+        reportUsage('connection-lost');
+      }
+    }, [down]);
 
     useEffect(() => {
       if (!down) {

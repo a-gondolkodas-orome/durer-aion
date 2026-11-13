@@ -11,6 +11,8 @@ tracker at all: its URL holds a team's id, which is the team's session cookie
 (`team_view.ts` in the backend), and every umami request carries the page's URL.
 */
 
+import i18next from "i18next";
+import { setUsageReporter } from "common-frontend/core";
 import type { TeamModelDto } from "common-frontend";
 
 declare global {
@@ -81,14 +83,23 @@ export class Tracker {
       this.observe(this.team);
     };
     document.head.append(script);
+    i18next.on('languageChanged', () => this.identify());
+    // A connection drop or a crash, from the shared screens: with the
+    // team's page, which says which match it happened in.
+    setUsageReporter((event, data) => {
+      umami()?.track(event, {
+        ...(this.team && { ...teamData(this.team), page: this.team.pageState }),
+        ...data,
+      });
+    });
   }
 
   // A session keeps the latest values identify sent, so the device's go
-  // along each time; sent again only when the team's change.
+  // along each time; sent again only when the team's or the language change.
   private identify() {
     const tracker = umami();
     if (!tracker) return;
-    const data = this.team ? teamData(this.team) : {};
+    const data = { ...(this.team && teamData(this.team)), language: i18next.language };
     const identity = JSON.stringify(data);
     if (identity === this.identifiedAs) return;
     this.identifiedAs = identity;
