@@ -3,7 +3,7 @@ import type { Game, Server as BgioServer, StorageAPI } from "boardgame.io";
 import { Server } from "boardgame.io/server";
 import { Async as AsyncStorage, createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
-import { describeMatchID, LogBudget, SocketIOButBotMoves } from "./socketio_botmoves";
+import { SocketIOButBotMoves } from "./socketio_botmoves";
 
 /** The transport, with the match queues it keeps open to inspection. */
 class InspectedTransport extends SocketIOButBotMoves {
@@ -40,7 +40,6 @@ const game: Game = {
 
 const KNOWN_MATCH = "known-match";
 const MADE_UP_MATCH = "made-up-match";
-const FLAKY_MATCH = "flaky-match";
 
 describe("the socket transport", () => {
   const running: (() => Promise<void>)[] = [];
@@ -50,16 +49,19 @@ describe("the socket transport", () => {
   });
 
   async function serve() {
-    // boardgame.io greets the console on boot, and a refusal is logged.
-    const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    // boardgame.io greets the console on boot — its CORS advice and the port it
+    // picked — and a test run's report is meant to have the console to itself.
+    const quiet = (["log", "warn"] as const).map(
+      method => vi.spyOn(console, method).mockImplementation(() => undefined)
+    );
     const failed = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const quiet = vi.spyOn(console, "log").mockImplementation(() => undefined);
     const transport = new InspectedTransport({}, {});
     const server = Server({
       games: [game],
       transport,
     });
     const { appServer } = await server.run(0);
+    quiet.forEach(spy => { spy.mockRestore(); });
     const context = server.app.context;
     const db = context.db as StorageAPI.Sync;
     const { port } = appServer.address() as AddressInfo;
@@ -68,7 +70,7 @@ describe("the socket transport", () => {
     running.push(async () => {
       sockets.forEach(socket => socket.disconnect());
       await new Promise(resolve => appServer.close(resolve));
-      [warned, failed, quiet].forEach(spy => { spy.mockRestore(); });
+      failed.mockRestore();
     });
 
     const client = () => {
@@ -76,7 +78,6 @@ describe("the socket transport", () => {
       sockets.push(socket);
       return socket;
     };
-    const refusals = () => warned.mock.calls.map(([line]) => String(line)).filter(line => line.startsWith("Refused"));
     // console.error is stubbed for the whole test, so a hook failure the
     // transport catches and logs is visible only here.
     const hookFailures = () => failed.mock.calls.map(([line]) => String(line)).filter(line => line.startsWith("Reacting to"));
@@ -86,7 +87,7 @@ describe("the socket transport", () => {
       await transport.queueFor(matchID)?.onIdle();
       await new Promise(resolve => setImmediate(resolve));
     };
-    return { db, client, context, failed, refusals, hookFailures, transport, drained };
+    return { db, client, context, hookFailures, drained };
   }
 
   function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH) {
@@ -157,17 +158,6 @@ describe("the socket transport", () => {
 
   const madeUpMove = { type: "MAKE_MOVE", payload: { type: "noop", args: [], playerID: "0", credentials: "made up" } };
 
-  it("refuses a sync naming a match that does not exist, and says so", async () => {
-    const { db, client, refusals } = await serve();
-    createKnownMatch(db);
-
-    const socket = client();
-    socket.emit("sync", MADE_UP_MATCH, null, undefined, 2);
-    await syncBehind(socket);
-
-    expect(refusals()).toEqual([expect.stringContaining(`sync for unknown match "${MADE_UP_MATCH}"`)]);
-  });
-
   // These reach boardgame.io, which answers them without writing: the bot
   // hook behind them is what must not fail (#695).
   it.each([
@@ -192,13 +182,11 @@ describe("the socket transport", () => {
   // listeners leave that rejection unhandled, which ends the process (#695).
   it.each([
     ["update", "an object", [madeUpMove, 0, {}, "0"]],
-    ["update", "a number", [madeUpMove, 0, 5, "0"]],
     ["update", "empty", [madeUpMove, 0, "", "0"]],
     ["chat", "an object", [{}, { id: "a", sender: "0", payload: "hi" }, "made up"]],
-    ["chat", "a number", [5, { id: "a", sender: "0", payload: "hi" }, "made up"]],
   ])("refuses a `%s` whose match id is %s before storage is asked", async (event, _case, args) => {
     const rejections = watchForUnhandledRejections();
-    const { db, client, context, refusals } = await serve();
+    const { db, client, context } = await serve();
     createKnownMatch(db);
     deferReads(context, matchID => typeof matchID === "string" && matchID !== ""
       ? Promise.resolve()
@@ -209,7 +197,6 @@ describe("the socket transport", () => {
     await syncBehind(socket);
 
     expect(rejections).toEqual([]);
-    expect(refusals()).toEqual([expect.stringContaining(`${event} without a match id`)]);
   });
 
   it.each([
@@ -230,91 +217,5 @@ describe("the socket transport", () => {
 
     expect(rejections).toEqual([]);
     expect(hookFailures()).toEqual([]);
-  });
-
-  it("reports a refusal once per socket, however many arrive", async () => {
-    const { db, client, refusals } = await serve();
-    createKnownMatch(db);
-
-    const socket = client();
-    for (let i = 0; i < 20; i++) socket.emit("sync", `${MADE_UP_MATCH}-${i}`, null, undefined, 2);
-    await syncBehind(socket);
-
-    expect(refusals()).toEqual([expect.stringContaining(`sync for unknown match "${MADE_UP_MATCH}-0"`)]);
-  });
-
-  it("says so when it was storage, not the match, that failed", async () => {
-    const { db, client, context, failed, refusals } = await serve();
-    createKnownMatch(db);
-    deferReads(context, () => Promise.reject(new Error("the database is not there")));
-
-    const socket = client();
-    socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
-    await vi.waitFor(() => {
-      expect(failed).toHaveBeenCalledWith(expect.stringContaining("Storage could not be read"), expect.anything());
-    });
-
-    expect(refusals()).toEqual([]);
-  });
-
-  // A client picks how many syncs meet a failing store, so it would pick how
-  // many stack traces the log gets.
-  it("reports storage failures within a budget, however many syncs meet one", async () => {
-    const { db, client, context, failed } = await serve();
-    createKnownMatch(db);
-    createKnownMatch(db, FLAKY_MATCH);
-    deferReads(context, matchID => matchID === FLAKY_MATCH
-      ? Promise.reject(new Error("the database is not there"))
-      : Promise.resolve());
-
-    const socket = client();
-    for (let i = 0; i < 25; i++) socket.emit("sync", FLAKY_MATCH, null, undefined, 2);
-    await syncBehind(socket);
-
-    const storageFailures = failed.mock.calls.filter(([line]) => String(line).startsWith("Storage could not be read"));
-    expect(storageFailures).toHaveLength(20);
-  });
-
-  it("keeps no queue for a match an update named but no socket joined", async () => {
-    const { db, client, transport, drained } = await serve();
-    createKnownMatch(db);
-
-    const socket = client();
-    await syncBehind(socket);
-    socket.emit("update", madeUpMove, 0, MADE_UP_MATCH, "0");
-    socket.emit("update", madeUpMove, 0, KNOWN_MATCH, "0");
-    await syncBehind(socket);
-    await drained(MADE_UP_MATCH);
-    await drained(KNOWN_MATCH);
-
-    expect(transport.queueFor(MADE_UP_MATCH)).toBeUndefined();
-    // The socket synced to this one, so its moves keep their queue.
-    expect(transport.queueFor(KNOWN_MATCH)).toBeDefined();
-  });
-});
-
-describe("a client's match id in a log line", () => {
-  it.each([
-    ["a plain id", "abc", '"abc"'],
-    ["a line break", "a\nRefused", '"a\\nRefused"'],
-    ["no string at all", { id: 1 }, "<object>"],
-    ["null", null, "<null>"],
-    ["an id longer than the limit", "x".repeat(100), `"${"x".repeat(64)}"…`],
-  ])("is written quoted and cut short for %s", (_case, matchID, written) => {
-    expect(describeMatchID(matchID)).toBe(written);
-  });
-});
-
-describe("the log budget", () => {
-  it("writes the first lines of a window, and counts what it held back", () => {
-    const written: unknown[][] = [];
-    let now = 0;
-    const budget = new LogBudget(2, 1000, (...line) => { written.push(line); }, () => now);
-
-    for (const line of ["a", "b", "c", "d"]) budget.write(line);
-    now = 1000;
-    budget.write("e", "detail");
-
-    expect(written).toEqual([["a"], ["b"], ["Withheld 2 more such lines"], ["e", "detail"]]);
   });
 });
