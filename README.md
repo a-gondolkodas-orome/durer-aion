@@ -424,6 +424,13 @@ The home page, `/jatekok/` and `/valto/` report visits to one website on the
 self-hosted [umami](https://umami.durerinfo.hu), told apart by path. Each page
 carries its own copy of the tracker tag.
 
+Umami records the device's *screen* by itself (Overview → Environment → More →
+Screen). The tag's `onload` adds what layout work needs and the screen does not
+say, as session data under Sessions → Properties: `viewport`, the browser
+window in CSS pixels; `pixelRatio`, which browser zoom and the system's display
+scaling both move; and `pointer`, `coarse` for a touch screen. A session keeps
+the values its latest page load sent.
+
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
