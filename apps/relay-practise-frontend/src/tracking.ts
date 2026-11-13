@@ -1,5 +1,5 @@
 /*
-Custom events for the umami tracker loaded (deferred) in index.html; pageviews it
+Custom events for the umami tracker loaded (async) in index.html; pageviews it
 sends by itself. A no-op when `window.umami` is absent — off gyakorlo.durerinfo.hu
 or before the script has loaded — and the tracker drops the call itself under Do
 Not Track.

@@ -25,7 +25,6 @@ describe('usePageviewTracking', () => {
 
   afterEach(() => {
     delete window.umami;
-    vi.useRealTimers();
     vi.unstubAllEnvs();
   });
 
@@ -76,18 +75,53 @@ describe('usePageviewTracking', () => {
     expect(urlOf(track)).toBe('/jatekok/');
   });
 
-  it('retries while the deferred umami script is not ready yet', () => {
-    vi.useFakeTimers();
-    delete window.umami;
-    render(
-      <MemoryRouter initialEntries={['/game/Bacteria']}>
-        <TrackingProbe />
-      </MemoryRouter>
-    );
-    expect(track).not.toHaveBeenCalled();
-    window.umami = { track: track as NonNullable<Window['umami']>['track'] };
-    act(() => { vi.advanceTimersByTime(100); });
-    expect(track).toHaveBeenCalledTimes(1);
-    expect(urlOf(track)).toBe('/game/Bacteria');
+  describe('before the async umami script has loaded', () => {
+    let script: HTMLScriptElement;
+
+    beforeEach(() => {
+      delete window.umami;
+      script = document.createElement('script');
+      script.setAttribute('src', 'https://umami.durerinfo.hu/script.js');
+      document.head.append(script);
+    });
+
+    afterEach(() => {
+      script.remove();
+    });
+
+    const load = () => {
+      window.umami = { track: track as NonNullable<Window['umami']>['track'] };
+      act(() => { script.dispatchEvent(new Event('load')); });
+    };
+
+    // However long it takes: a slow tracker must not lose the first pageview.
+    it('sends the pageview once the script loads', () => {
+      render(
+        <MemoryRouter initialEntries={['/game/Bacteria']}>
+          <TrackingProbe />
+        </MemoryRouter>
+      );
+      expect(track).not.toHaveBeenCalled();
+      load();
+      expect(track).toHaveBeenCalledTimes(1);
+      expect(urlOf(track)).toBe('/game/Bacteria');
+    });
+
+    it('sends only the page the visitor is on by then', () => {
+      const Nav = () => {
+        const navigate = useNavigate();
+        return <button onClick={() => void navigate('/game/TicTacToe')}>go</button>;
+      };
+      const { getByText } = render(
+        <MemoryRouter initialEntries={['/']}>
+          <TrackingProbe />
+          <Nav />
+        </MemoryRouter>
+      );
+      act(() => { getByText('go').click(); });
+      load();
+      expect(track).toHaveBeenCalledTimes(1);
+      expect(urlOf(track)).toBe('/game/TicTacToe');
+    });
   });
 });
