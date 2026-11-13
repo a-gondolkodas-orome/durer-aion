@@ -176,6 +176,14 @@ In `scripts/test.tsv`, the teams logging in with `006-0000-000`, `007-0000-000` 
 closed, and one that is open, in that order; the rest have none, so `000` to
 `002` can start at any time.
 
+A competition's own window, which every team without one of its own follows, is
+the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set
+on the **Import/export** tab: the table of competitions shows each one's window,
+and its edit button sets one in place of the config's, or returns it to the
+config's. Neither the team's window nor the competition's means any time. The
+server decides a start by its own clock, and the team's page reads the window by
+the server's clock too, not the browser's.
+
 `Competition` is the competition the row's team enters, by edition, round and
 category (`20 online C`; `20. internetes C` works too) or by its id, so one file
 holds a whole round's registrations, the online round's C, D and E competitions

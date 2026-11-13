@@ -39,7 +39,10 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
 3. **The team's view.** `GET /team/me` answers `publicTeamView` (`team_view.ts`)
    with both matches' status and the team's competition without its
    problems, from which the client builds its boards and the chooser shows
-   only the matches the competition has. The frontend keeps that one object in
+   only the matches the competition has. It also serves the team's start
+   window (`teamStartWindow` in `start_window.ts`: the team's own, else its
+   competition's, the one set on the admin page before the config's) and the
+   server's time, by which the page keeps Start disabled outside the window. The frontend keeps that one object in
    `team-state-store.ts`, and `Main.tsx` picks the screen from its `pageState`.
 4. **Disclaimer and home.** `POST /team/me/gohome` moves the team to `HOME`,
    from the disclaimer or after a match. It is refused while a match is in
@@ -50,7 +53,10 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
      never from the disclaimer;
    - `getNewGame` picks the game of the team's competition
      (`relay--<id>` or `strategy--<id>`, hosted from the registry by
-     `games.ts`), and answers 403 for a match the competition does not have;
+     `games.ts`), and answers 403 for a match the competition does not have,
+     and for a start outside the team's start window. Only the start is held
+     to the window: a match started in it runs its full time, and add-minutes
+     may carry it past the window's end;
    - `createGame` creates an unlisted match under a fresh id;
    - `injectPlayer` seats the team as `'0'`, named by its `teamId` and holding
      its `credentials`, and `injectBot` seats the bot as `'1'`;
