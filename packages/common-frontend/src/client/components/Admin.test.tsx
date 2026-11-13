@@ -405,11 +405,11 @@ test('the team list, with the add-time form, and the stats are on two tabs, the 
 
   expect(await screen.findByText('Alpha')).toBeVisible();
   expect(screen.getByText('hozzáadás')).toBeVisible();
-  expect(screen.getByText('Kategória')).not.toBeVisible();
+  expect(screen.getByText('Verseny')).not.toBeVisible();
 
   fireEvent.click(screen.getByRole('tab', { name: 'Statisztika' }));
 
-  expect(screen.getByText('Kategória')).toBeVisible();
+  expect(screen.getByText('Verseny')).toBeVisible();
   expect(screen.getByText('Alpha')).not.toBeVisible();
   expect(screen.getByText('hozzáadás')).not.toBeVisible();
   expect(window.location.search).toBe('?tab=statisztika');
@@ -418,6 +418,22 @@ test('the team list, with the add-time form, and the stats are on two tabs, the 
 
   expect(screen.getByText('Alpha')).toBeVisible();
   expect(window.location.search).toBe('');
+});
+
+// The categories of two competitions can share a letter, as an international
+// E+ beside the online round's E would; a competition the server no longer has
+// keeps its id.
+test('the stats have a row per competition, by its name', async () => {
+  window.history.replaceState(null, '', '/admin?tab=statisztika');
+  vi.spyOn(repo, 'getAll').mockResolvedValue([
+    alpha,
+    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bravo'), competitionId: 'u4lw7pcca1--20-online-d', category: 'D' },
+    { ...team('3a8f2d1b-5c6e-4f7a-8b9c-0d1e2f3a4b5c', 'Charlie'), competitionId: 'zzzzzzzzzz--gone' },
+  ]);
+  renderAdmin();
+
+  const rows = (await screen.findAllByRole('row')).slice(1).map(row => within(row).getAllByRole('cell')[0].textContent);
+  expect(rows).toEqual(['20 online C', '20 online D', 'zzzzzzzzzz--gone']);
 });
 
 test('the stats say what the numbers in each triple count', async () => {
@@ -435,7 +451,7 @@ test('the tab named in the URL is the one that opens', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   renderAdmin();
 
-  expect(await screen.findByText('Kategória')).toBeVisible();
+  expect(await screen.findByText('Verseny')).toBeVisible();
   expect(screen.getByRole('tab', { name: 'Statisztika' })).toHaveAttribute('aria-selected', 'true');
 });
 
@@ -521,7 +537,7 @@ test('the competitions tab lists the competitions newest first, with what to imp
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect([...grids.columns].reverse().find(columns => columns.some(column => column.field === 'importAs'))
     ?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'startWindow']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'startWindow']);
   if (row === null) throw new Error('no table row');
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
