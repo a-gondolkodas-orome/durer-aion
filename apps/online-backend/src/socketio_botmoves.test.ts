@@ -3,7 +3,7 @@ import type { Game, Server as BgioServer, StorageAPI } from "boardgame.io";
 import { Server } from "boardgame.io/server";
 import { Async as AsyncStorage, createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
-import { describeMatchID, SocketIOButBotMoves, WarningBudget } from "./socketio_botmoves";
+import { describeMatchID, LogBudget, SocketIOButBotMoves } from "./socketio_botmoves";
 
 /** The transport, with the match queues it keeps open to inspection. */
 class InspectedTransport extends SocketIOButBotMoves {
@@ -40,6 +40,7 @@ const game: Game = {
 
 const KNOWN_MATCH = "known-match";
 const MADE_UP_MATCH = "made-up-match";
+const FLAKY_MATCH = "flaky-match";
 
 describe("the socket transport", () => {
   const running: (() => Promise<void>)[] = [];
@@ -256,6 +257,24 @@ describe("the socket transport", () => {
     expect(refusals()).toEqual([]);
   });
 
+  // A client picks how many syncs meet a failing store, so it would pick how
+  // many stack traces the log gets.
+  it("reports storage failures within a budget, however many syncs meet one", async () => {
+    const { db, client, context, failed } = await serve();
+    createKnownMatch(db);
+    createKnownMatch(db, FLAKY_MATCH);
+    deferReads(context, matchID => matchID === FLAKY_MATCH
+      ? Promise.reject(new Error("the database is not there"))
+      : Promise.resolve());
+
+    const socket = client();
+    for (let i = 0; i < 25; i++) socket.emit("sync", FLAKY_MATCH, null, undefined, 2);
+    await syncBehind(socket);
+
+    const storageFailures = failed.mock.calls.filter(([line]) => String(line).startsWith("Storage could not be read"));
+    expect(storageFailures).toHaveLength(20);
+  });
+
   it("keeps no queue for a match an update named but no socket joined", async () => {
     const { db, client, transport, drained } = await serve();
     createKnownMatch(db);
@@ -286,17 +305,16 @@ describe("a client's match id in a log line", () => {
   });
 });
 
-describe("the refusal warning budget", () => {
-  it("writes the first warnings of a window, and counts what it held back", () => {
-    const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+describe("the log budget", () => {
+  it("writes the first lines of a window, and counts what it held back", () => {
+    const written: unknown[][] = [];
     let now = 0;
-    const budget = new WarningBudget(2, 1000, () => now);
+    const budget = new LogBudget(2, 1000, (...line) => { written.push(line); }, () => now);
 
-    for (const line of ["a", "b", "c", "d"]) budget.warn(line);
+    for (const line of ["a", "b", "c", "d"]) budget.write(line);
     now = 1000;
-    budget.warn("e");
+    budget.write("e", "detail");
 
-    expect(warned.mock.calls.map(([line]) => line)).toEqual(["a", "b", "Withheld 2 more such warnings", "e"]);
-    warned.mockRestore();
+    expect(written).toEqual([["a"], ["b"], ["Withheld 2 more such lines"], ["e", "detail"]]);
   });
 });

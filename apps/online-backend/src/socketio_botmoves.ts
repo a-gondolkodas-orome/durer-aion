@@ -123,10 +123,10 @@ const logListenerFailure = (event: string, matchID: unknown) => (error: unknown)
   console.error(`Reacting to a ${event} for match ${describeMatchID(matchID)} failed:`, error);
 };
 
-/** Writes at most `limit` warnings per window, across every socket: a limit per
+/** Writes at most `limit` lines per window, across every socket: a limit per
  *  socket alone is reset by opening another one. What it holds back is counted,
- *  and the count is written with the first warning of a later window. */
-export class WarningBudget {
+ *  and the count is written with the first line of a later window. */
+export class LogBudget {
   private windowStart = -Infinity;
   private written = 0;
   private withheld = 0;
@@ -134,14 +134,15 @@ export class WarningBudget {
   constructor(
     private readonly limit: number,
     private readonly windowMs: number,
+    private readonly log: (...line: unknown[]) => void,
     private readonly now: () => number = Date.now
   ) {}
 
-  warn(line: string): void {
+  write(...line: unknown[]): void {
     const now = this.now();
     if (now - this.windowStart >= this.windowMs) {
       if (this.withheld > 0) {
-        console.warn(`Withheld ${this.withheld} more such warnings`);
+        this.log(`Withheld ${this.withheld} more such lines`);
       }
       this.windowStart = now;
       this.written = 0;
@@ -149,7 +150,7 @@ export class WarningBudget {
     }
     if (this.written < this.limit) {
       this.written++;
-      console.warn(line);
+      this.log(...line);
     } else {
       this.withheld++;
     }
@@ -165,7 +166,10 @@ export class WarningBudget {
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, Bot>;
-  private readonly refusals = new WarningBudget(20, 60_000);
+  // console is looked up per line rather than bound here, so a spy installed
+  // after construction still sees it.
+  private readonly refusals = new LogBudget(20, 60_000, (...line) => { console.warn(...line); });
+  private readonly storageFailures = new LogBudget(20, 60_000, (...line) => { console.error(...line); });
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, Bot>,
@@ -229,7 +233,7 @@ export class SocketIOButBotMoves extends SocketIO {
           const refuse = (reason: string) => {
             if (!reported) {
               reported = true;
-              this.refusals.warn(`Refused a packet on socket ${socket.id}: ${reason}`);
+              this.refusals.write(`Refused a packet on socket ${socket.id}: ${reason}`);
             }
             next(new Error(reason));
           };
@@ -251,8 +255,9 @@ export class SocketIOButBotMoves extends SocketIO {
               next();
             },
             (error: unknown) => {
-              // Not the client's doing, so not under the once-per-socket limit.
-              console.error(`Storage could not be read for a sync of match ${describeMatchID(matchID)}:`, error);
+              // Not the client's doing, so not under the once-per-socket limit;
+              // but how many syncs meet a failing store is, so it has a budget.
+              this.storageFailures.write(`Storage could not be read for a sync of match ${describeMatchID(matchID)}:`, error);
               next(error instanceof Error ? error : new Error(String(error)));
             }
           );
