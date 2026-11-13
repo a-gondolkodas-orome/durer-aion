@@ -390,7 +390,7 @@ test('a single team\'s page has no tabs, not even while the list loads', async (
 });
 
 const importAnswer = (overrides: Partial<TeamImportResultDto> = {}): TeamImportResultDto => ({
-  successful: 0, existing: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
+  successful: 0, existing: 0, updated: 0, failed: 0, export_table: [], logs: { sev: [], value: [] }, ...overrides,
 });
 
 const alphaCodes = ['Alpha', COMPETITION_C, 'a@b.com', 'x', 'id-a', '111-2222-333', 'creds-a'];

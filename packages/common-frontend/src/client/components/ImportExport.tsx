@@ -11,7 +11,8 @@ import { CompetitionTable } from './CompetitionTable';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
 function summary(result: TeamImportResultDto): string {
-  const existing = result.existing > 0 ? `, ${result.existing} már szerepelt` : '';
+  const updated = result.updated > 0 ? ` (${result.updated} frissült)` : '';
+  const existing = result.existing > 0 ? `, ${result.existing} már szerepelt${updated}` : '';
   return `${result.successful} csapat importálva${existing}, ${result.failed} sor hibás`;
 }
 
@@ -50,7 +51,9 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       if (answer.successful === 0) {
         // A file whose every team is already there is a re-run, not a failure.
         if (answer.failed === 0 && answer.existing > 0) {
-          enqueueSnackbar(`Nem került be új csapat: mind a(z) ${answer.existing} már szerepelt.`, { variant: 'info' });
+          const updated = answer.updated > 0 ? `, közülük ${answer.updated} a fájl szerint frissült` : '';
+          enqueueSnackbar(`Nem került be új csapat: mind a(z) ${answer.existing} már szerepelt${updated}.`, { variant: 'info' });
+          if (answer.updated > 0) props.onImported();
         } else {
           enqueueSnackbar('Egy csapat sem került be.', { variant: 'error' });
         }
