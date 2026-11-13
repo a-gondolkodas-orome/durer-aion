@@ -11,7 +11,7 @@ export interface RelayNumbers {
 }
 
 /// The online relay's as of the 20th edition: 9 problems worth 3 to 6 points,
-/// 40 in all. The local apps serve no competition and run this relay.
+/// 40 in all.
 const RELAY_FALLBACK = {
   minutes: RELAY_DEFAULT_DURATION_MINUTES,
   problemPoints: [3, 3, 4, 4, 4, 5, 5, 6, 6],

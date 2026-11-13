@@ -25,7 +25,7 @@ import { cardButtonSx, cardSx, cardTokens } from './card';
 export function ChooserItem(props: {
   status: MatchStatus,
   type: 'strategy' | 'relay',
-  /// The numbers its rules tell come from here; the local apps have none.
+  /// The numbers its rules tell come from here.
   competition?: PublicCompetition | null,
   /// False outside the team's start window, when the server refuses a start.
   canStart?: boolean,

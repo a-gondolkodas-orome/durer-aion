@@ -3,7 +3,7 @@ import { gameWrapper, GameStateMixin, GameType } from 'game';
 import { boardWrapper } from 'common-frontend';
 import { localWithBots, matchStorageKey } from 'common-frontend/core';
 import type { RelayBoard, StrategyBoard, StrategyDescription } from 'common-frontend';
-import type { MyGameState as RelayGameState, RelayMoveArgs } from 'game';
+import type { MyGameState as RelayGameState, RelayMoveArgs, RelayOptions, StrategyOptions } from 'game';
 import { RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
 import botWrapper from './botwrapper';
@@ -15,13 +15,14 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
-  description: StrategyDescription
+  description: StrategyDescription,
+  options?: StrategyOptions,
   ) {
   // The same key to both: what the transport persists the match log under is
   // what the step files report as the match's log.
   const storageKey = matchStorageKey(game.name);
   return Client({
-    game: gameWrapper(game, (report) => handleGameReport(report, storageKey)),
+    game: gameWrapper(game, (report) => handleGameReport(report, storageKey), options),
     board: boardWrapper(board, description, game),
     multiplayer: localWithBots(
       {
@@ -33,15 +34,16 @@ export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   });
 }
 
-// Only the name is the caller's: RelayWrapper builds the game itself, and the
-// name keys the saved match.
+// Only the name and the options are the caller's: RelayWrapper builds the game
+// itself, and the name keys the saved match.
 export function ClientRelayWithBot(
   gameName: string,
   board: RelayBoard,
   strategy: BotStrategy<RelayGameState, RelayMoveArgs>,
-  _description: ReactNode) {
+  _description: ReactNode,
+  options?: RelayOptions) {
   return Client({
-    game: RelayWrapper(handleGameReport),
+    game: RelayWrapper(handleGameReport, options),
     board: board,
     multiplayer: localWithBots(
       {
