@@ -264,7 +264,6 @@ describe("the socket transport a browser talks to", () => {
   });
 
   it("refuses a sync for a match nobody created", async () => {
-    // The refusal is reported, once for the socket that earned it.
     const warned = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const socket = await connectClient();
     const heard: string[] = [];
