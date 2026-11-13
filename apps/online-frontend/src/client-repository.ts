@@ -4,6 +4,7 @@ import i18n from "i18next";
 // Type-only on purpose: client-repository.test.ts loads this file without the
 // package's dist build, which the CI test job does not produce.
 import type { AdminClientRepository, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto } from "common-frontend";
+import type { Tracker } from "./tracking";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
 // ride a cross-origin request. In dev the Vite server proxies the backend
@@ -36,6 +37,8 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
 
   version = "ONLINE" as const;
 
+  constructor(private tracker?: Tracker) {}
+
   async getTeamState(): Promise<TeamModelDto | null> {
     let result;
     try {
@@ -67,6 +70,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     if (typeof result.data.serverTime === 'string') {
       result.data.clockOffsetMs = Date.parse(result.data.serverTime) - Date.now();
     }
+    this.tracker?.observe(result.data as TeamModelDto);
     return result.data as TeamModelDto;
   }
 
@@ -76,6 +80,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   ): Promise<void> {
     try {
       await apiAxiosInstance().post('team/join', { code });
+      this.tracker?.login();
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       if (err.response?.status === 404) {
@@ -105,6 +110,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async startRelay(): Promise<void> {
     try {
       await apiAxiosInstance().post('team/me/relay/play');
+      this.tracker?.started('relay');
     } catch (e: unknown) {
       const err = makeAxiosError(e)
       console.error(err.message)
@@ -115,6 +121,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async startStrategy(): Promise<void> {
     try {
       await apiAxiosInstance().post('team/me/strategy/play');
+      this.tracker?.started('strategy');
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)

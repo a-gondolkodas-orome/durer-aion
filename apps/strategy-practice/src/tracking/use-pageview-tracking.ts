@@ -14,26 +14,24 @@ The url is prefixed with the site's base path (`/jatekok` when deployed), since
 the home page and `/valto/` report to the same umami website and the app's own
 `/` would otherwise be indistinguishable from theirs.
 
-The umami script is loaded with `defer`, so window.umami may not exist on the
-first render; retry briefly until it appears. It stays undefined (or track()
-no-ops) with Do-Not-Track or off the production domain, which is left untracked.
+The umami script is loaded with `async`, so the app does not wait for it, and
+window.umami may not exist yet; the pageview then waits for the script's load
+event. It stays undefined (or track() no-ops) with Do-Not-Track or off the
+production domain, which is left untracked.
 */
 export const usePageviewTracking = () => {
   const location = useLocation();
 
   useEffect(() => {
     const url = import.meta.env.BASE_URL.replace(/\/$/, '') + location.pathname + location.search;
-    let cancelled = false;
-    let attempts = 0;
-    const send = () => {
-      if (cancelled) return;
-      if (window.umami) {
-        trackPageview(url);
-      } else if (attempts++ < 20) {
-        setTimeout(send, 100);
-      }
-    };
-    send();
-    return () => { cancelled = true; };
+    if (window.umami) {
+      trackPageview(url);
+      return;
+    }
+    // With no tracker tag, or one that never loads (blocked), nothing is sent.
+    const script = document.querySelector('script[src*="umami"]');
+    const onLoad = () => trackPageview(url);
+    script?.addEventListener('load', onLoad, { once: true });
+    return () => script?.removeEventListener('load', onLoad);
   }, [location.pathname, location.search]);
 };

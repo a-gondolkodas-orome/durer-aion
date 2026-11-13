@@ -1,5 +1,5 @@
 /*
-Thin wrappers around the self-hosted umami tracker loaded (deferred) in
+Thin wrappers around the self-hosted umami tracker loaded (async) in
 index.html. Every call is a no-op when `window.umami` is absent — which happens
 when the script has not loaded yet, the visitor has Do-Not-Track enabled, or the
 page is not served from the production domain (see data-domains in index.html).

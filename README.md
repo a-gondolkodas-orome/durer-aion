@@ -424,6 +424,23 @@ The home page, `/jatekok/` and `/valto/` report visits to one website on the
 self-hosted [umami](https://umami.durerinfo.hu), told apart by path. Each page
 carries its own copy of the tracker tag.
 
+Umami records the device's *screen* by itself (Overview → Environment → More →
+Screen). The tag's `onload` adds what layout work needs and the screen does not
+say, as session data under Sessions → Properties: `viewport`, the browser
+window in CSS pixels; `pixelRatio`, which browser zoom and the system's display
+scaling both move; and `pointer`, `coarse` for a touch screen. A session keeps
+the values its latest page load sent.
+
+The competition, `verseny.durerinfo.hu`, reports to a website of its own, from
+`apps/online-frontend/src/tracking.ts` rather than a tag: a pageview per load,
+never from an admin page, the same session data plus the team's `category`,
+`year` and `language`, and the events `login`, `relay-started`,
+`relay-finished`, `strategy-started` and `strategy-finished`, the last two with
+`points`. Starts and ends are sent only by the browser that started the match,
+so each counts once per team. `connection-lost` (the board's alert showed) and
+`crash` (the error screen showed, with the error's message) carry the team's
+`page`. Nothing names a team.
+
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
