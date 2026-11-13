@@ -270,6 +270,30 @@ test('the team dialog gives the team a start window of its own, and takes it awa
   expect(setStartWindow).toHaveBeenLastCalledWith(alpha.teamId, { opensAt: null, closesAt: null });
 });
 
+// The team's own window replaces its competition's, so the card names that one too.
+test('the team dialog names the competition window a team\'s own replaces', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00', closesAt: '2026-11-20T21:30+01:00' }, configStartWindow: null },
+  ]);
+  vi.spyOn(repo, 'setStartWindow')
+    .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
+  renderAdmin(alpha.teamId);
+
+  const summary = await screen.findByTestId('startWindowSummary');
+  await waitFor(() => {
+    expect(summary).toHaveTextContent('Nincs saját ablaka: a versenye ablakában indíthat, 2026-11-20T15:00+01:00 – 2026-11-20T21:30+01:00.');
+  });
+  fireEvent.change(screen.getByLabelText('Kezdete'), { target: { value: '2026-11-21T15:00+01:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  await waitFor(() => {
+    expect(summary).toHaveTextContent('Saját ablaka van, a versenyé helyett: 2026-11-21T15:00+01:00 után bármikor. '
+      + 'A verseny ablaka, amit felülír: 2026-11-20T15:00+01:00 – 2026-11-20T21:30+01:00.');
+  });
+});
+
 // The placeholder shows the format, but goes as soon as typing starts.
 test('the team dialog fills a start window field with the current time, to edit from', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);

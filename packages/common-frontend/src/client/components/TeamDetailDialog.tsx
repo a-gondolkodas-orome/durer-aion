@@ -1,6 +1,7 @@
 import { Box, Stack } from '@mui/system';
-import { useAddMinutes, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useSetStartWindow } from '../hooks/user-hooks';
+import { useAddMinutes, useCompetitions, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useSetStartWindow } from '../hooks/user-hooks';
 import { validateStartWindow } from 'schemas';
+import type { StartWindow } from 'schemas';
 import { windowTimeNow } from '../utils/window-time';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
@@ -449,6 +450,12 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
 }
 
 
+/// A start window as the admin page writes it; none means any time.
+function describeWindow(window: StartWindow | null): string {
+  if (window === null) return 'bármikor';
+  return window.closesAt === undefined ? `${window.opensAt} után bármikor` : `${window.opensAt} – ${window.closesAt}`;
+}
+
 /// The team's own start window, which replaces its competition's: for a team
 /// writing the round late, or a testing code, which gets a wide one such as
 /// 2001 to 2099. The server refuses a start outside it; a match already
@@ -461,6 +468,12 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
   const [closesAt, setClosesAt] = useState(team.startClosesAt ?? '');
   const [error, setError] = useState<string | null>(null);
   const own = team.startOpensAt !== null && team.startOpensAt !== undefined;
+  // The competition's window in force, which the team's own replaces; the
+  // same request as the Import/export tab's table, so the two share it.
+  const getCompetitions = useCompetitions();
+  const { data: competitions } = useSWR('team/admin/competitions', getCompetitions);
+  const competitionWindow = competitions?.find(competition => competition.id === team.competitionId)?.startWindow;
+  const competitionDescribed = competitionWindow === undefined ? undefined : describeWindow(competitionWindow);
   // The current time, in the format the fields take: a placeholder to read and,
   // through "Most", a value to start from, since the placeholder goes once
   // typing starts.
@@ -498,8 +511,13 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
       </Stack>
       <Stack sx={{ gap: '8px', padding: { xs: '16px', md: '20px 24px' } }} data-testid="startWindowSummary">
         {own
-          ? <span>Saját ablaka van, a versenyé helyett: {team.startOpensAt}{team.startClosesAt ? ` – ${team.startClosesAt}` : ' után bármikor'}.</span>
-          : <span>Nincs saját ablaka: a versenye ablakában indíthat.</span>}
+          ? <span>
+            Saját ablaka van, a versenyé helyett: {describeWindow({ opensAt: team.startOpensAt ?? '', closesAt: team.startClosesAt ?? undefined })}.
+            {competitionDescribed !== undefined && ` A verseny ablaka, amit felülír: ${competitionDescribed}.`}
+          </span>
+          : <span>
+            Nincs saját ablaka: a versenye ablakában indíthat{competitionDescribed !== undefined && `, ${competitionDescribed}`}.
+          </span>}
         <Box sx={{ fontSize: 13, color: MUTED }}>
           Csak azt korlátozza, mikor kezdhet játékot: az elkezdett játék végig fut. Tesztkódnak tág ablak való, például 2001-től 2099-ig.
         </Box>
