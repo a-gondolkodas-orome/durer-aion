@@ -74,6 +74,11 @@ export class TeamsRepository {
     return updated > 0;
   }
 
+  /** Sets fields of a team that is already there, validated as an insert is. */
+  async updateTeam(team: TeamModel, changes: Partial<Pick<TeamModel, "email">>) {
+    await team.update(changes);
+  }
+
   async insertTeam(
       { teamname, competitionId, category, email, other, teamId, joinCode, credentials } :
       { teamname: string, competitionId: string, category: string, email: string, other: string, teamId: string,
