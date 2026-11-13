@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll } from '../hooks/user-hooks';
+import { useAddMinutes, useAll, useCompetitions } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
@@ -7,6 +7,7 @@ import { DataGrid, ExportCsv, QuickFilter, QuickFilterControl, Toolbar } from '@
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
+import { CompetitionTable } from './CompetitionTable';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -51,7 +52,7 @@ const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: f
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
-const TABS = ['csapatok', 'statisztika', 'import-export'] as const;
+const TABS = ['csapatok', 'versenyek', 'statisztika', 'import-export'] as const;
 type AdminTab = typeof TABS[number];
 
 function tabFromUrl(): AdminTab {
@@ -86,6 +87,8 @@ export function Admin(props: { teamId?: string }) {
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
+  const getCompetitions = useCompetitions();
+  const { data: competitions, mutate: refetchCompetitions } = useSWR('team/admin/competitions', getCompetitions);
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
@@ -150,6 +153,7 @@ export function Admin(props: { teamId?: string }) {
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
+        <Tab label="Versenyek" value="versenyek" id="admin-tab-versenyek" aria-controls="admin-panel-versenyek"/>
         <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
         <Tab label="Import/export" value="import-export" id="admin-tab-import-export" aria-controls="admin-panel-import-export"/>
       </Tabs>
@@ -338,11 +342,17 @@ export function Admin(props: { teamId?: string }) {
         </Form>
         </Stack>
       </Stack>
+      <Stack {...panelProps('versenyek', tab)}>
+        <Stack sx={{ padding: '10px' }}>
+          <CompetitionTable competitions={competitions ?? []} onWindowChanged={() => { void refetchCompetitions(); }}/>
+        </Stack>
+      </Stack>
       <Stack {...panelProps('statisztika', tab)}>
         <Stats data={teams}/>
       </Stack>
       <Stack {...panelProps('import-export', tab)}>
-        <ImportExport teams={teams} onImported={() => { void mutate(); }}/>
+        <ImportExport teams={teams} onImported={() => { void mutate(); }}
+          onOpenCompetitions={() => { openTab('versenyek'); }}/>
       </Stack>
       </>}
     </Stack>
