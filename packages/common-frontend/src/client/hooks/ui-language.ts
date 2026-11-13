@@ -16,13 +16,23 @@ export function competitionLanguage(languages: readonly Language[], chosen: stri
   return languages[0] ?? 'hu';
 }
 
-// The practice sites' key, which the dry run shares an origin with: one choice
-// serves all three there.
-const storageKey = 'lang';
+/// The login page's language, before there is a competition to go by: the
+/// one chosen, else Hungarian.
+export function loginLanguage(chosen: string | null): Language {
+  return isLanguage(chosen) ? chosen : 'hu';
+}
 
-/// The language last chosen in the switcher, null if none. Storage may be
-/// unavailable, as in a private window; that reads as no choice.
+// The practice sites' key and parameter, which the dry run shares an origin
+// with: one choice serves all three there.
+const storageKey = 'lang';
+const searchParam = 'lang';
+
+/// The language chosen: a `?lang=` link's, else the one last picked in the
+/// switcher, else null. Storage may be unavailable, as in a private window;
+/// that reads as no stored choice.
 export function readChosenLanguage(): string | null {
+  const linked = new URLSearchParams(window.location.search).get(searchParam);
+  if (linked !== null) return linked;
   try {
     return localStorage.getItem(storageKey);
   } catch {
@@ -30,10 +40,16 @@ export function readChosenLanguage(): string | null {
   }
 }
 
-export function storeChosenLanguage(language: string) {
+/// Stores a pick in the switcher, and drops a `?lang=` the page opened with,
+/// which would otherwise outrank the pick on the next reload.
+export function rememberChosenLanguage(language: string) {
   try {
     localStorage.setItem(storageKey, language);
   } catch {
     // The choice then lasts until a reload, which is all it can.
   }
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(searchParam)) return;
+  url.searchParams.delete(searchParam);
+  window.history.replaceState(window.history.state, '', url);
 }

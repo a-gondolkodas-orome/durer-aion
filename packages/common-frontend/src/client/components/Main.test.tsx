@@ -177,6 +177,28 @@ test('a choice the competition does not have is ignored', () => {
   expect(i18next.language).toBe('hu');
 });
 
+test('the login page is Hungarian with no choice', () => {
+  renderMain();
+  expect(i18next.language).toBe('hu');
+});
+
+test('the login page follows the stored choice', () => {
+  localStorage.setItem('lang', 'en');
+  renderMain();
+  expect(i18next.language).toBe('en');
+});
+
+test('a ?lang= link outranks the stored choice, on the login page and after it', () => {
+  localStorage.setItem('lang', 'hu');
+  window.history.replaceState({}, '', '/?lang=en');
+  renderMain();
+  expect(i18next.language).toBe('en');
+
+  MockTeamState.mockHomeIn(['hu', 'en']);
+  renderMain();
+  expect(i18next.language).toBe('en');
+});
+
 test('the admin page stays Hungarian under a team session in an English competition', () => {
   MockTeamState.mockHomeIn(['en', 'hu']);
   window.history.replaceState({}, '', '/admin');

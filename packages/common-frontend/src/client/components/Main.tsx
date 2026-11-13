@@ -13,7 +13,7 @@ import { Admin } from "./Admin";
 import { ErrorBoundary } from "./ErrorBoundary";
 import i18next from "i18next";
 import { useOptionalAdminRepo } from "../client-repo-context";
-import { competitionLanguage, readChosenLanguage, storeChosenLanguage } from "../hooks/ui-language";
+import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenLanguage } from "../hooks/ui-language";
 
 export function Main(props: { gitCommitHash: string }) {
   const teamState = useTeamState();
@@ -24,14 +24,16 @@ export function Main(props: { gitCommitHash: string }) {
   const maxWidth = !admin && teamState?.pageState === "STRATEGY" ? STRATEGY_PAGE_MAX_WIDTH : PAGE_MAX_WIDTH;
 
   // The team's competition decides the language; with two, the team chooses.
-  // The admin pages are written in Hungarian only, and so is the login page,
-  // which has no competition to go by yet.
+  // The login page has no competition to go by yet, so it follows the choice
+  // alone. The admin pages are written in Hungarian only.
   const [chosenLanguage, setChosenLanguage] = useState(readChosenLanguage);
   const languages = admin ? undefined : teamState?.competition?.languages;
-  const language = languages === undefined ? 'hu' : competitionLanguage(languages, chosenLanguage);
+  const language = admin ? 'hu'
+    : languages === undefined ? loginLanguage(chosenLanguage)
+      : competitionLanguage(languages, chosenLanguage);
   const chooseLanguage = (chosen: string) => {
     setChosenLanguage(chosen);
-    storeChosenLanguage(chosen);
+    rememberChosenLanguage(chosen);
   };
 
   useEffect(() => {
