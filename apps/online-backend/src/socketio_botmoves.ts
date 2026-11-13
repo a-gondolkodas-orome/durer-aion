@@ -100,13 +100,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-/** Where each packet boardgame.io listens for carries its match id. */
-const MATCH_ID_ARGUMENT: ReadonlyMap<string, number> = new Map([
-  ["sync", 0],
-  ["update", 2],
-  ["chat", 0],
-]);
-
 /** socket.io does not await a listener, and an unhandled rejection ends the
  *  process with every match on it. */
 const logListenerFailure = (event: string, matchID: unknown) => (error: unknown) => {
@@ -148,7 +141,7 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Refuses a packet naming a match that storage does not have.
+        /** Refuses a `sync` naming a match that storage does not have.
          *
          * boardgame.io's `Master.onSync` skips its credential check when
          * `playerID` is null — the spectator case it is written for — and
@@ -159,50 +152,50 @@ export class SocketIOButBotMoves extends SocketIO {
          *
          * A match here is only ever created by the server, for a team that
          * asked for one (`server/team_manage.ts`), and the id reaches a
-         * browser only in that answer. So a packet naming a match storage does
-         * not have belongs to no client of this competition, and it never
+         * browser only in that answer. So a sync for a match storage does not
+         * have belongs to no client of this competition, and the packet never
          * reaches boardgame.io's listener.
+         *
+         * Only `sync`: boardgame.io answers an `update` or `chat` for an
+         * unknown match without writing anything, and checking every move
+         * here would cost it a storage read.
          *
          * A packet middleware rather than a wrapped listener: it is the hook
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
-        const refusalFor = async ([event, ...args]: IOTypes.Event): Promise<string | undefined> => {
-          const at = MATCH_ID_ARGUMENT.get(String(event));
-          if (at === undefined) {
-            return undefined;
-          }
-          const matchID: unknown = args[at];
-          if (typeof matchID !== "string" || matchID === "") {
-            return `${String(event)} without a match id`;
-          }
-          try {
-            const { metadata } = await fetch(app.context.db, matchID, { metadata: true } as const);
-            return metadata === undefined ? `${String(event)} for unknown match ${matchID}` : undefined;
-          } catch (error: unknown) {
-            return `storage could not be read for match ${matchID}: ${String(error)}`;
-          }
-        };
-
         // Logged once per socket, so a client cannot fill the log.
         let reported = false;
-
-        /* socket.io does not wait for one packet's middleware before starting
-         * the next, and a reordered update is a move boardgame.io rejects as
-         * stale. So each check waits for the one before it. */
-        let checked: Promise<void> = Promise.resolve();
-        socket.use((packet: IOTypes.Event, next) => {
-          checked = checked.then(() => refusalFor(packet)).then((reason) => {
-            if (reason === undefined) {
-              next();
-              return;
-            }
+        socket.use(([event, matchID]: IOTypes.Event, next) => {
+          if (event !== "sync") {
+            next();
+            return;
+          }
+          const refuse = (reason: string) => {
             if (!reported) {
               reported = true;
               console.warn(`Refused a packet on socket ${socket.id}: ${reason}`);
             }
             next(new Error(reason));
-          });
+          };
+          if (typeof matchID !== "string" || matchID === "") {
+            refuse("sync without a match id");
+            return;
+          }
+          void fetch(app.context.db, matchID, { metadata: true } as const).then(
+            ({ metadata }) => {
+              if (metadata === undefined) {
+                refuse(`sync for unknown match ${matchID}`);
+                return;
+              }
+              next();
+            },
+            (error: unknown) => {
+              // Not the client's doing, so not under the once-per-socket limit.
+              console.error(`Storage could not be read for a sync of match ${matchID}:`, error);
+              next(error instanceof Error ? error : new Error(String(error)));
+            }
+          );
         });
 
         socket.on("update", (...args: Parameters<Master['onUpdate']>) => {

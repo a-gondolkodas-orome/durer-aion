@@ -2,7 +2,6 @@ import type { AddressInfo } from "node:net";
 import type { Game, Server as BgioServer, StorageAPI } from "boardgame.io";
 import { Server } from "boardgame.io/server";
 import { Async as AsyncStorage, createMatch } from "boardgame.io/internal";
-import type { Server as IOServer } from "socket.io";
 import { io as connect, type Socket } from "socket.io-client";
 import { SocketIOButBotMoves } from "./socketio_botmoves";
 
@@ -53,11 +52,6 @@ describe("the socket transport", () => {
     });
     const { appServer } = await server.run(0);
     const context = server.app.context;
-    // The syncs that got past the middleware (which `onAny` runs before).
-    const delivered: unknown[] = [];
-    (server.app as typeof server.app & { _io: IOServer })._io.of(`/${game.name ?? ""}`).on("connection", (socket) => {
-      socket.on("sync", (matchID: unknown) => { delivered.push(matchID); });
-    });
     const db = context.db as StorageAPI.Sync;
     const { port } = appServer.address() as AddressInfo;
 
@@ -74,7 +68,7 @@ describe("the socket transport", () => {
       return socket;
     };
     const refusals = () => warned.mock.calls.map(([line]) => String(line)).filter(line => line.startsWith("Refused"));
-    return { db, client, context, delivered, refusals };
+    return { db, client, context, failed, refusals };
   }
 
   function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH) {
@@ -148,13 +142,25 @@ describe("the socket transport", () => {
 
   const madeUpMove = { type: "MAKE_MOVE", payload: { type: "noop", args: [], playerID: "0", credentials: "made up" } };
 
+  it("refuses a sync naming a match that does not exist, and says so", async () => {
+    const { db, client, refusals } = await serve();
+    createKnownMatch(db);
+
+    const socket = client();
+    socket.emit("sync", MADE_UP_MATCH, null, undefined, 2);
+    await syncBehind(socket);
+
+    expect(refusals()).toEqual([expect.stringContaining(`sync for unknown match ${MADE_UP_MATCH}`)]);
+  });
+
+  // These reach boardgame.io, which answers them without writing: the bot
+  // hook behind them is what must not fail (#695).
   it.each([
-    ["sync", [MADE_UP_MATCH, null, undefined, 2]],
     ["update", [madeUpMove, 0, MADE_UP_MATCH, "0"]],
     ["chat", [MADE_UP_MATCH, { id: "a", sender: "0", payload: "hi" }, "made up"]],
-  ])("refuses a `%s` naming a match that does not exist", async (event, args) => {
+  ])("survives a `%s` naming a match that does not exist, and writes none", async (event, args) => {
     const rejections = watchForUnhandledRejections();
-    const { db, client, refusals } = await serve();
+    const { db, client } = await serve();
     createKnownMatch(db);
 
     const socket = client();
@@ -162,7 +168,7 @@ describe("the socket transport", () => {
     await syncBehind(socket);
     await settle();
 
-    expect(refusals()).toEqual([expect.stringContaining(`${event} for unknown match ${MADE_UP_MATCH}`)]);
+    expect(db.fetch(MADE_UP_MATCH, { metadata: true, state: true })).toEqual({});
     expect(rejections).toEqual([]);
   });
 
@@ -196,32 +202,17 @@ describe("the socket transport", () => {
     expect(refusals()).toEqual([expect.stringContaining(`sync for unknown match ${MADE_UP_MATCH}-0`)]);
   });
 
-  // Storage answers in the reverse of the order it was asked.
-  it("releases a socket's packets in the order they arrived", async () => {
-    const { db, client, context, delivered } = await serve();
-    const sent = ["first", "second", "third", "fourth"];
-    sent.forEach(id => { createKnownMatch(db, id); });
-    deferReads(context, matchID => new Promise(resolve => {
-      setTimeout(resolve, 20 * (sent.length - sent.indexOf(matchID)));
-    }));
-
-    const socket = client();
-    sent.forEach(id => socket.emit("sync", id, null, undefined, 2));
-    await vi.waitFor(() => { expect(delivered).toHaveLength(sent.length); });
-
-    expect(delivered).toEqual(sent);
-  });
-
   it("says so when it was storage, not the match, that failed", async () => {
-    const { db, client, context, refusals } = await serve();
+    const { db, client, context, failed, refusals } = await serve();
     createKnownMatch(db);
     deferReads(context, () => Promise.reject(new Error("the database is not there")));
 
     const socket = client();
     socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
-    await vi.waitFor(() => { expect(refusals()).toHaveLength(1); });
+    await vi.waitFor(() => {
+      expect(failed).toHaveBeenCalledWith(expect.stringContaining("Storage could not be read"), expect.anything());
+    });
 
-    expect(refusals()[0]).toContain("storage could not be read");
-    expect(refusals()[0]).not.toContain("unknown match");
+    expect(refusals()).toEqual([]);
   });
 });
