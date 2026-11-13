@@ -1,8 +1,7 @@
 import { Box, Stack } from '@mui/system';
 import { useAddMinutes, useCompetitions, useGetLogs, useMatchState, useResetRelay, useResetStrategy, useSetStartWindow } from '../hooks/user-hooks';
 import { validateStartWindow } from 'schemas';
-import type { StartWindow } from 'schemas';
-import { windowTimeNow } from '../utils/window-time';
+import { windowText, windowTimeNow } from '../utils/window-time';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import Refresh from '@mui/icons-material/Refresh';
@@ -450,12 +449,6 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
 }
 
 
-/// A start window as the admin page writes it; none means any time.
-function describeWindow(window: StartWindow | null): string {
-  if (window === null) return 'bármikor';
-  return window.closesAt === undefined ? `${window.opensAt} után bármikor` : `${window.opensAt} – ${window.closesAt}`;
-}
-
 /// The team's own start window, which replaces its competition's: for a team
 /// writing the round late, or a testing code, which gets a wide one such as
 /// 2001 to 2099. The server refuses a start outside it; a match already
@@ -473,7 +466,7 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
   const getCompetitions = useCompetitions();
   const { data: competitions } = useSWR('team/admin/competitions', getCompetitions);
   const competitionWindow = competitions?.find(competition => competition.id === team.competitionId)?.startWindow;
-  const competitionDescribed = competitionWindow === undefined ? undefined : describeWindow(competitionWindow);
+  const competitionDescribed = competitionWindow === undefined ? undefined : windowText(competitionWindow);
   // The current time, in the format the fields take: a placeholder to read and,
   // through "Most", a value to start from, since the placeholder goes once
   // typing starts.
@@ -502,7 +495,10 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
     setError(null);
     void save({ opensAt: opens, closesAt: closes === '' ? null : closes });
   };
-  const inputSx = { font: 'inherit', height: 40, boxSizing: 'border-box', width: 230, padding: '0 12px', border: '1px solid #9e9e9e', borderRadius: '8px' } as const;
+  // "Most" sits inside the field's right end, as on the competitions table.
+  const fieldSx = { position: 'relative', display: 'inline-flex', alignItems: 'center' } as const;
+  const inputSx = { font: 'inherit', height: 40, boxSizing: 'border-box', width: 260, padding: '0 56px 0 12px', border: '1px solid #9e9e9e', borderRadius: '8px' } as const;
+  const nowSx = { position: 'absolute', right: 4, minWidth: 0, textTransform: 'none' } as const;
 
   return (
     <Stack component="section" aria-label="Indítási ablak" sx={cardSx}>
@@ -512,7 +508,7 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
       <Stack sx={{ gap: '8px', padding: { xs: '16px', md: '20px 24px' } }} data-testid="startWindowSummary">
         {own
           ? <span>
-            Saját ablaka van, a versenyé helyett: {describeWindow({ opensAt: team.startOpensAt ?? '', closesAt: team.startClosesAt ?? undefined })}.
+            Saját ablaka van, a versenyé helyett: {windowText({ opensAt: team.startOpensAt ?? '', ...(team.startClosesAt != null && { closesAt: team.startClosesAt }) })}.
             {competitionDescribed !== undefined && ` A verseny ablaka, amit felülír: ${competitionDescribed}.`}
           </span>
           : <span>
@@ -525,17 +521,21 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
       <Stack component="form" sx={{ ...cardFooterSx, justifyContent: 'flex-start' }}
         onSubmit={(event) => { event.preventDefault(); submit(); }}>
         <Box component="label" htmlFor="start-opens" sx={{ fontWeight: 500 }}>Kezdete</Box>
-        <Box component="input" id="start-opens" value={opensAt} placeholder={example} sx={inputSx}
-          aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => setOpensAt(event.target.value)}/>
-        <Button size="small" aria-label="Kezdete: most" sx={{ textTransform: 'none' }}
-          onClick={() => { setOpensAt(windowTimeNow()); }}>Most</Button>
+        <Box sx={fieldSx}>
+          <Box component="input" id="start-opens" value={opensAt} placeholder={example} sx={inputSx}
+            aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setOpensAt(event.target.value)}/>
+          <Button size="small" aria-label="Kezdete: most" sx={nowSx}
+            onClick={() => { setOpensAt(windowTimeNow()); }}>Most</Button>
+        </Box>
         <Box component="label" htmlFor="start-closes" sx={{ fontWeight: 500 }}>Vége (elhagyható)</Box>
-        <Box component="input" id="start-closes" value={closesAt} placeholder={example} sx={inputSx}
-          aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => setClosesAt(event.target.value)}/>
-        <Button size="small" aria-label="Vége: most" sx={{ textTransform: 'none' }}
-          onClick={() => { setClosesAt(windowTimeNow()); }}>Most</Button>
+        <Box sx={fieldSx}>
+          <Box component="input" id="start-closes" value={closesAt} placeholder={example} sx={inputSx}
+            aria-invalid={error !== null} aria-describedby={error !== null ? 'start-window-error' : undefined}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setClosesAt(event.target.value)}/>
+          <Button size="small" aria-label="Vége: most" sx={nowSx}
+            onClick={() => { setClosesAt(windowTimeNow()); }}>Most</Button>
+        </Box>
         <Button variant="contained" color="primary" type="submit" sx={{ textTransform: 'none', height: 40 }}>
           Mentés
         </Button>

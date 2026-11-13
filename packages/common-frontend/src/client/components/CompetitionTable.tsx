@@ -9,7 +9,7 @@ import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
 import { useSetCompetitionWindow } from '../hooks/user-hooks';
-import { windowTimeNow } from '../utils/window-time';
+import { windowText, windowTimeNow } from '../utils/window-time';
 
 const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
   online: 'internetes',
@@ -44,13 +44,6 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
     id, importAs: id, edition: null, round: '', category: '', label: metadata.label.hu ?? metadata.label.en ?? '',
     ...window,
   };
-}
-
-/// A start window as the admin page shows it: as stored, ISO 8601 with its
-/// offset, so what is shown is what was typed.
-function windowText(window: StartWindow | null): string {
-  if (window === null) return 'bármikor';
-  return window.closesAt === undefined ? `${window.opensAt} után` : `${window.opensAt} – ${window.closesAt}`;
 }
 
 /// Every registered competition, newest edition first, with what the import's

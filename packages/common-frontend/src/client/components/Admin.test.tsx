@@ -10,7 +10,7 @@ import { MockClientRepository } from '../mock-client-repository';
 import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
 import { Admin } from './Admin';
-import { windowTimeNow } from '../utils/window-time';
+import { windowTimeNow, windowTimeText } from '../utils/window-time';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -261,7 +261,7 @@ test('the team dialog gives the team a start window of its own, and takes it awa
   fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
 
   await waitFor(() => {
-    expect(screen.getByTestId('startWindowSummary')).toHaveTextContent('Saját ablaka van, a versenyé helyett: 2026-11-21T15:00+01:00 után bármikor.');
+    expect(screen.getByTestId('startWindowSummary')).toHaveTextContent(`Saját ablaka van, a versenyé helyett: ${windowTimeText('2026-11-21T15:00+01:00')} után.`);
   });
   expect(setStartWindow).toHaveBeenCalledWith(alpha.teamId, { opensAt: '2026-11-21T15:00+01:00', closesAt: null });
 
@@ -281,16 +281,18 @@ test('the team dialog names the competition window a team\'s own replaces', asyn
     .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
   renderAdmin(alpha.teamId);
 
+  // Read out in the browser's time zone, then as stored.
+  const competitionWindow = `${windowTimeText('2026-11-20T15:00+01:00')} – ${windowTimeText('2026-11-20T21:30+01:00')}`;
   const summary = await screen.findByTestId('startWindowSummary');
   await waitFor(() => {
-    expect(summary).toHaveTextContent('Nincs saját ablaka: a versenye ablakában indíthat, 2026-11-20T15:00+01:00 – 2026-11-20T21:30+01:00.');
+    expect(summary).toHaveTextContent(`Nincs saját ablaka: a versenye ablakában indíthat, ${competitionWindow}.`);
   });
   fireEvent.change(screen.getByLabelText('Kezdete'), { target: { value: '2026-11-21T15:00+01:00' } });
   fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
 
   await waitFor(() => {
-    expect(summary).toHaveTextContent('Saját ablaka van, a versenyé helyett: 2026-11-21T15:00+01:00 után bármikor. '
-      + 'A verseny ablaka, amit felülír: 2026-11-20T15:00+01:00 – 2026-11-20T21:30+01:00.');
+    expect(summary).toHaveTextContent(`Saját ablaka van, a versenyé helyett: ${windowTimeText('2026-11-21T15:00+01:00')} után. `
+      + `A verseny ablaka, amit felülír: ${competitionWindow}.`);
   });
 });
 
@@ -548,7 +550,7 @@ test('the import tab sets a competition\'s start window, and lists it as set', a
   await waitFor(() => {
     expect(setWindow).toHaveBeenCalledWith(COMPETITION_C, { opensAt: '2026-11-20T15:00+01:00', closesAt: null });
   });
-  expect(await within(table).findByText('2026-11-20T15:00+01:00 után (itt megadva)')).toBeInTheDocument();
+  expect(await within(table).findByText(`${windowTimeText('2026-11-20T15:00+01:00')} után (itt megadva)`)).toBeInTheDocument();
 });
 
 test('the import tab refuses a start window with no offset before sending it', async () => {
