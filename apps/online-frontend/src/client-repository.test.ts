@@ -65,11 +65,13 @@ describe("the team routes", () => {
     await repo.startRelay();
     await repo.startStrategy();
     await repo.toHome();
+    await repo.viewStrategy();
 
     expect(calls.map(call => [call.method, call.url])).toStrictEqual([
       ["post", "team/me/relay/play"],
       ["post", "team/me/strategy/play"],
       ["post", "team/me/gohome"],
+      ["post", "team/me/strategy/view"],
     ]);
   });
 

@@ -44,6 +44,10 @@ export class OfflineClientRepository implements ClientRepository {
     throw Error("NOT call this");
   }
 
+  viewStrategy(): Promise<void> {
+    throw Error("NOT call this");
+  }
+
   toHome(): Promise<void> {
     const teamState = getTeamStateFromLocal();
     const newState = { ...teamState, pageState: 'HOME' }

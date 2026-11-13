@@ -110,6 +110,18 @@ export function allowedToStart(
   return own.state === "NOT STARTED";
 }
 
+/** Whether the team may go back to its finished strategy match, to look at
+ *  the board as it ended: only from the home page, and not while the relay
+ *  runs. */
+export function allowedToViewStrategy(
+  team: Pick<TeamModel, "pageState">,
+  matches: TeamMatches,
+) {
+  return team.pageState === "HOME"
+    && matches.relayMatch.state !== "IN PROGRESS"
+    && matches.strategyMatch.state === "FINISHED";
+}
+
 /** The game of the team's competition the team asks to start. A competition
  *  without that match answers 403, as any start the team may not make does,
  *  and so does a start outside the team's start window. Only the start is checked: a match started in the window

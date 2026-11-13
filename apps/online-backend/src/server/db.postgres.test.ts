@@ -76,6 +76,20 @@ describe('TeamsRepository.goHome', () => {
   });
 });
 
+describe('TeamsRepository.viewStrategy', () => {
+  it('shows the strategy match only to a team still home with the matches the caller read', async () => {
+    const read = await database.teams.insertTeam(team());
+    await TeamModel.update({ pageState: 'HOME', strategyMatchID: 'done' }, { where: { teamId: read.teamId } });
+    const home = await database.teams.getTeam({ teamId: read.teamId });
+    expect(home && await database.teams.viewStrategy(home)).toBe(true);
+    expect((await database.teams.getTeam({ teamId: read.teamId }))?.pageState).toBe('STRATEGY');
+
+    await TeamModel.update({ pageState: 'RELAY', relayMatchID: 'current' }, { where: { teamId: read.teamId } });
+    expect(home && await database.teams.viewStrategy(home)).toBe(false);
+    expect((await database.teams.getTeam({ teamId: read.teamId }))?.pageState).toBe('RELAY');
+  });
+});
+
 // fetchMatchStates reads bgio-postgres' own table through the model it
 // registers, which no API of the library promises: this is what notices a
 // release that renames either.

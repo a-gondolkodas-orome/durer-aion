@@ -122,6 +122,16 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     }
   }
 
+  async viewStrategy(): Promise<void> {
+    try {
+      await apiAxiosInstance().post('team/me/strategy/view');
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+  }
+
   async toHome(): Promise<void> {
     try {
       await apiAxiosInstance().post('team/me/gohome');

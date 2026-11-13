@@ -192,6 +192,15 @@ each, and the export writes the id. A row naming no competition, or one the
 registry lacks, fails on its own and the rest go in. A team name is unique
 within its competition only, and a team plays the matches its competition has.
 
+A row naming a team that is already in its competition is that team: re-running
+a grown list adds the late teams, and re-running a corrected one fixes a bad
+import, since the file's `Email`, `Opens At` and `Closes At` win, a blank cell
+clearing them. A file without a column leaves its field as it is; the two window
+columns are one window, so a file with either sets both. `Other` is never
+overwritten, as the admin page's
+resets note the replaced match there, and a row whose `ID`, `Login Code` or
+`Credentials` is not that team's fails.
+
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition
 server: it needs Python packages the server has no reason to carry.

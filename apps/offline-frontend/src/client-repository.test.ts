@@ -38,6 +38,26 @@ test("a relay whose time ran out goes home with the score its board kept", async
   expect(sendGameData).toHaveBeenCalledExactlyOnceWith({ component: "relay", phase: "end", G: { points: 5 } });
 });
 
+describe("viewStrategy", () => {
+  const stored = (fields: object) => localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({
+    teamId: "1", joinCode: "abc", teamName: "Csapat", category: "C", credentials: "c", email: "e",
+    pageState: "HOME", relayMatch: { state: "NOT STARTED" }, ...fields,
+  }));
+  const finished = { state: "FINISHED", startAt: "2026-10-10T10:00:00Z", endAt: "2026-10-10T10:30:00Z", matchID: "", score: 9 };
+
+  test("takes the team back to its finished strategy match, which stays finished", async () => {
+    stored({ strategyMatch: finished });
+    await new OfflineClientRepository().viewStrategy();
+    expect(readStoredTeamState()).toMatchObject({ pageState: "STRATEGY", strategyMatch: { state: "FINISHED", score: 9 } });
+  });
+
+  test("refuses a strategy match that has not ended", () => {
+    stored({ strategyMatch: { state: "NOT STARTED" } });
+    expect(() => new OfflineClientRepository().viewStrategy()).toThrow();
+    expect(readStoredTeamState()?.pageState).toBe("HOME");
+  });
+});
+
 // Teams rehearse on shared computers: a login left behind must not hand the
 // team, and its match, to whoever sits down a day later.
 describe("the stored login", () => {
