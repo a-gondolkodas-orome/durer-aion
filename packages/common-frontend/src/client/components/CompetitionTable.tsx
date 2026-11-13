@@ -138,6 +138,8 @@ export function CompetitionTable(props: {
         initialState={{
           sorting: { sortModel: [{ field: 'edition', sort: 'desc' }] },
           pagination: { paginationModel: { pageSize: 10 } },
+          // Only a practice set needs a label, and none is imported into yet.
+          columns: { columnVisibilityModel: { label: false } },
         }}
         pageSizeOptions={[10, 25, 50]}
         disableRowSelectionOnClick
