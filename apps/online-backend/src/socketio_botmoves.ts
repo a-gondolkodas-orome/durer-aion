@@ -197,7 +197,8 @@ export class SocketIOButBotMoves extends SocketIO {
         socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
           const matchID = args[2];
           void this.onPlayerUpdate(app.context, game, bot, args)
-            .catch(logListenerFailure("update", matchID));
+            .catch(logListenerFailure("update", matchID))
+            .then(() => this.releaseUnjoinedQueue(matchID));
         });
 
         /* A player's move is the only other thing that asks the bot to play,
@@ -254,6 +255,27 @@ export class SocketIOButBotMoves extends SocketIO {
     // in a push of its own, or the move and its reply land as one
     // update. See #346.
     await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, bot, matchID));
+  }
+
+  /** Drops the queue an `update` made for a match no socket has joined.
+   *
+   *  boardgame.io's own `update` listener makes a queue for whatever match id
+   *  the packet names, and deletes one only when the last client of a joined
+   *  match leaves, so an id nobody syncs to keeps its queue for the life of
+   *  the process — one per made-up id an anonymous client cares to send. Its
+   *  listener registered first, so the queue exists by the time this runs.
+   *
+   *  Only an idle queue is dropped, and the next task for the match gets a new
+   *  one: no two queues ever hold work for the same match at once. */
+  private async releaseUnjoinedQueue(matchID: string): Promise<void> {
+    const queue = this.perMatchQueue.get(matchID);
+    if (queue === undefined) {
+      return;
+    }
+    await queue.onIdle();
+    if (queue.size === 0 && queue.pending === 0 && !this.roomInfo.has(matchID) && this.perMatchQueue.get(matchID) === queue) {
+      this.deleteMatchQueue(matchID);
+    }
   }
 
   /** Plays the bot's turn if the match is waiting on one. Callers run it on

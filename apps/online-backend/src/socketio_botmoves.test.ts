@@ -87,7 +87,7 @@ describe("the socket transport", () => {
       await transport.queueFor(matchID)?.onIdle();
       await new Promise(resolve => setImmediate(resolve));
     };
-    return { db, client, context, hookFailures, drained };
+    return { db, client, context, hookFailures, transport, drained };
   }
 
   function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH) {
@@ -217,5 +217,22 @@ describe("the socket transport", () => {
 
     expect(rejections).toEqual([]);
     expect(hookFailures()).toEqual([]);
+  });
+
+  it("keeps no queue for a match an update named but no socket joined", async () => {
+    const { db, client, transport, drained } = await serve();
+    createKnownMatch(db);
+
+    const socket = client();
+    await syncBehind(socket);
+    socket.emit("update", madeUpMove, 0, MADE_UP_MATCH, "0");
+    socket.emit("update", madeUpMove, 0, KNOWN_MATCH, "0");
+    await syncBehind(socket);
+    await drained(MADE_UP_MATCH);
+    await drained(KNOWN_MATCH);
+
+    expect(transport.queueFor(MADE_UP_MATCH)).toBeUndefined();
+    // The socket synced to this one, so its moves keep their queue.
+    expect(transport.queueFor(KNOWN_MATCH)).toBeDefined();
   });
 });
