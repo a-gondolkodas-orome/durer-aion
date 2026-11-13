@@ -117,6 +117,30 @@ describe('the start window', () => {
     expect(screen.queryByTestId('startWindowNote')).not.toBeInTheDocument();
   });
 
+  // The competition is over for it too: the round it did not start never will be.
+  test('thanks and totals a team that played one of two rounds once the window closes', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T20:00:00Z') });
+    renderChooser(team({ startWindow, relayMatch: finished }));
+
+    expect(screen.getByText('chooser.finish.title')).toBeInTheDocument();
+    expect(screen.queryByTestId('startWindowNote')).not.toBeInTheDocument();
+  });
+
+  test('does not thank a team with one of two rounds played while the window is open', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T14:00:00Z') });
+    renderChooser(team({ startWindow, relayMatch: finished }));
+
+    expect(screen.queryByText('chooser.finish.title')).not.toBeInTheDocument();
+  });
+
+  test('tells a team that played nothing only that the competition is over', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T20:00:00Z') });
+    renderChooser(team({ startWindow }));
+
+    expect(screen.queryByText('chooser.finish.title')).not.toBeInTheDocument();
+    expect(screen.getByText('chooser.window.closed')).toBeInTheDocument();
+  });
+
   test('says nothing without a window', () => {
     renderChooser(team({ competition: relayOnly, startWindow: null }));
 
