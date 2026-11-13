@@ -1,6 +1,7 @@
 import React from 'react';
 import { Main, GameProvider, ClientRepoProvider, AdminRepoProvider } from 'common-frontend';
 import { RealClientRepository } from './client-repository';
+import { tracker } from './tracking';
 import { ThemeProvider } from '@mui/material/styles';
 
 // Branding, not configuration: every build of this app uses these, so they live
@@ -23,7 +24,7 @@ const theme = {
 // client under it.
 const RelayClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.RelayClient })));
 const StrategyClient = React.lazy(() => import('./ReactClient').then(module => ({ default: module.StrategyClient })));
-const clientRepository = new RealClientRepository();
+const clientRepository = new RealClientRepository(tracker);
 
 function App() {
   return (

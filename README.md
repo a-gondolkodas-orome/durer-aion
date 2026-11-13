@@ -431,6 +431,14 @@ window in CSS pixels; `pixelRatio`, which browser zoom and the system's display
 scaling both move; and `pointer`, `coarse` for a touch screen. A session keeps
 the values its latest page load sent.
 
+The competition, `verseny.durerinfo.hu`, reports to a website of its own, from
+`apps/online-frontend/src/tracking.ts` rather than a tag: a pageview per load,
+never from an admin page, the same session data plus the team's `category` and
+`year`, and the events `login`, `relay-started`, `relay-finished`,
+`strategy-started` and `strategy-finished`, the last two with `points`. Starts
+and ends are sent only by the browser that started the match, so each counts
+once per team. Nothing names a team.
+
 # Competition secrecy
 
 A new competition's game must stay secret until after the competition, which is
