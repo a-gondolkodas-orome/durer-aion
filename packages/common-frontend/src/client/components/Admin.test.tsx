@@ -449,7 +449,7 @@ test('the import tab lists the competitions newest first, with what to import th
   const row = (await within(table).findByText('20 online C')).closest('li');
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect(grids.columns.at(-1)?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'startWindow']);
   if (row === null) throw new Error('no table row');
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
@@ -457,6 +457,44 @@ test('the import tab lists the competitions newest first, with what to import th
 
   fireEvent.click(within(row).getByRole('button', { name: `Másolás: ${COMPETITION_C}` }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
+});
+
+// A competition's window is set on the page, not only in its config in code.
+test('the import tab sets a competition\'s start window, and lists it as set', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const setWindow = vi.spyOn(repo, 'setCompetitionWindow').mockResolvedValue();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  const table = await screen.findByTestId('competitionTable');
+  expect(within(table).getAllByText('bármikor')).toHaveLength(2);
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00' }, configStartWindow: null },
+  ]);
+  fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
+  fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00+01:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  await waitFor(() => {
+    expect(setWindow).toHaveBeenCalledWith(COMPETITION_C, { opensAt: '2026-11-20T15:00+01:00', closesAt: null });
+  });
+  expect(await within(table).findByText('2026-11-20T15:00+01:00 után (itt megadva)')).toBeInTheDocument();
+});
+
+test('the import tab refuses a start window with no offset before sending it', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const setWindow = vi.spyOn(repo, 'setCompetitionWindow').mockResolvedValue();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  const table = await screen.findByTestId('competitionTable');
+  fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
+  fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+
+  expect(await screen.findByText(/időzónás időpont/)).toBeInTheDocument();
+  expect(setWindow).not.toHaveBeenCalled();
 });
 
 test('the import tab lists the server\'s errors and warnings', async () => {

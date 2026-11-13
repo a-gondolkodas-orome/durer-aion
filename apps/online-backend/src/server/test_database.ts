@@ -30,7 +30,7 @@ export async function startTestDatabase() {
     /** boardgame.io's match store, on the same connection as the teams. */
     db,
     teams,
-    /** Empties the teams and the matches, for a test that starts from nothing. */
+    /** Empties the teams, the competition windows and the matches, for a test that starts from nothing. */
     async reset() {
       await db.sequelize.truncate();
     },

@@ -209,6 +209,17 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return result.data as CompetitionSummaryDto[];
   }
 
+  async setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void> {
+    const url = urlcat('/team/admin/competitions/:competitionId/start-window', { competitionId });
+    try {
+      await apiAxiosInstance().put(url, window);
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+  }
+
   async importTeams(file: File): Promise<TeamImportResultDto> {
     const body = new FormData();
     body.append('file', file);

@@ -53,6 +53,12 @@ export function adminTeamId(team: TeamModelDto): string {
 export interface CompetitionSummaryDto {
   id: string;
   metadata: CompetitionMetadata;
+  /// The start window in force: the one set on the admin page, else the one
+  /// the competition's config gives; null for any time.
+  startWindow?: StartWindow | null;
+  /// The one the competition's config gives, which a window set on the admin
+  /// page replaces.
+  configStartWindow?: StartWindow | null;
 }
 
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some

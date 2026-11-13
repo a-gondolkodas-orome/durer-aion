@@ -1,11 +1,14 @@
-import { IconButton } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
+import Edit from '@mui/icons-material/Edit';
 import { Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
-import { competitionName, editionSchoolYear } from 'schemas';
-import type { CompetitionMetadata } from 'schemas';
+import { useState } from 'react';
+import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas';
+import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
+import { useSetCompetitionWindow } from '../hooks/user-hooks';
 
 const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
   online: 'internetes',
@@ -22,22 +25,38 @@ interface CompetitionRow {
   round: string;
   category: string;
   label: string;
+  startWindow: StartWindow | null;
+  /// Whether the window is one set on the admin page, not the config's.
+  windowSet: boolean;
 }
 
-function competitionRow({ id, metadata }: CompetitionSummaryDto): CompetitionRow {
+function competitionRow({ id, metadata, startWindow = null, configStartWindow = null }: CompetitionSummaryDto):
+  CompetitionRow {
+  const window = { startWindow, windowSet: JSON.stringify(startWindow) !== JSON.stringify(configStartWindow) };
   if (metadata.kind === 'competition') {
     return {
       id, importAs: competitionName(metadata) ?? id, edition: metadata.edition,
-      round: ROUND_NAMES[metadata.round], category: metadata.category, label: metadata.label?.hu ?? '',
+      round: ROUND_NAMES[metadata.round], category: metadata.category, label: metadata.label?.hu ?? '', ...window,
     };
   }
-  return { id, importAs: id, edition: null, round: '', category: '', label: metadata.label.hu ?? metadata.label.en ?? '' };
+  return {
+    id, importAs: id, edition: null, round: '', category: '', label: metadata.label.hu ?? metadata.label.en ?? '',
+    ...window,
+  };
+}
+
+/// A start window as the admin page shows it: as stored, ISO 8601 with its
+/// offset, so what is shown is what was typed.
+function windowText(window: StartWindow | null): string {
+  if (window === null) return 'bármikor';
+  return window.closesAt === undefined ? `${window.opensAt} után` : `${window.opensAt} – ${window.closesAt}`;
 }
 
 /// Every registered competition, newest edition first, with what the import's
-/// Competition column takes for it, to copy.
-export function CompetitionTable(props: { competitions: CompetitionSummaryDto[] }) {
+/// Competition column takes for it, to copy, and its start window, to change.
+export function CompetitionTable(props: { competitions: CompetitionSummaryDto[], onWindowChanged?: () => void }) {
   const { enqueueSnackbar } = useSnackbar();
+  const [editing, setEditing] = useState<CompetitionRow | null>(null);
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -85,6 +104,23 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[] 
           { field: 'round', headerName: 'Forduló', width: 100 },
           { field: 'category', headerName: 'Kategória', width: 90 },
           { field: 'label', headerName: 'Név', width: 160 },
+          {
+            field: 'startWindow',
+            headerName: 'Indítási ablak',
+            description: 'Mikor kezdhet játékot a verseny egy csapata, ha nincs saját ablaka. '
+              + 'A kódbeli helyett itt is megadható.',
+            width: 380,
+            sortable: false,
+            renderCell: ({ row }: { row: CompetitionRow }) => (
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
+                <span>{windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}</span>
+                <IconButton size="small" aria-label={`Indítási ablak módosítása: ${row.importAs}`} title="Módosítás"
+                  onClick={() => { setEditing(row); }}>
+                  <Edit fontSize="inherit"/>
+                </IconButton>
+              </Stack>
+            ),
+          },
         ]}
         initialState={{
           sorting: { sortModel: [{ field: 'edition', sort: 'desc' }] },
@@ -93,6 +129,68 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[] 
         pageSizeOptions={[10, 25, 50]}
         disableRowSelectionOnClick
       />
+      {editing !== null && <CompetitionWindowDialog competition={editing}
+        onClose={(changed) => { setEditing(null); if (changed) props.onWindowChanged?.(); }}/>}
     </Stack>
+  );
+}
+
+const WINDOW_EXAMPLE = '2026-11-20T15:00+01:00';
+
+/// Sets a competition's start window in place of its config's, or returns it
+/// to its config's. A team with a window of its own keeps that one.
+function CompetitionWindowDialog(props: { competition: CompetitionRow, onClose: (changed: boolean) => void }) {
+  const { competition } = props;
+  const setCompetitionWindow = useSetCompetitionWindow();
+  const { enqueueSnackbar } = useSnackbar();
+  const [opensAt, setOpensAt] = useState(competition.startWindow?.opensAt ?? '');
+  const [closesAt, setClosesAt] = useState(competition.startWindow?.closesAt ?? '');
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async (window: { opensAt: string | null, closesAt: string | null }) => {
+    try {
+      await setCompetitionWindow(competition.id, window);
+      enqueueSnackbar('Sikeres művelet', { variant: 'success' });
+      props.onClose(true);
+    } catch (e: unknown) {
+      enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
+    }
+  };
+  const submit = () => {
+    const opens = opensAt.trim();
+    const closes = closesAt.trim();
+    if (opens === '' || validateStartWindow({ opensAt: opens, ...(closes !== '' && { closesAt: closes }) }).length > 0) {
+      setError(`A kezdet kötelező, a vége elhagyható. Mindkettő időzónás időpont, például ${WINDOW_EXAMPLE}, `
+        + 'és a vége a kezdete után van.');
+      return;
+    }
+    setError(null);
+    void save({ opensAt: opens, closesAt: closes === '' ? null : closes });
+  };
+
+  return (
+    <Dialog open onClose={() => { props.onClose(false); }} aria-labelledby="competition-window-title">
+      <DialogTitle id="competition-window-title">Indítási ablak: {competition.importAs}</DialogTitle>
+      <DialogContent>
+        <Stack component="form" id="competition-window-form" sx={{ gap: '16px', paddingTop: '8px' }}
+          onSubmit={(event) => { event.preventDefault(); submit(); }}>
+          <span>
+            Ebben kezdhet játékot a verseny egy csapata, ha nincs saját ablaka. Csak azt korlátozza, mikor kezdhet
+            játékot: az elkezdett játék végig fut.
+          </span>
+          <TextField label="Kezdete" value={opensAt} placeholder={WINDOW_EXAMPLE} error={error !== null}
+            onChange={(event) => { setOpensAt(event.target.value); }}/>
+          <TextField label="Vége (elhagyható)" value={closesAt} placeholder={WINDOW_EXAMPLE} error={error !== null}
+            helperText={error} onChange={(event) => { setClosesAt(event.target.value); }}/>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        {competition.windowSet && <Button onClick={() => { void save({ opensAt: null, closesAt: null }); }}>
+          Vissza a kódbeli ablakhoz
+        </Button>}
+        <Button onClick={() => { props.onClose(false); }}>Mégse</Button>
+        <Button variant="contained" type="submit" form="competition-window-form">Mentés</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

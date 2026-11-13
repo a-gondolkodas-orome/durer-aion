@@ -27,7 +27,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
   const theme = useTheme();
   const importTeams = useImportTeams();
   const getCompetitions = useCompetitions();
-  const { data: competitions } = useSWR('team/admin/competitions', getCompetitions);
+  const { data: competitions, mutate: refetchCompetitions } = useSWR('team/admin/competitions', getCompetitions);
   const { enqueueSnackbar } = useSnackbar();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -140,7 +140,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       </Stack>
       <Stack sx={{ gap: '16px', minWidth: 0 }}>
         <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Versenyek</Stack>
-        <CompetitionTable competitions={competitions ?? []}/>
+        <CompetitionTable competitions={competitions ?? []} onWindowChanged={() => { void refetchCompetitions(); }}/>
       </Stack>
     </Stack>
   );
