@@ -11,6 +11,7 @@ import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Main } from './Main';
+import i18next from 'i18next';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -30,6 +31,7 @@ vi.mock('./Admin', () => ({
 // rendering; this puts it back for the ones that expect a team's own page.
 afterEach(() => {
   window.history.replaceState({}, '', '/');
+  localStorage.clear();
 });
 
 // `Layout` merges its own theme into the surrounding one, so `Main` needs an
@@ -41,7 +43,7 @@ const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff'
 // app's alone; `{ admin: false }` renders as the local apps do.
 const renderMain = (options: { admin: boolean } = { admin: true }) => {
   const repo = new MockClientRepository();
-  const main = <Main language="hu" gitCommitHash="test" />;
+  const main = <Main gitCommitHash="test" />;
   return render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
@@ -144,6 +146,65 @@ test('the admin page offers no language switcher', () => {
   const { queryByText } = renderMain();
 
   expect(queryByText('Magyar')).not.toBeInTheDocument();
+});
+
+test('a team in a competition held in both languages gets the switcher', () => {
+  MockTeamState.mockHomeIn(['hu', 'en']);
+  const { getAllByText } = renderMain();
+  expect(getAllByText('Magyar').length).toBeGreaterThan(0);
+  expect(i18next.language).toBe('hu');
+});
+
+test('a team in a competition held in both plays in the language it chose', () => {
+  localStorage.setItem('lang', 'en');
+  MockTeamState.mockHomeIn(['hu', 'en']);
+  const { getAllByText } = renderMain();
+  expect(getAllByText('English').length).toBeGreaterThan(0);
+  expect(i18next.language).toBe('en');
+});
+
+test('a competition held in English alone is shown in English, with no switcher', () => {
+  MockTeamState.mockHomeIn(['en']);
+  const { queryByText } = renderMain();
+  expect(i18next.language).toBe('en');
+  expect(queryByText('English')).not.toBeInTheDocument();
+});
+
+test('a choice the competition does not have is ignored', () => {
+  localStorage.setItem('lang', 'en');
+  MockTeamState.mockHomeIn(['hu']);
+  renderMain();
+  expect(i18next.language).toBe('hu');
+});
+
+test('the login page is Hungarian with no choice', () => {
+  renderMain();
+  expect(i18next.language).toBe('hu');
+});
+
+test('the login page follows the stored choice', () => {
+  localStorage.setItem('lang', 'en');
+  renderMain();
+  expect(i18next.language).toBe('en');
+});
+
+test('a ?lang= link outranks the stored choice, on the login page and after it', () => {
+  localStorage.setItem('lang', 'hu');
+  window.history.replaceState({}, '', '/?lang=en');
+  renderMain();
+  expect(i18next.language).toBe('en');
+
+  MockTeamState.mockHomeIn(['hu', 'en']);
+  renderMain();
+  expect(i18next.language).toBe('en');
+});
+
+test('the admin page stays Hungarian under a team session in an English competition', () => {
+  MockTeamState.mockHomeIn(['en', 'hu']);
+  window.history.replaceState({}, '', '/admin');
+  const { queryByText } = renderMain();
+  expect(i18next.language).toBe('hu');
+  expect(queryByText('English')).not.toBeInTheDocument();
 });
 
 // MUI's default `maxWidth="lg"` caps a Container at the theme's lg breakpoint,

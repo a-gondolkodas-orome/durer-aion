@@ -1,5 +1,5 @@
 import { Stack } from '@mui/system';
-import { useAddMinutes, useAll } from '../hooks/user-hooks';
+import { useAddMinutes, useAll, useCompetitions } from '../hooks/user-hooks';
 import { Button, Dialog, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { Fragment, ReactNode, useState } from 'react';
 import useSWR from 'swr';
@@ -7,6 +7,7 @@ import { DataGrid, ExportCsv, QuickFilter, QuickFilterControl, Toolbar } from '@
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
+import { CompetitionTable, competitionTitle } from './CompetitionTable';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -51,7 +52,7 @@ const MATCH_STATE_DESCRIPTION = 'NOT STARTED: még nem kezdte el. IN PROGRESS: f
 
 // The open tab is kept in `?tab=`, so a reload or a shared link opens the same
 // one. Anything else in it is read as the default.
-const TABS = ['csapatok', 'statisztika', 'import-export'] as const;
+const TABS = ['csapatok', 'versenyek', 'statisztika', 'import-export'] as const;
 type AdminTab = typeof TABS[number];
 
 function tabFromUrl(): AdminTab {
@@ -86,6 +87,8 @@ export function Admin(props: { teamId?: string }) {
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
   const { data, mutate } = useSWR("users/all", getAll)
+  const getCompetitions = useCompetitions();
+  const { data: competitions, mutate: refetchCompetitions } = useSWR('team/admin/competitions', getCompetitions);
   const [selectedRow, setSelectedRow] = useState<TeamModelDto | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogInterface | null>(null);
   const [tab, setTab] = useState<AdminTab>(tabFromUrl);
@@ -98,6 +101,13 @@ export function Admin(props: { teamId?: string }) {
   // Until the list loads it is not known whether the path names a team, so
   // neither the team nor the tabs show; an unknown team falls back to the list.
   const teams = teamFromPath ? undefined : data;
+  // A team's competition by name; one the server no longer has, by its id.
+  const titles = new Map((competitions ?? []).map(it => [it.id, competitionTitle(it)]));
+  const titleOf = (competitionId: string) => titles.get(competitionId) ?? competitionId;
+  const teamCounts = new Map<string, number>();
+  for (const { competitionId = '' } of teams ?? []) {
+    teamCounts.set(competitionId, (teamCounts.get(competitionId) ?? 0) + 1);
+  }
 
   return (
     <Stack sx={{
@@ -150,6 +160,7 @@ export function Admin(props: { teamId?: string }) {
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Csapatok" value="csapatok" id="admin-tab-csapatok" aria-controls="admin-panel-csapatok"/>
+        <Tab label="Versenyek" value="versenyek" id="admin-tab-versenyek" aria-controls="admin-panel-versenyek"/>
         <Tab label="Statisztika" value="statisztika" id="admin-tab-statisztika" aria-controls="admin-panel-statisztika"/>
         <Tab label="Import/export" value="import-export" id="admin-tab-import-export" aria-controls="admin-panel-import-export"/>
       </Tabs>
@@ -171,9 +182,9 @@ export function Admin(props: { teamId?: string }) {
               editable: false,
             },
             {
-              field: 'category',
-              headerName: 'Kategória',
-              width: 100,
+              field: 'competitionTitle',
+              headerName: 'Verseny',
+              width: 160,
               editable: false,
             },
             {
@@ -244,6 +255,7 @@ export function Admin(props: { teamId?: string }) {
               id: a.teamId,
               relayMatchState: a.relayMatch.state,
               strategyMatchState: a.strategyMatch.state,
+              competitionTitle: titleOf(a.competitionId ?? ''),
               ...a,
             };
           })}
@@ -338,21 +350,30 @@ export function Admin(props: { teamId?: string }) {
         </Form>
         </Stack>
       </Stack>
+      <Stack {...panelProps('versenyek', tab)}>
+        <Stack sx={{ padding: '10px' }}>
+          <CompetitionTable competitions={competitions ?? []} teamCounts={teamCounts}
+            onWindowChanged={() => { void refetchCompetitions(); }}/>
+        </Stack>
+      </Stack>
       <Stack {...panelProps('statisztika', tab)}>
-        <Stats data={teams}/>
+        <Stats data={teams} titleOf={titleOf}/>
       </Stack>
       <Stack {...panelProps('import-export', tab)}>
-        <ImportExport teams={teams} onImported={() => { void mutate(); }}/>
+        <ImportExport teams={teams} onImported={() => { void mutate(); }}
+          onOpenCompetitions={() => { openTab('versenyek'); }}/>
       </Stack>
       </>}
     </Stack>
   )
 }
 
-function Stats(props: { data: TeamModelDto[] }) {
-  const categories = Array.from(new Set(props.data.map(it => it.category)));
-  const stat = categories.sort().map(cat => {
-    const current = props.data.filter(it => it.category === cat);
+/// One row per competition, in the order of their names.
+function Stats(props: { data: TeamModelDto[], titleOf: (competitionId: string) => string }) {
+  const competitionIds = Array.from(new Set(props.data.map(it => it.competitionId ?? '')))
+    .sort((a, b) => props.titleOf(a).localeCompare(props.titleOf(b), 'hu'));
+  const stat = competitionIds.map(competitionId => {
+    const current = props.data.filter(it => (it.competitionId ?? '') === competitionId);
     const bothNotStarted = current.filter(it => it.strategyMatch.state === "NOT STARTED" && it.relayMatch.state === "NOT STARTED").length;
     const relayInProgress = current.filter(it => it.relayMatch.state === "IN PROGRESS").length;
     const strategyInProgress = current.filter(it => it.strategyMatch.state === "IN PROGRESS").length;
@@ -361,7 +382,8 @@ function Stats(props: { data: TeamModelDto[] }) {
     const strategyPoints = Array.from(new Set(finishedStrategyScores));
     const relayPoints = Array.from(new Set(finishedRelayScores));
     return {
-      category: cat,
+      competitionId,
+      competition: props.titleOf(competitionId),
       all: current.length,
       notStarted: bothNotStarted,
       relayInProgress: relayInProgress,
@@ -389,7 +411,7 @@ function Stats(props: { data: TeamModelDto[] }) {
   <Table>
     <TableHead>
       <TableRow>
-        <TableCell>Kategória</TableCell>
+        <TableCell>Verseny</TableCell>
         <TableCell>Összesen</TableCell>
         <TableCell>Váltó</TableCell>
         <TableCell>Stratégiás</TableCell>
@@ -400,8 +422,8 @@ function Stats(props: { data: TeamModelDto[] }) {
     </TableHead>
     <TableBody>
       {stat.map(s => (
-        <TableRow key={s.category}>
-          <TableCell>{s.category}</TableCell>
+        <TableRow key={s.competitionId}>
+          <TableCell>{s.competition}</TableCell>
           <TableCell>{s.all}</TableCell>
           <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
           <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>

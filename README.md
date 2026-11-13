@@ -178,7 +178,7 @@ closed, and one that is open, in that order; the rest have none, so `000` to
 
 A competition's own window, which every team without one of its own follows, is
 the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set
-on the **Import/export** tab: the table of competitions shows each one's window,
+on the **Versenyek** tab: its table of competitions shows each one's window,
 and its edit button sets one in place of the config's, or returns it to the
 config's. Neither the team's window nor the competition's means any time. The
 server decides a start by its own clock, and the team's page reads the window by
@@ -221,9 +221,9 @@ py -m venv .venv
 $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scripts\admin.py
 ```
 
-It writes the match data (`match_data_*.json`) and the results
-(`durer-results-<year>.tsv`) to `scripts/admin-output/`, wherever it is run
-from.
+It writes the match data (`match_data_*.json`) and the results, one file per
+competition (`durer-results-<year>-<competition id>.tsv`), to
+`scripts/admin-output/`, wherever it is run from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
   no credential of its own. Unset it prompts, and with no terminal to prompt on
@@ -232,6 +232,10 @@ from.
   `dev:server`, for trying the script on local data. Against the docker stack it
   must be `http://localhost`: port 8000 is not published, nginx proxies `/team`
   and `/game`.
+- `DURER_COMPETITIONS` — the competitions to export, their ids separated by
+  commas, as the admin page's **Versenyek** tab lists them; unset, every
+  competition. An id the server does not have stops the script before it
+  downloads anything.
 
 Whether the browser's password prompt appears for the admin pages' XHRs under
 the `dev:online` proxy has not been walked, so check them against `stack:up`.

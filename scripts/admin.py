@@ -34,6 +34,9 @@ BASE_URL = os.environ.get('DURER_BASE_URL', 'http://localhost:8000')
 # this folder out.
 OUTPUT_DIR = Path(__file__).resolve().parent / 'admin-output'
 OUTPUT_DIR.mkdir(exist_ok=True)
+# The competitions to export, as a comma-separated list of their ids; unset or
+# empty, every competition. The admin page's Versenyek tab lists the ids.
+COMPETITION_IDS = [cid.strip() for cid in os.environ.get('DURER_COMPETITIONS', '').split(',') if cid.strip()]
 
 # %%
 def get_request(username:str, password:str, baseurl:str, endpoint:str):
@@ -56,7 +59,28 @@ def get_request(username:str, password:str, baseurl:str, endpoint:str):
       print(response.text)
       raise Exception(f"Request failed with status code {response.status_code}")
 
+competitions = {c['id']: c for c in get_request('admin', ADMIN_PASSWORD, BASE_URL, '/team/admin/competitions')}
+unknown = [cid for cid in COMPETITION_IDS if cid not in competitions]
+if unknown:
+  raise SystemExit(f'No competition with id {", ".join(unknown)} on {BASE_URL}. '
+                   f'The ones it has: {", ".join(sorted(competitions))}.')
+
+def competition_title(competition_id:str):
+  """
+    What the admin page calls a competition: its name where it has one, else
+    its label, else its id, which is all a competition the server no longer has
+    keeps.
+  """
+  metadata = competitions.get(competition_id, {}).get('metadata')
+  if metadata is None:
+    return competition_id
+  if metadata['kind'] == 'competition':
+    return f"{metadata['edition']} {metadata['round']} {metadata['category']}"
+  return metadata['label'].get('hu') or metadata['label'].get('en') or competition_id
+
 team_states = get_request('admin', ADMIN_PASSWORD, BASE_URL, '/team/admin/all')
+if COMPETITION_IDS:
+  team_states = [team for team in team_states if team['competitionId'] in COMPETITION_IDS]
 team_states_dict = {}
 for team in team_states:
     team_states_dict[team['joinCode']] = team
@@ -100,6 +124,11 @@ def name_sort_key(name:str):
   return (plain.casefold(), name)
 
 def export_results_tsv(team_states_dict, relay_states, strategy_states):
+  """
+    One file per competition: a competition is ranked on its own, and the
+    relay_<n> columns are its own relay's problems, which another's need not
+    share.
+  """
   # Init: if a game is not started, a "-" will be written
   login_codes = set(relay_states.keys()).union(set(strategy_states.keys()))
   results = {code:{"strategy":"-", "relay": "-", "relay_detailed": []} for code in login_codes}
@@ -119,24 +148,29 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
     if code in strategy_states:
       results[code]["strategy"] = strategy_states[code]["G"]["points"]
 
-  # Export: one column per relay problem, as many as the longest relay, and
-  # padded, so every row has the header's cells.
-  relay_columns = max((len(r["relay_detailed"]) for r in results.values()), default=0)
-  results_path = OUTPUT_DIR / f'durer-results-{date.today().year}.tsv'
-  with open(results_path, 'w', encoding='utf-8') as f:
-    f.write('\t'.join(["login", "team", "category", "strategy", "relay"]
-                      + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
-    for code in sorted(results, key=lambda code: (team_states_dict[code]["category"],
-                                                  name_sort_key(team_states_dict[code]["teamName"]), code)):
-      detailed = list(map(str, results[code]["relay_detailed"]))
-      f.write('\t'.join([
-        code,
-        team_states_dict[code]["teamName"],
-        team_states_dict[code]["category"],
-        str(results[code]["strategy"]),
-        str(results[code]["relay"]),
-      ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")
-  print(f"Results of {len(results)} teams written to {results_path}")
+  by_competition = {}
+  for code in results:
+    by_competition.setdefault(team_states_dict[code]["competitionId"], []).append(code)
+
+  for competition_id, codes in sorted(by_competition.items()):
+    # Export: one column per relay problem, as many as the longest relay, and
+    # padded, so every row has the header's cells.
+    relay_columns = max((len(results[code]["relay_detailed"]) for code in codes), default=0)
+    results_path = OUTPUT_DIR / f'durer-results-{date.today().year}-{competition_id}.tsv'
+    with open(results_path, 'w', encoding='utf-8') as f:
+      f.write('\t'.join(["login", "team", "competition", "category", "strategy", "relay"]
+                        + [f"relay_{i + 1}" for i in range(relay_columns)]) + "\n")
+      for code in sorted(codes, key=lambda code: (name_sort_key(team_states_dict[code]["teamName"]), code)):
+        detailed = list(map(str, results[code]["relay_detailed"]))
+        f.write('\t'.join([
+          code,
+          team_states_dict[code]["teamName"],
+          competition_title(competition_id),
+          team_states_dict[code]["category"],
+          str(results[code]["strategy"]),
+          str(results[code]["relay"]),
+        ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")
+    print(f"Results of {len(codes)} teams of {competition_title(competition_id)} written to {results_path}")
 export_results_tsv(team_states_dict, relay_states, strategy_states)
 
 # %%

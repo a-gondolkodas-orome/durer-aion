@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { PageState, TeamModelDto } from "../dto/TeamStateDto";
+import type { Language } from "schemas";
 
 export const mockTeamState: TeamModelDto = {
   teamId: "Long Id",
@@ -31,6 +32,19 @@ export const MockTeamState = {
   mockDisclaimer: () => setPageState("DISCLAIMER"),
   mockRelay: () => setPageState("RELAY"),
   mockStrategy: () => setPageState("STRATEGY"),
+  /// On the home screen, in a competition held in the given languages.
+  mockHomeIn: (languages: Language[]) => {
+    teamState = {
+      ...mockTeamState,
+      pageState: "HOME",
+      competition: {
+        id: "0000000000--test",
+        languages,
+        relay: { durationMinutes: 60, problemPoints: [1] },
+        metadata: { kind: 'other', label: { hu: 'Teszt', en: 'Test' } },
+      },
+    };
+  },
   mockFinishedStrategy: () => {
     teamState = {
       ...mockTeamState,
