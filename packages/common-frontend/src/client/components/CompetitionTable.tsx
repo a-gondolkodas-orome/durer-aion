@@ -46,9 +46,20 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
+/// What the admin page calls a competition: its name where it has one, else
+/// its label, else its id.
+export function competitionTitle({ id, metadata }: CompetitionSummaryDto): string {
+  return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
+}
+
 /// Every registered competition, newest edition first, with what the import's
 /// Competition column takes for it, to copy, and its start window, to change.
-export function CompetitionTable(props: { competitions: CompetitionSummaryDto[], onWindowChanged?: () => void }) {
+export function CompetitionTable(props: {
+  competitions: CompetitionSummaryDto[],
+  /// How many teams each competition has, by its id.
+  teamCounts: ReadonlyMap<string, number>,
+  onWindowChanged?: () => void,
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [editing, setEditing] = useState<CompetitionRow | null>(null);
   const copy = async (text: string) => {
@@ -73,7 +84,9 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[],
   return (
     <Stack sx={{ height: '600px' }} data-testid="competitionTable">
       <DataGrid
-        rows={props.competitions.map(competitionRow)}
+        rows={props.competitions.map(competition => ({
+          ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
+        }))}
         columns={[
           {
             field: 'importAs',
@@ -98,6 +111,7 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[],
           { field: 'round', headerName: 'Forduló', width: 100 },
           { field: 'category', headerName: 'Kategória', width: 90 },
           { field: 'label', headerName: 'Név', width: 160 },
+          { field: 'teams', headerName: 'Csapatok', width: 90, type: 'number' },
           {
             field: 'startWindow',
             headerName: 'Indítási ablak',
