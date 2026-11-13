@@ -71,6 +71,14 @@ describe('a version written down in more than one file', () => {
 
   it('Node: .nvmrc, both engines.node, every setup-node step, both devcontainers and the Dockerfile agree', () => {
     const workflows = workflowNodeVersions();
+    // The Dockerfile names the version once, and every stage on a node image
+    // takes it from there; a stage pinning its own tag would escape the check.
+    const dockerfile = read('Dockerfile');
+    const nodeStages = [...dockerfile.matchAll(/^FROM\s+(?:--\S+\s+)*(node:\S+)/gm)].map(([, image]) => image);
+    expect(nodeStages.length, 'no `FROM node:` found in the Dockerfile — is the pattern stale?').toBeGreaterThan(0);
+    for (const image of nodeStages) {
+      expect(image, 'a Dockerfile stage pins its own node tag instead of NODE_VERSION').toMatch(/^node:\$\{NODE_VERSION\}(-[\w.-]+)?$/);
+    }
     // A pattern that stopped matching would otherwise pass by finding nothing to compare.
     expect(workflows.length, 'no setup-node pin found under .github/workflows — is the pattern stale?').toBeGreaterThan(0);
     // ">=26.13.0 <27" — only the lower bound names an exact version.
@@ -82,8 +90,8 @@ describe('a version written down in more than one file', () => {
       ...workflows,
       ['.devcontainer/devcontainer.json node feature', nodeFeature('.devcontainer/devcontainer.json')],
       [`${app}.devcontainer/devcontainer.json node feature`, nodeFeature(`${app}.devcontainer/devcontainer.json`)],
-      // The image the competition is deployed from.
-      ['Dockerfile FROM node', read('Dockerfile').match(/^FROM node:(\S+)/m)?.[1]]
+      // The images the competition is deployed from.
+      ['Dockerfile ARG NODE_VERSION', dockerfile.match(/^ARG NODE_VERSION=(\S+)$/m)?.[1]]
     ]);
   });
 

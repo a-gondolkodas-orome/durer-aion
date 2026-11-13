@@ -32,7 +32,9 @@ export default defineConfig({
     // Everything installed stays external — the backend's own dependencies
     // and the ones the game package reaches (MUI, React, lodash, boardgame.io),
     // which npm installs alongside the workspace. Marking external only what
-    // this package.json declares would inline those.
+    // this package.json declares would inline those. The production image
+    // installs this package.json's dependencies alone, so one the bundle
+    // requires must be declared here; its build fails otherwise (Dockerfile).
     neverBundle: true,
     // `paths` resolves each of these to a source path, but the external check
     // runs on the bare specifier first, and they all belong to declared
