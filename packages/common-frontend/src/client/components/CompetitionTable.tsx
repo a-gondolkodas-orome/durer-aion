@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
-import { Stack } from '@mui/system';
+import { Box, Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
@@ -109,15 +109,20 @@ export function CompetitionTable(props: { competitions: CompetitionSummaryDto[],
             headerName: 'Indítási ablak',
             description: 'Mikor kezdhet játékot a verseny egy csapata, ha nincs saját ablaka. '
               + 'A kódbeli helyett itt is megadható.',
-            width: 380,
+            width: 480,
             sortable: false,
             renderCell: ({ row }: { row: CompetitionRow }) => (
-              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
-                <span>{windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}</span>
+              // The button first: a window with both ends is wider than the
+              // column, and would push a button after it out of sight.
+              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '4px', minWidth: 0 }}>
                 <IconButton size="small" aria-label={`Indítási ablak módosítása: ${row.importAs}`} title="Módosítás"
                   onClick={() => { setEditing(row); }}>
                   <Edit fontSize="inherit"/>
                 </IconButton>
+                <Box component="span" title={windowText(row.startWindow)}
+                  sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}
+                </Box>
               </Stack>
             ),
           },
