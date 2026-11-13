@@ -71,6 +71,10 @@ describe('a version written down in more than one file', () => {
 
   it('Node: .nvmrc, both engines.node, every setup-node step, both devcontainers and the Dockerfile agree', () => {
     const workflows = workflowNodeVersions();
+    // Every stage's base, the version without a variant suffix such as `-slim`.
+    const dockerfileNodes = [...read('Dockerfile').matchAll(/^FROM node:(\d[^\s-]*)/gm)]
+      .map(([, version], i) => [`Dockerfile FROM node #${i + 1}`, version]);
+    expect(dockerfileNodes.length, 'no `FROM node:` found in the Dockerfile — is the pattern stale?').toBeGreaterThan(0);
     // A pattern that stopped matching would otherwise pass by finding nothing to compare.
     expect(workflows.length, 'no setup-node pin found under .github/workflows — is the pattern stale?').toBeGreaterThan(0);
     // ">=26.13.0 <27" — only the lower bound names an exact version.
@@ -82,8 +86,8 @@ describe('a version written down in more than one file', () => {
       ...workflows,
       ['.devcontainer/devcontainer.json node feature', nodeFeature('.devcontainer/devcontainer.json')],
       [`${app}.devcontainer/devcontainer.json node feature`, nodeFeature(`${app}.devcontainer/devcontainer.json`)],
-      // The image the competition is deployed from.
-      ['Dockerfile FROM node', read('Dockerfile').match(/^FROM node:(\S+)/m)?.[1]]
+      // The images the competition is deployed from, the slim runtime base included.
+      ...dockerfileNodes
     ]);
   });
 

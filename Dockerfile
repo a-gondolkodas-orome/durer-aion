@@ -43,15 +43,59 @@ RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.ts
       exit 1; \
     fi
 
-EXPOSE 8000
+# The dev server, which docker-compose.dev.yml also names as its command.
+CMD [ "npm", "run", "dev:server" ]
 
-# Run the server that was just built. docker-compose.dev.yml overrides this with
-# the watching dev server for local development.
-CMD [ "npm", "run", "start", "--workspace=online-backend" ]
+# The server bundle, built from the dev stage's tree, so the leak check above
+# guards everything the production image takes from it.
+FROM dev AS build
+
+RUN npx turbo build --filter=online-backend
+
+# The backend's runtime dependencies and nothing else, installed from the
+# lockfile. The workspace packages it depends on (`game`, `schemas`, …) are
+# inlined into the bundle from source (tsdown.config.mts), so they are dropped
+# from its manifest first: left in, npm would install them and theirs, which for
+# `game` means MUI and React. npm ci takes the trimmed manifest, since every
+# dependency left still matches the lockfile; the other workspaces' manifests
+# are copied only because the lockfile names them.
+FROM node:26.13.0 AS prod-deps
+
+WORKDIR /usr/src/app
+
+COPY package.json package-lock.json .npmrc ./
+COPY --parents apps/*/package.json packages/*/package.json ./
+
+RUN node -e " \
+      const fs = require('fs'); \
+      const file = 'apps/online-backend/package.json'; \
+      const manifest = JSON.parse(fs.readFileSync(file)); \
+      const ws = n => fs.existsSync('packages/' + n + '/package.json'); \
+      for (const name of Object.keys(manifest.dependencies)) if (ws(name)) delete manifest.dependencies[name]; \
+      fs.writeFileSync(file, JSON.stringify(manifest, null, 2)); \
+    "
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace=online-backend
 
 # Last, so it is the stage a plain `docker compose build` picks — that is what
 # `npm run stack:build` (the CI gate) and `npm run stack:prod` get, and what a
-# deployment runs. The leak check above guards this stage too, through `FROM`.
-FROM dev AS prod
+# deployment runs. It holds the bundle, its runtime dependencies and the team
+# import script: no workspace source, no devDependencies, no npm (#705).
+FROM node:26.13.0-slim AS prod
 
-RUN npx turbo build --filter=online-backend
+# Nothing in this image installs or runs a package script, so the package
+# managers the base image ships are only attack surface.
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+      /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg /opt/yarn-*
+
+WORKDIR /usr/src/app
+
+COPY --from=prod-deps /usr/src/app/node_modules ./node_modules
+COPY --from=prod-deps /usr/src/app/apps/online-backend ./apps/online-backend
+COPY --from=build /usr/src/app/apps/online-backend/dist ./apps/online-backend/dist
+# docker-compose.yml bind-mounts ./scripts over this, so this copy is what a
+# container started without that mount has for `teams:import`.
+COPY scripts/import_teams.sh ./scripts/
+
+EXPOSE 8000
+
+CMD [ "node", "--enable-source-maps", "apps/online-backend/dist/server.js" ]
