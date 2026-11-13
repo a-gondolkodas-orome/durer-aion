@@ -187,6 +187,30 @@ describe("the socket transport", () => {
     expect(hookFailures()).toEqual([]);
   });
 
+  // Postgres rejects a key that is not a string, and boardgame.io's own
+  // listeners leave that rejection unhandled, which ends the process (#695).
+  it.each([
+    ["update", "an object", [madeUpMove, 0, {}, "0"]],
+    ["update", "a number", [madeUpMove, 0, 5, "0"]],
+    ["update", "empty", [madeUpMove, 0, "", "0"]],
+    ["chat", "an object", [{}, { id: "a", sender: "0", payload: "hi" }, "made up"]],
+    ["chat", "a number", [5, { id: "a", sender: "0", payload: "hi" }, "made up"]],
+  ])("refuses a `%s` whose match id is %s before storage is asked", async (event, _case, args) => {
+    const rejections = watchForUnhandledRejections();
+    const { db, client, context, refusals } = await serve();
+    createKnownMatch(db);
+    deferReads(context, matchID => typeof matchID === "string" && matchID !== ""
+      ? Promise.resolve()
+      : Promise.reject(new Error("not a key this store can read")));
+
+    const socket = client();
+    socket.emit(event, ...args);
+    await syncBehind(socket);
+
+    expect(rejections).toEqual([]);
+    expect(refusals()).toEqual([expect.stringContaining(`${event} without a match id`)]);
+  });
+
   it.each([
     ["no payload", { type: "MAKE_MOVE" }],
     ["a payload that is not an object", { type: "MAKE_MOVE", payload: "a move" }],

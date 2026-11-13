@@ -100,6 +100,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+/** Where each packet boardgame.io listens for carries its match id, counted
+ *  from the first argument after the event name. */
+const MATCH_ID_POSITION = { sync: 0, chat: 0, update: 2 } as const;
+
 const LOGGED_ID_LENGTH = 64;
 
 /** A client-supplied match id as a log can carry it: quoted, so a newline in it
@@ -203,9 +207,12 @@ export class SocketIOButBotMoves extends SocketIO {
          * have belongs to no client of this competition, and the packet never
          * reaches boardgame.io's listener.
          *
-         * Only `sync`: boardgame.io answers an `update` or `chat` for an
-         * unknown match without writing anything, and checking every move
-         * here would cost it a storage read.
+         * Only `sync` is looked up: boardgame.io answers an `update` or `chat`
+         * for an unknown match without writing anything, and checking every
+         * move here would cost it a storage read. All three must name their
+         * match by a non-empty string, though: boardgame.io hands the id to
+         * storage as it came, Postgres rejects a key that is not a string,
+         * and boardgame.io's listeners leave that rejection unhandled (#695).
          *
          * A packet middleware rather than a wrapped listener: it is the hook
          * socket.io documents for this, and it does not depend on what the
@@ -213,8 +220,9 @@ export class SocketIOButBotMoves extends SocketIO {
          */
         // Logged once per socket, so one socket cannot spend the whole budget.
         let reported = false;
-        socket.use(([event, matchID]: IOTypes.Event, next) => {
-          if (event !== "sync") {
+        socket.use(([event, ...args]: IOTypes.Event, next) => {
+          const position = MATCH_ID_POSITION[event as keyof typeof MATCH_ID_POSITION] as number | undefined;
+          if (position === undefined) {
             next();
             return;
           }
@@ -225,8 +233,13 @@ export class SocketIOButBotMoves extends SocketIO {
             }
             next(new Error(reason));
           };
+          const matchID: unknown = args[position];
           if (typeof matchID !== "string" || matchID === "") {
-            refuse("sync without a match id");
+            refuse(`${event} without a match id`);
+            return;
+          }
+          if (event !== "sync") {
+            next();
             return;
           }
           void fetch(app.context.db, matchID, { metadata: true } as const).then(
@@ -246,7 +259,7 @@ export class SocketIOButBotMoves extends SocketIO {
         });
 
         socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
-          const matchID: unknown = args[2];
+          const matchID = args[2];
           void this.onPlayerUpdate(app.context, game, bot, args)
             .catch(logListenerFailure("update", matchID))
             .then(() => this.releaseUnjoinedQueue(matchID));
@@ -291,12 +304,6 @@ export class SocketIOButBotMoves extends SocketIO {
     bot: Bot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
-    // A key storage cannot read fails on every packet, and logListenerFailure
-    // has no limit: past this check, a failure is storage's or the bot's, not
-    // the client's.
-    if (typeof matchID !== "string" || matchID === "") {
-      return;
-    }
     const action: unknown = actionData;
     if (!isRecord(action) || action.type !== "MAKE_MOVE") {
       return;
@@ -324,16 +331,14 @@ export class SocketIOButBotMoves extends SocketIO {
    *
    *  Only an idle queue is dropped, and the next task for the match gets a new
    *  one: no two queues ever hold work for the same match at once. */
-  private async releaseUnjoinedQueue(matchID: unknown): Promise<void> {
-    // Keyed by whatever the client sent, not only by strings.
-    const key = matchID as string;
-    const queue = this.perMatchQueue.get(key);
+  private async releaseUnjoinedQueue(matchID: string): Promise<void> {
+    const queue = this.perMatchQueue.get(matchID);
     if (queue === undefined) {
       return;
     }
     await queue.onIdle();
-    if (queue.size === 0 && queue.pending === 0 && !this.roomInfo.has(key) && this.perMatchQueue.get(key) === queue) {
-      this.deleteMatchQueue(key);
+    if (queue.size === 0 && queue.pending === 0 && !this.roomInfo.has(matchID) && this.perMatchQueue.get(matchID) === queue) {
+      this.deleteMatchQueue(matchID);
     }
   }
 
