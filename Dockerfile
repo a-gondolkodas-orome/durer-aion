@@ -4,7 +4,10 @@
 # the frontend here makes BuildKit fetch it, so the build does not depend on
 # how recent the daemon's built-in version happens to be.
 
-FROM node:26.13.0 AS deps
+# Every stage's base, written once; check-versions.test.mjs holds it to .nvmrc.
+ARG NODE_VERSION=26.13.0
+
+FROM node:${NODE_VERSION} AS deps
 
 WORKDIR /usr/src/app
 
@@ -54,43 +57,34 @@ RUN npx turbo build --filter=online-backend
 
 # The backend's runtime dependencies and nothing else, installed from the
 # lockfile. The workspace packages it depends on (`game`, `schemas`, …) are
-# inlined into the bundle from source (tsdown.config.mts), so they are dropped
-# from its manifest first: left in, npm would install them and theirs, which for
-# `game` means MUI and React. Listing them as devDependencies instead does not
-# help: `--omit=dev` still installs a workspace and its dependencies. A workspace
-# is whatever the lockfile records as a link, in any dependency field. npm ci
-# takes the trimmed manifest, since every dependency left still matches the
-# lockfile; the other workspaces' manifests are copied only because the lockfile
-# names them.
-FROM node:26.13.0 AS prod-deps
+# inlined into the bundle from source (apps/online-backend/tsdown.config.mts),
+# but npm still installs each one's dependencies: what keeps MUI and React out
+# is that `game` lists them as peers, which .npmrc's legacy-peer-deps leaves
+# uninstalled. Every workspace manifest is copied because the lockfile names
+# them all.
+FROM node:${NODE_VERSION} AS prod-deps
 
 WORKDIR /usr/src/app
 
 COPY package.json package-lock.json .npmrc ./
 COPY --parents apps/*/package.json packages/*/package.json ./
 
-RUN node -e " \
-      const fs = require('fs'); \
-      const file = 'apps/online-backend/package.json'; \
-      const manifest = JSON.parse(fs.readFileSync(file)); \
-      const lock = JSON.parse(fs.readFileSync('package-lock.json')).packages; \
-      for (const field of ['dependencies', 'optionalDependencies', 'peerDependencies']) \
-        for (const name of Object.keys(manifest[field] ?? {})) \
-          if (lock['node_modules/' + name]?.link) delete manifest[field][name]; \
-      fs.writeFileSync(file, JSON.stringify(manifest, null, 2)); \
-    "
 RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --workspace=online-backend
 
 # Last, so it is the stage a plain `docker compose build` picks — that is what
 # `npm run stack:build` (the CI gate) and `npm run stack:prod` get, and what a
 # deployment runs. It holds the bundle, its runtime dependencies and the team
 # import script: no workspace source, no devDependencies, no npm (#705).
-FROM node:26.13.0-slim AS prod
+FROM node:${NODE_VERSION}-slim AS prod
 
 # Nothing in this image installs or runs a package script, so the package
-# managers the base image ships are only attack surface.
-RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
-      /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg /opt/yarn-*
+# managers the base image ships are only attack surface. Which ones it ships
+# changes between Node releases, and `rm -rf` passes on a path that is not
+# there, so the loop is what notices one this removal does not cover.
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx; \
+    for tool in npm npx corepack yarn yarnpkg pnpm; do \
+      if command -v "$tool"; then echo "$tool is still in the runtime image" >&2; exit 1; fi; \
+    done
 
 WORKDIR /usr/src/app
 
@@ -102,9 +96,10 @@ COPY --from=build /usr/src/app/apps/online-backend/dist ./apps/online-backend/di
 COPY scripts/import_teams.sh ./scripts/
 
 # The bundle keeps every npm dependency an external require(), including those
-# only a workspace package declares, which the trim above leaves uninstalled.
-# The server's sanity-check mode loads every module both entries require and
-# exits, so a missing one fails this build rather than the deployed server.
+# only a workspace package declares, which prod-deps may leave uninstalled. The
+# server's sanity-check mode loads every module the server requires and exits,
+# so a missing one fails this build rather than the deployed server. The team
+# import requires nothing the server does not.
 RUN node apps/online-backend/dist/server.js sanity-check
 
 EXPOSE 8000
