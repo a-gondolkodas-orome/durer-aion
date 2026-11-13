@@ -241,6 +241,12 @@ export class SocketIOButBotMoves extends SocketIO {
     bot: Bot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
+    // A key storage cannot read fails on every packet, and logListenerFailure
+    // has no limit: past this check, a failure is storage's or the bot's, not
+    // the client's.
+    if (typeof matchID !== "string" || matchID === "") {
+      return;
+    }
     const action: unknown = actionData;
     if (!isRecord(action) || action.type !== "MAKE_MOVE") {
       return;

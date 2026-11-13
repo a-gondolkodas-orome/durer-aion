@@ -68,7 +68,10 @@ describe("the socket transport", () => {
       return socket;
     };
     const refusals = () => warned.mock.calls.map(([line]) => String(line)).filter(line => line.startsWith("Refused"));
-    return { db, client, context, failed, refusals };
+    // console.error is stubbed for the whole test, so a hook failure the
+    // transport catches and logs is visible only here.
+    const hookFailures = () => failed.mock.calls.map(([line]) => String(line)).filter(line => line.startsWith("Reacting to"));
+    return { db, client, context, failed, refusals, hookFailures };
   }
 
   function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH) {
@@ -160,7 +163,7 @@ describe("the socket transport", () => {
     ["chat", [MADE_UP_MATCH, { id: "a", sender: "0", payload: "hi" }, "made up"]],
   ])("survives a `%s` naming a match that does not exist, and writes none", async (event, args) => {
     const rejections = watchForUnhandledRejections();
-    const { db, client } = await serve();
+    const { db, client, hookFailures } = await serve();
     createKnownMatch(db);
 
     const socket = client();
@@ -170,6 +173,7 @@ describe("the socket transport", () => {
 
     expect(db.fetch(MADE_UP_MATCH, { metadata: true, state: true })).toEqual({});
     expect(rejections).toEqual([]);
+    expect(hookFailures()).toEqual([]);
   });
 
   it.each([
@@ -180,7 +184,7 @@ describe("the socket transport", () => {
     ["nothing", null],
   ])("survives an update for a real match whose action carries %s", async (_case, actionData) => {
     const rejections = watchForUnhandledRejections();
-    const { db, client } = await serve();
+    const { db, client, hookFailures } = await serve();
     createKnownMatch(db);
 
     const socket = client();
@@ -189,6 +193,7 @@ describe("the socket transport", () => {
     await settle();
 
     expect(rejections).toEqual([]);
+    expect(hookFailures()).toEqual([]);
   });
 
   it("reports a refusal once per socket, however many arrive", async () => {
