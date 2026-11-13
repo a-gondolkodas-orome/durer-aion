@@ -8,7 +8,6 @@ import { ThemeProvider } from '@mui/material/styles';
 // in git rather than in a gitignored `.env` that goes stale when the sample
 // changes (#443).
 const ACCENT_COLOR = '#11009E';
-const LANGUAGE = 'hu';
 
 const theme = {
   palette: {
@@ -37,7 +36,7 @@ function App() {
         <ClientRepoProvider
           value={clientRepository}>
           <AdminRepoProvider value={clientRepository}>
-            <Main language={LANGUAGE} gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
+            <Main gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH}/>
           </AdminRepoProvider>
         </ClientRepoProvider>
       </ThemeProvider>

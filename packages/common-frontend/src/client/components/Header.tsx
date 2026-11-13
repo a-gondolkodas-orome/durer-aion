@@ -14,8 +14,8 @@ export const STRATEGY_PAGE_MAX_WIDTH = 1320;
 
 // titles[0] and titles[1] are translation keys for the two side titles;
 // titles[2] is an optional, already-translated text shown instead of the team name
-/// `languageSwitcher` is for the sites that are meant to be read in either
-/// language; the competition round and its admin pages are Hungarian only.
+/// `languageSwitcher` is for a page meant to be read in either language: the
+/// practice sites, and a team's pages in a competition held in both.
 /// `compact` is for the game pages, where the height goes to the game.
 /// `maxWidth` is the page's own, so the header's edges line up with it.
 /// `leaveLabel` names the logout button for a site where logging out is not

@@ -1,5 +1,5 @@
 import { Container } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header, PAGE_MAX_WIDTH, STRATEGY_PAGE_MAX_WIDTH } from "./Header";
 import { Layout } from "./Layout";
@@ -13,8 +13,9 @@ import { Admin } from "./Admin";
 import { ErrorBoundary } from "./ErrorBoundary";
 import i18next from "i18next";
 import { useOptionalAdminRepo } from "../client-repo-context";
+import { competitionLanguage, readChosenLanguage, storeChosenLanguage } from "../hooks/ui-language";
 
-export function Main(props: { language: string, gitCommitHash: string }) {
+export function Main(props: { gitCommitHash: string }) {
   const teamState = useTeamState();
   // Only the online app provides an admin repository; elsewhere `/admin` is
   // just a path, and the team's own pages answer it.
@@ -22,15 +23,27 @@ export function Main(props: { language: string, gitCommitHash: string }) {
 
   const maxWidth = !admin && teamState?.pageState === "STRATEGY" ? STRATEGY_PAGE_MAX_WIDTH : PAGE_MAX_WIDTH;
 
+  // The team's competition decides the language; with two, the team chooses.
+  // The admin pages are written in Hungarian only, and so is the login page,
+  // which has no competition to go by yet.
+  const [chosenLanguage, setChosenLanguage] = useState(readChosenLanguage);
+  const languages = admin ? undefined : teamState?.competition?.languages;
+  const language = languages === undefined ? 'hu' : competitionLanguage(languages, chosenLanguage);
+  const chooseLanguage = (chosen: string) => {
+    setChosenLanguage(chosen);
+    storeChosenLanguage(chosen);
+  };
+
   useEffect(() => {
-    void i18next.changeLanguage(props.language);
-  }, [props.language])
+    void i18next.changeLanguage(language);
+  }, [language])
 
   return (
     <Layout>
       <LoadTeamState />
       <Header teamName={teamState?.teamName ?? null}
-        compact={teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY"} maxWidth={maxWidth}/>
+        compact={teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY"} maxWidth={maxWidth}
+        languageSwitcher={languages !== undefined && languages.length > 1} onChooseLanguage={chooseLanguage}/>
       {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
           breakpoint, 1280px, at that width and up, overriding the sx below */}
       <Container
