@@ -150,6 +150,11 @@
       "unfinished": "Befejezetlen: lejárt közben az idő",
       "won": "Győzelem"
     },
+    "ended": {
+      "result": "Eredmény",
+      "text": "A táblát már csak megnézni lehet, lépni nem.",
+      "title": "A stratégiás játék véget ért."
+    },
     "firstPlayer": "Kezdünk",
     "info": {
       "label": "Próba vagy éles?",
@@ -235,7 +240,8 @@
       "role": "Válasszatok szerepet!",
       "starting": "Indul a játszma…",
       "yourTurn": "Ti jöttök!"
-    }
+    },
+    "viewBoard": "Tábla megtekintése"
   },
   "waitingRoom": {
     "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",

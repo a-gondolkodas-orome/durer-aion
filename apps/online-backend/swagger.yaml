@@ -377,6 +377,25 @@ paths:
         "403":
           description: Not allowed to start
 
+  /team/me/strategy/view:
+    post:
+      summary: Take the logged-in team back to its finished STRATEGY match, to look at the board as it ended
+      security:
+      - teamSession: []
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicTeamView"
+        "401":
+          description: No session
+        "403":
+          description: Not at home, the strategy match has not ended, or the relay is in progress
+
   /team/me/gohome:
     post:
       summary: Let the logged-in team set their PageState to HOME

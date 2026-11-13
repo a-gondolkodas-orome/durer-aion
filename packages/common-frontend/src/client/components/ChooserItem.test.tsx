@@ -10,9 +10,11 @@ vi.mock('react-i18next', () => ({
 }));
 
 const startRelay = vi.fn<() => Promise<void>>();
+const viewStrategy = vi.fn<() => Promise<void>>(() => Promise.resolve());
 vi.mock('../hooks/user-hooks', () => ({
   useStartRelay: () => startRelay,
   useStartStrategy: () => () => Promise.resolve(),
+  useViewStrategy: () => viewStrategy,
 }));
 
 // Regression: a double click sent two starts.
@@ -45,6 +47,27 @@ test('a finished round shows its results and when it was filled in, and no butto
   expect(screen.getByText(/chooser\.filledAt/)).toBeInTheDocument();
   // The detailed table: the time row too.
   expect(screen.getAllByText('relay.endTable.time').length).toBeGreaterThan(0);
+});
+
+const finishedAt = {
+  state: 'FINISHED' as const,
+  score: 12,
+  matchID: 'm',
+  startAt: new Date('2026-11-09T12:56:00Z'),
+  endAt: new Date('2026-11-09T13:26:00Z'),
+};
+
+test('a finished strategy match can be looked at again, its board as it ended', async () => {
+  render(<ChooserItem type="strategy" status={{ ...finishedAt, strategyResults: ['won', 'won'] }} />);
+
+  await act(async () => fireEvent.click(screen.getByRole('button', { name: 'strategy.viewBoard' })));
+  expect(viewStrategy).toHaveBeenCalledTimes(1);
+});
+
+test('a finished relay offers no way back to its page', () => {
+  render(<ChooserItem type="relay" status={finishedAt} />);
+
+  expect(screen.queryByRole('button', { name: 'strategy.viewBoard' })).not.toBeInTheDocument();
 });
 
 // Before the clock runs, each point is a line, with a quieter line under the
