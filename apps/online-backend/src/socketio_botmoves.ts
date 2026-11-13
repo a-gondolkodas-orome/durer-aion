@@ -104,11 +104,58 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  *  from the first argument after the event name. */
 const MATCH_ID_POSITION = { sync: 0, chat: 0, update: 2 } as const;
 
+const LOGGED_ID_LENGTH = 64;
+
+/** A client-supplied match id as a log can carry it: quoted, so a newline in it
+ *  cannot start a line of its own, and cut short, so its length is not the
+ *  client's to choose. */
+export function describeMatchID(matchID: unknown): string {
+  if (typeof matchID !== "string") {
+    return `<${matchID === null ? "null" : typeof matchID}>`;
+  }
+  const quoted = JSON.stringify(matchID.slice(0, LOGGED_ID_LENGTH));
+  return matchID.length > LOGGED_ID_LENGTH ? `${quoted}…` : quoted;
+}
+
 /** socket.io does not await a listener, and an unhandled rejection ends the
  *  process with every match on it. */
-const logListenerFailure = (event: string, matchID: string) => (error: unknown) => {
-  console.error(`Reacting to a ${event} for match ${JSON.stringify(matchID)} failed:`, error);
+const logListenerFailure = (event: string, matchID: unknown) => (error: unknown) => {
+  console.error(`Reacting to a ${event} for match ${describeMatchID(matchID)} failed:`, error);
 };
+
+/** Writes at most `limit` lines per window, across every socket: a limit per
+ *  socket alone is reset by opening another one. What it holds back is counted,
+ *  and the count is written with the first line of a later window. */
+export class LogBudget {
+  private windowStart = -Infinity;
+  private written = 0;
+  private withheld = 0;
+
+  constructor(
+    private readonly limit: number,
+    private readonly windowMs: number,
+    private readonly log: (...line: unknown[]) => void,
+    private readonly now: () => number = Date.now
+  ) {}
+
+  write(...line: unknown[]): void {
+    const now = this.now();
+    if (now - this.windowStart >= this.windowMs) {
+      if (this.withheld > 0) {
+        this.log(`Withheld ${this.withheld} more such lines`);
+      }
+      this.windowStart = now;
+      this.written = 0;
+      this.withheld = 0;
+    }
+    if (this.written < this.limit) {
+      this.written++;
+      this.log(...line);
+    } else {
+      this.withheld++;
+    }
+  }
+}
 
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
@@ -119,6 +166,10 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, Bot>;
+  // console is looked up per line rather than bound here, so a spy installed
+  // after construction still sees it.
+  private readonly refusals = new LogBudget(20, 60_000, (...line) => { console.warn(...line); });
+  private readonly storageFailures = new LogBudget(20, 60_000, (...line) => { console.error(...line); });
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, Bot>,
@@ -171,15 +222,24 @@ export class SocketIOButBotMoves extends SocketIO {
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
+        // Logged once per socket, so one socket cannot spend the whole budget.
+        let reported = false;
         socket.use(([event, ...args]: IOTypes.Event, next) => {
           const position = MATCH_ID_POSITION[event as keyof typeof MATCH_ID_POSITION] as number | undefined;
           if (position === undefined) {
             next();
             return;
           }
+          const refuse = (reason: string) => {
+            if (!reported) {
+              reported = true;
+              this.refusals.write(`Refused a packet on socket ${socket.id}: ${reason}`);
+            }
+            next(new Error(reason));
+          };
           const matchID: unknown = args[position];
           if (typeof matchID !== "string" || matchID === "") {
-            next(new Error(`${event} without a match id`));
+            refuse(`${event} without a match id`);
             return;
           }
           if (event !== "sync") {
@@ -188,9 +248,18 @@ export class SocketIOButBotMoves extends SocketIO {
           }
           void fetch(app.context.db, matchID, { metadata: true } as const).then(
             ({ metadata }) => {
-              next(metadata === undefined ? new Error(`sync for unknown match ${matchID}`) : undefined);
+              if (metadata === undefined) {
+                refuse(`sync for unknown match ${describeMatchID(matchID)}`);
+                return;
+              }
+              next();
             },
-            (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
+            (error: unknown) => {
+              // Not the client's doing, so not under the once-per-socket limit;
+              // but how many syncs meet a failing store is, so it has a budget.
+              this.storageFailures.write(`Storage could not be read for a sync of match ${describeMatchID(matchID)}:`, error);
+              next(error instanceof Error ? error : new Error(String(error)));
+            }
           );
         });
 
