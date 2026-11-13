@@ -509,17 +509,18 @@ test('the import tab uploads the picked file, and saves the join codes when aske
 
 // The Competition column takes a name or an id, so the page lists what to
 // write for each competition, to copy.
-test('the import tab lists the competitions newest first, with what to import them as', async () => {
+test('the competitions tab lists the competitions newest first, with what to import them as', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const writeText = vi.fn().mockResolvedValue(undefined);
   Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
   renderAdmin();
 
-  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
   const table = await screen.findByTestId('competitionTable');
   const row = (await within(table).findByText('20 online C')).closest('li');
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
-  expect(grids.columns.at(-1)?.map(column => column.field))
+  expect([...grids.columns].reverse().find(columns => columns.some(column => column.field === 'importAs'))
+    ?.map(column => column.field))
     .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'startWindow']);
   if (row === null) throw new Error('no table row');
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
@@ -530,13 +531,27 @@ test('the import tab lists the competitions newest first, with what to import th
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
+// The import's help names the tab with what its Competition column takes.
+test('the import tab links to the competitions tab', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Versenyek fül' }));
+
+  expect(screen.getByRole('tab', { name: 'Versenyek' })).toHaveAttribute('aria-selected', 'true');
+  expect(window.location.search).toBe('?tab=versenyek');
+  expect(await screen.findByTestId('competitionTable')).toBeVisible();
+  expect(screen.getByText('Importálás')).not.toBeVisible();
+});
+
 // A competition's window is set on the page, not only in its config in code.
-test('the import tab sets a competition\'s start window, and lists it as set', async () => {
+test('the competitions tab sets a competition\'s start window, and lists it as set', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const setWindow = vi.spyOn(repo, 'setCompetitionWindow').mockResolvedValue();
   renderAdmin();
 
-  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
   const table = await screen.findByTestId('competitionTable');
   expect(within(table).getAllByText('bármikor')).toHaveLength(2);
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
@@ -553,12 +568,12 @@ test('the import tab sets a competition\'s start window, and lists it as set', a
   expect(await within(table).findByText(`${windowTimeText('2026-11-20T15:00+01:00')} után (itt megadva)`)).toBeInTheDocument();
 });
 
-test('the import tab refuses a start window with no offset before sending it', async () => {
+test('the competitions tab refuses a start window with no offset before sending it', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const setWindow = vi.spyOn(repo, 'setCompetitionWindow').mockResolvedValue();
   renderAdmin();
 
-  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
   const table = await screen.findByTestId('competitionTable');
   fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
   fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00' } });
@@ -695,7 +710,7 @@ test('the team list\'s CSV holds no login secret', async () => {
   renderAdmin();
   await screen.findByText('Alpha');
 
-  // The team list's grid, not the import tab's table of competitions.
+  // The team list's grid, not the competitions tab's table.
   const teamGrid = [...grids.columns].reverse().find(columns => columns.some(column => column.field === 'teamName'));
   const exported = (teamGrid ?? []).filter(column => column.disableExport !== true).map(column => column.field);
 

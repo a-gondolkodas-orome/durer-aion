@@ -282,7 +282,7 @@ The admin page's TSV upload does the same job through the browser.
 
 Each row's `Competition` column names its team's competition, such as
 `20 online C`, or its id, so one file holds every category of the round. The
-admin page's **Import/export** tab lists the competitions with what to write.
+admin page's **Versenyek** tab lists the competitions with what to write.
 
 **Start windows.** Before codes go out, check on the same tab when each
 competition's teams may start their matches (*Indítási ablak*), and set the

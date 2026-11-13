@@ -1,13 +1,11 @@
 import { ChangeEvent, useState } from 'react';
 import { Stack } from '@mui/system';
-import { Button } from '@mui/material';
+import { Button, Link } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
-import useSWR from 'swr';
 import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
-import { useCompetitions, useImportTeams } from '../hooks/user-hooks';
+import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
-import { CompetitionTable } from './CompetitionTable';
 import { InfoTip } from './InfoTip';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 
@@ -21,14 +19,14 @@ function summary(result: TeamImportResultDto): string {
 /// same route and the same importer as `npm run teams:import`, row by row, so
 /// a file with bad rows still loads the good ones. Each row names its team's
 /// competition, so one file can fill the C, D and E competitions of a round at
-/// once; the table beside it says what to write for each. The export is every
+/// once; the Versenyek tab says what to write for each. The export is every
 /// team with its join code and credentials, in the import's own format: the one
 /// download on the admin page that carries a login secret.
-export function ImportExport(props: { teams: TeamModelDto[], onImported: () => void }) {
+export function ImportExport(props: {
+  teams: TeamModelDto[], onImported: () => void, onOpenCompetitions: () => void,
+}) {
   const theme = useTheme();
   const importTeams = useImportTeams();
-  const getCompetitions = useCompetitions();
-  const { data: competitions, mutate: refetchCompetitions } = useSWR('team/admin/competitions', getCompetitions);
   const { enqueueSnackbar } = useSnackbar();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -78,7 +76,7 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
       <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '32px' }}>
         <Stack sx={{ gap: '16px', flex: '1 1 0', minWidth: 0 }}>
           <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Importálás</Stack>
-          <ImportHelp/>
+          <ImportHelp onOpenCompetitions={props.onOpenCompetitions}/>
           <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <Button variant="outlined" color="primary" component="label" disabled={busy}>
               Fájl kiválasztása
@@ -141,17 +139,13 @@ export function ImportExport(props: { teams: TeamModelDto[], onImported: () => v
           </Stack>
         </Stack>
       </Stack>
-      <Stack sx={{ gap: '16px', minWidth: 0 }}>
-        <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Versenyek</Stack>
-        <CompetitionTable competitions={competitions ?? []} onWindowChanged={() => { void refetchCompetitions(); }}/>
-      </Stack>
     </Stack>
   );
 }
 
 /// What the import takes, column by column: what an organiser needs at a
 /// glance is in sight, the rest behind an ⓘ beside its column.
-function ImportHelp() {
+function ImportHelp(props: { onOpenCompetitions: () => void }) {
   return (
     <Stack sx={{ fontSize: 14, gap: '8px', '& ul': { margin: 0, paddingLeft: '20px' }, '& li': { margin: '4px 0' } }}>
       <span>
@@ -162,7 +156,11 @@ function ImportHelp() {
       <ul>
         <li><b>Teamname</b></li>
         <li>
-          <b>Competition</b>: a csapat versenye, a lenti táblázat szerint, például 20 online C
+          <b>Competition</b>: a csapat versenye, a{' '}
+          <Link component="button" variant="inherit" onClick={props.onOpenCompetitions} sx={{ verticalAlign: 'baseline' }}>
+            Versenyek fül
+          </Link>{' '}
+          szerint, például 20 online C
           <InfoTip label="Competition">
             A verseny neve vagy azonosítója. Soronként más lehet, így egy fájlban több verseny csapatai is lehetnek.
           </InfoTip>

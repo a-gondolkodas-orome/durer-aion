@@ -178,7 +178,7 @@ closed, and one that is open, in that order; the rest have none, so `000` to
 
 A competition's own window, which every team without one of its own follows, is
 the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set
-on the **Import/export** tab: the table of competitions shows each one's window,
+on the **Versenyek** tab: its table of competitions shows each one's window,
 and its edit button sets one in place of the config's, or returns it to the
 config's. Neither the team's window nor the competition's means any time. The
 server decides a start by its own clock, and the team's page reads the window by

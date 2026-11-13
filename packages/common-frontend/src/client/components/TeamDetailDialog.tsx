@@ -462,7 +462,7 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
   const [error, setError] = useState<string | null>(null);
   const own = team.startOpensAt !== null && team.startOpensAt !== undefined;
   // The competition's window in force, which the team's own replaces; the
-  // same request as the Import/export tab's table, so the two share it.
+  // same request as the Versenyek tab's table, so the two share it.
   const getCompetitions = useCompetitions();
   const { data: competitions } = useSWR('team/admin/competitions', getCompetitions);
   const competitionWindow = competitions?.find(competition => competition.id === team.competitionId)?.startWindow;
