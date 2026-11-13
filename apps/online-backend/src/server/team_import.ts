@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
-import { OTHER_IMPORT_MAX_LENGTH } from './model';
+import { OTHER_IMPORT_MAX_LENGTH, type TeamModel } from './model';
 import { namesCompetition, validateStartWindow } from 'schemas';
 import type { CompetitionConfig, StartWindow } from 'schemas';
 import { registry } from 'problem-bank/all';
@@ -117,6 +117,30 @@ function databaseText(item: ValidationErrorItem): string {
   return (item.path !== null ? table[item.path] : undefined) ?? item.message;
 }
 
+/** What a row sets in a team that is already there: each field the file has
+ * a column for, where it differs. The file wins, so a re-import fixes a bad
+ * one, and a blank cell clears; a field the file has no column for, given as
+ * undefined, is left as it is. The name, the competition and the identifiers
+ * name the team rather than describe it, so they are never changed, and
+ * `other` is not offered: the admin routes append their audit trail to it. */
+export function changesTo(
+  team: Pick<TeamModel, 'email' | 'startOpensAt' | 'startClosesAt'>,
+  file: { email: string | undefined, startWindow?: StartWindow | null },
+): Partial<Pick<TeamModel, 'email' | 'startOpensAt' | 'startClosesAt'>> {
+  const changes: Partial<Pick<TeamModel, 'email' | 'startOpensAt' | 'startClosesAt'>> = {};
+  if (file.email !== undefined && file.email !== (team.email ?? '')) changes.email = file.email;
+  // The two columns are one window: a file with either sets both.
+  if (file.startWindow !== undefined) {
+    const opensAt = file.startWindow?.opensAt ?? null;
+    const closesAt = file.startWindow?.closesAt ?? null;
+    if (opensAt !== team.startOpensAt || closesAt !== team.startClosesAt) {
+      changes.startOpensAt = opensAt;
+      changes.startClosesAt = closesAt;
+    }
+  }
+  return changes;
+}
+
 function randomDigits(numDigits: number) {
   let result = "";
   for (let i = 0; i < numDigits; i++) { result += `${randomInt(0, 10)}`; }
@@ -127,11 +151,11 @@ function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
 export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
-  const { successful, existing, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
+  const { successful, existing, updated, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
-  console.info(`Összesen ${successful} csapat került be, ${existing} már szerepelt, ${failed} sor hibás.`);
+  console.info(`Összesen ${successful} csapat került be, ${existing} már szerepelt (${updated} frissült), ${failed} sor hibás.`);
   export_table.unshift([...COLUMNS]);
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
@@ -164,7 +188,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     onerror('Egy csapat sem került be. A fejlécben nincs tabulátor: az oszlopokat tabulátorral kell elválasztani, '
       + 'nem szóközzel.');
     onerror(`A fájl első sora: „${header[0].trim()}”`);
-    return { successful: 0, existing: 0, failed: 0, export_table, logs };
+    return { successful: 0, existing: 0, updated: 0, failed: 0, export_table, logs };
   }
   if ('refused' in read) {
     onerror(`Egy csapat sem került be. ${read.refused}`);
@@ -173,7 +197,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       + 'neve, például 20 online C, vagy az azonosítója); Email, Other, ID, Login Code, Credentials, Opens At és Closes At (elhagyható; '
       + 'az ID-t, a Login Code-ot és a Credentials-t ilyenkor a szerver generálja, az Opens At és a Closes At a csapat '
       + 'saját indítási ablaka a versenyé helyett).');
-    return { successful: 0, existing: 0, failed: 0, export_table, logs };
+    return { successful: 0, existing: 0, updated: 0, failed: 0, export_table, logs };
   }
   if (read.unknown.length > 0) {
     onwarn(`Ezeket az oszlopokat nem ismerjük, kimaradnak: ${read.unknown.join(', ')}`);
@@ -183,13 +207,16 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
   let successful = 0;
   let failed = 0; // not counting blank lines
   await teams.connect();
-  // Re-running a grown registration list is how late teams are added, so a
-  // row naming a team that is already in its competition is that team, not a
-  // clash — as long as the identifiers it supplies are that team's own.
+  // Re-running a grown registration list is how late teams are added, and
+  // re-running a corrected one how a bad import is fixed, so a row naming a
+  // team that is already in its competition is that team, not a clash — as
+  // long as the identifiers it supplies are that team's own. What the row
+  // changes in it is `changesTo`'s to say.
   const liveKey = (competitionId: string, teamName: string) => JSON.stringify([competitionId, teamName]);
   const live = new Map((await teams.listTeams() ?? [])
     .map(team => [liveKey(team.competitionId, team.teamName), team]));
-  const existing: string[] = [];
+  const unchanged: string[] = [];
+  const updated: string[] = [];
   for (const [index, row] of table.entries()) {
     // The file's own line number, header included, as an editor shows it.
     const line = index + 2;
@@ -269,18 +296,23 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
         failed++;
         continue;
       }
-      existing.push(teamname);
-      // Not applied: the import never changes a team that is already there.
-      // Said, since a fix made in the file would otherwise vanish in silence.
-      if (email !== '' && email !== (there.email ?? '')) {
-        onwarn(`${where}: már szerepel, más e-mail címmel; a fájlbeli nem került át.`);
+      const windowInFile = positions["Opens At"] !== undefined || positions["Closes At"] !== undefined;
+      const changes = changesTo(there, {
+        email: positions.Email === undefined ? undefined : email,
+        startWindow: windowInFile ? startWindow ?? null : undefined,
+      });
+      if (Object.keys(changes).length === 0) {
+        unchanged.push(teamname);
+        continue;
       }
-      // Only from a file that has the columns: one without them says nothing
-      // about a window the admin page set.
-      if ((positions["Opens At"] !== undefined || positions["Closes At"] !== undefined)
-        && ((startWindow?.opensAt ?? null) !== there.startOpensAt
-          || (startWindow?.closesAt ?? null) !== there.startClosesAt)) {
-        onwarn(`${where}: már szerepel, más Opens At vagy Closes At értékkel; a fájlbeli nem került át.`);
+      try {
+        await teams.updateTeam(there, changes);
+        updated.push(teamname);
+      } catch (err) {
+        if (!(err instanceof ValidationError)) throw err;
+        const reasons = err.errors.length > 0 ? [...new Set(err.errors.map(databaseText))].join('; ') : err.message;
+        onerror(`${where}: ${reasons}.`);
+        failed++;
       }
       continue;
     }
@@ -330,13 +362,17 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     }
   }
 
-  if (existing.length > 0) {
-    const named = existing.slice(0, NAMED_EXISTING).join(', ');
-    const rest = existing.length > NAMED_EXISTING ? ` és még ${existing.length - NAMED_EXISTING}` : '';
-    // First, so the rows that did go wrong are not read as part of it.
-    logs.value.unshift(`${existing.length} csapat már szerepelt, változatlanul hagytuk: ${named}${rest}.`);
+  const names = (teams: string[]) => teams.slice(0, NAMED_EXISTING).join(', ')
+    + (teams.length > NAMED_EXISTING ? ` és még ${teams.length - NAMED_EXISTING}` : '');
+  // First, so the rows that did go wrong are not read as part of them.
+  if (unchanged.length > 0) {
+    logs.value.unshift(`${unchanged.length} csapat már szerepelt, változatlanul: ${names(unchanged)}.`);
+    logs.sev.unshift('warn');
+  }
+  if (updated.length > 0) {
+    logs.value.unshift(`${updated.length} csapat már szerepelt, a fájl szerint frissült: ${names(updated)}.`);
     logs.sev.unshift('warn');
   }
 
-  return { successful, existing: existing.length, failed, export_table, logs };
+  return { successful, existing: unchanged.length + updated.length, updated: updated.length, failed, export_table, logs };
 }

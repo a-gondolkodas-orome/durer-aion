@@ -53,7 +53,8 @@ describe("publicTeamView", () => {
   });
 
   it("serves what the client plays with", () => {
-    expect(publicTeamView(team, matches)).toStrictEqual({
+    const now = new Date("2026-10-20T13:00:00Z");
+    expect(publicTeamView(team, matches, undefined, now)).toStrictEqual({
       teamName: "Csapat",
       category: "E",
       competition: {
@@ -64,6 +65,7 @@ describe("publicTeamView", () => {
         metadata: { kind: "competition", edition: 20, round: "online", category: "E" },
       },
       startWindow: null,
+      serverTime: "2026-10-20T13:00:00.000Z",
       credentials: "secret-token",
       pageState: "HOME",
       relayMatch: { state: "NOT STARTED" },

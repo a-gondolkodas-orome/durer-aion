@@ -412,7 +412,7 @@ describe('import_teams_from_tsv', () => {
       });
     };
 
-    it('is left as it is, and all of them are one line, ahead of the real problems', async () => {
+    it('is left as it is when the file says the same, and all of them are one line, ahead of the real problems', async () => {
       live = Array.from({ length: 12 }, (_, i) => liveTeam(`Old ${i + 1}`));
       tsv(
         ...live.map(team => [team.teamName, C, 'a@b.com', '', '', '', '']),
@@ -426,7 +426,7 @@ describe('import_teams_from_tsv', () => {
       // New, and Bad, which the model refuses.
       expect(create).toHaveBeenCalledTimes(2);
       expect(result.logs.value).toEqual([
-        '12 csapat már szerepelt, változatlanul hagytuk: '
+        '12 csapat már szerepelt, változatlanul: '
           + 'Old 1, Old 2, Old 3, Old 4, Old 5, Old 6, Old 7, Old 8, Old 9, Old 10 és még 2.',
         '15. sor (Bad): a belépőkód nem 111-2222-333 alakú.',
       ]);
@@ -455,42 +455,111 @@ describe('import_teams_from_tsv', () => {
       expect(result.logs.value).toEqual(['2. sor (Alpha): már van ilyen nevű csapat, de más belépőkód értékkel.']);
     });
 
-    // The import never changes a team that is there, so an email fixed in the
-    // file would otherwise not land, and nothing would say so.
-    it('says when the file holds another email than the team has', async () => {
-      live = [liveTeam('Alpha')];
-      tsv(['Alpha', C, 'new@b.com', '', '', '', '']);
+    // A bad import is fixed by importing the corrected file: its values win.
+    describe('takes the file\'s values', () => {
+      // `update` runs the model's validators and then reaches the database:
+      // this stands in for the second half, as `create` above does.
+      let update: MockInstance;
+      beforeEach(() => {
+        update = vi.spyOn(TeamModel.prototype, 'update').mockImplementation(async function (
+          this: TeamModel, values: Partial<TeamModel>) {
+          this.set(values);
+          await this.validate();
+          return this;
+        } as unknown as TeamModel['update']);
+      });
 
-      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+      it('and updates the team where they differ', async () => {
+        const alpha = liveTeam('Alpha');
+        live = [alpha, liveTeam('Beta')];
+        tsv(['Alpha', C, 'new@b.com', '', '', '', ''], ['Beta', C, 'a@b.com', '', '', '', '']);
 
-      expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
-      expect(create).not.toHaveBeenCalled();
-      expect(result.logs.value).toEqual([
-        '1 csapat már szerepelt, változatlanul hagytuk: Alpha.',
-        '2. sor (Alpha): már szerepel, más e-mail címmel; a fájlbeli nem került át.',
-      ]);
-    });
+        const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
-    it('says when the file holds another start window than the team has', async () => {
-      live = [liveTeam('Alpha')];
-      (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\tOpens At\nAlpha\t${C}\t2026-11-21T15:00+01:00\n`);
+        expect(result).toMatchObject({ successful: 0, existing: 2, updated: 1, failed: 0 });
+        expect(create).not.toHaveBeenCalled();
+        expect(alpha.email).toBe('new@b.com');
+        expect(result.logs.value).toEqual([
+          '1 csapat már szerepelt, a fájl szerint frissült: Alpha.',
+          '1 csapat már szerepelt, változatlanul: Beta.',
+        ]);
+      });
 
-      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+      it('and a blank cell clears the field', async () => {
+        const alpha = liveTeam('Alpha');
+        live = [alpha];
+        tsv(['Alpha', C, '', '', '', '', '']);
 
-      expect(result).toMatchObject({ successful: 0, existing: 1, failed: 0 });
-      expect(result.logs.value).toEqual([
-        '1 csapat már szerepelt, változatlanul hagytuk: Alpha.',
-        '2. sor (Alpha): már szerepel, más Opens At vagy Closes At értékkel; a fájlbeli nem került át.',
-      ]);
-    });
+        await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
-    it('says nothing of a window a file without the columns leaves out', async () => {
-      live = [liveTeam('Alpha', { startOpensAt: '2001-01-01T00:00Z' })];
-      tsv(['Alpha', C, 'a@b.com', '', '', '', '']);
+        expect(alpha.email).toBe('');
+      });
 
-      const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+      // A list of names and competitions says nothing about anyone's email.
+      it('but leaves a field the file has no column for', async () => {
+        live = [liveTeam('Alpha')];
+        (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\nAlpha\t${C}\n`);
 
-      expect(result.logs.value).toEqual(['1 csapat már szerepelt, változatlanul hagytuk: Alpha.']);
+        const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(update).not.toHaveBeenCalled();
+        expect(result).toMatchObject({ existing: 1, updated: 0 });
+      });
+
+      it('and fails a row whose value the model refuses, keeping the team as it was', async () => {
+        const alpha = liveTeam('Alpha');
+        live = [alpha];
+        tsv(['Alpha', C, `${'a'.repeat(250)}@b.com`, '', '', '', '']);
+
+        const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(result).toMatchObject({ existing: 0, updated: 0, failed: 1 });
+        expect(result.logs.value).toEqual(['2. sor (Alpha): az Email túl hosszú (legfeljebb 255 karakter).']);
+      });
+
+      // Other holds the organisers' notes and the admin routes' audit trail.
+      it('except Other, which the file never overwrites', async () => {
+        const alpha = liveTeam('Alpha', { other: 'prevrelayid:abc' });
+        live = [alpha];
+        tsv(['Alpha', C, 'a@b.com', 'from the file', '', '', '']);
+
+        await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(update).not.toHaveBeenCalled();
+        expect(alpha.other).toBe('prevrelayid:abc');
+      });
+
+      it('and its start window, either column setting both', async () => {
+        const alpha = liveTeam('Alpha', { startOpensAt: '2001-01-01T00:00Z', startClosesAt: '2002-01-01T00:00Z' });
+        live = [alpha];
+        (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\tOpens At\nAlpha\t${C}\t2026-11-21T15:00+01:00\n`);
+
+        const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(result).toMatchObject({ existing: 1, updated: 1 });
+        expect([alpha.startOpensAt, alpha.startClosesAt]).toEqual(['2026-11-21T15:00+01:00', null]);
+      });
+
+      it('and blank window cells take the team\'s own window away', async () => {
+        const alpha = liveTeam('Alpha', { startOpensAt: '2001-01-01T00:00Z' });
+        live = [alpha];
+        (readFileSync as Mock).mockReturnValue(`Teamname\tCompetition\tOpens At\tCloses At\nAlpha\t${C}\t\t\n`);
+
+        await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(alpha.startOpensAt).toBeNull();
+      });
+
+      // A window the admin page set stays, unless the file says otherwise.
+      it('but leaves the window when the file has neither column', async () => {
+        live = [liveTeam('Alpha', { startOpensAt: '2001-01-01T00:00Z' })];
+        tsv(['Alpha', C, 'a@b.com', '', '', '', '']);
+
+        const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
+
+        expect(update).not.toHaveBeenCalled();
+        expect(result.logs.value).toEqual(['1 csapat már szerepelt, változatlanul: Alpha.']);
+      });
     });
 
     // A team name is unique within its competition only, and teams are not

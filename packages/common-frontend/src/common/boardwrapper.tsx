@@ -1,14 +1,17 @@
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { LIVE_COLOUR, LiveGameCell, LiveGameRun } from "../client/components/ResultTables";
-import { useBackToHome } from "../client/hooks/user-hooks";
+import { useBackToHome, useTeamState } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
@@ -87,6 +90,10 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     const moves = useMemo(() => asStrategyWrapperMoves(props.moves), [props.moves]);
     const [msRemaining, setMsRemaining] = useMsRemaining(G.millisecondsRemaining); // asked from the server
     const backToHome = useBackToHome();
+    // A team that comes back to a match already over has seen its result: it
+    // finds the board, and the result behind the ribbon's button.
+    const team = useTeamState();
+    const [resultClosed, setResultClosed] = useState(() => team?.strategyMatch.state === 'FINISHED');
     const isOffline = useClientRepo().version === "OFFLINE";
     const theme = useTheme();
     const { t } = useTranslation();
@@ -295,8 +302,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
 
     return (
       <>
-        <EndDialog open={finished} onClose={backToHome}>
-          <StrategyEndTable allPoints={G.points} liveResults={G.liveResults} />
+        <EndDialog open={finished && !resultClosed} onClose={() => setResultClosed(true)}>
+          <StrategyEndTable allPoints={G.points} liveResults={G.liveResults} onViewBoard={() => setResultClosed(true)} />
         </EndDialog>
         <Stack sx={{
           padding: { xs: '10px', md: '16px 20px' },
@@ -332,6 +339,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
               {!rulesBeside && rulesButton}
             </Stack>
           </Stack>
+          {/* Under the result dialog too, so closing it moves nothing. */}
+          {finished && <EndedRibbon onResult={() => setResultClosed(false)} onHome={backToHome} />}
           <Box sx={{
             ...(rulesColumns !== null && { display: 'grid', gridTemplateColumns: rulesColumns, gap: `${COLUMN_GAP}px`, alignItems: 'start' }),
           }}>
@@ -390,6 +399,36 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     );
   };
 };
+
+/** Once the match is over: the board stays to look at, and from here the
+ *  result opens again or the team goes home. */
+function EndedRibbon(props: { onResult: () => void, onHome: () => void }) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const button = { minHeight: '44px', fontSize: '14px', fontWeight: 600, textTransform: 'none', borderRadius: '8px', flex: { xs: 1, sm: 'none' } } as const;
+  return (
+    <Stack sx={{
+      flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' }, gap: '10px 14px',
+      padding: '10px 12px 10px 16px', borderRadius: '14px',
+      backgroundColor: alpha(theme.palette.primary.main, 0.08), border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+    }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'flex-start', gap: '10px', flex: 1, fontSize: '14px', lineHeight: 1.4 }}>
+        <VisibilityOutlinedIcon sx={{ color: 'primary.dark', fontSize: '20px', flexShrink: 0 }} />
+        <Box><b>{t('strategy.ended.title')}</b> {t('strategy.ended.text')}</Box>
+      </Stack>
+      <Stack sx={{ flexDirection: 'row', gap: '8px' }}>
+        <Button variant="outlined" startIcon={<InsertChartOutlinedIcon />} onClick={props.onResult}
+          sx={{ ...button, backgroundColor: '#fff' }}>
+          {t('strategy.ended.result')}
+        </Button>
+        <Button variant="contained" disableElevation startIcon={<HomeOutlinedIcon />} onClick={props.onHome}
+          sx={{ ...button, flex: { xs: 1.6, sm: 'none' } }}>
+          {t('general.backHome')}
+        </Button>
+      </Stack>
+    </Stack>
+  );
+}
 
 /// How many games before the current run the strip shows.
 const SHOWN_BEFORE_RUN = 2;

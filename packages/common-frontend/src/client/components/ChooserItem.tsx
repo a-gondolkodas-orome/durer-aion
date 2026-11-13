@@ -1,13 +1,14 @@
-import { Box, Button, IconButton } from '@mui/material';
+import { Box, Button, IconButton, Tooltip } from '@mui/material';
 import type { ReactNode } from 'react';
 import { Stack } from '@mui/system';
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { MatchStatus } from '../dto/TeamStateDto';
-import { useStartRelay, useStartStrategy } from '../hooks/user-hooks';
+import { useStartRelay, useStartStrategy, useViewStrategy } from '../hooks/user-hooks';
 import { formatTime } from '../utils/DateFormatter';
 import { useId, useState } from 'react';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
 import { RELAY_MAX_TRIES, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from 'game';
@@ -31,6 +32,7 @@ export function ChooserItem(props: {
 }) {
   const startRelay = useStartRelay();
   const startStrategy = useStartStrategy();
+  const viewStrategy = useViewStrategy();
 
   const [mobileDescOpen, setMobileDescOpen] = useState(true);
   const descId = useId();
@@ -65,6 +67,19 @@ export function ChooserItem(props: {
         <Box sx={{ flex: 1, fontWeight: 700, fontSize: 22, lineHeight: 1.2 }}>
           {props.type === 'relay' ? t('relay.name') : t('strategy.name')}
         </Box>
+        {/* A finished strategy match can be looked at again, its board as it
+            ended. The relay's page would show only its last problem. */}
+        {finished && props.type === 'strategy' &&
+          <Tooltip title={t('strategy.viewBoard')}>
+            <IconButton aria-label={t('strategy.viewBoard')} disabled={starting}
+              onClick={() => {
+                setStarting(true);
+                void viewStrategy().finally(() => setStarting(false));
+              }}
+              sx={{ width: '44px', height: '44px', borderRadius: '10px', border: '1px solid', borderColor: 'divider', backgroundColor: '#fff', color: 'text.primary' }}>
+              <VisibilityOutlinedIcon />
+            </IconButton>
+          </Tooltip>}
         {/* The row takes a tap anywhere; this is the same toggle for a keyboard
             and a screen reader. It has no handler of its own: its click bubbles
             to the row's. */}

@@ -171,9 +171,18 @@ competition's: ISO 8601 with an offset, such as `2026-11-20T15:00+01:00`, with
 `Closes At` optional. A testing code gets a wide one, such as 2001 to 2099, and
 a team writing the round late gets its own day. The window decides only when a
 match may start: a match started inside it runs its full time.
-In `scripts/test.tsv`, the teams logging in with `000-0000-000`, `001-0000-000` and
-`002-0000-000` have a window that has not opened yet, one that has closed, and
-one that is open, in that order; the rest have none.
+In `scripts/test.tsv`, the teams logging in with `006-0000-000`, `007-0000-000` and
+`008-0000-000` (C, D and E) have a window that has not opened yet, one that has
+closed, and one that is open, in that order; the rest have none, so `000` to
+`002` can start at any time.
+
+A competition's own window, which every team without one of its own follows, is
+the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set
+on the **Import/export** tab: the table of competitions shows each one's window,
+and its edit button sets one in place of the config's, or returns it to the
+config's. Neither the team's window nor the competition's means any time. The
+server decides a start by its own clock, and the team's page reads the window by
+the server's clock too, not the browser's.
 
 `Competition` is the competition the row's team enters, by edition, round and
 category (`20 online C`; `20. internetes C` works too) or by its id, so one file
@@ -182,6 +191,15 @@ at once. The tab's table of competitions, newest first, gives what to write for
 each, and the export writes the id. A row naming no competition, or one the
 registry lacks, fails on its own and the rest go in. A team name is unique
 within its competition only, and a team plays the matches its competition has.
+
+A row naming a team that is already in its competition is that team: re-running
+a grown list adds the late teams, and re-running a corrected one fixes a bad
+import, since the file's `Email`, `Opens At` and `Closes At` win, a blank cell
+clearing them. A file without a column leaves its field as it is; the two window
+columns are one window, so a file with either sets both. `Other` is never
+overwritten, as the admin page's
+resets note the replaced match there, and a row whose `ID`, `Login Code` or
+`Credentials` is not that team's fails.
 
 `scripts/admin.py` is the post-competition scoring pull. Run it on your own
 machine, from a checkout, against the production site, not on the competition

@@ -50,6 +50,10 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
     this.requireSession();
     return Promise.resolve();
   }
+  viewStrategy(): Promise<void> {
+    this.requireSession();
+    return Promise.resolve();
+  }
   logout(): Promise<void> {
     this.session = null;
     return Promise.resolve();
@@ -80,6 +84,9 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
     throw Error("NOT call this");
   }
   setStartWindow(_teamId: string, _window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto> {
+    throw Error("NOT call this");
+  }
+  setCompetitionWindow(_competitionId: string, _window: { opensAt: string | null, closesAt: string | null }): Promise<void> {
     throw Error("NOT call this");
   }
   addMinutes(_matchId: string, _minutes: number): Promise<string> {

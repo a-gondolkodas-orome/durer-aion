@@ -9,14 +9,16 @@ import { useTranslation, Trans } from 'react-i18next';
 import type { StartWindow } from 'schemas';
 import { useStartWindowNote } from '../hooks/start-window';
 
-export function Disclaimer(props: { teamName: string, category: string, startWindow?: StartWindow | null }) {
+export function Disclaimer(props: {
+  teamName: string, category: string, startWindow?: StartWindow | null, clockOffsetMs?: number,
+}) {
   const goHome = useToHome();
   const theme = useTheme();
   const isOffline = useClientRepo().version === "OFFLINE";
   const { t } = useTranslation();
   // Reading on is allowed at any time, the rules included; only the start
   // waits for the window, and this says so before the team clicks through.
-  const { note: windowNote } = useStartWindowNote(props.startWindow);
+  const { note: windowNote } = useStartWindowNote(props.startWindow, props.clockOffsetMs);
 
   return (
     <Stack

@@ -27,7 +27,8 @@ entry. The server and the dry run import both; the relay practice site imports
 
 The team's row (the backend's `model.ts`) carries a `pageState` and the ids of its two
 matches, `relayMatchID` and `strategyMatchID`. The page states
-(`PAGE_STATES` in `schemas`) are `DISCLAIMER → HOME → RELAY | STRATEGY → HOME`.
+(`PAGE_STATES` in `schemas`) are `DISCLAIMER → HOME → RELAY | STRATEGY → HOME`,
+and from `HOME` back to a finished `STRATEGY` (step 7).
 
 1. **Import.** `team_import.ts`, from `npm run teams:import` or
    `PUT /team/admin/import`, creates each row in `DISCLAIMER` with both match
@@ -39,7 +40,10 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
 3. **The team's view.** `GET /team/me` answers `publicTeamView` (`team_view.ts`)
    with both matches' status and the team's competition without its
    problems, from which the client builds its boards and the chooser shows
-   only the matches the competition has. The frontend keeps that one object in
+   only the matches the competition has. It also serves the team's start
+   window (`teamStartWindow` in `start_window.ts`: the team's own, else its
+   competition's, the one set on the admin page before the config's) and the
+   server's time, by which the page keeps Start disabled outside the window. The frontend keeps that one object in
    `team-state-store.ts`, and `Main.tsx` picks the screen from its `pageState`.
 4. **Disclaimer and home.** `POST /team/me/gohome` moves the team to `HOME`,
    from the disclaimer or after a match. It is refused while a match is in
@@ -50,7 +54,10 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
      never from the disclaimer;
    - `getNewGame` picks the game of the team's competition
      (`relay--<id>` or `strategy--<id>`, hosted from the registry by
-     `games.ts`), and answers 403 for a match the competition does not have;
+     `games.ts`), and answers 403 for a match the competition does not have,
+     and for a start outside the team's start window. Only the start is held
+     to the window: a match started in it runs its full time, and add-minutes
+     may carry it past the window's end;
    - `createGame` creates an unlisted match under a fresh id;
    - `injectPlayer` seats the team as `'0'`, named by its `teamId` and holding
      its `credentials`, and `injectBot` seats the bot as `'1'`;
@@ -61,6 +68,14 @@ matches, `relayMatchID` and `strategyMatchID`. The page states
    — `ReactClient.tsx` in `online-frontend`, built by `client_factory.tsx` in
    `common-frontend` — and from here on every move is boardgame.io traffic, not
    REST.
+7. **Looking back.** `POST /team/me/strategy/view` takes the team from `HOME`
+   back to its finished strategy match, where the board shows it locked, as it
+   ended. `allowedToViewStrategy` (`team_manage.ts`) allows it only
+   for a finished strategy match while the relay is not running, and
+   `TeamsRepository.viewStrategy` writes the page only if the row is still
+   `HOME` with the match ids that were read, so a start landing in between
+   wins. The relay has no such way back: its page would show only its last
+   problem.
 
 ## How the bot gets its turn
 
@@ -136,7 +151,8 @@ worth.
 Nothing about a match is stored on the team row except its id.
 `deriveMatchStatus` (`match_status.ts`) reads `NOT STARTED`, `IN PROGRESS` or
 `FINISHED`, with the score, off the match's own game state, every time it is
-asked. `/team/me`, `allowedToStart`, `gohome` and every admin view use it.
+asked. `/team/me`, `allowedToStart`, `allowedToViewStrategy`, `gohome` and
+every admin view use it.
 
 ## What the organisers can do
 

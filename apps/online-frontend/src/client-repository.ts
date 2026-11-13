@@ -62,6 +62,11 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     if (result.data.strategyMatch.endAt) {
       result.data.strategyMatch.endAt = new Date(result.data.strategyMatch.endAt);
     }
+    // Taken on arrival, not when a page reads it: the state can be held for
+    // hours, and the browser's clock is what the offset corrects.
+    if (typeof result.data.serverTime === 'string') {
+      result.data.clockOffsetMs = Date.parse(result.data.serverTime) - Date.now();
+    }
     return result.data as TeamModelDto;
   }
 
@@ -110,6 +115,16 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async startStrategy(): Promise<void> {
     try {
       await apiAxiosInstance().post('team/me/strategy/play');
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
+  }
+
+  async viewStrategy(): Promise<void> {
+    try {
+      await apiAxiosInstance().post('team/me/strategy/view');
     } catch (e: unknown) {
       const err = makeAxiosError(e);
       console.error(err.message)
@@ -217,6 +232,17 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
       throw new Error('Váratlan hiba történt', { cause: e });
     }
     return result.data as CompetitionSummaryDto[];
+  }
+
+  async setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void> {
+    const url = urlcat('/team/admin/competitions/:competitionId/start-window', { competitionId });
+    try {
+      await apiAxiosInstance().put(url, window);
+    } catch (e: unknown) {
+      const err = makeAxiosError(e);
+      console.error(err.message)
+      throw new Error('Váratlan hiba történt', { cause: e });
+    }
   }
 
   async importTeams(file: File): Promise<TeamImportResultDto> {

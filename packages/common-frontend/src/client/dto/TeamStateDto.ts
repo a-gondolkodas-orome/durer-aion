@@ -21,6 +21,10 @@ export interface TeamModelDto {
   /// When the team may start its matches, its own window or its competition's;
   /// null for any time. The local apps serve none, and have no window.
   startWindow?: StartWindow | null;
+  /// The server's clock less the browser's, in milliseconds, taken when the
+  /// state arrived: the page judges the start window by the server's clock,
+  /// since a school computer's may be off by hours. The local apps have none.
+  clockOffsetMs?: number;
   /// The team's own window, in place of its competition's, which the admin
   /// routes serve as the row holds it.
   startOpensAt?: string | null;
@@ -49,6 +53,12 @@ export function adminTeamId(team: TeamModelDto): string {
 export interface CompetitionSummaryDto {
   id: string;
   metadata: CompetitionMetadata;
+  /// The start window in force: the one set on the admin page, else the one
+  /// the competition's config gives; null for any time.
+  startWindow?: StartWindow | null;
+  /// The one the competition's config gives, which a window set on the admin
+  /// page replaces.
+  configStartWindow?: StartWindow | null;
 }
 
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some
@@ -56,9 +66,11 @@ export interface CompetitionSummaryDto {
 /// problem, `sev` and `value` index-aligned.
 export interface TeamImportResultDto {
   successful: number;
-  /// Rows naming a team that is already there, left as it is: re-running a
-  /// grown list is how late teams are added.
+  /// Rows naming a team that is already there: re-running a grown list is how
+  /// late teams are added, and a corrected one how a bad import is fixed.
   existing: number;
+  /// Of those, the teams the file changed: its values win.
+  updated: number;
   failed: number;
   /// The teams that landed, in the import's column order, with the generated
   /// id, join code and credentials filled in.

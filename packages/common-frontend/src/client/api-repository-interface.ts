@@ -15,6 +15,8 @@ export interface ClientRepository {
   startRelay(): Promise<void>
   startStrategy(): Promise<void>
   toHome(): Promise<void>
+  /** Back to the finished strategy match, to look at the board as it ended. */
+  viewStrategy(): Promise<void>
   // The end report of a relay whose time ran out with no move to end it: the
   // game ends a match past its time only on a move arriving after the grace
   // for late answers, and a team waiting at the buzzer sends none. Locally the
@@ -40,5 +42,8 @@ export interface AdminClientRepository {
   setStartWindow(teamId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   getCompetitions(): Promise<CompetitionSummaryDto[]>
+  /** Sets the competition's start window in place of its config's; a null
+   *  `opensAt` returns it to its config's. */
+  setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void>
   importTeams(file: File): Promise<TeamImportResultDto>
 }

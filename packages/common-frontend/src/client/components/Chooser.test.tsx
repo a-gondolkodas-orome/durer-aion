@@ -100,6 +100,15 @@ describe('the start window', () => {
     expect(screen.getByText('item:relay:closed')).toBeInTheDocument();
   });
 
+  // A browser whose clock runs an hour behind the server's.
+  test('goes by the server\'s clock, not the browser\'s', () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T12:30:00Z') });
+    renderChooser(team({ competition: relayOnly, startWindow, clockOffsetMs: 3600_000 }));
+
+    expect(screen.getByText('chooser.window.openUntil')).toBeInTheDocument();
+    expect(screen.getByText('item:relay')).toBeInTheDocument();
+  });
+
   // Its results are what it comes back for.
   test('says nothing to a team with no round left to start', () => {
     vi.useFakeTimers({ now: new Date('2026-10-20T20:00:00Z') });

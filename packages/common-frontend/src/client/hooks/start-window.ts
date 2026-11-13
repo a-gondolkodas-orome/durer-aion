@@ -16,18 +16,26 @@ export function nextBoundary(startWindow: StartWindow, now: Date): number | unde
     .find(time => time > now.getTime());
 }
 
-/// Where the browser's clock is against the team's start window, kept current:
+/// Where the server's clock is against the team's start window, kept current:
 /// the page changes when the window opens or closes without a reload. The
-/// server decides a start by its own clock; this is only what the page says.
-export function useStartWindowState(startWindow: StartWindow | null | undefined): StartWindowState {
-  const [now, setNow] = useState(() => new Date());
+/// server decides a start by its own clock, so the page reads the browser's
+/// corrected by `clockOffsetMs`, the server's clock less the browser's: a
+/// browser whose clock is off must not keep Start disabled while the server
+/// would take it.
+export function useStartWindowState(
+  startWindow: StartWindow | null | undefined, clockOffsetMs = 0,
+): StartWindowState {
+  // The browser's clock; the server's is this plus the offset.
+  const [tick, setTick] = useState(() => Date.now());
+  const now = new Date(tick + clockOffsetMs);
   useEffect(() => {
     if (startWindow === null || startWindow === undefined) return;
-    const next = nextBoundary(startWindow, now);
+    const next = nextBoundary(startWindow, new Date(tick + clockOffsetMs));
     if (next === undefined) return;
-    const timer = setTimeout(() => { setNow(new Date()); }, Math.min(next - now.getTime(), MAX_TIMEOUT));
+    const delay = Math.min(next - (tick + clockOffsetMs), MAX_TIMEOUT);
+    const timer = setTimeout(() => { setTick(Date.now()); }, delay);
     return () => { clearTimeout(timer); };
-  }, [startWindow, now]);
+  }, [startWindow, tick, clockOffsetMs]);
   return startWindowState(startWindow ?? undefined, now);
 }
 
@@ -53,9 +61,9 @@ function windowNote(
 
 /// The window's state, kept current, and what the disclaimer and the home
 /// screen say about it.
-export function useStartWindowNote(startWindow: StartWindow | null | undefined):
+export function useStartWindowNote(startWindow: StartWindow | null | undefined, clockOffsetMs?: number):
   { state: StartWindowState, note: string | undefined } {
-  const state = useStartWindowState(startWindow);
+  const state = useStartWindowState(startWindow, clockOffsetMs);
   const language = useUiLanguage();
   const { t } = useTranslation();
   return { state, note: windowNote(state, startWindow, language, t) };

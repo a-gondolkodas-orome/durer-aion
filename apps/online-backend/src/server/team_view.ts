@@ -33,6 +33,9 @@ export interface PublicTeamView {
   /** When the team may start its matches: its own window or its
    *  competition's. Null when it may start at any time. */
   startWindow: StartWindow | null;
+  /** The server's clock as it answers, ISO 8601: the page judges the start
+   *  window by it rather than by the browser's clock, which may be off. */
+  serverTime: string;
   credentials: string;
   pageState: TeamModel["pageState"];
   relayMatch: MatchStatus;
@@ -49,6 +52,7 @@ export function publicTeamView(
   team: TeamModel,
   matches: TeamMatches,
   competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
+  now: Date = new Date(),
 ): PublicTeamView {
   const competition = competitions.get(team.competitionId);
   return {
@@ -56,6 +60,7 @@ export function publicTeamView(
     category: team.category,
     competition: competition === undefined ? null : publicCompetition(competition),
     startWindow: teamStartWindow(team, competition) ?? null,
+    serverTime: now.toISOString(),
     credentials: team.credentials,
     pageState: team.pageState,
     relayMatch: matches.relayMatch,

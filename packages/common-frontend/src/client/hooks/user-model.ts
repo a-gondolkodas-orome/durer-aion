@@ -49,6 +49,10 @@ export class UserModel {
     await this.repo.toHome();
   }
 
+  async viewStrategy(): Promise<void> {
+    await this.repo.viewStrategy();
+  }
+
   // Returns the function that removes the listener again.
   addListener(setTeamState: (teamState: TeamModelDto | null) => void): () => void {
     if (typeof window === "undefined") {

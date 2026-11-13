@@ -241,11 +241,67 @@ paths:
                     metadata:
                       type: object
                       description: The competition's metadata, as `schemas` types it
+                    startWindow:
+                      allOf:
+                      - $ref: "#/components/schemas/StartWindow"
+                      nullable: true
+                      description: >
+                        The start window in force: the one set through the
+                        route below, else the one the competition's config
+                        gives. Null for any time.
+                    configStartWindow:
+                      allOf:
+                      - $ref: "#/components/schemas/StartWindow"
+                      nullable: true
+                      description: The one the competition's config gives, which a window set through the route below replaces.
+  /team/admin/competitions/{competitionId}/start-window:
+    put:
+      summary: Set a competition's start window in place of its config's, or return it to its config's
+      description: >
+        A team with a window of its own keeps that one. Only the start of a
+        match is held to the window: a match started in it runs its full time.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: competitionId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                opensAt:
+                  type: string
+                  nullable: true
+                  description: ISO 8601 with an offset; null returns the competition to its config's window.
+                  example: "2026-11-20T15:00+01:00"
+                closesAt:
+                  type: string
+                  nullable: true
+                  description: ISO 8601 with an offset, after opensAt; left out or null, the window stays open.
+      responses:
+        "204":
+          description: Set
+        "400":
+          description: Not a window, or a time without an offset, or one closing before it opens
+        "401":
+          description: Not an organiser
+        "404":
+          description: No competition with this id
+        "415":
+          description: The body is not JSON, or there is none
   /team/admin/import:
     put:
       summary: Import teams from a TSV file
       description: |
-        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded, with a header naming its columns: "Teamname" and "Competition" (required; the competition the row's team enters, by its id or by edition, round and category such as "20 online C"), "Email", "Other", "ID", "Login Code" and "Credentials" (optional).
+        This endpoint allows admins to upload a TSV file with team information. The file must be UTF-8 encoded, with a header naming its columns: "Teamname" and "Competition" (required; the competition the row's team enters, by its id or by edition, round and category such as "20 online C"), "Email", "Other", "ID", "Login Code", "Credentials", "Opens At" and "Closes At" (optional; the last two are the team's own start window, ISO 8601 with an offset, in place of its competition's).
       security:
         - basicAdminAuth: []
       tags:
@@ -397,7 +453,7 @@ paths:
         "401":
           description: No session
         "403":
-          description: Not allowed to start
+          description: Not allowed to start — the team already started this match or is playing the other, the competition has no such match, or it is outside the team's start window
 
   /team/me/strategy/play:
     post:
@@ -416,7 +472,26 @@ paths:
         "401":
           description: No session
         "403":
-          description: Not allowed to start
+          description: Not allowed to start — the team already started this match or is playing the other, the competition has no such match, or it is outside the team's start window
+
+  /team/me/strategy/view:
+    post:
+      summary: Take the logged-in team back to its finished STRATEGY match, to look at the board as it ended
+      security:
+      - teamSession: []
+      tags:
+      - user
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicTeamView"
+        "401":
+          description: No session
+        "403":
+          description: Not at home, the strategy match has not ended, or the relay is in progress
 
   /team/me/gohome:
     post:
@@ -521,6 +596,19 @@ components:
             The team's competition without its relay's problems: id, languages,
             the relay's duration, the strategy game and its duration, and
             metadata. Null for a competition the server no longer has.
+        startWindow:
+          allOf:
+          - $ref: "#/components/schemas/StartWindow"
+          nullable: true
+          description: >
+            When the team may start its matches: its own window, else its
+            competition's. Null for any time.
+        serverTime:
+          type: string
+          format: date-time
+          description: >
+            The server's clock as it answers. The page judges the start window
+            by it, not by the browser's clock, since the server decides.
         credentials:
           type: string
         pageState:
@@ -545,10 +633,11 @@ components:
         startOpensAt:
           type: string
           nullable: true
-          description: The team's own start window, in place of its competition's; null without one.
+          description: The team's own start window's start, ISO 8601 with an offset, in place of its competition's window.
         startClosesAt:
           type: string
           nullable: true
+          description: Its end, set only with startOpensAt; null leaves the window open.
         category:
           type: string
         credentials:
@@ -578,6 +667,18 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    StartWindow:
+      type: object
+      description: When a team may start either match. ISO 8601 with an offset; without a closesAt it stays open.
+      required: [opensAt]
+      properties:
+        opensAt:
+          type: string
+          example: "2026-11-20T15:00+01:00"
+        closesAt:
+          type: string
+          example: "2026-11-20T21:30+01:00"
 
     ActionShape:
       type: string

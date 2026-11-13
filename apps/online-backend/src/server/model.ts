@@ -187,3 +187,38 @@ export const teamAttributes: ModelAttributes<
     }
   },
 };
+
+/** A competition's start window as an organiser set it on the admin page, in
+ *  place of the one its config in code gives (`startWindow`): one row per
+ *  competition that has one, none for a competition that follows its config.
+ *  ISO 8601 with an offset, as `StartWindow` is. */
+export class CompetitionWindowModel extends Model<
+  InferAttributes<CompetitionWindowModel, OmitTimestamps>,
+  InferCreationAttributes<CompetitionWindowModel, OmitTimestamps>
+> {
+  declare competitionId: string;
+  declare opensAt: string;
+  declare closesAt: string | null;
+
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+}
+
+export const competitionWindowAttributes: ModelAttributes<
+  CompetitionWindowModel,
+  InferAttributes<CompetitionWindowModel, OmitTimestamps>
+> = {
+  competitionId: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+  },
+  opensAt: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  closesAt: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+};

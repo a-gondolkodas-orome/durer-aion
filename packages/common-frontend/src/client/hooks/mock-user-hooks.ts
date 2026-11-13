@@ -31,6 +31,13 @@ export const MockTeamState = {
   mockDisclaimer: () => setPageState("DISCLAIMER"),
   mockRelay: () => setPageState("RELAY"),
   mockStrategy: () => setPageState("STRATEGY"),
+  mockFinishedStrategy: () => {
+    teamState = {
+      ...mockTeamState,
+      pageState: "STRATEGY",
+      strategyMatch: { state: "FINISHED", matchID: "m", score: 0, startAt: new Date(), endAt: new Date() },
+    };
+  },
   mockHook: {
     useTeamState: () => teamState,
     useRefreshTeamState: vi.fn(),
@@ -39,6 +46,7 @@ export const MockTeamState = {
     useStartRelay: vi.fn(),
     useStartStrategy: vi.fn(),
     useToHome: vi.fn(),
+    useViewStrategy: vi.fn(),
     useBackToHome: vi.fn(),
     LoadTeamState: () => null,
   },
