@@ -96,6 +96,12 @@ export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player.
 export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
 
+/** socket.io does not await a listener, and an unhandled rejection ends the
+ *  process with every match on it. */
+const logListenerFailure = (event: string, matchID: string) => (error: unknown) => {
+  console.error(`Reacting to a ${event} for match ${JSON.stringify(matchID)} failed:`, error);
+};
+
 /** This is a special transport specifically designed for replacing a player's move
  * with a bot's move.
  *
@@ -146,17 +152,33 @@ export class SocketIOButBotMoves extends SocketIO {
          * have belongs to no client of this competition, and the packet never
          * reaches boardgame.io's listener.
          *
+         * An `update` must name its match by a string too: Postgres rejects
+         * any other key, and boardgame.io leaves that unhandled (#695). It is
+         * not looked up, since boardgame.io writes nothing for an unknown match.
+         *
+         * Every `chat` is refused: no client of ours sends one, and
+         * boardgame.io's listener reads storage for it without awaiting.
+         *
          * A packet middleware rather than a wrapped listener: it is the hook
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
-        socket.use(([event, matchID]: IOTypes.Event, next) => {
-          if (event !== "sync") {
+        socket.use(([event, ...args]: IOTypes.Event, next) => {
+          if (event === "chat") {
+            next(new Error("chat is not used"));
+            return;
+          }
+          if (event !== "sync" && event !== "update") {
             next();
             return;
           }
+          const matchID: unknown = event === "sync" ? args[0] : args[2];
           if (typeof matchID !== "string" || matchID === "") {
-            next(new Error("sync without a match id"));
+            next(new Error(`${event} without a match id`));
+            return;
+          }
+          if (event !== "sync") {
+            next();
             return;
           }
           void fetch(app.context.db, matchID, { metadata: true } as const).then(
@@ -167,31 +189,10 @@ export class SocketIOButBotMoves extends SocketIO {
           );
         });
 
-        /* Where a refused packet lands. With no listener here socket.io
-         * writes "Missing error handler on `socket`" and a stack trace for
-         * every one of them — a log an unauthenticated client could fill at
-         * will. Refusing a sync is routine, so it is answered with nothing. */
-        socket.on("error", () => undefined);
-
-        socket.on("update", async (...args: Parameters<Master['onUpdate']>) => {
-          // The arguments are stale: we react to a player's step
-          // But we are on the same API that reacts to it
-          // Basically we assume that a socket.on('update', ...)
-          // already updated the game state, making StateID and PlayerID stale
-          const [actionData, , matchID, stalePlayerID] = args;
-          if (actionData.type !== "MAKE_MOVE") {
-            return;
-          }
-          if (isMakeMovePayloadReadOnly(actionData.payload.type)) {
-            return;
-          }
-          if (stalePlayerID === BOT_ID) {
-            return;
-          }
-          // The player's move is already stored and pushed; the bot answers
-          // in a push of its own, or the move and its reply land as one
-          // update. See #346.
-          await this.getMatchQueue(matchID).add(() => this.playBotTurn(app.context, game, bot, matchID));
+        socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
+          const matchID = args[2];
+          void this.onPlayerUpdate(app.context, game, bot, args)
+            .catch(logListenerFailure("update", matchID));
         });
 
         /* A player's move is the only other thing that asks the bot to play,
@@ -209,8 +210,8 @@ export class SocketIOButBotMoves extends SocketIO {
          * stored and subscribe after it is published. Only a socket that
          * boardgame.io took as the match's client gets it, so a sync that
          * failed its credential check is sent nothing. */
-        socket.on("sync", async (matchID: string) => {
-          await this.getMatchQueue(matchID).add(async () => {
+        socket.on("sync", (matchID: string) => {
+          void this.getMatchQueue(matchID).add(async () => {
             await this.playBotTurn(app.context, game, bot, matchID);
             const client = this.clientInfo.get(socket.id);
             if (client?.matchID !== matchID) {
@@ -218,10 +219,31 @@ export class SocketIOButBotMoves extends SocketIO {
             }
             const { state } = await fetch(app.context.db, matchID, { state: true } as const);
             emit(socket, getFilterPlayerView(game)(client.playerID, { type: "update", args: [matchID, state] }));
-          });
+          }).catch(logListenerFailure("sync", matchID));
         });
       });
     }
+  }
+
+  /** Has the bot answer a player's move. The arguments are stale: boardgame.io's
+   *  own listener has applied the move by the time the queue gets to this. */
+  private async onPlayerUpdate(
+    context: Pick<Server.AppCtx, "db" | "auth">,
+    game: Game,
+    bot: Bot,
+    [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
+  ): Promise<void> {
+    // Typed as boardgame.io's action, but it is whatever the client sent.
+    if (actionData?.type !== "MAKE_MOVE" || isMakeMovePayloadReadOnly(actionData.payload?.type)) {
+      return;
+    }
+    if (stalePlayerID === BOT_ID) {
+      return;
+    }
+    // The player's move is already stored and pushed; the bot answers
+    // in a push of its own, or the move and its reply land as one
+    // update. See #346.
+    await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, bot, matchID));
   }
 
   /** Plays the bot's turn if the match is waiting on one. Callers run it on
@@ -240,6 +262,9 @@ export class SocketIOButBotMoves extends SocketIO {
     matchID: string
   ): Promise<void> {
     const { state } = await fetch(db, matchID, { state: true } as const);
+    if (state === undefined) {
+      return;
+    }
     if (currentPlayer(state.ctx) !== BOT_ID) {
       // Not a real action, possibly a failed move.
       return;
