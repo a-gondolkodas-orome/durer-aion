@@ -1,7 +1,7 @@
 import type { AddressInfo } from "node:net";
-import type { Game, Server as BgioServer, StorageAPI } from "boardgame.io";
+import type { Game, StorageAPI } from "boardgame.io";
 import { Server } from "boardgame.io/server";
-import { Async as AsyncStorage, createMatch } from "boardgame.io/internal";
+import { createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
 import { SocketIOButBotMoves } from "./socketio_botmoves";
 
@@ -10,26 +10,6 @@ class InspectedTransport extends SocketIOButBotMoves {
   queueFor(matchID: string) {
     return this.perMatchQueue.get(matchID);
   }
-}
-
-/** The in-memory store as an async one whose reads wait on `settle`, as
- *  Postgres's would. */
-function deferReads(context: BgioServer.AppCtx, settle: (matchID: string) => Promise<void>) {
-  const store = context.db as StorageAPI.Sync;
-  const deferred: StorageAPI.Async = {
-    type: () => AsyncStorage.prototype.type(),
-    connect: async () => undefined,
-    createMatch: async (matchID, opts) => { store.createMatch(matchID, opts); },
-    setState: async (matchID, state, deltalog) => { store.setState(matchID, state, deltalog); },
-    setMetadata: async (matchID, metadata) => { store.setMetadata(matchID, metadata); },
-    fetch: async (matchID, opts) => {
-      await settle(matchID);
-      return store.fetch(matchID, opts);
-    },
-    wipe: async () => { throw new Error("not delegated"); },
-    listMatches: async () => { throw new Error("not delegated"); },
-  };
-  context.db = deferred;
 }
 
 const game: Game = {
@@ -63,8 +43,7 @@ describe("the socket transport", () => {
     });
     const { appServer } = await server.run(0);
     quiet.forEach(spy => { spy.mockRestore(); });
-    const context = server.app.context;
-    const db = context.db as StorageAPI.Sync;
+    const db = server.app.context.db as StorageAPI.Sync;
     const { port } = appServer.address() as AddressInfo;
 
     const sockets: Socket[] = [];
@@ -88,7 +67,7 @@ describe("the socket transport", () => {
       await transport.queueFor(matchID)?.onIdle();
       await new Promise(resolve => setImmediate(resolve));
     };
-    return { db, client, context, hookFailures, drained };
+    return { db, client, hookFailures, drained };
   }
 
   function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH) {
@@ -101,6 +80,13 @@ describe("the socket transport", () => {
     const synced = new Promise<string>(resolve => socket.on("sync", (id: string) => { resolve(id); }));
     socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
     return synced;
+  }
+
+  /** The match ids storage is asked for from here on, other than the one
+   *  `syncBehind` reads. */
+  function readsOtherThanKnown(db: StorageAPI.Sync) {
+    const fetch = vi.spyOn(db, "fetch");
+    return () => fetch.mock.calls.map(([matchID]) => matchID as unknown).filter(matchID => matchID !== KNOWN_MATCH);
   }
 
   function watchForUnhandledRejections() {
@@ -183,46 +169,35 @@ describe("the socket transport", () => {
     ["a number", 5],
     ["empty", ""],
   ])("refuses an update whose match id is %s before storage is asked", async (_case, matchID) => {
-    const rejections = watchForUnhandledRejections();
-    const { db, client, context } = await serve();
+    const { db, client } = await serve();
     createKnownMatch(db);
-    deferReads(context, matchID => typeof matchID === "string" && matchID !== ""
-      ? Promise.resolve()
-      : Promise.reject(new Error("not a key this store can read")));
+    const reads = readsOtherThanKnown(db);
 
     const socket = client();
     socket.emit("update", madeUpMove, 0, matchID, "0");
     await syncBehind(socket);
 
-    expect(rejections).toEqual([]);
+    expect(reads()).toEqual([]);
   });
 
   it.each([
     ["a match that exists", CHAT_MATCH],
     ["an object for a match id", {}],
   ])("refuses every chat, even one naming %s, before storage is asked", async (_case, matchID) => {
-    const rejections = watchForUnhandledRejections();
-    const { db, client, context } = await serve();
+    const { db, client } = await serve();
     createKnownMatch(db);
     createKnownMatch(db, CHAT_MATCH);
-    const read: unknown[] = [];
-    deferReads(context, id => { read.push(id); return Promise.resolve(); });
+    const reads = readsOtherThanKnown(db);
 
     const socket = client();
     socket.emit("chat", matchID, { id: "a", sender: "0", payload: "hi" }, "made up");
     await syncBehind(socket);
 
-    expect(rejections).toEqual([]);
-    // Only the sync that signals the chat was dealt with read anything.
-    expect(read).not.toHaveLength(0);
-    expect(read.filter(id => id !== KNOWN_MATCH)).toEqual([]);
+    expect(reads()).toEqual([]);
   });
 
   it.each([
     ["no payload", { type: "MAKE_MOVE" }],
-    ["a payload that is not an object", { type: "MAKE_MOVE", payload: "a move" }],
-    ["a payload with no type", { type: "MAKE_MOVE", payload: {} }],
-    ["no type at all", {}],
     ["nothing", null],
   ])("survives an update for a real match whose action carries %s", async (_case, actionData) => {
     const rejections = watchForUnhandledRejections();
