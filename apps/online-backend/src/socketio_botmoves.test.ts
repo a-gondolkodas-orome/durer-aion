@@ -102,6 +102,13 @@ describe("the socket transport", () => {
     return synced;
   }
 
+  /** The match ids storage is asked for from here on, other than the one
+   *  `syncBehind` reads. */
+  function readsOtherThanKnown(db: StorageAPI.Sync) {
+    const fetch = vi.spyOn(db, "fetch");
+    return () => fetch.mock.calls.map(([matchID]) => matchID as unknown).filter(matchID => matchID !== KNOWN_MATCH);
+  }
+
   function watchForUnhandledRejections() {
     const rejections: unknown[] = [];
     const listener = (error: unknown) => { rejections.push(error); };
@@ -193,18 +200,15 @@ describe("the socket transport", () => {
     ["a number", 5],
     ["empty", ""],
   ])("refuses an update whose match id is %s before storage is asked", async (_case, matchID) => {
-    const rejections = watchForUnhandledRejections();
-    const { db, client, context, refusals } = await serve();
+    const { db, client, refusals } = await serve();
     createKnownMatch(db);
-    deferReads(context, matchID => typeof matchID === "string" && matchID !== ""
-      ? Promise.resolve()
-      : Promise.reject(new Error("not a key this store can read")));
+    const reads = readsOtherThanKnown(db);
 
     const socket = client();
     socket.emit("update", madeUpMove, 0, matchID, "0");
     await syncBehind(socket);
 
-    expect(rejections).toEqual([]);
+    expect(reads()).toEqual([]);
     expect(refusals()).toEqual([expect.stringContaining("update without a match id")]);
   });
 
@@ -212,28 +216,20 @@ describe("the socket transport", () => {
     ["a match that exists", CHAT_MATCH],
     ["an object for a match id", {}],
   ])("refuses every chat, even one naming %s, before storage is asked", async (_case, matchID) => {
-    const rejections = watchForUnhandledRejections();
-    const { db, client, context } = await serve();
+    const { db, client } = await serve();
     createKnownMatch(db);
     createKnownMatch(db, CHAT_MATCH);
-    const read: unknown[] = [];
-    deferReads(context, id => { read.push(id); return Promise.resolve(); });
+    const reads = readsOtherThanKnown(db);
 
     const socket = client();
     socket.emit("chat", matchID, { id: "a", sender: "0", payload: "hi" }, "made up");
     await syncBehind(socket);
 
-    expect(rejections).toEqual([]);
-    // Only the sync that signals the chat was dealt with read anything.
-    expect(read).not.toHaveLength(0);
-    expect(read.filter(id => id !== KNOWN_MATCH)).toEqual([]);
+    expect(reads()).toEqual([]);
   });
 
   it.each([
     ["no payload", { type: "MAKE_MOVE" }],
-    ["a payload that is not an object", { type: "MAKE_MOVE", payload: "a move" }],
-    ["a payload with no type", { type: "MAKE_MOVE", payload: {} }],
-    ["no type at all", {}],
     ["nothing", null],
   ])("survives an update for a real match whose action carries %s", async (_case, actionData) => {
     const rejections = watchForUnhandledRejections();

@@ -96,14 +96,6 @@ export async function fetch<T_Opts extends StorageAPI.FetchOpts>(
 /// Bot's playerID is '1', because the gameWrapper uses player '0' for the human player.
 export const BOT_ID = PlayerIDType.JUDGE_PLAYER;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/** Where each packet boardgame.io listens for carries its match id, counted
- *  from the first argument after the event name. */
-const MATCH_ID_POSITION = { sync: 0, update: 2 } as const;
-
 const LOGGED_ID_LENGTH = 64;
 
 /** A client-supplied match id as a log can carry it: quoted, so a newline in it
@@ -211,12 +203,9 @@ export class SocketIOButBotMoves extends SocketIO {
          * have belongs to no client of this competition, and the packet never
          * reaches boardgame.io's listener.
          *
-         * Only `sync` is looked up: boardgame.io answers an `update` for an
-         * unknown match without writing anything, and checking every move here
-         * would cost it a storage read. Both must name their match by a
-         * non-empty string, though: boardgame.io hands the id to storage as it
-         * came, Postgres rejects a key that is not a string, and boardgame.io's
-         * listeners leave that rejection unhandled (#695).
+         * An `update` must name its match by a string too: Postgres rejects
+         * any other key, and boardgame.io leaves that unhandled (#695). It is
+         * not looked up, since boardgame.io writes nothing for an unknown match.
          *
          * Every `chat` is refused: no client of ours sends one, and
          * boardgame.io's listener reads storage for it without awaiting.
@@ -239,12 +228,11 @@ export class SocketIOButBotMoves extends SocketIO {
             refuse("chat is not used");
             return;
           }
-          const position = MATCH_ID_POSITION[event as keyof typeof MATCH_ID_POSITION] as number | undefined;
-          if (position === undefined) {
+          if (event !== "sync" && event !== "update") {
             next();
             return;
           }
-          const matchID: unknown = args[position];
+          const matchID: unknown = event === "sync" ? args[0] : args[2];
           if (typeof matchID !== "string" || matchID === "") {
             refuse(`${event} without a match id`);
             return;
@@ -307,20 +295,15 @@ export class SocketIOButBotMoves extends SocketIO {
   }
 
   /** Has the bot answer a player's move. The arguments are stale: boardgame.io's
-   *  own listener has applied the move by the time the queue gets to this. The
-   *  action is unchecked client input. */
+   *  own listener has applied the move by the time the queue gets to this. */
   private async onPlayerUpdate(
     context: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
     bot: Bot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
-    const action: unknown = actionData;
-    if (!isRecord(action) || action.type !== "MAKE_MOVE") {
-      return;
-    }
-    const payloadType: unknown = isRecord(action.payload) ? action.payload.type : undefined;
-    if (typeof payloadType !== "string" || isMakeMovePayloadReadOnly(payloadType)) {
+    // Typed as boardgame.io's action, but it is whatever the client sent.
+    if (actionData?.type !== "MAKE_MOVE" || isMakeMovePayloadReadOnly(actionData.payload?.type)) {
       return;
     }
     if (stalePlayerID === BOT_ID) {
