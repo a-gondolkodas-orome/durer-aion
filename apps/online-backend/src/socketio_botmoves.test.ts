@@ -40,6 +40,7 @@ const game: Game = {
 
 const KNOWN_MATCH = "known-match";
 const MADE_UP_MATCH = "made-up-match";
+const CHAT_MATCH = "chat-match";
 
 describe("the socket transport", () => {
   const running: (() => Promise<void>)[] = [];
@@ -158,18 +159,15 @@ describe("the socket transport", () => {
 
   const madeUpMove = { type: "MAKE_MOVE", payload: { type: "noop", args: [], playerID: "0", credentials: "made up" } };
 
-  // These reach boardgame.io, which answers them without writing: the bot
-  // hook behind them is what must not fail (#695).
-  it.each([
-    ["update", [madeUpMove, 0, MADE_UP_MATCH, "0"]],
-    ["chat", [MADE_UP_MATCH, { id: "a", sender: "0", payload: "hi" }, "made up"]],
-  ])("survives a `%s` naming a match that does not exist, and writes none", async (event, args) => {
+  // This reaches boardgame.io, which answers it without writing: the bot hook
+  // behind it is what must not fail (#695).
+  it("survives an update naming a match that does not exist, and writes none", async () => {
     const rejections = watchForUnhandledRejections();
     const { db, client, hookFailures, drained } = await serve();
     createKnownMatch(db);
 
     const socket = client();
-    socket.emit(event, ...args);
+    socket.emit("update", madeUpMove, 0, MADE_UP_MATCH, "0");
     await syncBehind(socket);
     await drained(MADE_UP_MATCH);
 
@@ -181,10 +179,10 @@ describe("the socket transport", () => {
   // Postgres rejects a key that is not a string, and boardgame.io's own
   // listeners leave that rejection unhandled, which ends the process (#695).
   it.each([
-    ["update", "an object", [madeUpMove, 0, {}, "0"]],
-    ["update", "empty", [madeUpMove, 0, "", "0"]],
-    ["chat", "an object", [{}, { id: "a", sender: "0", payload: "hi" }, "made up"]],
-  ])("refuses a `%s` whose match id is %s before storage is asked", async (event, _case, args) => {
+    ["an object", {}],
+    ["a number", 5],
+    ["empty", ""],
+  ])("refuses an update whose match id is %s before storage is asked", async (_case, matchID) => {
     const rejections = watchForUnhandledRejections();
     const { db, client, context } = await serve();
     createKnownMatch(db);
@@ -193,10 +191,31 @@ describe("the socket transport", () => {
       : Promise.reject(new Error("not a key this store can read")));
 
     const socket = client();
-    socket.emit(event, ...args);
+    socket.emit("update", madeUpMove, 0, matchID, "0");
     await syncBehind(socket);
 
     expect(rejections).toEqual([]);
+  });
+
+  it.each([
+    ["a match that exists", CHAT_MATCH],
+    ["an object for a match id", {}],
+  ])("refuses every chat, even one naming %s, before storage is asked", async (_case, matchID) => {
+    const rejections = watchForUnhandledRejections();
+    const { db, client, context } = await serve();
+    createKnownMatch(db);
+    createKnownMatch(db, CHAT_MATCH);
+    const read: unknown[] = [];
+    deferReads(context, id => { read.push(id); return Promise.resolve(); });
+
+    const socket = client();
+    socket.emit("chat", matchID, { id: "a", sender: "0", payload: "hi" }, "made up");
+    await syncBehind(socket);
+
+    expect(rejections).toEqual([]);
+    // Only the sync that signals the chat was dealt with read anything.
+    expect(read).not.toHaveLength(0);
+    expect(read.filter(id => id !== KNOWN_MATCH)).toEqual([]);
   });
 
   it.each([

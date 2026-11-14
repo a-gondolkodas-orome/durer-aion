@@ -102,7 +102,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /** Where each packet boardgame.io listens for carries its match id, counted
  *  from the first argument after the event name. */
-const MATCH_ID_POSITION = { sync: 0, chat: 0, update: 2 } as const;
+const MATCH_ID_POSITION = { sync: 0, update: 2 } as const;
 
 /** socket.io does not await a listener, and an unhandled rejection ends the
  *  process with every match on it. */
@@ -160,18 +160,25 @@ export class SocketIOButBotMoves extends SocketIO {
          * have belongs to no client of this competition, and the packet never
          * reaches boardgame.io's listener.
          *
-         * Only `sync` is looked up: boardgame.io answers an `update` or `chat`
-         * for an unknown match without writing anything, and checking every
-         * move here would cost it a storage read. All three must name their
-         * match by a non-empty string, though: boardgame.io hands the id to
-         * storage as it came, Postgres rejects a key that is not a string,
-         * and boardgame.io's listeners leave that rejection unhandled (#695).
+         * Only `sync` is looked up: boardgame.io answers an `update` for an
+         * unknown match without writing anything, and checking every move here
+         * would cost it a storage read. Both must name their match by a
+         * non-empty string, though: boardgame.io hands the id to storage as it
+         * came, Postgres rejects a key that is not a string, and boardgame.io's
+         * listeners leave that rejection unhandled (#695).
+         *
+         * Every `chat` is refused: no client of ours sends one, and
+         * boardgame.io's listener reads storage for it without awaiting.
          *
          * A packet middleware rather than a wrapped listener: it is the hook
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
         socket.use(([event, ...args]: IOTypes.Event, next) => {
+          if (event === "chat") {
+            next(new Error("chat is not used"));
+            return;
+          }
           const position = MATCH_ID_POSITION[event as keyof typeof MATCH_ID_POSITION] as number | undefined;
           if (position === undefined) {
             next();
