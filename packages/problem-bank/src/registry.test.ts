@@ -1,4 +1,4 @@
-import { strategyGameOfCategory, strategyGames } from 'game';
+import { strategyGames } from 'game';
 import type { CompetitionConfig } from 'schemas';
 import { registry } from '../all';
 import { assertValidRegistry, createRegistry, validateRegistry } from './registry';
@@ -6,16 +6,6 @@ import { assertValidRegistry, createRegistry, validateRegistry } from './registr
 describe('the registry of every bank', () => {
   it('is valid', () => {
     expect(validateRegistry(registry, strategyGames)).toEqual([]);
-  });
-
-  // The live round picks a team's strategy game by its category until teams
-  // belong to competitions (#137, step 6), so each of those games must be one
-  // an online round in that category plays.
-  it.each(Object.entries(strategyGameOfCategory))('has an online round in category %s playing %s', (category, gameId) => {
-    const played = [...registry.competitions.values()].some(({ metadata, strategy }) =>
-      metadata.kind === 'competition' && metadata.round === 'online' && metadata.category === category
-      && strategy?.gameId === gameId);
-    expect(played).toBe(true);
   });
 });
 

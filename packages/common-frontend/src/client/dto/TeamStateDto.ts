@@ -15,8 +15,8 @@ export interface TeamModelDto {
   teamName: string;
   /// Served by the admin routes only.
   competitionId?: string;
-  /// Served to the team by the online round, null for a competition the
-  /// server no longer has; the local apps have none.
+  /// Served to the team, by the online round and the dry run alike; null for
+  /// a competition the online round's server no longer has.
   competition?: PublicCompetition | null;
   /// When the team may start its matches, its own window or its competition's;
   /// null for any time. The local apps serve none, and have no window.

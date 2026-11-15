@@ -1,5 +1,6 @@
 import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
+import { dryRunCompetition } from "./rehearsed-round";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { handleGameReport } from "./game-report";
@@ -14,7 +15,8 @@ export class OfflineClientRepository implements ClientRepository {
 
   startRelay(): Promise<void> {
     const teamState = getTeamStateFromLocal();
-    if (!(teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
+    const relay = teamState.competition?.relay;
+    if (!(relay !== undefined && teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
       throw new Error(i18n.t('error.unexpected'));
     }
     const newState = {
@@ -23,7 +25,7 @@ export class OfflineClientRepository implements ClientRepository {
       relayMatch: {
         state: 'IN PROGRESS',
         startAt: new Date(),
-        endAt: addMin(new Date(), 60),
+        endAt: addMin(new Date(), relay.durationMinutes),
         matchID: "",
       },
     }
@@ -36,7 +38,8 @@ export class OfflineClientRepository implements ClientRepository {
 
   startStrategy(): Promise<void> {
     const teamState = getTeamStateFromLocal();
-    if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
+    const strategy = teamState.competition?.strategy;
+    if (!(strategy !== undefined && teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
       throw new Error(i18n.t('error.unexpected'));
     }
     const newState = {
@@ -45,7 +48,7 @@ export class OfflineClientRepository implements ClientRepository {
       strategyMatch: {
         state: 'IN PROGRESS',
         startAt: new Date(),
-        endAt: addMin(new Date(), 30),
+        endAt: addMin(new Date(), strategy.durationMinutes),
         matchID: "",
       },
     }
@@ -127,14 +130,16 @@ export class OfflineClientRepository implements ClientRepository {
     const i = teamData.findIndex(e => e.join_code === joinCode);
     const pageState = readStoredTeamState()?.pageState ?? "DISCLAIMER";
 
-    if (i > -1) {
-      const i = teamData.findIndex(e => e.join_code === joinCode);
-      const currentTeamData = teamData[i];
+    // teamData.test.ts holds every test team's competition to the round.
+    const competition = i > -1 ? dryRunCompetition(teamData[i].competitionId) : undefined;
+    if (competition !== undefined) {
+      const { metadata } = competition;
       const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
-        teamName: currentTeamData.teamname,
-        category: currentTeamData.category,
+        teamName: teamData[i].teamname,
+        competition,
+        category: metadata.kind === 'competition' ? metadata.category : '',
         credentials: "credentials",
         email: "asd@asd.asd",
         pageState: pageState,

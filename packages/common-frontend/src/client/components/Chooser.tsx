@@ -13,8 +13,8 @@ export function Chooser(props: {
 }) {
   const relayScore = (props.state.relayMatch as FinishedMatchStatus).score ?? 0;
   const strategyScore = (props.state.strategyMatch as FinishedMatchStatus).score ?? 0;
-  // The online round shows the matches the team's competition has; the local
-  // apps serve no competition, and have both.
+  // The matches the team's competition has; a state that carries no
+  // competition at all, as a test's may, has both.
   const { competition } = props.state;
   const hasRelay = competition === undefined || competition?.relay !== undefined;
   const hasStrategy = competition === undefined || competition?.strategy !== undefined;

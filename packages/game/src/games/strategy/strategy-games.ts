@@ -6,7 +6,7 @@
 // re-exporting `strategy` next to `board` is what would hand the bot to the
 // live client again. ESLint holds each registry to the files it may import
 // (eslint.config.mjs).
-import type { CompetitionCategory, StrategyGameId, StrategyGameInfo } from "schemas";
+import type { StrategyGameId, StrategyGameInfo } from "schemas";
 import { MyGameWrapper as GameWrapper20ocde } from "./20ocde/game";
 import type { MyGameState as GameState20ocde } from "./20ocde/game";
 
@@ -43,13 +43,3 @@ export const strategyNames = {
   "20o-d": "20od",
   "20o-e": "20oe",
 } satisfies Record<StrategyGameKey, string>;
-
-// The game each category plays in the offline dry run, until it follows the
-// registry (#137, step 10); the live round plays its competition's own game.
-// The problem bank's competitions say the same, and a test holds the two
-// together.
-export const strategyGameOfCategory = {
-  C: "20o-c",
-  D: "20o-d",
-  E: "20o-e",
-} satisfies Record<CompetitionCategory, StrategyGameKey>;

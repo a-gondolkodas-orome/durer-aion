@@ -13,7 +13,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
   localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({
-    teamId: "1", joinCode: "abc", teamName: "Csapat", category: "C", credentials: "c", email: "e",
+    teamId: "1", joinCode: "abc", teamName: "Csapat", competition: { id: teamData[0].competitionId }, category: "C", credentials: "c", email: "e",
     pageState: "RELAY",
     relayMatch: { state: "IN PROGRESS", startAt: "2026-10-10T10:00:00Z", endAt: "2026-10-10T11:00:00Z", matchID: "" },
     strategyMatch: { state: "NOT STARTED" },
@@ -40,7 +40,7 @@ test("a relay whose time ran out goes home with the score its board kept", async
 
 describe("viewStrategy", () => {
   const stored = (fields: object) => localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({
-    teamId: "1", joinCode: "abc", teamName: "Csapat", category: "C", credentials: "c", email: "e",
+    teamId: "1", joinCode: "abc", teamName: "Csapat", competition: { id: teamData[0].competitionId }, category: "C", credentials: "c", email: "e",
     pageState: "HOME", relayMatch: { state: "NOT STARTED" }, ...fields,
   }));
   const finished = { state: "FINISHED", startAt: "2026-10-10T10:00:00Z", endAt: "2026-10-10T10:30:00Z", matchID: "", score: 9 };
