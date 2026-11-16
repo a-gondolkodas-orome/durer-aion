@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
+import i18next from 'i18next';
 import { ErrorPage } from './error-page';
 
 // react-router logs every error it catches; the two failing routes below are the
@@ -33,6 +34,15 @@ describe('ErrorPage', () => {
     });
 
     expect(await screen.findByText(/nem található/)).toBeDefined();
+  });
+
+  it('speaks the chosen language alone', async () => {
+    await i18next.changeLanguage('en');
+    renderRouter({ path: '*', element: <ErrorPage /> });
+
+    expect(screen.getByText(/does not exist/)).toBeDefined();
+    expect(homeLink().textContent).toBe('Back to home');
+    expect(screen.queryByText(/nem található/)).toBeNull();
   });
 
   it('reports an unexpected error separately, so a broken page is not read as a wrong address', () => {

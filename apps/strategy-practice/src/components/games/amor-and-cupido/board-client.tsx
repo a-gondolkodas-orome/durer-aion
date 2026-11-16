@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, EDGES, findWinningTriangle } from './gameplay';
 
@@ -14,6 +15,7 @@ const ownerStroke = (owner: number | null): string => {
 };
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('amor-and-cupido');
   const isMoveAllowed = (edge: number) => moves.claimEdge.isAllowed(board, edge);
 
   const winningEdges =
@@ -49,7 +51,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                 tabIndex={isMoveAllowed(edge) ? 0 : undefined}
                 role={isMoveAllowed(edge) ? 'button' : undefined}
                 aria-label={
-                  isMoveAllowed(edge) ? `Pair person ${a + 1} with person ${b + 1}` : undefined
+                  isMoveAllowed(edge) ? t('board.pair', { a: a + 1, b: b + 1 }) : undefined
                 }
               />
             </g>

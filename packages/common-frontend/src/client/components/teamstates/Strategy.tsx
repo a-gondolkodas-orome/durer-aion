@@ -12,15 +12,17 @@ export function Strategy(props: { state: TeamModelDto }) {
   switch (props.state.strategyMatch.state) {
     case "FINISHED":
     case "IN PROGRESS":
+      // See the same check in Relay.tsx.
+      if (!StrategyClient) throw new Error('GameProvider gives no StrategyClient');
       return (
         <div data-testid={testId}>
-         {StrategyClient ? <Suspense fallback={<Loading/>}>
+          <Suspense fallback={<Loading/>}>
             <StrategyClient
               competition={props.state.competition}
               credentials={props.state.credentials}
               matchID={(props.state.strategyMatch  as InProgressMatchStatus).matchID}
             />
-          </Suspense> : <>no strategy client in game context</>}
+          </Suspense>
         </div>
       );
     case "NOT STARTED":

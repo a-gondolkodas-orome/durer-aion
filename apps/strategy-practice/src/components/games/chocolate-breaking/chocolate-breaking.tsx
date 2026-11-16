@@ -23,6 +23,20 @@ import {
 const CELL = 30; // px per chocolate cell
 const CUT = 18; // px hit area of a cut line
 
+// A cut's hit area, centred on its line across the piece.
+const cutStyle = ({ dir, pos }: Move, w: number, h: number) => dir === 'v'
+  ? { left: pos * CELL, top: 0, height: h * CELL, width: CUT, transform: 'translateX(-50%)' }
+  : { left: 0, top: pos * CELL, width: w * CELL, height: CUT, transform: 'translateY(-50%)' };
+
+// Resting state shows a dashed "break here" guide so the cut lines are
+// discoverable without hovering (e.g. on touch screens); the selected cut
+// becomes a solid blue line.
+const cutLineClass = (dir: Move['dir'], active: boolean) => active
+  ? `bg-blue-600 rounded-full ${dir === 'v' ? 'w-1 h-full' : 'h-1 w-full'}`
+  : dir === 'v'
+    ? 'h-full border-l-2 border-dashed border-amber-100/70 dark:border-amber-100/40'
+    : 'w-full border-t-2 border-dashed border-amber-100/70 dark:border-amber-100/40';
+
 const PieceView = ({ piece, ctx, hovered, setHovered, clearHovered, onActivate }: {
   piece: Piece;
   ctx: Ctx;
@@ -55,23 +69,12 @@ const PieceView = ({ piece, ctx, hovered, setHovered, clearHovered, onActivate }
         </div>
         {ctx.isClientMoveAllowed && breaks.map(br => {
           const active = hoveredHere?.dir === br.dir && hoveredHere?.pos === br.pos;
-          const style = br.dir === 'v'
-            ? { left: br.pos * CELL, top: 0, height: h * CELL, width: CUT, transform: 'translateX(-50%)' }
-            : { left: 0, top: br.pos * CELL, width: w * CELL, height: CUT, transform: 'translateY(-50%)' };
           const cut = { id: piece.id, dir: br.dir, pos: br.pos };
-          // Resting state shows a dashed "break here" guide so the cut lines are
-          // discoverable without hovering (e.g. on touch screens); the selected
-          // cut becomes a solid blue line.
-          const line = active
-            ? `bg-blue-600 rounded-full ${br.dir === 'v' ? 'w-1 h-full' : 'h-1 w-full'}`
-            : br.dir === 'v'
-              ? 'h-full border-l-2 border-dashed border-amber-100/70 dark:border-amber-100/40'
-              : 'w-full border-t-2 border-dashed border-amber-100/70 dark:border-amber-100/40';
           return (
             <button
               key={`${br.dir}${br.pos}`}
               className="absolute flex items-center justify-center cursor-pointer touch-manipulation"
-              style={style}
+              style={cutStyle(cut, w, h)}
               aria-label={`${w}×${h} → ${br.a.w}×${br.a.h} + ${br.b.w}×${br.b.h}`}
               onClick={() => onActivate(cut)}
               onFocus={() => setHovered(cut)}
@@ -79,7 +82,7 @@ const PieceView = ({ piece, ctx, hovered, setHovered, clearHovered, onActivate }
               onPointerEnter={e => { if (e.pointerType === 'mouse') setHovered(cut); }}
               onPointerLeave={e => { if (e.pointerType === 'mouse') clearHovered(); }}
             >
-              <span className={`transition-colors ${line}`} />
+              <span className={`transition-colors ${cutLineClass(br.dir, active)}`} />
             </button>
           );
         })}

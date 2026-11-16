@@ -1,6 +1,7 @@
 {
   "board": {
-    "copCount": "This game has {{copCount}} policemen."
+    "copCount": "This game has {{copCount}} policemen.",
+    "vertex": "Vertex {{number}}"
   },
   "colour": {
     "amber": "amber",

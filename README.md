@@ -331,7 +331,17 @@ why the rest is left alone.
 
 `npm run i18n:check` compares English against Hungarian in
 `packages/common-frontend/public/locales` and `apps/strategy-practice/src/locales`,
-and reads the code for keys nobody uses or nobody defines.
+and reads the code for keys nobody uses or nobody defines. Text typed straight
+into JSX — between tags, in a `{…}` child, or in a label, title, placeholder or
+alt — is caught by `npm run lint` instead (`eslint.i18n.mjs`); each config says
+what it leaves out, among them the admin page, which is Hungarian on purpose.
+
+- **Lint does not see** an attribute on an SVG element or `<a>` — the
+  screen-reader labels on a board's cells; JSX passed through an attribute other
+  than a label (`fallback={<p>…</p>}`); a label inside a props object
+  (`inputProps={{ 'aria-label': … }}`); or anything inside a variable named in
+  capitals, which the plugin takes for a constant. A review is what catches
+  those.
 
 - **Keys are literals** at `t('…')` or `i18nKey="…"`, in a
   `useTranslation('<namespace>')` scope or written `namespace:key`.

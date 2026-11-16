@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { range } from 'lodash';
 import { POLICE, THIEF, type Board } from './gameplay';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
@@ -14,6 +15,7 @@ const cubeCoords = [
 ];
 
 export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('policeman-thief');
   // Exactly one piece is due to move at any moment; the same move then decides
   // both what a click does and which intersections are offered.
   const activeMove = () => {
@@ -106,7 +108,7 @@ export const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
             }}
             tabIndex={isClickable(vertex) ? 0 : undefined}
             role={isClickable(vertex) ? 'button' : undefined}
-            aria-label={isClickable(vertex) ? `Vertex ${vertex + 1}` : undefined}
+            aria-label={isClickable(vertex) ? t('board.vertex', { number: vertex + 1 }) : undefined}
             className={isClickable(vertex) ? 'opacity-50' : ''}
           />
         ))}

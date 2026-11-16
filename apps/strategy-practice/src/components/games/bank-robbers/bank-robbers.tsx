@@ -7,6 +7,7 @@ import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 import { generateStartBoard, isRobbable, moves, type Board } from './gameplay';
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('bank-robbers');
   const getCoords = (index: number) => {
     const step = Math.PI * 2 / board.circle.length;
     const angle = index * step + (board.firstMove === null ? 0 : board.firstMove * step);
@@ -58,7 +59,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
               }}
               tabIndex={isAllowedMove(index) ? 0 : undefined}
               role={isAllowedMove(index) ? 'button' : undefined}
-              aria-label={isAllowedMove(index) ? `Bank ${index + 1}` : undefined}
+              aria-label={isAllowedMove(index) ? t('board.bank', { number: index + 1 }) : undefined}
             />
           );
         })}

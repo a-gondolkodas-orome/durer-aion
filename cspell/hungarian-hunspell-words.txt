@@ -79,6 +79,7 @@ beszínezett
 beszínezve
 beszúrni
 betartásával
+Betöltés
 betöltése
 beválthatjuk
 beváltotok
@@ -369,6 +370,7 @@ kéttagú
 kettéosztást
 kettéosztja
 kettéosztó
+kettévágása
 keveredést
 kezdése
 kezdésig
@@ -756,6 +758,7 @@ oszthatót
 összekötöttük
 összekötve
 összeolvasva
+összepárosítása
 összepárosítva
 összeragasztott
 összességében

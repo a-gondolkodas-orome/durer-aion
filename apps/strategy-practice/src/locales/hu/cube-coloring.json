@@ -1,4 +1,7 @@
 {
+  "board": {
+    "node": "{{number}}. csúcs"
+  },
   "colour": {
     "red": "Piros",
     "blue": "Kék",

@@ -67,7 +67,7 @@ export const Overview = () => {
     />
     <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
       {showFilters && (
-        <div aria-label="filter" className="mt-2 pt-3 flex flex-col gap-1 mb-2 border-2 p-3"
+        <div aria-label={t('filters.toggle')} className="mt-2 pt-3 flex flex-col gap-1 mb-2 border-2 p-3"
           style={{ borderRadius: '10px' }}
         >
           <CategoryFilter selected={selectedCategories} onChange={setSelectedCategories} />
@@ -112,7 +112,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
             <IconButton
               component="a"
               href="/.."
-              aria-label="Home"
+              aria-label={t('home')}
               size="small"
               color="inherit"
             >

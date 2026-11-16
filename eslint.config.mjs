@@ -4,6 +4,7 @@ import eslint from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
+import { i18nPlugin, i18nRules } from './eslint.i18n.mjs';
 import { quotesRule, stylisticPlugin, stylisticRules } from './eslint.stylistic.mjs';
 
 const noBotMessage = 'The live client must not ship the bot: import `game` or `game/client` only.';
@@ -172,6 +173,22 @@ export default defineConfig(
       'react-hooks/exhaustive-deps': 'error',
       'react-hooks/set-state-in-effect': 'error',
     },
+  },
+  // No hard-coded text between JSX tags — see eslint.i18n.mjs. Three things are left
+  // out. The admin page, which is for the organisers and Hungarian on purpose
+  // (#698), and is these five files. A live game's folder, which README.md
+  // § Creating a new game lets hold one language only: its rules text, and the
+  // board and status line that go with them. And the suites, whose markup is a
+  // stand-in, never shown to anyone.
+  {
+    files: ['**/*.tsx'],
+    ignores: [
+      'packages/common-frontend/src/client/components/{Admin,CompetitionTable,ConfirmDialog,ImportExport,TeamDetailDialog}.tsx',
+      'packages/game/src/games/**',
+      '**/*.test.tsx',
+    ],
+    plugins: i18nPlugin,
+    rules: i18nRules,
   },
   // packages/strategy-engine is apps/strategy-practice code moved out of it, still
   // written in that app's dialect: `!` stands in for a guard the game's rules already
