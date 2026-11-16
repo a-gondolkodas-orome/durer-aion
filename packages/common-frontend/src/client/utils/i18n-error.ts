@@ -28,11 +28,11 @@ const t = (key: string) => key;
 /** What each server code is shown as. Codes only a broken client can cause
  *  are an unexpected error to whoever sees them. */
 const API_ERROR_KEYS: Record<ApiErrorCode, string> = {
-  INVALID_BODY: t("error.unexpected"),
+  JOIN_INVALID_BODY: t("error.unexpected"),
   INVALID_START_WINDOW: t("error.invalidStartWindow"),
-  NO_FILE: t("error.noFile"),
-  MULTIPLE_FILES: t("error.multipleFiles"),
-  NOT_TSV: t("error.notTsv"),
+  IMPORT_NO_FILE: t("error.importNoFile"),
+  IMPORT_MULTIPLE_FILES: t("error.importMultipleFiles"),
+  IMPORT_NOT_TSV: t("error.importNotTsv"),
   NOT_LOGGED_IN: t("error.notLoggedIn"),
   START_NOT_ALLOWED: t("error.startNotAllowed"),
   NO_SUCH_MATCH: t("error.noSuchMatch"),

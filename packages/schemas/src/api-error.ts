@@ -4,15 +4,16 @@
  * for whoever reads the response by hand, and no client shows it.
  *
  * A code is a promise to the clients: rename one only together with the
- * frontend's translation of it (`error.api.<code>`).
+ * frontend's translation of it (`i18n-error.ts`). A code one route alone
+ * answers is named for that route, so it reads without the request beside it.
  */
 export const API_ERROR_CODES = [
   // 400
-  "INVALID_BODY",
+  "JOIN_INVALID_BODY",
   "INVALID_START_WINDOW",
-  "NO_FILE",
-  "MULTIPLE_FILES",
-  "NOT_TSV",
+  "IMPORT_NO_FILE",
+  "IMPORT_MULTIPLE_FILES",
+  "IMPORT_NOT_TSV",
   // 401
   "NOT_LOGGED_IN",
   // 403

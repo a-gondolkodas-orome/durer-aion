@@ -318,13 +318,13 @@ export function configureTeamsRouter(
    * checked on the name the client sent.
    */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
-    const { file } = ctx.request.files ?? refuse(ctx, 400, "NO_FILE", 'No files uploaded!');
+    const { file } = ctx.request.files ?? refuse(ctx, 400, "IMPORT_NO_FILE", 'No files uploaded!');
     try {
       if (Array.isArray(file)) {
-        refuse(ctx, 400, "MULTIPLE_FILES", 'Multiple files are not supported.');
+        refuse(ctx, 400, "IMPORT_MULTIPLE_FILES", 'Multiple files are not supported.');
       }
       if (!file?.originalFilename?.endsWith('.tsv')) {
-        refuse(ctx, 400, "NOT_TSV", 'Invalid file format. Only TSV files are allowed.');
+        refuse(ctx, 400, "IMPORT_NOT_TSV", 'Invalid file format. Only TSV files are allowed.');
       }
       ctx.body = await import_teams_from_tsv(teams, file.filepath);
     } finally {
@@ -350,7 +350,7 @@ export function configureTeamsRouter(
    */
   router.post("/team/join", joinLimit, requireJson, koaBody(), async (ctx) => {
     const sent: unknown = (ctx.request.body as { code?: unknown } | undefined)?.code;
-    const code = typeof sent === "string" ? sent : refuse(ctx, 400, "INVALID_BODY", "Expected { code: string }.");
+    const code = typeof sent === "string" ? sent : refuse(ctx, 400, "JOIN_INVALID_BODY", "Expected { code: string }.");
     const team = await teams.getTeam({ joinCode: code }) ?? refuse(ctx, 404, "UNKNOWN_JOIN_CODE", "No team has this join code.");
     setTeamCookie(ctx, team.teamId);
     ctx.status = 204;

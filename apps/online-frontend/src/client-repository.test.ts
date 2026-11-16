@@ -179,10 +179,10 @@ describe("the team import", () => {
   });
 
   test("a file the route refuses for its name is said to need .tsv", async () => {
-    fakeAxios(() => refused(400, "NOT_TSV"));
+    fakeAxios(() => refused(400, "IMPORT_NOT_TSV"));
 
     await expect(new RealClientRepository().importTeams(new File([""], "teams.csv")))
-      .rejects.toMatchObject({ i18nKey: "error.notTsv" });
+      .rejects.toMatchObject({ i18nKey: "error.importNotTsv" });
   });
 
   // nginx refuses an upload over its limit before the backend sees it.

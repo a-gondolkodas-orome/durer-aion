@@ -660,12 +660,12 @@ test('a second import keeps the codes of the first', async () => {
 
 test('the import tab says why the server refused the file', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  vi.spyOn(repo, 'importTeams').mockRejectedValue(new I18nError('error.notTsv'));
+  vi.spyOn(repo, 'importTeams').mockRejectedValue(new I18nError('error.importNotTsv'));
   renderAdmin();
 
   await importFile('teams.csv');
 
-  expect(await screen.findByText('error.notTsv')).toBeInTheDocument();
+  expect(await screen.findByText('error.importNotTsv')).toBeInTheDocument();
 });
 
 test('a reset asks first, names the team, and does nothing when cancelled', async () => {

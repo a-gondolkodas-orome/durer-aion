@@ -363,7 +363,7 @@ paths:
                           type: string
                         description: Log messages
         "400":
-          description: NO_FILE, MULTIPLE_FILES, or NOT_TSV
+          description: IMPORT_NO_FILE, IMPORT_MULTIPLE_FILES, or IMPORT_NOT_TSV
           content:
             application/json:
               schema:
@@ -539,11 +539,11 @@ components:
         code:
           type: string
           enum:
-            - INVALID_BODY
+            - JOIN_INVALID_BODY
             - INVALID_START_WINDOW
-            - NO_FILE
-            - MULTIPLE_FILES
-            - NOT_TSV
+            - IMPORT_NO_FILE
+            - IMPORT_MULTIPLE_FILES
+            - IMPORT_NOT_TSV
             - NOT_LOGGED_IN
             - START_NOT_ALLOWED
             - NO_SUCH_MATCH
