@@ -30,19 +30,18 @@
     "dev": "npx tsdown --watch --no-clean --onSuccess \"echo rebuilt game\""
   },
   "//": [
-    "@mui/icons-material is imported by no board here. It stays declared for a year's private game whose board uses an icon, so that import resolves from this package's own dependency rather than by npm hoisting common-frontend's copy — issue #432 is what that accident looks like when it breaks."
+    "MUI and Emotion are peers, like React: the board needs them, and the app that renders it — online-frontend, offline-frontend — provides them. As peers they stay out of the backend's production install, which takes this package in as a workspace dependency (Dockerfile); listed in devDependencies they would not, since npm installs a workspace's devDependencies even under --omit=dev.",
+    "@mui/icons-material is imported by no board here. It stays declared for a year's private game whose board uses an icon, so the import resolves from a declared dependency rather than by npm hoisting common-frontend's copy — issue #432 is what that accident looks like when it breaks. Both apps that render a board declare it for the same reason."
   ],
-  "dependencies": {
-    "@emotion/react": "11.14.0",
-    "@emotion/styled": "11.14.1",
-    "@mui/icons-material": "9.5.0",
-    "@mui/material": "9.5.0"
-  },
   "devDependencies": {
     "@types/react": "19.3.0",
     "schemas": "*"
   },
   "peerDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.5.0",
+    "@mui/material": "^9.5.0",
     "boardgame.io": "0.50.*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

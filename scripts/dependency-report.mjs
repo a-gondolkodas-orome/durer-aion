@@ -55,12 +55,13 @@ export const HELD_BACK = {
 // nginx is the exception at 2, because its majors and minors both carry meaning: 1.30.x is the
 // stable line and 1.31.x is mainline, both current on Docker Hub, so a major-wide row would keep
 // offering mainline as if it were a patch.
+// `pin` captures the version where `where` writes it down.
 // Not here on purpose: mcr.microsoft.com/devcontainers/*, which floats on a major because a dev
 // environment is not a deployment.
 export const DOCKER_IMAGES = [
-  { image: 'node', where: 'Dockerfile', line: 1 },
-  { image: 'nginx', where: 'apps/online-frontend/nginx/Dockerfile', line: 2 },
-  { image: 'postgres', where: 'docker-compose.yml', line: 1 }
+  { image: 'node', where: 'Dockerfile', pin: /^ARG NODE_VERSION=(\S+)$/m, line: 1 },
+  { image: 'nginx', where: 'apps/online-frontend/nginx/Dockerfile', pin: /^FROM nginx:(\S+)/m, line: 2 },
+  { image: 'postgres', where: 'docker-compose.yml', pin: /image: postgres:(\S+)/, line: 1 }
 ];
 
 const fetchJson = async url => {
@@ -215,11 +216,10 @@ export const newestTagInLine = (tags, current, line) => {
     .join('.');
 };
 
-const dockerRows = () => DOCKER_IMAGES.map(({ image, where, line }) => {
-  // `FROM node:24.20.0` in a Dockerfile, `image: postgres:17.11` in the compose file.
-  const [, current] = read(where).match(new RegExp(`(?:FROM|image:)[ \\t]*${image}:(\\S+)`)) ?? [];
+const dockerRows = () => DOCKER_IMAGES.map(({ image, where, pin, line }) => {
+  const [, current] = read(where).match(pin) ?? [];
   return checkVersion(`library/${image}`, current ?? 'unknown', [where], async () => {
-    if (!current) throw new Error(`no ${image}: tag found in ${where}`);
+    if (!current) throw new Error(`no ${image} version found in ${where}`);
     // Filtered server-side to the pinned line, because these repositories carry thousands of tags
     // and one page is all this asks for. `library/` is where Docker Hub keeps the official images;
     // the endpoint answers anonymously, and GITHUB_TOKEN does not apply to it.

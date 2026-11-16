@@ -82,8 +82,8 @@ describe('a version written down in more than one file', () => {
       ...workflows,
       ['.devcontainer/devcontainer.json node feature', nodeFeature('.devcontainer/devcontainer.json')],
       [`${app}.devcontainer/devcontainer.json node feature`, nodeFeature(`${app}.devcontainer/devcontainer.json`)],
-      // The image the competition is deployed from.
-      ['Dockerfile FROM node', read('Dockerfile').match(/^FROM node:(\S+)/m)?.[1]]
+      // The images the competition is deployed from; every stage takes the version from this ARG.
+      ['Dockerfile ARG NODE_VERSION', read('Dockerfile').match(/^ARG NODE_VERSION=(\S+)$/m)?.[1]]
     ]);
   });
 
