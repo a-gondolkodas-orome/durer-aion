@@ -12,6 +12,7 @@ import { smartBotStrategy, randomBotStrategy } from './bot-strategy';
 import { getAllowedSuperset, moves, vertices, type Board } from './gameplay';
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('totem-poles');
   const [firstNode, setFirstNode] = useState<number | null>(null);
   const { value: validHoveredNode, hoverProps } = useHoverPreview<number>(ctx.moveCount);
 
@@ -93,7 +94,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
         }}
         tabIndex={isClickable ? 0 : undefined}
         role={isClickable ? 'button' : undefined}
-        aria-label={isClickable ? `Node ${vertex.id + 1}` : undefined}
+        aria-label={isClickable ? t('board.node', { number: vertex.id + 1 }) : undefined}
         {...hoverProps(vertex.id)}
       />
       );

@@ -1,4 +1,9 @@
 {
+  "errorPage": {
+    "backToHome": "Back to home",
+    "notFound": "Sorry, the page you are looking for does not exist.",
+    "unexpected": "Sorry, an unexpected error occurred."
+  },
   "filters": {
     "category": "Category",
     "clear": "Clear filters",
@@ -9,6 +14,7 @@
     "yearTo": "Last year",
     "round": "Round"
   },
+  "home": "Home",
   "icon": {
     "board": "Board",
     "cards": "Cards",

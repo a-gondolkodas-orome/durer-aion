@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { range } from 'lodash';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { COORDS, LINES } from './board-data';
@@ -12,6 +13,7 @@ const pos = COORDS.map(([x, y]) => ({ cx: px(x), cy: px(y) }));
 const segments = LINES.flatMap(([a, b, c]) => [[a, b], [b, c]] as const);
 
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('modified-mill');
   const isClickable = (node: number) => moves.placePiece.isAllowed(board, node);
 
   const handleClick = (node: number) => {
@@ -49,7 +51,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             }}
             tabIndex={isClickable(node) ? 0 : undefined}
             role={isClickable(node) ? 'button' : undefined}
-            aria-label={isClickable(node) ? `Empty cell ${node + 1}` : undefined}
+            aria-label={isClickable(node) ? t('board.emptyCell', { number: node + 1 }) : undefined}
             className={isClickable(node) ? 'cursor-pointer' : ''}
           >
             <circle

@@ -1,6 +1,7 @@
 {
   "board": {
-    "copCount": "Ebben a játékban {{copCount}} rendőr van."
+    "copCount": "Ebben a játékban {{copCount}} rendőr van.",
+    "vertex": "{{number}}. útkereszteződés"
   },
   "colour": {
     "amber": "sárga",

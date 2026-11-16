@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { range } from 'lodash';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, type TurnState, FIELD_COUNT, OPPOSITE_PAIRS } from './gameplay';
@@ -12,6 +13,7 @@ const coords: { cx: number; cy: number }[] = range(FIELD_COUNT).map((i) => {
 });
 
 export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProps<Board, TurnState>) => {
+  const { t } = useTranslation('six-fields-circle');
   const first = ctx.turnState?.first ?? null;
 
   const isClickable = (node: number) => {
@@ -74,7 +76,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
               onKeyUp={(event) => { if (event.key === 'Enter') handleClick(node); }}
               tabIndex={clickable ? 0 : undefined}
               role={clickable ? 'button' : undefined}
-              aria-label={clickable ? `Field ${node + 1}, ${board[node]} discs` : undefined}
+              aria-label={clickable ? t('board.field', { number: node + 1, count: board[node] }) : undefined}
               className={clickable ? 'cursor-pointer' : ''}
             >
               <circle

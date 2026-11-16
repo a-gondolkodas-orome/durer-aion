@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { range } from 'lodash';
 import { GameBoard, type BoardClientProps } from 'strategy-game-factory';
 import { type Board, hubs, others } from './gameplay';
@@ -21,6 +22,7 @@ const edges = [
 ];
 
 export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('four-connected-fields');
   const isClickable = (node: number) => moves.placeCoin.isAllowed(board, node);
 
   return (
@@ -45,7 +47,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             }}
             tabIndex={isClickable(node) ? 0 : undefined}
             role={isClickable(node) ? 'button' : undefined}
-            aria-label={isClickable(node) ? `Field ${node + 1}, ${board[node]} coins` : undefined}
+            aria-label={isClickable(node) ? t('board.field', { number: node + 1, count: board[node] }) : undefined}
             className={isClickable(node) ? 'cursor-pointer' : ''}
           >
             <circle

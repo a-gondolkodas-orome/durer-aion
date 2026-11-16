@@ -1,4 +1,9 @@
 {
+  "errorPage": {
+    "backToHome": "Vissza a főoldalra",
+    "notFound": "Sajnáljuk, a keresett oldal nem található.",
+    "unexpected": "Sajnáljuk, egy váratlan hiba történt."
+  },
   "filters": {
     "category": "Kategória",
     "clear": "Szűrés törlése",
@@ -9,6 +14,7 @@
     "yearTo": "Utolsó év",
     "round": "Forduló"
   },
+  "home": "Főoldal",
   "icon": {
     "board": "Tábla",
     "cards": "Kártyák",

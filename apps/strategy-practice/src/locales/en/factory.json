@@ -17,6 +17,7 @@
     "youWon": "You won. Congratulations! :)"
   },
   "gameOver": "Game over",
+  "loading": "Loading",
   "mode": {
     "legend": "Game mode",
     "twoPlayers": "2 players",

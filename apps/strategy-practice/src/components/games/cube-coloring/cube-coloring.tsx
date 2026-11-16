@@ -116,7 +116,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           }}
           tabIndex={isColoringAllowed(nodeId) ? 0 : undefined}
           role={isColoringAllowed(nodeId) ? 'button' : undefined}
-          aria-label={isColoringAllowed(nodeId) ? `Node ${nodeId + 1}` : undefined}
+          aria-label={isColoringAllowed(nodeId) ? t('board.node', { number: nodeId + 1 }) : undefined}
           fill={nodeColors[board[nodeId]]?.svg}
           className={!nodeColors[board[nodeId]]
             ? (isColoringAllowed(nodeId) || color === null

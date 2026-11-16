@@ -37,6 +37,11 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
 
   const isSelected = (r: number, c: number) => !!selected && selected.r === r && selected.c === c;
 
+  const lineChoices = (r: NonNullable<typeof rect>): { orientation: Orientation; count: number; label: string }[] => [
+    { orientation: 'row', count: r.maxC - r.minC + 1, label: t('board.removeRow') },
+    { orientation: 'col', count: r.maxR - r.minR + 1, label: t('board.removeColumn') }
+  ];
+
   return (
     <GameBoard>
       <div className="flex justify-center py-2">
@@ -72,18 +77,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
       </div>
       {selected && rect && ctx.isClientMoveAllowed && (
         <div className="flex flex-wrap justify-center gap-2 mt-2">
-          {[
-            {
-              orientation: 'row' as const,
-              count: rect.maxC - rect.minC + 1,
-              label: t('board.removeRow')
-            },
-            {
-              orientation: 'col' as const,
-              count: rect.maxR - rect.minR + 1,
-              label: t('board.removeColumn')
-            }
-          ].map(({ orientation, count, label }) => (
+          {lineChoices(rect).map(({ orientation, count, label }) => (
             <button
               key={orientation}
               className="primary-button w-auto grow"
