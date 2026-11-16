@@ -146,7 +146,7 @@ describe('import_teams_from_tsv', () => {
 
       expect(result.successful).toBe(1);
       expect(create.mock.calls[0][0]).toMatchObject({
-        teamName: 'Test Team', competitionId: C, category: 'C', email: 'test@example.com', other: 'Some Info',
+        teamName: 'Test Team', competitionId: C, email: 'test@example.com', other: 'Some Info',
       });
       expect(result.logs.value).toEqual([]);
       // The export keeps the import's own order, so it goes back in as it is.
@@ -190,17 +190,13 @@ describe('import_teams_from_tsv', () => {
   describe('the competition each row names', () => {
     // The online round is the C, D and E competitions at once, from one
     // registration list.
-    it('stores each team with its own, and the category its metadata names', async () => {
+    it('stores each team with its own', async () => {
       tsv(['Alpha', C, '', '', '', '', ''], ['Bravo', D, '', '', '', '', ''], ['Charlie', ` ${E} `, '', '', '', '', '']);
 
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result).toMatchObject({ successful: 3, failed: 0 });
-      expect(create.mock.calls.map(([values]) => [values.competitionId, values.category])).toEqual([
-        [C, 'C'],
-        [D, 'D'],
-        [E, 'E'],
-      ]);
+      expect(create.mock.calls.map(([values]) => values.competitionId)).toEqual([C, D, E]);
       expect(result.export_table.map(row => row[1])).toEqual([C, D, E]);
     });
 
@@ -212,7 +208,7 @@ describe('import_teams_from_tsv', () => {
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv');
 
       expect(result.successful).toBe(1);
-      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: 'w2b34gqoin--01-final-b', category: 'B' });
+      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: 'w2b34gqoin--01-final-b' });
     });
 
     it.each([
@@ -246,7 +242,7 @@ describe('import_teams_from_tsv', () => {
 
     it('knows a team already there when the row names its competition by name', async () => {
       live = [TeamModel.build({
-        teamName: 'Alpha', competitionId: C, category: 'C', email: '', other: '', pageState: 'HOME',
+        teamName: 'Alpha', competitionId: C, email: '', other: '', pageState: 'HOME',
         teamId: TEAM_ID, joinCode: JOIN_CODE, credentials: CREDENTIALS, relayMatchID: null, strategyMatchID: null,
       })];
       tsv(['Alpha', '20 online C', '', '', '', '', '']);
@@ -405,7 +401,7 @@ describe('import_teams_from_tsv', () => {
     const liveTeam = (teamName: string, fields: Partial<TeamModel> = {}) => {
       const k = String(++n).padStart(3, '0');
       return TeamModel.build({
-        teamName, competitionId: C, category: 'C', email: 'a@b.com', other: '', pageState: 'HOME',
+        teamName, competitionId: C, email: 'a@b.com', other: '', pageState: 'HOME',
         teamId: `8eae8669-125c-42e5-8b49-89afbac31${k}`, joinCode: `111-2222-${k}`,
         credentials: `67676767-6767-4767-a767-676767676${k}`, relayMatchID: null, strategyMatchID: null,
         ...fields,

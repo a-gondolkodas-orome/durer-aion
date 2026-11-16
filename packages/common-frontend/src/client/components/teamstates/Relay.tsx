@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { type CompetitionCategory, InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
+import { InProgressMatchStatus, TeamModelDto } from "../../dto/TeamStateDto";
 import { useGame } from "./GameContext";
 import { Loading } from "../Loading";
 import React, { Suspense } from "react";
@@ -16,7 +16,6 @@ export function Relay(props: { state: TeamModelDto }) {
         <div data-testid={testId}>
           {RelayClient ? <Suspense fallback={<Loading/>}>
             <RelayClient
-              category={props.state.category as CompetitionCategory}
               competition={props.state.competition}
               teamName={props.state.teamName}
               credentials={props.state.credentials}
@@ -27,6 +26,6 @@ export function Relay(props: { state: TeamModelDto }) {
       );
     case "NOT STARTED":
     default:
-      return <div data-testid={testId}>{t('relay.error.badCategory')}</div>;
+      return <div data-testid={testId}>{t('relay.error.noMatch')}</div>;
   }
 }

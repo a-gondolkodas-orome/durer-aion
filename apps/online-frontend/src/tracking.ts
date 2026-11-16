@@ -37,11 +37,12 @@ const device = () => ({
 
 // The year goes as a string: it is a label to group by, and umami shows a
 // number with four decimals. Never the team's name: the category is as fine as
-// a breakdown needs to be.
-const teamData = (team: TeamModelDto) => ({
-  category: team.category,
-  ...(team.competition?.metadata.kind === 'competition' && { year: String(team.competition.metadata.edition) }),
-});
+// a breakdown needs to be. Both are the competition's, which a practice set
+// has neither of.
+const teamData = (team: TeamModelDto) => {
+  const metadata = team.competition?.metadata;
+  return metadata?.kind === 'competition' ? { category: metadata.category, year: String(metadata.edition) } : {};
+};
 
 type MatchKind = 'relay' | 'strategy';
 

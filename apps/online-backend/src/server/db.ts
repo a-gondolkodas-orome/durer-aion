@@ -102,15 +102,14 @@ export class TeamsRepository {
   }
 
   async insertTeam(
-      { teamname, competitionId, category, email, other, startWindow, teamId, joinCode, credentials } :
-      { teamname: string, competitionId: string, category: string, email: string, other: string,
+      { teamname, competitionId, email, other, startWindow, teamId, joinCode, credentials } :
+      { teamname: string, competitionId: string, email: string, other: string,
         startWindow?: StartWindow, teamId: string, joinCode: string, credentials: string }) {
     return await TeamModel.create({
       teamId, joinCode, other,
       competitionId,
       startOpensAt: startWindow?.opensAt ?? null,
       startClosesAt: startWindow?.closesAt ?? null,
-      category,
       email,
       credentials,
       strategyMatchID: null,

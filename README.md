@@ -47,8 +47,9 @@ and the database behind it.
 `stack:up` returns once the containers are actually up and fails if they are
 not, and it runs in the background. `npm run stack:logs` follows all three
 containers (Ctrl-C stops watching, not the stack); `npm run stack:down` stops
-it. The imported teams cover the three age categories: `000-0000-000` is C,
-`001-0000-000` is D, `002-0000-000` is E, with a thousand more behind them.
+it. The imported teams cover edition XX's online C, D and E competitions:
+`000-0000-000` is in C, `001-0000-000` in D, `002-0000-000` in E, with a
+thousand more behind them.
 
 **Only one of the two flows at a time.** The stack's postgres and
 `npm run db:up` both bind 5432, so `stack:up` fails while the other one holds
@@ -437,8 +438,8 @@ the values its latest page load sent.
 
 The competition, `verseny.durerinfo.hu`, reports to a website of its own, from
 `apps/online-frontend/src/tracking.ts` rather than a tag: a pageview per load,
-never from an admin page, the same session data plus the team's `category`,
-`year` and `language`, and the events `login`, `relay-started`,
+never from an admin page, the same session data plus the team's `language` and
+its competition's `category` and `year` (none for a practice set), and the events `login`, `relay-started`,
 `relay-finished`, `strategy-started` and `strategy-finished`, the last two with
 `points`. Starts and ends are sent only by the browser that started the match,
 so each counts once per team. `connection-lost` (the board's alert showed) and
@@ -464,6 +465,40 @@ The sync workflow can be used locally with:
 SYNC_SOURCE=/tmp/public.git SYNC_TARGET=/tmp/private.git REF=sync-test \
   node scripts/sync-mirror.mjs
 ```
+
+# Adding a competition
+
+A competition is what a join code is valid for: a relay, a strategy game or
+both, the languages it is held in, and when its matches may start. Its edition,
+round and category are metadata, shown and never acted on, so two competitions
+may share a category, and a practice set has none. `CompetitionConfig` in
+`competition.ts` (`packages/schemas`) is the model, with every field explained.
+
+Competitions and their problems live in code, one bank per file under
+`packages/problem-bank/banks/`; `edition-20-online.ts` is the one to copy.
+
+1. **Ids.** `npm run new-id -- <slug>` prints one for each slug: ten random
+   characters, `--`, then the slug, such as `mkhi1nnoim--20-online-c`. An id
+   never changes once something refers to it, slug included, and a problem
+   shared between relays is written once, under one id.
+2. **The bank.** `competitions` maps each id to its config and `problems` each
+   problem id to its answer and its content per language. A relay lists its
+   problems by id, with each one's points in this relay. A strategy game is
+   named by its game id in the game package's registries (README § *Creating a
+   new game*).
+3. **Register it** in `all.ts`, which the live round's server serves. The
+   server validates every competition at start, and refuses to start on an
+   invalid one; the problem bank's suite runs the same validation, so CI fails
+   first.
+4. **Where else it goes.** The dry run rehearses the round its
+   `rehearsed-round.ts` names, with test teams in `teamData.ts`. The relay
+   practice site serves the banks `practice-sets.ts` names, which must be
+   released.
+5. **Import the teams** with the competition's id, or its name such as
+   `20 online C`, in the TSV's `Competition` column (README § *Admin*).
+
+This year's competitions are added in the year's private repo until the round
+is over, as its game is (§ *Competition secrecy*).
 
 # Debugging
 

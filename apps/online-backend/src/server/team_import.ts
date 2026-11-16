@@ -18,7 +18,7 @@ const REQUIRED: readonly Column[] = ["Teamname", "Competition"];
 
 /** The registered competition a row's `Competition` cell names, by its id or
  * by edition, round and category, or the reason it names none. */
-function competitionNamed(cell: string): CompetitionConfig | { refused: string } {
+export function competitionToImportInto(cell: string): CompetitionConfig | { refused: string } {
   const text = cell.trim();
   const byId = registry.competitions.get(text);
   if (byId !== undefined) return byId;
@@ -28,19 +28,6 @@ function competitionNamed(cell: string): CompetitionConfig | { refused: string }
     return { refused: `Több verseny is „${text}”: ${named.map(({ id }) => id).join(', ')}. Az azonosítóval egyértelmű.` };
   }
   return { refused: `Nincs ilyen verseny: „${text}”. Az azonosítója vagy a neve kell, például: 20 online C.` };
-}
-
-/** The registered competition a row's team enters, with the category the team
- * is stored with (its metadata's, shown and never acted on), or the reason it
- * cannot take it. */
-export function competitionToImportInto(competitionId: string):
-  { competition: CompetitionConfig, category: string } | { refused: string } {
-  const competition = competitionNamed(competitionId);
-  if ('refused' in competition) {
-    return competition;
-  }
-  const { metadata } = competition;
-  return { competition, category: metadata.kind === 'competition' ? metadata.category : '' };
 }
 
 /** The team's own start window from a row's `Opens At` and `Closes At`
@@ -284,7 +271,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     // By the competition's id, which a row naming it by edition, round and
     // category does not hold.
     const there = into !== null && !('refused' in into)
-      ? live.get(liveKey(into.competition.id, teamname)) : undefined;
+      ? live.get(liveKey(into.id, teamname)) : undefined;
     if (ok && there !== undefined) {
       const differs = [
         teamId !== '' && teamId !== there.teamId ? 'ID' : null,
@@ -332,7 +319,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (ok && into !== null && !('refused' in into)) {
       try {
         await teams.insertTeam({
-          teamname, competitionId: into.competition.id, category: into.category, email, other,
+          teamname, competitionId: into.id, email, other,
           startWindow, teamId,
           joinCode: login_code, credentials,
         });
@@ -353,7 +340,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
     if (ok) {
       // The id, however the row named the competition: it stays the same when
       // a competition with the same name is registered later.
-      const row_to_export = [teamname, into !== null && !('refused' in into) ? into.competition.id : competitionId, email, other,
+      const row_to_export = [teamname, into !== null && !('refused' in into) ? into.id : competitionId, email, other,
         teamId, login_code, credentials, startWindow?.opensAt ?? '', startWindow?.closesAt ?? ''];
       export_table.push(row_to_export);
       successful++;

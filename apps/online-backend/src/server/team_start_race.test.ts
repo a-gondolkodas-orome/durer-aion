@@ -51,7 +51,6 @@ beforeEach(async () => {
   const team = await database.teams.insertTeam({
     teamname: "Alpha",
     competitionId: COMPETITION_ID,
-    category: "C",
     email: "team@example.com",
     other: "",
     teamId: TEAM_ID,

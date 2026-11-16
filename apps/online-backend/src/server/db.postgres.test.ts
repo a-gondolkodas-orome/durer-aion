@@ -28,7 +28,6 @@ function team(overrides: Partial<Parameters<TeamsRepository['insertTeam']>[0]> =
   return {
     teamname: `Team ${n}`,
     competitionId: 'mkhi1nnoim--20-online-c',
-    category: 'C',
     email: 'team@example.com',
     other: '',
     teamId: `8eae8669-125c-42e5-8b49-89afbac31${n}`,

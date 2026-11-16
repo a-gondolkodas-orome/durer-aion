@@ -83,7 +83,6 @@ export class OfflineClientRepository implements ClientRepository {
     const practiceSet = findPracticeSet(joinCode);
 
     if (practiceSet !== undefined) {
-      const { metadata } = practiceSet;
       // There is no disclaimer/home page in this app: logging in to a test
       // always starts from HOME so that startRelay() can run right away.
       const pageState = "HOME";
@@ -91,7 +90,6 @@ export class OfflineClientRepository implements ClientRepository {
         teamId: "1",
         joinCode: joinCode,
         teamName: joinCode,
-        category: metadata.kind === 'competition' ? metadata.category : '',
         credentials: "credentials",
         email: "asd@asd.asd",
         pageState: pageState,

@@ -6,7 +6,6 @@ export const mockTeamState: TeamModelDto = {
   teamId: "Long Id",
   joinCode: "111-1111-111",
   teamName: "test team",
-  category: "C",
   credentials: "credentials",
   email: "email",
   pageState: "HOME",

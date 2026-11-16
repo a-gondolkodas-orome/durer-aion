@@ -12,7 +12,6 @@ const teamsByJoinCode: Record<string, () => TeamModelDto> = {
   // A team in the middle of a relay match.
   "2": () => ({
     teamName: "TEAM 2",
-    category: "C",
     credentials: "credentials",
     pageState: "RELAY",
     relayMatch: {

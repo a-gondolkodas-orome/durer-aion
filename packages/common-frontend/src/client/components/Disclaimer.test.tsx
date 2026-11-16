@@ -12,7 +12,8 @@ vi.mock('react-i18next', () => ({
     t: (key: string, options?: object) => options ? `${key} ${JSON.stringify(options)}` : key,
     i18n: { language: 'hu' },
   }),
-  Trans: (props: { i18nKey: string }) => props.i18nKey,
+  Trans: (props: { i18nKey: string, values?: object }) =>
+    props.values ? `${props.i18nKey} ${JSON.stringify(props.values)}` : props.i18nKey,
 }));
 vi.mock('../client-repo-context', () => ({
   useClientRepo: () => ({ version: 'ONLINE' }),
@@ -39,7 +40,7 @@ const practice: PublicCompetition = {
 
 const renderDisclaimer = (startWindow?: StartWindow | null, competition: PublicCompetition | null = onlineC) => render(
   <ThemeProvider theme={createTheme({ palette: { background: { paperOpacity: 1 } } })}>
-    <Disclaimer teamName="Alpha" category="C" competition={competition} startWindow={startWindow}/>
+    <Disclaimer teamName="Alpha" competition={competition} startWindow={startWindow}/>
   </ThemeProvider>);
 
 afterEach(() => { vi.useRealTimers(); });
@@ -66,14 +67,14 @@ test("states the online round's threshold out of its most points", () => {
   expect(screen.getByText('disclaimer.progress')).toBeInTheDocument();
   expect(screen.getByText(/disclaimer\.progressDescription/)).toHaveTextContent(
     'disclaimer.progressDescriptionOnline {"minpoints":25,"maxpoints":52}');
-  expect(screen.getByText('disclaimer.welcomeOnline')).toBeInTheDocument();
+  expect(screen.getByText('disclaimer.welcomeOnline {"tname":"Alpha"}')).toBeInTheDocument();
 });
 
 test('says nothing of advancing for a competition with no threshold, and speaks of it in general words', () => {
   renderDisclaimer(null, practice);
 
   expect(screen.queryByText('disclaimer.progress')).not.toBeInTheDocument();
-  expect(screen.getByText('disclaimer.welcome')).toBeInTheDocument();
+  expect(screen.getByText('disclaimer.welcome {"tname":"Alpha"}')).toBeInTheDocument();
   expect(screen.getByText(/disclaimer\.start /)).toBeInTheDocument();
 });
 
@@ -92,4 +93,14 @@ test('names no end time without a close', () => {
   renderDisclaimer({ opensAt: '2026-10-20T15:00:00Z' });
 
   expect(screen.getByText(/disclaimer\.start/)).toHaveTextContent('"until":""');
+});
+
+// The category is the competition's, and a practice set has none to name.
+test("names the competition's category, and none for a practice set", () => {
+  const { unmount } = renderDisclaimer(null);
+  expect(screen.getByText('disclaimer.category {"category":"C"}')).toBeInTheDocument();
+  unmount();
+
+  renderDisclaimer(null, practice);
+  expect(screen.queryByText(/disclaimer\.category/)).not.toBeInTheDocument();
 });

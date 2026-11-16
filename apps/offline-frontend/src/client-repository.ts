@@ -133,13 +133,11 @@ export class OfflineClientRepository implements ClientRepository {
     // teamData.test.ts holds every test team's competition to the round.
     const competition = i > -1 ? dryRunCompetition(teamData[i].competitionId) : undefined;
     if (competition !== undefined) {
-      const { metadata } = competition;
       const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
         teamName: teamData[i].teamname,
         competition,
-        category: metadata.kind === 'competition' ? metadata.category : '',
         credentials: "credentials",
         email: "asd@asd.asd",
         pageState: pageState,

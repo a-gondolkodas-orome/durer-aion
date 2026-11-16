@@ -25,7 +25,6 @@ import type { TeamMatches } from "./match_status";
  */
 export interface PublicTeamView {
   teamName: string;
-  category: string;
   /** What the client builds its boards from: which matches there are, how
    *  long each runs and in which languages. Null for a row naming a
    *  competition the server no longer has, which has nothing to play. */
@@ -57,7 +56,6 @@ export function publicTeamView(
   const competition = competitions.get(team.competitionId);
   return {
     teamName: team.teamName,
-    category: team.category,
     competition: competition === undefined ? null : publicCompetition(competition),
     startWindow: teamStartWindow(team, competition) ?? null,
     serverTime: now.toISOString(),

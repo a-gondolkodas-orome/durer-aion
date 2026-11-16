@@ -21,7 +21,7 @@ const testGame: Game<TestState> = {
   },
 };
 
-/// What a local app builds per category: a client component, here what it
+/// What a local app builds per competition: a client component, here what it
 /// mounts. Every mount shares the game object, which keys the master.
 function buildClient(key: string) {
   const game = { ...testGame };

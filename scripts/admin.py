@@ -78,6 +78,16 @@ def competition_title(competition_id:str):
     return f"{metadata['edition']} {metadata['round']} {metadata['category']}"
   return metadata['label'].get('hu') or metadata['label'].get('en') or competition_id
 
+
+def competition_category(competition_id:str):
+  """
+    The competition's category: empty for one with none, such as a practice
+    set, and for one the server no longer has.
+  """
+  metadata = competitions.get(competition_id, {}).get('metadata') or {}
+  return metadata.get('category', '')
+
+
 team_states = get_request('admin', ADMIN_PASSWORD, BASE_URL, '/team/admin/all')
 if COMPETITION_IDS:
   team_states = [team for team in team_states if team['competitionId'] in COMPETITION_IDS]
@@ -166,7 +176,7 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
           code,
           team_states_dict[code]["teamName"],
           competition_title(competition_id),
-          team_states_dict[code]["category"],
+          competition_category(competition_id),
           str(results[code]["strategy"]),
           str(results[code]["relay"]),
         ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")

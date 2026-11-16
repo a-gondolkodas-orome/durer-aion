@@ -14,7 +14,6 @@ const finished = (matchID: string, score: number): MatchStatus =>
 
 const team = (relayMatch: MatchStatus, strategyMatch: MatchStatus = notStarted) => ({
   teamName: 'Never sent',
-  category: 'C',
   credentials: '',
   pageState: 'HOME',
   competition: { metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' } },
@@ -123,6 +122,14 @@ describe('the session data', () => {
 
     expect(identify.mock.calls.at(-1)?.[0]).toMatchObject({ category: 'C', language: 'en' });
     await i18next.changeLanguage('hu');
+  });
+
+  // The category and year are the competition's metadata.
+  test('names neither for a practice set', () => {
+    new Tracker().observe({ ...team(notStarted), competition: { metadata: { kind: 'other', label: { hu: 'Algebra' } } } } as TeamModelDto);
+
+    expect(identify.mock.calls[0][0]).not.toHaveProperty('category');
+    expect(identify.mock.calls[0][0]).not.toHaveProperty('year');
   });
 });
 

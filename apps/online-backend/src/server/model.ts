@@ -30,7 +30,6 @@ export class TeamModel extends Model<
   /// as `StartWindow` is.
   declare startOpensAt: string | null;
   declare startClosesAt: string | null;
-  declare category: string;
   declare credentials: string;
   declare email: string;
 
@@ -114,9 +113,6 @@ export const teamAttributes: ModelAttributes<
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
-  },
-  category: {
-    type: DataTypes.STRING,
   },
   email: {
     type: DataTypes.STRING,

@@ -1,8 +1,7 @@
 import { createContext, useContext } from "react";
-import type { CompetitionCategory, PublicCompetition } from "schemas";
+import type { PublicCompetition } from "schemas";
 
 interface ClientProps {
-  category: CompetitionCategory;
   /// The team's: its boards are built from it.
   competition?: PublicCompetition | null;
   teamName?: string;

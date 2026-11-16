@@ -65,7 +65,6 @@ async function team(fields: { pageState: PageState, relayMatchID?: string, strat
   const row = await database.teams.insertTeam({
     teamname: "Alpha",
     competitionId: "unused-here",
-    category: "C",
     email: "team@example.com",
     other: "",
     teamId: TEAM_ID,
