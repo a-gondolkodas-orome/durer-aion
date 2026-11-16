@@ -5,6 +5,7 @@ import reactPlugin from '@eslint-react/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
+import { i18nPlugin, i18nRules } from '../../eslint.i18n.mjs';
 import { quotesRule, stylisticPlugin, stylisticRules, stylisticRulesOff } from '../../eslint.stylistic.mjs';
 
 // The house spelling: rules that say the same thing about any file, whatever it
@@ -200,6 +201,15 @@ export default defineConfig(
         ]
       }]
     }
+  },
+  // No hard-coded user-facing text — see eslint.i18n.mjs. Every game here is in
+  // both languages, so unlike the root config's block this one reaches the games;
+  // only the suites and their helpers are left out, whose markup nobody sees.
+  {
+    files: ['src/**/*.tsx'],
+    ignores: ['src/**/*.test.tsx', 'src/**/test-helpers.tsx'],
+    plugins: i18nPlugin,
+    rules: i18nRules
   },
   {
     // SVG files contain inline path data that cannot be meaningfully reformatted

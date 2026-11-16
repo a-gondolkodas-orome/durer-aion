@@ -331,7 +331,10 @@ why the rest is left alone.
 
 `npm run i18n:check` compares English against Hungarian in
 `packages/common-frontend/public/locales` and `apps/strategy-practice/src/locales`,
-and reads the code for keys nobody uses or nobody defines.
+and reads the code for keys nobody uses or nobody defines. Text typed straight
+into JSX, between tags or in a label, title, placeholder or alt, is caught by
+`npm run lint` instead: `eslint.i18n.mjs` says how, and each config says what it
+leaves out — among them the admin page, which is Hungarian on purpose.
 
 - **Keys are literals** at `t('…')` or `i18nKey="…"`, in a
   `useTranslation('<namespace>')` scope or written `namespace:key`.
