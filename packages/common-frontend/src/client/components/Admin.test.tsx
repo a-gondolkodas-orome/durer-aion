@@ -62,7 +62,6 @@ const team = (teamId: string, teamName: string): TeamModelDto => ({
   teamId,
   teamName,
   competitionId: 'mkhi1nnoim--20-online-c',
-  category: 'C',
   credentials: 'credentials',
   pageState: 'HOME',
   relayMatch: { state: 'NOT STARTED' },
@@ -427,7 +426,7 @@ test('the stats have a row per competition, by its name', async () => {
   window.history.replaceState(null, '', '/admin?tab=statisztika');
   vi.spyOn(repo, 'getAll').mockResolvedValue([
     alpha,
-    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bravo'), competitionId: 'u4lw7pcca1--20-online-d', category: 'D' },
+    { ...team('2f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b', 'Bravo'), competitionId: 'u4lw7pcca1--20-online-d' },
     { ...team('3a8f2d1b-5c6e-4f7a-8b9c-0d1e2f3a4b5c', 'Charlie'), competitionId: 'zzzzzzzzzz--gone' },
   ]);
   renderAdmin();

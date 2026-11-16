@@ -92,10 +92,10 @@ export function readStoredTeamState(): TeamModelDto | null {
   if (!isRecord(parsed)) {
     return null;
   }
-  const { teamId, joinCode, teamName, category, credentials, email, pageState } = parsed;
+  const { teamId, joinCode, teamName, credentials, email, pageState } = parsed;
   if (
     typeof teamId !== 'string' || typeof joinCode !== 'string' ||
-    typeof teamName !== 'string' || typeof category !== 'string' ||
+    typeof teamName !== 'string' ||
     typeof credentials !== 'string' || typeof email !== 'string' ||
     !isPageState(pageState)
   ) {
@@ -119,7 +119,6 @@ export function readStoredTeamState(): TeamModelDto | null {
     joinCode,
     teamName,
     competition,
-    category,
     credentials,
     email,
     pageState,

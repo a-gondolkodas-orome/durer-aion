@@ -9,7 +9,6 @@ const team = {
   competitionId: "wkr6zml6mu--20-online-e",
   startOpensAt: null,
   startClosesAt: null,
-  category: "E",
   credentials: "secret-token",
   email: "team@example.com",
   other: "organiser notes",
@@ -56,7 +55,6 @@ describe("publicTeamView", () => {
     const now = new Date("2026-10-20T13:00:00Z");
     expect(publicTeamView(team, matches, undefined, now)).toStrictEqual({
       teamName: "Csapat",
-      category: "E",
       competition: {
         id: "wkr6zml6mu--20-online-e",
         languages: ["hu"],

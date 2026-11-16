@@ -31,7 +31,6 @@ const finished = {
 
 const team = (fields: Partial<TeamModelDto>): TeamModelDto => ({
   teamName: 'Alpha',
-  category: 'C',
   credentials: 'c',
   pageState: 'HOME',
   relayMatch: { state: 'NOT STARTED' },

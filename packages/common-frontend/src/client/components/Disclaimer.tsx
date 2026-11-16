@@ -19,7 +19,7 @@ function timeOfDay(time: Date, language: Language): string {
 }
 
 export function Disclaimer(props: {
-  teamName: string, category: string, competition?: PublicCompetition | null,
+  teamName: string, competition?: PublicCompetition | null,
   startWindow?: StartWindow | null, clockOffsetMs?: number,
 }) {
   const goHome = useToHome();
@@ -37,6 +37,8 @@ export function Disclaimer(props: {
   const { competition } = props;
   const metadata = competition?.metadata;
   const online = metadata?.kind === 'competition' && metadata.round === 'online';
+  // A practice set, which is not a round of the Dürer, has none.
+  const category = metadata?.kind === 'competition' ? metadata.category : undefined;
   // Both ends: when the competing time is over, and the last moment to start.
   const end = competition ? competingEnd(props.startWindow, competition) : undefined;
   const close = props.startWindow?.closesAt;
@@ -79,7 +81,7 @@ export function Disclaimer(props: {
               }} />
           </div>
         </Stack>
-        <Stack sx={{
+        {category !== undefined && <Stack sx={{
           fontStyle: "italic",
           alignSelf: "center",
           flexDirection: "row",
@@ -89,12 +91,12 @@ export function Disclaimer(props: {
           <div style={{ textAlign: "center" }}>
             <Trans
               i18nKey='disclaimer.category'
-              values={{ category: props.category }}
+              values={{ category }}
               components={{
                 b: <b style={{ color: theme.palette.primary.main }} />
               }} />
           </div>
-        </Stack>
+        </Stack>}
         {online ? t('disclaimer.startOnline', { until }) : t('disclaimer.start', { until })}
       </Stack>
 

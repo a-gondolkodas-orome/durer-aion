@@ -28,7 +28,6 @@ function teamRow(other: string, pageState: TeamModel["pageState"] = "STRATEGY") 
     joinCode: "000-0000-000",
     teamName: "Alpha",
     competitionId: "mkhi1nnoim--20-online-c",
-    category: "C",
     credentials: "1f9e1c9a-4e5b-4d0f-9a2b-3c4d5e6f7a8b",
     email: "team@example.com",
     pageState,

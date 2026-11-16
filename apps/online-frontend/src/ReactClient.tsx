@@ -54,7 +54,7 @@ interface ClientProps {
 // chooser does not offer) or a team without a competition has none.
 function NoMatch() {
   const { t } = useTranslation();
-  return <p>{t('relay.error.badCategory')}</p>;
+  return <p>{t('relay.error.noMatch')}</p>;
 }
 
 export function RelayClient({ competition, matchID, credentials }: ClientProps) {

@@ -46,7 +46,7 @@ const strategyClientOfSession = perStoredSession((id: CompetitionId) => {
 // The chooser offers only the matches the team's competition has.
 function NoMatch() {
   const { t } = useTranslation();
-  return <p>{t('relay.error.badCategory')}</p>;
+  return <p>{t('relay.error.noMatch')}</p>;
 }
 
 export function RelayClient({ competition }: { competition?: PublicCompetition | null }) {

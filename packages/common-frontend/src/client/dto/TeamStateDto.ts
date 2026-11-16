@@ -2,7 +2,7 @@ import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
 import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartWindow } from "schemas";
 
-export { isPageState, type CompetitionCategory, type PageState } from "schemas";
+export { isPageState, type PageState } from "schemas";
 
 /// `teamId`, `joinCode` and `email` are optional because only the
 /// authenticated admin routes serve them: `GET /team/me` answers a team with
@@ -29,7 +29,6 @@ export interface TeamModelDto {
   /// routes serve as the row holds it.
   startOpensAt?: string | null;
   startClosesAt?: string | null;
-  category: string;
   credentials: string;
   email?: string;
   pageState: PageState
