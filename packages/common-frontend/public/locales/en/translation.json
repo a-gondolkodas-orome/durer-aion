@@ -73,7 +73,7 @@
       "online": "Online round"
     },
     "subtitle": "Online round",
-    "titleOfEdition": "{{edition}}. Dürer Competition",
+    "titleOfEdition": "Dürer Competition #{{edition}}",
     "titlePlain": "Dürer Competition",
     "relayPractise": "Practising relays"
   },
