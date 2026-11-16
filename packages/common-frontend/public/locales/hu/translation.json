@@ -65,8 +65,13 @@
   "header": {
     "logout": "kilépés",
     "menu": "menü",
+    "round": {
+      "final": "Döntő",
+      "local": "Helyi forduló",
+      "online": "Online forduló"
+    },
     "subtitle": "Online forduló",
-    "title": "XX. Dürer Verseny",
+    "titleOfEdition": "{{edition}}. Dürer Verseny",
     "titlePlain": "Dürer Verseny",
     "relayPractise": "Váltók gyakorlása"
   },

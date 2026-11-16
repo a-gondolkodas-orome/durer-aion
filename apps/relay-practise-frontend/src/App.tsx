@@ -59,12 +59,7 @@ function App() {
     return t(`login.competitionType.${metadata.round}`, { num: metadata.edition, category: metadata.category });
   };
 
-  // t('header.titlePlain'), t('header.relayPractise');
-  const titles = ['header.titlePlain', 'header.relayPractise'];
-  const title = setTitle();
-  if (title !== undefined) {
-    titles.push(title);
-  }
+  const heading = { title: t('header.titlePlain'), subtitle: t('header.relayPractise') };
 
   return (
     <GameProvider
@@ -80,7 +75,8 @@ function App() {
               teamName={teamState?.teamName ?? null}
               leaveLabel={t('relay.endTable.selectOtherRound')}
               languageSwitcher
-              titles={titles}
+              heading={heading}
+              teamLabel={setTitle()}
               homeAddress='/..'
               onChooseLanguage={rememberChosenLanguage}
             />

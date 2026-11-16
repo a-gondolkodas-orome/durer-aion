@@ -54,7 +54,7 @@ export function Login() {
         lineHeight: 1.2,
         letterSpacing: '-0.01em',
       }}>
-        {t('login.beforeTitle')}{t('header.title')}{t('login.afterTitle')}
+        {t('login.beforeTitle')}{t('header.titlePlain')}{t('login.afterTitle')}
       </Stack>
       <Stack sx={{
         marginTop: '12px',
