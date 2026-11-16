@@ -6,12 +6,14 @@ import { useSnackbar } from "notistack";
 import i18next from "i18next";
 import { useAdminRepo, useClientRepo } from "../client-repo-context";
 
-export const useTeamState = (): TeamModelDto | null => {
+/// `undefined` until the first `team/me` answer, `null` for no team logged in.
+export const useTeamState = (): TeamModelDto | null | undefined => {
   return useTeamStateValue();
 };
 
 export const LoadTeamState = () => {
   const repo = useClientRepo();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
       if (typeof window === 'undefined') {
@@ -27,10 +29,14 @@ export const LoadTeamState = () => {
           })
           .catch((e: unknown) => {
             console.error("could not load the team state", e);
+            // The team stays unknown rather than logged out: a login form
+            // would tell a logged-in team its session is gone. Nothing else is
+            // on the page, so the message stays until a reload.
+            enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error', persist: true });
           });
 
       return userModel.addListener(setTeamState);
-  }, [repo]);
+  }, [repo, enqueueSnackbar]);
 
   return null;
 };
@@ -105,7 +111,7 @@ export const useLogout = () => {
 
 // Where the team stands, as far as a refused request could have moved it: the
 // page, and whether each match has started or ended.
-const stage = (team: TeamModelDto | null) =>
+const stage = (team: TeamModelDto | null | undefined) =>
   team && [team.pageState, team.relayMatch.state, team.strategyMatch.state].join();
 
 /**

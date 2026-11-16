@@ -84,7 +84,8 @@ export function Main(props: { gitCommitHash: string }) {
               or a live, playable board for one still holding a team's session
               from testing. */}
           {admin ? <Admin teamId={window.location.pathname.split('/').at(2)}/> : <>
-            {!teamState && <LoginLayout><Login /></LoginLayout>}
+            {/* `undefined`, not yet known, renders nothing: see the store */}
+            {teamState === null && <LoginLayout><Login /></LoginLayout>}
             {teamState && teamState.pageState === "DISCLAIMER" && (
               <Disclaimer teamName={teamState.teamName} competition={teamState.competition}
                 startWindow={teamState.startWindow} clockOffsetMs={teamState.clockOffsetMs}/>
