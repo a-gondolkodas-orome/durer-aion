@@ -28,13 +28,12 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
       <div className="flex gap-1 mb-2 flex-wrap">
         {slots.map((d, i) => {
           const isNextSlot = d === null && i === board.digits.length && ctx.phase === 'play';
-          const slotClass = isNextSlot
-            ? 'border-blue-400 bg-blue-50 dark:bg-blue-900 text-blue-400 dark:text-blue-300'
-            : `border-slate-600 ${d === null ? 'opacity-50' : ''}`;
           return (
             <div
               key={i}
-              className={`border-2 w-10 py-2 rounded-sm text-center text-2xl ${slotClass}`}
+              className={`border-2 w-10 py-2 rounded-sm text-center text-2xl ${isNextSlot
+                ? 'border-blue-400 bg-blue-50 dark:bg-blue-900 text-blue-400 dark:text-blue-300'
+                : `border-slate-600 ${d === null ? 'opacity-50' : ''}`}`}
             >
               {d ?? '?'}
             </div>
