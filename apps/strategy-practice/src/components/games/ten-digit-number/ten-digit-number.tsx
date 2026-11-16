@@ -5,6 +5,11 @@ import {
 import { availableDigits, moves, totalDigits, type Board } from './gameplay';
 import { randomBotStrategy, smartBotStrategy } from './bot-strategy';
 
+// The slot the next digit goes in is highlighted; empty slots after it are faded.
+const slotClass = (isNextSlot: boolean, digit: number | null) => isNextSlot
+  ? 'border-blue-400 bg-blue-50 dark:bg-blue-900 text-blue-400 dark:text-blue-300'
+  : `border-slate-600 ${digit === null ? 'opacity-50' : ''}`;
+
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
   const { t } = useTranslation('ten-digit-number');
   const slots = Array.from({ length: totalDigits }, (_, i) =>
@@ -31,9 +36,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
           return (
             <div
               key={i}
-              className={`border-2 w-10 py-2 rounded-sm text-center text-2xl ${isNextSlot
-                ? 'border-blue-400 bg-blue-50 dark:bg-blue-900 text-blue-400 dark:text-blue-300'
-                : `border-slate-600 ${d === null ? 'opacity-50' : ''}`}`}
+              className={`border-2 w-10 py-2 rounded-sm text-center text-2xl ${slotClass(isNextSlot, d)}`}
             >
               {d ?? '?'}
             </div>

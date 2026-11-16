@@ -202,9 +202,10 @@ export default defineConfig(
       }]
     }
   },
-  // No hard-coded text between JSX tags — see eslint.i18n.mjs. Every game here is in
-  // both languages, so unlike the root config's block this one reaches the games;
-  // only the suites and their helpers are left out, whose markup nobody sees.
+  // No hard-coded user-facing text — see eslint.i18n.mjs. A game here takes all its
+  // text from t(), whichever languages it ships, so unlike the root config's block
+  // this one reaches the games; only the suites and their helpers are left out,
+  // whose markup nobody sees.
   {
     files: ['src/**/*.tsx'],
     ignores: ['src/**/*.test.tsx', 'src/**/test-helpers.tsx'],

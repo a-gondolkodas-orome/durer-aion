@@ -12,8 +12,8 @@ export function Relay(props: { state: TeamModelDto }) {
   switch (props.state.relayMatch.state) {
     case "FINISHED":
     case "IN PROGRESS":
-      // Every app that renders a team's page provides both clients, so a missing
-      // one is a wiring bug: thrown for the ErrorBoundary around the page to report.
+      // Every app that renders this provides its client, so a missing one is a
+      // wiring bug: thrown for the ErrorBoundary around the page to report.
       if (!RelayClient) throw new Error('GameProvider gives no RelayClient');
       return (
         <div data-testid={testId}>

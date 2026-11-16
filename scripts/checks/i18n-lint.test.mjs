@@ -46,4 +46,13 @@ describe('hard-coded user-facing text', () => {
   ])('leaves %s', (_, jsx) => {
     expect(reports(jsx)).toBe(0);
   });
+
+  // The gaps README.md § The checks CI runs leaves to review. A plugin upgrade
+  // that closes one fails its case here, and the README line can go.
+  it.each([
+    ['an attribute on an SVG element', '<circle aria-label="Field one here" />'],
+    ['JSX passed through an attribute other than a label', '<Suspense fallback={<p>Loading now</p>} />'],
+  ])('does not see %s', (_, jsx) => {
+    expect(reports(jsx)).toBe(0);
+  });
 });
