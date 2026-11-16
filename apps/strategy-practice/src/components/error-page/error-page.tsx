@@ -1,20 +1,15 @@
+import { useTranslation } from 'react-i18next';
 import { Link, useRouteError } from 'react-router';
 
 export const ErrorPage = () => {
+  const { t } = useTranslation('overview');
   const error = useRouteError() as { status?: number } | null;
+  const notFound = !error || error?.status === 404;
 
-  if (!error || error?.status === 404) {
-    return <main className="p-2">
-      <p>Sajnáljuk, a keresett oldal nem található.</p>
-      <p>Sorry, the page you are looking for does not exist.</p>
-      <Link to="/">Vissza a főoldalra / Back to home</Link>
-    </main>;
-  }
   return (
-    <main>
-      <p>Sajnáljuk, egy váratlan hiba történt.</p>
-      <p>Sorry, an unexpected error occurred.</p>
-      <Link to='/'>Vissza a főoldalra / Back to home</Link>
+    <main className="p-2">
+      <p>{notFound ? t('errorPage.notFound') : t('errorPage.unexpected')}</p>
+      <Link to="/">{t('errorPage.backToHome')}</Link>
     </main>
   );
 };

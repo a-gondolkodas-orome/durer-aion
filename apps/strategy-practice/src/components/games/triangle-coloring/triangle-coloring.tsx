@@ -39,6 +39,7 @@ const vertices = [
 ];
 
 const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('triangle-coloring');
   const getTrianglePoints = (i: number) => {
     const v = triangles[i].v;
     const [v0, v1, v2] = [vertices[v[0]], vertices[v[1]], vertices[v[2]]];
@@ -76,7 +77,7 @@ const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
               }}
               tabIndex={isClickable(i) ? 0 : undefined}
               role={isClickable(i) ? 'button' : undefined}
-              aria-label={isClickable(i) ? `Triangle ${i + 1}` : undefined}
+              aria-label={isClickable(i) ? t('board.triangle', { number: i + 1 }) : undefined}
             ></polygon>
           ))}
         </g>

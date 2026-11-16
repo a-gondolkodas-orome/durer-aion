@@ -243,12 +243,15 @@ const PlayerNameSetup = ({ roleLabels, playerNames, setPlayerNames, onStart }: {
   );
 };
 
-const Spinner = () => (
-  <div
-    role="status" aria-label="Loading"
-    className="animate-spin h-8 w-8 border-t-blue-600 rounded-full border-4"
-  ></div>
-);
+const Spinner = () => {
+  const { t } = useTranslation('factory');
+  return (
+    <div
+      role="status" aria-label={t('loading')}
+      className="animate-spin h-8 w-8 border-t-blue-600 rounded-full border-4"
+    ></div>
+  );
+};
 
 const PlayerTurnPanel = ({ ctx }: { ctx: Ctx }) => {
   const playerName = (i: number) => ctx.resolvedPlayerNames[i];

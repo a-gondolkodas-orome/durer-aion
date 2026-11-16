@@ -1,4 +1,7 @@
 {
+  "board": {
+    "node": "Node {{number}}"
+  },
   "colour": {
     "red": "Red",
     "blue": "Blue",

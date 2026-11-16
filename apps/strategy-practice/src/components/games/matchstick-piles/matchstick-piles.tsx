@@ -25,6 +25,7 @@ const Matchstick = ({ removed }: { removed: boolean }) => (
 );
 
 const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
+  const { t } = useTranslation('matchstick-piles');
   const { value: activeHover, hoverProps } = useHoverPreview<Hover>(ctx.moveCount);
 
   const canSplit = (pileId: number, splitAfter: number) =>
@@ -67,7 +68,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   {matchId > 0 && (
                     <button
                       type="button"
-                      aria-label="split pile here"
+                      aria-label={t('board.split')}
                       disabled={!canSplit(pileId, matchId - 1)}
                       className="self-stretch w-4 flex items-center justify-center group"
                       onClick={() => moves.splitPile(board, pileId, matchId)}
@@ -85,7 +86,7 @@ const BoardClient = ({ board, ctx, moves }: BoardClientProps<Board>) => {
                   )}
                   <button
                     type="button"
-                    aria-label="remove a match from this pile"
+                    aria-label={t('board.remove')}
                     disabled={!moves.removeMatch.isAllowed(board, pileId)}
                     className={`
                       p-1 rounded-sm
