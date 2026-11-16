@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
-import { setTeamState, useTeamStateValue } from './team-state-store';
+import { forgetTeamState, setTeamState, useTeamStateValue } from './team-state-store';
 import { TeamModelDto } from '../dto/TeamStateDto';
 
 // Module state rather than per-provider state — see the note atop
@@ -19,9 +19,20 @@ const team = (id: string) => ({ id } as unknown as TeamModelDto);
 // to be flushed before the assertion.
 const set = (next: TeamModelDto | null) => act(() => setTeamState(next));
 
+// "Not known yet" and "logged out" are told apart, or a reload shows a
+// logged-in team the login form until `team/me` answers (#777).
+test('the team is unknown, not logged out, until the first answer', () => {
+  act(() => forgetTeamState());
+  const { result } = renderHook(() => useTeamStateValue());
+  expect(result.current).toBeUndefined();
+
+  set(null);
+
+  expect(result.current).toBeNull();
+});
+
 test('a subscribed component sees the new team', () => {
   const { result } = renderHook(() => useTeamStateValue());
-  expect(result.current).toBeNull();
 
   set(team('a'));
 
