@@ -178,3 +178,13 @@ describe("RelayWrapper duration", () => {
     expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toStrictEqual(expectedMinutes * 60 * 1000);
   });
 });
+
+describe("RelayWrapper's setup data", () => {
+  const judge = [{ problemText: "Hány?", answer: 12, points: 5 }];
+
+  test("holds the judge's problems in the match, and keeps them from the team", () => {
+    const G = RelayWrapper().setup?.({} as never, { durationMinutes: 40, judge });
+    expect(G?.judge).toStrictEqual(judge);
+    expect(GameRelay.playerView?.({ G, ctx: {}, playerID: "0" } as never)).toMatchObject({ judge: undefined });
+  });
+});

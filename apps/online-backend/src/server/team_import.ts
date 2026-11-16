@@ -4,8 +4,7 @@ import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH, type TeamModel } from './model';
 import { namesCompetition, validateStartWindow } from 'schemas';
-import type { CompetitionConfig, StartWindow } from 'schemas';
-import { registry } from 'problem-bank/all';
+import type { CompetitionConfig, CompetitionSource, StartWindow } from 'schemas';
 
 // The importer's columns, in the order the export writes them. A file may hold
 // them in any order: each is found by its header, whatever its case. Each row
@@ -16,13 +15,15 @@ const COLUMNS = ["Teamname", "Competition", "Email", "Other", "ID", "Login Code"
 type Column = typeof COLUMNS[number];
 const REQUIRED: readonly Column[] = ["Teamname", "Competition"];
 
-/** The registered competition a row's `Competition` cell names, by its id or
- * by edition, round and category, or the reason it names none. */
-export function competitionToImportInto(cell: string): CompetitionConfig | { refused: string } {
+/** The competition of `competitions` a row's `Competition` cell names, by its
+ * id or by edition, round and category, or the reason it names none. */
+export function competitionToImportInto(
+  cell: string, competitions: readonly CompetitionConfig[],
+): CompetitionConfig | { refused: string } {
   const text = cell.trim();
-  const byId = registry.competitions.get(text);
+  const byId = competitions.find(({ id }) => id === text);
   if (byId !== undefined) return byId;
-  const named = [...registry.competitions.values()].filter(({ metadata }) => namesCompetition(text, metadata));
+  const named = competitions.filter(({ metadata }) => namesCompetition(text, metadata));
   if (named.length === 1) return named[0];
   if (named.length > 1) {
     return { refused: `Több verseny is „${text}”: ${named.map(({ id }) => id).join(', ')}. Az azonosítóval egyértelmű.` };
@@ -137,8 +138,11 @@ function randomDigits(numDigits: number) {
 function generateLoginCode() {
   return `${randomDigits(3)}-${randomDigits(4)}-${randomDigits(3)}`;
 }
-export async function import_teams_from_tsv_locally(teams: TeamsRepository, filename: string) {
-  const { successful, existing, updated, failed, export_table, logs } = await import_teams_from_tsv(teams, filename);
+export async function import_teams_from_tsv_locally(
+  teams: TeamsRepository, filename: string, competitionSource: CompetitionSource,
+) {
+  const { successful, existing, updated, failed, export_table, logs } =
+    await import_teams_from_tsv(teams, filename, competitionSource);
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
@@ -147,7 +151,11 @@ export async function import_teams_from_tsv_locally(teams: TeamsRepository, file
   writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
 
-export async function import_teams_from_tsv(teams: TeamsRepository, filename: string) {
+export async function import_teams_from_tsv(
+  teams: TeamsRepository, filename: string, competitionSource: CompetitionSource,
+) {
+  // Read once, so every row of a file is checked against the same competitions.
+  const competitions = await competitionSource.listCompetitions();
   const logs: {
     sev: ('warn' | 'error')[];
     value: string[];
@@ -249,7 +257,7 @@ export async function import_teams_from_tsv(teams: TeamsRepository, filename: st
       onerror(`${where}: hiányzik a verseny (Competition): az azonosítója vagy a neve, például 20 online C.`);
       ok = false;
     } else {
-      into = competitionToImportInto(competitionId);
+      into = competitionToImportInto(competitionId, competitions);
       if ('refused' in into) {
         onerror(`${where}: ${into.refused}`);
         ok = false;

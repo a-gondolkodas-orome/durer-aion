@@ -7,6 +7,7 @@ import { parse } from "yaml";
 import type { TeamsRepository } from "./db";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { registry } from "problem-bank/all";
 
 // swagger.yaml is written by hand; this is what keeps its route list honest.
 // It checks which routes exist and their path parameters, not the shapes of
@@ -21,7 +22,7 @@ const spec = parse(readFileSync(join(__dirname, "..", "..", "swagger.yaml"), "ut
 
 function servedRoutes() {
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
-  configureTeamsRouter(router, {} as TeamsRepository, [], requireAdmin("unused"));
+  configureTeamsRouter(router, {} as TeamsRepository, [], requireAdmin("unused"), registry);
   return router.stack.flatMap(layer => layer.methods
     // koa-router adds HEAD to every GET
     .filter(method => method !== "HEAD")

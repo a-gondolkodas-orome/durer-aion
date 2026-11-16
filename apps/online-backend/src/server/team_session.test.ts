@@ -8,6 +8,7 @@ import type { TeamModel } from "./model";
 import { TEAM_COOKIE, TEAM_COOKIE_MAX_AGE_MS, TEAM_COOKIE_PATH, clearTeamCookie, requireTeam, setTeamCookie } from "./team_session";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { registry } from "problem-bank/all";
 
 const GUID = "8eae8669-125c-42e5-8b49-89afbac31679";
 
@@ -136,7 +137,7 @@ describe("the team routes over HTTP", () => {
     // route would fail the test through koa's own error logging below.
     app.silent = true;
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin("unused-here"));
+    configureTeamsRouter(router, teams, [], requireAdmin("unused-here"), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");

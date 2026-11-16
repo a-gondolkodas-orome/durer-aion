@@ -230,15 +230,15 @@ export interface CompetitionSource {
   listCompetitions(): Promise<CompetitionConfig[]>;
 }
 
-/// The boardgame.io game a competition's relay is registered under, the same
-/// on the server and in the client that connects to it.
-export function relayGameName(competitionId: CompetitionId): string {
-  return `relay--${competitionId}`;
-}
+/// The boardgame.io game every relay is played as, the same on the server and
+/// in the client that connects to it. One game serves every competition: what
+/// differs between them is the match's setup data (docs/ARCHITECTURE.md
+/// § *The two kinds of match*).
+export const RELAY_GAME_NAME = 'relay';
 
-/// The strategy match's, as `relayGameName`.
-export function strategyGameName(competitionId: CompetitionId): string {
-  return `strategy--${competitionId}`;
+/// The game a strategy game is played as, as `RELAY_GAME_NAME`.
+export function strategyGameName(gameId: StrategyGameId): string {
+  return `strategy--${gameId}`;
 }
 
 /// What a team is served of its competition: everything but the relay's

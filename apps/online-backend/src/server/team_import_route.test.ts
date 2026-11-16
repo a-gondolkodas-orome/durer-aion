@@ -6,6 +6,7 @@ import type { Server } from "boardgame.io";
 import { TeamsRepository } from "./db";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { registry } from "problem-bank/all";
 
 // Over HTTP, as admin_session.test.ts serves its routes: koa-body needs a real
 // multipart request.
@@ -18,7 +19,7 @@ it.each([
   // The 400 is under test, and koa logs every error it writes.
   app.silent = true;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
-  configureTeamsRouter(router, teams as TeamsRepository, [], requireAdmin("pw"));
+  configureTeamsRouter(router, teams as TeamsRepository, [], requireAdmin("pw"), registry);
   app.use(router.routes());
   const server = app.listen(0, "127.0.0.1");
   await once(server, "listening");

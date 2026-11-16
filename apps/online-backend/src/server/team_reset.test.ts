@@ -8,6 +8,7 @@ import type { TeamsRepository } from "./db";
 import { OTHER_IMPORT_MAX_LENGTH, OTHER_MAX_LENGTH, TeamModel, teamAttributes } from "./model";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { registry } from "problem-bank/all";
 
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
 const MATCH_ID = "0EKBiMgbJ5A";
@@ -63,7 +64,7 @@ describe("POST /team/admin/:teamID/reset/:game", () => {
     const running = { G: { start: new Date().toISOString(), end: "2099-01-01T00:00:00Z", points: 0 }, ctx: {} };
     app.context.db = { fetch: () => ({ state: running }) } as unknown as Server.AppCtx["db"];
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
@@ -149,7 +150,7 @@ describe("PUT /team/admin/:teamID/start-window", () => {
     const running = { G: { start: new Date().toISOString(), end: "2099-01-01T00:00:00Z", points: 0 }, ctx: {} };
     app.context.db = { fetch: () => ({ state: running }) } as unknown as Server.AppCtx["db"];
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");

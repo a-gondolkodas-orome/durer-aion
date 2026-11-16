@@ -3,6 +3,7 @@
 // the games, bots or socket transport.
 import './env';
 import { argv, exit } from 'process';
+import { registry } from 'problem-bank/all';
 import { getDb } from './server/db';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
@@ -15,7 +16,7 @@ if (filename === undefined) {
 
 const { teams } = getDb();
 
-import_teams_from_tsv_locally(teams, filename).then(() => exit(0)).catch((e: unknown) => {
+import_teams_from_tsv_locally(teams, filename, registry.competitionSource).then(() => exit(0)).catch((e: unknown) => {
   console.error('team import failed', e);
   exit(1);
 });

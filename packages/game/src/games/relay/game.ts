@@ -9,6 +9,26 @@ interface Answer {
   date: string;
 }
 
+/// One problem of a relay as the judge serves it, with its answer and what it
+/// is worth there.
+export interface RelayJudgeProblem {
+  /// The same in every language, or one per language.
+  problemText: Localizable<string>;
+  answer: number;
+  points: number;
+  url?: Localizable<string>;
+  help1?: string;
+  help2?: string;
+}
+
+/// What the server starts a relay match with: the competition's settings as
+/// they stand then, so a later change to the competition leaves the match as
+/// it began.
+export interface RelaySetupData {
+  durationMinutes: number;
+  judge: RelayJudgeProblem[];
+}
+
 export interface MyGameState {
   currentProblem: number;
   // The current problem, the same in every language or in each of its own,
@@ -31,6 +51,10 @@ export interface MyGameState {
   end: string;
   // Empty, or absent in a language, where the problem has no image.
   imageUrl: Localizable<string>;
+  // The relay's problems with their answers, for the server's judge, which
+  // reads the match's own; `playerView` keeps them from the team. Absent where
+  // the judge holds the problems itself: the dry run and the practice site.
+  judge?: RelayJudgeProblem[];
 }
 
 // The judge's moves' arguments, one tuple per move.
@@ -104,10 +128,10 @@ export function RelayWrapper(
   sendRelayFunction: (_report: RelayReport) => void = () => undefined,
   { durationMinutes = RELAY_DEFAULT_DURATION_MINUTES }: RelayOptions = {},
 ): Game<MyGameState> {
-  const durationMs = durationMinutes * 60 * 1000;
-  const GameRelay: Game<MyGameState> = {
+  const GameRelay: Game<MyGameState, Record<string, unknown>, RelaySetupData | undefined> = {
     name: "relay",
-    setup: () => {
+    setup: (_context, setupData) => {
+      const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
       return {
         currentProblem: 0,
         // The judge's firstProblem move fills in the problem fields: the game
@@ -125,8 +149,10 @@ export function RelayWrapper(
         start: new Date().toISOString(),
         end: new Date(Date.now() + durationMs).toISOString(),
         imageUrl: "",
+        ...(setupData !== undefined && { judge: setupData.judge }),
       };
     },
+    playerView: ({ G }) => ({ ...G, judge: undefined }),
     phases:
     {
       startNewGame: {

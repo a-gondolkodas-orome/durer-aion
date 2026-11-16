@@ -1,7 +1,7 @@
 import { strategyGames } from 'game';
 import type { CompetitionConfig } from 'schemas';
 import { registry } from '../all';
-import { assertValidRegistry, createRegistry, validateRegistry } from './registry';
+import { assertValidRegistry, createRegistry, validateRegistry, validatingCompetitionSource } from './registry';
 
 describe('the registry of every bank', () => {
   it('is valid', () => {
@@ -48,5 +48,32 @@ describe('createRegistry', () => {
   it('refuses an id two banks share', () => {
     const bank = { problems: { 'aaaaaaaaaa--first': { answer: 1, content: { hu: { problemText: '1?' } } } }, competitions: {} };
     expect(() => createRegistry([bank, bank])).toThrow('aaaaaaaaaa--first');
+  });
+});
+
+describe('validatingCompetitionSource', () => {
+  const competition: CompetitionConfig = {
+    id: 'bbbbbbbbbb--set',
+    languages: ['hu'],
+    relay: { durationMinutes: 60, problems: [{ problemId: 'aaaaaaaaaa--first', points: 3 }] },
+    metadata: { kind: 'other', label: { hu: 'Próba' } },
+  };
+  const withProblems = (problems: object) => {
+    const { competitionSource, problemSource } = createRegistry([{
+      problems: problems as never, competitions: { [competition.id]: competition },
+    }]);
+    return validatingCompetitionSource(competitionSource, problemSource, strategyGames);
+  };
+
+  it('hands out a valid competition as the source has it', async () => {
+    const source = withProblems({ 'aaaaaaaaaa--first': { answer: 1, content: { hu: { problemText: '1?' } } } });
+    await expect(source.getCompetition(competition.id)).resolves.toMatchObject({ id: competition.id });
+    await expect(source.getCompetition('cccccccccc--none')).resolves.toBeUndefined();
+  });
+
+  it('refuses one that refers to a problem the problem source does not have', async () => {
+    const source = withProblems({});
+    await expect(source.getCompetition(competition.id)).rejects.toThrow('aaaaaaaaaa--first) does not exist');
+    await expect(source.listCompetitions()).rejects.toThrow(competition.id);
   });
 });

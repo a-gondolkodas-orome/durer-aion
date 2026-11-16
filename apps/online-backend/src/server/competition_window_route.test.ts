@@ -4,7 +4,8 @@ import Koa from "koa";
 import Router from "@koa/router";
 import type { Server } from "boardgame.io";
 import { GameRelay } from "game";
-import { relayGameName } from "schemas";
+import { RELAY_GAME_NAME } from "schemas";
+import { registry } from "problem-bank/all";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 import { TEAM_COOKIE } from "./team_session";
@@ -31,8 +32,8 @@ beforeAll(async () => {
   app.silent = true;
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
-  configureTeamsRouter(router, database.teams, [{ ...GameRelay, name: relayGameName(COMPETITION_ID) }],
-    requireAdmin(PASSWORD));
+  configureTeamsRouter(router, database.teams, [{ ...GameRelay, name: RELAY_GAME_NAME }],
+    requireAdmin(PASSWORD), registry);
   app.use(router.routes());
   const handle = app.callback();
   server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");

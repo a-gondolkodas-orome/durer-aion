@@ -5,14 +5,14 @@ import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { GameType } from 'schemas';
+import type { Registry } from 'problem-bank';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { allowedToViewStrategy, getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
-import { registry } from 'problem-bank/all';
 import { publicTeamView } from './team_view';
-import { readStartWindowBody, withCompetitionWindows } from './start_window';
+import { readStartWindowBody, withCompetitionWindow } from './start_window';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
@@ -31,21 +31,25 @@ import { TeamModel, appendOtherNote } from './model';
  *   environment the real password comes from. Every `/team/admin` and
  *   `/game/admin` route below names it; `server/admin_session.ts` says why it
  *   hangs on the routes instead of on the prefix they share.
+ * @param sources - Where the competitions and the relays' problems are read
+ *   from, per request, so a competition the source starts returning later is
+ *   served without a restart.
  */
 export function configureTeamsRouter(
   router: Router<DefaultState, Server.AppCtx>,
   teams: TeamsRepository,
   games: AnyBgioGame[],
-  adminAuth: ReturnType<typeof requireAdmin>
+  adminAuth: ReturnType<typeof requireAdmin>,
+  { competitionSource: competitions, problemSource: problems }: Pick<Registry, 'competitionSource' | 'problemSource'>,
 ) {
   // Per router rather than per module, so its counts belong to the server it
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
 
-  // The competitions with the windows set on the admin page in force: read
-  // per request, since an organiser may change one mid-round.
-  async function competitionsNow() {
-    return withCompetitionWindows(registry.competitions, await teams.competitionWindows());
+  // The team's competition with the window set on the admin page in force:
+  // read per request, since an organiser may change one mid-round.
+  async function competitionNow(team: TeamModel) {
+    return withCompetitionWindow(await competitions.getCompetition(team.competitionId), await teams.competitionWindows());
   }
 
   // Overlapping starts can both pass `allowedToStart`; the conditional write
@@ -286,7 +290,7 @@ export function configureTeamsRouter(
    */
   router.get("/team/admin/competitions", adminAuth, async (ctx) => {
     const windows = await teams.competitionWindows();
-    ctx.body = [...registry.competitions.values()].map(({ id, metadata, startWindow }) => ({
+    ctx.body = (await competitions.listCompetitions()).map(({ id, metadata, startWindow }) => ({
       id, metadata,
       startWindow: windows.get(id) ?? startWindow ?? null,
       configStartWindow: startWindow ?? null,
@@ -303,7 +307,7 @@ export function configureTeamsRouter(
    */
   router.put("/team/admin/competitions/:competitionId/start-window", adminAuth, requireJson, koaBody(), async (ctx) => {
     const { competitionId } = ctx.params;
-    if (!registry.competitions.has(competitionId)) {
+    if (await competitions.getCompetition(competitionId) === undefined) {
       ctx.throw(404, `No competition with id ${competitionId}.`);
       return;
     }
@@ -333,7 +337,7 @@ export function configureTeamsRouter(
         ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
         return;
       }
-      ctx.body = await import_teams_from_tsv(teams, file.filepath);
+      ctx.body = await import_teams_from_tsv(teams, file.filepath, competitions);
     } finally {
       // Every field, not only `file`: formidable writes whatever is uploaded.
       const uploaded = Object.values(ctx.request.files ?? {}).flat();
@@ -383,16 +387,17 @@ export function configureTeamsRouter(
    */
   router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team), await competitionsNow());
+    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team), await competitionNow(team));
   });
 
   /**
    * Let the logged-in team start a RELAY match.
    */
   router.post<TeamState>("/team/me/relay/play", requireTeam(teams), async (ctx) => {
-    const { game, team } = await getNewGame(ctx, games, "RELAY", ctx.state.team, await competitionsNow());
+    const { game, team, setupData } =
+      await getNewGame(ctx, games, "RELAY", ctx.state.team, await competitionNow(ctx.state.team), problems);
 
-    const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
+    const body: LobbyAPI.CreatedMatch = await createGame(game, ctx, setupData);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
@@ -404,9 +409,10 @@ export function configureTeamsRouter(
    * Let the logged-in team start a STRATEGY match.
    */
   router.post<TeamState>("/team/me/strategy/play", requireTeam(teams), async (ctx) => {
-    const { game, team } = await getNewGame(ctx, games, "STRATEGY", ctx.state.team, await competitionsNow());
+    const { game, team, setupData } =
+      await getNewGame(ctx, games, "STRATEGY", ctx.state.team, await competitionNow(ctx.state.team), problems);
 
-    const body: LobbyAPI.CreatedMatch = await createGame(game, ctx);
+    const body: LobbyAPI.CreatedMatch = await createGame(game, ctx, setupData);
     await injectPlayer(ctx.db, body.matchID, { playerID: PlayerIDType.GUESSER_PLAYER, name: team.teamId, credentials: team.credentials });
     await injectBot(ctx.db, body.matchID);
 
@@ -428,7 +434,7 @@ export function configureTeamsRouter(
       ctx.throw(403, "Team is not allowed to view the strategy match.")
 
     team.set({ pageState: "STRATEGY" });
-    ctx.body = publicTeamView(team, matches);
+    ctx.body = publicTeamView(team, matches, await competitionNow(team));
   });
 
   /**
@@ -444,6 +450,6 @@ export function configureTeamsRouter(
       ctx.throw(403, "Not allowed, match in progress.")
 
     team.set({ pageState: "HOME" });
-    ctx.body = publicTeamView(team, matches, await competitionsNow());
+    ctx.body = publicTeamView(team, matches, await competitionNow(team));
   });
 }
