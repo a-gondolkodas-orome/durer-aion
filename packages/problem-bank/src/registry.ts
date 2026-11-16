@@ -82,13 +82,12 @@ export function assertValidRegistry(
 /// competition a source starts handing out after it.
 ///
 /// `getCompetition` rejects an invalid competition. `listCompetitions` leaves
-/// it out and reports it through `onInvalid`, so one bad competition does not
-/// take the admin page's list, or a whole team import, down with it.
+/// it out and logs it, so one bad competition does not take the admin page's
+/// list, or a whole team import, down with it.
 export function validatingCompetitionSource(
   competitions: CompetitionSource,
   problems: ProblemSource,
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
-  onInvalid: (error: Error) => void = error => { console.error(error.message); },
 ): CompetitionSource {
   const games = new Map(Object.entries(strategyGames));
   async function validated(competition: CompetitionConfig): Promise<CompetitionConfig> {
@@ -108,7 +107,7 @@ export function validatingCompetitionSource(
       const read = await Promise.allSettled((await competitions.listCompetitions()).map(validated));
       return read.flatMap(result => {
         if (result.status === 'fulfilled') return [result.value];
-        onInvalid(result.reason instanceof Error ? result.reason : new Error(String(result.reason)));
+        console.error(result.reason instanceof Error ? result.reason.message : result.reason);
         return [];
       });
     },

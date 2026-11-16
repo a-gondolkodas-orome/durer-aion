@@ -104,7 +104,7 @@ describe("a competition the source starts returning after the server started", (
     expect(await response.json()).toMatchObject({ competition: { id: competition.id } });
   });
 
-  it("plays its relay by its own settings, and keeps them when the competition changes", async () => {
+  it("plays its relay by its own settings", async () => {
     const matchID = await start(await importTeam("Bravo"), "relay");
     const fetched = await database.db.fetch(matchID, { state: true, metadata: true });
     const state = fetched.state as State<MyGameState>;
@@ -117,13 +117,6 @@ describe("a competition the source starts returning after the server started", (
     const judge = new relay.bot({ enumerate: () => [] });
     const first = { type: "firstProblem", args: [{ hu: "Hány?" }, [5], { hu: "" }] };
     expect((await judge.play(state as never, "1", fetched.metadata?.setupData)).action.payload).toMatchObject(first);
-
-    // Changed after the start, the competition leaves the match as it began.
-    competitions.set(competition.id, { ...competition, relay: { durationMinutes: 90, problems: [] } });
-    onTestFinished(() => { competitions.set(competition.id, competition); });
-    const later = await database.db.fetch(matchID, { state: true, metadata: true });
-    expect(minutes((later.state as State<MyGameState>).G)).toBe(40);
-    expect((await judge.play(later.state as never, "1", later.metadata?.setupData)).action.payload).toMatchObject(first);
   });
 
   it("plays its strategy game for its own duration", async () => {

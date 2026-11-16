@@ -60,14 +60,12 @@ describe('validatingCompetitionSource', () => {
   };
   const valid: CompetitionConfig = { ...competition, id: 'dddddddddd--valid', relay: undefined,
     strategy: { durationMinutes: 30, gameId: '20o-c' } };
-  const invalid: Error[] = [];
   const withProblems = (problems: object) => {
     const { competitionSource, problemSource } = createRegistry([{
       problems: problems as never, competitions: { [competition.id]: competition, [valid.id]: valid },
     }]);
-    return validatingCompetitionSource(competitionSource, problemSource, strategyGames, error => { invalid.push(error); });
+    return validatingCompetitionSource(competitionSource, problemSource, strategyGames);
   };
-  beforeEach(() => { invalid.length = 0; });
 
   it('hands out a valid competition as the source has it', async () => {
     const source = withProblems({ 'aaaaaaaaaa--first': { answer: 1, content: { hu: { problemText: '1?' } } } });
@@ -80,9 +78,11 @@ describe('validatingCompetitionSource', () => {
     await expect(source.getCompetition(competition.id)).rejects.toThrow('aaaaaaaaaa--first) does not exist');
   });
 
-  it('lists the valid competitions, and reports an invalid one rather than failing them all', async () => {
+  it('lists the valid competitions, and logs an invalid one rather than failing them all', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    onTestFinished(() => { logged.mockRestore(); });
     const source = withProblems({});
     await expect(source.listCompetitions()).resolves.toEqual([valid]);
-    expect(invalid.map(({ message }) => message)).toEqual([expect.stringContaining(competition.id)]);
+    expect(logged).toHaveBeenCalledExactlyOnceWith(expect.stringContaining(competition.id));
   });
 });
