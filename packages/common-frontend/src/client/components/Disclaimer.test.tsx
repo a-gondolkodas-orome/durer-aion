@@ -78,14 +78,14 @@ test('says nothing of advancing for a competition with no threshold, and speaks 
 });
 
 // The close is the last start; a match started then runs its full time.
-test('ends the competing time the longer match after the window closes', () => {
+test('tells when the competing time ends, and until when a match may start', () => {
   vi.useFakeTimers({ now: new Date('2026-10-20T12:00:00Z') });
   renderDisclaimer({ opensAt: '2026-10-20T15:00:00Z', closesAt: '2026-10-20T19:00:00Z' });
 
-  const end = new Intl.DateTimeFormat('hu', { hour: '2-digit', minute: '2-digit' })
-    .format(new Date('2026-10-20T20:00:00Z'));
+  const time = (at: string) => new Intl.DateTimeFormat('hu', { hour: '2-digit', minute: '2-digit' }).format(new Date(at));
+  const [end, close] = [time('2026-10-20T20:00:00Z'), time('2026-10-20T19:00:00Z')];
   expect(screen.getByText(/disclaimer\.start/)).toHaveTextContent(
-    `"until":"disclaimer.until {\\"time\\":\\"${end}\\"}"`);
+    `"until":"disclaimer.until {\\"end\\":\\"${end}\\",\\"close\\":\\"${close}\\"}"`);
 });
 
 test('names no end time without a close', () => {

@@ -37,8 +37,11 @@ export function Disclaimer(props: {
   const { competition } = props;
   const metadata = competition?.metadata;
   const online = metadata?.kind === 'competition' && metadata.round === 'online';
+  // Both ends: when the competing time is over, and the last moment to start.
   const end = competition ? competingEnd(props.startWindow, competition) : undefined;
-  const until = end === undefined ? '' : t('disclaimer.until', { time: timeOfDay(end, language) });
+  const close = props.startWindow?.closesAt;
+  const until = end === undefined || close === undefined ? ''
+    : t('disclaimer.until', { end: timeOfDay(end, language), close: timeOfDay(new Date(close), language) });
   const advancingPoints = competition?.advancingPoints;
 
   return (

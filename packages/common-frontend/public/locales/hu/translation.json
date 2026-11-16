@@ -42,7 +42,7 @@
     "progressDescriptionOnline": "Azok a csapatok, amelyek az online forduló során a megszerezhető {{maxpoints}} pontból legalább {{minpoints}} pontot elérnek, továbbjutnak a helyi fordulóba. (Fenntartjuk a jogot, hogy a ponthatárt esetleg csökkentsük, növelni biztosan nem fogjuk.) Az online fordulón szerzett pontszám nem számít bele a további eredményekbe.",
     "start": "A versenyen a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget a versenyzési időszak végéig{{until}}. A mesterséges intelligencia használata is tilos.",
     "startOnline": "Az online fordulón a csapatoknak önállóan kell dolgozniuk, más emberektől nem kérhetnek segítséget a versenyzési időszak végéig{{until}}. A mesterséges intelligencia használata is tilos.",
-    "until": " ({{time}}-ig)",
+    "until": " ({{end}}-ig; {{close}}-ig lehet belekezdeni)",
     "welcome": "Kedves <i>{{tname}}</i> csapat, üdvözlünk a versenyen!",
     "welcomeOnline": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!"
   },
