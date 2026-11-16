@@ -10,6 +10,7 @@ import { MockClientRepository } from '../mock-client-repository';
 import { forgetTeamState } from '../hooks/team-state-store';
 import { mockTeamState } from '../hooks/mock-user-hooks';
 import type { TeamModelDto } from '../dto/TeamStateDto';
+import { I18nError } from '../utils/i18n-error';
 import { Main } from './Main';
 
 // Main.test.tsx mocks the hooks away; what is under test here is the page
@@ -81,4 +82,15 @@ test('a failed team/me shows an error, not the login form', async () => {
   expect(await findByText(i18next.t('error.unexpected'))).toBeInTheDocument();
   expect(queryByTestId('loginRoot')).not.toBeInTheDocument();
   expect(consoleError).toHaveBeenCalled();
+});
+
+// Offline is something the team can fix, so it is said as such.
+test('a team/me that never reached the server says so', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  const teamMe = delayTeamState();
+  const { findByText } = renderMain();
+
+  await teamMe.fail(new I18nError('error.noConnection'));
+
+  expect(await findByText(i18next.t('error.noConnection'))).toBeInTheDocument();
 });

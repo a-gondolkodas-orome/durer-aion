@@ -33,7 +33,7 @@ export const LoadTeamState = () => {
             // The team stays unknown rather than logged out: a login form
             // would tell a logged-in team its session is gone. Nothing else is
             // on the page, so the message stays until a reload.
-            enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error', persist: true });
+            enqueueSnackbar(errorMessage(e, i18next.t), { variant: 'error', persist: true });
           });
 
       return userModel.addListener(setTeamState);
