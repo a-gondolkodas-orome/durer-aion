@@ -324,6 +324,9 @@ function MatchDetails(props: { kind: MatchKind, status: Exclude<MatchStatus, { s
     <Box component="dl" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px', margin: 0 }}>
       <Fact label="Kezdés">{formatTime(status.startAt)}</Fact>
       <Fact label="Vége">{formatTime(new Date(data.G.end))}</Fact>
+      {data.G.finishedAt && <Fact label="Befejezve" help="A csapat ekkor fejezte be a játékot, a tervezett vége előtt. A „Vége” a tervezett vége marad.">
+        {formatTime(new Date(data.G.finishedAt))}
+      </Fact>}
       {relayG && <Fact label="Aktuális feladat">{relayG.currentProblem + 1}.</Fact>}
       {strategyG && <Fact label="Próbálkozások" help="Az elkezdett éles játszmák száma, a most futót is beleértve. A táblázatban csak a befejezettek vannak, ezért játszma közben eggyel több.">
         {strategyG.numberOfTries}

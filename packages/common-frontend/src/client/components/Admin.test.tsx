@@ -11,6 +11,7 @@ import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamSta
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 import { windowTimeNow, windowTimeText } from '../utils/window-time';
+import { formatTime } from '../utils/DateFormatter';
 import { I18nError } from '../utils/i18n-error';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
@@ -228,6 +229,23 @@ test('a finished match shows no remaining time', async () => {
 
   expect(await screen.findByText('Kezdés')).toBeInTheDocument();
   expect(screen.queryByText('Hátralévő idő')).not.toBeInTheDocument();
+});
+
+// #746: a match finished early shows when it ended beside its scheduled end.
+test('a match finished early shows when it ended, as well as its scheduled end', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue({ ...gameState(7, LATER), G: { ...gameState(7, LATER).G, finishedAt: EARLIER } });
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(EARLIER), score: 7 });
+
+  expect((await screen.findByText('Befejezve')).nextElementSibling).toHaveTextContent(formatTime(new Date(EARLIER)));
+  expect(screen.getByText('Vége').nextElementSibling).toHaveTextContent(formatTime(new Date(LATER)));
+});
+
+test('a match that ran out of time shows only its scheduled end', async () => {
+  vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(7, LATER));
+  openTeamWithRelay({ state: 'FINISHED', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: new Date(LATER), score: 7 });
+
+  expect(await screen.findByText('Vége')).toBeInTheDocument();
+  expect(screen.queryByText('Befejezve')).not.toBeInTheDocument();
 });
 
 // The button did nothing at all when the request was refused.
