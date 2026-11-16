@@ -117,7 +117,7 @@ sequenceDiagram
     end
 ```
 
-The backend's `botwrapper.ts` turns a strategy function — `(state, botID) => [args, moveName]`
+The backend's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`
 — into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
 game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
 move land first. `hostedGames` (`games.ts`) lists each game beside its
@@ -138,15 +138,12 @@ into the match's state. The relay's problems and answers stay in the metadata,
 where the server's judge reads them (`socketio_botmoves.ts` hands the bot the
 match's `setupData`): no client is sent the metadata, but every client is sent
 the match's *initial* state as stored, with no `playerView` applied, when its
-board connects. A relay started under the old per-competition game names has
-no problems in its setup data and cannot be judged, so a deploy that renames
-the games is not made during a round.
+board connects.
 
 The backend reads competitions only through `CompetitionSource`, passed in by
 `server.ts`, the one module that picks where they come from; the registry is
 still validated whole at start, and a competition the source hands out is
-validated as it is read (`validatingCompetitionSource`), once per object it
-hands out. An ESLint rule keeps every other backend module off
+validated each time it is read (`validatingCompetitionSource`). An ESLint rule keeps every other backend module off
 `problem-bank/all`: only `server.ts` and the team import CLI pick the source.
 
 **A strategy match** is the game's own definition wrapped by `gameWrapper`

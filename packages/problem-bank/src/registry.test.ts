@@ -85,25 +85,4 @@ describe('validatingCompetitionSource', () => {
     await expect(source.listCompetitions()).resolves.toEqual([valid]);
     expect(invalid.map(({ message }) => message)).toEqual([expect.stringContaining(competition.id)]);
   });
-
-  it('checks a competition the source hands out again only when it is a new object', async () => {
-    let reads = 0;
-    const problemSource = {
-      getProblems: (ids: readonly string[]) => {
-        reads += 1;
-        return Promise.resolve(new Map(ids.map(id => [id, { id, answer: 1, content: { hu: { problemText: '1?' } } }])));
-      },
-    };
-    let current = competition;
-    const source = validatingCompetitionSource({
-      getCompetition: () => Promise.resolve(current),
-      listCompetitions: () => Promise.resolve([current]),
-    }, problemSource, strategyGames);
-    await source.getCompetition(competition.id);
-    await source.getCompetition(competition.id);
-    expect(reads).toBe(1);
-    current = { ...competition };
-    await source.getCompetition(competition.id);
-    expect(reads).toBe(2);
-  });
 });

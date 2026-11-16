@@ -262,8 +262,7 @@ export class SocketIOButBotMoves extends SocketIO {
     bot: MatchBot,
     matchID: string
   ): Promise<void> {
-    // The metadata too, for the setup data the relay's judge reads its
-    // problems from: it is kept there, since no client is sent it.
+    // The metadata too: the relay's judge reads its problems from the setup data.
     const { state, metadata } = await fetch(db, matchID, { state: true, metadata: true } as const);
     if (state === undefined) {
       return;

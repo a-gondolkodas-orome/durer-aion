@@ -145,7 +145,14 @@ export async function getNewGame(
   }
   const { relay, strategy, languages } = competition
     ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", "Competition " + team.competitionId + " not found");
-  if ((gameType === "RELAY" ? relay : strategy) === undefined) {
+  // The setup is read only once the start is allowed.
+  const match = gameType === "RELAY"
+    ? relay && { gameName: RELAY_GAME_NAME, setup: () => relaySetup(relay, languages, problems) }
+    : strategy && {
+      gameName: strategyGameName(strategy.gameId),
+      setup: () => Promise.resolve({ durationMinutes: strategy.durationMinutes }),
+    };
+  if (match === undefined) {
     refuse(ctx, 403, "NO_SUCH_MATCH", "The team's competition has no such match.");
   }
   const state = startWindowState(teamStartWindow(team, competition), now);
@@ -153,15 +160,10 @@ export async function getNewGame(
     if (state === "closed") refuse(ctx, 403, "COMPETITION_OVER", "The competition is over.");
     refuse(ctx, 403, "COMPETITION_NOT_STARTED", "The competition has not started yet.");
   }
-  const [gameName, setupData] = relay !== undefined && gameType === "RELAY"
-    ? [RELAY_GAME_NAME, await relaySetup(relay, languages, problems)]
-    : strategy !== undefined && gameType === "STRATEGY"
-      ? [strategyGameName(strategy.gameId), { durationMinutes: strategy.durationMinutes }]
-      : refuse(ctx, 403, "NO_SUCH_MATCH", "The team's competition has no such match.");
 
   const game: AnyBgioGame = games.find(
-    (g) => g.name === gameName
-  ) ?? refuse(ctx, 404, "GAME_NOT_FOUND", "Game " + gameName + " not found");
+    (g) => g.name === match.gameName
+  ) ?? refuse(ctx, 404, "GAME_NOT_FOUND", "Game " + match.gameName + " not found");
 
-  return { game, team, setupData };
+  return { game, team, setupData: await match.setup() };
 }

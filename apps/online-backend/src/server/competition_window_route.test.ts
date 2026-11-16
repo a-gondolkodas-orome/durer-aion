@@ -4,7 +4,6 @@ import Koa from "koa";
 import Router from "@koa/router";
 import type { Server } from "boardgame.io";
 import { GameRelay } from "game";
-import { RELAY_GAME_NAME } from "schemas";
 import { registry } from "problem-bank/all";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
@@ -32,7 +31,7 @@ beforeAll(async () => {
   app.silent = true;
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
-  configureTeamsRouter(router, database.teams, [{ ...GameRelay, name: RELAY_GAME_NAME }],
+  configureTeamsRouter(router, database.teams, [GameRelay],
     requireAdmin(PASSWORD), registry);
   app.use(router.routes());
   const handle = app.callback();

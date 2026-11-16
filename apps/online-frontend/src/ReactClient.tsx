@@ -2,7 +2,7 @@ import { GameRelay, MyGameWrappers } from "game";
 import type { StrategyGameKey } from "game";
 import { MyBoardWrapper, strategyDescriptions } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
-import { RELAY_GAME_NAME, strategyGameName } from "schemas";
+import { strategyGameName } from "schemas";
 import type { PublicCompetition } from "schemas";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +22,7 @@ const strategyClients = new Map<StrategyGameKey, OnlineClient>();
 
 function relayClient(competition: PublicCompetition): OnlineClient | null {
   if (competition.relay === undefined) return null;
-  relayOnlineClient ??= ClientFactoryRelay({ ...GameRelay, name: RELAY_GAME_NAME }, InProgressRelay, description).OnlineClient;
+  relayOnlineClient ??= ClientFactoryRelay(GameRelay, InProgressRelay, description).OnlineClient;
   return relayOnlineClient;
 }
 

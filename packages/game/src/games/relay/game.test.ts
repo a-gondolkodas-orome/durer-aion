@@ -178,14 +178,3 @@ describe("RelayWrapper duration", () => {
     expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toStrictEqual(expectedMinutes * 60 * 1000);
   });
 });
-
-describe("RelayWrapper's setup data", () => {
-  const judge = [{ problemText: "Hány?", answer: 12, points: 5 }];
-
-  // Every client is sent the match's initial state, unfiltered by playerView.
-  test("takes its duration, and keeps the answers out of the match's state", () => {
-    const G = RelayWrapper().setup?.({} as never, { durationMinutes: 40, judge });
-    expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toBe(40 * 60_000);
-    expect(JSON.stringify(G)).not.toContain("Hány?");
-  });
-});

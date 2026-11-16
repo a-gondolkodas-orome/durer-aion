@@ -4,7 +4,7 @@ import Koa from "koa";
 import Router from "@koa/router";
 import type { Server } from "boardgame.io";
 import { GameRelay, MyGameWrappers, gameWrapper } from "game";
-import { RELAY_GAME_NAME, strategyGameName } from "schemas";
+import { strategyGameName } from "schemas";
 import { registry } from "problem-bank/all";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
@@ -31,7 +31,7 @@ beforeAll(async () => {
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
   configureTeamsRouter(router, database.teams, [
-    { ...GameRelay, name: RELAY_GAME_NAME },
+    GameRelay,
     { ...gameWrapper(MyGameWrappers["20o-c"]()), name: strategyGameName("20o-c") },
   ], requireAdmin("unused-here"), registry);
   app.use(router.routes());

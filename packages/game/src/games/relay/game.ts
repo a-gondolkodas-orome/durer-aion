@@ -1,5 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { RELAY_GAME_NAME } from "schemas";
 import type { Localizable, RelayProblemResult } from "schemas";
 import { timestampMoves } from "../../common/timestamp";
 import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
@@ -21,11 +22,8 @@ export interface RelayJudgeProblem {
   help2?: string;
 }
 
-/// What the server starts a relay match with: the competition's settings as
-/// they stand then, so a later change to the competition leaves the match as
-/// it began. boardgame.io keeps it in the match's metadata, which no client is
-/// sent; the setup copies only the duration into the state, since every client
-/// is sent the match's initial state unfiltered by `playerView`.
+/// What the server starts a relay match with; only the duration may enter the
+/// state (docs/ARCHITECTURE.md § *The two kinds of match*).
 export interface RelaySetupData {
   durationMinutes: number;
   judge: RelayJudgeProblem[];
@@ -127,7 +125,7 @@ export function RelayWrapper(
   { durationMinutes = RELAY_DEFAULT_DURATION_MINUTES }: RelayOptions = {},
 ): Game<MyGameState> {
   const GameRelay: Game<MyGameState, Record<string, unknown>, RelaySetupData | undefined> = {
-    name: "relay",
+    name: RELAY_GAME_NAME,
     setup: (_context, setupData) => {
       const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
       return {
