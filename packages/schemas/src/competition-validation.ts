@@ -55,17 +55,17 @@ function isPositiveInteger(value: number) {
   return Number.isSafeInteger(value) && value > 0;
 }
 
-function validateLabel(label: LocalizedLabel, where: string): string[] {
+function validateLabel(label: LocalizedLabel, where: string, what = 'label'): string[] {
   const errors: string[] = [];
   const languages = Object.keys(label);
   if (languages.length === 0) {
-    errors.push(`${where}: the label is in no language`);
+    errors.push(`${where}: the ${what} is in no language`);
   }
   for (const language of languages) {
     if (!isLanguage(language)) {
-      errors.push(`${where}: the label is in the unknown language "${language}"`);
+      errors.push(`${where}: the ${what} is in the unknown language "${language}"`);
     } else if (label[language]?.trim() === '') {
-      errors.push(`${where}: the ${language} label is empty`);
+      errors.push(`${where}: the ${language} ${what} is empty`);
     }
   }
   return errors;
@@ -130,6 +130,14 @@ export function validateCompetition(competition: CompetitionConfig, references: 
 
   if (competition.advancingPoints !== undefined && !isPositiveInteger(competition.advancingPoints)) {
     errors.push(`${where}: the advancing points ${competition.advancingPoints} are not a positive integer`);
+  }
+
+  const { finishMessage } = competition;
+  if (finishMessage !== undefined) {
+    errors.push(...validateLabel(finishMessage, where, 'finish message'));
+    if (Object.keys(finishMessage).length > 0 && !competition.languages.some(language => finishMessage[language] !== undefined)) {
+      errors.push(`${where}: the finish message is in none of the competition's languages`);
+    }
   }
 
   const { metadata } = competition;

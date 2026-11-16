@@ -66,6 +66,20 @@ test('calls a competition finished once its one match is', () => {
   expect(screen.queryByText('chooser.finish.breakdown')).not.toBeInTheDocument();
 });
 
+test('thanks a team in the online round\'s words by default', () => {
+  renderChooser(team({ competition: relayOnly, relayMatch: finished }));
+
+  expect(screen.getByText('chooser.finish.content')).toBeInTheDocument();
+});
+
+test('says the competition\'s own finish message, in the team\'s language', () => {
+  const finishMessage = { hu: 'Köszönjük, hogy gyakoroltatok!', en: 'Thank you for practising!' };
+  renderChooser(team({ competition: { ...relayOnly, finishMessage }, relayMatch: finished }));
+
+  expect(screen.getByText('Köszönjük, hogy gyakoroltatok!')).toBeInTheDocument();
+  expect(screen.queryByText('chooser.finish.content')).not.toBeInTheDocument();
+});
+
 test('is not finished while one of two matches is left', () => {
   renderChooser(team({ relayMatch: finished }));
 

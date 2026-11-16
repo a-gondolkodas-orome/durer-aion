@@ -173,6 +173,16 @@ describe('validateCompetition', () => {
     ]);
   });
 
+  it('refuses a finish message that is empty, or in none of the competition\'s languages', () => {
+    expect(validateCompetition({ ...base, relay, finishMessage: { hu: 'Köszönjük!' } }, references)).toEqual([]);
+    expect(validateCompetition({ ...base, relay, finishMessage: { hu: ' ' } }, references)).toEqual([
+      `competition ${competition.id}: the hu finish message is empty`,
+    ]);
+    expect(validateCompetition({ ...base, relay, finishMessage: { en: 'Thank you!' } }, references)).toEqual([
+      `competition ${competition.id}: the finish message is in none of the competition's languages`,
+    ]);
+  });
+
   it('refuses an empty relay', () => {
     expect(validateCompetition({ ...base, relay: { ...relay, problems: [] } }, references)).toEqual([
       `competition ${competition.id}: the relay has no problems`,

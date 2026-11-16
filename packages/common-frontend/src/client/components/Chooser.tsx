@@ -7,6 +7,8 @@ import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { useStartWindowNote } from "../hooks/start-window";
+import { useUiLanguage } from "../hooks/ui-language";
+import { localizeLabel } from "schemas";
 
 export function Chooser(props: {
   state: TeamModelDto;
@@ -35,6 +37,9 @@ export function Chooser(props: {
     || (hasStrategy && props.state.strategyMatch.state === "NOT STARTED");
   const theme = useTheme();
   const { t } = useTranslation();
+  const language = useUiLanguage();
+  const finishMessage = competition?.finishMessage === undefined ? undefined
+    : localizeLabel(competition.finishMessage, language);
 
   return (
     <Stack
@@ -64,7 +69,7 @@ export function Chooser(props: {
           >
             {t('chooser.finish.title')}
           </p>
-          <span style={{ textAlign: "center" }}>{t('chooser.finish.content')}</span>
+          <span style={{ textAlign: "center" }}>{finishMessage ?? t('chooser.finish.content')}</span>
           {/* Larger than either round's score below, which it adds up. */}
           <Stack sx={{ alignItems: "center", gap: "4px", marginY: "16px" }}>
             <span style={{ fontSize: "20px" }}>{t('chooser.finish.final')}</span>

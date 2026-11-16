@@ -212,6 +212,11 @@ export interface CompetitionConfig {
   /// nothing of advancing. Nothing else acts on it: who advances is the
   /// organisers' call, and they may lower the threshold after the round.
   advancingPoints?: number;
+  /// What a team reads once its matches are over, in place of the online
+  /// round's thanks and its promise of results by Thursday: a round with
+  /// another results date, or a practice set with no results to publish, says
+  /// its own. Shown in another language where the team's is missing.
+  finishMessage?: LocalizedLabel;
   metadata: CompetitionMetadata;
 }
 
@@ -249,6 +254,7 @@ export interface PublicCompetition {
   };
   strategy?: StrategyConfig;
   advancingPoints?: number;
+  finishMessage?: LocalizedLabel;
   metadata: CompetitionMetadata;
 }
 
@@ -256,7 +262,7 @@ export interface PublicCompetition {
 /// field added to the config later stays private until someone decides
 /// otherwise.
 export function publicCompetition(competition: CompetitionConfig): PublicCompetition {
-  const { id, languages, relay, strategy, advancingPoints, metadata } = competition;
+  const { id, languages, relay, strategy, advancingPoints, finishMessage, metadata } = competition;
   return {
     id,
     languages,
@@ -265,6 +271,7 @@ export function publicCompetition(competition: CompetitionConfig): PublicCompeti
     }),
     ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes, gameId: strategy.gameId } }),
     ...(advancingPoints !== undefined && { advancingPoints }),
+    ...(finishMessage !== undefined && { finishMessage }),
     metadata,
   };
 }
