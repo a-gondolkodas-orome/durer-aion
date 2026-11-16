@@ -6,14 +6,16 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 import { LanguageDropdown } from './Langswitcher';
+import type { Heading } from './competition-heading';
 
 /// How wide a page gets. The strategy page is wider, as the game's rules sit
 /// beside its board.
 export const PAGE_MAX_WIDTH = 1200;
 export const STRATEGY_PAGE_MAX_WIDTH = 1320;
 
-// titles[0] and titles[1] are translation keys for the two side titles;
-// titles[2] is an optional, already-translated text shown instead of the team name
+/// `heading` is the two lines in the middle, already translated; without one,
+/// the online round's before login. `teamLabel` is shown in place of the team's
+/// name.
 /// `languageSwitcher` is for a page meant to be read in either language: the
 /// practice sites, and a team's pages in a competition held in both.
 /// `compact` is for the game pages, where the height goes to the game.
@@ -28,7 +30,8 @@ export function Header(props: {
   compact?: boolean,
   maxWidth?: number,
   languageSwitcher?: boolean,
-  titles?: string[],
+  heading?: Heading,
+  teamLabel?: string,
   homeAddress?: string,
   onChooseLanguage?: (language: string) => void
 }) {
@@ -43,11 +46,10 @@ export function Header(props: {
         enqueueSnackbar(t('error.unexpected'), { variant: 'error' });
       });
   };
-  const teamLabel = props.titles?.[2] ?? props.teamName;
+  const teamLabel = props.teamLabel ?? props.teamName;
   const leaveLabel = props.leaveLabel ?? t('header.logout');
   const LeaveIcon = props.leaveLabel ? ArrowBackRounded : Logout;
-  const title = props.titles ? t(props.titles[0]) : t('header.title');
-  const subtitle = props.titles ? t(props.titles[1]) : t('header.subtitle');
+  const { title, subtitle } = props.heading ?? { title: t('header.titlePlain'), subtitle: t('header.subtitle') };
   return (
     <Box component="header" sx={{
       backgroundColor: theme.palette.primary.main,

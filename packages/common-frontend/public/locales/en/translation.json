@@ -67,8 +67,13 @@
   "header": {
     "logout": "logout",
     "menu": "menu",
+    "round": {
+      "final": "Final",
+      "local": "Local round",
+      "online": "Online round"
+    },
     "subtitle": "Online round",
-    "title": "XX. Dürer Competition",
+    "titleOfEdition": "{{edition}}. Dürer Competition",
     "titlePlain": "Dürer Competition",
     "relayPractise": "Practising relays"
   },

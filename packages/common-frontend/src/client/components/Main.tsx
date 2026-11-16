@@ -12,7 +12,9 @@ import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
 import { ErrorBoundary } from "./ErrorBoundary";
 import i18next from "i18next";
-import { useOptionalAdminRepo } from "../client-repo-context";
+import { useClientRepo, useOptionalAdminRepo } from "../client-repo-context";
+import { useTranslation } from "react-i18next";
+import { competitionHeading } from "./competition-heading";
 import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenLanguage } from "../hooks/ui-language";
 
 export function Main(props: { gitCommitHash: string }) {
@@ -40,10 +42,18 @@ export function Main(props: { gitCommitHash: string }) {
     void i18next.changeLanguage(language);
   }, [language])
 
+  const { t } = useTranslation();
+  const heading = competitionHeading(admin ? undefined : teamState?.competition, language, t);
+  // The dry run's tab keeps its own title, which says it is a rehearsal.
+  const online = useClientRepo().version === "ONLINE";
+  useEffect(() => {
+    if (online) document.title = heading.title;
+  }, [online, heading.title]);
+
   return (
     <Layout>
       <LoadTeamState />
-      <Header teamName={teamState?.teamName ?? null}
+      <Header teamName={teamState?.teamName ?? null} heading={heading}
         compact={teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY"} maxWidth={maxWidth}
         languageSwitcher={languages !== undefined && languages.length > 1} onChooseLanguage={chooseLanguage}/>
       {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
