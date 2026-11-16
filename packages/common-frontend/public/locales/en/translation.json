@@ -47,7 +47,29 @@
     "welcomeOnline": "Dear Team <i>{{tname}}</i>, welcome to the online round!"
   },
   "error": {
-    "unexpected": "An unexpected error occurred"
+    "competitionNotFound": "No such competition.",
+    "competitionNotStarted": "The competition hasn't started yet.",
+    "competitionOver": "It is too late to start the competition.",
+    "fileTooLarge": "The file is too large.",
+    "gameNotFound": "This game is not on the server.",
+    "importMultipleFiles": "Only one file can be imported at a time.",
+    "importNoFile": "No file was uploaded.",
+    "importNotTsv": "Only .tsv files can be imported.",
+    "importTimedOut": "The import took too long. Refresh and check which teams were added before trying again.",
+    "invalidStartWindow": "Invalid start window: the start is required, and every time needs a time zone.",
+    "matchFinished": "A finished match can no longer be changed.",
+    "matchInProgress": "You can't go back to the home page while a round is running.",
+    "matchNotFound": "No such match.",
+    "missingTeamId": "The ID of team {{teamName}} is missing.",
+    "noConnection": "Couldn't reach the server. Check your internet connection and try again.",
+    "noSuchMatch": "Your competition has no such round.",
+    "notLoggedIn": "Your session has expired. Please log in again.",
+    "staleMatchId": "This is no longer the team's current match. Refresh and try again.",
+    "startNotAllowed": "This round can't be started now.",
+    "teamNotFound": "No such team.",
+    "timedOut": "The server didn't answer in time. Please try again.",
+    "unexpected": "An unexpected error occurred",
+    "viewNotAllowed": "The strategy game can't be viewed now."
   },
   "general": {
     "backHome": "Back to the home page",

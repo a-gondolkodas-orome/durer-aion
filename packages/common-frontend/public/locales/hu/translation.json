@@ -47,7 +47,29 @@
     "welcomeOnline": "Kedves <i>{{tname}}</i> csapat, üdvözlünk az online fordulón!"
   },
   "error": {
-    "unexpected": "Váratlan hiba történt"
+    "competitionNotFound": "Nincs ilyen verseny.",
+    "competitionNotStarted": "A verseny még nem kezdődött el.",
+    "competitionOver": "A versenybe már nem lehet belekezdeni.",
+    "fileTooLarge": "A fájl túl nagy.",
+    "gameNotFound": "Ez a játék nincs a szerveren.",
+    "importMultipleFiles": "Egyszerre csak egy fájlt lehet importálni.",
+    "importNoFile": "Nem érkezett fájl.",
+    "importNotTsv": "Csak .tsv kiterjesztésű fájlt lehet importálni.",
+    "importTimedOut": "Az importálás túl sokáig tartott. Frissíts, és nézd meg, mely csapatok kerültek be, mielőtt újra próbálod.",
+    "invalidStartWindow": "Hibás időablak: a kezdet kötelező, és minden időpont mellé időzóna kell.",
+    "matchFinished": "Lejárt játékot már nem lehet módosítani.",
+    "matchInProgress": "Amíg egy forduló tart, nem lehet visszamenni a kezdőlapra.",
+    "matchNotFound": "Nincs ilyen játék.",
+    "missingTeamId": "A(z) {{teamName}} csapat azonosítója hiányzik.",
+    "noConnection": "Nem sikerült elérni a szervert. Nézd meg, van-e internetkapcsolat, és próbáld újra.",
+    "noSuchMatch": "Ehhez a versenyhez nem tartozik ilyen forduló.",
+    "notLoggedIn": "Lejárt a belépés, lépj be újra.",
+    "staleMatchId": "Ez már nem a csapat aktuális játéka. Frissíts, és próbáld újra.",
+    "startNotAllowed": "Ezt a fordulót most nem lehet elkezdeni.",
+    "teamNotFound": "Nincs ilyen csapat.",
+    "timedOut": "A szerver nem válaszolt időben. Próbáld újra.",
+    "unexpected": "Váratlan hiba történt",
+    "viewNotAllowed": "A stratégiás játékot most nem lehet megnézni."
   },
   "general": {
     "backHome": "Vissza a kezdőlapra",

@@ -6,6 +6,7 @@
 export * from './src/client/utils/storage-keys';
 export * from './src/client/utils/stored-session';
 export * from './src/client/utils/usage-report';
+export * from './src/client/utils/i18n-error';
 export * from './src/client/dto/TeamStateDto';
 export * from './src/client/api-repository-interface';
 export * from './src/common/local-with-bots';

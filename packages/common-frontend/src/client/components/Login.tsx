@@ -26,10 +26,12 @@ const unwrapDefault = (mod: unknown): unknown => {
 const MaskedInput = unwrapDefault(reactTextMask) as typeof reactTextMask.default;
 import { useTranslation } from 'react-i18next';
 import { useId } from 'react';
+import { useErrorMessage } from '../utils/error-message';
 
 const idMask = [/\d/, /\d/,  /\d/, "-", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/ ];
 
 export function Login() {
+  const errorMessage = useErrorMessage();
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const login = useLogin();
@@ -72,9 +74,7 @@ export function Login() {
               return;
             }
             login(values.joinCode).catch((err: unknown) => {
-              // A rejection that is not an Error has no `message`, and the snackbar
-              // then shows an empty box where the reason should be.
-              enqueueSnackbar(err instanceof Error ? err.message : t('error.unexpected'), { variant: 'error' });
+              enqueueSnackbar(errorMessage(err), { variant: 'error' });
             });
           }}>
           {/* Wrapped, the button goes under the field at the field's width;

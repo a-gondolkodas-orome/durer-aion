@@ -92,6 +92,7 @@ describe("rateLimit", () => {
     await limit(ctx, route);
 
     expect(ctx.status).toBe(429);
+    expect(ctx.body).toMatchObject({ code: "TOO_MANY_ATTEMPTS" });
     expect(route).not.toHaveBeenCalled();
     expect(ctx.set).toHaveBeenCalledWith("Retry-After", "45");
   });

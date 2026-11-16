@@ -118,7 +118,7 @@ describe("getNewGame", () => {
 
   it("refuses with 403 a match the team's competition does not have", async () => {
     await expect(getNewGame(appCtx({ db: {} }), games, "STRATEGY", team({ competitionId: relayOnly.id }), competitions))
-      .rejects.toMatchObject({ status: 403 });
+      .rejects.toMatchObject({ status: 403, code: "NO_SUCH_MATCH" });
   });
 
   describe("in a competition with a start window", () => {
@@ -137,19 +137,19 @@ describe("getNewGame", () => {
 
     it("refuses with 403 a start before the window opens", async () => {
       await expect(start("2026-10-20T12:59:00Z"))
-        .rejects.toMatchObject({ status: 403, message: "The competition has not started yet." });
+        .rejects.toMatchObject({ status: 403, code: "COMPETITION_NOT_STARTED" });
     });
 
     it("refuses with 403 a start after the window closes", async () => {
       await expect(start("2026-10-20T19:30:00Z"))
-        .rejects.toMatchObject({ status: 403, message: "The competition is over." });
+        .rejects.toMatchObject({ status: 403, code: "COMPETITION_OVER" });
     });
 
     // A team writing the round the day after.
     it("holds a team with a window of its own to that one instead", async () => {
       const late = { startOpensAt: "2026-10-21T15:00:00+02:00", startClosesAt: "2026-10-21T21:30:00+02:00" };
       await expect(start("2026-10-20T13:00:00Z", late))
-        .rejects.toMatchObject({ status: 403, message: "The competition has not started yet." });
+        .rejects.toMatchObject({ status: 403, code: "COMPETITION_NOT_STARTED" });
       await expect(start("2026-10-21T13:00:00Z", late)).resolves.toBeDefined();
     });
 

@@ -9,6 +9,7 @@ import { useRefreshTeamState } from "../hooks/user-hooks";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { RELAY_MAX_TRIES } from "game";
+import { useErrorMessage } from '../utils/error-message';
 
 function sanitizeValue(value: string) {
   const regex = /^([1-9]*[0-9]*)$/;
@@ -32,6 +33,7 @@ export interface MyProps {
 export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) => {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
+  const errorMessage = useErrorMessage();
   const refreshState = useRefreshTeamState();
   // The form below remounts on each new attempt. Its input is focused only on
   // the attempt that follows a guess sent from this screen: a teammate's guess
@@ -52,7 +54,7 @@ export const ExerciseForm: React.FunctionComponent<MyProps> = (props: MyProps) =
       await props.onSubmit(result);
     } catch (e: unknown) {
       console.error(e);
-      enqueueSnackbar(e instanceof Error ? e.message : t('error.unexpected'), { variant: 'error' });
+      enqueueSnackbar(errorMessage(e), { variant: 'error' });
       return;
     }
     void refreshState();

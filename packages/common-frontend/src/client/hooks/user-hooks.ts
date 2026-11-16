@@ -3,8 +3,9 @@ import { currentTeamState, setTeamState, useTeamStateValue } from "./team-state-
 import { TeamModelDto } from "../dto/TeamStateDto";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
-import i18next from "i18next";
 import { useAdminRepo, useClientRepo } from "../client-repo-context";
+import { errorMessage } from "../utils/i18n-error";
+import i18next from "i18next";
 
 /// `undefined` until the first `team/me` answer, `null` for no team logged in.
 export const useTeamState = (): TeamModelDto | null | undefined => {
@@ -32,7 +33,7 @@ export const LoadTeamState = () => {
             // The team stays unknown rather than logged out: a login form
             // would tell a logged-in team its session is gone. Nothing else is
             // on the page, so the message stays until a reload.
-            enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error', persist: true });
+            enqueueSnackbar(errorMessage(e, i18next.t), { variant: 'error', persist: true });
           });
 
       return userModel.addListener(setTeamState);
@@ -119,8 +120,9 @@ const stage = (team: TeamModelDto | null | undefined) =>
  * it now stands — refused or not, and never by reloading the page (#112). A
  * refusal is often its own answer: another device started the match first, or
  * the session ended, and the fetched state shows that. Only a refusal that
- * leaves the team where it was, or a fetch that fails as well, is reported, and
- * then the page stays as it is, for the team to try again.
+ * leaves the team where it was, or a fetch that fails as well, is reported —
+ * with the server's reason, such as a start window not yet open — and then the
+ * page stays as it is, for the team to try again.
  */
 const useRequestThenRefetch = (request: (userModel: UserModel) => Promise<void>) => {
   const repo = useClientRepo();
@@ -128,24 +130,22 @@ const useRequestThenRefetch = (request: (userModel: UserModel) => Promise<void>)
   return async () => {
     const userModel = new UserModel(repo);
     const before = stage(currentTeamState());
-    let refused = false;
+    let refusal: { reason: unknown } | null = null;
     try {
       await request(userModel);
-    } catch {
-      // Why it was refused is nothing the team can act on; where it left them,
-      // fetched next, is.
-      refused = true;
+    } catch (e: unknown) {
+      refusal = { reason: e };
     }
     let state: TeamModelDto | null;
     try {
       state = await userModel.getTeamState();
-    } catch {
-      enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error' });
+    } catch (e: unknown) {
+      enqueueSnackbar(errorMessage(e, i18next.t), { variant: 'error' });
       return;
     }
     setTeamState(state);
-    if (refused && stage(state) === before) {
-      enqueueSnackbar(i18next.t('error.unexpected'), { variant: 'error' });
+    if (refusal && stage(state) === before) {
+      enqueueSnackbar(errorMessage(refusal.reason, i18next.t), { variant: 'error' });
     }
   };
 };

@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { SnackbarProvider } from 'notistack';
 import { ExerciseForm } from './ExerciseForm';
+import { I18nError } from '../utils/i18n-error';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -80,13 +81,13 @@ test('focuses the input on the attempt after a guess from this screen', async ()
 // Regression for "throws": a `.catch` chained onto the handler's promise let
 // a handler that threw escape the form unreported.
 test.each<[string, () => Promise<void>]>([
-  ['rejects', () => Promise.reject(new Error('failed'))],
-  ['throws', () => { throw new Error('failed'); }],
+  ['rejects', () => Promise.reject(new I18nError('error.noConnection'))],
+  ['throws', () => { throw new I18nError('error.noConnection'); }],
 ])('reports a handler that %s', async (_, handler) => {
   const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
   renderForm(false, vi.fn(handler));
   await sendGuess();
-  expect(await screen.findByText('failed')).toBeInTheDocument();
+  expect(await screen.findByText('error.noConnection')).toBeInTheDocument();
   expect(logged).toHaveBeenCalledOnce();
   expect(refreshState).not.toHaveBeenCalled();
 });
