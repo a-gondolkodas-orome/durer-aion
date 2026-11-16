@@ -144,6 +144,14 @@ export function configureTeamsRouter(
       refuse(ctx, 409, "MATCH_FINISHED", 'Restarting an already finished match is not supported right now.');
     }
 
+    // Before the state is written, so a match no hosted game plays (one
+    // stored under a game name the server no longer hosts) is refused
+    // unchanged, and a retry does not add the minutes twice.
+    const game = games.find(g => g.name === metadata.gameName);
+    if (!game) {
+      refuse(ctx, 404, "GAME_NOT_FOUND", `Match found, but game ${metadata.gameName} was not found.`);
+    }
+
     const new_state = {
       ...state,
       _stateID: state._stateID + 1
@@ -155,11 +163,6 @@ export function configureTeamsRouter(
     new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
     await ctx.db.setState(matchID, new_state);
-
-    const game = games.find(g => g.name === metadata.gameName);
-    if (!game) {
-      refuse(ctx, 404, "GAME_NOT_FOUND", `Match found, but game ${metadata.gameName} was not found.`);
-    }
 
     /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
     This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
