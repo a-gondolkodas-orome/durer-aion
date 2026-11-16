@@ -76,7 +76,7 @@ export const BoardClient = ({ board, ctx, setTurnState, moves }: BoardClientProp
               onKeyUp={(event) => { if (event.key === 'Enter') handleClick(node); }}
               tabIndex={clickable ? 0 : undefined}
               role={clickable ? 'button' : undefined}
-              aria-label={clickable ? t('board.field', { number: node + 1, discs: board[node] }) : undefined}
+              aria-label={clickable ? t('board.field', { number: node + 1, count: board[node] }) : undefined}
               className={clickable ? 'cursor-pointer' : ''}
             >
               <circle

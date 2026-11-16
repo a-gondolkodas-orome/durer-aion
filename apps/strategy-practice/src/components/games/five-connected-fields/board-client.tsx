@@ -43,7 +43,7 @@ export const BoardClient = ({ board, moves }: BoardClientProps<Board>) => {
             }}
             tabIndex={isClickable(node) ? 0 : undefined}
             role={isClickable(node) ? 'button' : undefined}
-            aria-label={isClickable(node) ? t('board.field', { number: node + 1, coins: board[node] }) : undefined}
+            aria-label={isClickable(node) ? t('board.field', { number: node + 1, count: board[node] }) : undefined}
             className={isClickable(node) ? 'cursor-pointer' : ''}
           >
             <circle
