@@ -7,10 +7,16 @@ import { RELAY_GAME_NAME, strategyGameName } from 'schemas';
 import type { Language, ProblemSource, RelayConfig } from 'schemas';
 import botWrapper from './botwrapper';
 
-/** The relay's judge, reading the problems of the match it plays. */
-function relayJudge(state: State<MyGameState>, botID: string) {
-  const { judge } = state.G;
-  if (judge === undefined) throw new Error('A relay match was set up without its problems');
+/** The relay's judge, reading the problems of the match it plays from the
+ *  match's setup data, which no client is sent. A relay started before the
+ *  problems moved there (one game per competition, #797) has none, and cannot
+ *  be judged. */
+function relayJudge(state: State<MyGameState>, botID: string, setupData: unknown) {
+  const judge = (setupData as Partial<RelaySetupData> | undefined)?.judge;
+  if (judge === undefined) {
+    throw new Error('This relay match has no problems in its setup data: it was started before the server '
+      + 'hosted one relay game for every competition, and cannot be judged.');
+  }
   return relayStrategy(judge)(state, botID);
 }
 

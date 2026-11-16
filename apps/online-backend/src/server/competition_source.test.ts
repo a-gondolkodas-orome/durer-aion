@@ -6,6 +6,8 @@ import { join } from "node:path";
 import Koa from "koa";
 import Router from "@koa/router";
 import type { Server, State } from "boardgame.io";
+import { getFilterPlayerView } from "boardgame.io/internal";
+import { Master } from "boardgame.io/master";
 import { strategyGames } from "game";
 import type { MyGameState } from "game";
 import { validatingCompetitionSource } from "problem-bank";
@@ -21,7 +23,7 @@ import { startTestDatabase } from "./test_database";
 // it is played as are hosted for every competition, so nothing is built for
 // it when the server starts.
 
-const problem: Problem = { id: "pppppppppp--late", answer: 12, content: { hu: { problemText: "Hány?" } } };
+const problem: Problem = { id: "pppppppppp--late", answer: 424242, content: { hu: { problemText: "Hány?" } } };
 const competition: CompetitionConfig = {
   id: "llllllllll--late",
   languages: ["hu"],
@@ -67,42 +69,89 @@ afterAll(async () => {
   vi.unstubAllEnvs();
 });
 
-async function importTeam(): Promise<string> {
+// Each test imports a team of its own: a team plays one match at a time.
+async function importTeam(name: string): Promise<string> {
   const file = join(mkdtempSync(join(tmpdir(), "teams-")), "teams.tsv");
-  writeFileSync(file, `Teamname\tCompetition\nAlpha\t${competition.id}\n`);
+  writeFileSync(file, `Teamname\tCompetition\n${name}\t${competition.id}\n`);
   const { successful } = await import_teams_from_tsv(database.teams, file, source);
   expect(successful).toBe(1);
-  const [team] = (await database.teams.listTeams()) ?? [];
+  const team = (await database.teams.listTeams())?.find(({ teamName }) => teamName === name);
+  if (team === undefined) throw new Error(`${name} was not imported`);
   await team.update({ pageState: "HOME" });
   return team.teamId;
 }
 
-async function startRelay(teamId: string): Promise<string> {
-  const response = await fetch(`http://127.0.0.1:${port}/team/me/relay/play`, {
-    method: "POST",
-    headers: { cookie: `${TEAM_COOKIE}=${teamId}` },
-  });
+async function asTeam(teamId: string, method: "GET" | "POST", path: string) {
+  return fetch(`http://127.0.0.1:${port}${path}`, { method, headers: { cookie: `${TEAM_COOKIE}=${teamId}` } });
+}
+
+async function start(teamId: string, match: "relay" | "strategy"): Promise<string> {
+  const response = await asTeam(teamId, "POST", `/team/me/${match}/play`);
   expect(response.status).toBe(200);
   return ((await response.json()) as { matchID: string }).matchID;
 }
 
-it("imports into and plays a competition the source starts returning after the server started", async () => {
+const minutes = ({ start, end }: { start: string, end: string }) =>
+  (new Date(end).getTime() - new Date(start).getTime()) / 60_000;
+
+describe("a competition the source starts returning after the server started", () => {
+  beforeAll(() => { competitions.set(competition.id, competition); });
+  afterAll(() => { competitions.clear(); });
+
+  it("is served to its team", async () => {
+    const response = await asTeam(await importTeam("Alpha"), "GET", "/team/me");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ competition: { id: competition.id } });
+  });
+
+  it("plays its relay by its own settings, and keeps them when the competition changes", async () => {
+    const matchID = await start(await importTeam("Bravo"), "relay");
+    const fetched = await database.db.fetch(matchID, { state: true, metadata: true });
+    const state = fetched.state as State<MyGameState>;
+    expect(minutes(state.G)).toBe(40);
+
+    // The judge serves the match's first problem, as the transport has it do:
+    // with the setup data from the match's metadata.
+    const relay = hosted.find(({ game }) => game.name === "relay");
+    if (relay === undefined) throw new Error("no relay game is hosted");
+    const judge = new relay.bot({ enumerate: () => [] });
+    const first = { type: "firstProblem", args: [{ hu: "Hány?" }, [5], { hu: "" }] };
+    expect((await judge.play(state as never, "1", fetched.metadata?.setupData)).action.payload).toMatchObject(first);
+
+    // Changed after the start, the competition leaves the match as it began.
+    competitions.set(competition.id, { ...competition, relay: { durationMinutes: 90, problems: [] } });
+    onTestFinished(() => { competitions.set(competition.id, competition); });
+    const later = await database.db.fetch(matchID, { state: true, metadata: true });
+    expect(minutes((later.state as State<MyGameState>).G)).toBe(40);
+    expect((await judge.play(later.state as never, "1", later.metadata?.setupData)).action.payload).toMatchObject(first);
+  });
+
+  it("plays its strategy game for its own duration", async () => {
+    const matchID = await start(await importTeam("Charlie"), "strategy");
+    const { state, metadata } = await database.db.fetch(matchID, { state: true, metadata: true });
+    expect(metadata?.gameName).toBe("strategy--20o-c");
+    expect(minutes(state?.G as { start: string, end: string })).toBe(25);
+  });
+});
+
+// boardgame.io sends a client the match's initial state as it is stored, with
+// no playerView applied, when its board connects (`Master.onSync`). So the
+// relay's answers must not be anywhere in the state.
+it("sends a team that connects to its relay none of the answers", async () => {
   competitions.set(competition.id, competition);
-  const matchID = await startRelay(await importTeam());
-
-  const state = (await database.db.fetch(matchID, { state: true })).state as State<MyGameState>;
-  const { G } = state;
-  expect(new Date(G.end).getTime() - new Date(G.start).getTime()).toBe(40 * 60_000);
-
-  // The judge serves the match's first problem.
-  const relay = hosted.find(({ game }) => game.name === "relay");
+  onTestFinished(() => { competitions.clear(); });
+  const teamId = await importTeam("Delta");
+  const matchID = await start(teamId, "relay");
+  const relay = hosted.find(({ game }) => game.name === "relay")?.game;
   if (relay === undefined) throw new Error("no relay game is hosted");
-  const judge = new relay.bot({ enumerate: () => [] });
-  const { action } = await judge.play(state as never, "1");
-  expect(action.payload).toMatchObject({ type: "firstProblem", args: [{ hu: "Hány?" }, [5], { hu: "" }] });
 
-  // Changed after the start, the competition leaves the match as it began.
-  competitions.set(competition.id, { ...competition, relay: { durationMinutes: 90, problems: [] } });
-  const { state: later } = await database.db.fetch(matchID, { state: true });
-  expect((await judge.play(later as never, "1")).action.payload).toMatchObject({ args: [{ hu: "Hány?" }, [5], { hu: "" }] });
+  const sent: unknown[] = [];
+  const filter = getFilterPlayerView(relay);
+  const master = new Master(relay, database.db, {
+    send: ({ playerID, ...data }) => { sent.push(filter(playerID, data)); },
+    sendAll: () => undefined,
+  });
+  await master.onSync(matchID, "0", teamId, 2);
+  expect(sent).toHaveLength(1);
+  expect(JSON.stringify(sent)).not.toContain(String(problem.answer));
 });

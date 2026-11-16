@@ -23,7 +23,9 @@ export interface RelayJudgeProblem {
 
 /// What the server starts a relay match with: the competition's settings as
 /// they stand then, so a later change to the competition leaves the match as
-/// it began.
+/// it began. boardgame.io keeps it in the match's metadata, which no client is
+/// sent; the setup copies only the duration into the state, since every client
+/// is sent the match's initial state unfiltered by `playerView`.
 export interface RelaySetupData {
   durationMinutes: number;
   judge: RelayJudgeProblem[];
@@ -51,10 +53,6 @@ export interface MyGameState {
   end: string;
   // Empty, or absent in a language, where the problem has no image.
   imageUrl: Localizable<string>;
-  // The relay's problems with their answers, for the server's judge, which
-  // reads the match's own; `playerView` keeps them from the team. Absent where
-  // the judge holds the problems itself: the dry run and the practice site.
-  judge?: RelayJudgeProblem[];
 }
 
 // The judge's moves' arguments, one tuple per move.
@@ -149,10 +147,8 @@ export function RelayWrapper(
         start: new Date().toISOString(),
         end: new Date(Date.now() + durationMs).toISOString(),
         imageUrl: "",
-        ...(setupData !== undefined && { judge: setupData.judge }),
       };
     },
-    playerView: ({ G }) => ({ ...G, judge: undefined }),
     phases:
     {
       startNewGame: {

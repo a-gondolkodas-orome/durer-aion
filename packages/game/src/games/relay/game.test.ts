@@ -182,9 +182,10 @@ describe("RelayWrapper duration", () => {
 describe("RelayWrapper's setup data", () => {
   const judge = [{ problemText: "Hány?", answer: 12, points: 5 }];
 
-  test("holds the judge's problems in the match, and keeps them from the team", () => {
+  // Every client is sent the match's initial state, unfiltered by playerView.
+  test("takes its duration, and keeps the answers out of the match's state", () => {
     const G = RelayWrapper().setup?.({} as never, { durationMinutes: 40, judge });
-    expect(G?.judge).toStrictEqual(judge);
-    expect(GameRelay.playerView?.({ G, ctx: {}, playerID: "0" } as never)).toMatchObject({ judge: undefined });
+    expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toBe(40 * 60_000);
+    expect(JSON.stringify(G)).not.toContain("Hány?");
   });
 });

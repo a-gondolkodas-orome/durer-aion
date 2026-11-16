@@ -10,6 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
+import type { MatchBot } from "./botwrapper";
 import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.
@@ -110,10 +111,10 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
-  bots: Record<string, Bot>;
+  bots: Record<string, MatchBot>;
   constructor(
     socketOpts: SocketOpts,
-    bots: Record<string, Bot>,
+    bots: Record<string, MatchBot>,
   ) {
     super({ ...socketOpts });
     this.bots = bots;
@@ -230,7 +231,7 @@ export class SocketIOButBotMoves extends SocketIO {
   private async onPlayerUpdate(
     context: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    bot: Bot,
+    bot: MatchBot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
     // Typed as boardgame.io's action, but it is whatever the client sent.
@@ -258,10 +259,12 @@ export class SocketIOButBotMoves extends SocketIO {
   private async playBotTurn(
     { db, auth }: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    bot: Bot,
+    bot: MatchBot,
     matchID: string
   ): Promise<void> {
-    const { state } = await fetch(db, matchID, { state: true } as const);
+    // The metadata too, for the setup data the relay's judge reads its
+    // problems from: it is kept there, since no client is sent it.
+    const { state, metadata } = await fetch(db, matchID, { state: true, metadata: true } as const);
     if (state === undefined) {
       return;
     }
@@ -281,7 +284,7 @@ export class SocketIOButBotMoves extends SocketIO {
     if (state.ctx.phase !== "play" && state.ctx.phase !== "startNewGame") {
       return;
     }
-    const botAction = await bot.play(state, botPlayer);
+    const botAction = await bot.play(state, botPlayer, metadata?.setupData);
 
     const master = new Master(
       game,

@@ -131,17 +131,23 @@ its games when the server is constructed, so a game per competition would make
 a competition added later — from a database, say — unplayable until a
 restart. What a competition decides goes into the match's setup data when a
 team starts it: the duration, and for a relay its problems with their answers
-and points, read through `ProblemSource`. The setup copies them into the
-match's state, so a match keeps the settings it started with whatever happens
-to the competition later. The relay's problems sit in `G.judge`, which the
-relay's `playerView` keeps from the team; the server's judge reads them from
-there. Renaming a game strands the matches stored under the old name, so a
-deploy that does is not made during a round.
+and points, read through `ProblemSource`. boardgame.io stores the setup
+data in the match's metadata, so a match keeps the settings it started with
+whatever happens to the competition later. The setup copies only the duration
+into the match's state. The relay's problems and answers stay in the metadata,
+where the server's judge reads them (`socketio_botmoves.ts` hands the bot the
+match's `setupData`): no client is sent the metadata, but every client is sent
+the match's *initial* state as stored, with no `playerView` applied, when its
+board connects. A relay started under the old per-competition game names has
+no problems in its setup data and cannot be judged, so a deploy that renames
+the games is not made during a round.
 
 The backend reads competitions only through `CompetitionSource`, passed in by
 `server.ts`, the one module that picks where they come from; the registry is
 still validated whole at start, and a competition the source hands out is
-validated as it is read (`validatingCompetitionSource`).
+validated as it is read (`validatingCompetitionSource`), once per object it
+hands out. An ESLint rule keeps every other backend module off
+`problem-bank/all`: only `server.ts` and the team import CLI pick the source.
 
 **A strategy match** is the game's own definition wrapped by `gameWrapper`
 (`gamewrapper.ts`), which owns the clock (30 minutes), the score and the phases:
