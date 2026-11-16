@@ -207,6 +207,11 @@ export interface CompetitionConfig {
   /// At least one of the two.
   relay?: RelayConfig;
   strategy?: StrategyConfig;
+  /// The points, of the relay and the strategy game together, that take a
+  /// team to the next round. The rules page states it; without one it says
+  /// nothing of advancing. Nothing else acts on it: who advances is the
+  /// organisers' call, and they may lower the threshold after the round.
+  advancingPoints?: number;
   metadata: CompetitionMetadata;
 }
 
@@ -243,6 +248,7 @@ export interface PublicCompetition {
     problemPoints: number[];
   };
   strategy?: StrategyConfig;
+  advancingPoints?: number;
   metadata: CompetitionMetadata;
 }
 
@@ -250,7 +256,7 @@ export interface PublicCompetition {
 /// field added to the config later stays private until someone decides
 /// otherwise.
 export function publicCompetition(competition: CompetitionConfig): PublicCompetition {
-  const { id, languages, relay, strategy, metadata } = competition;
+  const { id, languages, relay, strategy, advancingPoints, metadata } = competition;
   return {
     id,
     languages,
@@ -258,6 +264,7 @@ export function publicCompetition(competition: CompetitionConfig): PublicCompeti
       relay: { durationMinutes: relay.durationMinutes, problemPoints: relay.problems.map(problem => problem.points) },
     }),
     ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes, gameId: strategy.gameId } }),
+    ...(advancingPoints !== undefined && { advancingPoints }),
     metadata,
   };
 }

@@ -3,11 +3,15 @@ import { render, screen } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import type { StartWindow } from 'schemas';
+import type { PublicCompetition, StartWindow } from 'schemas';
 import { Disclaimer } from './Disclaimer';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'hu' } }),
+  // The options are shown beside the key, so a test sees what was filled in.
+  useTranslation: () => ({
+    t: (key: string, options?: object) => options ? `${key} ${JSON.stringify(options)}` : key,
+    i18n: { language: 'hu' },
+  }),
   Trans: (props: { i18nKey: string }) => props.i18nKey,
 }));
 vi.mock('../client-repo-context', () => ({
@@ -17,9 +21,25 @@ vi.mock('../hooks/user-hooks', () => ({
   useToHome: () => () => Promise.resolve(),
 }));
 
-const renderDisclaimer = (startWindow?: StartWindow | null) => render(
+const onlineC: PublicCompetition = {
+  id: 'mkhi1nnoim--20-online-c',
+  languages: ['hu'],
+  relay: { durationMinutes: 60, problemPoints: [3, 3, 4, 4, 4, 5, 5, 6, 6] },
+  strategy: { durationMinutes: 30, gameId: '20o-c' },
+  advancingPoints: 25,
+  metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
+};
+
+const practice: PublicCompetition = {
+  id: 'aaaaaaaaaa--algebra',
+  languages: ['hu'],
+  relay: { durationMinutes: 45, problemPoints: [2, 5, 3] },
+  metadata: { kind: 'other', label: { hu: 'Algebra' } },
+};
+
+const renderDisclaimer = (startWindow?: StartWindow | null, competition: PublicCompetition | null = onlineC) => render(
   <ThemeProvider theme={createTheme({ palette: { background: { paperOpacity: 1 } } })}>
-    <Disclaimer teamName="Alpha" category="C" startWindow={startWindow}/>
+    <Disclaimer teamName="Alpha" category="C" competition={competition} startWindow={startWindow}/>
   </ThemeProvider>);
 
 afterEach(() => { vi.useRealTimers(); });
@@ -38,4 +58,38 @@ test('says nothing without a window', () => {
   renderDisclaimer(null);
 
   expect(screen.queryByTestId('startWindowNote')).not.toBeInTheDocument();
+});
+
+test("states the online round's threshold out of its most points", () => {
+  renderDisclaimer(null);
+
+  expect(screen.getByText('disclaimer.progress')).toBeInTheDocument();
+  expect(screen.getByText(/disclaimer\.progressDescription/)).toHaveTextContent(
+    'disclaimer.progressDescriptionOnline {"minpoints":25,"maxpoints":52}');
+  expect(screen.getByText('disclaimer.welcomeOnline')).toBeInTheDocument();
+});
+
+test('says nothing of advancing for a competition with no threshold, and speaks of it in general words', () => {
+  renderDisclaimer(null, practice);
+
+  expect(screen.queryByText('disclaimer.progress')).not.toBeInTheDocument();
+  expect(screen.getByText('disclaimer.welcome')).toBeInTheDocument();
+  expect(screen.getByText(/disclaimer\.start /)).toBeInTheDocument();
+});
+
+// The close is the last start; a match started then runs its full time.
+test('ends the competing time the longer match after the window closes', () => {
+  vi.useFakeTimers({ now: new Date('2026-10-20T12:00:00Z') });
+  renderDisclaimer({ opensAt: '2026-10-20T15:00:00Z', closesAt: '2026-10-20T19:00:00Z' });
+
+  const end = new Intl.DateTimeFormat('hu', { hour: '2-digit', minute: '2-digit' })
+    .format(new Date('2026-10-20T20:00:00Z'));
+  expect(screen.getByText(/disclaimer\.start/)).toHaveTextContent(
+    `"until":"disclaimer.until {\\"time\\":\\"${end}\\"}"`);
+});
+
+test('names no end time without a close', () => {
+  renderDisclaimer({ opensAt: '2026-10-20T15:00:00Z' });
+
+  expect(screen.getByText(/disclaimer\.start/)).toHaveTextContent('"until":""');
 });

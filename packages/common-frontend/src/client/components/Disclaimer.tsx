@@ -6,11 +6,21 @@ import { useToHome } from "../hooks/user-hooks";
 import { useClientRepo } from "../client-repo-context";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation, Trans } from 'react-i18next';
-import type { StartWindow } from 'schemas';
+import type { Language, PublicCompetition, StartWindow } from 'schemas';
 import { useStartWindowNote } from '../hooks/start-window';
+import { useUiLanguage } from '../hooks/ui-language';
+import { competingEnd, maxPoints } from './round-numbers';
+
+/// A time of day as the team reads it, in the browser's time zone. English is
+/// British, as elsewhere.
+function timeOfDay(time: Date, language: Language): string {
+  return new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : language, { hour: "2-digit", minute: "2-digit" })
+    .format(time);
+}
 
 export function Disclaimer(props: {
-  teamName: string, category: string, startWindow?: StartWindow | null, clockOffsetMs?: number,
+  teamName: string, category: string, competition?: PublicCompetition | null,
+  startWindow?: StartWindow | null, clockOffsetMs?: number,
 }) {
   const goHome = useToHome();
   const theme = useTheme();
@@ -19,6 +29,17 @@ export function Disclaimer(props: {
   // Reading on is allowed at any time, the rules included; only the start
   // waits for the window, and this says so before the team clicks through.
   const { note: windowNote } = useStartWindowNote(props.startWindow, props.clockOffsetMs);
+  const language = useUiLanguage();
+
+  // The online round has words of its own; any other competition is told of
+  // in general ones. Without a competition there is nothing to play, and
+  // nothing but the general words to say.
+  const { competition } = props;
+  const metadata = competition?.metadata;
+  const online = metadata?.kind === 'competition' && metadata.round === 'online';
+  const end = competition ? competingEnd(props.startWindow, competition) : undefined;
+  const until = end === undefined ? '' : t('disclaimer.until', { time: timeOfDay(end, language) });
+  const advancingPoints = competition?.advancingPoints;
 
   return (
     <Stack
@@ -46,7 +67,9 @@ export function Disclaimer(props: {
         }}>
           <div style={{ textAlign: "center" }}>
             <Trans
-              i18nKey='disclaimer.welcome'
+              // t('disclaimer.welcomeOnline')
+              // t('disclaimer.welcome')
+              i18nKey={online ? 'disclaimer.welcomeOnline' : 'disclaimer.welcome'}
               values={{ tname: props.teamName }}
               components={{
                 i: <i style={{ color: theme.palette.primary.main }} />
@@ -69,30 +92,34 @@ export function Disclaimer(props: {
               }} />
           </div>
         </Stack>
-        {t('disclaimer.start')}
+        {online ? t('disclaimer.startOnline', { until }) : t('disclaimer.start', { until })}
       </Stack>
 
-      <Stack
-        sx={{
-          fontSize: 24,
-          marginBottom: "10px",
-          fontStyle: "italic",
-        }}
-      >
-        {t('disclaimer.progress')}
-      </Stack>
+      {competition && advancingPoints !== undefined && <>
+        <Stack
+          sx={{
+            fontSize: 24,
+            marginBottom: "10px",
+            fontStyle: "italic",
+          }}
+        >
+          {t('disclaimer.progress')}
+        </Stack>
 
-      <Stack
-        sx={{
-          fontSize: 16,
-          marginBottom: {
-            xs: "15px",
-            md: "15px",
-          }
-        }}
-      >
-        {t('disclaimer.progressDescription', { minpoints: 25, maxpoints: 52 })}
-      </Stack>
+        <Stack
+          sx={{
+            fontSize: 16,
+            marginBottom: {
+              xs: "15px",
+              md: "15px",
+            }
+          }}
+        >
+          {online
+            ? t('disclaimer.progressDescriptionOnline', { minpoints: advancingPoints, maxpoints: maxPoints(competition) })
+            : t('disclaimer.progressDescription', { minpoints: advancingPoints, maxpoints: maxPoints(competition) })}
+        </Stack>
+      </>}
 
       <Stack
         sx={{

@@ -128,6 +128,10 @@ export function validateCompetition(competition: CompetitionConfig, references: 
     errors.push(...validateStartWindow(competition.startWindow).map(error => `${where}: ${error}`));
   }
 
+  if (competition.advancingPoints !== undefined && !isPositiveInteger(competition.advancingPoints)) {
+    errors.push(`${where}: the advancing points ${competition.advancingPoints} are not a positive integer`);
+  }
+
   const { metadata } = competition;
   if (metadata.kind === 'competition') {
     if (!isPositiveInteger(metadata.edition)) {
