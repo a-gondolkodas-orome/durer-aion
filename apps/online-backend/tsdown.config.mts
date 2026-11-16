@@ -29,12 +29,12 @@ export default defineConfig({
   sourcemap: true,
 
   deps: {
-    // Everything installed stays external — the backend's own dependencies
-    // and the ones the game package reaches (MUI, React, lodash, boardgame.io),
-    // which npm installs alongside the workspace. Marking external only what
-    // this package.json declares would inline those. The production image
-    // installs this package.json's dependencies alone, so one the bundle
-    // requires must be declared here; its build fails otherwise (Dockerfile).
+    // Everything installed stays external: the backend's own dependencies and
+    // those of the workspace packages bundled in below, which npm installs
+    // alongside it. Marking external only what this package.json declares
+    // would inline the latter. The production image installs exactly those
+    // two sets and no peers, so a bundle require() must name a dependency of
+    // one of them; the image build fails otherwise (Dockerfile).
     neverBundle: true,
     // `paths` resolves each of these to a source path, but the external check
     // runs on the bare specifier first, and they all belong to declared
