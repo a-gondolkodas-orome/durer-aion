@@ -174,7 +174,7 @@ export default defineConfig(
       'react-hooks/set-state-in-effect': 'error',
     },
   },
-  // No hard-coded user-facing text — see eslint.i18n.mjs. Three things are left
+  // No hard-coded text between JSX tags — see eslint.i18n.mjs. Three things are left
   // out. The admin page, which is for the organisers and Hungarian on purpose
   // (#698), and is these five files. A live game's folder, which README.md
   // § Creating a new game lets hold one language only: its rules text, and the

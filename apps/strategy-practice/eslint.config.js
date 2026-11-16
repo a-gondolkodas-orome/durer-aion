@@ -202,7 +202,7 @@ export default defineConfig(
       }]
     }
   },
-  // No hard-coded user-facing text — see eslint.i18n.mjs. Every game here is in
+  // No hard-coded text between JSX tags — see eslint.i18n.mjs. Every game here is in
   // both languages, so unlike the root config's block this one reaches the games;
   // only the suites and their helpers are left out, whose markup nobody sees.
   {
