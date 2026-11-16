@@ -7,6 +7,7 @@ import { setTeamState, useTeamStateValue } from './team-state-store';
 import { LoadTeamState, useBackToHome, useLogin, useLogout, useStartRelay, useToHome } from './user-hooks';
 import { loginMarkerStorageKey } from '../utils/storage-keys';
 import type { TeamModelDto } from '../dto/TeamStateDto';
+import { I18nError } from '../utils/i18n-error';
 // The snackbar's text comes from the i18next instance the apps initialise here.
 import '../../common/i18n';
 
@@ -193,6 +194,15 @@ describe('a refused start or go-home', () => {
 
     expect(result.current.team).toMatchObject({ pageState: 'RELAY' });
     expect(enqueueSnackbar).toHaveBeenCalledExactlyOnceWith('Váratlan hiba történt', { variant: 'error' });
+  });
+
+  // The reason is one the team can act on: wait for the window to open.
+  test('says why the server refused, when it said', async () => {
+    const result = await refused('toHome', new I18nError('error.competitionNotStarted'));
+
+    await act(() => result.current.toHome());
+
+    expect(enqueueSnackbar).toHaveBeenCalledExactlyOnceWith('A verseny még nem kezdődött el.', { variant: 'error' });
   });
 
   test('with the network down keeps the page, and says so', async () => {

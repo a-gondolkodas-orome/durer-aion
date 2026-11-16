@@ -1,10 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
+import { I18nError } from "common-frontend/core";
 import { RealClientRepository } from "./client-repository";
-
-// Uninitialised, i18next's `t` answers with nothing at all, which would make
-// the assertion below read `Error: undefined`; the app initialises it, a unit
-// test has no reason to.
-vi.mock("i18next", () => ({ default: { t: (key: string) => key } }));
 
 // Every call the repository makes, with what it was given. `axios.create` is
 // what the repository builds its client from, so this is the whole transport.
@@ -25,6 +21,9 @@ const ok = () => Promise.resolve({ data: {} });
 const status = (code: number, data?: unknown) =>
   Promise.reject(new AxiosError("failed", "ERR_BAD_REQUEST", undefined, undefined, { status: code, data } as AxiosResponse));
 
+/** The server refusing, with the code it says why with. */
+const refused = (httpStatus: number, code: string) => status(httpStatus, { code, message: "In English." });
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -40,20 +39,28 @@ describe("the team routes", () => {
     expect(calls).toStrictEqual([{ method: "post", url: "team/join", body: { code: "000-0000-000" } }]);
   });
 
+  // A message is a translation key, not a Hungarian string: what these pin is
+  // which key a code picks, and `npm run i18n:check` that hu and en carry it.
   test("an unknown join code is reported as such", async () => {
-    fakeAxios(() => status(404));
-
-    await expect(new RealClientRepository().joinWithCode("999-9999-999")).rejects.toThrow("Nem létező kód");
-  });
-
-  // The message is a translation key, not a Hungarian string: what this pins
-  // is that a 429 picks that key, and `npm run i18n:check` that hu and en both
-  // carry it. i18next answers with the key itself here, uninitialised.
-  test("a client over the guessing limit is told to wait", async () => {
-    fakeAxios(() => status(429));
+    fakeAxios(() => refused(404, "UNKNOWN_JOIN_CODE"));
 
     await expect(new RealClientRepository().joinWithCode("999-9999-999"))
-      .rejects.toThrow("login.error.tooManyAttempts");
+      .rejects.toMatchObject({ i18nKey: "login.error.wrongid", code: "UNKNOWN_JOIN_CODE" });
+  });
+
+  test("a client over the guessing limit is told to wait", async () => {
+    fakeAxios(() => refused(429, "TOO_MANY_ATTEMPTS"));
+
+    await expect(new RealClientRepository().joinWithCode("999-9999-999"))
+      .rejects.toMatchObject({ i18nKey: "login.error.tooManyAttempts" });
+  });
+
+  // Why a start was refused is something the team can act on: wait, or stop.
+  test("a start outside the start window says which side of it", async () => {
+    fakeAxios(() => refused(403, "COMPETITION_NOT_STARTED"));
+
+    await expect(new RealClientRepository().startRelay())
+      .rejects.toMatchObject({ i18nKey: "error.competitionNotStarted" });
   });
 
   // The session is the cookie, so the routes name no team; and starting a
@@ -101,28 +108,49 @@ describe("the team routes", () => {
   });
 
   test("a browser with no session has no team", async () => {
-    fakeAxios(() => status(401));
+    fakeAxios(() => refused(401, "NOT_LOGGED_IN"));
 
     expect(await new RealClientRepository().getTeamState()).toBeNull();
+  });
+
+  test("any other failure to read the state is reported, not taken for a logout", async () => {
+    fakeAxios(() => status(502));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().getTeamState()).rejects.toBeInstanceOf(I18nError);
+  });
+});
+
+describe("a failed request", () => {
+  test("a code this client does not know is an unexpected error", async () => {
+    fakeAxios(() => refused(403, "SOMETHING_NEW"));
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().toHome()).rejects.toMatchObject({ i18nKey: "error.unexpected" });
+    expect(logged).toHaveBeenCalled();
+  });
+
+  test("a server error is an unexpected error", async () => {
+    fakeAxios(() => status(500));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(new RealClientRepository().addMinutes("match-1", 5))
+      .rejects.toMatchObject({ i18nKey: "error.unexpected" });
+  });
+
+  test("no answer at all is a lost connection", async () => {
+    fakeAxios(() => Promise.reject(new AxiosError("Network Error", "ERR_NETWORK")));
+
+    await expect(new RealClientRepository().getAll()).rejects.toMatchObject({ i18nKey: "error.noConnection" });
   });
 });
 
 describe("adding minutes to a match", () => {
-  // Regression for #101: the check read axios's `code`, which is an error name
-  // such as "ERR_BAD_RESPONSE", never an HTTP status, so this never matched.
-  test("a match the server will not extend is reported as expired", async () => {
-    fakeAxios(() => status(501));
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
+  test("a match that is over is reported as such", async () => {
+    fakeAxios(() => refused(409, "MATCH_FINISHED"));
 
     await expect(new RealClientRepository().addMinutes("match-1", 5))
-      .rejects.toThrow("Lejárt játékot már nem lehet módosítani");
-  });
-
-  test("any other failure is reported like the other admin actions", async () => {
-    fakeAxios(() => status(500));
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    await expect(new RealClientRepository().addMinutes("match-1", 5)).rejects.toThrow("Váratlan hiba történt");
+      .rejects.toMatchObject({ i18nKey: "error.matchFinished" });
   });
 });
 
@@ -151,11 +179,25 @@ describe("the team import", () => {
   });
 
   test("a file the route refuses for its name is said to need .tsv", async () => {
-    fakeAxios(() => status(400));
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    fakeAxios(() => refused(400, "NOT_TSV"));
 
     await expect(new RealClientRepository().importTeams(new File([""], "teams.csv")))
-      .rejects.toThrow("Csak .tsv kiterjesztésű fájlt lehet importálni.");
+      .rejects.toMatchObject({ i18nKey: "error.notTsv" });
+  });
+
+  // nginx refuses an upload over its limit before the backend sees it.
+  test("a file too large for the proxy is said to be too large", async () => {
+    fakeAxios(() => status(413, "<html>Request Entity Too Large</html>"));
+
+    await expect(new RealClientRepository().importTeams(new File([""], "teams.tsv")))
+      .rejects.toMatchObject({ i18nKey: "error.fileTooLarge" });
+  });
+
+  test("an import that outlasts the timeout says some teams may be in", async () => {
+    fakeAxios(() => Promise.reject(new AxiosError("timeout", "ECONNABORTED")));
+
+    await expect(new RealClientRepository().importTeams(new File([""], "teams.tsv")))
+      .rejects.toMatchObject({ i18nKey: "error.importTimedOut" });
   });
 });
 

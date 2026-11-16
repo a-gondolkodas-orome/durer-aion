@@ -1,6 +1,7 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
 import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartWindow } from "schemas";
+import { I18nError } from "../utils/i18n-error";
 
 export { isPageState, type PageState } from "schemas";
 
@@ -42,7 +43,8 @@ export interface TeamModelDto {
 /// render around, and the surrounding handlers report the throw.
 export function adminTeamId(team: TeamModelDto): string {
   if (team.teamId === undefined) {
-    throw new Error(`A(z) ${team.teamName} csapat azonosítója hiányzik.`);
+    // t('error.missingTeamId')
+    throw new I18nError('error.missingTeamId', { params: { teamName: team.teamName } });
   }
   return team.teamId;
 }

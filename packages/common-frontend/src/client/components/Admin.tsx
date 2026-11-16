@@ -16,6 +16,7 @@ import { ConfirmDialogInterface, ConfirmDialog, formatMinutes } from './ConfirmD
 import * as Yup from 'yup';
 import { alpha } from '@mui/system'
 import { FieldProps } from "formik"
+import { useErrorMessage } from '../utils/error-message';
 
 declare module '@mui/x-data-grid' {
   interface ToolbarPropsOverrides {
@@ -82,6 +83,7 @@ const panelProps = (panel: AdminTab, open: AdminTab) => ({
 });
 
 export function Admin(props: { teamId?: string }) {
+  const errorMessage = useErrorMessage();
   const theme = useTheme();
   const getAll = useAll();
   const addMinutes = useAddMinutes();
@@ -312,7 +314,7 @@ export function Admin(props: { teamId?: string }) {
                   }
                   enqueueSnackbar("Sikeres művelet", { variant: 'success' });
                 } catch (e) {
-                  const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                  const message = errorMessage(e);
                   enqueueSnackbar(message, { variant: 'error' });
                 }
               },

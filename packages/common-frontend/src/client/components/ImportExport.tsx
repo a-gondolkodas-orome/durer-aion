@@ -8,6 +8,7 @@ import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { InfoTip } from './InfoTip';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
+import { useErrorMessage } from '../utils/error-message';
 
 function summary(result: TeamImportResultDto): string {
   const updated = result.updated > 0 ? ` (${result.updated} frissült)` : '';
@@ -28,6 +29,7 @@ export function ImportExport(props: {
   const theme = useTheme();
   const importTeams = useImportTeams();
   const { enqueueSnackbar } = useSnackbar();
+  const errorMessage = useErrorMessage();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TeamImportResultDto | null>(null);
@@ -62,7 +64,7 @@ export function ImportExport(props: {
       props.onImported();
       enqueueSnackbar(summary(answer), { variant: answer.failed === 0 ? 'success' : 'warning' });
     } catch (e: unknown) {
-      enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
+      enqueueSnackbar(errorMessage(e), { variant: 'error' });
     } finally {
       setBusy(false);
     }

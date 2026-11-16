@@ -11,6 +11,7 @@ import { MatchStateDto, TeamImportResultDto, TeamModelDto } from '../dto/TeamSta
 import { Layout } from './Layout';
 import { Admin } from './Admin';
 import { windowTimeNow, windowTimeText } from '../utils/window-time';
+import { I18nError } from '../utils/i18n-error';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
@@ -232,12 +233,12 @@ test('a finished match shows no remaining time', async () => {
 // The button did nothing at all when the request was refused.
 test('a refused logs request is reported', async () => {
   vi.spyOn(repo, 'getMatchState').mockResolvedValue(gameState(4, inAnHour()));
-  vi.spyOn(repo, 'getMatchLogs').mockRejectedValue(new Error('Váratlan hiba történt'));
+  vi.spyOn(repo, 'getMatchLogs').mockRejectedValue(new Error('network down'));
   openTeamWithRelay({ state: 'IN PROGRESS', matchID: 'relay-match', startAt: new Date(EARLIER), endAt: inAnHour() });
 
   fireEvent.click(await screen.findByText('Logok lekérése'));
 
-  expect(await screen.findByText('Váratlan hiba történt')).toBeInTheDocument();
+  expect(await screen.findByText('error.unexpected')).toBeInTheDocument();
 });
 
 test('the team dialog names the page the team is on', async () => {
@@ -659,12 +660,12 @@ test('a second import keeps the codes of the first', async () => {
 
 test('the import tab says why the server refused the file', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  vi.spyOn(repo, 'importTeams').mockRejectedValue(new Error('Csak .tsv kiterjesztésű fájlt lehet importálni.'));
+  vi.spyOn(repo, 'importTeams').mockRejectedValue(new I18nError('error.notTsv'));
   renderAdmin();
 
   await importFile('teams.csv');
 
-  expect(await screen.findByText('Csak .tsv kiterjesztésű fájlt lehet importálni.')).toBeInTheDocument();
+  expect(await screen.findByText('error.notTsv')).toBeInTheDocument();
 });
 
 test('a reset asks first, names the team, and does nothing when cancelled', async () => {

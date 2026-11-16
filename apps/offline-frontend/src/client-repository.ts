@@ -1,11 +1,10 @@
-import { ClientRepository, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
+import { ClientRepository, I18nError, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
 import { teamData } from "./teamData";
 import { dryRunCompetition } from "./rehearsed-round";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { handleGameReport } from "./game-report";
 import { readStoredStrategyResults, readStoredRelayResults, readStoredTeamState } from "./stored-team-state";
-import i18n from "i18next";
 
 export const STORED_LOGIN_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
@@ -17,7 +16,7 @@ export class OfflineClientRepository implements ClientRepository {
     const teamState = getTeamStateFromLocal();
     const relay = teamState.competition?.relay;
     if (!(relay !== undefined && teamState.pageState === 'HOME' && teamState.relayMatch.state === 'NOT STARTED' && teamState.strategyMatch.state !== 'IN PROGRESS')) {
-      throw new Error(i18n.t('error.unexpected'));
+      throw new I18nError('error.unexpected');
     }
     const newState = {
       ...teamState,
@@ -40,7 +39,7 @@ export class OfflineClientRepository implements ClientRepository {
     const teamState = getTeamStateFromLocal();
     const strategy = teamState.competition?.strategy;
     if (!(strategy !== undefined && teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'NOT STARTED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error(i18n.t('error.unexpected'));
+      throw new I18nError('error.unexpected');
     }
     const newState = {
       ...teamState,
@@ -64,7 +63,7 @@ export class OfflineClientRepository implements ClientRepository {
   viewStrategy(): Promise<void> {
     const teamState = getTeamStateFromLocal();
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'FINISHED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
-      throw new Error(i18n.t('error.unexpected'));
+      throw new I18nError('error.unexpected');
     }
     localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({ ...teamState, pageState: 'STRATEGY' }));
     return Promise.resolve();
@@ -157,7 +156,7 @@ export class OfflineClientRepository implements ClientRepository {
       return Promise.resolve();
     }
 
-    throw new Error(i18n.t('login.error.wrongid'));
+    throw new I18nError('login.error.wrongid');
   }
 
 }
@@ -166,7 +165,7 @@ export class OfflineClientRepository implements ClientRepository {
 const getTeamStateFromLocal = (): TeamModelDto => {
   const teamState = readStoredTeamState();
   if (teamState === null) {
-    throw new Error(i18n.t('error.unexpected'));
+    throw new I18nError('error.unexpected');
   }
   return teamState;
 }
