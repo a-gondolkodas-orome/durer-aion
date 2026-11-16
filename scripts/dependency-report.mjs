@@ -216,8 +216,10 @@ export const newestTagInLine = (tags, current, line) => {
 };
 
 const dockerRows = () => DOCKER_IMAGES.map(({ image, where, line }) => {
-  // `FROM node:24.20.0` in a Dockerfile, `image: postgres:17.11` in the compose file.
-  const [, current] = read(where).match(new RegExp(`(?:FROM|image:)[ \\t]*${image}:(\\S+)`)) ?? [];
+  // `FROM node:24.20.0` or `ARG NODE_VERSION=24.20.0` in a Dockerfile, `image: postgres:17.11` in
+  // the compose file. A tag starting with `$` is the ARG's use, not a version.
+  const [, current] = read(where).match(new RegExp(
+    `(?:(?:FROM|image:)[ \\t]*${image}:|ARG ${image.toUpperCase()}_VERSION=)([^\\s$]\\S*)`)) ?? [];
   return checkVersion(`library/${image}`, current ?? 'unknown', [where], async () => {
     if (!current) throw new Error(`no ${image}: tag found in ${where}`);
     // Filtered server-side to the pinned line, because these repositories carry thousands of tags
