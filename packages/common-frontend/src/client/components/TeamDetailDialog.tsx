@@ -22,6 +22,7 @@ import { RelayKey, RelayResultsTable, StrategyGamesTable } from './ResultTables'
 import * as Yup from 'yup';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useErrorMessage } from '../utils/error-message';
 
 type MatchKind = 'relay' | 'strategy';
 
@@ -351,6 +352,7 @@ const LOGS_HINT: Record<MatchKind, string> = {
 
 /// Adding minutes, for a running match only, and the match's log.
 function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<MatchStatus, { state: 'NOT STARTED' }>, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+  const errorMessage = useErrorMessage();
   const { status } = props;
   const addMinutes = useAddMinutes();
   const getLogs = useGetLogs();
@@ -362,7 +364,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
     try {
       setMatchLogs(await getLogs(status.matchID));
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+      const message = errorMessage(e);
       enqueueSnackbar(message, { variant: 'error' });
     }
   };
@@ -394,7 +396,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
                 await mutate(matchStateKey(status.matchID));
                 enqueueSnackbar("Sikeres művelet", { variant: 'success' });
               } catch (e: unknown) {
-                const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+                const message = errorMessage(e);
                 enqueueSnackbar(message, { variant: 'error' });
               }
             },
@@ -454,6 +456,7 @@ function MatchTools(props: { kind: MatchKind, teamName: string, status: Exclude<
 /// 2001 to 2099. The server refuses a start outside it; a match already
 /// started runs on.
 function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void }) {
+  const errorMessage = useErrorMessage();
   const { team } = props;
   const setStartWindow = useSetStartWindow();
   const { enqueueSnackbar } = useSnackbar();
@@ -480,7 +483,7 @@ function StartWindowCard(props: { heading: 'h2' | 'h3', team: TeamModelDto, setT
       setClosesAt(saved.startClosesAt ?? '');
       enqueueSnackbar("Sikeres művelet", { variant: 'success' });
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+      const message = errorMessage(e);
       enqueueSnackbar(message, { variant: 'error' });
     }
   };
@@ -565,6 +568,7 @@ function resetDescription(kind: MatchKind) {
 
 /// The resets, together: both are destructive and both ask first.
 function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamState: (team: TeamModelDto) => void, setConfirmDialog: Dispatch<ConfirmDialogInterface | null> }) {
+  const errorMessage = useErrorMessage();
   const resetRelay = useResetRelay();
   const resetStrategy = useResetStrategy();
   const { enqueueSnackbar } = useSnackbar();
@@ -587,7 +591,7 @@ function DangerZone(props: { heading: 'h2' | 'h3', team: TeamModelDto, setTeamSt
           props.setTeamState(await reset(adminTeamId(team)));
           enqueueSnackbar("Sikeres művelet", { variant: 'success' });
         } catch (e: unknown) {
-          const message = e instanceof Error ? e.message : "Váratlan hiba történt";
+          const message = errorMessage(e);
           enqueueSnackbar(message, { variant: 'error' });
         }
       },

@@ -4,6 +4,7 @@ import type { Server } from 'boardgame.io';
 import { isIPv6 } from 'node:net';
 import { Address6 } from 'ip-address';
 import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
+import { writeRefusal } from './api_error';
 
 /** Rate limiting for the routes that answer a guess at a secret (issues #437,
  * #719): the join code on `POST /team/join`, and the organisers' password on
@@ -112,8 +113,7 @@ export function attemptLimiter({ limit, windowSeconds }: RateLimitOptions) {
         // failing, which no route should answer as if the client were at fault.
         if (!(refusal instanceof RateLimiterRes)) throw refusal;
         ctx.set('Retry-After', `${Math.ceil(refusal.msBeforeNext / 1000)}`);
-        ctx.status = 429;
-        ctx.body = 'Too many attempts.';
+        writeRefusal(ctx, 429, 'TOO_MANY_ATTEMPTS', 'Too many attempts.');
         return false;
       }
     },

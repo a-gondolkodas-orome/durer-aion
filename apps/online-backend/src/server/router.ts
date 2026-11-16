@@ -17,6 +17,7 @@ import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } f
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
 import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
+import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
 
 /**
@@ -46,6 +47,9 @@ export function configureTeamsRouter(
   // serves and a test starts with an empty one.
   const joinLimit = rateLimit({ limit: JOIN_ATTEMPT_LIMIT, windowSeconds: JOIN_ATTEMPT_WINDOW_SECONDS });
 
+  // First, so every route below answers a refusal as `{ code, message }`.
+  router.use(apiErrorBody);
+
   // The team's competition with the window set on the admin page in force:
   // read per request, since an organiser may change one mid-round.
   async function competitionNow(team: TeamModel) {
@@ -57,7 +61,7 @@ export function configureTeamsRouter(
   async function claimStart(ctx: Server.AppCtx, team: TeamModel, gameType: GameType, matchID: string) {
     if (!(await teams.startMatch(team, gameType, matchID))) {
       await ctx.db.wipe(matchID);
-      ctx.throw(403, "Team is not allowed to start game.");
+      refuse(ctx, 403, "START_NOT_ALLOWED", "Team is not allowed to start game.");
     }
   }
 
@@ -82,7 +86,7 @@ export function configureTeamsRouter(
       log: true,
     });
     if (!log) {
-      ctx.throw(404, "Match " + matchID + " not found");
+      refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
     }
     ctx.body = log;
   });
@@ -99,7 +103,7 @@ export function configureTeamsRouter(
       state: true,
     });
     if (!state) {
-      ctx.throw(404, "Match " + matchID + " not found");
+      refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
     }
     ctx.body = state;
   });
@@ -122,7 +126,7 @@ export function configureTeamsRouter(
       }
     );
     if (!state) {
-      ctx.throw(404, "Match " + matchID + " not found");
+      refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
     }
     const teamId = metadata.players[0].name;
     const team = await teams.getTeam({ teamId });
@@ -134,11 +138,10 @@ export function configureTeamsRouter(
 
     const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
     if (gameType === null) {
-      ctx.throw(501, `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
-      return;
+      refuse(ctx, 409, "STALE_MATCH_ID", `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
     }
     if (deriveMatchStatus(gameType, matchID, state, new Date()).state !== 'IN PROGRESS') {
-      ctx.throw(501, 'Restarting an already finished match is not supported right now.');
+      refuse(ctx, 409, "MATCH_FINISHED", 'Restarting an already finished match is not supported right now.');
     }
 
     const new_state = {
@@ -155,8 +158,7 @@ export function configureTeamsRouter(
 
     const game = games.find(g => g.name === metadata.gameName);
     if (!game) {
-      ctx.throw(404, `Match found, but game ${metadata.gameName} was not found.`);
-      return
+      refuse(ctx, 404, "GAME_NOT_FOUND", `Match found, but game ${metadata.gameName} was not found.`);
     }
 
     /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
@@ -194,7 +196,7 @@ export function configureTeamsRouter(
       metadata: true,
     });
     if (!metadata) {
-      ctx.throw(404, "Match " + matchID + " not found");
+      refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
     }
     ctx.body = metadata;
   });
@@ -210,8 +212,7 @@ export function configureTeamsRouter(
     const team = await teams.getTeam({ teamId });
 
     if (!team) {
-      ctx.throw(404, `Team not found with teamID ${teamId}.`);
-      return;
+      refuse(ctx, 404, "TEAM_NOT_FOUND", `Team not found with teamID ${teamId}.`);
     }
     if (team.pageState === 'STRATEGY')
       team.pageState = 'HOME'
@@ -234,8 +235,7 @@ export function configureTeamsRouter(
     const team = await teams.getTeam({ teamId });
 
     if (!team) {
-      ctx.throw(404, `Team not found with teamID ${teamId}.`);
-      return;
+      refuse(ctx, 404, "TEAM_NOT_FOUND", `Team not found with teamID ${teamId}.`);
     }
     if (team.pageState === 'RELAY')
       team.pageState = 'HOME'
@@ -260,13 +260,11 @@ export function configureTeamsRouter(
     const teamId = ctx.params.teamID;
     const window = readStartWindowBody(ctx.request.body);
     if (window !== null && 'refused' in window) {
-      ctx.throw(400, window.refused);
-      return;
+      refuse(ctx, 400, "INVALID_START_WINDOW", window.refused);
     }
     const team = await teams.getTeam({ teamId });
     if (!team) {
-      ctx.throw(404, `Team not found with teamID ${teamId}.`);
-      return;
+      refuse(ctx, 404, "TEAM_NOT_FOUND", `Team not found with teamID ${teamId}.`);
     }
     team.startOpensAt = window?.opensAt ?? null;
     team.startClosesAt = window?.closesAt ?? null;
@@ -308,13 +306,11 @@ export function configureTeamsRouter(
   router.put("/team/admin/competitions/:competitionId/start-window", adminAuth, requireJson, koaBody(), async (ctx) => {
     const { competitionId } = ctx.params;
     if (await competitions.getCompetition(competitionId) === undefined) {
-      ctx.throw(404, `No competition with id ${competitionId}.`);
-      return;
+      refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
     }
     const window = readStartWindowBody(ctx.request.body);
     if (window !== null && 'refused' in window) {
-      ctx.throw(400, window.refused);
-      return;
+      refuse(ctx, 400, "INVALID_START_WINDOW", window.refused);
     }
     await teams.setCompetitionWindow(competitionId, window);
     ctx.status = 204;
@@ -326,16 +322,13 @@ export function configureTeamsRouter(
    * checked on the name the client sent.
    */
   router.put("/team/admin/import", adminAuth, koaBody({ multipart: true }), async (ctx) => {
-    const { file } = ctx.request.files ?? ctx.throw(400, 'No files uploaded!');
+    const { file } = ctx.request.files ?? refuse(ctx, 400, "IMPORT_NO_FILE", 'No files uploaded!');
     try {
       if (Array.isArray(file)) {
-        ctx.throw(400, 'Multiple files are not supported.');
-        return;
+        refuse(ctx, 400, "IMPORT_MULTIPLE_FILES", 'Multiple files are not supported.');
       }
       if (!file?.originalFilename?.endsWith('.tsv')) {
-        ctx.status = 400;
-        ctx.body = { error: 'Invalid file format. Only TSV files are allowed.' };
-        return;
+        refuse(ctx, 400, "IMPORT_NOT_TSV", 'Invalid file format. Only TSV files are allowed.');
       }
       ctx.body = await import_teams_from_tsv(teams, file.filepath, competitions);
     } finally {
@@ -361,8 +354,8 @@ export function configureTeamsRouter(
    */
   router.post("/team/join", joinLimit, requireJson, koaBody(), async (ctx) => {
     const sent: unknown = (ctx.request.body as { code?: unknown } | undefined)?.code;
-    const code = typeof sent === "string" ? sent : ctx.throw(400, "Expected { code: string }.");
-    const team = await teams.getTeam({ joinCode: code }) ?? ctx.throw(404, "Team not found!");
+    const code = typeof sent === "string" ? sent : refuse(ctx, 400, "JOIN_INVALID_BODY", "Expected { code: string }.");
+    const team = await teams.getTeam({ joinCode: code }) ?? refuse(ctx, 404, "UNKNOWN_JOIN_CODE", "No team has this join code.");
     setTeamCookie(ctx, team.teamId);
     ctx.status = 204;
   });
@@ -428,10 +421,10 @@ export function configureTeamsRouter(
     const team = ctx.state.team;
     const matches = await teamMatches(ctx.db, team);
     if (!allowedToViewStrategy(team, matches))
-      ctx.throw(403, "Team is not allowed to view the strategy match.")
+      refuse(ctx, 403, "VIEW_NOT_ALLOWED", "Team is not allowed to view the strategy match.");
     // A start landing after this read changes a match id, and the write refuses.
     if (!(await teams.viewStrategy(team)))
-      ctx.throw(403, "Team is not allowed to view the strategy match.")
+      refuse(ctx, 403, "VIEW_NOT_ALLOWED", "Team is not allowed to view the strategy match.");
 
     team.set({ pageState: "STRATEGY" });
     ctx.body = publicTeamView(team, matches, await competitionNow(team));
@@ -444,10 +437,10 @@ export function configureTeamsRouter(
     const team = ctx.state.team;
     const matches = await teamMatches(ctx.db, team);
     if (matches.relayMatch.state === 'IN PROGRESS' || matches.strategyMatch.state === 'IN PROGRESS')
-      ctx.throw(403, "Not allowed, match in progress.")
+      refuse(ctx, 403, "MATCH_IN_PROGRESS", "Not allowed, match in progress.");
     // A start landing after this read changes a match id, and the write refuses.
     if (!(await teams.goHome(team)))
-      ctx.throw(403, "Not allowed, match in progress.")
+      refuse(ctx, 403, "MATCH_IN_PROGRESS", "Not allowed, match in progress.");
 
     team.set({ pageState: "HOME" });
     ctx.body = publicTeamView(team, matches, await competitionNow(team));

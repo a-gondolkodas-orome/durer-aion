@@ -10,6 +10,7 @@ import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
 import { useSetCompetitionWindow } from '../hooks/user-hooks';
 import { windowText, windowTimeNow } from '../utils/window-time';
+import { useErrorMessage } from '../utils/error-message';
 
 const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
   online: 'internetes',
@@ -154,6 +155,7 @@ export function CompetitionTable(props: {
 /// Sets a competition's start window in place of its config's, or returns it
 /// to its config's. A team with a window of its own keeps that one.
 function CompetitionWindowDialog(props: { competition: CompetitionRow, onClose: (changed: boolean) => void }) {
+  const errorMessage = useErrorMessage();
   const { competition } = props;
   const setCompetitionWindow = useSetCompetitionWindow();
   const { enqueueSnackbar } = useSnackbar();
@@ -175,7 +177,7 @@ function CompetitionWindowDialog(props: { competition: CompetitionRow, onClose: 
       enqueueSnackbar('Sikeres művelet', { variant: 'success' });
       props.onClose(true);
     } catch (e: unknown) {
-      enqueueSnackbar(e instanceof Error ? e.message : 'Váratlan hiba történt', { variant: 'error' });
+      enqueueSnackbar(errorMessage(e), { variant: 'error' });
     }
   };
   const submit = () => {

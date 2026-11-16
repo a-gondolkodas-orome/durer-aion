@@ -10,6 +10,7 @@ import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
 import { teamMatches, type TeamMatches } from "./match_status";
 import { teamStartWindow } from "./start_window";
+import { refuse } from "./api_error";
 
 /** Joins a player to a match where the bot's side is not connected.
  * @param db: Database context
@@ -140,26 +141,27 @@ export async function getNewGame(
   now: Date = new Date(),
 ) {
   if (!allowedToStart(team, await teamMatches(ctx.db, team), gameType)) {
-    ctx.throw(403, "Team is not allowed to start game.");
+    refuse(ctx, 403, "START_NOT_ALLOWED", "Team is not allowed to start game.");
   }
   const { relay, strategy, languages } = competition
-    ?? ctx.throw(404, "Competition " + team.competitionId + " not found");
+    ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", "Competition " + team.competitionId + " not found");
   if ((gameType === "RELAY" ? relay : strategy) === undefined) {
-    ctx.throw(403, "The team's competition has no such match.");
+    refuse(ctx, 403, "NO_SUCH_MATCH", "The team's competition has no such match.");
   }
   const state = startWindowState(teamStartWindow(team, competition), now);
   if (state !== "open") {
-    ctx.throw(403, state === "closed" ? "The competition is over." : "The competition has not started yet.");
+    if (state === "closed") refuse(ctx, 403, "COMPETITION_OVER", "The competition is over.");
+    refuse(ctx, 403, "COMPETITION_NOT_STARTED", "The competition has not started yet.");
   }
   const [gameName, setupData] = relay !== undefined && gameType === "RELAY"
     ? [RELAY_GAME_NAME, await relaySetup(relay, languages, problems)]
     : strategy !== undefined && gameType === "STRATEGY"
       ? [strategyGameName(strategy.gameId), { durationMinutes: strategy.durationMinutes }]
-      : ctx.throw(403, "The team's competition has no such match.");
+      : refuse(ctx, 403, "NO_SUCH_MATCH", "The team's competition has no such match.");
 
   const game: AnyBgioGame = games.find(
     (g) => g.name === gameName
-  ) ?? ctx.throw(404, "Game " + gameName + " not found");
+  ) ?? refuse(ctx, 404, "GAME_NOT_FOUND", "Game " + gameName + " not found");
 
   return { game, team, setupData };
 }

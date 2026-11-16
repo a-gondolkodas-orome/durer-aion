@@ -1,5 +1,5 @@
 import type { Ctx } from "boardgame.io";
-import { TeamModelDto } from "common-frontend/core";
+import { I18nError, TeamModelDto } from "common-frontend/core";
 import { readPersistedLog } from "./bgio-log";
 import { readStoredTeamState } from "./stored-team-state";
 
@@ -50,7 +50,7 @@ function getJoinCode(teamState?: TeamModelDto) {
   }
   const teamStateStorage = readStoredTeamState();
   if (teamStateStorage === null) {
-    throw new Error('Váratlan hiba történt (toHome)');
+    throw new I18nError('error.unexpected');
   }
   return teamStateStorage.joinCode;
 }

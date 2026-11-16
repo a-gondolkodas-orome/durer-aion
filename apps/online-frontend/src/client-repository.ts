@@ -1,9 +1,7 @@
 import urlcat from "urlcat";
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import i18n from "i18next";
-// Type-only on purpose: client-repository.test.ts loads this file without the
-// package's dist build, which the CI test job does not produce.
-import type { AdminClientRepository, ClientRepository, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto } from "common-frontend";
+import axios, { AxiosInstance } from 'axios';
+import { I18nError, apiRefusal } from "common-frontend/core";
+import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto } from "common-frontend";
 import type { Tracker } from "./tracking";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
@@ -23,12 +21,44 @@ function apiAxiosInstance(timeoutMs = 10000): AxiosInstance {
 // `proxy_read_timeout`: past that the codes are lost either way.
 const IMPORT_TIMEOUT_MS = 90_000;
 
-function makeAxiosError(any_error: unknown): AxiosError {
-  if (!axios.isAxiosError(any_error)) {
-    throw  any_error;
+/**
+ * Sends a request and answers its data, or throws an `I18nError` saying why it
+ * failed: the server's code when it refused, otherwise what the browser saw.
+ * A failure with no code is an unexpected error to the user, and its details
+ * go to the console.
+ */
+async function request<T>(
+  send: (api: AxiosInstance) => Promise<{ data: T }>,
+  { timeoutMs, timedOutKey = 'error.timedOut' }: { timeoutMs?: number, timedOutKey?: string } = {},
+): Promise<T> {
+  try {
+    return (await send(apiAxiosInstance(timeoutMs))).data;
+  } catch (e: unknown) {
+    if (!axios.isAxiosError(e)) {
+      throw e;
+    }
+    const refusal = apiRefusal(e.response?.data, e);
+    if (refusal) {
+      throw refusal;
+    }
+    // t('error.fileTooLarge'), t('error.timedOut'), t('error.noConnection')
+    if (e.response?.status === 413) {
+      throw new I18nError('error.fileTooLarge', { cause: e });
+    }
+    if (e.code === 'ECONNABORTED') {
+      throw new I18nError(timedOutKey, { cause: e });
+    }
+    if (e.response === undefined) {
+      throw new I18nError('error.noConnection', { cause: e });
+    }
+    console.error(e.message, e.response.data);
+    throw new I18nError('error.unexpected', { cause: e });
   }
-  const axiosError = any_error as AxiosError<Error>;
-  return axiosError;
+}
+
+// The times travel as ISO strings; the pages read Dates.
+function withDates(match: MatchStatus): MatchStatus {
+  return match.state === 'NOT STARTED' ? match : { ...match, startAt: new Date(match.startAt), endAt: new Date(match.endAt) };
 }
 
 /** The team routes: the session cookie says which team, so nothing here
@@ -40,270 +70,109 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   constructor(private tracker?: Tracker) {}
 
   async getTeamState(): Promise<TeamModelDto | null> {
-    let result;
+    let data;
     try {
-      result = await apiAxiosInstance().get('team/me');
+      data = await request(api => api.get<TeamModelDto & { serverTime?: string }>('team/me'));
     } catch (e: unknown) {
-      const err = makeAxiosError(e);
       // No session — a browser that never logged in, or whose cookie expired.
-      if (err.response?.status === 401) {
+      if (e instanceof I18nError && e.code === 'NOT_LOGGED_IN') {
         return null;
       }
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
+      throw e;
     }
 
-    if (result.data.relayMatch.startAt) {
-      result.data.relayMatch.startAt = new Date(result.data.relayMatch.startAt);
-    }
-    if (result.data.relayMatch.endAt) {
-      result.data.relayMatch.endAt = new Date(result.data.relayMatch.endAt);
-    }
-    if (result.data.strategyMatch.startAt) {
-      result.data.strategyMatch.startAt = new Date(result.data.strategyMatch.startAt);
-    }
-    if (result.data.strategyMatch.endAt) {
-      result.data.strategyMatch.endAt = new Date(result.data.strategyMatch.endAt);
-    }
+    const state: TeamModelDto = {
+      ...data,
+      relayMatch: withDates(data.relayMatch),
+      strategyMatch: withDates(data.strategyMatch),
+    };
     // Taken on arrival, not when a page reads it: the state can be held for
     // hours, and the browser's clock is what the offset corrects.
-    if (typeof result.data.serverTime === 'string') {
-      result.data.clockOffsetMs = Date.parse(result.data.serverTime) - Date.now();
+    if (typeof data.serverTime === 'string') {
+      state.clockOffsetMs = Date.parse(data.serverTime) - Date.now();
     }
-    this.tracker?.observe(result.data as TeamModelDto);
-    return result.data as TeamModelDto;
+    this.tracker?.observe(state);
+    return state;
   }
 
   // The code goes in the body, never in the URL: it is the team's login secret.
-  async joinWithCode(
-    code: string,
-  ): Promise<void> {
-    try {
-      await apiAxiosInstance().post('team/join', { code });
-      this.tracker?.login();
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      if (err.response?.status === 404) {
-        throw new Error('Nem létező kód', { cause: e });
-      }
-      // The server limits how often a code may be guessed at
-      // (apps/online-backend/src/server/rate_limit.ts). Only wrong codes count
-      // against it, so a team that sees this has been typing them.
-      if (err.response?.status === 429) {
-        throw new Error(i18n.t('login.error.tooManyAttempts'), { cause: e });
-      }
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+  async joinWithCode(code: string): Promise<void> {
+    await request(api => api.post('team/join', { code }));
+    this.tracker?.login();
   }
 
   async logout(): Promise<void> {
-    try {
-      // The empty body is what makes it JSON, which the server requires.
-      await apiAxiosInstance().post('team/me/logout', {});
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    // The empty body is what makes it JSON, which the server requires.
+    await request(api => api.post('team/me/logout', {}));
   }
 
   async startRelay(): Promise<void> {
-    try {
-      await apiAxiosInstance().post('team/me/relay/play');
-      this.tracker?.started('relay');
-    } catch (e: unknown) {
-      const err = makeAxiosError(e)
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    await request(api => api.post('team/me/relay/play'));
+    this.tracker?.started('relay');
   }
 
   async startStrategy(): Promise<void> {
-    try {
-      await apiAxiosInstance().post('team/me/strategy/play');
-      this.tracker?.started('strategy');
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    await request(api => api.post('team/me/strategy/play'));
+    this.tracker?.started('strategy');
   }
 
   async viewStrategy(): Promise<void> {
-    try {
-      await apiAxiosInstance().post('team/me/strategy/view');
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    await request(api => api.post('team/me/strategy/view'));
   }
 
   async toHome(): Promise<void> {
-    try {
-      await apiAxiosInstance().post('team/me/gohome');
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    await request(api => api.post('team/me/gohome'));
   }
 
   async getAll(): Promise<TeamModelDto[]> {
-    const url = urlcat('/team/admin/all', {
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().get(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-
-    return result.data as TeamModelDto[];
+    return await request(api => api.get<TeamModelDto[]>('/team/admin/all'));
   }
 
   async resetRelay(teamId: string): Promise<TeamModelDto> {
-    const url = urlcat('/team/admin/:teamId/reset/relay', {
-      teamId,
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().post(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data as TeamModelDto;
+    const url = urlcat('/team/admin/:teamId/reset/relay', { teamId });
+    return await request(api => api.post<TeamModelDto>(url));
   }
 
   async resetStrategy(teamId: string): Promise<TeamModelDto> {
-    const url = urlcat('/team/admin/:teamId/reset/strategy', {
-      teamId,
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().post(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data as TeamModelDto;
+    const url = urlcat('/team/admin/:teamId/reset/strategy', { teamId });
+    return await request(api => api.post<TeamModelDto>(url));
   }
 
   async setStartWindow(teamId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto> {
-    const url = urlcat('/team/admin/:teamId/start-window', {
-      teamId,
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().put(url, window);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data as TeamModelDto;
+    const url = urlcat('/team/admin/:teamId/start-window', { teamId });
+    return await request(api => api.put<TeamModelDto>(url, window));
   }
 
   async addMinutes(matchId: string, minutes: number): Promise<string> {
-    const url = urlcat('/game/admin/:matchId/addminutes/:minutes', {
-      matchId,
-      minutes,
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().post(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      // The server's 501: the match is finished, or no longer the team's current one.
-      if (err.response?.status === 501) {
-        throw new Error('Lejárt játékot már nem lehet módosítani', { cause: e });
-      }
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data;
+    const url = urlcat('/game/admin/:matchId/addminutes/:minutes', { matchId, minutes });
+    return await request(api => api.post<string>(url));
   }
 
   async getCompetitions(): Promise<CompetitionSummaryDto[]> {
-    let result;
-    try {
-      result = await apiAxiosInstance().get('/team/admin/competitions');
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data as CompetitionSummaryDto[];
+    return await request(api => api.get<CompetitionSummaryDto[]>('/team/admin/competitions'));
   }
 
   async setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void> {
     const url = urlcat('/team/admin/competitions/:competitionId/start-window', { competitionId });
-    try {
-      await apiAxiosInstance().put(url, window);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    await request(api => api.put(url, window));
   }
 
   async importTeams(file: File): Promise<TeamImportResultDto> {
     const body = new FormData();
     body.append('file', file);
-    try {
-      const result = await apiAxiosInstance(IMPORT_TIMEOUT_MS).put('/team/admin/import', body);
-      return result.data as TeamImportResultDto;
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      // The route checks the name the browser sent.
-      if (err.response?.status === 400) {
-        throw new Error('Csak .tsv kiterjesztésű fájlt lehet importálni.', { cause: e });
-      }
-      if (err.response?.status === 413) {
-        throw new Error('A fájl túl nagy.', { cause: e });
-      }
-      if (err.code === 'ECONNABORTED') {
-        // The server was not told to stop, so some teams may be in.
-        throw new Error('Az importálás túl sokáig tartott. Frissíts, és nézd meg, mely csapatok kerültek be, '
-          + 'mielőtt újra próbálod.', { cause: e });
-      }
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
+    // Giving up does not stop the server, so some teams may be in.
+    // t('error.importTimedOut')
+    return await request(api => api.put<TeamImportResultDto>('/team/admin/import', body),
+      { timeoutMs: IMPORT_TIMEOUT_MS, timedOutKey: 'error.importTimedOut' });
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {
-    const url = urlcat('/game/admin/:matchId/state', {
-      matchId,
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().get(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data as MatchStateDto;
+    const url = urlcat('/game/admin/:matchId/state', { matchId });
+    return await request(api => api.get<MatchStateDto>(url));
   }
 
   async getMatchLogs(matchId: string): Promise<MatchStateDto> {
-    const url = urlcat('/game/admin/:matchId/logs', {
-      matchId,
-    });
-    let result;
-    try {
-      result = await apiAxiosInstance().get(url);
-    } catch (e: unknown) {
-      const err = makeAxiosError(e);
-      console.error(err.message)
-      throw new Error('Váratlan hiba történt', { cause: e });
-    }
-    return result.data;
+    const url = urlcat('/game/admin/:matchId/logs', { matchId });
+    return await request(api => api.get<MatchStateDto>(url));
   }
 }
