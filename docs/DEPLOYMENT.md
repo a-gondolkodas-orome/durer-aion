@@ -281,7 +281,7 @@ This writes `scripts/<file>.tsv.export` back on the host, with the generated joi
 The admin page's TSV upload does the same job through the browser.
 
 Each row's `Competition` column names its team's competition, such as
-`20 online C`, or its id, so one file holds every category of the round. The
+`20 online C`, or its id, so one file holds every competition of the round. The
 admin page's **Versenyek** tab lists the competitions with what to write.
 
 **Start windows.** Before codes go out, check on the same tab when each
