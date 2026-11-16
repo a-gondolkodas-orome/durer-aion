@@ -58,12 +58,16 @@ describe('validatingCompetitionSource', () => {
     relay: { durationMinutes: 60, problems: [{ problemId: 'aaaaaaaaaa--first', points: 3 }] },
     metadata: { kind: 'other', label: { hu: 'Próba' } },
   };
+  const valid: CompetitionConfig = { ...competition, id: 'dddddddddd--valid', relay: undefined,
+    strategy: { durationMinutes: 30, gameId: '20o-c' } };
+  const invalid: Error[] = [];
   const withProblems = (problems: object) => {
     const { competitionSource, problemSource } = createRegistry([{
-      problems: problems as never, competitions: { [competition.id]: competition },
+      problems: problems as never, competitions: { [competition.id]: competition, [valid.id]: valid },
     }]);
-    return validatingCompetitionSource(competitionSource, problemSource, strategyGames);
+    return validatingCompetitionSource(competitionSource, problemSource, strategyGames, error => { invalid.push(error); });
   };
+  beforeEach(() => { invalid.length = 0; });
 
   it('hands out a valid competition as the source has it', async () => {
     const source = withProblems({ 'aaaaaaaaaa--first': { answer: 1, content: { hu: { problemText: '1?' } } } });
@@ -74,6 +78,32 @@ describe('validatingCompetitionSource', () => {
   it('refuses one that refers to a problem the problem source does not have', async () => {
     const source = withProblems({});
     await expect(source.getCompetition(competition.id)).rejects.toThrow('aaaaaaaaaa--first) does not exist');
-    await expect(source.listCompetitions()).rejects.toThrow(competition.id);
+  });
+
+  it('lists the valid competitions, and reports an invalid one rather than failing them all', async () => {
+    const source = withProblems({});
+    await expect(source.listCompetitions()).resolves.toEqual([valid]);
+    expect(invalid.map(({ message }) => message)).toEqual([expect.stringContaining(competition.id)]);
+  });
+
+  it('checks a competition the source hands out again only when it is a new object', async () => {
+    let reads = 0;
+    const problemSource = {
+      getProblems: (ids: readonly string[]) => {
+        reads += 1;
+        return Promise.resolve(new Map(ids.map(id => [id, { id, answer: 1, content: { hu: { problemText: '1?' } } }])));
+      },
+    };
+    let current = competition;
+    const source = validatingCompetitionSource({
+      getCompetition: () => Promise.resolve(current),
+      listCompetitions: () => Promise.resolve([current]),
+    }, problemSource, strategyGames);
+    await source.getCompetition(competition.id);
+    await source.getCompetition(competition.id);
+    expect(reads).toBe(1);
+    current = { ...competition };
+    await source.getCompetition(competition.id);
+    expect(reads).toBe(2);
   });
 });

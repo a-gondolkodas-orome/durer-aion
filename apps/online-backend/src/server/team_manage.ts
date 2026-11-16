@@ -144,6 +144,9 @@ export async function getNewGame(
   }
   const { relay, strategy, languages } = competition
     ?? ctx.throw(404, "Competition " + team.competitionId + " not found");
+  if ((gameType === "RELAY" ? relay : strategy) === undefined) {
+    ctx.throw(403, "The team's competition has no such match.");
+  }
   const state = startWindowState(teamStartWindow(team, competition), now);
   if (state !== "open") {
     ctx.throw(403, state === "closed" ? "The competition is over." : "The competition has not started yet.");

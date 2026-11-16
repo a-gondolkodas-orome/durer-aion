@@ -80,18 +80,30 @@ export function assertValidRegistry(
 /// or refers to a problem `problems` does not have or a strategy game not in
 /// `strategyGames`. The registry is checked whole at start; this is for a
 /// competition a source starts handing out after it.
+///
+/// `getCompetition` rejects an invalid competition. `listCompetitions` leaves
+/// it out and reports it through `onInvalid`, so one bad competition does not
+/// take the admin page's list, or a whole team import, down with it.
+///
+/// A competition that passed is not checked again while the source hands out
+/// the same object, as the in-code one does on every read: a source that reads
+/// afresh hands out a new object, which is checked again.
 export function validatingCompetitionSource(
   competitions: CompetitionSource,
   problems: ProblemSource,
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
+  onInvalid: (error: Error) => void = error => { console.error(error.message); },
 ): CompetitionSource {
   const games = new Map(Object.entries(strategyGames));
+  const valid = new WeakSet<CompetitionConfig>();
   async function validated(competition: CompetitionConfig): Promise<CompetitionConfig> {
+    if (valid.has(competition)) return competition;
     const ids = competition.relay?.problems.map(({ problemId }) => problemId) ?? [];
     const errors = validateCompetition(competition, { problems: await problems.getProblems(ids), strategyGames: games });
     if (errors.length > 0) {
       throw new Error(`The competition ${competition.id} is invalid:\n${errors.map(error => `  - ${error}`).join('\n')}`);
     }
+    valid.add(competition);
     return competition;
   }
   return {
@@ -100,7 +112,12 @@ export function validatingCompetitionSource(
       return competition === undefined ? undefined : validated(competition);
     },
     async listCompetitions() {
-      return Promise.all((await competitions.listCompetitions()).map(validated));
+      const read = await Promise.allSettled((await competitions.listCompetitions()).map(validated));
+      return read.flatMap(result => {
+        if (result.status === 'fulfilled') return [result.value];
+        onInvalid(result.reason instanceof Error ? result.reason : new Error(String(result.reason)));
+        return [];
+      });
     },
   };
 }
