@@ -58,6 +58,7 @@ const GAME_STATE_MIXIN_KEYS: ReadonlySet<string> = new Set(Object.keys({
   winningStreak: true,
   points: true,
   liveResults: true,
+  finishedAt: true,
 } satisfies Record<keyof GameStateMixin, true>));
 
 /// A starting position arrives as a move argument and is merged into `G`, so
@@ -81,6 +82,17 @@ export interface GameStateTimer {
   millisecondsRemaining: number;
   start: string;
   end: string;
+  // When the match ended, if that was before `end`: absent while it runs, in a
+  // match that ran out of time, and in one played before the field existed.
+  finishedAt?: string;
+}
+
+/// Each wrapper's game-level `onEnd`, which boardgame.io runs however the
+/// match ends: a winning move, the judge's last relay answer, or a move past
+/// the time. Only an early end is stamped — a match that ran out of time ended
+/// at `end`, whenever the move that closed it came.
+export function recordFinish(G: GameStateTimer): void {
+  if (Date.now() < new Date(G.end).getTime()) G.finishedAt = new Date().toISOString();
 }
 
 export type SetupFunction<G> = () => G;

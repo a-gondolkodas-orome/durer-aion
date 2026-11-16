@@ -57,6 +57,27 @@ describe("RelayWrapper end report", () => {
   });
 });
 
+describe("RelayWrapper finish time", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("a relay finished early records the time of its last answer", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-10T10:00:00Z"));
+    const client = Client({ game: RelayWrapper(), numPlayers: 2 });
+    client.start();
+    client.moves.startGame();
+    client.moves.firstProblem("first problem text", [2], "");
+    client.moves.submitAnswer(120);
+
+    vi.setSystemTime(new Date("2026-10-10T10:12:00Z"));
+    client.moves.endGame(true);
+
+    expect(client.getState()?.G.finishedAt).toStrictEqual("2026-10-10T10:12:00.000Z");
+  });
+});
+
 describe("GameRelay move log", () => {
   const timeOfMoves = new Date("2026-11-14T09:30:00.000Z");
 
