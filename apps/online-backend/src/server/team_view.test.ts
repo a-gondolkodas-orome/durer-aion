@@ -62,6 +62,7 @@ describe("publicTeamView", () => {
         languages: ["hu"],
         relay: { durationMinutes: 60, problemPoints: [3, 3, 4, 4, 4, 5, 5, 6, 6] },
         strategy: { durationMinutes: 30, gameId: "20o-e" },
+        advancingPoints: 25,
         metadata: { kind: "competition", edition: 20, round: "online", category: "E" },
       },
       startWindow: null,

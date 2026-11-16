@@ -166,6 +166,13 @@ describe('validateCompetition', () => {
     expect(validateCompetition({ ...base, relay: zero, strategy: fractional }, references)).toHaveLength(2);
   });
 
+  it('refuses advancing points that are not a positive integer', () => {
+    expect(validateCompetition({ ...base, relay, advancingPoints: 25 }, references)).toEqual([]);
+    expect(validateCompetition({ ...base, relay, advancingPoints: 0 }, references)).toEqual([
+      'competition a1b2c3d4e5--online-c: the advancing points 0 are not a positive integer',
+    ]);
+  });
+
   it('refuses an empty relay', () => {
     expect(validateCompetition({ ...base, relay: { ...relay, problems: [] } }, references)).toEqual([
       `competition ${competition.id}: the relay has no problems`,

@@ -24,6 +24,7 @@ export const competitions: CompetitionBank = {
       ],
     },
     strategy: { durationMinutes: 30, gameId: '20o-c' },
+    advancingPoints: 25,
     metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
   },
   'u4lw7pcca1--20-online-d': {
@@ -43,6 +44,7 @@ export const competitions: CompetitionBank = {
       ],
     },
     strategy: { durationMinutes: 30, gameId: '20o-d' },
+    advancingPoints: 25,
     metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' },
   },
   'wkr6zml6mu--20-online-e': {
@@ -62,6 +64,7 @@ export const competitions: CompetitionBank = {
       ],
     },
     strategy: { durationMinutes: 30, gameId: '20o-e' },
+    advancingPoints: 25,
     metadata: { kind: 'competition', edition: 20, round: 'online', category: 'E' },
   },
 };
