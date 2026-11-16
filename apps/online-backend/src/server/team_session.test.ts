@@ -152,6 +152,7 @@ describe("the team routes over HTTP", () => {
     const response = await request("/team/me", { headers: { cookie: `${TEAM_COOKIE}=${GUID}` } });
 
     expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ code: "NOT_LOGGED_IN" });
     const expiry = response.headers.getSetCookie();
     expect(expiry).toHaveLength(1);
     expect(expiry[0]).toMatch(new RegExp(`^${TEAM_COOKIE}=; path=${TEAM_COOKIE_PATH}; expires=`));
@@ -170,6 +171,20 @@ describe("the team routes over HTTP", () => {
     expect(response.headers.getSetCookie()[0]).toMatch(new RegExp(`^${TEAM_COOKIE}=${GUID}; path=${TEAM_COOKIE_PATH};`));
   });
 
+  it("tells a code no team has from a refusal of another kind", async () => {
+    const request = await serve(teamsWith(null));
+
+    const response = await request("/team/join", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: "999-9999-999" }),
+    });
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ code: "UNKNOWN_JOIN_CODE" });
+    expect(response.headers.getSetCookie()).toHaveLength(0);
+  });
+
   // A form another site auto-submits is a top-level navigation whose answer
   // may set the cookie (login CSRF); a JSON body cannot be sent that way.
   it("refuses to log a team in from a form post", async () => {
@@ -183,6 +198,7 @@ describe("the team routes over HTTP", () => {
     });
 
     expect(response.status).toBe(415);
+    expect(await response.json()).toMatchObject({ code: "JSON_REQUIRED" });
     expect(response.headers.getSetCookie()).toHaveLength(0);
     expect(teams.getTeam).not.toHaveBeenCalled();
   });

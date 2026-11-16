@@ -3,6 +3,7 @@ import type { DefaultState } from 'koa';
 import type { Server } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { TeamModel } from './model';
+import { refuse, writeRefusal } from './api_error';
 
 /** The team's session: its GUID in an HttpOnly cookie (issue #89).
  *
@@ -95,8 +96,7 @@ export function requireTeam(teams: TeamsRepository): Router.Middleware<TeamState
       if (teamId !== undefined) {
         clearTeamCookie(ctx);
       }
-      ctx.status = 401;
-      ctx.body = 'Not logged in.';
+      writeRefusal(ctx, 401, 'NOT_LOGGED_IN', 'Not logged in.');
       return;
     }
     ctx.state.team = team;
@@ -117,7 +117,7 @@ export function requireTeam(teams: TeamsRepository): Router.Middleware<TeamState
  */
 export const requireJson: Router.Middleware<DefaultState, Server.AppCtx> = async (ctx, next) => {
   if (!ctx.is('json')) {
-    ctx.throw(415, 'Expected application/json.');
+    refuse(ctx, 415, 'JSON_REQUIRED', 'Expected application/json.');
   }
   await next();
 };

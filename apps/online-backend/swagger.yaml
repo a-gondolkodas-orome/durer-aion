@@ -4,7 +4,10 @@ openapi: 3.0.0
 info:
   title: Teams and Games API
   version: 1.0.0
-  description: API for managing teams, games, and matches
+  description: >
+    API for managing teams, games, and matches. A request the server refuses
+    is answered with an ApiError body, `{ code, message }`; the code says why,
+    and is what a client reads.
 
 servers:
   - url: http://localhost:8000
@@ -88,8 +91,14 @@ paths:
           description: Match not found
         "500":
           description: Team not found
-        "501":
-          description: Restarting finished match not supported
+        "409":
+          description: >
+            STALE_MATCH_ID, the match is not the team's current one; or
+            MATCH_FINISHED, the match is over
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
 
   /game/admin/{matchId}/metadata:
     get:
@@ -354,15 +363,11 @@ paths:
                           type: string
                         description: Log messages
         "400":
-          description: Invalid file format or multiple files uploaded
+          description: NO_FILE, MULTIPLE_FILES, or NOT_TSV
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: Description of the import error
+                $ref: "#/components/schemas/ApiError"
   /team/join:
     post:
       summary: Log a team in
@@ -394,9 +399,11 @@ paths:
         "400":
           description: No join code in the body
         "404":
-          description: Team not found
+          description: UNKNOWN_JOIN_CODE, no team has this join code
         "415":
           description: The body is not JSON, or there is none — a form post cannot log a team in
+        "429":
+          description: TOO_MANY_ATTEMPTS, too many wrong codes from this client; Retry-After says for how long
 
   /team/me/logout:
     post:
@@ -525,6 +532,38 @@ components:
       The team's GUID, set by POST /team/join and set afresh by every /team/me
       request it admits. HttpOnly, SameSite=Lax, path /team/me.
   schemas:
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_BODY
+            - INVALID_START_WINDOW
+            - NO_FILE
+            - MULTIPLE_FILES
+            - NOT_TSV
+            - NOT_LOGGED_IN
+            - START_NOT_ALLOWED
+            - NO_SUCH_MATCH
+            - COMPETITION_NOT_STARTED
+            - COMPETITION_OVER
+            - VIEW_NOT_ALLOWED
+            - MATCH_IN_PROGRESS
+            - UNKNOWN_JOIN_CODE
+            - TEAM_NOT_FOUND
+            - MATCH_NOT_FOUND
+            - GAME_NOT_FOUND
+            - COMPETITION_NOT_FOUND
+            - STALE_MATCH_ID
+            - MATCH_FINISHED
+            - JSON_REQUIRED
+            - TOO_MANY_ATTEMPTS
+        message:
+          type: string
+          description: English, for a person reading the response; clients show their own translation of the code
+
     GUID:
       type: string
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"

@@ -7,6 +7,7 @@ import { parse } from "yaml";
 import type { TeamsRepository } from "./db";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { API_ERROR_CODES } from "schemas";
 
 // swagger.yaml is written by hand; this is what keeps its route list honest.
 // It checks which routes exist and their path parameters, not the shapes of
@@ -15,7 +16,10 @@ import { configureTeamsRouter } from "./router";
 const HTTP_METHODS = ["get", "put", "post", "delete", "patch", "options", "head"];
 
 interface Operation { parameters?: { in: string; name: string }[] }
-interface Spec { paths: Record<string, Record<string, Operation>> }
+interface Spec {
+  paths: Record<string, Record<string, Operation>>;
+  components: { schemas: { ApiError: { properties: { code: { enum: string[] } } } } };
+}
 
 const spec = parse(readFileSync(join(__dirname, "..", "..", "swagger.yaml"), "utf8")) as Spec;
 
@@ -50,5 +54,9 @@ describe("swagger.yaml", () => {
         expect(declared, `${method.toUpperCase()} ${path}`).toEqual(inPath);
       }
     }
+  });
+
+  it("lists the error codes the server answers with", () => {
+    expect(spec.components.schemas.ApiError.properties.code.enum).toEqual([...API_ERROR_CODES]);
   });
 });
