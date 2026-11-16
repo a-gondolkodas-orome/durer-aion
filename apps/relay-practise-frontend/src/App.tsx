@@ -46,7 +46,9 @@ function App() {
   // A stored test the site no longer lists, such as one saved under an
   // earlier version's codes, reads as none: the selector shows again.
   const practiceSet = storedTeamState ? findPracticeSet(storedTeamState.teamName) : undefined;
-  const teamState = practiceSet ? storedTeamState : null;
+  // `undefined` while the stored test is still being read: neither the
+  // selector nor a round shows yet.
+  const teamState = storedTeamState === undefined ? undefined : practiceSet ? storedTeamState : null;
 
   // Shown in the header instead of the set's id.
   const setTitle = () => {
@@ -101,7 +103,7 @@ function App() {
               data-testid="mainRoot"
             >
               <ErrorBoundary>
-                {!teamState && <LoginLayout><LoginToRelay /></LoginLayout>}
+                {teamState === null && <LoginLayout><LoginToRelay /></LoginLayout>}
                 {teamState && <Relay state={teamState}/>}
               </ErrorBoundary>
             </Container>
