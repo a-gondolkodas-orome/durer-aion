@@ -353,9 +353,11 @@ export const strategyGameFactory = <TBoard, TTurnState = unknown>({
     const visibleVariants = getVariantsForMode(mode);
 
     return (
-    <main className="flex flex-col p-2 pb-16 md:pb-2 min-h-dvh">
+    // The gutter is the content's, not main's: padding here would inset the
+    // header's green bar from the window's edges.
+    <main className="flex flex-col pb-16 md:pb-2 min-h-dvh">
       <GameHeader />
-      <div className="flex justify-center grow">
+      <div className="flex justify-center grow px-2 pt-2">
         <div className="max-w-[100ch] w-full">
           <GameRule ruleDescription={activeVariant.rule ?? rule} />
           <div className="flex flex-wrap">
