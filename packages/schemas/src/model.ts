@@ -25,6 +25,9 @@ export interface InProgressMatchStatus {
 /// decides navigation: the team may not start this match again and may go back
 /// home.
 ///
+/// Online, `endAt` is when the match actually ended (`G.finishedAt`), or its
+/// `G.end` if it ran out of time.
+///
 /// `relayResults` and `strategyResults` are for the home page: the first on a
 /// relay match, the second on a strategy match. `ChooserItem` in common-frontend
 /// says when a finished match has neither.

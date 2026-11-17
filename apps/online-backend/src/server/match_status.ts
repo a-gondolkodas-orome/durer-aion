@@ -35,7 +35,10 @@ export function deriveMatchStatus(
   if (ctx.gameover === undefined && now.getTime() <= endAt.getTime())
     return { state: "IN PROGRESS", matchID, startAt, endAt };
 
-  const finished: FinishedMatchStatus = { state: "FINISHED", matchID, startAt, endAt, score: timer.points };
+  // A match that ran out of time has no `finishedAt`: it ended at `end`.
+  const finished: FinishedMatchStatus = {
+    state: "FINISHED", matchID, startAt, endAt: new Date(timer.finishedAt ?? timer.end), score: timer.points,
+  };
   if (gameType === "RELAY")
     return { ...finished, relayResults: relayProblemResults(G as MyGameState) };
   return { ...finished, strategyResults: timer.liveResults };

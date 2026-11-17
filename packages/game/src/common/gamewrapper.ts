@@ -1,7 +1,7 @@
 import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
-import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType } from './types';
+import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -118,6 +118,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
       maxMoves: 1,
     },
     name: game.name,
+    onEnd: ({ G }) => recordFinish(G),
     minPlayers: 2,
     maxPlayers: 2,
     phases: {
