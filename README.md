@@ -444,6 +444,9 @@ The home page, `/jatekok/` and `/valto/` report visits to one website on the
 self-hosted [umami](https://umami.durerinfo.hu), told apart by path. Each page
 carries its own copy of the tracker tag.
 
+Every tracked page says so in one line in its footer, beside the build's short
+commit hash; the competition and the dry run say it on the login page only.
+
 Umami records the device's *screen* by itself (Overview → Environment → More →
 Screen). The tag's `onload` adds what layout work needs and the screen does not
 say, as session data under Sessions → Properties: `viewport`, the browser

@@ -43,7 +43,7 @@ const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff'
 // app's alone; `{ admin: false }` renders as the local apps do.
 const renderMain = (options: { admin: boolean } = { admin: true }) => {
   const repo = new MockClientRepository();
-  const main = <Main gitCommitHash="test" />;
+  const main = <Main gitCommitHash="0123456789abcdef" />;
   return render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
@@ -228,4 +228,26 @@ test.each([
   mockState();
   const { queryByTestId } = renderMain();
   expect(queryByTestId("loginLogo")).toBeNull();
+});
+
+const trackingNote = /Névtelen használati statisztikát/;
+
+test('the footer names the build by its short hash, with the tracking note on the login page', () => {
+  const { getByText } = renderMain();
+  expect(getByText('verzió: 0123456')).toBeInTheDocument();
+  expect(getByText(trackingNote)).toBeInTheDocument();
+});
+
+test('a team past the login page keeps the version but not the tracking note', () => {
+  MockTeamState.mockRelay();
+  const { getByText, queryByText } = renderMain();
+  expect(getByText('verzió: 0123456')).toBeInTheDocument();
+  expect(queryByText(trackingNote)).not.toBeInTheDocument();
+});
+
+// An admin page loads no tracker (tracking.ts), so it has nothing to note.
+test('the admin page carries no tracking note', () => {
+  window.history.replaceState({}, '', '/admin');
+  const { queryByText } = renderMain();
+  expect(queryByText(trackingNote)).not.toBeInTheDocument();
 });

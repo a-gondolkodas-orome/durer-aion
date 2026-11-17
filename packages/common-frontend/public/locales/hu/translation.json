@@ -71,6 +71,10 @@
     "unexpected": "Váratlan hiba történt",
     "viewNotAllowed": "A stratégiás játékot most nem lehet megnézni."
   },
+  "footer": {
+    "tracking": "Névtelen használati statisztikát gyűjtünk, sütik nélkül.",
+    "version": "verzió: {{hash}}"
+  },
   "general": {
     "backHome": "Vissza a kezdőlapra",
     "close": "Bezárás",
@@ -104,7 +108,6 @@
     "error": {
       "empty": "Nem adtál meg kódot!",
       "wrongid": "Rossz belépési kód!",
-      "noRound": "Nem választottál még fordulót!",
       "tooManyAttempts": "Túl sok hibás próbálkozás, várj egy percet!"
     },
     "fallback": "Ha nem találjátok az emailt, akkor írjatok nekünk a verseny [K] durerinfo [P] hu email címre.",
