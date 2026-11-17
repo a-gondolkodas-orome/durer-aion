@@ -2,9 +2,9 @@ import type { PostgresStore } from 'bgio-postgres';
 import { Sequelize, UniqueConstraintError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH, TeamModel } from './model';
-import { import_teams_from_tsv } from './team_import';
+import { import_teams_from_tsv, import_teams_from_tsv_locally } from './team_import';
 import { registry } from 'problem-bank/all';
-import { readFileSync } from 'fs';
+import { existsSync, openSync, readFileSync, unlinkSync, writeSync } from 'fs';
 import type { Mock, MockInstance } from 'vitest';
 
 vi.mock('fs');
@@ -579,6 +579,45 @@ describe('import_teams_from_tsv', () => {
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv', registry.competitionSource);
 
       expect(result).toMatchObject({ successful: 1, existing: 0, failed: 1 });
+    });
+  });
+
+  describe('import_teams_from_tsv_locally', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    });
+
+    // #784: the prod backend runs as `node`, and an import run without the
+    // host's uid cannot write into the bind-mounted scripts/.
+    it('adds no team when it cannot write the export', async () => {
+      tsv(['Test Team', C, '', '', '', '', '']);
+      (openSync as Mock).mockImplementation(() => {
+        throw Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' });
+      });
+
+      await expect(import_teams_from_tsv_locally(teams, 'dummy_file.tsv', registry.competitionSource))
+        .rejects.toThrow('EACCES');
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('writes the export, header first', async () => {
+      tsv(['Test Team', C, '', '', '', '', '']);
+      (openSync as Mock).mockReturnValue(7);
+
+      await import_teams_from_tsv_locally(teams, 'dummy_file.tsv', registry.competitionSource);
+
+      expect(openSync).toHaveBeenCalledWith('dummy_file.tsv.export', 'a');
+      expect(String((writeSync as Mock).mock.calls[0][1])).toMatch(/^Teamname\tCompetition\t.*\nTest Team\t/);
+    });
+
+    it('removes an export it created when the import throws', async () => {
+      tsv(['Test Team', C, '', '', '', '', '']);
+      (existsSync as Mock).mockReturnValue(false);
+      vi.spyOn(TeamModel, 'findAll').mockRejectedValue(new Error('connection lost'));
+
+      await expect(import_teams_from_tsv_locally(teams, 'dummy_file.tsv', registry.competitionSource))
+        .rejects.toThrow('connection lost');
+      expect(unlinkSync).toHaveBeenCalledWith('dummy_file.tsv.export');
     });
   });
 });

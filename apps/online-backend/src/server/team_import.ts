@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { closeSync, existsSync, ftruncateSync, openSync, readFileSync, unlinkSync, writeSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
@@ -141,14 +141,31 @@ function generateLoginCode() {
 export async function import_teams_from_tsv_locally(
   teams: TeamsRepository, filename: string, competitionSource: CompetitionSource,
 ) {
-  const { successful, existing, updated, failed, export_table, logs } =
-    await import_teams_from_tsv(teams, filename, competitionSource);
-  for (let i = 0; i < logs.value.length; i++) {
-    console[logs.sev[i]](logs.value[i]);
+  // The export is opened before any team is written: an import that adds teams
+  // and then cannot write their join codes looks failed while it is not, and
+  // the codes it made are in the database alone. Appending neither truncates an
+  // earlier export nor needs one, and fails as the write itself would: a
+  // directory the user cannot write (DEPLOYMENT.md § 7), a read-only mount.
+  const exportPath = `${filename}.export`;
+  const existed = existsSync(exportPath);
+  const fd = openSync(exportPath, 'a');
+  try {
+    const { successful, existing, updated, failed, export_table, logs } =
+      await import_teams_from_tsv(teams, filename, competitionSource);
+    for (let i = 0; i < logs.value.length; i++) {
+      console[logs.sev[i]](logs.value[i]);
+    }
+    console.info(`Összesen ${successful} csapat került be, ${existing} már szerepelt (${updated} frissült), ${failed} sor hibás.`);
+    export_table.unshift([...COLUMNS]);
+    ftruncateSync(fd, 0);
+    writeSync(fd, export_table.map(row => row.join('\t')).join('\n'), null, 'utf-8');
+  } catch (e) {
+    // An empty export beside the TSV would read as an import of no teams.
+    if (!existed) unlinkSync(exportPath);
+    throw e;
+  } finally {
+    closeSync(fd);
   }
-  console.info(`Összesen ${successful} csapat került be, ${existing} már szerepelt (${updated} frissült), ${failed} sor hibás.`);
-  export_table.unshift([...COLUMNS]);
-  writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
 }
 
 export async function import_teams_from_tsv(

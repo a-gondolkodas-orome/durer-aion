@@ -13,4 +13,14 @@ if [ "$#" -ne 1 ]; then
   exit 2
 fi
 
+# The export goes beside the TSV. The prod image runs as `node`, uid 1000, which
+# cannot write a bind-mounted directory another uid owns; the importer would
+# refuse with a bare EACCES, so say here what to run instead.
+if [ ! -w "$(dirname -- "$1")" ] || { [ -e "$1.export" ] && [ ! -w "$1.export" ]; }; then
+  echo "import_teams.sh: uid $(id -u) cannot write $1.export." >&2
+  echo "Run it as the owner of that directory (DEPLOYMENT.md § 7):" >&2
+  echo "  docker compose --env-file=.env.docker exec --user \"\$(id -u):\$(id -g)\" backend ./scripts/import_teams.sh $1" >&2
+  exit 1
+fi
+
 node apps/online-backend/dist/import_teams.js "$1"

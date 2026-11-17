@@ -10,14 +10,15 @@
 
 import { spawnSync } from 'node:child_process';
 
-const tsv = process.argv[2] ?? 'scripts/test.tsv';
-
 const user = process.getuid ? ['--user', `${process.getuid()}:${process.getgid()}`] : [];
 
 const { status, error } = spawnSync(
   'docker',
-  ['compose', '--env-file=.env.docker', 'exec', ...user, 'backend', './scripts/import_teams.sh', tsv],
+  ['compose', '--env-file=.env.docker', 'exec', ...user, 'backend', './scripts/import_teams.sh', ...process.argv.slice(2)],
   { stdio: 'inherit' },
 );
-if (error) throw error;
+if (error) {
+  console.error(error.code === 'ENOENT' ? 'teams:import needs docker on the PATH.' : error.message);
+  process.exit(1);
+}
 process.exit(status ?? 1);
