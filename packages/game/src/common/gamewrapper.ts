@@ -87,6 +87,15 @@ export interface StrategyOptions {
 
 /// What the server starts a strategy match with: the competition's duration
 /// as it stands then.
+/// The phases gameWrapper runs every strategy game through. `ctx.phase` is a
+/// plain string to boardgame.io, so whatever reads it — the board wrapper, the
+/// server's bot — compares it with these rather than with a literal of its own.
+export const PHASE = {
+  startNewGame: "startNewGame",
+  chooseRole: "chooseRole",
+  play: "play",
+} as const;
+
 export interface StrategySetupData {
   durationMinutes: number;
 }
@@ -122,9 +131,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     minPlayers: 2,
     maxPlayers: 2,
     phases: {
-      startNewGame: {
+      [PHASE.startNewGame]: {
         moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
-        next: "chooseRole",
+        next: PHASE.chooseRole,
         // The team picks the difficulty, the bot answers with the position,
         // and the phase ends with that one round of turns.
         turn: {
@@ -132,18 +141,18 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
         start: true,
       },
-      chooseRole: {
+      [PHASE.chooseRole]: {
         moves: { ...timestampMoves({ chooseRole }), getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
-        next: "play",
+        next: PHASE.play,
         turn: {
           order: TurnOrder.RESET,
         },
       },
-      play: {
+      [PHASE.play]: {
         moves: { ...timestampMoves(game.moves ?? {}), getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
-        next: "startNewGame",
+        next: PHASE.startNewGame,
         turn: {
           order: {
             first: ({ G }) => {

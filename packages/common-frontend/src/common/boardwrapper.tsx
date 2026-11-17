@@ -15,7 +15,7 @@ import { useBackToHome, useTeamState } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
-import { GUESSER_PLAYER, JUDGE_PLAYER, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
+import { GUESSER_PLAYER, JUDGE_PLAYER, PHASE, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
 import type { Difficulty, GamePresentation, GameStateMixin } from "game";
 import type { LiveGameResult } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
@@ -164,7 +164,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // new game.
     const judgeToMove = ctx.currentPlayer === JUDGE_PLAYER;
     const teamToMove = !judgeToMove && !finished;
-    const betweenGames = ctx.phase === 'startNewGame';
+    const betweenGames = ctx.phase === PHASE.startNewGame;
     // `difficulty` and `winner` outlive the game they describe until the next
     // one is chosen, so between games they are the last game's mode and result.
     const difficulty = G.difficulty ?? null;
@@ -208,7 +208,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         tone = 'won';
       } else {
         status = t('strategy.result.timeUp');
-        sub = ctx.phase === 'play' || ctx.phase === 'chooseRole' ? t('strategy.result.unfinished') : '';
+        sub = ctx.phase === PHASE.play || ctx.phase === PHASE.chooseRole ? t('strategy.result.unfinished') : '';
       }
     } else if (betweenGames && difficulty === null) {
       status = t('strategy.intro.title');
@@ -242,7 +242,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
           ? (startVaries ? t('strategy.result.practiceNoteBotVaries') : t('strategy.result.practiceNoteBot'))
           : startVaries ? t('strategy.result.practiceNoteStart') : null;
       }
-    } else if (ctx.phase === 'chooseRole') {
+    } else if (ctx.phase === PHASE.chooseRole) {
       status = t('strategy.status.role');
       sub = startVaries ? t('strategy.status.lookAtPosition') : '';
       actions = (
@@ -263,7 +263,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     }
     // The role the team chose, on the chip at the board's edge: only while a
     // game is played, when the board is what the team reads.
-    const role = ctx.phase !== 'play' || finished || G.firstPlayer == null ? null
+    const role = ctx.phase !== PHASE.play || finished || G.firstPlayer == null ? null
       : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
@@ -271,7 +271,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     const boardState: BoardState =
       finished ? 'locked'
       : betweenGames ? (lastResult !== null && !judgeToMove ? 'locked' : 'empty')
-      : ctx.phase === 'chooseRole' ? 'locked'
+      : ctx.phase === PHASE.chooseRole ? 'locked'
       : teamToMove ? 'live' : 'waiting';
 
     const pulse = {
