@@ -85,7 +85,6 @@ export function getPlayerStepDescription({ G, ctx }: { G: Position, ctx: Pick<Ct
 
 export function MyGameWrapper(category: Category): GameType<MyGameState> {
   return {
-    name: `20o${category.toLowerCase()}`,
     setup: () => startingPosition(category),
     possibleMoves,
     // The roles name each side's mark, which the first player's depends on by

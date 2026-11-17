@@ -71,7 +71,6 @@ export function getPlayerStepDescription({ G, ctx }: { G: Position, ctx: Pick<Ct
 
 export function MyGameWrapper(): GameType<MyGameState> {
   return {
-    name: 'mintaketkupac',
     setup: startingPosition,
     possibleMoves,
     roleLabels: ['Kezdő (1–3 korong)', 'Második (1–4 korong)'],

@@ -144,6 +144,9 @@ interface GameMixin<G> extends GamePresentation<G> {
 
 /// Base structure, passed through directly to boardgame.io.
 interface WrappableGame<G = unknown, PluginAPIs extends Record<string, unknown> = Record<string, unknown>> {
+  // The match's name, which the host gives it: `strategyGameName(gameId)`
+  // online, a name per competition in the offline dry run. A game's own
+  // MyGameWrapper leaves it out.
   name?: string;
   minPlayers?: number;
   maxPlayers?: number;

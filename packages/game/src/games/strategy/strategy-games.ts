@@ -1,6 +1,6 @@
 // The strategy games' registries, one per package entry. This one is the shared
-// half: the game definitions and their names, which the server and every client
-// need alike. The bots live in strategy-bots.ts (the `game/bot` entry) and the
+// half: the game definitions, which the server and every client need alike.
+// The bots live in strategy-bots.ts (the `game/bot` entry) and the
 // boards and descriptions in strategy-client.ts (`game/client`), and each
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
@@ -49,13 +49,3 @@ export const MyGameWrappers: { [K in StrategyGameKey]: () => GameType<StrategyGa
   "minta-ketkupac": () => GameWrapperKetkupac(),
   "minta-sablon": () => GameWrapperSablon(),
 };
-
-export const strategyNames = {
-  // need to be unique even if the game is the same
-  // should also match up with the name defined in game.ts
-  "20o-c": "20oc",
-  "20o-d": "20od",
-  "20o-e": "20oe",
-  "minta-ketkupac": "mintaketkupac",
-  "minta-sablon": "mintasablon",
-} satisfies Record<StrategyGameKey, string>;

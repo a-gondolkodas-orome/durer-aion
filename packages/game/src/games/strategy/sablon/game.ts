@@ -33,7 +33,6 @@ export function possibleMoves(G: Position, ctx: Pick<Ctx, 'phase'>): { move: str
 
 export function MyGameWrapper(): GameType<MyGameState> {
   return {
-    name: 'mintasablon',
     // Never played: the bot's opening replaces it before the first move.
     setup: () => startingPosition(OPENING_RANGE.min),
     possibleMoves,
