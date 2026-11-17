@@ -319,7 +319,7 @@
     "strategyGameNotInLanguages": "a stratégiás játék ({{gameId}}) a verseny egyik nyelvén sincs meg",
     "strategyGameUnknown": "nincs ilyen stratégiás játék: {{gameId}}",
     "textEmpty": "a szövege üres ({{language}})",
-    "unknownRound": "a forduló („{{round}}”) nem ezek egyike: {{rounds}}",
+    "unknownRound": "a forduló („{{round}}”) nem ezek egyike: online, local, final",
     "unsupportedLanguage": "nem támogatott nyelv: „{{language}}”"
   }
 }

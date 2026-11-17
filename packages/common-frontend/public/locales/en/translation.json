@@ -323,7 +323,7 @@
     "strategyGameNotInLanguages": "the strategy game ({{gameId}}) is in none of the competition's languages",
     "strategyGameUnknown": "no such strategy game: {{gameId}}",
     "textEmpty": "its text is empty ({{language}})",
-    "unknownRound": "the round (“{{round}}”) is not one of {{rounds}}",
+    "unknownRound": "the round (“{{round}}”) is not one of online, local, final",
     "unsupportedLanguage": "unsupported language: “{{language}}”"
   }
 }

@@ -46,7 +46,7 @@ export interface ValidationParams {
   FINISH_MESSAGE_EMPTY: { language: string };
   FINISH_MESSAGE_NOT_IN_LANGUAGES: Record<never, never>;
   EDITION_NOT_POSITIVE: { edition: number };
-  UNKNOWN_ROUND: { round: string, rounds: string };
+  UNKNOWN_ROUND: { round: string };
   CATEGORY_EMPTY: Record<never, never>;
   LABEL_IN_NO_LANGUAGE: Record<never, never>;
   LABEL_UNKNOWN_LANGUAGE: { language: string };
@@ -105,7 +105,7 @@ const ENGLISH: { [C in ValidationCode]: (params: ValidationParams[C]) => string 
   FINISH_MESSAGE_EMPTY: ({ language }) => `the ${language} finish message is empty`,
   FINISH_MESSAGE_NOT_IN_LANGUAGES: () => 'the finish message is in none of the competition\'s languages',
   EDITION_NOT_POSITIVE: ({ edition }) => `the edition ${edition} is not a positive integer`,
-  UNKNOWN_ROUND: ({ round, rounds }) => `the round "${round}" is not one of ${rounds}`,
+  UNKNOWN_ROUND: ({ round }) => `the round "${round}" is not one of ${ROUNDS.join(', ')}`,
   CATEGORY_EMPTY: () => 'the category is empty',
   LABEL_IN_NO_LANGUAGE: () => 'the label is in no language',
   LABEL_UNKNOWN_LANGUAGE: ({ language }) => `the label is in the unknown language "${language}"`,
@@ -265,7 +265,7 @@ export function validateCompetition(competition: CompetitionConfig, references: 
       findings.push(finding('EDITION_NOT_POSITIVE', subject, { edition: metadata.edition }));
     }
     if (!(ROUNDS as readonly string[]).includes(metadata.round)) {
-      findings.push(finding('UNKNOWN_ROUND', subject, { round: metadata.round, rounds: ROUNDS.join(', ') }));
+      findings.push(finding('UNKNOWN_ROUND', subject, { round: metadata.round }));
     }
     if (metadata.category.trim() === '') {
       findings.push(finding('CATEGORY_EMPTY', subject));
