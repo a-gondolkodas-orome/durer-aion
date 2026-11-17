@@ -494,8 +494,10 @@ may share a category, and a practice set has none. `CompetitionConfig` in
 `competition.ts` (`packages/schemas`) is the model, with every field explained.
 
 Competitions and their problems live in code, one bank per file under
-`packages/problem-bank/banks/`; `edition-20-online.ts` is the one to copy for a
-round of the Dürer, `reference.ts` for anything else.
+`packages/problem-bank/banks/`, or in the database's `Competitions` and
+`Problems` tables, which the server serves beside them; an id in both stops it
+at start. What follows is the code's way; `edition-20-online.ts` is the one to
+copy for a round of the Dürer, `reference.ts` for anything else.
 
 1. **Ids.** `npm run new-id -- <slug>` prints one for each slug: ten random
    characters, `--`, then the slug, such as `mkhi1nnoim--20-online-c`. An id

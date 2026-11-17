@@ -1,7 +1,16 @@
 import { PostgresStore } from 'bgio-postgres';
 import { env } from 'process';
 import type { GameType, StartWindow } from 'schemas';
-import { CompetitionWindowModel, competitionWindowAttributes, teamAttributes, TeamModel } from './model';
+import {
+  competitionAttributes,
+  CompetitionModel,
+  CompetitionWindowModel,
+  competitionWindowAttributes,
+  problemAttributes,
+  ProblemModel,
+  teamAttributes,
+  TeamModel,
+} from './model';
 import { Sequelize, WhereOptions } from 'sequelize';
 
 export class TeamsRepository {
@@ -15,6 +24,14 @@ export class TeamsRepository {
     CompetitionWindowModel.init(competitionWindowAttributes, {
       sequelize: db.sequelize,
       tableName: "CompetitionWindows",
+    });
+    CompetitionModel.init(competitionAttributes, {
+      sequelize: db.sequelize,
+      tableName: "Competitions",
+    });
+    ProblemModel.init(problemAttributes, {
+      sequelize: db.sequelize,
+      tableName: "Problems",
     });
   }
   async connect() {

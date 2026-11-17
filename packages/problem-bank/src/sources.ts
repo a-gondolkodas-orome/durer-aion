@@ -55,6 +55,47 @@ export function inCodeCompetitionSource(competitions: ReadonlyMap<CompetitionId,
   };
 }
 
+/// One `ProblemSource` serving the problems of all of `sources`. An id two of
+/// them return is an error rather than either one's problem: the server refuses
+/// to start with an id in both the code and the database, so reaching one here
+/// means a source started handing it out since.
+export function combinedProblemSource(sources: readonly ProblemSource[]): ProblemSource {
+  return {
+    async getProblems(ids) {
+      const found = new Map<ProblemId, Problem>();
+      for (const problems of await Promise.all(sources.map(source => source.getProblems(ids)))) {
+        for (const [id, problem] of problems) {
+          if (found.has(id)) throw new Error(`Two sources hold the problem ${id}`);
+          found.set(id, problem);
+        }
+      }
+      return found;
+    },
+  };
+}
+
+/// One `CompetitionSource` serving the competitions of all of `sources`, with
+/// an id two of them hold an error, as in `combinedProblemSource`.
+export function combinedCompetitionSource(sources: readonly CompetitionSource[]): CompetitionSource {
+  return {
+    async getCompetition(id) {
+      const found = (await Promise.all(sources.map(source => source.getCompetition(id))))
+        .filter(competition => competition !== undefined);
+      if (found.length > 1) throw new Error(`Two sources hold the competition ${id}`);
+      return found[0];
+    },
+    async listCompetitions() {
+      const all = (await Promise.all(sources.map(source => source.listCompetitions()))).flat();
+      const ids = new Set<CompetitionId>();
+      for (const { id } of all) {
+        if (ids.has(id)) throw new Error(`Two sources hold the competition ${id}`);
+        ids.add(id);
+      }
+      return all;
+    },
+  };
+}
+
 /// One problem of a relay, in play order, with what it is worth there.
 export interface RelayProblem {
   problem: Problem;
