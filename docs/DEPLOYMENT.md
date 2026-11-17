@@ -399,11 +399,12 @@ shows `limiting connections by zone "socketio_per_address"`. The number is baked
 `web` image, so raising it is an edit to `apps/online-frontend/nginx/nginx.conf` and the
 `npm run stack:prod` of step 9.
 
-Behind that, the backend limits what one address may send over all its sockets together
-(`packet_budget.ts`) and disconnects a socket past it. A board cut off that way shows the
-connection lost and stays so until the team reloads the page — socket.io does not reconnect
-after a disconnect the server made. It is sized for the same school, and a proxy in front
-collapses it the same way.
+Behind that, the backend lets a socket's packets through only with its match's credentials,
+and counts the failures per address (`socket_guard.ts`); a proxy in front collapses that count
+the same way, and one team's mistakes would then lock every team out of loading a board. What
+a team's boards send is limited per team, and a socket past its limit is disconnected: that
+board shows the connection lost until the team reloads the page, since socket.io does not
+reconnect after a disconnect the server made.
 
 Then `docker-compose.tls.yml`, beside `docker-compose.yml` in the checkout, opening the port
 and mounting both the certificates and that file:

@@ -27,6 +27,10 @@ const game = { ...gameWrapper(MyGameWrappers["minta-ketkupac"]()), name: GAME_NA
 const HUMAN_ID = "0";
 // Each test gets its own server and its own store, so one id is enough.
 const MATCH_ID = "match-under-test";
+/** What the router puts on the team's seat of every match it creates; the
+ *  socket guard lets nothing through without it. */
+const TEAM_CREDENTIALS = "the-team's";
+const BOT_CREDENTIALS = "bot-credentials-for-this-test";
 
 /** How long a step may take before the test calls it a hang. The bot pauses
  *  400ms for UX (botwrapper.ts) and then the move travels back, so this is
@@ -77,7 +81,7 @@ interface BgioState {
 }
 
 const makeMove = (type: string, args: unknown[], playerID: string) =>
-  ({ type: "MAKE_MOVE", payload: { type, args, playerID } });
+  ({ type: "MAKE_MOVE", payload: { type, args, playerID, credentials: TEAM_CREDENTIALS } });
 
 describe("the socket transport a browser talks to", () => {
   let server: BgioServer;
@@ -93,7 +97,7 @@ describe("the socket transport a browser talks to", () => {
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     // What the bot signs its moves with; the server reads it from the
     // environment (server/common.ts) and refuses to start without it.
-    vi.stubEnv("BOT_CREDENTIALS", "bot-credentials-for-this-test");
+    vi.stubEnv("BOT_CREDENTIALS", BOT_CREDENTIALS);
 
     server = Server({
       games: [game],
@@ -130,12 +134,14 @@ describe("the socket transport a browser talks to", () => {
   async function createStoredMatch(): Promise<void> {
     const match = createMatch({ game, numPlayers: 2, setupData: undefined, unlisted: true });
     if ("setupDataError" in match) throw new Error(match.setupDataError);
+    match.metadata.players[0].credentials = TEAM_CREDENTIALS;
+    match.metadata.players[1].credentials = BOT_CREDENTIALS;
     await server.db.createMatch(MATCH_ID, match);
   }
 
   async function syncAs(socket: Socket, matchID: string, playerID: string): Promise<BgioState> {
     const synced = nextEvent(socket, "sync");
-    socket.emit("sync", matchID, playerID, undefined, 2);
+    socket.emit("sync", matchID, playerID, TEAM_CREDENTIALS, 2);
     const [, payload] = await synced as [string, { state: BgioState; }];
     return payload.state;
   }
@@ -255,9 +261,6 @@ describe("the socket transport a browser talks to", () => {
 
   it("sends a sync that fails the credential check nothing more", async () => {
     await createStoredMatch();
-    const { metadata } = await server.db.fetch(MATCH_ID, { metadata: true });
-    metadata.players[0].credentials = "the-team's";
-    await server.db.setMetadata(MATCH_ID, metadata);
     const socket = await connectClient();
     const heard: string[] = [];
     socket.onAny((event: string) => heard.push(event));
@@ -282,7 +285,7 @@ describe("the socket transport a browser talks to", () => {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     // The packet is dropped rather than answered — the middleware in
-    // socketio_botmoves.ts rejects it before boardgame.io's listener sees it,
+    // socket_guard.ts rejects it before boardgame.io's listener sees it,
     // which is what stops anonymous traffic from writing matches into storage.
     expect(heard).toStrictEqual([]);
     expect(socket.connected).toBe(true);

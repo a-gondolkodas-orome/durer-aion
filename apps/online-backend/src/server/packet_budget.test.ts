@@ -19,7 +19,7 @@ describe("a socket's packet budget", () => {
   // ten seconds, and the clock's once-a-second poll for the whole of it — far
   // more polling than the last second's worth Countdown.tsx asks for.
   it("is not spent by a real client's traffic over a whole match", () => {
-    const budget = new PacketBudget();
+    const budget = new PacketBudget(SOCKET_PACKET_LIMIT);
     const sent: number[] = [0, 0];
     const matchMs = 3 * 60 * 60 * 1000;
     for (let second = 0; second * 1000 < matchMs; second++) {
@@ -34,7 +34,7 @@ describe("a socket's packet budget", () => {
   });
 
   it("stops a socket sending steadily within its first window", () => {
-    const budget = new PacketBudget();
+    const budget = new PacketBudget(SOCKET_PACKET_LIMIT);
     const refusedAt = Array.from({ length: SOCKET_PACKET_LIMIT.limit * 2 }, (_, i) => i).find(i => !budget.take(i));
     expect(refusedAt).toBe(SOCKET_PACKET_LIMIT.limit);
   });

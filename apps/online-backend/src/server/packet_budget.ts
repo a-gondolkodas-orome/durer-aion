@@ -1,48 +1,41 @@
 import type IOTypes from 'socket.io';
 import { clientKey } from './rate_limit';
 
-/** How many socket.io packets a client may send (#720).
- *
- * Every `sync` reads Postgres before anything asks who is sending it, and every
- * `update` reads it again for the bot — on the one connection pool that the
- * teams' moves and the bot's replies wait on (`getDb()`). Without a ceiling, one
- * client sending steadily keeps that pool busy and every live match waits behind
- * it. Both budgets are spent before the packet middleware reaches storage, and a
- * socket over either is disconnected.
- *
- * The one that bounds a client is the address's: a socket costs nothing to open
- * and reads nothing when it connects, so a budget of the socket's own would be
- * refilled by reconnecting, or multiplied by opening more — nginx lets one
- * address hold hundreds (`limit_conn` in `nginx.conf`). The address is
- * `clientKey`'s, the one the join limit counts, so an IPv6 subscriber's whole
- * prefix is one client.
- *
- * One address is a whole school behind its NAT, which is what the address
- * budget is sized for. Someone flooding from inside a school spends that
- * school's budget and stalls that school's boards, and nobody else's. The
- * socket's budget is the tighter second limit, so that one runaway tab is cut
- * off before it eats into the rest of its school's.
- *
- * What a real board sends is far below both: a `sync` when it connects, a
- * `getTime` when the page loads, one `update` per move, which a person makes at
- * most a few times a second for a few seconds, and in the clock's last second
- * a `getTime` once a second (`Countdown.tsx`). The suite plays a whole match of
- * that against the socket's budget. They have to sit that far above it: a
- * board the server disconnects stays disconnected until the team reloads the
- * page, since socket.io does not reconnect after a disconnect the server made.
- */
+/** Fixed-window counters for what a socket client may send (#720), and the
+ *  limits `socket_guard.ts` holds clients to with them. That file says what
+ *  each limit is for; the numbers and their sizing are here. */
+
 export interface PacketLimit {
   limit: number;
   windowMs: number;
 }
 
+/** Packets one socket may send, whoever it is.
+ *
+ * What a real board sends is far below it: a `sync` when it connects, a
+ * `getTime` when the page loads, one `update` per move, which a person makes at
+ * most a few times a second for a few seconds, and in the clock's last second
+ * a `getTime` once a second (`Countdown.tsx`). The suite plays a whole match of
+ * that against it. It has to sit that far above: a board the server
+ * disconnects stays disconnected until the team reloads the page, since
+ * socket.io does not reconnect after a disconnect the server made.
+ */
 export const SOCKET_PACKET_LIMIT: PacketLimit = { limit: 40, windowMs: 10_000 };
 
-/** Fifty teams, each with a couple of boards at the socket budget's busiest
- *  real traffic, fit with room to spare; a client flooding from one address
- *  gets a hundred reads a second, which a pool of twenty serves alongside the
- *  live matches. */
-export const ADDRESS_PACKET_LIMIT: PacketLimit = { limit: 1_000, windowMs: 10_000 };
+/** Packets one team may send over all its sockets together: a few tabs' worth
+ *  of the socket limit, so a team reloading or with a second tab open never
+ *  meets it, and one opening hundreds of sockets is held to this. */
+export const TEAM_PACKET_LIMIT: PacketLimit = { limit: 200, windowMs: 10_000 };
+
+/** Packets with credentials that do not check out, per address.
+ *
+ * Only failures are charged, as on `POST /team/join` (`rate_limit.ts`), which
+ * is what makes a limit this low safe for a school behind one NAT address: its
+ * boards always present a match's own credentials and spend none of it. What
+ * fails is a client guessing, or a tab left open on a match that no longer
+ * exists — a few packets, nowhere near twenty a minute.
+ */
+export const FAILED_PACKET_LIMIT: PacketLimit = { limit: 20, windowMs: 60_000 };
 
 /** A fixed window: `limit` packets in every `windowMs` from the first packet of
  *  the window. */
@@ -50,7 +43,7 @@ export class PacketBudget {
   private windowStart = -Infinity;
   private spent = 0;
 
-  constructor(private readonly budget: PacketLimit = SOCKET_PACKET_LIMIT) {}
+  constructor(private readonly budget: PacketLimit) {}
 
   /** Charges one packet; false once the window's packets are spent. */
   take(now = Date.now()): boolean {
@@ -62,6 +55,11 @@ export class PacketBudget {
     return this.spent <= this.budget.limit;
   }
 
+  /** Gives back a packet `take` charged, once it turned out not to count. */
+  refund(): void {
+    if (this.spent > 0) this.spent -= 1;
+  }
+
   /** Whether the window is over, so the budget is as good as a fresh one. */
   expired(now: number): boolean {
     return now - this.windowStart >= this.budget.windowMs;
@@ -69,8 +67,7 @@ export class PacketBudget {
 }
 
 /** A `PacketBudget` per key. Synchronous, unlike `rate-limiter-flexible`'s
- *  limiters: socket.io dispatches a packet when its middleware calls `next`,
- *  so an awaited check could let a later packet of the socket overtake it.
+ *  limiters, so that a check never yields to a later packet of the socket.
  *
  *  A key whose window is over is forgotten, at most once a window, so a client
  *  that stopped sending does not stay in memory. */
@@ -95,14 +92,19 @@ export class KeyedPacketBudget {
     return budget.take(now);
   }
 
+  refund(key: string): void {
+    this.budgets.get(key)?.refund();
+  }
+
   /** How many keys are held; for the suite. */
   get size(): number {
     return this.budgets.size;
   }
 }
 
-/** The client a socket's packets are charged to: the address koa's `ctx.ip`
- *  would report for the request that opened it, through `clientKey`.
+/** The client a socket's failures are charged to: the address koa's `ctx.ip`
+ *  would report for the request that opened it, through `clientKey`, so that
+ *  this and the join limit count the same client.
  *
  *  With `proxy` — `app.proxy`, set in `server.ts` — that is the first
  *  `X-Forwarded-For` entry, which nginx overwrites with the address that

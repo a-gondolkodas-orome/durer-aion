@@ -4,7 +4,7 @@ import { Server } from "boardgame.io/server";
 import { createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
 import { SocketIOButBotMoves } from "./socketio_botmoves";
-import { SOCKET_PACKET_LIMIT, type PacketLimit } from "./server/packet_budget";
+import type { GuardLimits } from "./server/socket_guard";
 
 /** The transport, with the match queues it keeps open to inspection. */
 class InspectedTransport extends SocketIOButBotMoves {
@@ -22,6 +22,10 @@ const game: Game = {
 const KNOWN_MATCH = "known-match";
 const MADE_UP_MATCH = "made-up-match";
 const CHAT_MATCH = "chat-match";
+/** The team's credentials, which server/router.ts puts on player 0 of every
+ *  match it creates. */
+const TEAM_SECRET = "team-secret";
+const OTHER_TEAM_SECRET = "other-team-secret";
 
 describe("the socket transport", () => {
   const running: (() => Promise<void>)[] = [];
@@ -30,7 +34,7 @@ describe("the socket transport", () => {
     await Promise.all(running.splice(0).map(stop => stop()));
   });
 
-  async function serve(limits: { socket?: PacketLimit, address?: PacketLimit } = {}) {
+  async function serve(limits: GuardLimits = {}) {
     // boardgame.io greets the console on boot — its CORS advice and the port it
     // picked — and a test run's report is meant to have the console to itself.
     const quiet = (["log", "warn"] as const).map(
@@ -42,7 +46,7 @@ describe("the socket transport", () => {
       games: [game],
       transport,
     });
-    // As server.ts sets it: the address a packet is charged to is nginx's
+    // As server.ts sets it: the address a failure is charged to is nginx's
     // X-Forwarded-For.
     server.app.proxy = true;
     const { appServer } = await server.run(0);
@@ -74,20 +78,25 @@ describe("the socket transport", () => {
       await transport.queueFor(matchID)?.onIdle();
       await new Promise(resolve => setImmediate(resolve));
     };
-    return { db, client, hookFailures, drained };
+    return { db, client, hookFailures, drained, transport };
   }
 
-  function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH) {
-    db.createMatch(matchID, createMatch({ game, numPlayers: 2, unlisted: true, setupData: undefined }) as never);
+  function createKnownMatch(db: StorageAPI.Sync, matchID = KNOWN_MATCH, credentials = TEAM_SECRET) {
+    const match = createMatch({ game, numPlayers: 2, unlisted: true, setupData: undefined });
+    if ("setupDataError" in match) throw new Error(match.setupDataError);
+    match.metadata.players[0].credentials = credentials;
+    db.createMatch(matchID, match);
   }
 
   /** A refusal is silence; the answer to a sync sent after it is the signal
    *  that it has been dealt with. */
-  function syncBehind(socket: Socket) {
+  function syncBehind(socket: Socket, matchID = KNOWN_MATCH, credentials = TEAM_SECRET) {
     const synced = new Promise<string>(resolve => socket.on("sync", (id: string) => { resolve(id); }));
-    socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
+    socket.emit("sync", matchID, "0", credentials, 2);
     return synced;
   }
+
+  const disconnectedBy = (socket: Socket) => new Promise<string>(resolve => socket.on("disconnect", resolve));
 
   /** The match ids storage is asked for from here on, other than the one
    *  `syncBehind` reads. */
@@ -110,11 +119,7 @@ describe("the socket transport", () => {
     const { db, client } = await serve();
     createKnownMatch(db);
 
-    const socket = client();
-    const synced = new Promise<string>(resolve => socket.on("sync", (matchID: string) => { resolve(matchID); }));
-    socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
-
-    expect(await synced).toBe(KNOWN_MATCH);
+    expect(await syncBehind(client())).toBe(KNOWN_MATCH);
   });
 
   // boardgame.io's Master.onSync creates a match when it does not find one,
@@ -203,21 +208,91 @@ describe("the socket transport", () => {
     expect(reads()).toEqual([]);
   });
 
+  // Only a match's own player gets a packet through to boardgame.io (#720).
+  describe("credentials", () => {
+    const move = (credentials: string) =>
+      ({ type: "MAKE_MOVE", payload: { type: "noop", args: [], playerID: "0", credentials } });
+
+    it("refuses a sync without the match's credentials", async () => {
+      const { db, client } = await serve();
+      createKnownMatch(db);
+
+      const socket = client();
+      const answered = vi.fn();
+      socket.on("sync", answered);
+      socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
+      socket.emit("sync", KNOWN_MATCH, "0", "made up", 2);
+      await syncBehind(socket);
+
+      expect(answered).toHaveBeenCalledTimes(1);
+    });
+
+    // boardgame.io keeps a queue for every match id an update names, and
+    // drops only those of matches a socket joined.
+    it("keeps an update with made-up credentials away from boardgame.io", async () => {
+      const { db, client, transport } = await serve();
+      createKnownMatch(db);
+
+      const socket = client();
+      socket.emit("update", move("made up"), 0, MADE_UP_MATCH, "0");
+      socket.emit("update", move("made up"), 0, KNOWN_MATCH, "0");
+      await syncBehind(socket);
+
+      expect(transport.queueFor(MADE_UP_MATCH)).toBeUndefined();
+      expect(db.fetch(KNOWN_MATCH, { state: true }).state?._stateID).toBe(0);
+    });
+
+    // socket.io sends what it buffered while disconnected before the sync
+    // reconnecting sends, so a move cannot rely on a sync before it.
+    it("plays a move sent before the socket's first sync", async () => {
+      const { db, client, drained } = await serve();
+      createKnownMatch(db);
+
+      const socket = client();
+      socket.emit("update", move(TEAM_SECRET), 0, KNOWN_MATCH, "0");
+      await syncBehind(socket);
+      await drained(KNOWN_MATCH);
+
+      expect(db.fetch(KNOWN_MATCH, { state: true }).state?._stateID).toBe(1);
+    });
+
+    it("stops reading for an address's failures once it has spent its allowance", async () => {
+      const { db, client } = await serve({ failed: { limit: 2, windowMs: 60_000 } });
+      createKnownMatch(db);
+      const reads = readsOtherThanKnown(db);
+
+      const guessing = client("192.0.2.1");
+      for (let i = 0; i < 4; i++) guessing.emit("sync", MADE_UP_MATCH, "0", "guess", 2);
+      await syncBehind(client("198.51.100.1"));
+
+      expect(reads()).toEqual([MADE_UP_MATCH, MADE_UP_MATCH]);
+    });
+
+    // A school's teams share an address with whoever is guessing beside them.
+    it("keeps serving a proved board at an address that is locked out", async () => {
+      const { db, client } = await serve({ failed: { limit: 1, windowMs: 60_000 } });
+      createKnownMatch(db);
+      await syncBehind(client());
+
+      const guessing = client();
+      guessing.emit("sync", MADE_UP_MATCH, "0", "guess", 2);
+      guessing.emit("sync", MADE_UP_MATCH, "0", "guess", 2);
+
+      expect(await syncBehind(client())).toBe(KNOWN_MATCH);
+    });
+  });
+
   // One client must not keep the pool every match shares busy (#720).
   describe("packet budgets", () => {
-    function disconnectedBy(socket: Socket) {
-      return new Promise<string>(resolve => socket.on("disconnect", resolve));
-    }
-
     it("disconnects a socket over its own budget before its next packet reaches storage", async () => {
-      const { db, client } = await serve();
+      const { db, client } = await serve({ socket: { limit: 3, windowMs: 60_000 } });
       createKnownMatch(db);
       const reads = readsOtherThanKnown(db);
 
       const socket = client();
       const disconnected = disconnectedBy(socket);
-      for (let i = 0; i < SOCKET_PACKET_LIMIT.limit; i++) socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
-      socket.emit("sync", MADE_UP_MATCH, null, undefined, 2);
+      for (let i = 0; i < 3; i++) socket.emit("sync", KNOWN_MATCH, "0", TEAM_SECRET, 2);
+      socket.emit("sync", MADE_UP_MATCH, "0", "guess", 2);
 
       expect(await disconnected).toBe("io server disconnect");
       expect(reads()).toEqual([]);
@@ -225,48 +300,36 @@ describe("the socket transport", () => {
 
     // A socket costs nothing to open, so a budget that a new one refilled
     // would bound nothing.
-    it("keeps refusing a client that reconnects once its address is over budget", async () => {
-      const { db, client } = await serve({ address: { limit: 3, windowMs: 60_000 } });
+    it("shares a team's budget between its sockets, and keeps it when it reconnects", async () => {
+      const { db, client } = await serve({ team: { limit: 3, windowMs: 60_000 } });
       createKnownMatch(db);
 
-      const first = client();
-      const firstGone = disconnectedBy(first);
-      for (let i = 0; i < 4; i++) first.emit("sync", KNOWN_MATCH, null, undefined, 2);
-      expect(await firstGone).toBe("io server disconnect");
-
-      const reads = readsOtherThanKnown(db);
-      const second = client();
-      const secondGone = disconnectedBy(second);
-      second.emit("sync", MADE_UP_MATCH, null, undefined, 2);
-
-      expect(await secondGone).toBe("io server disconnect");
-      expect(reads()).toEqual([]);
-    });
-
-    it("shares an address's budget between its sockets", async () => {
-      const { db, client } = await serve({ address: { limit: 4, windowMs: 60_000 } });
-      createKnownMatch(db);
-
-      const [first, second, third] = [client(), client(), client()];
+      await syncBehind(client());
+      await syncBehind(client());
+      const third = client();
+      await syncBehind(third);
       const gone = disconnectedBy(third);
-      await Promise.all([first, second].map(socket => Promise.all([syncBehind(socket), syncBehind(socket)])));
-      third.emit("sync", KNOWN_MATCH, null, undefined, 2);
-
+      third.emit("sync", KNOWN_MATCH, "0", TEAM_SECRET, 2);
       expect(await gone).toBe("io server disconnect");
+
+      const reconnected = client();
+      const goneAgain = disconnectedBy(reconnected);
+      reconnected.emit("sync", KNOWN_MATCH, "0", TEAM_SECRET, 2);
+      expect(await goneAgain).toBe("io server disconnect");
     });
 
-    // A school's teams share one address; one flooding it must not reach
-    // the boards of another school.
-    it("leaves another address's sockets served", async () => {
-      const { db, client } = await serve({ address: { limit: 2, windowMs: 60_000 } });
+    // A team flooding cuts off its own boards, and nobody else's at its address.
+    it("leaves another team served", async () => {
+      const { db, client } = await serve({ team: { limit: 1, windowMs: 60_000 } });
       createKnownMatch(db);
+      createKnownMatch(db, CHAT_MATCH, OTHER_TEAM_SECRET);
 
-      const flooding = client("192.0.2.1");
+      const flooding = client();
       const gone = disconnectedBy(flooding);
-      for (let i = 0; i < 3; i++) flooding.emit("sync", KNOWN_MATCH, null, undefined, 2);
+      for (let i = 0; i < 2; i++) flooding.emit("sync", KNOWN_MATCH, "0", TEAM_SECRET, 2);
       await gone;
 
-      expect(await syncBehind(client("198.51.100.1"))).toBe(KNOWN_MATCH);
+      expect(await syncBehind(client(), CHAT_MATCH, OTHER_TEAM_SECRET)).toBe(CHAT_MATCH);
     });
   });
 
