@@ -39,6 +39,9 @@ export function readStartWindowBody(body: unknown): StartWindow | null | { refus
     return { refused: "opensAt and closesAt are strings or null." };
   }
   const window: StartWindow = { opensAt, ...(closesAt !== null && { closesAt }) };
-  const errors = validateStartWindow(window);
-  return errors.length > 0 ? { refused: errors.join("; ") } : window;
+  // The validator's messages are Hungarian, for organisers; a refusal's own
+  // message is English (api-error.ts).
+  return validateStartWindow(window).length > 0
+    ? { refused: "opensAt and closesAt are ISO 8601 times with an offset, closesAt after opensAt." }
+    : window;
 }

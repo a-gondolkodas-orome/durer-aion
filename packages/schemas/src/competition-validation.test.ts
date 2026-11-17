@@ -78,16 +78,16 @@ describe('validateProblem', () => {
 
   it('refuses a problem with no content, or an empty text', () => {
     expect(validateProblem({ ...hungarianOnly, content: {} })).toEqual([
-      `problem ${hungarianOnly.id}: has no content in any language`,
+      `feladat ${hungarianOnly.id}: egyik nyelven sincs szövege`,
     ]);
     expect(validateProblem({ ...hungarianOnly, content: { hu: { problemText: ' ' } } })).toEqual([
-      `problem ${hungarianOnly.id}: its hu text is empty`,
+      `feladat ${hungarianOnly.id}: a szövege üres (hu)`,
     ]);
   });
 
   it('refuses an answer that is not an integer', () => {
     expect(validateProblem({ ...hungarianOnly, answer: 1.5 })).toEqual([
-      `problem ${hungarianOnly.id}: the answer 1.5 is not an integer`,
+      `feladat ${hungarianOnly.id}: a válasz (1.5) nem egész szám`,
     ]);
   });
 });
@@ -128,7 +128,7 @@ describe('validateCompetition', () => {
 
   it('refuses a competition with neither match', () => {
     expect(validateCompetition(base, references)).toEqual([
-      `competition ${competition.id}: has neither a relay nor a strategy game`,
+      `verseny ${competition.id}: sem váltója, sem stratégiás játéka nincs`,
     ]);
   });
 
@@ -139,24 +139,24 @@ describe('validateCompetition', () => {
   it('refuses no language, or one named twice', () => {
     // Its relay problems and strategy game are then in none of its languages too.
     expect(validateCompetition({ ...competition, languages: [] }, references)).toContain(
-      `competition ${competition.id}: has no language`,
+      `verseny ${competition.id}: nincs megadva nyelve`,
     );
     expect(validateCompetition({ ...competition, languages: ['hu', 'hu'] }, references)).toEqual([
-      `competition ${competition.id}: names a language twice`,
+      `verseny ${competition.id}: egy nyelvet kétszer is felsorol`,
     ]);
   });
 
   it('refuses a window time without an offset, which would be read in local time', () => {
     const local = { ...competition, startWindow: { opensAt: '2026-10-20T15:00:00' } };
     expect(validateCompetition(local, references)).toEqual([
-      `competition ${competition.id}: opensAt "2026-10-20T15:00:00" is not an ISO 8601 time with an offset`,
+      `verseny ${competition.id}: az opensAt („2026-10-20T15:00:00”) nem időzónával megadott ISO 8601 időpont`,
     ]);
   });
 
   it('refuses a window that closes before it opens', () => {
     const backwards = { ...competition, startWindow: { opensAt: '2026-10-20T15:00:00Z', closesAt: '2026-10-20T14:00:00Z' } };
     expect(validateCompetition(backwards, references)).toEqual([
-      `competition ${competition.id}: closesAt is not after opensAt`,
+      `verseny ${competition.id}: a closesAt nem az opensAt utáni`,
     ]);
   });
 
@@ -169,23 +169,23 @@ describe('validateCompetition', () => {
   it('refuses advancing points that are not a positive integer', () => {
     expect(validateCompetition({ ...base, relay, advancingPoints: 25 }, references)).toEqual([]);
     expect(validateCompetition({ ...base, relay, advancingPoints: 0 }, references)).toEqual([
-      'competition a1b2c3d4e5--online-c: the advancing points 0 are not a positive integer',
+      'verseny a1b2c3d4e5--online-c: a továbbjutási ponthatár (0) nem pozitív egész szám',
     ]);
   });
 
   it('refuses a finish message that is empty, or in none of the competition\'s languages', () => {
     expect(validateCompetition({ ...base, relay, finishMessage: { hu: 'Köszönjük!' } }, references)).toEqual([]);
     expect(validateCompetition({ ...base, relay, finishMessage: { hu: ' ' } }, references)).toEqual([
-      `competition ${competition.id}: the hu finish message is empty`,
+      `verseny ${competition.id}: a záróüzenet üres (hu)`,
     ]);
     expect(validateCompetition({ ...base, relay, finishMessage: { en: 'Thank you!' } }, references)).toEqual([
-      `competition ${competition.id}: the finish message is in none of the competition's languages`,
+      `verseny ${competition.id}: a záróüzenet a verseny egyik nyelvén sincs megadva`,
     ]);
   });
 
   it('refuses an empty relay', () => {
     expect(validateCompetition({ ...base, relay: { ...relay, problems: [] } }, references)).toEqual([
-      `competition ${competition.id}: the relay has no problems`,
+      `verseny ${competition.id}: a váltóban nincs feladat`,
     ]);
   });
 
@@ -199,9 +199,9 @@ describe('validateCompetition', () => {
       ],
     };
     expect(validateCompetition({ ...base, relay: faulty }, references)).toEqual([
-      `competition ${competition.id}: relay problem 2 (${hungarianOnly.id}) is already in the relay`,
-      `competition ${competition.id}: relay problem 2 (${hungarianOnly.id}) is worth 0 points, not a positive integer`,
-      `competition ${competition.id}: relay problem 3 (zzzzzzzzzz--missing) does not exist`,
+      `verseny ${competition.id}: a váltó 2. feladata (${hungarianOnly.id}) korábban már szerepel a váltóban`,
+      `verseny ${competition.id}: a váltó 2. feladata (${hungarianOnly.id}): a pontértéke (0) nem pozitív egész szám`,
+      `verseny ${competition.id}: a váltó 3. feladata (zzzzzzzzzz--missing) nem létezik`,
     ]);
   });
 
@@ -211,17 +211,17 @@ describe('validateCompetition', () => {
 
   it('refuses a relay problem in none of the competition\'s languages', () => {
     expect(validateCompetition({ ...base, languages: ['en'], relay }, references)).toEqual([
-      `competition ${competition.id}: relay problem 1 (${hungarianOnly.id}) is in none of the competition's languages`,
+      `verseny ${competition.id}: a váltó 1. feladata (${hungarianOnly.id}) a verseny egyik nyelvén sincs meg`,
     ]);
   });
 
   it('refuses a strategy game that is not registered, or in none of the competition\'s languages', () => {
     const unknown = { ...base, strategy: { ...strategy, gameId: 'stones-e' } };
     expect(validateCompetition(unknown, references)).toEqual([
-      `competition ${competition.id}: the strategy game stones-e is not registered`,
+      `verseny ${competition.id}: nincs ilyen stratégiás játék: stones-e`,
     ]);
     expect(validateCompetition({ ...base, languages: ['en'], strategy }, references)).toEqual([
-      `competition ${competition.id}: the strategy game 19o-c is in none of the competition's languages`,
+      `verseny ${competition.id}: a stratégiás játék (19o-c) a verseny egyik nyelvén sincs meg`,
     ]);
     expect(validateCompetition({ ...base, languages: ['hu', 'en'], strategy }, references)).toEqual([]);
   });
@@ -234,18 +234,18 @@ describe('validateCompetition', () => {
   it('refuses an edition that is not a positive integer, or an empty category', () => {
     const metadata = { kind: 'competition', edition: 0, round: 'final', category: ' ' } as const;
     expect(validateCompetition({ ...base, relay, metadata }, references)).toEqual([
-      `competition ${competition.id}: the edition 0 is not a positive integer`,
-      `competition ${competition.id}: the category is empty`,
+      `verseny ${competition.id}: a kiadás (0) nem pozitív egész szám`,
+      `verseny ${competition.id}: a kategória üres`,
     ]);
   });
 
   it('refuses a label in no language, or an empty one', () => {
     expect(validateCompetition({ ...base, relay, metadata: { kind: 'other', label: {} } }, references)).toEqual([
-      `competition ${competition.id}: the label is in no language`,
+      `verseny ${competition.id}: a felirat egyik nyelven sincs megadva`,
     ]);
     const metadata = { kind: 'competition', edition: 19, round: 'online', category: 'E+', label: { en: '' } } as const;
     expect(validateCompetition({ ...base, relay, metadata }, references)).toEqual([
-      `competition ${competition.id}: the en label is empty`,
+      `verseny ${competition.id}: a felirat üres (en)`,
     ]);
   });
 });

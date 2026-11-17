@@ -38,34 +38,37 @@ export function validateStartWindow({ opensAt, closesAt }: StartWindow): string[
   const errors: string[] = [];
   const opens = parseInstant(opensAt);
   if (opens === undefined) {
-    errors.push(`opensAt "${opensAt}" is not an ISO 8601 time with an offset`);
+    errors.push(`az opensAt („${opensAt}”) nem időzónával megadott ISO 8601 időpont`);
   }
   if (closesAt !== undefined) {
     const closes = parseInstant(closesAt);
     if (closes === undefined) {
-      errors.push(`closesAt "${closesAt}" is not an ISO 8601 time with an offset`);
+      errors.push(`a closesAt („${closesAt}”) nem időzónával megadott ISO 8601 időpont`);
     } else if (opens !== undefined && closes <= opens) {
-      errors.push('closesAt is not after opensAt');
+      errors.push('a closesAt nem az opensAt utáni');
     }
   }
   return errors;
 }
 
+const MALFORMED_ID = 'az azonosító nem a megszokott alakú, mint például k3x9q2m7ab--hatszog-terulet';
+
 function isPositiveInteger(value: number) {
   return Number.isSafeInteger(value) && value > 0;
 }
 
-function validateLabel(label: LocalizedLabel, where: string, what = 'label'): string[] {
+/// `what` names the label with its article, as a sentence's subject.
+function validateLabel(label: LocalizedLabel, where: string, what = 'a felirat'): string[] {
   const errors: string[] = [];
   const languages = Object.keys(label);
   if (languages.length === 0) {
-    errors.push(`${where}: the ${what} is in no language`);
+    errors.push(`${where}: ${what} egyik nyelven sincs megadva`);
   }
   for (const language of languages) {
     if (!isLanguage(language)) {
-      errors.push(`${where}: the ${what} is in the unknown language "${language}"`);
+      errors.push(`${where}: ${what} ismeretlen nyelven van megadva: „${language}”`);
     } else if (label[language]?.trim() === '') {
-      errors.push(`${where}: the ${language} ${what} is empty`);
+      errors.push(`${where}: ${what} üres (${language})`);
     }
   }
   return errors;
@@ -75,24 +78,24 @@ function validateLabel(label: LocalizedLabel, where: string, what = 'label'): st
 /// means it is valid.
 export function validateProblem(problem: Problem): string[] {
   const errors: string[] = [];
-  const where = `problem ${problem.id}`;
+  const where = `feladat ${problem.id}`;
   if (!isEntityId(problem.id)) {
-    errors.push(`${where}: the id is not of the form <10 characters of [0-9a-z]>--<slug>`);
+    errors.push(`${where}: ${MALFORMED_ID}`);
   }
 
   if (!Number.isSafeInteger(problem.answer)) {
-    errors.push(`${where}: the answer ${problem.answer} is not an integer`);
+    errors.push(`${where}: a válasz (${problem.answer}) nem egész szám`);
   }
 
   const languages = Object.keys(problem.content);
   if (languages.length === 0) {
-    errors.push(`${where}: has no content in any language`);
+    errors.push(`${where}: egyik nyelven sincs szövege`);
   }
   for (const language of languages) {
     if (!isLanguage(language)) {
-      errors.push(`${where}: has content in the unknown language "${language}"`);
+      errors.push(`${where}: ismeretlen nyelvű szövege van: „${language}”`);
     } else if (problem.content[language]?.problemText.trim() === '') {
-      errors.push(`${where}: its ${language} text is empty`);
+      errors.push(`${where}: a szövege üres (${language})`);
     }
   }
 
@@ -107,21 +110,21 @@ export function validateProblem(problem: Problem): string[] {
 /// here: a problem shared between competitions is reported once that way.
 export function validateCompetition(competition: CompetitionConfig, references: CompetitionReferences): string[] {
   const errors: string[] = [];
-  const where = `competition ${competition.id}`;
+  const where = `verseny ${competition.id}`;
   if (!isEntityId(competition.id)) {
-    errors.push(`${where}: the id is not of the form <10 characters of [0-9a-z]>--<slug>`);
+    errors.push(`${where}: ${MALFORMED_ID}`);
   }
 
   if (competition.languages.length === 0) {
-    errors.push(`${where}: has no language`);
+    errors.push(`${where}: nincs megadva nyelve`);
   }
   for (const language of competition.languages) {
     if (!isLanguage(language)) {
-      errors.push(`${where}: the language "${String(language)}" is not one of the supported ones`);
+      errors.push(`${where}: nem támogatott nyelv: „${String(language)}”`);
     }
   }
   if (new Set(competition.languages).size !== competition.languages.length) {
-    errors.push(`${where}: names a language twice`);
+    errors.push(`${where}: egy nyelvet kétszer is felsorol`);
   }
 
   if (competition.startWindow !== undefined) {
@@ -129,27 +132,27 @@ export function validateCompetition(competition: CompetitionConfig, references: 
   }
 
   if (competition.advancingPoints !== undefined && !isPositiveInteger(competition.advancingPoints)) {
-    errors.push(`${where}: the advancing points ${competition.advancingPoints} are not a positive integer`);
+    errors.push(`${where}: a továbbjutási ponthatár (${competition.advancingPoints}) nem pozitív egész szám`);
   }
 
   const { finishMessage } = competition;
   if (finishMessage !== undefined) {
-    errors.push(...validateLabel(finishMessage, where, 'finish message'));
+    errors.push(...validateLabel(finishMessage, where, 'a záróüzenet'));
     if (Object.keys(finishMessage).length > 0 && !competition.languages.some(language => finishMessage[language] !== undefined)) {
-      errors.push(`${where}: the finish message is in none of the competition's languages`);
+      errors.push(`${where}: a záróüzenet a verseny egyik nyelvén sincs megadva`);
     }
   }
 
   const { metadata } = competition;
   if (metadata.kind === 'competition') {
     if (!isPositiveInteger(metadata.edition)) {
-      errors.push(`${where}: the edition ${metadata.edition} is not a positive integer`);
+      errors.push(`${where}: a kiadás (${metadata.edition}) nem pozitív egész szám`);
     }
     if (!(ROUNDS as readonly string[]).includes(metadata.round)) {
-      errors.push(`${where}: the round "${metadata.round}" is not one of ${ROUNDS.join(', ')}`);
+      errors.push(`${where}: a forduló („${metadata.round}”) nem ezek egyike: ${ROUNDS.join(', ')}`);
     }
     if (metadata.category.trim() === '') {
-      errors.push(`${where}: the category is empty`);
+      errors.push(`${where}: a kategória üres`);
     }
     if (metadata.label !== undefined) {
       errors.push(...validateLabel(metadata.label, where));
@@ -159,34 +162,34 @@ export function validateCompetition(competition: CompetitionConfig, references: 
   }
 
   if (competition.relay === undefined && competition.strategy === undefined) {
-    errors.push(`${where}: has neither a relay nor a strategy game`);
+    errors.push(`${where}: sem váltója, sem stratégiás játéka nincs`);
   }
 
   if (competition.relay !== undefined) {
     const { durationMinutes, problems } = competition.relay;
     if (!isPositiveInteger(durationMinutes)) {
-      errors.push(`${where}: the relay's duration ${durationMinutes} is not a positive whole number of minutes`);
+      errors.push(`${where}: a váltó hossza (${durationMinutes}) nem pozitív egész számú perc`);
     }
     if (problems.length === 0) {
-      errors.push(`${where}: the relay has no problems`);
+      errors.push(`${where}: a váltóban nincs feladat`);
     }
     const seen = new Set<ProblemId>();
     problems.forEach(({ problemId, points }, index) => {
-      const at = `${where}: relay problem ${index + 1} (${problemId})`;
+      const at = `${where}: a váltó ${index + 1}. feladata (${problemId})`;
       if (seen.has(problemId)) {
-        errors.push(`${at} is already in the relay`);
+        errors.push(`${at} korábban már szerepel a váltóban`);
       }
       seen.add(problemId);
       if (!isPositiveInteger(points)) {
-        errors.push(`${at} is worth ${points} points, not a positive integer`);
+        errors.push(`${at}: a pontértéke (${points}) nem pozitív egész szám`);
       }
       const problem = references.problems.get(problemId);
       if (problem === undefined) {
-        errors.push(`${at} does not exist`);
+        errors.push(`${at} nem létezik`);
         return;
       }
       if (!competition.languages.some(language => problem.content[language] !== undefined)) {
-        errors.push(`${at} is in none of the competition's languages`);
+        errors.push(`${at} a verseny egyik nyelvén sincs meg`);
       }
     });
   }
@@ -194,14 +197,14 @@ export function validateCompetition(competition: CompetitionConfig, references: 
   if (competition.strategy !== undefined) {
     const { durationMinutes, gameId } = competition.strategy;
     if (!isPositiveInteger(durationMinutes)) {
-      errors.push(`${where}: the strategy game's duration ${durationMinutes} is not a positive whole number of minutes`);
+      errors.push(`${where}: a stratégiás játék hossza (${durationMinutes}) nem pozitív egész számú perc`);
     }
     const game = references.strategyGames.get(gameId);
     if (game === undefined) {
-      errors.push(`${where}: the strategy game ${gameId} is not registered`);
+      errors.push(`${where}: nincs ilyen stratégiás játék: ${gameId}`);
     } else {
       if (!competition.languages.some(language => game.languages.includes(language))) {
-        errors.push(`${where}: the strategy game ${gameId} is in none of the competition's languages`);
+        errors.push(`${where}: a stratégiás játék (${gameId}) a verseny egyik nyelvén sincs meg`);
       }
     }
   }

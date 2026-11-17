@@ -58,7 +58,7 @@ export function validateRegistry(
   // A problem and a competition never share an id either: the format is the
   // same, and an id names one thing wherever it is read.
   for (const id of registry.problems.keys()) {
-    if (registry.competitions.has(id)) errors.push(`${id} names both a problem and a competition`);
+    if (registry.competitions.has(id)) errors.push(`${id} egy feladat és egy verseny azonosítója is`);
   }
   return errors;
 }
@@ -72,7 +72,7 @@ export function assertValidRegistry(
 ): void {
   const errors = validateRegistry(registry, strategyGames);
   if (errors.length > 0) {
-    throw new Error(`The competition registry is invalid:\n${errors.map(error => `  - ${error}`).join('\n')}`);
+    throw new Error(`A kódban tárolt versenyek és feladatok hibásak:\n${errors.map(error => `  - ${error}`).join('\n')}`);
   }
 }
 
@@ -94,7 +94,7 @@ export function validatingCompetitionSource(
     const ids = competition.relay?.problems.map(({ problemId }) => problemId) ?? [];
     const errors = validateCompetition(competition, { problems: await problems.getProblems(ids), strategyGames: games });
     if (errors.length > 0) {
-      throw new Error(`The competition ${competition.id} is invalid:\n${errors.map(error => `  - ${error}`).join('\n')}`);
+      throw new Error(`A verseny hibás: ${competition.id}\n${errors.map(error => `  - ${error}`).join('\n')}`);
     }
     return competition;
   }
