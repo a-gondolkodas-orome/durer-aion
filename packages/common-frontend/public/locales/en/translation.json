@@ -285,11 +285,5 @@
       "yourTurn": "Your turn!"
     },
     "viewBoard": "View the board"
-  },
-  "waitingRoom": {
-    "instruction": "When the competition starts, you will be automatically redirected to the competition interface.",
-    "remainingEnd": "left until start!",
-    "remainingStart": "Still",
-    "soon": "The online round will start soon!"
   }
 }
