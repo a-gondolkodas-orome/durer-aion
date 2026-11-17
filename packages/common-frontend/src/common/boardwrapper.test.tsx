@@ -50,7 +50,7 @@ function boardElement(ctx: Partial<Ctx>, game: Partial<GameStateMixin> & Record<
     liveResults: [],
     ...game,
   };
-  const moves = { getTime: vi.fn(), chooseNewGameType: vi.fn(), chooseRole: vi.fn() };
+  const moves = { getTime: vi.fn(), chooseNewGameType: vi.fn(), chooseRole: vi.fn(), newStartingPosition: vi.fn() };
   const props = {
     G,
     ctx: { numPlayers: 2, playOrder: ['0', '1'], playOrderPos: 0, activePlayers: null, turn: 1, ...ctx },
@@ -269,6 +269,22 @@ describe('choosing a role', () => {
     expect(screen.getByText('strategy.status.lookAtPosition')).toBeInTheDocument();
     fireEvent.click(button('Másodikak leszünk (2 X)'));
     expect(moves.chooseRole).toHaveBeenCalledWith(JUDGE_PLAYER);
+  });
+
+  test('offers another opening of a varying start in practice', () => {
+    const moves = renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, { difficulty: 'test' }, NamedBoard);
+
+    fireEvent.click(button('strategy.status.newStart'));
+    expect(moves.newStartingPosition).toHaveBeenCalledOnce();
+  });
+
+  test.each([
+    ['in a live game', { difficulty: 'live' } as const, NamedBoard],
+    ['where the start does not vary', { difficulty: 'test' } as const, Board],
+  ])('offers no other opening %s', (_, game, Wrapped) => {
+    renderBoard({ phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, game, Wrapped);
+
+    expect(screen.queryByRole('button', { name: 'strategy.status.newStart' })).not.toBeInTheDocument();
   });
 });
 

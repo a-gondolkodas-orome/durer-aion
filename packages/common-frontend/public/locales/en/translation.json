@@ -280,6 +280,7 @@
     "status": {
       "botTurn": "The computer is moving…",
       "lookAtPosition": "Look at the position!",
+      "newStart": "Another starting position",
       "role": "Choose your role!",
       "starting": "The game is starting…",
       "yourTurn": "Your turn!"
