@@ -26,6 +26,16 @@ function chooseNewGameType({ G, playerID, events }: MoveContext, difficulty: unk
   events.endTurn();
 };
 
+/// In a practice game, before a role is chosen, the team may ask for another
+/// opening: the bot answers in `startNewGame` as it does for every new game,
+/// whose turn order then skips the team's choice of difficulty.
+function newStartingPosition({ G, playerID, events }: MoveContext) {
+  if (playerID !== GUESSER_PLAYER || G.difficulty !== "test") {
+    return INVALID_MOVE;
+  };
+  events.setPhase(PHASE.startNewGame);
+};
+
 /// The only source of a game's opening position: the bot sends it, typed on
 /// its side by `startingPositionMove`.
 function setStartingPosition({ G, playerID, events }: MoveContext, startingPosition: unknown) {
@@ -139,14 +149,20 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
         next: PHASE.chooseRole,
         // The team picks the difficulty, the bot answers with the position,
-        // and the phase ends with that one round of turns.
+        // and the phase ends with that one round of turns. Coming back for
+        // another opening of the same practice game (`newStartingPosition`),
+        // the round is the bot's turn alone: only then is a mode chosen with
+        // no game decided, since every game played to its end has a winner.
         turn: {
-          order: TurnOrder.ONCE,
+          order: {
+            ...TurnOrder.ONCE,
+            first: ({ G }) => G.difficulty != null && G.winner === null ? 1 : 0,
+          },
         },
         start: true,
       },
       [PHASE.chooseRole]: {
-        moves: { ...timestampMoves({ chooseRole }), getTime: clockPoll },
+        moves: { ...timestampMoves({ chooseRole, newStartingPosition }), getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: PHASE.play,
         turn: {

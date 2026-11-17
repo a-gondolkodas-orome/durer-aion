@@ -1,5 +1,6 @@
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip, alpha, useMediaQuery } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
@@ -181,6 +182,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     let actions: ReactNode = null;
     // On wider screens, a fuller line in place of `sub`.
     let subWide: string | null = null;
+    // A small action of its own after the line under the status.
+    let subAction: ReactNode = null;
     let intro: ReactNode = null;
     // A game's own role labels name the roles on the buttons and on the chip
     // alike. Without them the wrapper has a phrase for each: on the buttons
@@ -240,6 +243,17 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
       case 'chooseRole':
         status = t('strategy.status.role');
         sub = startVaries ? t('strategy.status.lookAtPosition') : '';
+        // A practice opening the team does not want to play from need not be
+        // played out to get another; a live game's opening is the one it gets.
+        if (startVaries && difficulty === 'test') {
+          subAction = (
+            <Button size="small" disabled={!teamToMove} onClick={() => moves.newStartingPosition()}
+              startIcon={<RefreshIcon fontSize="small" />}
+              sx={{ textTransform: 'none', fontSize: '15px', lineHeight: '22px', paddingY: 0, marginLeft: '8px', verticalAlign: 'baseline' }}>
+              {t('strategy.status.newStart')}
+            </Button>
+          );
+        }
         actions = (
           <>
             <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(GUESSER_PLAYER)}>{first}</PairButton>
@@ -337,7 +351,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                 shrink it, as a grid item, to its content. */}
             <Box sx={{ minWidth: 0 }}>
               <GameArea mode={difficulty} liveNumber={G.numberOfTries} role={role}
-                status={status} tone={tone} sub={sub} subWide={subWide} actions={actions} intro={intro}
+                status={status} tone={tone} sub={sub} subWide={subWide} subAction={subAction} actions={actions} intro={intro}
                 info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
                 <BoardArea state={boardState(stage)}>{board(props)}</BoardArea>
               </GameArea>
@@ -484,7 +498,7 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: 
 /// board does not move from one state to the next.
 function GameArea(props: {
   mode: Difficulty | null, liveNumber: number, role: string | null, status: string, tone: Tone, sub: string,
-  subWide: string | null, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
+  subWide: string | null, subAction: ReactNode, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
   children: ReactNode,
 }) {
   const { t } = useTranslation();
@@ -523,6 +537,7 @@ function GameArea(props: {
             <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{props.sub}</Box>
             <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{props.subWide}</Box>
           </>}
+          {props.subAction}
         </Box>
         <Stack sx={{ position: 'relative', minHeight: '52px', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
           {/* Stretched, so a pair whose one label wraps keeps one height. */}

@@ -89,6 +89,25 @@ describe("gameWrapper", () => {
     expect(client.getState()?.ctx.phase).toStrictEqual("play");
   });
 
+  test("a practice game's opening can be swapped for another before a role is chosen", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("test");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
+    client.moves.newStartingPosition();
+    // Straight to the bot: the team chose the game's mode already.
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(JUDGE_PLAYER);
+    client.moves.setStartingPosition({ data: "another" });
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("chooseRole");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+    expect(client.getState()?.G.data).toStrictEqual("another");
+    expect(client.getState()?.G.difficulty).toStrictEqual("test");
+    expect(client.getState()?.G.numberOfTries).toStrictEqual(0);
+  });
+
   test("move", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
@@ -492,6 +511,32 @@ describe("gameWrapper move guards", () => {
 
     expect(client.getState()?.G.difficulty).toStrictEqual("live");
     expect(client.getState()?.G.numberOfTries).toStrictEqual(1);
+    expect(rejected).toHaveBeenCalledOnce();
+  });
+
+  test("a live game's opening cannot be swapped for another", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
+    client.moves.newStartingPosition();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("chooseRole");
+    expect(client.getState()?.G.data).toStrictEqual("startingPosition");
+    expect(rejected).toHaveBeenCalledOnce();
+  });
+
+  test("a practice game's opening cannot be swapped once a role is chosen", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("test");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole(GUESSER_PLAYER);
+
+    client.moves.newStartingPosition();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("play");
     expect(rejected).toHaveBeenCalledOnce();
   });
 

@@ -152,7 +152,9 @@ validated each time it is read (`validatingCompetitionSource`). An ESLint rule k
 - `startNewGame` — the team chooses `test` or `live`
   (`chooseNewGameType`), and the bot answers with the opening position
   (`setStartingPosition`);
-- `chooseRole` — the team chooses who moves first;
+- `chooseRole` — the team chooses who moves first. In a `test` game it may
+  ask for another opening instead (`newStartingPosition`), which sends it back
+  to `startNewGame` for the bot's answer alone;
 - `play` — the game's own moves, until one sets `G.winner`. Then it is back to
   `startNewGame`, unless the game's move ended the whole match itself
   (`20ocde` does on a second win in a row).

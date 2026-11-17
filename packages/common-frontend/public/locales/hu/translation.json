@@ -276,6 +276,7 @@
     "status": {
       "botTurn": "A gép lép…",
       "lookAtPosition": "Nézzétek meg az állást!",
+      "newStart": "Másik kezdőállást kérünk",
       "role": "Válasszatok szerepet!",
       "starting": "Indul a játszma…",
       "yourTurn": "Ti jöttök!"
