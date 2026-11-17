@@ -56,6 +56,9 @@
         color: var(--fg);
         font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
         line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
       }
       header {
         background: var(--primary);
@@ -66,7 +69,8 @@
       header > div { padding-block: 1rem; }
       header h1 { margin: 0; font-size: 1.75rem; line-height: 1.2; }
       header p { margin: 0.15rem 0 0; color: #dcebd1; }
-      main { padding-block: 2rem 3rem; }
+      /* At least the window's height, the footer at its bottom on a short page. */
+      main { padding-block: 2rem 3rem; flex: 1; display: flex; flex-direction: column; width: 100%; }
       .card {
         position: relative;
         display: block;
@@ -96,7 +100,7 @@
       .card h2 span::before { content: " | "; font-style: normal; }
       .card p { margin: 0; color: var(--muted); }
       .card p + p { margin-top: 0.35rem; font-style: italic; }
-      footer { margin-top: 3rem; color: var(--muted); font-size: 0.9rem; }
+      footer { margin-top: auto; padding-top: 3rem; color: var(--muted); font-size: 0.9rem; }
       footer a { color: inherit; }
       footer p { margin: 0.35rem 0 0; font-size: 0.8rem; }
       footer p + p { font-style: italic; }

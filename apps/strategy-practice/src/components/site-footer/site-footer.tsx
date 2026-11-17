@@ -7,7 +7,7 @@ export const SiteFooter = () => {
   const { t } = useTranslation('footer');
   const hash = import.meta.env.VITE_GIT_COMMIT_HASH;
   return (
-    <div className="px-2 py-2 text-center text-xs text-gray-500 dark:text-gray-400">
+    <div className="mt-auto px-2 py-2 text-center text-xs text-gray-500 dark:text-gray-400">
       {t('tracking')}
       {hash && <>
         <span aria-hidden="true" className="hidden sm:inline">{' | '}</span>

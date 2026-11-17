@@ -59,8 +59,10 @@ export const Overview = () => {
     gameList
   );
 
-  // Below md, the bottom padding is the fixed primary-footer bar's room.
-  return <main className="flex-1 w-full pb-16 md:pb-0">
+  // At least the window's height, so a short list's footer sits at its bottom
+  // (SiteFooter's mt-auto). Below md, the bottom padding is the fixed
+  // primary-footer bar's room.
+  return <main className="flex flex-col min-h-dvh w-full pb-16 md:pb-0">
     <OverviewHeader
       filtersOpen={showFilters}
       onToggleFilters={() => setShowFilters(o => !o)}
@@ -136,7 +138,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
         </div>
       </div>
     </header>
-    <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
+    <div className="w-full max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
       <Trans t={t} i18nKey="intro" components={{ durerinfo: <a href="https://durerinfo.hu" /> }} />
     </div>
   </>;
