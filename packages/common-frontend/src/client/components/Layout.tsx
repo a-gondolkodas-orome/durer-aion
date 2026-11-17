@@ -25,8 +25,11 @@ export const Layout: React.FunctionComponent<LayoutProps> = (props: LayoutProps)
               }}
               domRoot={snackbarRoot ?? undefined}
             >
-                <Stack sx={(theme) => ({ backgroundColor: theme.palette.background.default })}>
-                  <div>
+                {/* At least the viewport's height, so a short page's footer sits at
+                    its bottom (SiteFooter's `marginTop: auto`). dvh, not vh: on a
+                    phone vh counts the browser bar too, and would scroll. */}
+                <Stack sx={(theme) => ({ backgroundColor: theme.palette.background.default, minHeight: '100dvh' })}>
+                  <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                     {props.children}
                   </div>
                 </Stack>

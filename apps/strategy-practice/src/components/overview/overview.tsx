@@ -6,6 +6,7 @@ import { LanguageSelector } from 'language';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import { IconButton } from '@mui/material';
 import { ThemeSwitcher } from '../../theme';
+import { SiteFooter } from '../site-footer/site-footer';
 import {
   FilterToggle, CategoryFilter, IconFilter, YearFilter, RoundFilter,
   filterByCategories, filterByIcons, filterByYears, filterByRounds, type YearRange
@@ -58,14 +59,17 @@ export const Overview = () => {
     gameList
   );
 
-  return <main className="flex-1 w-full">
+  // At least the window's height, so a short list's footer sits at its bottom
+  // (SiteFooter's mt-auto). Below md, the bottom padding is the fixed
+  // primary-footer bar's room.
+  return <main className="flex flex-col min-h-dvh w-full pb-16 md:pb-0">
     <OverviewHeader
       filtersOpen={showFilters}
       onToggleFilters={() => setShowFilters(o => !o)}
       activeFilterCount={selectedCategories.length + selectedIcons.length +
         (yearRange === null ? 0 : 1) + selectedRounds.length}
     />
-    <div className="px-2 sm:px-3 py-3 sm:py-4 mb-10">
+    <div className="px-2 sm:px-3 py-3 sm:py-4 mb-4">
       {showFilters && (
         <div aria-label={t('filters.toggle')} className="mt-2 pt-3 flex flex-col gap-1 mb-2 border-2 p-3"
           style={{ borderRadius: '10px' }}
@@ -90,6 +94,8 @@ export const Overview = () => {
         />
       ))}
     </div>
+
+    <SiteFooter />
 
     <div className="primary-footer">
       <ThemeSwitcher />
@@ -132,7 +138,7 @@ const OverviewHeader = ({ filtersOpen, onToggleFilters, activeFilterCount }: {
         </div>
       </div>
     </header>
-    <div className="max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
+    <div className="w-full max-w-[100ch] mx-auto mt-6 pb-3 text-left px-3 sm:px-5.5 pl-2">
       <Trans t={t} i18nKey="intro" components={{ durerinfo: <a href="https://durerinfo.hu" /> }} />
     </div>
   </>;
