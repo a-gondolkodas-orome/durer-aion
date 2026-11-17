@@ -4,12 +4,18 @@ import type { ReactNode } from "react";
 import type { Localizable } from "schemas";
 import { MyBoard as Board20ocde } from "./20ocde/board";
 import { descriptionC as description20oc, descriptionD as description20od, descriptionE as description20oe } from "./20ocde/main";
+import { MyBoard as BoardKetkupac } from "./ketkupac/board";
+import { description as descriptionKetkupac } from "./ketkupac/main";
+import { MyBoard as BoardSablon } from "./sablon/board";
+import { description as descriptionSablon } from "./sablon/main";
 import type { StrategyGameKey } from "./strategy-games";
 
 const boards = {
   "20o-c": Board20ocde,
   "20o-d": Board20ocde,
   "20o-e": Board20ocde,
+  "minta-ketkupac": BoardKetkupac,
+  "minta-sablon": BoardSablon,
 } satisfies Record<StrategyGameKey, unknown>;
 
 // The rules text shown above the board: one for every language, or one per
@@ -18,6 +24,8 @@ export const strategyDescriptions = {
   "20o-c": description20oc,
   "20o-d": description20od,
   "20o-e": description20oe,
+  "minta-ketkupac": descriptionKetkupac,
+  "minta-sablon": descriptionSablon,
 } satisfies Record<StrategyGameKey, Localizable<ReactNode>>;
 
 // Generic over the game so the caller keeps the board's own state type: a

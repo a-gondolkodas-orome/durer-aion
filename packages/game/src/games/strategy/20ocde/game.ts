@@ -1,6 +1,6 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { JUDGE_PLAYER, otherPlayer, strategyPoints } from '../../../common/types';
+import { JUDGE_PLAYER, otherPlayer, recordWinner } from '../../../common/types';
 import type { GameStateMixin, GameType, PlayerIDType } from '../../../common/types';
 
 export const BOARD_SIZE = 5;
@@ -83,22 +83,6 @@ export function getPlayerStepDescription({ G, ctx }: { G: Position, ctx: Pick<Ct
   return G.xsThisTurn?.length === 1 ? 'Tegyétek le a második X-et!' : 'Tegyétek le az első X-et!';
 }
 
-function scoreRound(G: GameStateMixin, winner: PlayerIDType): boolean {
-  G.winner = winner;
-  if (G.difficulty !== 'live') return false;
-  if (winner === JUDGE_PLAYER) {
-    G.winningStreak = 0;
-    G.numberOfLoss += 1;
-  } else {
-    G.winningStreak += 1;
-    if (G.winningStreak >= 2) {
-      G.points = strategyPoints(G.numberOfLoss);
-      return true;
-    }
-  }
-  return false;
-}
-
 export function MyGameWrapper(category: Category): GameType<MyGameState> {
   return {
     name: `20o${category.toLowerCase()}`,
@@ -127,7 +111,7 @@ export function MyGameWrapper(category: Category): GameType<MyGameState> {
         const winner = winningLine(G.cells).length > 0
           ? otherPlayer(oPlayer)
           : G.cells.every(cell => cell !== null) ? oPlayer : null;
-        if (winner !== null && scoreRound(G, winner)) {
+        if (winner !== null && recordWinner(G, winner)) {
           events.endGame();
           return;
         }

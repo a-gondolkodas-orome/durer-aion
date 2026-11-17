@@ -9,6 +9,10 @@
 import type { StrategyGameId, StrategyGameInfo } from "schemas";
 import { MyGameWrapper as GameWrapper20ocde } from "./20ocde/game";
 import type { MyGameState as GameState20ocde } from "./20ocde/game";
+import { MyGameWrapper as GameWrapperKetkupac } from "./ketkupac/game";
+import type { MyGameState as GameStateKetkupac } from "./ketkupac/game";
+import { MyGameWrapper as GameWrapperSablon } from "./sablon/game";
+import type { MyGameState as GameStateSablon } from "./sablon/game";
 
 // The strategy games a competition can name (`StrategyConfig.gameId`), each a
 // game in one variant, and the languages its board and description exist in.
@@ -17,6 +21,10 @@ export const strategyGames = {
   "20o-c": { languages: ["hu"] },
   "20o-d": { languages: ["hu"] },
   "20o-e": { languages: ["hu"] },
+  // The reference games (banks/reference.ts), which no competition was held
+  // with: the platform's own test bed.
+  "minta-ketkupac": { languages: ["hu"] },
+  "minta-sablon": { languages: ["hu", "en"] },
 } satisfies Record<StrategyGameId, StrategyGameInfo>;
 
 export type StrategyGameKey = keyof typeof strategyGames;
@@ -28,12 +36,16 @@ export interface StrategyGameStates {
   "20o-c": GameState20ocde;
   "20o-d": GameState20ocde;
   "20o-e": GameState20ocde;
+  "minta-ketkupac": GameStateKetkupac;
+  "minta-sablon": GameStateSablon;
 }
 
 export const MyGameWrappers = {
   "20o-c": () => GameWrapper20ocde("C"),
   "20o-d": () => GameWrapper20ocde("D"),
   "20o-e": () => GameWrapper20ocde("E"),
+  "minta-ketkupac": () => GameWrapperKetkupac(),
+  "minta-sablon": () => GameWrapperSablon(),
 } satisfies Record<StrategyGameKey, unknown>;
 
 export const strategyNames = {
@@ -42,4 +54,6 @@ export const strategyNames = {
   "20o-c": "20oc",
   "20o-d": "20od",
   "20o-e": "20oe",
+  "minta-ketkupac": "mintaketkupac",
+  "minta-sablon": "mintasablon",
 } satisfies Record<StrategyGameKey, string>;
