@@ -10,7 +10,9 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
-import { PacketBudget } from "./server/packet_budget";
+import {
+  ADDRESS_PACKET_LIMIT, KeyedPacketBudget, PacketBudget, SOCKET_PACKET_LIMIT, socketClientKey, type PacketLimit,
+} from "./server/packet_budget";
 import type { MatchBot } from "./botwrapper";
 import type { CorsOptionsDelegate } from "cors";
 
@@ -113,12 +115,19 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, MatchBot>;
+  private readonly socketPacketLimit: PacketLimit;
+  /** One for every namespace: a client's sockets to either game share it. */
+  private readonly addressBudget: KeyedPacketBudget;
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, MatchBot>,
+    // The suite's way to reach a limit in a few packets.
+    { socket = SOCKET_PACKET_LIMIT, address = ADDRESS_PACKET_LIMIT }: { socket?: PacketLimit, address?: PacketLimit } = {},
   ) {
     super({ ...socketOpts });
     this.bots = bots;
+    this.socketPacketLimit = socket;
+    this.addressBudget = new KeyedPacketBudget(address);
   }
   init(
     app: Server.App & { _io: IOTypes.Server; },
@@ -139,8 +148,9 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Disconnects a socket that has spent its packet budget
-         * (`server/packet_budget.ts`), and refuses a `sync` naming a match that storage does not have.
+        /** Disconnects a socket whose client or itself has spent its packet
+         * budget (`server/packet_budget.ts`), and refuses a `sync` naming a
+         * match that storage does not have.
          *
          * boardgame.io's `Master.onSync` skips its credential check when
          * `playerID` is null — the spectator case it is written for — and
@@ -166,11 +176,15 @@ export class SocketIOButBotMoves extends SocketIO {
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
-        const budget = new PacketBudget();
+        const socketBudget = new PacketBudget(this.socketPacketLimit);
+        // Read when the socket connects, by when server.ts has set app.proxy.
+        const clientAddress = socketClientKey(socket.handshake, app.proxy);
         socket.use(([event, ...args]: IOTypes.Event, next) => {
-          // First, so that a socket over its budget is dropped before any
-          // packet of it reaches storage (#720).
-          if (!budget.take()) {
+          // First, so that a socket over a budget is dropped before any packet
+          // of it reaches storage (#720). Both are charged, so a refused
+          // packet still counts against the address.
+          const withinAddress = this.addressBudget.take(clientAddress);
+          if (!socketBudget.take() || !withinAddress) {
             socket.disconnect(true);
             return;
           }

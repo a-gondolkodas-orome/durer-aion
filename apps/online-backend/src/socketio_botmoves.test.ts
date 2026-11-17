@@ -4,7 +4,7 @@ import { Server } from "boardgame.io/server";
 import { createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
 import { SocketIOButBotMoves } from "./socketio_botmoves";
-import { PACKET_LIMIT } from "./server/packet_budget";
+import { SOCKET_PACKET_LIMIT, type PacketLimit } from "./server/packet_budget";
 
 /** The transport, with the match queues it keeps open to inspection. */
 class InspectedTransport extends SocketIOButBotMoves {
@@ -30,18 +30,21 @@ describe("the socket transport", () => {
     await Promise.all(running.splice(0).map(stop => stop()));
   });
 
-  async function serve() {
+  async function serve(limits: { socket?: PacketLimit, address?: PacketLimit } = {}) {
     // boardgame.io greets the console on boot — its CORS advice and the port it
     // picked — and a test run's report is meant to have the console to itself.
     const quiet = (["log", "warn"] as const).map(
       method => vi.spyOn(console, method).mockImplementation(() => undefined)
     );
     const failed = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const transport = new InspectedTransport({}, {});
+    const transport = new InspectedTransport({}, {}, limits);
     const server = Server({
       games: [game],
       transport,
     });
+    // As server.ts sets it: the address a packet is charged to is nginx's
+    // X-Forwarded-For.
+    server.app.proxy = true;
     const { appServer } = await server.run(0);
     quiet.forEach(spy => { spy.mockRestore(); });
     const db = server.app.context.db as StorageAPI.Sync;
@@ -54,8 +57,11 @@ describe("the socket transport", () => {
       failed.mockRestore();
     });
 
-    const client = () => {
-      const socket = connect(`http://127.0.0.1:${port}/${game.name}`, { transports: ["websocket"] });
+    const client = (address = "192.0.2.1") => {
+      const socket = connect(`http://127.0.0.1:${port}/${game.name}`, {
+        transports: ["websocket"],
+        extraHeaders: { "X-Forwarded-For": address },
+      });
       sockets.push(socket);
       return socket;
     };
@@ -198,18 +204,70 @@ describe("the socket transport", () => {
   });
 
   // One client must not keep the pool every match shares busy (#720).
-  it("disconnects a socket over its packet budget before its next packet reaches storage", async () => {
-    const { db, client } = await serve();
-    createKnownMatch(db);
-    const reads = readsOtherThanKnown(db);
+  describe("packet budgets", () => {
+    function disconnectedBy(socket: Socket) {
+      return new Promise<string>(resolve => socket.on("disconnect", resolve));
+    }
 
-    const socket = client();
-    const disconnected = new Promise<string>(resolve => socket.on("disconnect", resolve));
-    for (let i = 0; i < PACKET_LIMIT; i++) socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
-    socket.emit("sync", MADE_UP_MATCH, null, undefined, 2);
+    it("disconnects a socket over its own budget before its next packet reaches storage", async () => {
+      const { db, client } = await serve();
+      createKnownMatch(db);
+      const reads = readsOtherThanKnown(db);
 
-    expect(await disconnected).toBe("io server disconnect");
-    expect(reads()).toEqual([]);
+      const socket = client();
+      const disconnected = disconnectedBy(socket);
+      for (let i = 0; i < SOCKET_PACKET_LIMIT.limit; i++) socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
+      socket.emit("sync", MADE_UP_MATCH, null, undefined, 2);
+
+      expect(await disconnected).toBe("io server disconnect");
+      expect(reads()).toEqual([]);
+    });
+
+    // A socket costs nothing to open, so a budget that a new one refilled
+    // would bound nothing.
+    it("keeps refusing a client that reconnects once its address is over budget", async () => {
+      const { db, client } = await serve({ address: { limit: 3, windowMs: 60_000 } });
+      createKnownMatch(db);
+
+      const first = client();
+      const firstGone = disconnectedBy(first);
+      for (let i = 0; i < 4; i++) first.emit("sync", KNOWN_MATCH, null, undefined, 2);
+      expect(await firstGone).toBe("io server disconnect");
+
+      const reads = readsOtherThanKnown(db);
+      const second = client();
+      const secondGone = disconnectedBy(second);
+      second.emit("sync", MADE_UP_MATCH, null, undefined, 2);
+
+      expect(await secondGone).toBe("io server disconnect");
+      expect(reads()).toEqual([]);
+    });
+
+    it("shares an address's budget between its sockets", async () => {
+      const { db, client } = await serve({ address: { limit: 4, windowMs: 60_000 } });
+      createKnownMatch(db);
+
+      const [first, second, third] = [client(), client(), client()];
+      const gone = disconnectedBy(third);
+      await Promise.all([first, second].map(socket => Promise.all([syncBehind(socket), syncBehind(socket)])));
+      third.emit("sync", KNOWN_MATCH, null, undefined, 2);
+
+      expect(await gone).toBe("io server disconnect");
+    });
+
+    // A school's teams share one address; one flooding it must not reach
+    // the boards of another school.
+    it("leaves another address's sockets served", async () => {
+      const { db, client } = await serve({ address: { limit: 2, windowMs: 60_000 } });
+      createKnownMatch(db);
+
+      const flooding = client("192.0.2.1");
+      const gone = disconnectedBy(flooding);
+      for (let i = 0; i < 3; i++) flooding.emit("sync", KNOWN_MATCH, null, undefined, 2);
+      await gone;
+
+      expect(await syncBehind(client("198.51.100.1"))).toBe(KNOWN_MATCH);
+    });
   });
 
   it.each([
