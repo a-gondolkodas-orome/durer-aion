@@ -1,5 +1,6 @@
 import { Box, Button, Stack } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
+import { PHASE } from '../../../common/gamewrapper';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalTake, TAKES } from './game';
 import type { MyGameState } from './game';
@@ -10,7 +11,7 @@ type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 // languages: the pile's size and the takes are numbers, and the rules text the
 // wrapper shows beside it says what they mean.
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
-  const active = isActive && ctx.phase === 'play' && !ctx.gameover && G.winner === null;
+  const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
   const justTaken = active ? G.lastJudgeTake ?? 0 : 0;
 
   return (
