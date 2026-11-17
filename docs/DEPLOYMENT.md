@@ -274,10 +274,13 @@ Drop the TSV into `scripts/` on the host — that directory is bind-mounted into
 container — and name it:
 
 ```bash
-docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scripts/<file>.tsv
+docker compose --env-file=.env.docker exec --user "$(id -u):$(id -g)" backend ./scripts/import_teams.sh scripts/<file>.tsv
 ```
 
 This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
+The `--user` matters: the server runs as the image's unprivileged `node` user, uid 1000,
+which can write to `scripts/` only if the deploy user happens to be uid 1000 too. Running
+the import as the deploy user's own uid makes the export theirs, with no host setup.
 The admin page's TSV upload does the same job through the browser.
 
 Each row's `Competition` column names its team's competition, such as
@@ -300,10 +303,11 @@ the original would generate new ones.
 You can also run the importer as a one-off container without the stack:
 
 ```bash
-docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh scripts/<file>.tsv
+docker compose --env-file=.env.docker run --rm --user "$(id -u):$(id -g)" backend ./scripts/import_teams.sh scripts/<file>.tsv
 ```
 
-> **Test drive:** `npm run teams:import` runs the same thing against `scripts/test.tsv`.
+> **Test drive:** `npm run teams:import` runs the same `exec`, as your uid, against
+> `scripts/test.tsv`.
 
 ## 8. A domain and HTTPS
 
