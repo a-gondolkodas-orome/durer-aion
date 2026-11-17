@@ -1,4 +1,4 @@
-import { validateStartWindow } from "schemas";
+import { formatFinding, validateStartWindow } from "schemas";
 import type { CompetitionConfig, StartWindow } from "schemas";
 import type { TeamModel } from "./model";
 
@@ -39,6 +39,6 @@ export function readStartWindowBody(body: unknown): StartWindow | null | { refus
     return { refused: "opensAt and closesAt are strings or null." };
   }
   const window: StartWindow = { opensAt, ...(closesAt !== null && { closesAt }) };
-  const errors = validateStartWindow(window);
-  return errors.length > 0 ? { refused: errors.join("; ") } : window;
+  const findings = validateStartWindow(window);
+  return findings.length > 0 ? { refused: findings.map(formatFinding).join("; ") } : window;
 }

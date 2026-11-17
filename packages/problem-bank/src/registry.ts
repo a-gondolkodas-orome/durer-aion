@@ -7,8 +7,9 @@ import type {
   ProblemSource,
   StrategyGameId,
   StrategyGameInfo,
+  ValidationFinding,
 } from 'schemas';
-import { validateCompetition, validateProblem } from 'schemas';
+import { formatFinding, validateCompetition, validateProblem } from 'schemas';
 import type { CompetitionBank, ProblemBank } from './sources';
 import { fromBanks, inCodeCompetitionSource, inCodeProblemSource } from './sources';
 
@@ -40,39 +41,43 @@ export function createRegistry(banks: readonly Bank[]): Registry {
   };
 }
 
-/// Every way the registry breaks the rules, as messages; none means it is
-/// valid. The strategy games are the `game` package's `strategyGames`, passed
-/// in so that this package needs no game at run time.
+/// Every way the registry breaks the rules; none means it is valid. The
+/// strategy games are the `game` package's `strategyGames`, passed in so that
+/// this package needs no game at run time.
 export function validateRegistry(
   registry: Registry,
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
-): string[] {
+): ValidationFinding[] {
   const references = {
     problems: registry.problems,
     strategyGames: new Map(Object.entries(strategyGames)),
   };
-  const errors = [
+  const findings: ValidationFinding[] = [
     ...[...registry.problems.values()].flatMap(validateProblem),
     ...[...registry.competitions.values()].flatMap(competition => validateCompetition(competition, references)),
   ];
   // A problem and a competition never share an id either: the format is the
   // same, and an id names one thing wherever it is read.
   for (const id of registry.problems.keys()) {
-    if (registry.competitions.has(id)) errors.push(`${id} egy feladat és egy verseny azonosítója is`);
+    if (registry.competitions.has(id)) findings.push({ code: 'ID_NAMES_BOTH', params: { id } });
   }
-  return errors;
+  return findings;
 }
 
-/// `validateRegistry`, throwing every message at once. The server calls it as
-/// it starts, so a registry that went out without CI stops the server rather
-/// than a team's match.
+function bulleted(findings: readonly ValidationFinding[]): string {
+  return findings.map(finding => `  - ${formatFinding(finding)}`).join('\n');
+}
+
+/// `validateRegistry`, throwing every finding at once, in English. The server
+/// calls it as it starts, so a registry that went out without CI stops the
+/// server rather than a team's match.
 export function assertValidRegistry(
   registry: Registry,
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
 ): void {
-  const errors = validateRegistry(registry, strategyGames);
-  if (errors.length > 0) {
-    throw new Error(`A kódban tárolt versenyek és feladatok hibásak:\n${errors.map(error => `  - ${error}`).join('\n')}`);
+  const findings = validateRegistry(registry, strategyGames);
+  if (findings.length > 0) {
+    throw new Error(`The competition registry is invalid:\n${bulleted(findings)}`);
   }
 }
 
@@ -92,9 +97,9 @@ export function validatingCompetitionSource(
   const games = new Map(Object.entries(strategyGames));
   async function validated(competition: CompetitionConfig): Promise<CompetitionConfig> {
     const ids = competition.relay?.problems.map(({ problemId }) => problemId) ?? [];
-    const errors = validateCompetition(competition, { problems: await problems.getProblems(ids), strategyGames: games });
-    if (errors.length > 0) {
-      throw new Error(`A verseny hibás: ${competition.id}\n${errors.map(error => `  - ${error}`).join('\n')}`);
+    const findings = validateCompetition(competition, { problems: await problems.getProblems(ids), strategyGames: games });
+    if (findings.length > 0) {
+      throw new Error(`The competition ${competition.id} is invalid:\n${bulleted(findings)}`);
     }
     return competition;
   }

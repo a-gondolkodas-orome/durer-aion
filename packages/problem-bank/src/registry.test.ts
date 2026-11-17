@@ -1,5 +1,6 @@
 import { strategyGames } from 'game';
 import type { CompetitionConfig } from 'schemas';
+import { formatFinding } from 'schemas';
 import { registry } from '../all';
 import { assertValidRegistry, createRegistry, validateRegistry, validatingCompetitionSource } from './registry';
 
@@ -22,9 +23,9 @@ describe('validateRegistry', () => {
       problems: { 'aaaaaaaaaa--first': { ...problem, answer: 1.5 } },
       competitions: { 'bbbbbbbbbb--set': { ...competition, strategy: { durationMinutes: 30, gameId: 'nope' } } },
     }]);
-    expect(validateRegistry(broken, strategyGames)).toEqual([
-      'feladat aaaaaaaaaa--first: a válasz (1.5) nem egész szám',
-      'verseny bbbbbbbbbb--set: nincs ilyen stratégiás játék: nope',
+    expect(validateRegistry(broken, strategyGames).map(formatFinding)).toEqual([
+      expect.stringContaining('aaaaaaaaaa--first: the answer 1.5'),
+      expect.stringContaining('the strategy game nope is not registered'),
     ]);
   });
 
@@ -33,16 +34,14 @@ describe('validateRegistry', () => {
       problems: { 'aaaaaaaaaa--first': problem },
       competitions: { 'aaaaaaaaaa--first': competition },
     }]);
-    expect(validateRegistry(clash, strategyGames)).toEqual([
-      'aaaaaaaaaa--first egy feladat és egy verseny azonosítója is',
-    ]);
+    const findings = validateRegistry(clash, strategyGames);
+    expect(findings).toEqual([{ code: 'ID_NAMES_BOTH', params: { id: 'aaaaaaaaaa--first' } }]);
+    expect(findings.map(formatFinding)).toEqual(['aaaaaaaaaa--first names both a problem and a competition']);
   });
 
   it('throws every message at once through assertValidRegistry', () => {
     const dangling = createRegistry([{ problems: {}, competitions: { 'bbbbbbbbbb--set': competition } }]);
-    expect(() => assertValidRegistry(dangling, strategyGames)).toThrow(
-      'hibásak:\n  - verseny bbbbbbbbbb--set: a váltó 1. feladata (aaaaaaaaaa--first) nem létezik',
-    );
+    expect(() => assertValidRegistry(dangling, strategyGames)).toThrow(/invalid:\n {2}- .*aaaaaaaaaa--first\) does not exist/);
   });
 });
 
@@ -77,7 +76,7 @@ describe('validatingCompetitionSource', () => {
 
   it('refuses one that refers to a problem the problem source does not have', async () => {
     const source = withProblems({});
-    await expect(source.getCompetition(competition.id)).rejects.toThrow('A verseny hibás: bbbbbbbbbb--set\n  - verseny bbbbbbbbbb--set: a váltó 1. feladata (aaaaaaaaaa--first) nem létezik');
+    await expect(source.getCompetition(competition.id)).rejects.toThrow('aaaaaaaaaa--first) does not exist');
   });
 
   it('lists the valid competitions, and logs an invalid one rather than failing them all', async () => {
