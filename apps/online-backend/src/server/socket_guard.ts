@@ -1,4 +1,6 @@
 import type { Server } from 'boardgame.io';
+import type IOTypes from 'socket.io';
+import { clientKey } from './rate_limit';
 import {
   FAILED_PACKET_LIMIT, KeyedPacketBudget, PacketBudget, SOCKET_PACKET_LIMIT, TEAM_PACKET_LIMIT, type PacketLimit,
 } from './packet_budget';
@@ -144,15 +146,32 @@ export class SocketGuard {
 
     const key = JSON.stringify([claim.matchID, claim.playerID, claim.credentials]);
     const known = this.proved.has(key);
-    if (!(known && event === 'update')) {
-      if (!known && this.failures.spentOut(address)) return DISCONNECT;
-      if (!(await this.isAuthentic(await this.storage.lookUp(claim.matchID), claim))) {
-        if (known) this.proved.delete(key);
-        else this.failures.take(address);
-        return refuse(`${event} not from a player of match ${claim.matchID}`);
-      }
-      this.proved.add(key);
+    if (known && event === 'update') return this.chargeTeam(claim);
+
+    if (!known && this.failures.spentOut(address)) return DISCONNECT;
+    if (!(await this.isAuthentic(await this.storage.lookUp(claim.matchID), claim))) {
+      if (known) this.proved.delete(key);
+      else this.failures.take(address);
+      return refuse(`${event} not from a player of match ${claim.matchID}`);
     }
-    return this.teams.take(claim.credentials) ? PASS : DISCONNECT;
+    this.proved.add(key);
+    return this.chargeTeam(claim);
   }
+
+  private chargeTeam({ credentials }: Claim): Verdict {
+    return this.teams.take(credentials) ? PASS : DISCONNECT;
+  }
+}
+
+/** The client a socket's failures are charged to: the address koa's `ctx.ip`
+ *  would report for the request that opened it, through `clientKey`, so that
+ *  this and the join limit count the same client.
+ *
+ *  With `proxy` — `app.proxy`, set in `server.ts` — that is the first
+ *  `X-Forwarded-For` entry, which nginx overwrites with the address that
+ *  connected to it (`nginx.conf`); without it, the peer's own address. */
+export function socketClientKey(handshake: IOTypes.Socket["handshake"], proxy: boolean): string {
+  const forwarded = handshake.headers['x-forwarded-for'];
+  const first = proxy && typeof forwarded === 'string' ? forwarded.split(',')[0]?.trim() : undefined;
+  return clientKey(first || handshake.address);
 }

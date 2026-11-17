@@ -1,6 +1,3 @@
-import type IOTypes from 'socket.io';
-import { clientKey } from './rate_limit';
-
 /** Fixed-window counters for what a socket client may send (#720), and the
  *  limits `socket_guard.ts` holds clients to with them. That file says what
  *  each limit is for; the numbers and their sizing are here. */
@@ -100,17 +97,4 @@ export class KeyedPacketBudget {
   get size(): number {
     return this.budgets.size;
   }
-}
-
-/** The client a socket's failures are charged to: the address koa's `ctx.ip`
- *  would report for the request that opened it, through `clientKey`, so that
- *  this and the join limit count the same client.
- *
- *  With `proxy` — `app.proxy`, set in `server.ts` — that is the first
- *  `X-Forwarded-For` entry, which nginx overwrites with the address that
- *  connected to it (`nginx.conf`); without it, the peer's own address. */
-export function socketClientKey(handshake: IOTypes.Socket["handshake"], proxy: boolean): string {
-  const forwarded = handshake.headers['x-forwarded-for'];
-  const first = proxy && typeof forwarded === 'string' ? forwarded.split(',')[0]?.trim() : undefined;
-  return clientKey(first || handshake.address);
 }

@@ -1,5 +1,4 @@
-import type IOTypes from "socket.io";
-import { KeyedPacketBudget, PacketBudget, SOCKET_PACKET_LIMIT, socketClientKey } from "./packet_budget";
+import { KeyedPacketBudget, PacketBudget, SOCKET_PACKET_LIMIT } from "./packet_budget";
 
 describe("a socket's packet budget", () => {
   it("refuses the packet past the limit within one window", () => {
@@ -51,27 +50,5 @@ describe("packet budgets kept per key", () => {
     budgets.take("gone", 0);
     budgets.take("current", 1_500);
     expect(budgets.size).toBe(1);
-  });
-});
-
-describe("the client a socket's packets are charged to", () => {
-  const handshake = (address: string, forwardedFor?: string) =>
-    ({ address, headers: forwardedFor === undefined ? {} : { "x-forwarded-for": forwardedFor } }) as unknown as IOTypes.Socket["handshake"];
-
-  it("is nginx's X-Forwarded-For behind the proxy", () => {
-    expect(socketClientKey(handshake("172.18.0.5", "203.0.113.7"), true)).toBe("203.0.113.7");
-  });
-
-  it("is the peer when the proxy is not trusted", () => {
-    expect(socketClientKey(handshake("203.0.113.7", "198.51.100.1"), false)).toBe("203.0.113.7");
-  });
-
-  it("is the peer when no header came", () => {
-    expect(socketClientKey(handshake("203.0.113.7"), true)).toBe("203.0.113.7");
-  });
-
-  it("is an IPv6 subscriber's prefix, as the join limit counts it", () => {
-    expect(socketClientKey(handshake("::1", "2001:db8:0:1::1"), true))
-      .toBe(socketClientKey(handshake("::1", "2001:db8:0:2::9"), true));
   });
 });

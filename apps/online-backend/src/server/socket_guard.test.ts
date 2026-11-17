@@ -1,5 +1,6 @@
 import type { Server } from "boardgame.io";
-import { SocketGuard, type GuardStorage } from "./socket_guard";
+import type IOTypes from "socket.io";
+import { SocketGuard, socketClientKey, type GuardStorage } from "./socket_guard";
 
 const MATCH = "match";
 const SECRET = "team-secret";
@@ -136,5 +137,27 @@ describe("the socket guard", () => {
     await judge(["unknown"]);
     expect(await judge(sync())).toEqual({ pass: false, disconnect: true });
     expect(lookUp).not.toHaveBeenCalled();
+  });
+});
+
+describe("the client a socket's failures are charged to", () => {
+  const handshake = (address: string, forwardedFor?: string) =>
+    ({ address, headers: forwardedFor === undefined ? {} : { "x-forwarded-for": forwardedFor } }) as unknown as IOTypes.Socket["handshake"];
+
+  it("is nginx's X-Forwarded-For behind the proxy", () => {
+    expect(socketClientKey(handshake("172.18.0.5", "203.0.113.7"), true)).toBe("203.0.113.7");
+  });
+
+  it("is the peer when the proxy is not trusted", () => {
+    expect(socketClientKey(handshake("203.0.113.7", "198.51.100.1"), false)).toBe("203.0.113.7");
+  });
+
+  it("is the peer when no header came", () => {
+    expect(socketClientKey(handshake("203.0.113.7"), true)).toBe("203.0.113.7");
+  });
+
+  it("is an IPv6 subscriber's prefix, as the join limit counts it", () => {
+    expect(socketClientKey(handshake("::1", "2001:db8:0:1::1"), true))
+      .toBe(socketClientKey(handshake("::1", "2001:db8:0:2::9"), true));
   });
 });

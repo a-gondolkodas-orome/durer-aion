@@ -10,8 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
-import { socketClientKey } from "./server/packet_budget";
-import { SocketGuard, type GuardLimits } from "./server/socket_guard";
+import { SocketGuard, socketClientKey, type GuardLimits } from "./server/socket_guard";
 import type { MatchBot } from "./botwrapper";
 import type { CorsOptionsDelegate } from "cors";
 
