@@ -117,7 +117,7 @@ sequenceDiagram
     end
 ```
 
-The backend's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`
+The game package's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`
 — into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
 game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
 move land first. `hostedGames` (`games.ts`) lists each game beside its

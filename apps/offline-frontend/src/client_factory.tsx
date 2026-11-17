@@ -2,9 +2,8 @@ import { State } from "boardgame.io";
 import { ClientRelayWithBot, ClientWithBot } from "./myclient";
 import { GameStateMixin, GameType } from "game";
 import type { RelayOptions, StrategyOptions } from "game";
-import type { MyGameState as RelayGameState, RelayMoveArgs } from "game";
+import type { BotStrategy, MyGameState as RelayGameState, RelayMoveArgs } from "game";
 import type { RelayBoard, StrategyBoard, StrategyDescription } from "common-frontend";
-import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
 
 export const ClientFactory = function<

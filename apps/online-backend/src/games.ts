@@ -1,11 +1,10 @@
-import { MyGameWrappers as strategyGameWrappers, RelayWrapper, gameWrapper } from 'game';
+import { MyGameWrappers as strategyGameWrappers, RelayWrapper, botWrapper, gameWrapper } from 'game';
 import type { MyGameState, RelaySetupData, StrategyGameKey } from 'game';
 import { StrategyWrappers as StrategyStrategy } from 'game/bot';
 import type { State } from 'boardgame.io';
 import { judgeProblems, relayStrategy } from 'relay-bot';
 import { strategyGameName } from 'schemas';
 import type { Language, ProblemSource, RelayConfig } from 'schemas';
-import botWrapper from './botwrapper';
 
 /** The relay's judge, over the problems in its match's setup data. */
 function relayJudge(state: State<MyGameState>, botID: string, setupData: unknown) {
