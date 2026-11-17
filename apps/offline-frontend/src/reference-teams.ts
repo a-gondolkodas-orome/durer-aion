@@ -1,6 +1,6 @@
 import type { CompetitionId } from "schemas";
 
-// One test team per reference competition (problem-bank/banks/reference.ts),
+// One test team per reference competition (reference.ts),
 // which the /minta-verseny/ build serves in place of the rehearsed round. Its
 // codes are not teamData.ts's, so neither build lets in the other's teams.
 export const referenceTeams: {

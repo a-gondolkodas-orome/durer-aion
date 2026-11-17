@@ -48,7 +48,7 @@ and the database behind it.
 not, and it runs in the background. `npm run stack:logs` follows all three
 containers (Ctrl-C stops watching, not the stack); `npm run stack:down` stops
 it. The imported teams cover the reference competitions
-(`packages/problem-bank/banks/reference.ts`), which no real round was held with:
+(`reference.ts`), which no real round was held with:
 `000-0000-000` is in the full round, `001-0000-000` and `002-0000-000` in the
 two strategy-only ones, `003-0000-000` in the relay-only one, with a thousand
 more behind them.
@@ -175,7 +175,7 @@ competition's: ISO 8601 with an offset, such as `2026-11-20T15:00+01:00`, with
 a team writing the round late gets its own day. The window decides only when a
 match may start: a match started inside it runs its full time.
 The teams of `scripts/test.tsv` take the reference competitions in turn
-(`packages/problem-bank/banks/reference.ts`): `000` the full round, `001` and
+(`reference.ts`): `000` the full round, `001` and
 `002` the two strategy-only ones and `003` the relay-only one, and so on. Those
 logging in with `006-0000-000`, `007-0000-000` and `008-0000-000` have a window
 that has not opened yet, one that has closed, and one that is open, in that
@@ -252,7 +252,7 @@ Each runs with no backend and no database, and each persists to localStorage.
 | what | run it | notes |
 | --- | --- | --- |
 | the offline dry run (`/proba-verseny/`) | `npm run dev:offline` | the rehearsal of the competition round, against the in-browser bot. With `VITE_S3_*` set — the competition-year build, not this one — every strategy move also uploads a `_stratstep_` file, and its `log` is the entries the live round's admin dump serves |
-| the reference competitions' dry run (`/minta-verseny/`) | `VITE_DRY_RUN_ROUND=reference npm run dev:offline` | the same app over `banks/reference.ts` in place of the rehearsed round, logging in with `900-0000-000` to `903-0000-000`: the full round, the two strategy-only competitions and the relay-only one. Unlinked from the home page, being for developers |
+| the reference competitions' dry run (`/minta-verseny/`) | `VITE_DRY_RUN_ROUND=reference npm run dev:offline` | the same app over `reference.ts` in place of the rehearsed round, logging in with `900-0000-000` to `903-0000-000`: the full round, the two strategy-only competitions and the relay-only one. Unlinked from the home page, being for developers |
 | the relay practice site (`/valto/`) | `npm run dev:relay-practice` | #224 replaced the frozen 2023 build |
 | the strategy practice site (`/jatekok/`) | `npm run dev:strategy-practice` | on port 8012, not 5173 |
 
@@ -539,7 +539,7 @@ that before a competition.
 
 1. One self-contained folder in `packages/game/src/games/strategy/<game-name>/`.
    The reference games, which the reference competitions play
-   (`banks/reference.ts`), are the examples: `sablon/` is the one to copy, the
+   (`reference.ts`), are the examples: `sablon/` is the one to copy, the
    least a game needs, in two languages, with an opening the bot draws;
    `ketkupac/` adds a turn of two steps, named roles and a step description.
    `20ocde/` is a game a round was held with. Each holds
@@ -582,8 +582,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
   - `setup`, the game's own half of `G` only
   - `moves`: a move sets `G.winner` when it decides a sub-game and ends with
     `events.endTurn()`. Each live game also scores the sub-game in its move
-    (#459); `recordWinner` (`types.ts`) does both, and says when the match is
-    won
+    (#459); `recordWinner` (`packages/game/src/common/types.ts`) does both,
+    and says when the match is won
   - `possibleMoves`, every legal move, from which the bot picks at random
   - optionally `turn`, boardgame.io's turn hooks. Not for the end of time:
     in the play phase `gameWrapper` ends a match on the first move past it

@@ -13,7 +13,7 @@ import { teamData } from "./teamData";
 // VITE_DRY_RUN_ROUND=reference serves the reference competitions instead, at
 // /minta-verseny/ (scripts/assemble-site.mjs). The variable is inlined at build
 // time, so each build bundles one of the two banks only.
-const servesReference = import.meta.env.VITE_DRY_RUN_ROUND === "reference";
+export const servesReference = import.meta.env.VITE_DRY_RUN_ROUND === "reference";
 
 const registry = createRegistry([servesReference ? reference : rehearsedRound]);
 

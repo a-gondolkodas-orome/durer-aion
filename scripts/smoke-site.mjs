@@ -22,6 +22,14 @@ const TIMEOUT = 15_000;
 
 // Hungarian throughout: the strategy and relay practice sites take `?lang=`, and the browser
 // locale below covers whatever else reads navigator.language.
+// A dry run's login, waiting for the team's name on the page it leads to. The code is typed
+// rather than filled: the field is masked, and the mask reads keystrokes.
+const logInAs = (code, teamName) => async page => {
+  await page.getByLabel('Belépési kód').pressSequentially(code);
+  await page.getByRole('button', { name: 'Belépés' }).click();
+  await page.getByText(teamName).first().waitFor({ timeout: TIMEOUT });
+};
+
 const PAGES = [
   { path: '/', text: 'Dürer gyakorlás' },
   {
@@ -36,8 +44,10 @@ const PAGES = [
     },
   },
   { path: '/valto/?lang=hu', text: 'Váltók gyakorlása' },
-  { path: '/proba-verseny/', text: 'Online forduló' },
-  { path: '/minta-verseny/', text: 'Online forduló' },
+  // The two dry runs are one app built twice, so each logs in with a code only its own round's
+  // teams have: a build serving the other round, or the other build copied in its place, fails.
+  { path: '/proba-verseny/', text: 'Online forduló', then: logInAs('100-0000-000', 'testC') },
+  { path: '/minta-verseny/', text: 'Online forduló', then: logInAs('900-0000-000', 'Minta teljes') },
 ];
 
 // Console errors the aborted third-party requests cause on purpose. Anything else is a failure.

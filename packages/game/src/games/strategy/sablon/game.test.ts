@@ -1,4 +1,6 @@
 import type { Ctx } from 'boardgame.io';
+import { Client } from 'boardgame.io/client';
+import { gameWrapper } from '../../../common/gamewrapper';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalTake, MyGameWrapper, OPENING_RANGE, possibleMoves, startingPosition } from './game';
@@ -39,6 +41,24 @@ describe('the template game\'s take', () => {
     expect(state.G.numberOfLoss).toBe(1);
     expect(state.G.lastJudgeTake).toBe(4);
   });
+});
+
+// Through the wrapper, as a match runs: the move ends the turn itself, once.
+test('a take passes the turn to the other player, and only to them', () => {
+  const client = Client({ game: gameWrapper(MyGameWrapper()), numPlayers: 2 });
+  client.start();
+  client.moves.chooseNewGameType('test');
+  client.moves.setStartingPosition(startingPosition(12));
+  client.moves.chooseRole(GUESSER_PLAYER);
+  expect(client.getState()?.ctx.phase).toBe('play');
+
+  for (const [player, next] of [[GUESSER_PLAYER, JUDGE_PLAYER], [JUDGE_PLAYER, GUESSER_PLAYER], [GUESSER_PLAYER, JUDGE_PLAYER]]) {
+    expect(client.getState()?.ctx.currentPlayer).toBe(player);
+    client.moves.take(1);
+    expect(client.getState()?.ctx.currentPlayer).toBe(next);
+  }
+  expect(client.getState()?.G.pile).toBe(9);
+  client.stop();
 });
 
 describe('the template game\'s bot', () => {

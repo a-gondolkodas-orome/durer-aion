@@ -1,7 +1,7 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { JUDGE_PLAYER, recordWinner } from '../../../common/types';
-import type { GameStateMixin, GameType, PlayerIDType } from '../../../common/types';
+import { currentPlayer, JUDGE_PLAYER, recordWinner } from '../../../common/types';
+import type { GameStateMixin, GameType } from '../../../common/types';
 
 // A reference game (README § Creating a new game): two piles, and a turn of two
 // steps — choose a pile, then take from it. The first player takes 1–3 tokens
@@ -89,7 +89,7 @@ export function MyGameWrapper(): GameType<MyGameState> {
         G.piles[from] -= taken;
         G.selectedPile = null;
         if (ctx.currentPlayer === JUDGE_PLAYER) G.lastJudgeTake = { pile: from, count: taken };
-        if (G.piles.every(size => size === 0) && recordWinner(G, ctx.currentPlayer as PlayerIDType)) {
+        if (G.piles.every(size => size === 0) && recordWinner(G, currentPlayer(ctx))) {
           events.endGame();
           return;
         }

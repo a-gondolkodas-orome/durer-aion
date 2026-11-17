@@ -1,5 +1,5 @@
 import { dryRunCompetition } from "./rehearsed-round";
-import { LOCAL_STORAGE_TEAMSTATE, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, RelayProblemResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend/core";
+import { teamStateStorageKey, TeamModelDto, MatchStatus, FinishedMatchStatus, LiveGameResult, RelayProblemResult, isPageState, relayResultsStorageKey, strategyResultsStorageKey } from "common-frontend/core";
 
 // The one place the stored team state is parsed (#367): every read goes through
 // this validation instead of trusting JSON.parse's `any`. Anything that does
@@ -88,7 +88,7 @@ export function readStoredTeamState(): TeamModelDto | null {
   if (typeof localStorage === 'undefined') {
     return null;
   }
-  const parsed = readStoredJson(LOCAL_STORAGE_TEAMSTATE);
+  const parsed = readStoredJson(teamStateStorageKey());
   if (!isRecord(parsed)) {
     return null;
   }

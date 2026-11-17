@@ -1,4 +1,4 @@
-import { ClientRepository, I18nError, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
+import { ClientRepository, I18nError, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "common-frontend/core";
 import { dryRunCompetition, dryRunTeams } from "./rehearsed-round";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
@@ -28,7 +28,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     sendGameData({ component: "relay", phase: "start" });
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+    localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
     return Promise.resolve();
@@ -52,7 +52,7 @@ export class OfflineClientRepository implements ClientRepository {
     }
 
   sendGameData({ component: "strategy", phase: "start" });
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+    localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
     return Promise.resolve();
@@ -64,7 +64,7 @@ export class OfflineClientRepository implements ClientRepository {
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'FINISHED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
       throw new I18nError('error.unexpected');
     }
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({ ...teamState, pageState: 'STRATEGY' }));
+    localStorage.setItem(teamStateStorageKey(), JSON.stringify({ ...teamState, pageState: 'STRATEGY' }));
     return Promise.resolve();
   }
 
@@ -91,7 +91,7 @@ export class OfflineClientRepository implements ClientRepository {
         strategyResults: readStoredStrategyResults(),
       }
     }
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
+    localStorage.setItem(teamStateStorageKey(), JSON.stringify(newState));
     return Promise.resolve();
   }
 
@@ -148,7 +148,7 @@ export class OfflineClientRepository implements ClientRepository {
       }
 
       sendDataLogin(teamState);
-      localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      localStorage.setItem(teamStateStorageKey(),
         JSON.stringify(teamState)
       );
       localStorage.setItem(lastActiveStorageKey(), String(Date.now()));

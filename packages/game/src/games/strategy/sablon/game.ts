@@ -1,7 +1,7 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
-import { JUDGE_PLAYER, recordWinner } from '../../../common/types';
-import type { GameStateMixin, GameType, PlayerIDType } from '../../../common/types';
+import { currentPlayer, JUDGE_PLAYER, recordWinner } from '../../../common/types';
+import type { GameStateMixin, GameType } from '../../../common/types';
 
 // The reference template (README § Creating a new game): the least a game
 // needs. One pile; a turn takes 1, 3 or 4 tokens from it; whoever takes the
@@ -38,12 +38,20 @@ export function MyGameWrapper(): GameType<MyGameState> {
     setup: () => startingPosition(OPENING_RANGE.min),
     possibleMoves,
     startVaries: true,
+    // The move ends the turn itself, as every game's does: a `turn` here
+    // replaces the wrapper's one-move limit, so a copy that adds a hook keeps
+    // working.
+    turn: { minMoves: 1 },
     moves: {
       take: ({ G, ctx, events }, count: unknown) => {
         if (!isLegalTake(G, ctx, count)) return INVALID_MOVE;
         G.pile -= count;
         if (ctx.currentPlayer === JUDGE_PLAYER) G.lastJudgeTake = count;
-        if (G.pile === 0 && recordWinner(G, ctx.currentPlayer as PlayerIDType)) events.endGame();
+        if (G.pile === 0 && recordWinner(G, currentPlayer(ctx))) {
+          events.endGame();
+          return;
+        }
+        events.endTurn();
       },
     },
   };
