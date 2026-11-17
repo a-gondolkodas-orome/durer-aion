@@ -18,7 +18,9 @@ export function StrategyEndTable(props: { allPoints: number, liveResults: LiveGa
       title={t('strategy.endTable.title')}
       points={props.allPoints}
       max={strategyPoints(0)}
-      reminder={team?.relayMatch.state === 'NOT STARTED' ? t('strategy.endTable.reminder') : undefined}
+      // Only a competition with a relay has one left to remind of.
+      reminder={team?.competition?.relay !== undefined && team.relayMatch.state === 'NOT STARTED'
+        ? t('strategy.endTable.reminder') : undefined}
       backLabel={t('general.backHome')}
       onBack={backToHome}
       onClose={props.onViewBoard && { label: t('strategy.viewBoard'), onClick: props.onViewBoard }}
