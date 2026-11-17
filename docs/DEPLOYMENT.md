@@ -402,9 +402,10 @@ shows `limiting connections by zone "socketio_per_address"`. The number is baked
 Behind that, the backend lets a socket's packets through only with its match's credentials,
 and counts the failures per address (`socket_guard.ts`); a proxy in front collapses that count
 the same way, and one team's mistakes would then lock every team out of loading a board. What
-a team's boards send is limited per team, and a socket past its limit is disconnected: that
-board shows the connection lost until the team reloads the page, since socket.io does not
-reconnect after a disconnect the server made.
+a team's boards send is limited per team. A socket past its limit, or one from an address
+locked out by its failures, is disconnected: that board shows the connection lost until the
+team reloads the page, since socket.io does not reconnect after a disconnect the server made.
+A lockout lasts a minute, so a reload within it is disconnected again.
 
 Then `docker-compose.tls.yml`, beside `docker-compose.yml` in the checkout, opening the port
 and mounting both the certificates and that file:

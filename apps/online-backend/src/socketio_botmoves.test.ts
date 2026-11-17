@@ -213,18 +213,21 @@ describe("the socket transport", () => {
     const move = (credentials: string) =>
       ({ type: "MAKE_MOVE", payload: { type: "noop", args: [], playerID: "0", credentials } });
 
-    it("refuses a sync without the match's credentials", async () => {
-      const { db, client } = await serve();
+    // boardgame.io queues every sync it is handed, credentials or not, and
+    // answers a spectator's (null player) with the match.
+    it.each([
+      ["another's credentials", "0", "made up"],
+      ["no player", null, undefined],
+    ])("keeps a sync with %s away from boardgame.io", async (_case, playerID, credentials) => {
+      const { db, client, transport } = await serve();
       createKnownMatch(db);
+      createKnownMatch(db, CHAT_MATCH, OTHER_TEAM_SECRET);
 
       const socket = client();
-      const answered = vi.fn();
-      socket.on("sync", answered);
-      socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
-      socket.emit("sync", KNOWN_MATCH, "0", "made up", 2);
+      socket.emit("sync", CHAT_MATCH, playerID, credentials, 2);
       await syncBehind(socket);
 
-      expect(answered).toHaveBeenCalledTimes(1);
+      expect(transport.queueFor(CHAT_MATCH)).toBeUndefined();
     });
 
     // boardgame.io keeps a queue for every match id an update names, and

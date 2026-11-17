@@ -1,15 +1,18 @@
 import type { Server } from "boardgame.io";
-import { SocketGuard } from "./socket_guard";
+import { SocketGuard, type GuardStorage } from "./socket_guard";
 
 const MATCH = "match";
 const SECRET = "team-secret";
 
 const metadata = { players: { 0: { id: 0, credentials: SECRET }, 1: { id: 1, credentials: "bot" } } } as unknown as Server.MatchData;
 
-/** A guard over one match, with the reads it makes on view. */
+/** A guard over one match, with the reads it makes on view. `authenticate`
+ *  is boardgame.io's default rule, as the server configures it. */
 function guard(limits: ConstructorParameters<typeof SocketGuard>[1] = {}) {
   const lookUp = vi.fn(async (matchID: string) => (matchID === MATCH ? metadata : undefined));
-  return { guard: new SocketGuard(lookUp, limits), lookUp };
+  const authenticate = vi.fn(({ playerID, credentials, metadata: { players } }: Parameters<GuardStorage["authenticate"]>[0]) =>
+    (players as Record<string, { credentials?: string } | undefined>)[playerID]?.credentials === credentials);
+  return { guard: new SocketGuard({ lookUp, authenticate }, limits), lookUp, authenticate };
 }
 
 const sync = (credentials: unknown = SECRET, matchID: unknown = MATCH) => ["sync", matchID, "0", credentials, 2];
@@ -49,11 +52,55 @@ describe("the socket guard", () => {
     expect((await judge(["chat", MATCH, {}, SECRET])).pass).toBe(false);
   });
 
-  it("gives back the failure a proving packet was charged", async () => {
-    const judge = guard({ failed: { limit: 1, windowMs: 60_000 } }).guard.forSocket("192.0.2.1");
-    await judge(sync());
-    expect((await judge(sync("guess", "a"))).pass).toBe(false);
-    expect(await judge(sync("guess", "b"))).toEqual({ pass: false, disconnect: false, reason: "too many failed packets from this address" });
+  // A board that waits on a read must not count as a failure meanwhile: after
+  // a restart every board at a school proves itself at once.
+  it("charges an address only for failures it has read", async () => {
+    let release: () => void = () => undefined;
+    const { guard: g, lookUp } = guard({ failed: { limit: 1, windowMs: 60_000 } });
+    const held = new Promise<void>(resolve => { release = resolve; });
+    lookUp.mockImplementation(async (matchID: string) => { await held; return matchID === MATCH ? metadata : undefined; });
+    const boards = Array.from({ length: 5 }, () => g.forSocket("192.0.2.1")(sync()));
+    release();
+
+    expect(await Promise.all(boards)).toEqual(Array(5).fill({ pass: true }));
+  });
+
+  // A school's own board can be the one turned away; dropped silently, its
+  // moves would show as played.
+  it("disconnects a socket its address's failures turn away, without reading", async () => {
+    const { guard: g, lookUp } = guard({ failed: { limit: 1, windowMs: 60_000 } });
+    const judge = g.forSocket("192.0.2.1");
+    expect(await judge(sync("guess"))).toEqual({ pass: false, disconnect: false, reason: `sync not from a player of match ${MATCH}` });
+    lookUp.mockClear();
+
+    expect(await g.forSocket("192.0.2.1")(sync())).toEqual({ pass: false, disconnect: true });
+    expect(await g.forSocket("198.51.100.1")(sync())).toEqual({ pass: true });
+    expect(lookUp).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps serving a proved player at an address that is locked out", async () => {
+    const { guard: g } = guard({ failed: { limit: 1, windowMs: 60_000 } });
+    await g.forSocket("192.0.2.1")(sync());
+    await g.forSocket("192.0.2.1")(sync("guess"));
+    expect(await g.forSocket("192.0.2.1")(sync())).toEqual({ pass: true });
+  });
+
+  // boardgame.io looks a seat up by the id as sent, so "00" is no seat.
+  it.each(["00", "", " 0"])("refuses the seat id %j, which only reads as a number like 0", async (playerID) => {
+    const judge = guard().guard.forSocket("192.0.2.1");
+    expect((await judge(["sync", MATCH, playerID, SECRET, 2])).pass).toBe(false);
+  });
+
+  it("asks the configured credential check, and refuses a seat without credentials whatever it says", async () => {
+    const { guard: g, lookUp, authenticate } = guard();
+    const judge = g.forSocket("192.0.2.1");
+    authenticate.mockReturnValueOnce(false);
+    expect((await judge(sync())).pass).toBe(false);
+
+    const seatless = { players: { 0: { id: 0 }, 1: { id: 1, credentials: "bot" } } } as unknown as Server.MatchData;
+    lookUp.mockResolvedValueOnce(seatless);
+    authenticate.mockReturnValue(true);
+    expect((await judge(sync())).pass).toBe(false);
   });
 
   it("forgets a proved player whose match is gone", async () => {

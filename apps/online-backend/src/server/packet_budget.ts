@@ -55,9 +55,9 @@ export class PacketBudget {
     return this.spent <= this.budget.limit;
   }
 
-  /** Gives back a packet `take` charged, once it turned out not to count. */
-  refund(): void {
-    if (this.spent > 0) this.spent -= 1;
+  /** Whether the window's packets are spent, without charging one. */
+  spentOut(now = Date.now()): boolean {
+    return !this.expired(now) && this.spent >= this.budget.limit;
   }
 
   /** Whether the window is over, so the budget is as good as a fresh one. */
@@ -92,8 +92,8 @@ export class KeyedPacketBudget {
     return budget.take(now);
   }
 
-  refund(key: string): void {
-    this.budgets.get(key)?.refund();
+  spentOut(key: string, now = Date.now()): boolean {
+    return this.budgets.get(key)?.spentOut(now) ?? false;
   }
 
   /** How many keys are held; for the suite. */

@@ -15,27 +15,33 @@ import {
  *
  * - Both packets carry the player's credentials — a `sync` as an argument, an
  *   `update` in its action's payload — and a packet whose credentials do not
- *   match its match's stored ones is refused. An `update` has to prove itself
- *   too, not ride on a `sync` before it: socket.io sends the moves it buffered
- *   while disconnected *before* the `sync` that reconnecting sends.
+ *   pass boardgame.io's own check against its match is refused. An `update`
+ *   has to prove itself too, not ride on a `sync` before it: socket.io sends
+ *   the moves it buffered while disconnected *before* the `sync` that
+ *   reconnecting sends.
  * - A player that has proved itself is remembered, so its moves cost no read
  *   of ours on top of boardgame.io's. A `sync` is looked up every time: they
  *   are rare, and a match can be wiped (the loser of a start race, `router.ts`)
  *   while boardgame.io would recreate it on a sync.
  * - Failures are counted per address and only failures, as `POST /team/join`
- *   counts wrong codes: past the limit, a packet that would need a read is
- *   refused without one. A school behind one NAT address spends none of it, and
- *   its boards that have proved themselves keep being served while someone
- *   beside them is locked out. A *new* board there would wait out the window.
+ *   counts wrong codes, and only once a read has shown them to be failures:
+ *   a school's boards proving themselves all at once — after a backend
+ *   restart, which forgets who has proved itself — spend none of it. Past the
+ *   limit, a packet that would need a read is not given one. Packets read
+ *   while the limit was being reached can pass it by as many as are in flight
+ *   at once, which is one per socket.
  * - What a proved player sends is counted per team, over all its sockets, so a
  *   team flooding spends its own allowance and cuts off only its own boards.
  * - What any socket sends is counted per socket, before anything else, so a
  *   runaway tab is cut off before it eats into its team's.
  *
- * A socket over its own or its team's budget is disconnected; a packet that
- * failed is refused and the socket kept. Every `chat` is refused: no client of
- * ours sends one, and boardgame.io's listener reads storage for it without
- * awaiting.
+ * A socket over its own or its team's budget is disconnected, and so is one
+ * turned away unread because its address is locked out: that can be a school's
+ * own board, beside someone guessing, and a board whose moves were dropped while
+ * it stayed connected would show them as played. Disconnected, it shows the
+ * connection lost. A packet whose credentials were read and failed is refused
+ * and the socket kept. Every `chat` is refused: no client of ours sends one,
+ * and boardgame.io's listener reads storage for it without awaiting.
  */
 
 export type Verdict =
@@ -44,6 +50,14 @@ export type Verdict =
   | { pass: false, disconnect: true };
 
 type Metadata = Server.MatchData | undefined;
+
+/** What the guard reads with: the match's metadata, and boardgame.io's
+ *  configured credential check (`app.context.auth`), so the two cannot
+ *  disagree about who a player is. */
+export interface GuardStorage {
+  lookUp(matchID: string): Promise<Metadata>;
+  authenticate(claim: { playerID: string, credentials: string, metadata: Server.MatchData }): boolean | Promise<boolean>;
+}
 
 export interface GuardLimits {
   socket?: PacketLimit;
@@ -78,23 +92,15 @@ function claimOf(event: 'sync' | 'update', args: unknown[]): Claim | string {
   return { event, matchID, playerID, credentials };
 }
 
-/** boardgame.io's default `Auth` rule, without its pass for a match none of
- *  whose players has credentials: every match here gets the team's when it is
- *  created (`router.ts`), so one without is not one a team plays. */
-function isAuthentic(metadata: Metadata, { playerID, credentials }: Claim): boolean {
-  const stored = metadata?.players[Number(playerID)]?.credentials;
-  return typeof stored === 'string' && stored !== '' && stored === credentials;
-}
-
 export class SocketGuard {
-  /** Claims that matched storage: bounded by the players of real matches. */
+  /** Claims that passed: bounded by the players of real matches. */
   private readonly proved = new Set<string>();
   private readonly socketLimit: PacketLimit;
   private readonly teams: KeyedPacketBudget;
   private readonly failures: KeyedPacketBudget;
 
   constructor(
-    private readonly lookUp: (matchID: string) => Promise<Metadata>,
+    private readonly storage: GuardStorage,
     { socket = SOCKET_PACKET_LIMIT, team = TEAM_PACKET_LIMIT, failed = FAILED_PACKET_LIMIT }: GuardLimits = {},
   ) {
     this.socketLimit = socket;
@@ -118,6 +124,18 @@ export class SocketGuard {
     };
   }
 
+  /** boardgame.io's check, and that the seat has credentials at all: its
+   *  default `Auth` passes anyone in a match none of whose seats has any, and
+   *  every match a team plays gets the team's when it is created
+   *  (`router.ts`). The seat is looked up by the id as sent, as boardgame.io
+   *  looks it up. */
+  private async isAuthentic(metadata: Metadata, { playerID, credentials }: Claim): Promise<boolean> {
+    if (metadata === undefined) return false;
+    const seat = (metadata.players as Record<string, { credentials?: unknown } | undefined>)[playerID];
+    if (typeof seat?.credentials !== 'string' || seat.credentials === '') return false;
+    return await this.storage.authenticate({ playerID, credentials, metadata });
+  }
+
   private async judge([event, ...args]: unknown[], address: string): Promise<Verdict> {
     if (event === 'chat') return refuse('chat is not used');
     if (event !== 'sync' && event !== 'update') return PASS;
@@ -127,18 +145,13 @@ export class SocketGuard {
     const key = JSON.stringify([claim.matchID, claim.playerID, claim.credentials]);
     const known = this.proved.has(key);
     if (!(known && event === 'update')) {
-      // Charged before the read, so that failures arriving together are
-      // counted rather than all passing a check none of them had reached yet.
-      if (!known && !this.failures.take(address)) return refuse('too many failed packets from this address');
-      const metadata = await this.lookUp(claim.matchID);
-      if (!isAuthentic(metadata, claim)) {
+      if (!known && this.failures.spentOut(address)) return DISCONNECT;
+      if (!(await this.isAuthentic(await this.storage.lookUp(claim.matchID), claim))) {
         if (known) this.proved.delete(key);
+        else this.failures.take(address);
         return refuse(`${event} not from a player of match ${claim.matchID}`);
       }
-      if (!known) {
-        this.failures.refund(address);
-        this.proved.add(key);
-      }
+      this.proved.add(key);
     }
     return this.teams.take(claim.credentials) ? PASS : DISCONNECT;
   }

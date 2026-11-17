@@ -133,10 +133,10 @@ export class SocketIOButBotMoves extends SocketIO {
     super.init(app, games, origins);
     // One for every namespace: a team's sockets to either game share its
     // budget, and an address's failures count across both.
-    const guard = new SocketGuard(
-      async matchID => (await fetch(app.context.db, matchID, { metadata: true } as const)).metadata,
-      this.guardLimits,
-    );
+    const guard = new SocketGuard({
+      lookUp: async matchID => (await fetch(app.context.db, matchID, { metadata: true } as const)).metadata,
+      authenticate: claim => app.context.auth.authenticateCredentials(claim),
+    }, this.guardLimits);
 
     for (const game of games) {
       if (!game.name) {
