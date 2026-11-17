@@ -10,6 +10,7 @@ export function SiteFooter(props: { gitCommitHash: string, trackingNote: boolean
       textAlign: "center",
       color: "#777",
       fontSize: '70%',
+      marginTop: 'auto',
       marginBottom: '8px'
     }}>
       {props.trackingNote && <div>{t('footer.tracking')}</div>}
