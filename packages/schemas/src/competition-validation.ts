@@ -132,7 +132,7 @@ export function validateCompetition(competition: CompetitionConfig, references: 
   }
 
   if (competition.advancingPoints !== undefined && !isPositiveInteger(competition.advancingPoints)) {
-    errors.push(`${where}: a továbbjutás ponthatára (${competition.advancingPoints}) nem pozitív egész szám`);
+    errors.push(`${where}: a továbbjutási ponthatár (${competition.advancingPoints}) nem pozitív egész szám`);
   }
 
   const { finishMessage } = competition;

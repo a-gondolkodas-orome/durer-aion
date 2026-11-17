@@ -169,7 +169,7 @@ describe('validateCompetition', () => {
   it('refuses advancing points that are not a positive integer', () => {
     expect(validateCompetition({ ...base, relay, advancingPoints: 25 }, references)).toEqual([]);
     expect(validateCompetition({ ...base, relay, advancingPoints: 0 }, references)).toEqual([
-      'verseny a1b2c3d4e5--online-c: a továbbjutás ponthatára (0) nem pozitív egész szám',
+      'verseny a1b2c3d4e5--online-c: a továbbjutási ponthatár (0) nem pozitív egész szám',
     ]);
   });
 
