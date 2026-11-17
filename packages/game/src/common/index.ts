@@ -5,3 +5,4 @@
 // instead.
 export * from './gamewrapper';
 export * from './types';
+export * from './botwrapper';

@@ -13,38 +13,16 @@ import type { GameRelay, MyGameState as RelayGameState } from 'game';
 /// bgio props: the relay game carries its own timer instead of gameWrapper's.
 export type RelayBoard = ComponentType<BoardProps<RelayGameState>>;
 
-export function MyClient<T_SpecificGameState>(
-  game: GameType<T_SpecificGameState>,
-  board: StrategyBoard<T_SpecificGameState>,
-  description: StrategyDescription
-) {
-  return Client({
-    game: gameWrapper(game),
-    board: boardWrapper(board, description, game),
-    numPlayers: 2,
-  });
-}
-
-export function MyClientRelay(
-  game: typeof GameRelay,
-  board: RelayBoard,
-  _description: ReactNode
-) {
-  return Client({
-    game: game,
-    board: board,
-    numPlayers: 2,
-  });
-}
-
 // socket.io makes one reconnect attempt at a time, and one started while the
 // network was down hangs until this timeout (default 20 s) before the next.
 const socketOpts = { timeout: 5000 };
 
 // Until the socket syncs with the server, boardgame.io shows its own
 // placeholder, an English "connecting...", so the online clients name ours.
+// The server serves each match under its name, so the live client needs the
+// one its host gives the game.
 export function MyOnlineClient<T_SpecificGameState>(
-  game: GameType<T_SpecificGameState>,
+  game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   description: StrategyDescription,
   serverUrl: string | undefined = undefined,

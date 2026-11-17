@@ -1,6 +1,6 @@
 import type { Ctx } from 'boardgame.io';
 import { Client } from 'boardgame.io/client';
-import { gameWrapper } from '../../../common/gamewrapper';
+import { gameWrapper, PHASE } from '../../../common/gamewrapper';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalTake, MyGameWrapper, OPENING_RANGE, possibleMoves, startingPosition } from './game';
@@ -12,7 +12,7 @@ type State = MyGameState & GameStateMixin;
 function playing(pile: number, currentPlayer = GUESSER_PLAYER): { G: State, ctx: Ctx } {
   const G = { ...startingPosition(pile), firstPlayer: GUESSER_PLAYER, winner: null, difficulty: 'live',
     winningStreak: 0, numberOfLoss: 0, points: 0 } as unknown as State;
-  return { G, ctx: { phase: 'play', currentPlayer } as Ctx };
+  return { G, ctx: { phase: PHASE.play, currentPlayer } as Ctx };
 }
 
 function take({ G, ctx }: { G: State, ctx: Ctx }, count: unknown) {
@@ -50,7 +50,7 @@ test('a take passes the turn to the other player, and only to them', () => {
   client.moves.chooseNewGameType('test');
   client.moves.setStartingPosition(startingPosition(12));
   client.moves.chooseRole(GUESSER_PLAYER);
-  expect(client.getState()?.ctx.phase).toBe('play');
+  expect(client.getState()?.ctx.phase).toBe(PHASE.play);
 
   for (const [player, next] of [[GUESSER_PLAYER, JUDGE_PLAYER], [JUDGE_PLAYER, GUESSER_PLAYER], [GUESSER_PLAYER, JUDGE_PLAYER]]) {
     expect(client.getState()?.ctx.currentPlayer).toBe(player);

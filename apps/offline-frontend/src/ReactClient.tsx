@@ -1,7 +1,7 @@
 import { MyGameWrappers } from "game";
 import type { StrategyGameKey } from "game";
 import { StrategyWrappers } from "game/bot";
-import { MyBoardWrapper, strategyDescriptions } from "game/client";
+import { boardFor, strategyDescriptions } from "game/client";
 import { relayStrategy } from "relay-bot";
 import type { CompetitionId, PublicCompetition } from "schemas";
 import { dryRunCompetition, dryRunRelay } from "./rehearsed-round";
@@ -29,7 +29,7 @@ function strategyClient(competition: PublicCompetition) {
 // Generic over the game, so that its rules, board and bot are one game's.
 function gameClient<K extends StrategyGameKey>(gameId: K, competitionId: CompetitionId, durationMinutes: number) {
   const game = { ...MyGameWrappers[gameId](), name: `strategy--${competitionId}` };
-  return ClientFactory(game, MyBoardWrapper(gameId), StrategyWrappers[gameId](), strategyDescriptions[gameId],
+  return ClientFactory(game, boardFor(gameId), StrategyWrappers[gameId](), strategyDescriptions[gameId],
     { durationMinutes }).ClientWithBot;
 }
 

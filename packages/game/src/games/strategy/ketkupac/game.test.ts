@@ -1,4 +1,5 @@
 import type { Ctx } from 'boardgame.io';
+import { PHASE } from '../../../common/gamewrapper';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { getPlayerStepDescription, isLegalTake, MyGameWrapper, OPENING_PILES, possibleMoves, startingPosition } from './game';
@@ -11,7 +12,7 @@ type State = MyGameState & GameStateMixin;
 function teamFirst(piles = [...OPENING_PILES], difficulty: 'test' | 'live' = 'test'): { G: State, ctx: Ctx } {
   const G = { ...startingPosition(), piles, firstPlayer: GUESSER_PLAYER, winner: null, difficulty,
     winningStreak: 0, numberOfLoss: 0, points: 0 } as unknown as State;
-  const ctx = { phase: 'play', currentPlayer: GUESSER_PLAYER } as Ctx;
+  const ctx = { phase: PHASE.play, currentPlayer: GUESSER_PLAYER } as Ctx;
   return { G, ctx };
 }
 
@@ -73,7 +74,7 @@ describe('the two-pile game\'s bot', () => {
   });
 
   test('leaves a lost position whenever it can, in a live game', () => {
-    const state = { ...teamFirst(), ctx: { phase: 'play', currentPlayer: JUDGE_PLAYER } as Ctx };
+    const state = { ...teamFirst(), ctx: { phase: PHASE.play, currentPlayer: JUDGE_PLAYER } as Ctx };
     state.G.difficulty = 'live';
     for (const piles of [[3, 6], [2, 5], [4, 4], [1, 7]]) {
       state.G.piles = piles;

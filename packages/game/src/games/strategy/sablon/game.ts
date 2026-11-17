@@ -1,5 +1,6 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { PHASE } from '../../../common/gamewrapper';
 import { currentPlayer, JUDGE_PLAYER, recordWinner } from '../../../common/types';
 import type { GameStateMixin, GameType } from '../../../common/types';
 
@@ -23,7 +24,7 @@ export function startingPosition(pile: number): MyGameState {
 }
 
 export function isLegalTake(G: Position, ctx: Pick<Ctx, 'phase'>, count: unknown): count is number {
-  if (ctx.phase !== 'play' || G.firstPlayer == null || G.winner != null) return false;
+  if (ctx.phase !== PHASE.play || G.firstPlayer == null || G.winner != null) return false;
   return TAKES.some(take => take === count) && (count as number) <= G.pile;
 }
 
@@ -33,7 +34,6 @@ export function possibleMoves(G: Position, ctx: Pick<Ctx, 'phase'>): { move: str
 
 export function MyGameWrapper(): GameType<MyGameState> {
   return {
-    name: 'mintasablon',
     // Never played: the bot's opening replaces it before the first move.
     setup: () => startingPosition(OPENING_RANGE.min),
     possibleMoves,

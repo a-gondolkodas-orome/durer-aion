@@ -565,7 +565,7 @@ that before a competition.
 
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:
-   `strategy-games.ts` (the game definition and its name — the `game` entry),
+   `strategy-games.ts` (the game definition — the `game` entry),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
    Each is keyed by the game id a competition names (`StrategyConfig.gameId`),
    one per game and variant, e.g. `20o-c`; `strategyGames` lists the ids and
@@ -580,9 +580,8 @@ game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and
 the clock, the test/live choice, choosing who starts, tries and score.
 
 - **`game.ts`** exports `MyGameWrapper(variant)`, returning
-  - `name`, equal to the game id's entry in `strategyNames`
-    (`strategy-games.ts`), which the offline dry run registers it under; the
-    live round registers each competition's game as `strategy--<id>`
+  - no `name`: the host names the match — the live round
+    `strategyGameName(gameId)`, the offline dry run one per competition
   - `setup`, the game's own half of `G` only
   - `moves`: a move sets `G.winner` when it decides a sub-game and ends with
     `events.endTurn()`. Each live game also scores the sub-game in its move

@@ -1,7 +1,6 @@
 import { ClientRelayWithBot } from "./myclient";
-import type { MyGameState as RelayGameState, RelayMoveArgs } from "game";
+import type { BotStrategy, MyGameState as RelayGameState, RelayMoveArgs } from "game";
 import type { RelayBoard } from "common-frontend";
-import type { BotStrategy } from "./botwrapper";
 import type { ReactNode } from "react";
 
 export const ClientFactoryRelay = function (

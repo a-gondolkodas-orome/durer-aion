@@ -281,11 +281,5 @@
       "yourTurn": "Ti jöttök!"
     },
     "viewBoard": "Tábla megtekintése"
-  },
-  "waitingRoom": {
-    "instruction": "A verseny kezdetekor automatikusan átirányításra kerültök a verseny felületre.",
-    "remainingEnd": "van hátra kezdésig!",
-    "remainingStart": "Még",
-    "soon": "Az online forduló hamarosan kezdődik!"
   }
 }

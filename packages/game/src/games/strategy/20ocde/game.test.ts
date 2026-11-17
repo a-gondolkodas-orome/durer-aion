@@ -1,4 +1,5 @@
 import type { Ctx } from 'boardgame.io';
+import { PHASE } from '../../../common/gamewrapper';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { getPlayerStepDescription, isLegalPlacement, MyGameWrapper, possibleMoves, startingPosition } from './game';
@@ -10,7 +11,7 @@ type State = MyGameState & GameStateMixin;
 // time. The team here plays X.
 function teamAsX(): { G: State, ctx: Ctx } {
   const G = { ...startingPosition('E'), firstPlayer: JUDGE_PLAYER, winner: null, difficulty: 'test' } as unknown as State;
-  const ctx = { phase: 'play', currentPlayer: GUESSER_PLAYER } as Ctx;
+  const ctx = { phase: PHASE.play, currentPlayer: GUESSER_PLAYER } as Ctx;
   return { G, ctx };
 }
 

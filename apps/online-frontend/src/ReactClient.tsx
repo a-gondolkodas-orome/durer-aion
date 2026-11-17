@@ -1,6 +1,6 @@
 import { GameRelay, MyGameWrappers } from "game";
 import type { StrategyGameKey } from "game";
-import { MyBoardWrapper, strategyDescriptions } from "game/client";
+import { boardFor, strategyDescriptions } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
 import { strategyGameName } from "schemas";
 import type { PublicCompetition } from "schemas";
@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 
 const description = <p className="text-justify"></p>
 
-type OnlineClient = ReturnType<typeof ClientFactoryRelay>["OnlineClient"];
+type OnlineClient = ReturnType<typeof ClientFactoryRelay>;
 
 // One client per game, built the first time a team opens a match of it and
 // kept, so a re-render does not remount the board. Each is registered under
@@ -22,7 +22,7 @@ const strategyClients = new Map<StrategyGameKey, OnlineClient>();
 
 function relayClient(competition: PublicCompetition): OnlineClient | null {
   if (competition.relay === undefined) return null;
-  relayOnlineClient ??= ClientFactoryRelay(GameRelay, InProgressRelay, description).OnlineClient;
+  relayOnlineClient ??= ClientFactoryRelay(GameRelay, InProgressRelay, description);
   return relayOnlineClient;
 }
 
@@ -41,7 +41,7 @@ function strategyClient(competition: PublicCompetition): OnlineClient | null {
 // Generic over the game, so that its rules and board are one game's.
 function gameClient<K extends StrategyGameKey>(gameId: K): OnlineClient {
   const game = { ...MyGameWrappers[gameId](), name: strategyGameName(gameId) };
-  return ClientFactory(game, MyBoardWrapper(gameId), strategyDescriptions[gameId]).OnlineClient;
+  return ClientFactory(game, boardFor(gameId), strategyDescriptions[gameId]);
 }
 
 interface ClientProps {

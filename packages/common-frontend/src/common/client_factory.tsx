@@ -1,29 +1,19 @@
-import { MyClient, MyClientRelay, MyOnlineClient, MyOnlineRelayClient } from "./myclient";
+import { MyOnlineClient, MyOnlineRelayClient } from "./myclient";
 import type { RelayBoard } from "./myclient";
 import type { StrategyBoard, StrategyDescription } from "./boardwrapper";
 import type { ReactNode } from "react";
 import { GameType } from "game";
 import type { GameRelay } from "game";
 
+// The live round's clients; the team always plays as player 0.
 export const ClientFactory = function<T_SpecificGameState> (
-  game: GameType<T_SpecificGameState>,
+  game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
   description: StrategyDescription,
-  serverUrl: string | undefined = undefined,
   ) {
-  const Client = MyClient(game, board, description);
-  const OnlineClient = MyOnlineClient(game, board, description, serverUrl);
-  return {
-    Client: function () {
-      return (<>
-        <Client />
-      </>);
-    },
-    OnlineClient: function ({ credentials, matchID }: { credentials?: string, matchID?: string }) {
-      return (<>
-        <OnlineClient playerID='0' credentials={credentials} matchID={matchID} />
-      </>);
-    }
+  const OnlineClient = MyOnlineClient(game, board, description);
+  return function ({ credentials, matchID }: { credentials?: string, matchID?: string }) {
+    return <OnlineClient playerID='0' credentials={credentials} matchID={matchID} />;
   };
 };
 
@@ -31,20 +21,9 @@ export const ClientFactoryRelay = function (
   game: typeof GameRelay,
   board: RelayBoard,
   description: ReactNode,
-  serverUrl: string | undefined = undefined,
   ) {
-  const Client = MyClientRelay(game, board, description);
-  const OnlineClient = MyOnlineRelayClient(game, board, description, serverUrl);
-  return {
-    Client: function () {
-      return (<>
-        <Client />
-      </>);
-    },
-    OnlineClient: function ({ credentials, matchID }: { credentials?: string, matchID?: string }) {
-      return (<>
-        <OnlineClient playerID='0' credentials={credentials} matchID={matchID} />
-      </>);
-    }
+  const OnlineClient = MyOnlineRelayClient(game, board, description);
+  return function ({ credentials, matchID }: { credentials?: string, matchID?: string }) {
+    return <OnlineClient playerID='0' credentials={credentials} matchID={matchID} />;
   };
 };

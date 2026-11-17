@@ -1,5 +1,6 @@
 import { Box, Button } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
+import { PHASE } from '../../../common/gamewrapper';
 import { JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { BOARD_SIZE, isLegalPlacement, markForPlayer, winningLine } from './game';
@@ -32,7 +33,7 @@ function lastMachineMove({ G, log }: MyGameProps): number[] {
 export function MyBoard(props: MyGameProps) {
   const { G, ctx, moves, isActive } = props;
   const machineMove = lastMachineMove(props);
-  const active = isActive && ctx.phase === 'play' && !ctx.gameover && G.winner === null;
+  const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
   const line = winningLine(G.cells);
   // The team's first X of a turn stands out until the second ends the turn.
   const xsThisTurn = ctx.currentPlayer === JUDGE_PLAYER ? [] : G.xsThisTurn ?? [];

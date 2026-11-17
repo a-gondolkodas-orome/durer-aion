@@ -3,11 +3,9 @@ import { gameWrapper, GameStateMixin, GameType } from 'game';
 import { boardWrapper } from 'common-frontend';
 import { localWithBots, matchStorageKey } from 'common-frontend/core';
 import type { RelayBoard, StrategyBoard, StrategyDescription } from 'common-frontend';
-import type { MyGameState as RelayGameState, RelayMoveArgs, RelayOptions, StrategyOptions } from 'game';
-import { RelayWrapper } from 'game';
+import type { BotStrategy, MyGameState as RelayGameState, RelayMoveArgs, RelayOptions, StrategyOptions } from 'game';
+import { botWrapper, RelayWrapper } from 'game';
 import { State } from 'boardgame.io';
-import botWrapper from './botwrapper';
-import type { BotStrategy } from './botwrapper';
 import { handleGameReport } from './game-report';
 import type { ReactNode } from 'react';
 
