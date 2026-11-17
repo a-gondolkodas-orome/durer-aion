@@ -390,6 +390,23 @@ lock everybody out together, and anyone guessing at the admin password would loc
 organisers out with them. If one has to be there, it must pass the client's address through
 and this nginx must stop overwriting it.
 
+The tracked config also caps the socket.io connections one address may hold at once
+(`limit_conn` on `/socket.io/`, 300), sized for a school whose teams all come through one NAT
+address; a connection past it is answered 429, and the board shows the connection lost. A
+proxy in front collapses every team into that one address too. If a school reports boards
+that will not connect while others work, `docker compose --env-file=.env.docker logs web`
+shows `limiting connections by zone "socketio_per_address"`. The number is baked into the
+`web` image, so raising it is an edit to `apps/online-frontend/nginx/nginx.conf` and the
+`npm run stack:prod` of step 9.
+
+Behind that, the backend lets a socket's packets through only with its match's credentials,
+and counts the failures per address (`socket_guard.ts`); a proxy in front collapses that count
+the same way, and one team's mistakes would then lock every team out of loading a board. What
+a team's boards send is limited per team. A socket past its limit, or one from an address
+locked out by its failures, is disconnected: that board shows the connection lost until the
+team reloads the page, since socket.io does not reconnect after a disconnect the server made.
+A lockout lasts a minute, so a reload within it is disconnected again.
+
 Then `docker-compose.tls.yml`, beside `docker-compose.yml` in the checkout, opening the port
 and mounting both the certificates and that file:
 

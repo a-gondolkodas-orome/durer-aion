@@ -10,6 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
+import { SocketGuard, socketClientKey, type GuardLimits } from "./server/socket_guard";
 import type { MatchBot } from "game";
 import type { CorsOptionsDelegate } from "cors";
 
@@ -112,12 +113,16 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  */
 export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, MatchBot>;
+  // The suite's way to reach a limit in a few packets.
+  private readonly guardLimits: GuardLimits;
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, MatchBot>,
+    guardLimits: GuardLimits = {},
   ) {
     super({ ...socketOpts });
     this.bots = bots;
+    this.guardLimits = guardLimits;
   }
   init(
     app: Server.App & { _io: IOTypes.Server; },
@@ -125,6 +130,12 @@ export class SocketIOButBotMoves extends SocketIO {
     origins?: Exclude<IOTypes.ServerOptions['cors'], undefined | CorsOptionsDelegate>['origin']
   ): void {
     super.init(app, games, origins);
+    // One for every namespace: a team's sockets to either game share its
+    // budget, and an address's failures count across both.
+    const guard = new SocketGuard({
+      lookUp: async matchID => (await fetch(app.context.db, matchID, { metadata: true } as const)).metadata,
+      authenticate: claim => app.context.auth.authenticateCredentials(claim),
+    }, this.guardLimits);
 
     for (const game of games) {
       if (!game.name) {
@@ -138,53 +149,23 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Refuses a `sync` naming a match that storage does not have.
-         *
-         * boardgame.io's `Master.onSync` skips its credential check when
-         * `playerID` is null — the spectator case it is written for — and
-         * creates and persists a match when it finds none under the id it was
-         * given. Between the two, anonymous socket traffic writes rows into
-         * Postgres for as long as it cares to, none of which any team can
-         * reach and nothing of which asks who is asking.
-         *
-         * A match here is only ever created by the server, for a team that
-         * asked for one (`server/team_manage.ts`), and the id reaches a
-         * browser only in that answer. So a sync for a match storage does not
-         * have belongs to no client of this competition, and the packet never
-         * reaches boardgame.io's listener.
-         *
-         * An `update` must name its match by a string too: Postgres rejects
-         * any other key, and boardgame.io leaves that unhandled (#695). It is
-         * not looked up, since boardgame.io writes nothing for an unknown match.
-         *
-         * Every `chat` is refused: no client of ours sends one, and
-         * boardgame.io's listener reads storage for it without awaiting.
-         *
-         * A packet middleware rather than a wrapped listener: it is the hook
-         * socket.io documents for this, and it does not depend on what the
-         * base transport registered before us.
-         */
-        socket.use(([event, ...args]: IOTypes.Event, next) => {
-          if (event === "chat") {
-            next(new Error("chat is not used"));
-            return;
-          }
-          if (event !== "sync" && event !== "update") {
-            next();
-            return;
-          }
-          const matchID: unknown = event === "sync" ? args[0] : args[2];
-          if (typeof matchID !== "string" || matchID === "") {
-            next(new Error(`${event} without a match id`));
-            return;
-          }
-          if (event !== "sync") {
-            next();
-            return;
-          }
-          void fetch(app.context.db, matchID, { metadata: true } as const).then(
-            ({ metadata }) => {
-              next(metadata === undefined ? new Error(`sync for unknown match ${matchID}`) : undefined);
+        /** Lets a packet through to boardgame.io only as `socket_guard.ts`
+         * decides. A packet middleware rather than a wrapped listener: it is
+         * the hook socket.io documents for this, and it does not depend on
+         * what the base transport registered before us. */
+        // Read when the socket connects, by when server.ts has set app.proxy.
+        const judge = guard.forSocket(socketClientKey(socket.handshake, app.proxy));
+        socket.use((packet: IOTypes.Event, next) => {
+          judge(packet).then(
+            verdict => {
+              if (verdict.pass) {
+                next();
+              } else if (verdict.disconnect) {
+                // Frees the connection nginx counts against the address too.
+                socket.disconnect(true);
+              } else {
+                next(new Error(verdict.reason));
+              }
             },
             (error: unknown) => { next(error instanceof Error ? error : new Error(String(error))); }
           );
