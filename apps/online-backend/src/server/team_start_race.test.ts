@@ -18,7 +18,7 @@ import { startTestDatabase } from "./test_database";
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
 
 let database: Awaited<ReturnType<typeof startTestDatabase>>;
-const COMPETITION_ID = "mkhi1nnoim--20-online-c";
+const COMPETITION_ID = "klmgbpb334--minta-teljes";
 let server: http.Server;
 let port: number;
 
@@ -32,7 +32,7 @@ beforeAll(async () => {
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
   configureTeamsRouter(router, database.teams, [
     GameRelay,
-    { ...gameWrapper(MyGameWrappers["20o-c"]()), name: strategyGameName("20o-c") },
+    { ...gameWrapper(MyGameWrappers["minta-ketkupac"]()), name: strategyGameName("minta-ketkupac") },
   ], requireAdmin("unused-here"), registry);
   app.use(router.routes());
   const handle = app.callback();

@@ -47,9 +47,11 @@ and the database behind it.
 `stack:up` returns once the containers are actually up and fails if they are
 not, and it runs in the background. `npm run stack:logs` follows all three
 containers (Ctrl-C stops watching, not the stack); `npm run stack:down` stops
-it. The imported teams cover edition XX's online C, D and E competitions:
-`000-0000-000` is in C, `001-0000-000` in D, `002-0000-000` in E, with a
-thousand more behind them.
+it. The imported teams cover the reference competitions
+(`packages/problem-bank/banks/reference.ts`), which no real round was held with:
+`000-0000-000` is in the full round, `001-0000-000` and `002-0000-000` in the
+two strategy-only ones, `003-0000-000` in the relay-only one, with a thousand
+more behind them.
 
 **Only one of the two flows at a time.** The stack's postgres and
 `npm run db:up` both bind 5432, so `stack:up` fails while the other one holds
@@ -172,10 +174,12 @@ competition's: ISO 8601 with an offset, such as `2026-11-20T15:00+01:00`, with
 `Closes At` optional. A testing code gets a wide one, such as 2001 to 2099, and
 a team writing the round late gets its own day. The window decides only when a
 match may start: a match started inside it runs its full time.
-In `scripts/test.tsv`, the teams logging in with `006-0000-000`, `007-0000-000` and
-`008-0000-000` (C, D and E) have a window that has not opened yet, one that has
-closed, and one that is open, in that order; the rest have none, so `000` to
-`002` can start at any time.
+The teams of `scripts/test.tsv` take the reference competitions in turn
+(`packages/problem-bank/banks/reference.ts`): `000` the full round, `001` and
+`002` the two strategy-only ones and `003` the relay-only one, and so on. Those
+logging in with `006-0000-000`, `007-0000-000` and `008-0000-000` have a window
+that has not opened yet, one that has closed, and one that is open, in that
+order; the rest have none, so `000` to `003` can start at any time.
 
 A competition's own window, which every team without one of its own follows, is
 the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set

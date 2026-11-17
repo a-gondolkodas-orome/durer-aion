@@ -14,7 +14,7 @@ import { startTestDatabase } from "./test_database";
 // stored, served to the admin page and the team, and holds the team's starts.
 
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
-const COMPETITION_ID = "mkhi1nnoim--20-online-c";
+const COMPETITION_ID = "klmgbpb334--minta-teljes";
 const PASSWORD = "organiser-password";
 const ADMIN = `Basic ${Buffer.from(`${ADMIN_USER}:${PASSWORD}`).toString("base64")}`;
 const FUTURE = { opensAt: "2099-01-01T00:00+01:00", closesAt: "2099-01-01T21:00+01:00" };
