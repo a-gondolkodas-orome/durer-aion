@@ -347,7 +347,7 @@ export async function import_teams_from_tsv(
           onerror(`${where}: ${reasons}.`);
           ok = false;
         } else {
-          console.log('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
+          console.error('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
           throw err;
         }
       }

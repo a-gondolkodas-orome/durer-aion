@@ -278,14 +278,11 @@ docker compose --env-file=.env.docker exec -T backend ./scripts/import_teams.sh 
 ```
 
 The importer prints the export, the same rows plus the generated join codes, and
-your shell writes it to `scripts/<file>.tsv.export`. The file is yours, while the
-server runs as the image's unprivileged `node` user. What it did, row by row and in
-total, goes to the terminal. `-T` keeps that out of the file: with a terminal
-attached, docker would send both into the one stream, with CRLF line endings.
-The shell empties the target before the import starts, so redirect a re-run into
-a new file rather than over an export whose codes have not gone out yet. The
-admin page's download has every team's code all the same.
-The admin page's TSV upload does the same job through the browser.
+your shell writes it to `scripts/<file>.tsv.export`; its messages go to the
+terminal. `-T` keeps them out of the file, which a terminal would merge in, with
+CRLF line endings. The shell empties its target before the import starts, so never
+redirect over a file you still need. The admin page's TSV upload does the same job
+through the browser, and its download has every team's code.
 
 Each row's `Competition` column names its team's competition, such as
 `20 online C`, or its id, so one file holds every competition of the round. The
@@ -302,7 +299,12 @@ way. README § *Admin* says how the windows combine.
 Teams cannot be deleted. A bad import is undone by dropping the volume
 (`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
 out, import the `.export` rather than the original TSV: it carries the codes, where
-the original would generate new ones.
+the original would generate new ones. Redirect that run to a new name, since a
+redirect onto its own input empties it before the importer reads it:
+
+```bash
+docker compose --env-file=.env.docker exec -T backend ./scripts/import_teams.sh scripts/<file>.tsv.export > scripts/<file>-2.tsv.export
+```
 
 You can also run the importer as a one-off container without the stack:
 
