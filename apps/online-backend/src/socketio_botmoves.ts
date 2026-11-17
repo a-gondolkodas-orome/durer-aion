@@ -150,7 +150,7 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Lets a packet through to boardgame.io only as `server/socket_guard.ts`
+        /** Lets a packet through to boardgame.io only as `socket_guard.ts`
          * decides. A packet middleware rather than a wrapped listener: it is
          * the hook socket.io documents for this, and it does not depend on
          * what the base transport registered before us. */
