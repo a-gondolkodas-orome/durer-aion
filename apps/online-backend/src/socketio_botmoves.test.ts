@@ -22,6 +22,7 @@ const game: Game = {
 const KNOWN_MATCH = "known-match";
 const MADE_UP_MATCH = "made-up-match";
 const CHAT_MATCH = "chat-match";
+const OTHER_TEAM_MATCH = "other-team-match";
 /** The team's credentials, which server/router.ts puts on player 0 of every
  *  match it creates. */
 const TEAM_SECRET = "team-secret";
@@ -221,13 +222,13 @@ describe("the socket transport", () => {
     ])("keeps a sync with %s away from boardgame.io", async (_case, playerID, credentials) => {
       const { db, client, transport } = await serve();
       createKnownMatch(db);
-      createKnownMatch(db, CHAT_MATCH, OTHER_TEAM_SECRET);
+      createKnownMatch(db, OTHER_TEAM_MATCH, OTHER_TEAM_SECRET);
 
       const socket = client();
-      socket.emit("sync", CHAT_MATCH, playerID, credentials, 2);
+      socket.emit("sync", OTHER_TEAM_MATCH, playerID, credentials, 2);
       await syncBehind(socket);
 
-      expect(transport.queueFor(CHAT_MATCH)).toBeUndefined();
+      expect(transport.queueFor(OTHER_TEAM_MATCH)).toBeUndefined();
     });
 
     // boardgame.io keeps a queue for every match id an update names, and
@@ -325,14 +326,14 @@ describe("the socket transport", () => {
     it("leaves another team served", async () => {
       const { db, client } = await serve({ team: { limit: 1, windowMs: 60_000 } });
       createKnownMatch(db);
-      createKnownMatch(db, CHAT_MATCH, OTHER_TEAM_SECRET);
+      createKnownMatch(db, OTHER_TEAM_MATCH, OTHER_TEAM_SECRET);
 
       const flooding = client();
       const gone = disconnectedBy(flooding);
       for (let i = 0; i < 2; i++) flooding.emit("sync", KNOWN_MATCH, "0", TEAM_SECRET, 2);
       await gone;
 
-      expect(await syncBehind(client(), CHAT_MATCH, OTHER_TEAM_SECRET)).toBe(CHAT_MATCH);
+      expect(await syncBehind(client(), OTHER_TEAM_MATCH, OTHER_TEAM_SECRET)).toBe(OTHER_TEAM_MATCH);
     });
   });
 
