@@ -1,5 +1,6 @@
 import { Box, Button, Stack } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
+import { PHASE } from '../../../common/gamewrapper';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalSelection, isLegalTake, maxTake } from './game';
 import type { MyGameState } from './game';
@@ -7,7 +8,7 @@ import type { MyGameState } from './game';
 type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
-  const active = isActive && ctx.phase === 'play' && !ctx.gameover && G.winner === null;
+  const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
   const selected = active ? G.selectedPile : null;
   const most = selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
 

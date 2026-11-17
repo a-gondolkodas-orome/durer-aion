@@ -1,5 +1,6 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { PHASE } from '../../../common/gamewrapper';
 import { currentPlayer, JUDGE_PLAYER, recordWinner } from '../../../common/types';
 import type { GameStateMixin, GameType } from '../../../common/types';
 
@@ -32,7 +33,7 @@ export function maxTake(G: Position, playerID: string): number {
 }
 
 function isPlaying(G: Position, ctx: Pick<Ctx, 'phase'>): boolean {
-  return ctx.phase === 'play' && G.firstPlayer != null && G.winner == null;
+  return ctx.phase === PHASE.play && G.firstPlayer != null && G.winner == null;
 }
 
 function isPile(G: Position, pile: unknown): pile is number {

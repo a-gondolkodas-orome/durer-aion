@@ -1,5 +1,6 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
+import { PHASE } from '../../../common/gamewrapper';
 import { JUDGE_PLAYER, otherPlayer, recordWinner } from '../../../common/types';
 import type { GameStateMixin, GameType } from '../../../common/types';
 
@@ -47,7 +48,7 @@ function marksLeft(G: Position, currentPlayer: string): number {
 /// Some or all of the marks left this turn. A single X is legal on its own: the
 /// turn then waits for the second.
 export function isLegalPlacement(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer'>, indices: unknown): indices is number[] {
-  if (ctx.phase !== 'play' || G.firstPlayer == null || G.winner != null) return false;
+  if (ctx.phase !== PHASE.play || G.firstPlayer == null || G.winner != null) return false;
   if (!Array.isArray(indices) || indices.length === 0 || indices.length > marksLeft(G, ctx.currentPlayer)) return false;
   if (!indices.every((index: unknown) => typeof index === 'number'
     && Number.isInteger(index) && index >= 0 && index < G.cells.length && G.cells[index] === null)) return false;
