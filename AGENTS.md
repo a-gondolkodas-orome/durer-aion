@@ -97,7 +97,9 @@ whether the change is safe, and both fail late if you get them wrong:
   specifier everywhere but the server and the offline dry run — the dry run
   imports it on purpose, since its bot runs in the browser after the game is
   public. Before a competition, still check by hand: `npm run build`, then grep
-  `apps/online-frontend/dist` for a lookup-table key
+  `apps/online-frontend/dist` for a lookup-table key. `sablon-maradek-0`, the
+  reference template bot's marker table, is in every build that carries the
+  bots, so finding it absent there means something
 
 **The rules and the bot are typechecked twice**, because the server reads the
 game package's source under its own `lib` and without the DOM. A `document` in

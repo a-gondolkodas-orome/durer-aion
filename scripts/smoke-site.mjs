@@ -37,6 +37,7 @@ const PAGES = [
   },
   { path: '/valto/?lang=hu', text: 'Váltók gyakorlása' },
   { path: '/proba-verseny/', text: 'Online forduló' },
+  { path: '/minta-verseny/', text: 'Online forduló' },
 ];
 
 // Console errors the aborted third-party requests cause on purpose. Anything else is a failure.

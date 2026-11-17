@@ -1,7 +1,7 @@
 import type { Ctx } from 'boardgame.io';
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { JUDGE_PLAYER, otherPlayer, recordWinner } from '../../../common/types';
-import type { GameStateMixin, GameType, PlayerIDType } from '../../../common/types';
+import type { GameStateMixin, GameType } from '../../../common/types';
 
 export const BOARD_SIZE = 5;
 export type Mark = 'O' | 'X';

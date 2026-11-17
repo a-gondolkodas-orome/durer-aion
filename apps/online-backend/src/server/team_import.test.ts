@@ -4,7 +4,6 @@ import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH, TeamModel } from './model';
 import { import_teams_from_tsv } from './team_import';
 import { createRegistry } from 'problem-bank';
-import * as reference from 'problem-bank/banks/reference';
 import { readFileSync } from 'fs';
 import type { Mock, MockInstance } from 'vitest';
 
@@ -27,14 +26,28 @@ const C = 'testroundc--99-online-c';
 const D = 'testroundd--99-online-d';
 const E = 'testrounde--99-online-e';
 
-// The reference competitions, and three named the way a round of the Dürer
-// is, which the import takes by that name too.
+const RELAY_ONLY = 'testrelay0--relay-only';
+
+// Three competitions named the way a round of the Dürer is, which the import
+// takes by that name too, and one that is a relay alone.
 const named = (category: string) => ({
   languages: ['hu' as const],
   strategy: { durationMinutes: 20, gameId: 'minta-ketkupac' },
   metadata: { kind: 'competition' as const, edition: 99, round: 'online' as const, category },
 });
-const registry = createRegistry([reference, { problems: {}, competitions: { [C]: named('C'), [D]: named('D'), [E]: named('E') } }]);
+const registry = createRegistry([{
+  problems: { 'testproble--one': { answer: 1, content: { hu: { problemText: '1?' } } } },
+  competitions: {
+    [C]: named('C'),
+    [D]: named('D'),
+    [E]: named('E'),
+    [RELAY_ONLY]: {
+      languages: ['hu'],
+      relay: { durationMinutes: 30, problems: [{ problemId: 'testproble--one', points: 3 }] },
+      metadata: { kind: 'other', label: { hu: 'Csak váltó' } },
+    },
+  },
+}]);
 
 function tsv(...rows: string[][]) {
   (readFileSync as Mock).mockReturnValue([HEADER, ...rows.map(row => row.join('\t'))].join('\n'));
@@ -214,12 +227,12 @@ describe('import_teams_from_tsv', () => {
     // Any registered competition, whatever its matches: a relay-only one
     // simply has no strategy match to start.
     it('takes a relay-only competition', async () => {
-      tsv(['Alpha', '49tbhzl1jz--minta-valto', '', '', '', '', '']);
+      tsv(['Alpha', RELAY_ONLY, '', '', '', '', '']);
 
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv', registry.competitionSource);
 
       expect(result.successful).toBe(1);
-      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: '49tbhzl1jz--minta-valto' });
+      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: RELAY_ONLY });
     });
 
     it.each([

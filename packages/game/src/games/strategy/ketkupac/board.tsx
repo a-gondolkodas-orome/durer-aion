@@ -20,7 +20,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
             key={pile}
             variant={selected === pile ? 'contained' : 'outlined'}
             disabled={!isLegalSelection(G, ctx, pile) || !active}
-            aria-label={`${pile + 1}. kupac: ${size} korong${justTaken > 0 ? `, a gép az imént ${justTaken}-t vett el belőle` : ''}`}
+            aria-label={`${pile + 1}. kupac: ${size} korong${justTaken > 0 ? `, a gép az imént ennyit vett el belőle: ${justTaken}` : ''}`}
             aria-pressed={selected === pile}
             onClick={() => moves.selectPile(pile)}
             sx={{ justifyContent: 'flex-start', gap: 1, minHeight: 56, flexWrap: 'wrap', textTransform: 'none' }}

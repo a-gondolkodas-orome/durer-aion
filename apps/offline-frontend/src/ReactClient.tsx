@@ -23,10 +23,14 @@ function relayClient(competition: PublicCompetition) {
 function strategyClient(competition: PublicCompetition) {
   const { strategy } = competition;
   if (strategy === undefined) return null;
-  const gameId = strategy.gameId as StrategyGameKey;
-  const game = { ...MyGameWrappers[gameId](), name: `strategy--${competition.id}` };
+  return gameClient(strategy.gameId as StrategyGameKey, competition.id, strategy.durationMinutes);
+}
+
+// Generic over the game, so that its rules, board and bot are one game's.
+function gameClient<K extends StrategyGameKey>(gameId: K, competitionId: CompetitionId, durationMinutes: number) {
+  const game = { ...MyGameWrappers[gameId](), name: `strategy--${competitionId}` };
   return ClientFactory(game, MyBoardWrapper(gameId), StrategyWrappers[gameId](), strategyDescriptions[gameId],
-    { durationMinutes: strategy.durationMinutes }).ClientWithBot;
+    { durationMinutes }).ClientWithBot;
 }
 
 // Built per stored session, not per page, so the next team logging in on this

@@ -32,11 +32,16 @@ function strategyClient(competition: PublicCompetition): OnlineClient | null {
   const gameId = strategy.gameId as StrategyGameKey;
   let client = strategyClients.get(gameId);
   if (client === undefined) {
-    const game = { ...MyGameWrappers[gameId](), name: strategyGameName(gameId) };
-    client = ClientFactory(game, MyBoardWrapper(gameId), strategyDescriptions[gameId]).OnlineClient;
+    client = gameClient(gameId);
     strategyClients.set(gameId, client);
   }
   return client;
+}
+
+// Generic over the game, so that its rules and board are one game's.
+function gameClient<K extends StrategyGameKey>(gameId: K): OnlineClient {
+  const game = { ...MyGameWrappers[gameId](), name: strategyGameName(gameId) };
+  return ClientFactory(game, MyBoardWrapper(gameId), strategyDescriptions[gameId]).OnlineClient;
 }
 
 interface ClientProps {

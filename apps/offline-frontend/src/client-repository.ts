@@ -1,6 +1,5 @@
 import { ClientRepository, I18nError, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
-import { teamData } from "./teamData";
-import { dryRunCompetition } from "./rehearsed-round";
+import { dryRunCompetition, dryRunTeams } from "./rehearsed-round";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { handleGameReport } from "./game-report";
@@ -126,16 +125,16 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   joinWithCode(joinCode: string): Promise<void> {
-    const i = teamData.findIndex(e => e.join_code === joinCode);
+    const i = dryRunTeams.findIndex(e => e.join_code === joinCode);
     const pageState = readStoredTeamState()?.pageState ?? "DISCLAIMER";
 
     // teamData.test.ts holds every test team's competition to the round.
-    const competition = i > -1 ? dryRunCompetition(teamData[i].competitionId) : undefined;
+    const competition = i > -1 ? dryRunCompetition(dryRunTeams[i].competitionId) : undefined;
     if (competition !== undefined) {
       const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
-        teamName: teamData[i].teamname,
+        teamName: dryRunTeams[i].teamname,
         competition,
         credentials: "credentials",
         email: "asd@asd.asd",

@@ -22,11 +22,16 @@ function relayJudge(state: State<MyGameState>, botID: string, setupData: unknown
 export function hostedGames() {
   return [
     { game: RelayWrapper(), bot: botWrapper(relayJudge) },
-    ...(Object.keys(strategyGameWrappers) as StrategyGameKey[]).map(gameId => ({
-      game: { ...gameWrapper(strategyGameWrappers[gameId]()), name: strategyGameName(gameId) },
-      bot: botWrapper(StrategyStrategy[gameId]()),
-    })),
+    ...(Object.keys(strategyGameWrappers) as StrategyGameKey[]).map(hostedStrategyGame),
   ];
+}
+
+// Generic over the game, so that its rules and its bot are one game's.
+function hostedStrategyGame<K extends StrategyGameKey>(gameId: K) {
+  return {
+    game: { ...gameWrapper(strategyGameWrappers[gameId]()), name: strategyGameName(gameId) },
+    bot: botWrapper(StrategyStrategy[gameId]()),
+  };
 }
 
 /** A relay match's setup: the duration, and the problems with their answers

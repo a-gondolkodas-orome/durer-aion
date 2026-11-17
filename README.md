@@ -252,13 +252,14 @@ Each runs with no backend and no database, and each persists to localStorage.
 | what | run it | notes |
 | --- | --- | --- |
 | the offline dry run (`/proba-verseny/`) | `npm run dev:offline` | the rehearsal of the competition round, against the in-browser bot. With `VITE_S3_*` set — the competition-year build, not this one — every strategy move also uploads a `_stratstep_` file, and its `log` is the entries the live round's admin dump serves |
+| the reference competitions' dry run (`/minta-verseny/`) | `VITE_DRY_RUN_ROUND=reference npm run dev:offline` | the same app over `banks/reference.ts` in place of the rehearsed round, logging in with `900-0000-000` to `903-0000-000`: the full round, the two strategy-only competitions and the relay-only one. Unlinked from the home page, being for developers |
 | the relay practice site (`/valto/`) | `npm run dev:relay-practice` | #224 replaced the frozen 2023 build |
 | the strategy practice site (`/jatekok/`) | `npm run dev:strategy-practice` | on port 8012, not 5173 |
 
 The Pages site assembles all three plus a home page:
 
 ```bash
-npm run site:build   # home + /jatekok/ + /proba-verseny/ + /valto/ into site/
+npm run site:build   # home + /jatekok/ + /proba-verseny/ + /minta-verseny/ + /valto/ into site/
 npm run site:serve   # on http://localhost:4321
 npm run site:smoke   # opens each app in Chromium and fails on what does not load
 ```
@@ -489,7 +490,8 @@ may share a category, and a practice set has none. `CompetitionConfig` in
 `competition.ts` (`packages/schemas`) is the model, with every field explained.
 
 Competitions and their problems live in code, one bank per file under
-`packages/problem-bank/banks/`; `edition-20-online.ts` is the one to copy.
+`packages/problem-bank/banks/`; `edition-20-online.ts` is the one to copy for a
+round of the Dürer, `reference.ts` for anything else.
 
 1. **Ids.** `npm run new-id -- <slug>` prints one for each slug: ten random
    characters, `--`, then the slug, such as `mkhi1nnoim--20-online-c`. An id
@@ -505,7 +507,8 @@ Competitions and their problems live in code, one bank per file under
    invalid one; the problem bank's suite runs the same validation, so CI fails
    first.
 4. **Where else it goes.** The dry run rehearses the round its
-   `rehearsed-round.ts` names, with test teams in `teamData.ts`. The relay
+   `rehearsed-round.ts` names, with test teams in `teamData.ts`; its
+   `/minta-verseny/` build serves `reference.ts`, with `reference-teams.ts`. The relay
    practice site serves the banks `practice-sets.ts` names, which must be
    released.
 5. **Import the teams** with the competition's id, or its name such as
@@ -534,8 +537,12 @@ and the `new-game` skill under that directory is the route.
 safe: why the bot must not reach the served bundle, and the by-hand check for
 that before a competition.
 
-1. One self-contained folder in `packages/game/src/games/strategy/<game-name>/`
-   — `20ocde/` is the live example:
+1. One self-contained folder in `packages/game/src/games/strategy/<game-name>/`.
+   The reference games, which the reference competitions play
+   (`banks/reference.ts`), are the examples: `sablon/` is the one to copy, the
+   least a game needs, in two languages, with an opening the bot draws;
+   `ketkupac/` adds a turn of two steps, named roles and a step description.
+   `20ocde/` is a game a round was held with. Each holds
 
    - `game.ts` — the boardgame.io game definition
    - `strategy.ts` — the server bot, plus any lookup tables it imports
@@ -575,7 +582,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
   - `setup`, the game's own half of `G` only
   - `moves`: a move sets `G.winner` when it decides a sub-game and ends with
     `events.endTurn()`. Each live game also scores the sub-game in its move
-    (#459)
+    (#459); `recordWinner` (`types.ts`) does both, and says when the match is
+    won
   - `possibleMoves`, every legal move, from which the bot picks at random
   - optionally `turn`, boardgame.io's turn hooks. Not for the end of time:
     in the play phase `gameWrapper` ends a match on the first move past it

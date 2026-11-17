@@ -7,6 +7,7 @@
 // live client again. ESLint holds each registry to the files it may import
 // (eslint.config.mjs).
 import type { StrategyGameId, StrategyGameInfo } from "schemas";
+import type { GameType } from "../../common/types";
 import { MyGameWrapper as GameWrapper20ocde } from "./20ocde/game";
 import type { MyGameState as GameState20ocde } from "./20ocde/game";
 import { MyGameWrapper as GameWrapperKetkupac } from "./ketkupac/game";
@@ -29,9 +30,10 @@ export const strategyGames = {
 
 export type StrategyGameKey = keyof typeof strategyGames;
 
-// Each game's own state type, on the `game` entry so a year's game can type its
-// board against it. Nothing in this repo reads it — the consumer is the year's
-// private repo, which a sweep of this one cannot see.
+// Each game's own state type. The registries below, and the other two entries,
+// are typed by it, so that a caller generic over the game id keeps one game's
+// rules, board and bot together: indexed by a plain StrategyGameKey they would
+// be a union of games, which no single game's client accepts.
 export interface StrategyGameStates {
   "20o-c": GameState20ocde;
   "20o-d": GameState20ocde;
@@ -40,13 +42,13 @@ export interface StrategyGameStates {
   "minta-sablon": GameStateSablon;
 }
 
-export const MyGameWrappers = {
+export const MyGameWrappers: { [K in StrategyGameKey]: () => GameType<StrategyGameStates[K]> } = {
   "20o-c": () => GameWrapper20ocde("C"),
   "20o-d": () => GameWrapper20ocde("D"),
   "20o-e": () => GameWrapper20ocde("E"),
   "minta-ketkupac": () => GameWrapperKetkupac(),
   "minta-sablon": () => GameWrapperSablon(),
-} satisfies Record<StrategyGameKey, unknown>;
+};
 
 export const strategyNames = {
   // need to be unique even if the game is the same

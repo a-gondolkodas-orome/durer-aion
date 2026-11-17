@@ -8,15 +8,17 @@ import { MyBoard as BoardKetkupac } from "./ketkupac/board";
 import { description as descriptionKetkupac } from "./ketkupac/main";
 import { MyBoard as BoardSablon } from "./sablon/board";
 import { description as descriptionSablon } from "./sablon/main";
-import type { StrategyGameKey } from "./strategy-games";
+import type { BoardProps } from "boardgame.io/react";
+import type { GameStateMixin } from "../../common/types";
+import type { StrategyGameKey, StrategyGameStates } from "./strategy-games";
 
-const boards = {
+const boards: { [K in StrategyGameKey]: (props: BoardProps<StrategyGameStates[K] & GameStateMixin>) => ReactNode } = {
   "20o-c": Board20ocde,
   "20o-d": Board20ocde,
   "20o-e": Board20ocde,
   "minta-ketkupac": BoardKetkupac,
   "minta-sablon": BoardSablon,
-} satisfies Record<StrategyGameKey, unknown>;
+};
 
 // The rules text shown above the board: one for every language, or one per
 // language the game lists (`strategyGames`).

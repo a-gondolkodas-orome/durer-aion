@@ -67,6 +67,15 @@ cpSync(join(repoRoot, 'apps/strategy-practice/dist'), join(site, 'jatekok'), { r
 cpSync(join(repoRoot, 'apps/relay-practise-frontend/dist'), join(site, 'valto'), { recursive: true });
 cpSync(join(repoRoot, 'apps/offline-frontend/dist'), join(site, 'proba-verseny'), { recursive: true });
 
+// The same app again, serving the reference competitions in place of the rehearsed round
+// (apps/offline-frontend/src/rehearsed-round.ts). Built after the copy above, since both builds
+// write the one `dist`; turbo caches them apart by the variable.
+step('Build the reference competitions\' dry run');
+run('npx', ['turbo', 'build', '--filter=offline-frontend'], {
+  env: { SITE_BASE: `${SITE_ROOT}minta-verseny/`, VITE_DRY_RUN_ROUND: 'reference' },
+});
+cpSync(join(repoRoot, 'apps/offline-frontend/dist'), join(site, 'minta-verseny'), { recursive: true });
+
 // The custom domain is declared by this file at the artifact root, so a deploy that shipped
 // without it would quietly hand the site back to the default domain — with every path in it
 // still root-absolute. Check rather than trust the copy above.
