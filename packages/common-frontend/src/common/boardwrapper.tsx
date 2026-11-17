@@ -25,6 +25,8 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { inLanguage, type Localizable } from "schemas";
 import { useUiLanguage } from "../client/hooks/ui-language";
+import { boardState, chosenRole, isTeamToMove, matchStage } from "./match-stage";
+import type { BoardState } from "./match-stage";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
 /// gameWrapper extends it, plus the client API. The wrapper passes its props
@@ -48,14 +50,6 @@ const WIN = '#1b5e20';
 const LOSS = '#8e1b10';
 const MUTED = '#57606a';
 const LINE = '#d0d7de';
-
-/// What the board area shows. `empty` has no position worth reading: no game
-/// yet, or the bot still placing the next one. `locked` has one the team needs
-/// to see but may not move on: the role depends on the opening position, and a
-/// finished game's is its result. `waiting` is the bot's turn, which only
-/// ignores clicks: the bot answers within a state update or two, so fading the
-/// board on each of its moves would flash it every turn.
-type BoardState = 'empty' | 'locked' | 'live' | 'waiting';
 
 /// The status line's colour: a wait, a result, or neither. Green is kept for
 /// a win, so the team's turn is in the plain colour like any other step.
@@ -159,16 +153,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // ctx.gameover is whatever the game passed to events.endGame(); this wrapper
     // only ever asks whether it is `true`.
     const finished = msRemaining < - 5000 || ctx.gameover === true;
-    // The judge is the bot, so its turn is a wait rather than a move to offer.
-    // It takes one outside `play` too: it sets the opening position of each
-    // new game.
-    const judgeToMove = ctx.currentPlayer === JUDGE_PLAYER;
-    const teamToMove = !judgeToMove && !finished;
+    const stage = matchStage(G, ctx, finished);
+    const teamToMove = isTeamToMove(ctx, finished);
     const betweenGames = ctx.phase === PHASE.startNewGame;
-    // `difficulty` and `winner` outlive the game they describe until the next
-    // one is chosen, so between games they are the last game's mode and result.
+    // Between games, the last game's mode (matchStage says why).
     const difficulty = G.difficulty ?? null;
-    const lastResult = betweenGames && G.winner !== null ? (G.winner === GUESSER_PLAYER ? 'won' : 'lost') : null;
     const rulesFirst = difficulty === null && !rulesRead && !finished;
     const startVaries = presentation.startVaries === true;
 
@@ -201,78 +190,78 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // The explanation of practice against live sits next to the next-game
     // buttons when they are there, in the corner otherwise.
     let infoBeside = false;
-    if (finished) {
-      // Two live wins in a row end the match; anything else ending it is the clock.
-      if (G.winningStreak >= 2) {
-        status = t('strategy.result.liveWon');
-        tone = 'won';
-      } else {
-        status = t('strategy.result.timeUp');
-        sub = ctx.phase === PHASE.play || ctx.phase === PHASE.chooseRole ? t('strategy.result.unfinished') : '';
+    switch (stage.kind) {
+      case 'ended':
+        if (stage.by === 'liveWon') {
+          status = t('strategy.result.liveWon');
+          tone = 'won';
+        } else {
+          status = t('strategy.result.timeUp');
+          sub = stage.unfinished ? t('strategy.result.unfinished') : '';
+        }
+        break;
+      case 'intro':
+        status = t('strategy.intro.title');
+        intro = <Intro enabled={teamToMove} startVaries={startVaries} moves={moves} />;
+        break;
+      case 'nextGame':
+        status = stage.botStarting ? t('strategy.status.starting') : t('strategy.intro.title');
+        actions = nextGame;
+        infoBeside = true;
+        break;
+      case 'result': {
+        const { practice, won } = stage;
+        status = practice
+          ? (won ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'))
+          : (won ? t('strategy.result.liveWon') : t('strategy.result.liveLost'));
+        tone = won ? 'won' : 'lost';
+        // A first live win is half the task. A live loss is the one moment the
+        // stake changes: fewer points, and the run starts over, so it is said
+        // here as well as in the strip.
+        sub = practice ? t('strategy.result.practiceNote')
+          : won ? (G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '')
+          : t('strategy.result.liveLostNext', { points: strategyPoints(G.numberOfLoss) });
+        actions = nextGame;
+        infoBeside = true;
+        // Before the first live game the team is about to choose one, so how it
+        // may differ from practice comes once more, in the line under the result:
+        // after a win, that the practice computer may not have played its best;
+        // after a loss that would read oddly, so only a varying start is worth
+        // saying. Phones, and a card the open rules narrow, keep the short line,
+        // as the longer one would wrap and move the board; the ⓘ says the rest.
+        if (practice && G.numberOfTries === 0 && !(wide && !rulesBeside && rulesOpen)) {
+          subWide = won
+            ? (startVaries ? t('strategy.result.practiceNoteBotVaries') : t('strategy.result.practiceNoteBot'))
+            : startVaries ? t('strategy.result.practiceNoteStart') : null;
+        }
+        break;
       }
-    } else if (betweenGames && difficulty === null) {
-      status = t('strategy.intro.title');
-      intro = <Intro enabled={teamToMove} startVaries={startVaries} moves={moves} />;
-    } else if (betweenGames && (judgeToMove || lastResult === null)) {
-      status = judgeToMove ? t('strategy.status.starting') : t('strategy.intro.title');
-      actions = nextGame;
-      infoBeside = true;
-    } else if (betweenGames && lastResult !== null) {
-      const practice = difficulty === 'test';
-      status = practice
-        ? (lastResult === 'won' ? t('strategy.result.practiceWon') : t('strategy.result.practiceLost'))
-        : (lastResult === 'won' ? t('strategy.result.liveWon') : t('strategy.result.liveLost'));
-      tone = lastResult;
-      // A first live win is half the task. A live loss is the one moment the
-      // stake changes: fewer points, and the run starts over, so it is said
-      // here as well as in the strip.
-      sub = practice ? t('strategy.result.practiceNote')
-        : lastResult === 'won' ? (G.winningStreak === 1 ? t('strategy.result.liveWonFirst') : '')
-        : t('strategy.result.liveLostNext', { points: strategyPoints(G.numberOfLoss) });
-      actions = nextGame;
-      infoBeside = true;
-      // Before the first live game the team is about to choose one, so how it
-      // may differ from practice comes once more, in the line under the result:
-      // after a win, that the practice computer may not have played its best;
-      // after a loss that would read oddly, so only a varying start is worth
-      // saying. Phones, and a card the open rules narrow, keep the short line,
-      // as the longer one would wrap and move the board; the ⓘ says the rest.
-      if (practice && G.numberOfTries === 0 && !(wide && !rulesBeside && rulesOpen)) {
-        subWide = lastResult === 'won'
-          ? (startVaries ? t('strategy.result.practiceNoteBotVaries') : t('strategy.result.practiceNoteBot'))
-          : startVaries ? t('strategy.result.practiceNoteStart') : null;
+      case 'chooseRole':
+        status = t('strategy.status.role');
+        sub = startVaries ? t('strategy.status.lookAtPosition') : '';
+        actions = (
+          <>
+            <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(GUESSER_PLAYER)}>{first}</PairButton>
+            <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(JUDGE_PLAYER)}>{second}</PairButton>
+          </>
+        );
+        break;
+      case 'play': {
+        status = stage.teamToMove ? t('strategy.status.yourTurn') : t('strategy.status.botTurn');
+        tone = stage.teamToMove ? 'plain' : 'wait';
+        // The game's own word on the move, in the line kept for it under the
+        // status, so the board above needs no lines of its own.
+        const step = stage.teamToMove
+          ? presentation.getPlayerStepDescription?.({ G, ctx }) ?? null
+          : null;
+        sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
+        break;
       }
-    } else if (ctx.phase === PHASE.chooseRole) {
-      status = t('strategy.status.role');
-      sub = startVaries ? t('strategy.status.lookAtPosition') : '';
-      actions = (
-        <>
-          <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(GUESSER_PLAYER)}>{first}</PairButton>
-          <PairButton variant="role" enabled={teamToMove} onClick={() => moves.chooseRole(JUDGE_PLAYER)}>{second}</PairButton>
-        </>
-      );
-    } else {
-      status = teamToMove ? t('strategy.status.yourTurn') : t('strategy.status.botTurn');
-      tone = teamToMove ? 'plain' : 'wait';
-      // The game's own word on the move, in the line kept for it under the
-      // status, so the board above needs no lines of its own.
-      const step = teamToMove
-        ? presentation.getPlayerStepDescription?.({ G, ctx }) ?? null
-        : null;
-      sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
     }
-    // The role the team chose, on the chip at the board's edge: only while a
-    // game is played, when the board is what the team reads.
-    const role = ctx.phase !== PHASE.play || finished || G.firstPlayer == null ? null
-      : G.firstPlayer === GUESSER_PLAYER ? firstRole : secondRole;
+    const roleChip = chosenRole(stage, G);
+    const role = roleChip === null ? null : roleChip === 'first' ? firstRole : secondRole;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
-
-    const boardState: BoardState =
-      finished ? 'locked'
-      : betweenGames ? (lastResult !== null && !judgeToMove ? 'locked' : 'empty')
-      : ctx.phase === PHASE.chooseRole ? 'locked'
-      : teamToMove ? 'live' : 'waiting';
 
     const pulse = {
       '@keyframes pointToRules': {
@@ -350,7 +339,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
               <GameArea mode={difficulty} liveNumber={G.numberOfTries} role={role}
                 status={status} tone={tone} sub={sub} subWide={subWide} actions={actions} intro={intro}
                 info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
-                <BoardArea state={boardState}>{board(props)}</BoardArea>
+                <BoardArea state={boardState(stage)}>{board(props)}</BoardArea>
               </GameArea>
             </Box>
             {/* The board stays to read and play while the rules are open. */}
