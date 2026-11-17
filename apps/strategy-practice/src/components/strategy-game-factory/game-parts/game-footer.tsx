@@ -17,7 +17,7 @@ export const GameFooter = () => {
   // The registry writes names in Hungarian order, family name first.
   const names = (list: string[]) => (i18n.language === 'hu' ? list : list.map(toWesternOrder)).join(', ');
   return (
-    <footer className="text-right">
+    <footer className="text-right px-2">
       { credit !== undefined && (
         <p className="px-2 font-light text-sm">
           { (credit.suggestedBy || []).length
