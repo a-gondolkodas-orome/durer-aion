@@ -11,6 +11,7 @@ import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
 import { Admin } from "./Admin";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { SiteFooter } from "./SiteFooter";
 import i18next from "i18next";
 import { useClientRepo, useOptionalAdminRepo } from "../client-repo-context";
 import { useTranslation } from "react-i18next";
@@ -102,14 +103,9 @@ export function Main(props: { gitCommitHash: string }) {
           </>}
         </ErrorBoundary>
       </Container>
-      <footer style={{
-        textAlign: "center",
-        color: "#777",
-        fontSize: '70%',
-        marginBottom: '8px'
-      }}>
-        <div>{props.gitCommitHash}</div>
-      </footer>
+      {/* The note only on the login page: an admin page loads no tracker, and
+          a team mid-round has the clock to read, not this */}
+      <SiteFooter gitCommitHash={props.gitCommitHash} trackingNote={!admin && teamState === null}/>
     </Layout>
   );
 }

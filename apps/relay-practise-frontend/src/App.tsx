@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GameProvider, ClientRepoProvider, ErrorBoundary, Header, Layout, LoginLayout, Relay, useTeamState, LoadTeamState } from 'common-frontend';
+import { GameProvider, ClientRepoProvider, ErrorBoundary, Header, Layout, LoginLayout, Relay, SiteFooter, useTeamState, LoadTeamState } from 'common-frontend';
 import { OfflineClientRepository } from './client-repository';
 import { ThemeProvider } from '@mui/material/styles';
 import { Container } from "@mui/material";
@@ -107,14 +107,7 @@ function App() {
                 {teamState && <Relay state={teamState}/>}
               </ErrorBoundary>
             </Container>
-            <footer style={{
-              textAlign: "center",
-              color: "#777",
-              fontSize: '70%',
-              marginBottom: '8px'
-            }}>
-              <div>{import.meta.env.VITE_GIT_COMMIT_HASH}</div>
-            </footer>
+            <SiteFooter gitCommitHash={import.meta.env.VITE_GIT_COMMIT_HASH} trackingNote/>
           </Layout>
         </ClientRepoProvider>
       </ThemeProvider>

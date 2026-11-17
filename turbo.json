@@ -16,7 +16,7 @@
     "DATABASE_URL",
     "DEV_SERVER_HOST",
     "SITE_BASE",
-    // Set by the three frontends' vite configs from `git rev-parse HEAD` when
+    // Set by the four frontends' vite configs from `git rev-parse HEAD` when
     // it is unset, which is every local build — so locally they share one hash
     // bucket, and a restored bundle names the commit that first built these
     // exact sources rather than the one checked out. The trees being identical

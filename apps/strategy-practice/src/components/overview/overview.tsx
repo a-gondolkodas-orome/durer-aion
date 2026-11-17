@@ -6,6 +6,7 @@ import { LanguageSelector } from 'language';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import { IconButton } from '@mui/material';
 import { ThemeSwitcher } from '../../theme';
+import { SiteFooter } from '../site-footer/site-footer';
 import {
   FilterToggle, CategoryFilter, IconFilter, YearFilter, RoundFilter,
   filterByCategories, filterByIcons, filterByYears, filterByRounds, type YearRange
@@ -90,6 +91,8 @@ export const Overview = () => {
         />
       ))}
     </div>
+
+    <SiteFooter />
 
     <div className="primary-footer">
       <ThemeSwitcher />

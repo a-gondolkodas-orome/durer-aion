@@ -1,6 +1,10 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { execSync } from 'node:child_process';
+
+// As in the other frontends' vite configs, which say why `||=`.
+process.env.VITE_GIT_COMMIT_HASH ||= execSync('git rev-parse HEAD').toString().trimEnd();
 
 export default defineConfig(() => ({
   plugins: [react()],

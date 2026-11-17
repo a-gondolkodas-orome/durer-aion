@@ -16,6 +16,7 @@ export * from './components/LoginLayout';
 export * from './components/Main';
 export * from './components/picture-component';
 export * from './components/RelayEndTable';
+export * from './components/SiteFooter';
 export * from './components/StrategyEndTable';
 export * from './components/TeamDetailDialog';
 export * from './components/theme';

@@ -3,6 +3,7 @@ import { LanguageSelector } from 'language';
 import { ThemeSwitcher } from '../../../theme';
 import { gameList } from '../../games/gameList';
 import { useGameKey } from '../../games/game-key';
+import { SiteFooter } from '../../site-footer/site-footer';
 
 const toWesternOrder = (name: string) => {
   const [family, ...given] = name.split(' ');
@@ -27,6 +28,7 @@ export const GameFooter = () => {
             : ''}
         </p>
       )}
+      <SiteFooter />
       <div className="primary-footer">
         <a
           href="https://forms.gle/7DwugmXNrvKgkiiu8"

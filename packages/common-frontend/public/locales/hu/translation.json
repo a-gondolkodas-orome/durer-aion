@@ -71,6 +71,10 @@
     "unexpected": "Váratlan hiba történt",
     "viewNotAllowed": "A stratégiás játékot most nem lehet megnézni."
   },
+  "footer": {
+    "tracking": "Névtelen használati statisztikát gyűjtünk, sütik nélkül.",
+    "version": "verzió: {{hash}}"
+  },
   "general": {
     "backHome": "Vissza a kezdőlapra",
     "close": "Bezárás",

@@ -71,6 +71,10 @@
     "unexpected": "An unexpected error occurred",
     "viewNotAllowed": "The strategy game can't be viewed now."
   },
+  "footer": {
+    "tracking": "We collect anonymous usage statistics, without cookies.",
+    "version": "version: {{hash}}"
+  },
   "general": {
     "backHome": "Back to the home page",
     "close": "Close",
