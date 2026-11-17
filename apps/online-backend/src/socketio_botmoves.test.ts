@@ -4,6 +4,7 @@ import { Server } from "boardgame.io/server";
 import { createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
 import { SocketIOButBotMoves } from "./socketio_botmoves";
+import { PACKET_LIMIT } from "./server/packet_budget";
 
 /** The transport, with the match queues it keeps open to inspection. */
 class InspectedTransport extends SocketIOButBotMoves {
@@ -193,6 +194,21 @@ describe("the socket transport", () => {
     socket.emit("chat", matchID, { id: "a", sender: "0", payload: "hi" }, "made up");
     await syncBehind(socket);
 
+    expect(reads()).toEqual([]);
+  });
+
+  // One client must not keep the pool every match shares busy (#720).
+  it("disconnects a socket over its packet budget before its next packet reaches storage", async () => {
+    const { db, client } = await serve();
+    createKnownMatch(db);
+    const reads = readsOtherThanKnown(db);
+
+    const socket = client();
+    const disconnected = new Promise<string>(resolve => socket.on("disconnect", resolve));
+    for (let i = 0; i < PACKET_LIMIT; i++) socket.emit("sync", KNOWN_MATCH, null, undefined, 2);
+    socket.emit("sync", MADE_UP_MATCH, null, undefined, 2);
+
+    expect(await disconnected).toBe("io server disconnect");
     expect(reads()).toEqual([]);
   });
 

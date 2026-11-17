@@ -127,7 +127,14 @@ export function getDb() {
   if (!env.DATABASE_URL) {
     throw new Error('Failed to load DB data. Only postgres is supported!');
   }
-  const db = new PostgresStore(env.DATABASE_URL, { logging: false });
+  const db = new PostgresStore(env.DATABASE_URL, {
+    logging: false,
+    // One pool for every team's moves, the bot's replies, the team routes and
+    // the packet guard's reads (#720). Sequelize's default of 5 is a queue
+    // a handful of busy clients fill; 20 is one backend's share of Postgres's
+    // default 100 connections, leaving room for the team import and a psql.
+    pool: { max: 20 },
+  });
   return {
     db,
     teams: new TeamsRepository(db),

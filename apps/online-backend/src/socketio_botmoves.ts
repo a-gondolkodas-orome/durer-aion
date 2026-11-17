@@ -10,6 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
+import { PacketBudget } from "./server/packet_budget";
 import type { MatchBot } from "./botwrapper";
 import type { CorsOptionsDelegate } from "cors";
 
@@ -138,7 +139,8 @@ export class SocketIOButBotMoves extends SocketIO {
        * See boardgame.io/dist/src/server/transport/socketio.ts
        */
       nsp.on("connection", (socket: IOTypes.Socket) => {
-        /** Refuses a `sync` naming a match that storage does not have.
+        /** Disconnects a socket that has spent its packet budget
+         * (`server/packet_budget.ts`), and refuses a `sync` naming a match that storage does not have.
          *
          * boardgame.io's `Master.onSync` skips its credential check when
          * `playerID` is null — the spectator case it is written for — and
@@ -164,7 +166,14 @@ export class SocketIOButBotMoves extends SocketIO {
          * socket.io documents for this, and it does not depend on what the
          * base transport registered before us.
          */
+        const budget = new PacketBudget();
         socket.use(([event, ...args]: IOTypes.Event, next) => {
+          // First, so that a socket over its budget is dropped before any
+          // packet of it reaches storage (#720).
+          if (!budget.take()) {
+            socket.disconnect(true);
+            return;
+          }
           if (event === "chat") {
             next(new Error("chat is not used"));
             return;
