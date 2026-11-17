@@ -88,8 +88,8 @@ export interface StrategyOptions {
 /// What the server starts a strategy match with: the competition's duration
 /// as it stands then.
 /// The phases gameWrapper runs every strategy game through. `ctx.phase` is a
-/// plain string to boardgame.io, so whatever reads it — the board wrapper, the
-/// server's bot — compares it with these rather than with a literal of its own.
+/// plain string to boardgame.io, so whatever reads it compares it with these
+/// rather than with a literal of its own.
 export const PHASE = {
   startNewGame: "startNewGame",
   chooseRole: "chooseRole",
