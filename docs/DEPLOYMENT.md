@@ -274,11 +274,15 @@ Drop the TSV into `scripts/` on the host — that directory is bind-mounted into
 container — and name it:
 
 ```bash
-docker compose --env-file=.env.docker exec backend ./scripts/import_teams.sh scripts/<file>.tsv
+docker compose --env-file=.env.docker exec -T backend ./scripts/import_teams.sh scripts/<file>.tsv > scripts/<file>.tsv.export
 ```
 
-This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
-The admin page's TSV upload does the same job through the browser.
+The importer prints the export, the same rows plus the generated join codes, and
+your shell writes it to `scripts/<file>.tsv.export`; its messages go to the
+terminal. `-T` keeps them out of the file, which a terminal would merge in, with
+CRLF line endings. The shell empties its target before the import starts, so never
+redirect over a file you still need. The admin page's TSV upload does the same job
+through the browser, and its download has every team's code.
 
 Each row's `Competition` column names its team's competition, such as
 `20 online C`, or its id, so one file holds every competition of the round. The
@@ -295,12 +299,17 @@ way. README § *Admin* says how the windows combine.
 Teams cannot be deleted. A bad import is undone by dropping the volume
 (`npm run stack:down -- --volumes`) and importing again. Once join codes have gone
 out, import the `.export` rather than the original TSV: it carries the codes, where
-the original would generate new ones.
+the original would generate new ones. Redirect that run to a new name, since a
+redirect onto its own input empties it before the importer reads it:
+
+```bash
+docker compose --env-file=.env.docker exec -T backend ./scripts/import_teams.sh scripts/<file>.tsv.export > scripts/<file>-2.tsv.export
+```
 
 You can also run the importer as a one-off container without the stack:
 
 ```bash
-docker compose --env-file=.env.docker run --rm backend ./scripts/import_teams.sh scripts/<file>.tsv
+docker compose --env-file=.env.docker run --rm -T backend ./scripts/import_teams.sh scripts/<file>.tsv > scripts/<file>.tsv.export
 ```
 
 > **Test drive:** `npm run teams:import` runs the same thing against `scripts/test.tsv`.

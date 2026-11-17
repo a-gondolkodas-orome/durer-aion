@@ -30,6 +30,9 @@ RUN leaked=$(find . -name node_modules -prune -o \( -name '.env*' -o -name '*.ts
       exit 1; \
     fi
 
+# Stays root, unlike prod: the watchers write into the image's workspace and
+# into the anonymous dist volume docker-compose.dev.yml mounts, both root-owned.
+# It is a local convenience, never deployed.
 CMD [ "npm", "run", "dev:server" ]
 
 # From dev, so the leak check guards what prod takes from here.
@@ -71,6 +74,11 @@ COPY scripts/import_teams.sh ./scripts/
 # Loads the modules the server requires at startup, so a dependency prod-deps
 # left out fails the build, not the deployment.
 RUN node apps/online-backend/dist/server.js sanity-check
+
+# Unprivileged: everything above is root-owned and only read from here on. The
+# team import writes nothing either: its export goes to stdout, and the
+# caller's shell puts it in a file on the host (DEPLOYMENT.md § 7).
+USER node
 
 EXPOSE 8000
 

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { randomInt, randomUUID } from 'crypto';
 import { ValidationError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
@@ -146,9 +146,17 @@ export async function import_teams_from_tsv_locally(
   for (let i = 0; i < logs.value.length; i++) {
     console[logs.sev[i]](logs.value[i]);
   }
-  console.info(`Összesen ${successful} csapat került be, ${existing} már szerepelt (${updated} frissült), ${failed} sor hibás.`);
+  // stderr, like the row messages above: stdout is the export alone.
+  console.error(`Összesen ${successful} csapat került be, ${existing} már szerepelt (${updated} frissült), ${failed} sor hibás.`);
   export_table.unshift([...COLUMNS]);
-  writeFileSync(`${filename}.export`, export_table.map(row => row.join('\t')).join('\n'), { 'encoding': 'utf-8' });
+  // The export goes to stdout, and the caller's shell writes it to a file
+  // (DEPLOYMENT.md § 7). So the file is the host user's own, whatever uid the
+  // container runs as. Waits for the write, because the caller exits as soon as
+  // this returns, and a write to a pipe is asynchronous.
+  const text = `${export_table.map(row => row.join('\t')).join('\n')}\n`;
+  await new Promise<void>((resolve, reject) => {
+    process.stdout.write(text, error => { if (error) reject(error); else resolve(); });
+  });
 }
 
 export async function import_teams_from_tsv(
@@ -339,7 +347,7 @@ export async function import_teams_from_tsv(
           onerror(`${where}: ${reasons}.`);
           ok = false;
         } else {
-          console.log('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
+          console.error('We experienced an unexpected error during import. This type of error is not handled in the import script, please file a bug report in the GitHub repository!')
           throw err;
         }
       }

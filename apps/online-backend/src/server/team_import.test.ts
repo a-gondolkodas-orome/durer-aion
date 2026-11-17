@@ -2,7 +2,7 @@ import type { PostgresStore } from 'bgio-postgres';
 import { Sequelize, UniqueConstraintError, ValidationErrorItem } from 'sequelize';
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH, TeamModel } from './model';
-import { import_teams_from_tsv } from './team_import';
+import { import_teams_from_tsv, import_teams_from_tsv_locally } from './team_import';
 import { createRegistry } from 'problem-bank';
 import { readFileSync } from 'fs';
 import type { Mock, MockInstance } from 'vitest';
@@ -603,5 +603,20 @@ describe('import_teams_from_tsv', () => {
 
       expect(result).toMatchObject({ successful: 1, existing: 0, failed: 1 });
     });
+  });
+
+  // The caller's shell redirects stdout into the export file, so nothing but
+  // the export may reach it (#784).
+  it('writes the export alone to stdout, header first', async () => {
+    tsv(['Test Team', C, '', '', '', '', '']);
+    const stdout = vi.spyOn(process.stdout, 'write')
+      .mockImplementation(((_: string, done: (error?: Error | null) => void) => { done(); return true; }) as typeof process.stdout.write);
+    const stderr = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await import_teams_from_tsv_locally(teams, 'dummy_file.tsv', registry.competitionSource);
+
+    expect(stdout).toHaveBeenCalledTimes(1);
+    expect(String(stdout.mock.calls[0][0])).toMatch(/^Teamname\tCompetition\t[^\n]*\nTest Team\t[^\n]*\n$/);
+    expect(stderr).toHaveBeenCalledWith(expect.stringMatching(/^Összesen 1 csapat került be/));
   });
 });

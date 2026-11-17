@@ -13,11 +13,11 @@
 **/.env
 **/.env.*
 
-# Real team lists are dropped into scripts/ on the host, and the importer writes
-# `<file>.tsv.export` back beside them — the same rows plus the generated join
-# codes and credentials. docker-compose.yml bind-mounts ./scripts in production
-# too and `npm run teams:import` reads the file through that mount, so either
-# baked into the image would be competitors' data shipped for nothing.
+# Real team lists are dropped into scripts/ on the host, and the import's
+# `<file>.tsv.export` is redirected back beside them — the same rows plus the
+# generated join codes and credentials. docker-compose.yml bind-mounts ./scripts
+# in production too and `npm run teams:import` reads the file through that mount,
+# so either baked into the image would be competitors' data shipped for nothing.
 #
 # The trailing `*` is what covers the export, and is why this matches
 # .gitignore's pattern exactly: docker matches against the whole path with
