@@ -2,14 +2,14 @@ import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
 import type { Localizable, RelayProblemResult } from "schemas";
 import { timestampMoves } from "../../common/timestamp";
-import { GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType } from "../../common/types";
+import { GameStateTimer, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType, recordFinish } from "../../common/types";
 
 interface Answer {
   answer: number;
   date: string;
 }
 
-export interface MyGameState {
+export interface MyGameState extends GameStateTimer {
   currentProblem: number;
   // The current problem, the same in every language or in each of its own,
   // which the board picks from by the team's: a team can switch language
@@ -26,9 +26,6 @@ export interface MyGameState {
   // first try, and what the end tables show for problems not reached yet.
   maxPointsList: number[];
   numberOfTry: number;
-  millisecondsRemaining: number;
-  start: string;
-  end: string;
   // Empty, or absent in a language, where the problem has no image.
   imageUrl: Localizable<string>;
 }
@@ -107,6 +104,7 @@ export function RelayWrapper(
   const durationMs = durationMinutes * 60 * 1000;
   const GameRelay: Game<MyGameState> = {
     name: "relay",
+    onEnd: ({ G }) => recordFinish(G),
     setup: () => {
       return {
         currentProblem: 0,

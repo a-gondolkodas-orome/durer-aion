@@ -60,6 +60,20 @@ describe("deriveMatchStatus", () => {
       .toBe("IN PROGRESS");
   });
 
+  // #746: the end shown is when the match ended, not when it was due to.
+  it("ends a match finished early when it finished", () => {
+    const finishedAt = at(-20 * 60 * 1000);
+    const won = strategyG({ finishedAt: finishedAt.toISOString() });
+
+    expect(deriveMatchStatus("STRATEGY", "m1", { G: won, ctx: ctx({ gameover: true }) }, at(-10 * 60 * 1000)))
+      .toMatchObject({ state: "FINISHED", endAt: finishedAt });
+  });
+
+  it("ends a match that ran out of time, or predates finishedAt, at its scheduled end", () => {
+    expect(deriveMatchStatus("STRATEGY", "m1", { G: strategyG(), ctx: ctx({ gameover: true }) }, at(30 * 1000)))
+      .toMatchObject({ state: "FINISHED", endAt: new Date(END) });
+  });
+
   it("carries a strategy match's results as the game recorded them", () => {
     expect(deriveMatchStatus("STRATEGY", "m1", { G: strategyG(), ctx: ctx() }, at(1000)))
       .toMatchObject({ state: "FINISHED", score: 0, strategyResults: ["lost", "won"] });

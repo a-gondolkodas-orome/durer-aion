@@ -421,6 +421,31 @@ describe("gameWrapper deadline", () => {
   });
 
   // A match must not close while a move it has just taken is still on screen.
+  test("a match won early records when it ended", () => {
+    const client = Client({ game: gameWrapper(createGameWithWinAndLose(() => ({ data: "" }))), numPlayers: 2 });
+    client.start();
+    for (const minutes of [5, 10]) {
+      vi.setSystemTime(new Date(START.getTime() + minutes * 60 * 1000));
+      client.moves.chooseNewGameType("live");
+      client.moves.setStartingPosition({ data: "startingPosition" });
+      client.moves.chooseRole(GUESSER_PLAYER);
+      client.moves.win();
+    }
+
+    expect(client.getState()?.ctx.gameover).toBeDefined();
+    expect(client.getState()?.G.finishedAt).toStrictEqual(new Date(START.getTime() + 10 * 60 * 1000).toISOString());
+  });
+
+  test("a match closed past its end records no end of its own", () => {
+    const client = playing(steppingGame());
+
+    at(LATE_MOVE_GRACE_MS + 1000);
+    client.moves.getTime();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+    expect(client.getState()?.G.finishedAt).toBeUndefined();
+  });
+
   test("the bot answering within the allowance leaves the match open", () => {
     const client = playing(steppingGame());
     at(1000);
