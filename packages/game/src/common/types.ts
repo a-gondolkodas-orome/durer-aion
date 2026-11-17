@@ -157,3 +157,20 @@ export type GameType<G> = WrappableGame<G & GameStateMixin> & GameMixin<G>;
 export function currentPlayer(ctx: Ctx): PlayerIDType {
   return ctx.currentPlayer as PlayerIDType;
 }
+
+/// Records who won the game in `play`, and in a live game the team's streak
+/// and losses. True when the win is the team's second in a row, which earns the
+/// match's points; the game's move then ends the match.
+export function recordWinner(G: GameStateMixin, winner: PlayerIDType): boolean {
+  G.winner = winner;
+  if (G.difficulty !== 'live') return false;
+  if (winner === JUDGE_PLAYER) {
+    G.winningStreak = 0;
+    G.numberOfLoss += 1;
+    return false;
+  }
+  G.winningStreak += 1;
+  if (G.winningStreak < 2) return false;
+  G.points = strategyPoints(G.numberOfLoss);
+  return true;
+}

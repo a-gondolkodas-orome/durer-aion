@@ -19,6 +19,7 @@ import * as edition12Final from './banks/edition-12-final';
 import * as edition12Local from './banks/edition-12-local';
 import * as edition19Online from './banks/edition-19-online';
 import * as edition20Online from './banks/edition-20-online';
+import * as reference from './banks/reference';
 
 // Every bank, for the live round's server, which serves whichever competition
 // a team entered. A site that serves only some, such as the relay practice
@@ -49,4 +50,5 @@ export const registry = createRegistry([
   edition12Local,
   edition19Online,
   edition20Online,
+  reference,
 ]);

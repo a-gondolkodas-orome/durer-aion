@@ -3,7 +3,7 @@ import { Sequelize, UniqueConstraintError, ValidationErrorItem } from 'sequelize
 import { TeamsRepository } from './db';
 import { OTHER_IMPORT_MAX_LENGTH, TeamModel } from './model';
 import { import_teams_from_tsv, import_teams_from_tsv_locally } from './team_import';
-import { registry } from 'problem-bank/all';
+import { createRegistry } from 'problem-bank';
 import { existsSync, openSync, readFileSync, unlinkSync, writeSync } from 'fs';
 import type { Mock, MockInstance } from 'vitest';
 
@@ -22,9 +22,32 @@ const JOIN_CODE = '111-2222-333';
 const CREDENTIALS = '67676767-6767-4767-a767-676767676768';
 
 const HEADER = 'Teamname\tCompetition\tEmail\tOther\tID\tLogin Code\tCredentials';
-const C = 'mkhi1nnoim--20-online-c';
-const D = 'u4lw7pcca1--20-online-d';
-const E = 'wkr6zml6mu--20-online-e';
+const C = 'testroundc--99-online-c';
+const D = 'testroundd--99-online-d';
+const E = 'testrounde--99-online-e';
+
+const RELAY_ONLY = 'testrelay0--relay-only';
+
+// Three competitions named the way a round of the Dürer is, which the import
+// takes by that name too, and one that is a relay alone.
+const named = (category: string) => ({
+  languages: ['hu' as const],
+  strategy: { durationMinutes: 20, gameId: 'minta-ketkupac' },
+  metadata: { kind: 'competition' as const, edition: 99, round: 'online' as const, category },
+});
+const registry = createRegistry([{
+  problems: { 'testproble--one': { answer: 1, content: { hu: { problemText: '1?' } } } },
+  competitions: {
+    [C]: named('C'),
+    [D]: named('D'),
+    [E]: named('E'),
+    [RELAY_ONLY]: {
+      languages: ['hu'],
+      relay: { durationMinutes: 30, problems: [{ problemId: 'testproble--one', points: 3 }] },
+      metadata: { kind: 'other', label: { hu: 'Csak váltó' } },
+    },
+  },
+}]);
 
 function tsv(...rows: string[][]) {
   (readFileSync as Mock).mockReturnValue([HEADER, ...rows.map(row => row.join('\t'))].join('\n'));
@@ -203,21 +226,21 @@ describe('import_teams_from_tsv', () => {
 
     // Any registered competition, whatever its matches: a relay-only one
     // simply has no strategy match to start.
-    it('takes a relay-only competition of any category', async () => {
-      tsv(['Alpha', 'w2b34gqoin--01-final-b', '', '', '', '', '']);
+    it('takes a relay-only competition', async () => {
+      tsv(['Alpha', RELAY_ONLY, '', '', '', '', '']);
 
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv', registry.competitionSource);
 
       expect(result.successful).toBe(1);
-      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: 'w2b34gqoin--01-final-b' });
+      expect(create.mock.calls[0][0]).toMatchObject({ competitionId: RELAY_ONLY });
     });
 
     it.each([
       ['none', '', '2. sor (Alpha): hiányzik a verseny (Competition): az azonosítója vagy a neve, például 20 online C.'],
       ['one the registry does not have', 'nosuchcomp--x',
         '2. sor (Alpha): Nincs ilyen verseny: „nosuchcomp--x”. Az azonosítója vagy a neve kell, például: 20 online C.'],
-      ['a name no competition has', '20 online B',
-        '2. sor (Alpha): Nincs ilyen verseny: „20 online B”. Az azonosítója vagy a neve kell, például: 20 online C.'],
+      ['a name no competition has', '99 online B',
+        '2. sor (Alpha): Nincs ilyen verseny: „99 online B”. Az azonosítója vagy a neve kell, például: 20 online C.'],
     ])('fails a row naming %s, and goes on', async (_, competitionId, message) => {
       tsv(['Alpha', competitionId, '', '', '', '', ''], ['Bravo', C, '', '', '', '', '']);
 
@@ -232,7 +255,7 @@ describe('import_teams_from_tsv', () => {
     // Organisers know a round by its edition, round and category, not by
     // an id; the export writes the id, which stays put.
     it('takes a competition by its name too', async () => {
-      tsv(['Alpha', '20 online C', '', '', '', '', ''], ['Bravo', '20. internetes d', '', '', '', '', '']);
+      tsv(['Alpha', '99 online C', '', '', '', '', ''], ['Bravo', '99. internetes d', '', '', '', '', '']);
 
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv', registry.competitionSource);
 
@@ -246,7 +269,7 @@ describe('import_teams_from_tsv', () => {
         teamName: 'Alpha', competitionId: C, email: '', other: '', pageState: 'HOME',
         teamId: TEAM_ID, joinCode: JOIN_CODE, credentials: CREDENTIALS, relayMatchID: null, strategyMatchID: null,
       })];
-      tsv(['Alpha', '20 online C', '', '', '', '', '']);
+      tsv(['Alpha', '99 online C', '', '', '', '', '']);
 
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv', registry.competitionSource);
 
@@ -562,7 +585,7 @@ describe('import_teams_from_tsv', () => {
     // A team name is unique within its competition only, and teams are not
     // linked across competitions.
     it('is not a team of the same name in another competition', async () => {
-      live = [liveTeam('Alpha', { competitionId: 'u4lw7pcca1--20-online-d' })];
+      live = [liveTeam('Alpha', { competitionId: D })];
       tsv(['Alpha', C, 'a@b.com', '', '', '', '']);
 
       const result = await import_teams_from_tsv(teams, 'dummy_file.tsv', registry.competitionSource);

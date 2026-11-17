@@ -27,7 +27,7 @@ function team(overrides: Partial<Parameters<TeamsRepository['insertTeam']>[0]> =
   const n = String(++teamNumber).padStart(3, '0');
   return {
     teamname: `Team ${n}`,
-    competitionId: 'mkhi1nnoim--20-online-c',
+    competitionId: 'klmgbpb334--minta-teljes',
     email: 'team@example.com',
     other: '',
     teamId: `8eae8669-125c-42e5-8b49-89afbac31${n}`,
@@ -57,7 +57,7 @@ describe('the unique constraints sync() creates', () => {
 
 it('lets teams of two competitions share a name', async () => {
   await database.teams.insertTeam(team({ teamname: 'Alpha' }));
-  await database.teams.insertTeam(team({ teamname: 'Alpha', competitionId: 'u4lw7pcca1--20-online-d' }));
+  await database.teams.insertTeam(team({ teamname: 'Alpha', competitionId: 'pc7jcwfdxr--minta-ketlepes' }));
 
   expect(await TeamModel.count({ where: { teamName: 'Alpha' } })).toBe(2);
 });

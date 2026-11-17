@@ -129,7 +129,7 @@ test("fills the strategy game's time in from the team's competition", () => {
   render(<ChooserItem type="strategy" status={{ state: 'NOT STARTED' }} competition={{
     id: 'aaaaaaaaaa--short',
     languages: ['hu'],
-    strategy: { durationMinutes: 20, gameId: '20o-e' },
+    strategy: { durationMinutes: 20, gameId: 'minta-sablon' },
     metadata: { kind: 'other', label: { hu: 'Rövid' } },
   }} />);
 

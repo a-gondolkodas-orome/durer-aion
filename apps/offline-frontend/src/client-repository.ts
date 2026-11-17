@@ -1,6 +1,5 @@
-import { ClientRepository, I18nError, LOCAL_STORAGE_TEAMSTATE, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey } from "common-frontend/core";
-import { teamData } from "./teamData";
-import { dryRunCompetition } from "./rehearsed-round";
+import { ClientRepository, I18nError, TeamModelDto, clearStoredSession, lastActiveStorageKey, relayPointsStorageKey, strategyPointsStorageKey, teamStateStorageKey } from "common-frontend/core";
+import { dryRunCompetition, dryRunTeams } from "./rehearsed-round";
 import type { RelayEndReport } from "game";
 import { sendDataLogin, sendGameData } from "./sendData";
 import { handleGameReport } from "./game-report";
@@ -29,7 +28,7 @@ export class OfflineClientRepository implements ClientRepository {
       },
     }
     sendGameData({ component: "relay", phase: "start" });
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+    localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
     return Promise.resolve();
@@ -53,7 +52,7 @@ export class OfflineClientRepository implements ClientRepository {
     }
 
   sendGameData({ component: "strategy", phase: "start" });
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+    localStorage.setItem(teamStateStorageKey(),
       JSON.stringify(newState)
     );
     return Promise.resolve();
@@ -65,7 +64,7 @@ export class OfflineClientRepository implements ClientRepository {
     if (!(teamState.pageState === 'HOME' && teamState.strategyMatch.state === 'FINISHED' && teamState.relayMatch.state !== 'IN PROGRESS')) {
       throw new I18nError('error.unexpected');
     }
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify({ ...teamState, pageState: 'STRATEGY' }));
+    localStorage.setItem(teamStateStorageKey(), JSON.stringify({ ...teamState, pageState: 'STRATEGY' }));
     return Promise.resolve();
   }
 
@@ -92,7 +91,7 @@ export class OfflineClientRepository implements ClientRepository {
         strategyResults: readStoredStrategyResults(),
       }
     }
-    localStorage.setItem(LOCAL_STORAGE_TEAMSTATE, JSON.stringify(newState));
+    localStorage.setItem(teamStateStorageKey(), JSON.stringify(newState));
     return Promise.resolve();
   }
 
@@ -126,16 +125,16 @@ export class OfflineClientRepository implements ClientRepository {
   }
 
   joinWithCode(joinCode: string): Promise<void> {
-    const i = teamData.findIndex(e => e.join_code === joinCode);
+    const i = dryRunTeams.findIndex(e => e.join_code === joinCode);
     const pageState = readStoredTeamState()?.pageState ?? "DISCLAIMER";
 
     // teamData.test.ts holds every test team's competition to the round.
-    const competition = i > -1 ? dryRunCompetition(teamData[i].competitionId) : undefined;
+    const competition = i > -1 ? dryRunCompetition(dryRunTeams[i].competitionId) : undefined;
     if (competition !== undefined) {
       const teamState: TeamModelDto = {
         teamId: "1",
         joinCode: joinCode,
-        teamName: teamData[i].teamname,
+        teamName: dryRunTeams[i].teamname,
         competition,
         credentials: "credentials",
         email: "asd@asd.asd",
@@ -149,7 +148,7 @@ export class OfflineClientRepository implements ClientRepository {
       }
 
       sendDataLogin(teamState);
-      localStorage.setItem(LOCAL_STORAGE_TEAMSTATE,
+      localStorage.setItem(teamStateStorageKey(),
         JSON.stringify(teamState)
       );
       localStorage.setItem(lastActiveStorageKey(), String(Date.now()));

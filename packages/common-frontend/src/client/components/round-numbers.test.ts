@@ -5,7 +5,7 @@ const competition: PublicCompetition = {
   id: 'aaaaaaaaaa--short',
   languages: ['hu'],
   relay: { durationMinutes: 45, problemPoints: [2, 5, 3] },
-  strategy: { durationMinutes: 20, gameId: '20o-e' },
+  strategy: { durationMinutes: 20, gameId: 'minta-sablon' },
   metadata: { kind: 'other', label: { hu: 'Rövid' } },
 };
 

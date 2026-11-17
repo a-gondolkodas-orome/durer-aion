@@ -3,9 +3,11 @@
 // something always sets it — VITE_GIT_COMMIT_HASH via vite.config.ts — and
 // optional when the code has a fallback for a build without it: sendData.ts
 // drops play data rather than upload it without the S3 pair, which the
-// practice deploy leaves unset.
+// practice deploy leaves unset; and a build without VITE_DRY_RUN_ROUND serves
+// the rehearsed round.
 interface ImportMetaEnv {
   readonly VITE_GIT_COMMIT_HASH: string;
   readonly VITE_S3_BUCKET_NAME?: string;
   readonly VITE_S3_FOLDER?: string;
+  readonly VITE_DRY_RUN_ROUND?: string;
 }
