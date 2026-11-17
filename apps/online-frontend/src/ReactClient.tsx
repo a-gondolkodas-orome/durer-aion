@@ -1,6 +1,6 @@
 import { GameRelay, MyGameWrappers } from "game";
 import type { StrategyGameKey } from "game";
-import { MyBoardWrapper, strategyDescriptions } from "game/client";
+import { boardFor, strategyDescriptions } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
 import { strategyGameName } from "schemas";
 import type { PublicCompetition } from "schemas";
@@ -41,7 +41,7 @@ function strategyClient(competition: PublicCompetition): OnlineClient | null {
 // Generic over the game, so that its rules and board are one game's.
 function gameClient<K extends StrategyGameKey>(gameId: K): OnlineClient {
   const game = { ...MyGameWrappers[gameId](), name: strategyGameName(gameId) };
-  return ClientFactory(game, MyBoardWrapper(gameId), strategyDescriptions[gameId]).OnlineClient;
+  return ClientFactory(game, boardFor(gameId), strategyDescriptions[gameId]).OnlineClient;
 }
 
 interface ClientProps {

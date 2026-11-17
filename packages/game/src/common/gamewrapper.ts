@@ -1,4 +1,4 @@
-import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
+import { Ctx, FnContext, Game, PhaseConfig, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
 import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish } from './types';
@@ -87,11 +87,24 @@ export interface StrategyOptions {
 
 /// What the server starts a strategy match with: the competition's duration
 /// as it stands then.
+/// The phases gameWrapper runs every strategy game through. `ctx.phase` is a
+/// plain string to boardgame.io, so whatever reads it compares it with these
+/// rather than with a literal of its own.
+export const PHASE = {
+  startNewGame: "startNewGame",
+  chooseRole: "chooseRole",
+  play: "play",
+} as const;
+
+export type StrategyPhase = (typeof PHASE)[keyof typeof PHASE];
+
 export interface StrategySetupData {
   durationMinutes: number;
 }
 
-export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>,
+/// `game` is a game's own definition, which has no name, plus the name its
+/// host gives the match (`WrappableGame` says why).
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState> & { name?: string },
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                  { durationMinutes = STRATEGY_DEFAULT_DURATION_MINUTES }: StrategyOptions = {},
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
@@ -122,9 +135,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     minPlayers: 2,
     maxPlayers: 2,
     phases: {
-      startNewGame: {
+      [PHASE.startNewGame]: {
         moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
-        next: "chooseRole",
+        next: PHASE.chooseRole,
         // The team picks the difficulty, the bot answers with the position,
         // and the phase ends with that one round of turns.
         turn: {
@@ -132,18 +145,18 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
         start: true,
       },
-      chooseRole: {
+      [PHASE.chooseRole]: {
         moves: { ...timestampMoves({ chooseRole }), getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
-        next: "play",
+        next: PHASE.play,
         turn: {
           order: TurnOrder.RESET,
         },
       },
-      play: {
+      [PHASE.play]: {
         moves: { ...timestampMoves(game.moves ?? {}), getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
-        next: "startNewGame",
+        next: PHASE.startNewGame,
         turn: {
           order: {
             first: ({ G }) => {
@@ -189,7 +202,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });
         }
       },
-    },
+      // Exactly the phases PHASE names, each passing to another of them, so
+      // the map and the constant cannot drift apart.
+    } satisfies Record<StrategyPhase, PhaseConfig<T_SpecificGameState & GameStateMixin> & { next?: StrategyPhase }>,
     // boardgame.io types playerID as a plain string.
     ai: {
       enumerate: (G, ctx, playerID) =>

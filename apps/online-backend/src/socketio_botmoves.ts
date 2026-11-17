@@ -8,7 +8,7 @@ import type { Bot } from "boardgame.io/ai";
 import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
-import { isMakeMovePayloadReadOnly, currentPlayer, PlayerIDType } from "game";
+import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
 import type { MatchBot } from "./botwrapper";
 import type { CorsOptionsDelegate } from "cors";
@@ -280,7 +280,7 @@ export class SocketIOButBotMoves extends SocketIO {
       // the check above lets through and which no game here produces.
       return;
     }
-    if (state.ctx.phase !== "play" && state.ctx.phase !== "startNewGame") {
+    if (state.ctx.phase !== PHASE.play && state.ctx.phase !== PHASE.startNewGame) {
       return;
     }
     const botAction = await bot.play(state, botPlayer, metadata?.setupData);
