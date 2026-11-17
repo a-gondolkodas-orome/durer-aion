@@ -10,7 +10,7 @@ import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
-import type { MatchBot } from "./botwrapper";
+import type { MatchBot } from "game";
 import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.

@@ -17,10 +17,9 @@ import { io as connect, Socket } from "socket.io-client";
 import { createMatch } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { Server } from "boardgame.io/server";
-import { MyGameWrappers, gameWrapper } from "game";
+import { MyGameWrappers, botWrapper, gameWrapper } from "game";
 import { StrategyWrappers } from "game/bot";
 import { strategyGameName } from "schemas";
-import botWrapper from "./botwrapper";
 import { BOT_ID, SocketIOButBotMoves } from "./socketio_botmoves";
 
 const GAME_NAME = strategyGameName("minta-ketkupac");

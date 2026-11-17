@@ -1,8 +1,11 @@
 import { State } from 'boardgame.io';
 import { Bot } from 'boardgame.io/ai';
 
-type BotStrategy<T_SpecificGameState, T_Move> =
-  (state: State<T_SpecificGameState>, botID: string, setupData: unknown) => [T_Move | undefined, string];
+/// A strategy names the move to make, or `undefined` for a random one.
+/// `setupData` is the match's setup data, which only the server has and hands
+/// on (see MatchBot); in the browser, `Local` calls a bot without it.
+export type BotStrategy<T_SpecificGameState, T_Move> =
+  (state: State<T_SpecificGameState>, botID: string, setupData?: unknown) => [T_Move | undefined, string];
 
 /// A bot that is also handed the match's setup data, which boardgame.io keeps
 /// in the match's metadata, out of every client's reach: the relay's judge
@@ -11,10 +14,12 @@ export type MatchBot = Bot & {
   play(state: State, playerID: string, setupData?: unknown): ReturnType<Bot['play']>;
 };
 
-/// wraps a convenient strategy to a full Boardgame.io Bot class
-/// @param strategy Must calculate the move to be made or `undefined` if a random move is to be made
-/// @result a Boardgame.io Bot class
-export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: BotStrategy<T_SpecificGameState, T_Move>) {
+/// Wraps a strategy into a boardgame.io Bot class. The return type is spelled
+/// out because a declaration file cannot name the class itself: it inherits
+/// Bot's private members.
+export function botWrapper<T_SpecificGameState, T_Move>(
+  botstrategy: BotStrategy<T_SpecificGameState, T_Move>,
+): new (...args: ConstructorParameters<typeof Bot>) => MatchBot {
   class _Bot extends Bot {
     // waits 400 ms for UX
     async wait(): Promise<void> {
@@ -43,4 +48,3 @@ export default function botWrapper<T_SpecificGameState, T_Move>(botstrategy: Bot
   }
   return _Bot;
 }
-// TODO: accept more than one move
