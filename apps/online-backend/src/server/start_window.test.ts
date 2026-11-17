@@ -52,4 +52,10 @@ describe("readStartWindowBody", () => {
   ])("refuses %s", (_, body) => {
     expect(readStartWindowBody(body)).toHaveProperty("refused");
   });
+
+  it("refuses a window the validator rejects in English, not with its Hungarian messages", () => {
+    expect(readStartWindowBody({ opensAt: "2026-10-21T15:00" })).toStrictEqual({
+      refused: "opensAt and closesAt are ISO 8601 times with an offset, closesAt after opensAt.",
+    });
+  });
 });

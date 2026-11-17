@@ -285,45 +285,5 @@
       "yourTurn": "Your turn!"
     },
     "viewBoard": "View the board"
-  },
-  "validation": {
-    "subject": {
-      "competition": "competition {{id}}",
-      "problem": "problem {{id}}",
-      "relayProblem": "competition {{id}}, relay problem {{position}} ({{problemId}})"
-    },
-    "advancingPointsNotPositive": "the advancing points ({{points}}) are not a positive integer",
-    "answerNotInteger": "the answer ({{answer}}) is not an integer",
-    "categoryEmpty": "the category is empty",
-    "closesAtInvalid": "the start window's end (“{{value}}”) is not a time with an offset, such as 2026-11-20T15:00+01:00",
-    "closesNotAfterOpens": "the start window does not end after it opens",
-    "contentUnknownLanguage": "has text in the unknown language “{{language}}”",
-    "editionNotPositive": "the edition ({{edition}}) is not a positive integer",
-    "finishMessageEmpty": "the finish message is empty ({{language}})",
-    "finishMessageInNoLanguage": "the finish message is in no language",
-    "finishMessageNotInLanguages": "the finish message is in none of the competition's languages",
-    "finishMessageUnknownLanguage": "the finish message is in the unknown language “{{language}}”",
-    "idNamesBoth": "the id {{id}} names both a problem and a competition",
-    "labelEmpty": "the label is empty ({{language}})",
-    "labelInNoLanguage": "the label is in no language",
-    "labelUnknownLanguage": "the label is in the unknown language “{{language}}”",
-    "languageTwice": "names a language twice",
-    "malformedId": "the id is not of the usual form, such as k3x9q2m7ab--hatszog-terulet",
-    "noContent": "has no text in any language",
-    "noLanguage": "has no language",
-    "noMatch": "has neither a relay nor a strategy game",
-    "opensAtInvalid": "the start window's opening (“{{value}}”) is not a time with an offset, such as 2026-11-20T15:00+01:00",
-    "relayDurationNotPositive": "the relay's duration ({{minutes}}) is not a positive whole number of minutes",
-    "relayEmpty": "the relay has no problems",
-    "relayPointsNotPositive": "its points ({{points}}) are not a positive integer",
-    "relayProblemMissing": "no such problem",
-    "relayProblemNotInLanguages": "is in none of the competition's languages",
-    "relayProblemRepeated": "is already earlier in the relay",
-    "strategyDurationNotPositive": "the strategy game's duration ({{minutes}}) is not a positive whole number of minutes",
-    "strategyGameNotInLanguages": "the strategy game ({{gameId}}) is in none of the competition's languages",
-    "strategyGameUnknown": "no such strategy game: {{gameId}}",
-    "textEmpty": "its text is empty ({{language}})",
-    "unknownRound": "the round (“{{round}}”) is not one of online, local, final",
-    "unsupportedLanguage": "unsupported language: “{{language}}”"
   }
 }

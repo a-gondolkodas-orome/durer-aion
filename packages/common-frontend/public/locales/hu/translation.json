@@ -281,45 +281,5 @@
       "yourTurn": "Ti jöttök!"
     },
     "viewBoard": "Tábla megtekintése"
-  },
-  "validation": {
-    "subject": {
-      "competition": "verseny {{id}}",
-      "problem": "feladat {{id}}",
-      "relayProblem": "verseny {{id}}, a váltó {{position}}. feladata ({{problemId}})"
-    },
-    "advancingPointsNotPositive": "a továbbjutási ponthatár ({{points}}) nem pozitív egész szám",
-    "answerNotInteger": "a válasz ({{answer}}) nem egész szám",
-    "categoryEmpty": "a kategória üres",
-    "closesAtInvalid": "az indítási ablak vége („{{value}}”) nem időzónával megadott időpont, például 2026-11-20T15:00+01:00",
-    "closesNotAfterOpens": "az indítási ablak vége nem a kezdete utáni",
-    "contentUnknownLanguage": "ismeretlen nyelvű szövege van: „{{language}}”",
-    "editionNotPositive": "a kiadás ({{edition}}) nem pozitív egész szám",
-    "finishMessageEmpty": "a záróüzenet üres ({{language}})",
-    "finishMessageInNoLanguage": "a záróüzenet egyik nyelven sincs megadva",
-    "finishMessageNotInLanguages": "a záróüzenet a verseny egyik nyelvén sincs megadva",
-    "finishMessageUnknownLanguage": "a záróüzenet ismeretlen nyelven van megadva: „{{language}}”",
-    "idNamesBoth": "a(z) {{id}} azonosító egy feladaté és egy versenyé is",
-    "labelEmpty": "a felirat üres ({{language}})",
-    "labelInNoLanguage": "a felirat egyik nyelven sincs megadva",
-    "labelUnknownLanguage": "a felirat ismeretlen nyelven van megadva: „{{language}}”",
-    "languageTwice": "egy nyelvet kétszer is felsorol",
-    "malformedId": "az azonosító nem a megszokott alakú, mint például k3x9q2m7ab--hatszog-terulet",
-    "noContent": "egyik nyelven sincs szövege",
-    "noLanguage": "nincs megadva nyelve",
-    "noMatch": "sem váltója, sem stratégiás játéka nincs",
-    "opensAtInvalid": "az indítási ablak kezdete („{{value}}”) nem időzónával megadott időpont, például 2026-11-20T15:00+01:00",
-    "relayDurationNotPositive": "a váltó hossza ({{minutes}}) nem pozitív egész számú perc",
-    "relayEmpty": "a váltóban nincs feladat",
-    "relayPointsNotPositive": "a pontértéke ({{points}}) nem pozitív egész szám",
-    "relayProblemMissing": "nincs ilyen feladat",
-    "relayProblemNotInLanguages": "a verseny egyik nyelvén sincs meg",
-    "relayProblemRepeated": "korábban már szerepel a váltóban",
-    "strategyDurationNotPositive": "a stratégiás játék hossza ({{minutes}}) nem pozitív egész számú perc",
-    "strategyGameNotInLanguages": "a stratégiás játék ({{gameId}}) a verseny egyik nyelvén sincs meg",
-    "strategyGameUnknown": "nincs ilyen stratégiás játék: {{gameId}}",
-    "textEmpty": "a szövege üres ({{language}})",
-    "unknownRound": "a forduló („{{round}}”) nem ezek egyike: online, local, final",
-    "unsupportedLanguage": "nem támogatott nyelv: „{{language}}”"
   }
 }

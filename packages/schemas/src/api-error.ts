@@ -6,6 +6,11 @@
  * A code is a promise to the clients: rename one only together with the
  * frontend's translation of it (`i18n-error.ts`). A code one route alone
  * answers is named for that route, so it reads without the request beside it.
+ *
+ * A report is the other kind of server text: a list of messages about what
+ * was sent, such as the team import's rows or the competition validator's
+ * findings. It is for organisers, so it is Hungarian, and the admin page shows
+ * it as it comes. A report's messages never go into a refusal's `message`.
  */
 export const API_ERROR_CODES = [
   // 400

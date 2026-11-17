@@ -1,4 +1,4 @@
-import { formatFinding, validateStartWindow } from "schemas";
+import { validateStartWindow } from "schemas";
 import type { CompetitionConfig, StartWindow } from "schemas";
 import type { TeamModel } from "./model";
 
@@ -39,6 +39,9 @@ export function readStartWindowBody(body: unknown): StartWindow | null | { refus
     return { refused: "opensAt and closesAt are strings or null." };
   }
   const window: StartWindow = { opensAt, ...(closesAt !== null && { closesAt }) };
-  const findings = validateStartWindow(window);
-  return findings.length > 0 ? { refused: findings.map(formatFinding).join("; ") } : window;
+  // The validator's messages are Hungarian, for organisers; a refusal's own
+  // message is English (api-error.ts).
+  return validateStartWindow(window).length > 0
+    ? { refused: "opensAt and closesAt are ISO 8601 times with an offset, closesAt after opensAt." }
+    : window;
 }
