@@ -80,12 +80,9 @@ export default function SelectRelayRound() {
   // Fit width to absolutely positioned input label
   const minWidthForLabel = (label: string) => `calc(${label.length}ch + 3em)`;
 
+  const id = other !== '' ? other : year;
+
   const handleProceed = async () => {
-    const id = other !== '' ? other : year;
-    if (id === '') {
-      enqueueSnackbar(t('login.error.noRound'), { variant: 'error' });
-      return;
-    }
     try {
       await login(id);
       await startRelay();
@@ -173,7 +170,7 @@ export default function SelectRelayRound() {
         </FormControl>
       }
 
-      <Button type="submit" variant="contained" sx={{
+      <Button type="submit" variant="contained" disabled={id === ''} sx={{
                 marginTop: "20px",
                 backgroundColor: theme.palette.primary.main,
                 color: theme.palette.primary.contrastText,
