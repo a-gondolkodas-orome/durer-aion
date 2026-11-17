@@ -68,9 +68,7 @@ WORKDIR /usr/src/app
 COPY --from=prod-deps /usr/src/app/node_modules ./node_modules
 COPY --from=prod-deps /usr/src/app/apps/online-backend ./apps/online-backend
 COPY --from=build /usr/src/app/apps/online-backend/dist ./apps/online-backend/dist
-# For a container started without docker-compose.yml's ./scripts mount. Its TSV
-# then goes in a directory mounted for it: the export is written beside the TSV,
-# and the image's own scripts/ is root's, not node's.
+# For a container started without docker-compose.yml's ./scripts mount.
 COPY scripts/import_teams.sh ./scripts/
 
 # Loads the modules the server requires at startup, so a dependency prod-deps
@@ -78,8 +76,8 @@ COPY scripts/import_teams.sh ./scripts/
 RUN node apps/online-backend/dist/server.js sanity-check
 
 # Unprivileged: everything above is root-owned and only read from here on. The
-# one write, the importer's `<file>.tsv.export`, goes to the bind-mounted
-# scripts/, so the import runs as the host user instead (DEPLOYMENT.md § 7).
+# team import writes nothing either: its export goes to stdout, and the
+# caller's shell puts it in a file on the host (DEPLOYMENT.md § 7).
 USER node
 
 EXPOSE 8000

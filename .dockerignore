@@ -13,8 +13,8 @@
 **/.env
 **/.env.*
 
-# Real team lists are dropped into scripts/ on the host, and the importer writes
-# `<file>.tsv.export` back beside them — the same rows plus the generated join
+# Real team lists are dropped into scripts/ on the host, and the import's
+# `<file>.tsv.export` is redirected back beside them — the same rows plus the generated join
 # codes and credentials. docker-compose.yml bind-mounts ./scripts in production
 # too and `npm run teams:import` reads the file through that mount, so either
 # baked into the image would be competitors' data shipped for nothing.

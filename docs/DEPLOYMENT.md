@@ -274,13 +274,17 @@ Drop the TSV into `scripts/` on the host — that directory is bind-mounted into
 container — and name it:
 
 ```bash
-docker compose --env-file=.env.docker exec --user "$(id -u):$(id -g)" backend ./scripts/import_teams.sh scripts/<file>.tsv
+docker compose --env-file=.env.docker exec -T backend ./scripts/import_teams.sh scripts/<file>.tsv > scripts/<file>.tsv.export
 ```
 
-This writes `scripts/<file>.tsv.export` back on the host, with the generated join codes.
-The `--user` matters: the server runs as the image's unprivileged `node` user, uid 1000,
-which can write to `scripts/` only if the deploy user happens to be uid 1000 too. Running
-the import as the deploy user's own uid makes the export theirs, with no host setup.
+The importer prints the export, the same rows plus the generated join codes, and
+your shell writes it to `scripts/<file>.tsv.export`. The file is yours, while the
+server runs as the image's unprivileged `node` user. What it did, row by row and in
+total, goes to the terminal. `-T` keeps that out of the file: with a terminal
+attached, docker would send both into the one stream, with CRLF line endings.
+The shell empties the target before the import starts, so redirect a re-run into
+a new file rather than over an export whose codes have not gone out yet. The
+admin page's download has every team's code all the same.
 The admin page's TSV upload does the same job through the browser.
 
 Each row's `Competition` column names its team's competition, such as
@@ -303,11 +307,10 @@ the original would generate new ones.
 You can also run the importer as a one-off container without the stack:
 
 ```bash
-docker compose --env-file=.env.docker run --rm --user "$(id -u):$(id -g)" backend ./scripts/import_teams.sh scripts/<file>.tsv
+docker compose --env-file=.env.docker run --rm -T backend ./scripts/import_teams.sh scripts/<file>.tsv > scripts/<file>.tsv.export
 ```
 
-> **Test drive:** `npm run teams:import` runs the same `exec`, as your uid, against
-> `scripts/test.tsv`.
+> **Test drive:** `npm run teams:import` runs the same thing against `scripts/test.tsv`.
 
 ## 8. A domain and HTTPS
 
