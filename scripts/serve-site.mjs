@@ -58,5 +58,6 @@ server.listen(port, () => {
   console.log('  /              home');
   console.log('  /jatekok/      strategy practice');
   console.log('  /proba-verseny/ competition dry run');
+  console.log('  /minta-verseny/ dry run of the reference competitions');
   console.log('  /valto/        relay practice');
 });

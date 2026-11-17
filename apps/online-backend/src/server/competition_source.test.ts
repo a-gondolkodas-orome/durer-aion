@@ -28,7 +28,7 @@ const competition: CompetitionConfig = {
   id: "llllllllll--late",
   languages: ["hu"],
   relay: { durationMinutes: 40, problems: [{ problemId: problem.id, points: 5 }] },
-  strategy: { durationMinutes: 25, gameId: "20o-c" },
+  strategy: { durationMinutes: 25, gameId: "minta-ketkupac" },
   metadata: { kind: "other", label: { hu: "Később érkező" } },
 };
 
@@ -122,7 +122,7 @@ describe("a competition the source starts returning after the server started", (
   it("plays its strategy game for its own duration", async () => {
     const matchID = await start(await importTeam("Charlie"), "strategy");
     const { state, metadata } = await database.db.fetch(matchID, { state: true, metadata: true });
-    expect(metadata?.gameName).toBe("strategy--20o-c");
+    expect(metadata?.gameName).toBe("strategy--minta-ketkupac");
     expect(minutes(state?.G as { start: string, end: string })).toBe(25);
   });
 });

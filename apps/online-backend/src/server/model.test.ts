@@ -12,7 +12,7 @@ const team = (other: string) => TeamModel.build({
   teamId: '8eae8669-125c-42e5-8b49-89afbac31679',
   joinCode: '000-0000-000',
   teamName: 'Alpha',
-  competitionId: 'mkhi1nnoim--20-online-c',
+  competitionId: 'klmgbpb334--minta-teljes',
   credentials: '4f1d3d3c-6d2a-4f5b-9c8d-0e1f2a3b4c5d',
   email: 'team@example.com',
   pageState: 'HOME',

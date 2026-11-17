@@ -59,7 +59,7 @@ describe('validatingCompetitionSource', () => {
     metadata: { kind: 'other', label: { hu: 'Próba' } },
   };
   const valid: CompetitionConfig = { ...competition, id: 'dddddddddd--valid', relay: undefined,
-    strategy: { durationMinutes: 30, gameId: '20o-c' } };
+    strategy: { durationMinutes: 30, gameId: 'minta-ketkupac' } };
   const withProblems = (problems: object) => {
     const { competitionSource, problemSource } = createRegistry([{
       problems: problems as never, competitions: { [competition.id]: competition, [valid.id]: valid },

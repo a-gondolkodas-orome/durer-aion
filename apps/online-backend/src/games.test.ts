@@ -33,6 +33,6 @@ describe("hostedGames", () => {
       (new Date(G.end).getTime() - new Date(G.start).getTime()) / 60_000;
 
     expect(minutes(setupOf(RELAY_GAME_NAME, 45))).toBe(45);
-    expect(minutes(setupOf(strategyGameName("20o-c"), 25))).toBe(25);
+    expect(minutes(setupOf(strategyGameName("minta-ketkupac"), 25))).toBe(25);
   });
 });

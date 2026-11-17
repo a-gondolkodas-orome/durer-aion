@@ -14,7 +14,9 @@ One page, its favicon and the `CNAME`, no build step: the signpost for the
 subpages around it. Its links are **relative**, so it works under
 `/durer-aion/` and under a custom domain alike with nothing to rebase. It links
 the two practice sites and not `/proba-verseny/`, which uploads play data to a
-shared bucket and is meant to be handed to testers rather than discovered.
+shared bucket and is meant to be handed to testers rather than discovered, nor
+`/minta-verseny/`, the same dry run over the reference competitions, which is
+for developers.
 
 The `CNAME` is what declares the custom domain, and it is not incidental:
 `scripts/assemble-site.mjs` reads it back out of the assembled `site/` and

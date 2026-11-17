@@ -22,8 +22,8 @@ import { StrategyWrappers } from "game/bot";
 import botWrapper from "./botwrapper";
 import { BOT_ID, SocketIOButBotMoves } from "./socketio_botmoves";
 
-const GAME_NAME = strategyNames["20o-e"];
-const game = { ...gameWrapper(MyGameWrappers["20o-e"]()), name: GAME_NAME };
+const GAME_NAME = strategyNames["minta-ketkupac"];
+const game = { ...gameWrapper(MyGameWrappers["minta-ketkupac"]()), name: GAME_NAME };
 const HUMAN_ID = "0";
 // Each test gets its own server and its own store, so one id is enough.
 const MATCH_ID = "match-under-test";
@@ -72,7 +72,7 @@ function updateMatching(socket: Socket, done: (state: BgioState) => boolean): Pr
 /** Only the fields these assertions read. */
 interface BgioState {
   ctx: { phase: string; currentPlayer: string };
-  G: { difficulty: string | null; cells: (string | null)[] };
+  G: { difficulty: string | null; piles: number[]; selectedPile: number | null };
   _stateID: number;
 }
 
@@ -101,7 +101,7 @@ describe("the socket transport a browser talks to", () => {
       // is what this file is about, not what persists behind it.
       transport: new SocketIOButBotMoves(
         { https: undefined },
-        { [GAME_NAME]: new (botWrapper(StrategyWrappers["20o-e"]()))({ enumerate: game.ai?.enumerate }) },
+        { [GAME_NAME]: new (botWrapper(StrategyWrappers["minta-ketkupac"]()))({ enumerate: game.ai?.enumerate }) },
       ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
@@ -189,15 +189,21 @@ describe("the socket transport a browser talks to", () => {
     const play = await playing;
     expect(play.ctx.currentPlayer).toBe(HUMAN_ID);
 
-    // In category E the first player places one O; the bot answers with its Xs,
-    // which only its strategy, run on the server, can have chosen.
+    // The player's turn is two moves: choosing a pile keeps the turn, and
+    // taking from it hands the turn to the bot, whose take only its strategy,
+    // run on the server, can have chosen.
+    const chosen = updateMatching(socket, ({ G }) => G.selectedPile === 1);
+    socket.emit("update", makeMove("selectPile", [1], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
+    const halfway = await chosen;
+    expect(halfway.ctx.currentPlayer).toBe(HUMAN_ID);
+
     const botReplied = updateMatching(socket, ({ G, ctx }) =>
-      G.cells.includes("X") && ctx.currentPlayer === HUMAN_ID);
-    socket.emit("update", makeMove("placeMarks", [[12]], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
+      G.piles[0] + G.piles[1] < 8 && ctx.currentPlayer === HUMAN_ID);
+    socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), halfway._stateID, MATCH_ID, HUMAN_ID);
     const state = await botReplied;
 
-    expect(state.G.cells[12]).toBe("O");
-    expect(state.G.cells.filter(cell => cell === "X")).toHaveLength(2);
+    expect(state.G.piles[0] + state.G.piles[1]).toBeLessThan(8);
+    expect(state.G.selectedPile).toBeNull();
   });
 
   it("gives a reconnecting player the state their last one left", async () => {
