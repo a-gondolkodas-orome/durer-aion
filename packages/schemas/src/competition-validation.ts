@@ -81,6 +81,8 @@ export type ValidationFinding = {
 function finding<C extends ValidationCode>(
   code: C, subject?: ValidationSubject, ...[params]: Record<never, never> extends ValidationParams[C] ? [ValidationParams[C]?] : [ValidationParams[C]]
 ): ValidationFinding {
+  // TypeScript cannot narrow the union by a generic `C`; the signature above
+  // is what ties `params` to `code`.
   return { code, ...(subject !== undefined && { subject }), params: params ?? {} } as ValidationFinding;
 }
 
@@ -125,6 +127,8 @@ const ENGLISH: { [C in ValidationCode]: (params: ValidationParams[C]) => string 
 
 /// The finding in English, for developers; the admin page translates the code.
 export function formatFinding({ code, subject, params }: ValidationFinding): string {
+  // Destructuring loses the link between `code` and `params`; a finding's
+  // type keeps it, so `ENGLISH[code]` is always given its own params.
   const text = (ENGLISH[code] as (params: ValidationFinding['params']) => string)(params);
   if (subject === undefined) return text;
   if (subject.kind === 'problem') return `problem ${subject.id}: ${text}`;
