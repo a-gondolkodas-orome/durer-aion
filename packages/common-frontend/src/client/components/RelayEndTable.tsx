@@ -22,7 +22,9 @@ export function RelayEndTable(props: { allPoints: number, problems: RelayProblem
       title={t('relay.endTable.title')}
       points={props.allPoints}
       max={relayMaxPoints(props.problems)}
-      reminder={!props.selectRound && team?.strategyMatch.state === 'NOT STARTED' ? t('relay.endTable.reminder') : undefined}
+      // Only a competition with a strategy game has one left to remind of.
+      reminder={!props.selectRound && team?.competition?.strategy !== undefined && team.strategyMatch.state === 'NOT STARTED'
+        ? t('relay.endTable.reminder') : undefined}
       backLabel={props.selectRound ? t('relay.endTable.selectOtherRound') : t('general.backHome')}
       onBack={backToHome}
     >
