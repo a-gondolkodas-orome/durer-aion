@@ -309,7 +309,6 @@ describe("gameWrapper clock", () => {
 
 test("polling the clock does not spend a limited turn's move", () => {
   const oneMovePerTurn: GameType<{ data: string }> = {
-    name: "stub-game",
     setup: () => ({ data: "setup" }),
     possibleMoves: () => [{ move: "step" }],
     moves: { step: ({ G }) => { G.data = "stepped"; } },
@@ -332,7 +331,6 @@ test("polling the clock does not spend a limited turn's move", () => {
 /// play phase stays open and both sides get a turn.
 function steppingGame(turnEnd = vi.fn()): GameType<{ data: string }> {
   return {
-    name: "stub-game",
     setup: () => ({ data: "setup" }),
     possibleMoves: () => [{ move: "step" }],
     moves: { step: ({ G, events }) => { G.data = "stepped"; events.endTurn(); } },

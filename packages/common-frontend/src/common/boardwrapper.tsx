@@ -15,7 +15,7 @@ import { useBackToHome, useTeamState } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
-import { GUESSER_PLAYER, JUDGE_PLAYER, PHASE, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
+import { GUESSER_PLAYER, JUDGE_PLAYER, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
 import type { Difficulty, GamePresentation, GameStateMixin } from "game";
 import type { LiveGameResult } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { inLanguage, type Localizable } from "schemas";
 import { useUiLanguage } from "../client/hooks/ui-language";
-import { boardState, chosenRole, isTeamToMove, matchStage } from "./match-stage";
+import { boardState, chosenRole, matchStage } from "./match-stage";
 import type { BoardState } from "./match-stage";
 
 /// What boardgame.io hands a strategy game's board: the game's own state as
@@ -154,8 +154,9 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // only ever asks whether it is `true`.
     const finished = msRemaining < - 5000 || ctx.gameover === true;
     const stage = matchStage(G, ctx, finished);
-    const teamToMove = isTeamToMove(ctx, finished);
-    const betweenGames = ctx.phase === PHASE.startNewGame;
+    const teamToMove = stage.kind !== 'ended' && stage.teamToMove;
+    // A game is under way once its role is being chosen.
+    const inGame = stage.kind === 'chooseRole' || stage.kind === 'play';
     // Between games, the last game's mode (matchStage says why).
     const difficulty = G.difficulty ?? null;
     const rulesFirst = difficulty === null && !rulesRead && !finished;
@@ -205,7 +206,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         intro = <Intro enabled={teamToMove} startVaries={startVaries} moves={moves} />;
         break;
       case 'nextGame':
-        status = stage.botStarting ? t('strategy.status.starting') : t('strategy.intro.title');
+        status = stage.teamToMove ? t('strategy.intro.title') : t('strategy.status.starting');
         actions = nextGame;
         infoBeside = true;
         break;
@@ -258,8 +259,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         break;
       }
     }
-    const roleChip = chosenRole(stage, G);
-    const role = roleChip === null ? null : roleChip === 'first' ? firstRole : secondRole;
+    const role = chosenRole(stage, G, [firstRole, secondRole]);
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
 
@@ -308,7 +308,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
           }}>
             <Box sx={{ fontSize: '18px', fontWeight: 700 }}>{t('strategy.name')}</Box>
             <Box sx={{ order: { xs: 2, md: 0 }, width: { xs: '100%', md: 'auto' } }}>
-              <Series G={G} ended={finished} playing={difficulty === 'live' && !betweenGames && !finished} />
+              <Series G={G} ended={finished} playing={difficulty === 'live' && inGame} />
             </Box>
             <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: { xs: '8px', md: '14px' } }}>
               <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '6px', fontSize: '16px', fontWeight: 600 }}>

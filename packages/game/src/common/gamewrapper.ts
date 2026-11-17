@@ -1,4 +1,4 @@
-import { Ctx, FnContext, Game, PlayerID } from 'boardgame.io';
+import { Ctx, FnContext, Game, PhaseConfig, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
 import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish } from './types';
@@ -96,11 +96,15 @@ export const PHASE = {
   play: "play",
 } as const;
 
+export type StrategyPhase = (typeof PHASE)[keyof typeof PHASE];
+
 export interface StrategySetupData {
   durationMinutes: number;
 }
 
-export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>,
+/// `game` is a game's own definition, which has no name, plus the name its
+/// host gives the match (`WrappableGame` says why).
+export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState> & { name?: string },
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                  { durationMinutes = STRATEGY_DEFAULT_DURATION_MINUTES }: StrategyOptions = {},
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
@@ -198,7 +202,9 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
           sendStrategyFunction({ component: "strategy", phase: "end", G: G, ctx: ctx });
         }
       },
-    },
+      // Exactly the phases PHASE names, each passing to another of them, so
+      // the map and the constant cannot drift apart.
+    } satisfies Record<StrategyPhase, PhaseConfig<T_SpecificGameState & GameStateMixin> & { next?: StrategyPhase }>,
     // boardgame.io types playerID as a plain string.
     ai: {
       enumerate: (G, ctx, playerID) =>
