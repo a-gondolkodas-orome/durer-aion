@@ -30,9 +30,11 @@ export const strategyDescriptions = {
   "minta-sablon": descriptionSablon,
 } satisfies Record<StrategyGameKey, Localizable<ReactNode>>;
 
-// Generic over the game so the caller keeps the board's own state type: a
-// plain StrategyGameKey parameter would widen the result to a union of boards,
-// which no single game's client can accept.
-export function MyBoardWrapper<T_Game extends StrategyGameKey>(gameId: T_Game): (typeof boards)[T_Game] {
+// The game's own board, bare: boardWrapper puts the clock, the role and
+// next-game buttons around it where each client is built. Generic over the
+// game so the caller keeps the board's own state type: a plain StrategyGameKey
+// parameter would widen the result to a union of boards, which no single
+// game's client can accept.
+export function boardFor<T_Game extends StrategyGameKey>(gameId: T_Game): (typeof boards)[T_Game] {
   return boards[gameId];
 }
