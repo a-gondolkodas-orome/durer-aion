@@ -14,18 +14,16 @@ export function teamStartWindow(
   return competition?.startWindow;
 }
 
-/** The competitions with the windows organisers set on the admin page in place
- *  of their configs' ones, so whatever reads a competition's `startWindow`
- *  reads the window in force. */
-export function withCompetitionWindows(
-  competitions: ReadonlyMap<string, CompetitionConfig>,
+/** The competition with the window organisers set on the admin page in place
+ *  of its config's one, so whatever reads its `startWindow` reads the window
+ *  in force. */
+export function withCompetitionWindow(
+  competition: CompetitionConfig | undefined,
   windows: ReadonlyMap<string, StartWindow>,
-): ReadonlyMap<string, CompetitionConfig> {
-  if (windows.size === 0) return competitions;
-  return new Map([...competitions].map(([id, competition]) => {
-    const window = windows.get(id);
-    return [id, window === undefined ? competition : { ...competition, startWindow: window }];
-  }));
+): CompetitionConfig | undefined {
+  if (competition === undefined) return undefined;
+  const window = windows.get(competition.id);
+  return window === undefined ? competition : { ...competition, startWindow: window };
 }
 
 /** A start window as an admin route's body gives it, `{ opensAt, closesAt }`,

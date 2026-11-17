@@ -1,9 +1,9 @@
 import { registry } from "problem-bank/all";
-import { relayGameName, strategyGameName } from "schemas";
-import { competitionGames } from "./games";
+import { RELAY_GAME_NAME, strategyGameName } from "schemas";
+import { hostedGames } from "./games";
 
-describe("competitionGames", () => {
-  const games = competitionGames(registry);
+describe("hostedGames", () => {
+  const games = hostedGames();
   const names = games.map(({ game }) => game.name);
 
   // The server keys its bots by game name, so a repeated name would leave
@@ -15,26 +15,24 @@ describe("competitionGames", () => {
   // The start routes look a team's game up by these names (team_manage.ts),
   // and a name with no game answers 404 when the team presses Start.
   it("hosts every match of every competition", () => {
-    const expected = [...registry.competitions.values()].flatMap(({ id, relay, strategy }) => [
-      ...(relay ? [relayGameName(id)] : []),
-      ...(strategy ? [strategyGameName(id)] : []),
+    const expected = [...registry.competitions.values()].flatMap(({ relay, strategy }) => [
+      ...(relay ? [RELAY_GAME_NAME] : []),
+      ...(strategy ? [strategyGameName(strategy.gameId)] : []),
     ]);
-    expect([...names].sort()).toEqual(expected.sort());
+    expect(names).toEqual(expect.arrayContaining(expected));
   });
 
   // The setup reads the clock twice, for the start and for the end, so a
   // millisecond ticking between the two reads would add to the duration.
-  it("gives each match its competition's duration", () => {
+  it("gives each match the duration it is set up with", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     onTestFinished(() => { vi.useRealTimers(); });
-    const competition = registry.competitions.get("mkhi1nnoim--20-online-c");
-    if (competition === undefined) throw new Error("edition XX's online C is not registered");
-    const { id, relay, strategy } = competition;
-    const setupOf = (name: string) => games.find(({ game }) => game.name === name)?.game.setup?.({} as never);
+    const setupOf = (name: string, durationMinutes: number) => games.find(({ game }) => game.name === name)
+      ?.game.setup?.({} as never, { durationMinutes, judge: [] }) as { start: string, end: string };
     const minutes = (G: { start: string, end: string }) =>
       (new Date(G.end).getTime() - new Date(G.start).getTime()) / 60_000;
 
-    expect(minutes(setupOf(relayGameName(id)) as { start: string, end: string })).toBe(relay?.durationMinutes);
-    expect(minutes(setupOf(strategyGameName(id)) as { start: string, end: string })).toBe(strategy?.durationMinutes);
+    expect(minutes(setupOf(RELAY_GAME_NAME, 45))).toBe(45);
+    expect(minutes(setupOf(strategyGameName("20o-c"), 25))).toBe(25);
   });
 });

@@ -3,6 +3,7 @@ import { Server } from "boardgame.io/server";
 import type { TeamsRepository } from "./db";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { registry } from "problem-bank/all";
 
 // boardgame.io adds its lobby routes inside `run()`, after ours, so only a
 // server that has run shows whether they are closed.
@@ -10,7 +11,7 @@ it("closes boardgame.io's lobby API without reporting an error", async () => {
   vi.spyOn(console, "log").mockImplementation(() => undefined);
   const game = { name: "game", setup: () => ({}) };
   const server = Server({ games: [game], origins: [] });
-  configureTeamsRouter(server.router, {} as TeamsRepository, [game], requireAdmin("unused-here"));
+  configureTeamsRouter(server.router, {} as TeamsRepository, [game], requireAdmin("unused-here"), registry);
   const errors = vi.fn();
   server.app.on("error", errors);
   const running = await server.run(0);

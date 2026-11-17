@@ -8,6 +8,7 @@ import type { TeamModel } from "./model";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 import { ADMIN_ATTEMPT_LIMIT } from "./rate_limit";
+import { registry } from "problem-bank/all";
 
 const PASSWORD = "organiser-password";
 const CREDENTIALS = `Basic ${Buffer.from(`${ADMIN_USER}:${PASSWORD}`).toString("base64")}`;
@@ -43,7 +44,7 @@ describe("the admin routes over HTTP", () => {
     // The 401 is what this file is about, and koa logs every error it writes.
     app.silent = true;
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
@@ -118,7 +119,7 @@ describe("guessing the admin password", () => {
     // No match exists, so the match routes answer 404 to the organisers.
     app.context.db = { fetch: () => Promise.resolve({}) } as unknown as Server.AppCtx["db"];
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
@@ -186,7 +187,7 @@ describe("every admin route", () => {
   function routes() {
     const adminAuth = requireAdmin(PASSWORD);
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teamsWith([]), [], adminAuth);
+    configureTeamsRouter(router, teamsWith([]), [], adminAuth, registry);
     // @koa/router types a layer's middleware against the default context, not
     // the router's own, so the identity checks need the wider element type.
     const middleware = (layer: (typeof router.stack)[number]) => layer.stack as unknown[];

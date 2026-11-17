@@ -1,5 +1,6 @@
 import { Ctx, FnContext, Game, PlayerID } from "boardgame.io";
 import { INVALID_MOVE, TurnOrder } from "boardgame.io/core";
+import { RELAY_GAME_NAME } from "schemas";
 import type { Localizable, RelayProblemResult } from "schemas";
 import { timestampMoves } from "../../common/timestamp";
 import { GameStateTimer, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType, recordFinish } from "../../common/types";
@@ -7,6 +8,25 @@ import { GameStateTimer, GUESSER_PLAYER, JUDGE_PLAYER, otherPlayer, PlayerIDType
 interface Answer {
   answer: number;
   date: string;
+}
+
+/// One problem of a relay as the judge serves it, with its answer and what it
+/// is worth there.
+export interface RelayJudgeProblem {
+  /// The same in every language, or one per language.
+  problemText: Localizable<string>;
+  answer: number;
+  points: number;
+  url?: Localizable<string>;
+  help1?: string;
+  help2?: string;
+}
+
+/// What the server starts a relay match with; only the duration may enter the
+/// state (docs/ARCHITECTURE.md § *The two kinds of match*).
+export interface RelaySetupData {
+  durationMinutes: number;
+  judge: RelayJudgeProblem[];
 }
 
 export interface MyGameState extends GameStateTimer {
@@ -101,11 +121,11 @@ export function RelayWrapper(
   sendRelayFunction: (_report: RelayReport) => void = () => undefined,
   { durationMinutes = RELAY_DEFAULT_DURATION_MINUTES }: RelayOptions = {},
 ): Game<MyGameState> {
-  const durationMs = durationMinutes * 60 * 1000;
-  const GameRelay: Game<MyGameState> = {
-    name: "relay",
+  const GameRelay: Game<MyGameState, Record<string, unknown>, RelaySetupData | undefined> = {
+    name: RELAY_GAME_NAME,
     onEnd: ({ G }) => recordFinish(G),
-    setup: () => {
+    setup: (_context, setupData) => {
+      const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
       return {
         currentProblem: 0,
         // The judge's firstProblem move fills in the problem fields: the game

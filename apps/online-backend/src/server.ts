@@ -2,9 +2,9 @@ import './env';
 import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
-import { competitionGames } from './games';
+import { hostedGames } from './games';
 import { strategyGames } from 'game';
-import { assertValidRegistry } from 'problem-bank';
+import { assertValidRegistry, validatingCompetitionSource } from 'problem-bank';
 import { registry } from 'problem-bank/all';
 import { configureTeamsRouter } from './server/router';
 import { getDb } from './server/db';
@@ -16,7 +16,7 @@ import { requireAdmin } from './server/admin_session';
 // edit, before any team starts a match.
 assertValidRegistry(registry, strategyGames);
 
-const hosted = competitionGames(registry);
+const hosted = hostedGames();
 const games = hosted.map(({ game }) => game);
 
 if (argv[2] === "sanity-check") {
@@ -62,6 +62,10 @@ server.app.proxy = true;
 
 // The organisers' login travels with the admin routes rather than being
 // mounted on the prefix they share — server/admin_session.ts says why.
-configureTeamsRouter(server.router, teams, games, requireAdmin(getAdminCredentials()));
+// The one place that picks where competitions and problems are read from.
+configureTeamsRouter(server.router, teams, games, requireAdmin(getAdminCredentials()), {
+  competitionSource: validatingCompetitionSource(registry.competitionSource, registry.problemSource, strategyGames),
+  problemSource: registry.problemSource,
+});
 
 void server.run(PORT);

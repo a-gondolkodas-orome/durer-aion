@@ -1,17 +1,10 @@
 import { State } from 'boardgame.io';
 import { MyGameState, RELAY_MAX_TRIES, RelayMoveArgs } from 'game';
+import type { RelayJudgeProblem } from 'game';
 import { localizeProblem } from 'schemas';
-import type { Language, Localizable, Problem as BankProblem, ProblemId, RelayConfig } from 'schemas';
+import type { Language, Problem as BankProblem, ProblemId, RelayConfig } from 'schemas';
 
-export interface Problem {
-  /// The same in every language, or one per language.
-  problemText: Localizable<string>;
-  answer: number;
-  points: number;
-  url?: Localizable<string>;
-  help1?: string;
-  help2?: string;
-}
+export type Problem = RelayJudgeProblem;
 
 export function relayStrategy(problemList: Problem[]) {
   return (state: State<MyGameState>, _botID: string): [RelayMoveArgs, string] => {

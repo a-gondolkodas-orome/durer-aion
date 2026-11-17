@@ -85,26 +85,34 @@ export interface StrategyOptions {
   durationMinutes?: number;
 }
 
+/// What the server starts a strategy match with: the competition's duration
+/// as it stands then.
+export interface StrategySetupData {
+  durationMinutes: number;
+}
+
 export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameState>,
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                  { durationMinutes = STRATEGY_DEFAULT_DURATION_MINUTES }: StrategyOptions = {},
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
-  const durationMs = durationMinutes * 60 * 1000;
-  const myGameWrapper: Game<T_SpecificGameState & GameStateMixin> = {
-    setup: () => ({
-      ...game.setup(),
-      millisecondsRemaining: durationMs,
-      start: new Date().toISOString(),
-      end: new Date(Date.now() + durationMs).toISOString(),
-      firstPlayer: null,
-      difficulty: null,
-      winner: null,
-      numberOfTries: 0,
-      numberOfLoss: 0,
-      winningStreak: 0,
-      points: 0,
-      liveResults: [],
-    }),
+  const myGameWrapper: Game<T_SpecificGameState & GameStateMixin, Record<string, unknown>, StrategySetupData | undefined> = {
+    setup: (_context, setupData) => {
+      const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
+      return {
+        ...game.setup(),
+        millisecondsRemaining: durationMs,
+        start: new Date().toISOString(),
+        end: new Date(Date.now() + durationMs).toISOString(),
+        firstPlayer: null,
+        difficulty: null,
+        winner: null,
+        numberOfTries: 0,
+        numberOfLoss: 0,
+        winningStreak: 0,
+        points: 0,
+        liveResults: [],
+      };
+    },
     turn: {
       minMoves: 1,
       maxMoves: 1,

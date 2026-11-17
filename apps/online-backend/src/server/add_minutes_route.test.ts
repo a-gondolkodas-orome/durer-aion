@@ -7,6 +7,7 @@ import type { TeamsRepository } from "./db";
 import type { TeamModel } from "./model";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
+import { registry } from "problem-bank/all";
 
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
 const MATCH_ID = "0EKBiMgbJ5A";
@@ -22,14 +23,17 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
     await Promise.all(servers.splice(0).map(server => new Promise(resolve => server.close(resolve))));
   });
 
+  const setState = vi.fn();
+  afterEach(() => { setState.mockReset(); });
+
   async function serve(team: Partial<TeamModel>, end: string) {
     const teams = { getTeam: vi.fn().mockResolvedValue(team) } as unknown as TeamsRepository;
     const app = new Koa<Koa.DefaultState, Server.AppCtx>();
     const state = { G: { start: "2001-01-01T00:00:00Z", end, points: 0 }, ctx: {}, _stateID: 0 };
     const metadata = { players: { 0: { name: TEAM_ID } }, gameName: "unused" };
-    app.context.db = { fetch: () => ({ state, metadata }) } as unknown as Server.AppCtx["db"];
+    app.context.db = { fetch: () => ({ state, metadata }), setState } as unknown as Server.AppCtx["db"];
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD));
+    configureTeamsRouter(router, teams, [], requireAdmin(PASSWORD), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
@@ -54,5 +58,15 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
 
     expect(response.status).toBe(409);
     expect(await response.json()).toMatchObject({ code: "MATCH_FINISHED" });
+  });
+
+  // A match stored under a game name the server no longer hosts, such as one
+  // started before the games were renamed (#797).
+  it("refuses a running match no hosted game plays, and leaves its time alone", async () => {
+    const response = await serve({ relayMatchID: MATCH_ID, strategyMatchID: null }, "2099-01-01T00:00:00Z");
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ code: "GAME_NOT_FOUND" });
+    expect(setState).not.toHaveBeenCalled();
   });
 });

@@ -3,7 +3,6 @@ import type { StrategyGameKey } from "game";
 import { StrategyWrappers } from "game/bot";
 import { MyBoardWrapper, strategyDescriptions } from "game/client";
 import { relayStrategy } from "relay-bot";
-import { relayGameName, strategyGameName } from "schemas";
 import type { CompetitionId, PublicCompetition } from "schemas";
 import { dryRunCompetition, dryRunRelay } from "./rehearsed-round";
 import { InProgressRelay } from "common-frontend";
@@ -13,12 +12,11 @@ import { useTranslation } from "react-i18next";
 
 const description = <p className="text-justify"></p>
 
-// Named as the live round names a competition's match, which also keys the
-// saved match apart per competition.
+// Named per competition, which keys the saved match apart per competition.
 function relayClient(competition: PublicCompetition) {
   const { relay } = competition;
   if (relay === undefined) return null;
-  return ClientFactoryRelay(relayGameName(competition.id), InProgressRelay, relayStrategy(dryRunRelay(competition.id)), description,
+  return ClientFactoryRelay(`relay--${competition.id}`, InProgressRelay, relayStrategy(dryRunRelay(competition.id)), description,
     { durationMinutes: relay.durationMinutes }).ClientWithBot;
 }
 
@@ -26,7 +24,7 @@ function strategyClient(competition: PublicCompetition) {
   const { strategy } = competition;
   if (strategy === undefined) return null;
   const gameId = strategy.gameId as StrategyGameKey;
-  const game = { ...MyGameWrappers[gameId](), name: strategyGameName(competition.id) };
+  const game = { ...MyGameWrappers[gameId](), name: `strategy--${competition.id}` };
   return ClientFactory(game, MyBoardWrapper(gameId), StrategyWrappers[gameId](), strategyDescriptions[gameId],
     { durationMinutes: strategy.durationMinutes }).ClientWithBot;
 }

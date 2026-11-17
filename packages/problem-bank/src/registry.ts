@@ -75,3 +75,41 @@ export function assertValidRegistry(
     throw new Error(`The competition registry is invalid:\n${errors.map(error => `  - ${error}`).join('\n')}`);
   }
 }
+
+/// `competitions`, refusing a competition it hands out that breaks the rules
+/// or refers to a problem `problems` does not have or a strategy game not in
+/// `strategyGames`. The registry is checked whole at start; this is for a
+/// competition a source starts handing out after it.
+///
+/// `getCompetition` rejects an invalid competition. `listCompetitions` leaves
+/// it out and logs it, so one bad competition does not take the admin page's
+/// list, or a whole team import, down with it.
+export function validatingCompetitionSource(
+  competitions: CompetitionSource,
+  problems: ProblemSource,
+  strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
+): CompetitionSource {
+  const games = new Map(Object.entries(strategyGames));
+  async function validated(competition: CompetitionConfig): Promise<CompetitionConfig> {
+    const ids = competition.relay?.problems.map(({ problemId }) => problemId) ?? [];
+    const errors = validateCompetition(competition, { problems: await problems.getProblems(ids), strategyGames: games });
+    if (errors.length > 0) {
+      throw new Error(`The competition ${competition.id} is invalid:\n${errors.map(error => `  - ${error}`).join('\n')}`);
+    }
+    return competition;
+  }
+  return {
+    async getCompetition(id) {
+      const competition = await competitions.getCompetition(id);
+      return competition === undefined ? undefined : validated(competition);
+    },
+    async listCompetitions() {
+      const read = await Promise.allSettled((await competitions.listCompetitions()).map(validated));
+      return read.flatMap(result => {
+        if (result.status === 'fulfilled') return [result.value];
+        console.error(result.reason instanceof Error ? result.reason.message : result.reason);
+        return [];
+      });
+    },
+  };
+}

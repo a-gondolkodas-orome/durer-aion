@@ -8,6 +8,7 @@ import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 import { TEAM_COOKIE } from "./team_session";
 import { startTestDatabase } from "./test_database";
+import { registry } from "problem-bank/all";
 
 // The way back to a finished strategy match only ever shows it: it must not
 // take a team to a match still running, or away from a relay it is playing.
@@ -27,7 +28,7 @@ beforeAll(async () => {
   app.silent = true;
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
-  configureTeamsRouter(router, database.teams, [], requireAdmin("unused-here"));
+  configureTeamsRouter(router, database.teams, [], requireAdmin("unused-here"), registry);
   app.use(router.routes());
   const handle = app.callback();
   server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");

@@ -3,6 +3,9 @@
 // the games, bots or socket transport.
 import './env';
 import { argv, exit } from 'process';
+import { strategyGames } from 'game';
+import { validatingCompetitionSource } from 'problem-bank';
+import { registry } from 'problem-bank/all';
 import { getDb } from './server/db';
 import { import_teams_from_tsv_locally } from './server/team_import';
 
@@ -15,7 +18,11 @@ if (filename === undefined) {
 
 const { teams } = getDb();
 
-import_teams_from_tsv_locally(teams, filename).then(() => exit(0)).catch((e: unknown) => {
+// The same check as the server's (server.ts), so a team is imported only into
+// a competition the server would let it play.
+const competitions = validatingCompetitionSource(registry.competitionSource, registry.problemSource, strategyGames);
+
+import_teams_from_tsv_locally(teams, filename, competitions).then(() => exit(0)).catch((e: unknown) => {
   console.error('team import failed', e);
   exit(1);
 });

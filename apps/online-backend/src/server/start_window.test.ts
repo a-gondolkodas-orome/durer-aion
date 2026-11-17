@@ -1,5 +1,5 @@
 import type { CompetitionConfig } from "schemas";
-import { readStartWindowBody, teamStartWindow, withCompetitionWindows } from "./start_window";
+import { readStartWindowBody, teamStartWindow, withCompetitionWindow } from "./start_window";
 
 const competition = { startWindow: { opensAt: "2026-10-20T15:00:00+02:00" } };
 
@@ -15,21 +15,20 @@ describe("teamStartWindow", () => {
   });
 });
 
-describe("withCompetitionWindows", () => {
+describe("withCompetitionWindow", () => {
   const inCode = { id: "a", startWindow: { opensAt: "2026-10-20T15:00+02:00" } } as CompetitionConfig;
   const without = { id: "b" } as CompetitionConfig;
-  const competitions = new Map([["a", inCode], ["b", without]]);
   const set = { opensAt: "2026-10-21T15:00+02:00", closesAt: "2026-10-21T21:00+02:00" };
 
   it("puts a window set on the admin page in place of the config's, or of none", () => {
-    const result = withCompetitionWindows(competitions, new Map([["a", set], ["b", set]]));
-    expect(result.get("a")?.startWindow).toBe(set);
-    expect(result.get("b")?.startWindow).toBe(set);
+    const windows = new Map([["a", set], ["b", set]]);
+    expect(withCompetitionWindow(inCode, windows)?.startWindow).toBe(set);
+    expect(withCompetitionWindow(without, windows)?.startWindow).toBe(set);
   });
 
   it("leaves a competition with none set as its config has it", () => {
-    expect(withCompetitionWindows(competitions, new Map([["b", set]])).get("a")).toBe(inCode);
-    expect(withCompetitionWindows(competitions, new Map())).toBe(competitions);
+    expect(withCompetitionWindow(inCode, new Map([["b", set]]))).toBe(inCode);
+    expect(withCompetitionWindow(undefined, new Map([["a", set]]))).toBeUndefined();
   });
 });
 

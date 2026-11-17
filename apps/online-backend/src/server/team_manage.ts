@@ -3,9 +3,9 @@ import { nanoid } from "nanoid";
 import { getBotCredentials } from "./common";
 import { AnyBgioGame, PlayerIDType } from "game";
 import { LobbyAPI, Server, StorageAPI } from "boardgame.io";
-import { GameType, relayGameName, startWindowState, strategyGameName } from "schemas";
-import type { CompetitionConfig } from "schemas";
-import { registry } from "problem-bank/all";
+import { GameType, RELAY_GAME_NAME, startWindowState, strategyGameName } from "schemas";
+import type { CompetitionConfig, ProblemSource } from "schemas";
+import { relaySetup } from "../games";
 import { BOT_ID, fetch } from "../socketio_botmoves";
 import { TeamModel } from "./model";
 import { teamMatches, type TeamMatches } from "./match_status";
@@ -63,17 +63,19 @@ export const injectBot = async (
  *
  * @param {AnyBgioGame} game - Game object
  * @param {Server.AppCtx} ctx - Context of the Koa & BGio call
+ * @param setupData - The competition's settings the match is played by
  * @returns {LobbyAPI.CreatedMatch} - MatchID for the created game
  */
 export async function createGame(
   game: AnyBgioGame,
-  ctx: Server.AppCtx
+  ctx: Server.AppCtx,
+  setupData: unknown,
 ) {
   const matchID: string = nanoid(11);
   const match = createMatch({
     game,
     numPlayers: 2,
-    setupData: undefined,
+    setupData,
     // Kept out of boardgame.io's lobby listing as well as behind the closed
     // `/games` prefix (server/router.ts): the listing carries the metadata,
     // and the team's GUID, which the session cookie carries
@@ -123,24 +125,34 @@ export function allowedToViewStrategy(
     && matches.strategyMatch.state === "FINISHED";
 }
 
-/** The game of the team's competition the team asks to start. A competition
- *  without that match answers 403, as any start the team may not make does,
- *  and so does a start outside the team's start window. Only the start is checked: a match started in the window
- *  runs its full time, and add-minutes may carry it past `closesAt`. */
+/** The game of the team's competition the team asks to start, with what the
+ *  match is set up with: the competition's settings as they stand now. A
+ *  competition without that match answers 403, as any start the team may not
+ *  make does, and so does a start outside the team's start window. Only the
+ *  start is checked: a match started in the window runs its full time, and
+ *  add-minutes may carry it past `closesAt`. */
 export async function getNewGame(
   ctx: Server.AppCtx,
   games: AnyBgioGame[],
   gameType: GameType,
   team: TeamModel,
-  competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
+  competition: CompetitionConfig | undefined,
+  problems: ProblemSource,
   now: Date = new Date(),
 ) {
   if (!allowedToStart(team, await teamMatches(ctx.db, team), gameType)) {
     refuse(ctx, 403, "START_NOT_ALLOWED", "Team is not allowed to start game.");
   }
-  const competition = competitions.get(team.competitionId)
+  const { relay, strategy, languages } = competition
     ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", "Competition " + team.competitionId + " not found");
-  if ((gameType === "RELAY" ? competition.relay : competition.strategy) === undefined) {
+  // The setup is read only once the start is allowed.
+  const match = gameType === "RELAY"
+    ? relay && { gameName: RELAY_GAME_NAME, setup: () => relaySetup(relay, languages, problems) }
+    : strategy && {
+      gameName: strategyGameName(strategy.gameId),
+      setup: () => Promise.resolve({ durationMinutes: strategy.durationMinutes }),
+    };
+  if (match === undefined) {
     refuse(ctx, 403, "NO_SUCH_MATCH", "The team's competition has no such match.");
   }
   const state = startWindowState(teamStartWindow(team, competition), now);
@@ -148,11 +160,10 @@ export async function getNewGame(
     if (state === "closed") refuse(ctx, 403, "COMPETITION_OVER", "The competition is over.");
     refuse(ctx, 403, "COMPETITION_NOT_STARTED", "The competition has not started yet.");
   }
-  const gameName = gameType === "RELAY" ? relayGameName(competition.id) : strategyGameName(competition.id);
 
   const game: AnyBgioGame = games.find(
-    (g) => g.name === gameName
-  ) ?? refuse(ctx, 404, "GAME_NOT_FOUND", "Game " + gameName + " not found");
+    (g) => g.name === match.gameName
+  ) ?? refuse(ctx, 404, "GAME_NOT_FOUND", "Game " + match.gameName + " not found");
 
-  return { game, team };
+  return { game, team, setupData: await match.setup() };
 }

@@ -1,33 +1,42 @@
 import { MyGameWrappers as strategyGameWrappers, RelayWrapper, gameWrapper } from 'game';
-import type { StrategyGameKey } from 'game';
+import type { MyGameState, RelaySetupData, StrategyGameKey } from 'game';
 import { StrategyWrappers as StrategyStrategy } from 'game/bot';
-import type { Registry } from 'problem-bank';
+import type { State } from 'boardgame.io';
 import { judgeProblems, relayStrategy } from 'relay-bot';
-import { relayGameName, strategyGameName } from 'schemas';
+import { strategyGameName } from 'schemas';
+import type { Language, ProblemSource, RelayConfig } from 'schemas';
 import botWrapper from './botwrapper';
 
-/** Each game the server hosts, beside the bot that plays it: a relay and a
- *  strategy match per competition that has one, under the names the client
- *  connects by. One entry holds both, so a game cannot end up with another
- *  game's bot.
- *
- *  The relay's judge is built from the bank here, once, so a relay that names
- *  a missing problem fails the server's start rather than a team's match.
- *  `assertValidRegistry` has checked by then that every strategy game id is
- *  registered. */
-export function competitionGames({ competitions, problems }: Registry) {
-  return [...competitions.values()].flatMap(({ id, languages, relay, strategy }) => [
-    ...(relay === undefined ? [] : [{
-      game: { ...RelayWrapper(undefined, { durationMinutes: relay.durationMinutes }), name: relayGameName(id) },
-      bot: botWrapper(relayStrategy(judgeProblems(relay, languages, problems))),
-    }]),
-    ...(strategy === undefined ? [] : [{
-      game: {
-        ...gameWrapper(strategyGameWrappers[strategy.gameId as StrategyGameKey](), undefined,
-          { durationMinutes: strategy.durationMinutes }),
-        name: strategyGameName(id),
-      },
-      bot: botWrapper(StrategyStrategy[strategy.gameId as StrategyGameKey]()),
-    }]),
-  ]);
+/** The relay's judge, over the problems in its match's setup data. */
+function relayJudge(state: State<MyGameState>, botID: string, setupData: unknown) {
+  const judge = (setupData as Partial<RelaySetupData> | undefined)?.judge;
+  if (judge === undefined) {
+    throw new Error('This relay match has no problems in its setup data (started before #797).');
+  }
+  return relayStrategy(judge)(state, botID);
+}
+
+/** Each game the server hosts beside the bot that plays it, so a game cannot
+ *  end up with another game's bot. None belongs to a competition
+ *  (docs/ARCHITECTURE.md § *The two kinds of match*). */
+export function hostedGames() {
+  return [
+    { game: RelayWrapper(), bot: botWrapper(relayJudge) },
+    ...(Object.keys(strategyGameWrappers) as StrategyGameKey[]).map(gameId => ({
+      game: { ...gameWrapper(strategyGameWrappers[gameId]()), name: strategyGameName(gameId) },
+      bot: botWrapper(StrategyStrategy[gameId]()),
+    })),
+  ];
+}
+
+/** A relay match's setup: the duration, and the problems with their answers
+ *  and points, read from the source now. A problem the source does not have
+ *  fails the team's start. */
+export async function relaySetup(
+  relay: RelayConfig,
+  languages: readonly Language[],
+  problems: ProblemSource,
+): Promise<RelaySetupData> {
+  const found = await problems.getProblems(relay.problems.map(({ problemId }) => problemId));
+  return { durationMinutes: relay.durationMinutes, judge: judgeProblems(relay, languages, found) };
 }

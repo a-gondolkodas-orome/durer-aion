@@ -52,13 +52,15 @@ and from `HOME` back to a finished `STRATEGY` (step 7).
    `router.ts` and `team_manage.ts`:
    - `allowedToStart` — one attempt at each kind of match, never both at once,
      never from the disclaimer;
-   - `getNewGame` picks the game of the team's competition
-     (`relay--<id>` or `strategy--<id>`, hosted from the registry by
-     `games.ts`), and answers 403 for a match the competition does not have,
-     and for a start outside the team's start window. Only the start is held
+   - `getNewGame` reads the team's competition from its source, picks the
+     game it is played as (`relay`, or `strategy--<gameId>`), and builds the
+     match's setup data from the competition as it stands; it answers 403 for
+     a match the competition does not have, and for a start outside the
+     team's start window. Only the start is held
      to the window: a match started in it runs its full time, and add-minutes
      may carry it past the window's end;
-   - `createGame` creates an unlisted match under a fresh id;
+   - `createGame` creates an unlisted match under a fresh id, with that setup
+     data;
    - `injectPlayer` seats the team as `'0'`, named by its `teamId` and holding
      its `credentials`, and `injectBot` seats the bot as `'1'`;
    - `claimStart` writes the match id and the new `pageState` to the row, but
@@ -115,13 +117,34 @@ sequenceDiagram
     end
 ```
 
-The backend's `botwrapper.ts` turns a strategy function — `(state, botID) => [args, moveName]`
+The backend's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`
 — into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
 game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
-move land first. `competitionGames` (`games.ts`) lists each game beside its
+move land first. `hostedGames` (`games.ts`) lists each game beside its
 bot, and `server.ts` builds both the game list and the bots from it.
 
 ## The two kinds of match
+
+**One game per kind, not per competition.** The server hosts one relay game
+and one game per strategy game, never one per competition: boardgame.io takes
+its games when the server is constructed, so a game per competition would make
+a competition added later — from a database, say — unplayable until a
+restart. What a competition decides goes into the match's setup data when a
+team starts it: the duration, and for a relay its problems with their answers
+and points, read through `ProblemSource`. boardgame.io stores the setup
+data in the match's metadata, so a match keeps the settings it started with
+whatever happens to the competition later. The setup copies only the duration
+into the match's state. The relay's problems and answers stay in the metadata,
+where the server's judge reads them (`socketio_botmoves.ts` hands the bot the
+match's `setupData`): no client is sent the metadata, but every client is sent
+the match's *initial* state as stored, with no `playerView` applied, when its
+board connects.
+
+The backend reads competitions only through `CompetitionSource`, passed in by
+`server.ts`, the one module that picks where they come from; the registry is
+still validated whole at start, and a competition the source hands out is
+validated each time it is read (`validatingCompetitionSource`). An ESLint rule keeps every other backend module off
+`problem-bank/all`: only `server.ts` and the team import CLI pick the source.
 
 **A strategy match** is the game's own definition wrapped by `gameWrapper`
 (`gamewrapper.ts`), which owns the clock (30 minutes), the score and the phases:
@@ -143,8 +166,8 @@ It is not wrapped, and has its own clock (60 minutes). The team starts it, and
 the judge's `firstProblem` serves the first problem, with every problem's points.
 After that the turns alternate: the team's `submitAnswer`, then the judge's
 `nextTry`, `newProblem` or `endGame`. The judge — `relayStrategy` in
-`relay-bot`, holding the problem bank — decides which, and what a later try is
-worth.
+`relay-bot`, over the match's own problems — decides which, and what a later
+try is worth.
 
 ## A match's status and score
 

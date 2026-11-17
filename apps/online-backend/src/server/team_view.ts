@@ -2,7 +2,6 @@ import { TeamModel } from "./model";
 import { MatchStatus, publicCompetition } from "schemas";
 import type { CompetitionConfig, PublicCompetition, StartWindow } from "schemas";
 import { teamStartWindow } from "./start_window";
-import { registry } from "problem-bank/all";
 import type { TeamMatches } from "./match_status";
 
 /** What the playing client is served for its own team.
@@ -50,10 +49,9 @@ export interface PublicTeamView {
 export function publicTeamView(
   team: TeamModel,
   matches: TeamMatches,
-  competitions: ReadonlyMap<string, CompetitionConfig> = registry.competitions,
+  competition: CompetitionConfig | undefined,
   now: Date = new Date(),
 ): PublicTeamView {
-  const competition = competitions.get(team.competitionId);
   return {
     teamName: team.teamName,
     competition: competition === undefined ? null : publicCompetition(competition),

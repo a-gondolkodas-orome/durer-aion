@@ -242,6 +242,23 @@ export default defineConfig(
       'no-restricted-syntax': ['error', noDynamicBotImport],
     },
   },
+  // The backend reads competitions and problems only through the sources it is
+  // handed (#797), so a source other than the code can take their place. Only
+  // its composition roots pick the in-code registry: the server and the team
+  // import CLI. The suites may name it, and are out of these files. The block
+  // above leaves apps/online-backend out, so this one sets the core rule alone.
+  {
+    files: ['apps/online-backend/src/**/*.ts'],
+    ignores: ['apps/online-backend/src/server.ts', 'apps/online-backend/src/import_teams.ts', '**/*.test.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [{
+          name: 'problem-bank/all',
+          message: 'Read competitions and problems through the CompetitionSource and ProblemSource you are handed; only server.ts and import_teams.ts pick the in-code registry.',
+        }],
+      }],
+    },
+  },
   // Inside packages/game, the same boundary as import allowlists: only strategy-bots.ts
   // names a bot, so nothing the `game` and `game/client` entries reach can be one. In a
   // game folder the rules and the board import nothing from beside them but ./game and

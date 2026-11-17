@@ -8,6 +8,7 @@ import type { TeamModel } from "./model";
 import { requireAdmin } from "./admin_session";
 import { configureTeamsRouter } from "./router";
 import { JOIN_ATTEMPT_LIMIT, clientKey, rateLimit } from "./rate_limit";
+import { registry } from "problem-bank/all";
 
 type LimitedCtx = Parameters<ReturnType<typeof rateLimit>>[0];
 
@@ -193,7 +194,7 @@ describe("POST /team/join over HTTP", () => {
     // The 404s below are the point of the test, and koa logs every error.
     app.silent = true;
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, teams, [], requireAdmin("unused-here"));
+    configureTeamsRouter(router, teams, [], requireAdmin("unused-here"), registry);
     app.use(router.routes());
     const handle = app.callback();
     const server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");
