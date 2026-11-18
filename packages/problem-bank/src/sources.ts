@@ -76,6 +76,11 @@ export function combinedProblemSource(sources: readonly ProblemSource[]): Proble
 
 /// One `CompetitionSource` serving the competitions of all of `sources`, with
 /// an id two of them hold an error, as in `combinedProblemSource`.
+///
+/// `getCompetition` rejects such an id. `listCompetitions` leaves every copy
+/// of it out and logs it, as `validatingCompetitionSource` does an invalid
+/// competition, so one clash does not take the admin page's list, or a whole
+/// team import, down with it.
 export function combinedCompetitionSource(sources: readonly CompetitionSource[]): CompetitionSource {
   return {
     async getCompetition(id) {
@@ -86,12 +91,14 @@ export function combinedCompetitionSource(sources: readonly CompetitionSource[])
     },
     async listCompetitions() {
       const all = (await Promise.all(sources.map(source => source.listCompetitions()))).flat();
-      const ids = new Set<CompetitionId>();
+      const seen = new Set<CompetitionId>();
+      const twice = new Set<CompetitionId>();
       for (const { id } of all) {
-        if (ids.has(id)) throw new Error(`Two sources hold the competition ${id}`);
-        ids.add(id);
+        if (seen.has(id)) twice.add(id);
+        seen.add(id);
       }
-      return all;
+      for (const id of twice) console.error(`Two sources hold the competition ${id}`);
+      return all.filter(({ id }) => !twice.has(id));
     },
   };
 }

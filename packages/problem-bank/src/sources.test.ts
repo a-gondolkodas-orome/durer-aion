@@ -80,9 +80,13 @@ describe('combinedCompetitionSource', () => {
   });
 
   it('refuses a competition two sources hold, naming it', async () => {
-    const combined = combinedCompetitionSource([code, code]);
-    await expect(combined.getCompetition(competition.id)).rejects.toThrow(competition.id);
-    await expect(combined.listCompetitions()).rejects.toThrow(competition.id);
+    await expect(combinedCompetitionSource([code, code]).getCompetition(competition.id)).rejects.toThrow(competition.id);
+  });
+
+  it('lists the others and logs a competition two sources hold', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(await combinedCompetitionSource([code, database, code]).listCompetitions()).toEqual([other]);
+    expect(logged).toHaveBeenCalledWith(expect.stringContaining(competition.id));
   });
 });
 
