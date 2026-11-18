@@ -11,8 +11,10 @@
 // small hand-curated file of coinages and proper nouns).
 //
 // Usage: npm run spell-check:hu-triage
-// Needs the hunspell binary and its Hungarian dictionary:
-//   sudo apt install hunspell hunspell-hu
+// Needs the hunspell binary and its Hungarian dictionary. A fresh container,
+// such as a cloud agent session's, has no package lists yet, so the install
+// alone fails there; the update first is what makes it work:
+//   sudo apt-get update && sudo apt-get install -y hunspell hunspell-hu
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -23,7 +25,7 @@ const handFile = join(root, "cspell/hungarian-words.txt");
 
 const hunspellCheck = spawnSync("hunspell", ["-v"], { encoding: "utf-8" });
 if (hunspellCheck.error) {
-  console.error("hunspell not found - install it with: sudo apt install hunspell hunspell-hu");
+  console.error("hunspell not found - install it with: sudo apt-get update && sudo apt-get install -y hunspell hunspell-hu");
   process.exit(1);
 }
 
