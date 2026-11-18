@@ -394,7 +394,9 @@ Vocabulary the dictionaries lack lives in three places: technical identifiers in
 `@cspell/dict-hu-hu` misses in `cspell/hungarian-hunspell-words.txt`, which no one
 maintains by hand — `npm run spell-check:hu-triage` regenerates it from the same
 globs, validating every word against real hunspell (needs
-`apt install hunspell hunspell-hu`) and printing whatever hunspell rejects for a
+`sudo apt-get update && sudo apt-get install -y hunspell hunspell-hu`; the
+update is not optional in a fresh container, a cloud session's included, which
+has no package lists) and printing whatever hunspell rejects for a
 human to fix or bless.
 </details>
 
