@@ -55,7 +55,7 @@ export async function assertNoIdInCodeAndDatabase(registry: Registry): Promise<v
   ].map(({ id }) => id);
   const both = [...new Set(inDatabase.filter(id => inCode.has(id)))].sort();
   if (both.length > 0) {
-    throw new Error(`A kódban és az adatbázisban is szerepel: ${both.join(', ')}`);
+    throw new Error(`Ezek az azonosítók a kódban és az adatbázisban is szerepelnek: ${both.join(', ')}`);
   }
 }
 

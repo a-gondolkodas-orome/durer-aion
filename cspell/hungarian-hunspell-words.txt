@@ -33,6 +33,7 @@ alátámasztottuk
 átváltani
 átvizsgálni
 azonosítója
+azonosítók
 beállította
 becsomagolni
 bedobnunk
