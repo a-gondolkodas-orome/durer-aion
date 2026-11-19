@@ -23,8 +23,7 @@ function summary(result: TeamImportResultDto): string {
 /// competition, so one file can fill the C, D and E competitions of a round at
 /// once; the Versenyek tab says what to write for each. The export is every
 /// team with its join code and credentials, in the import's own format: the one
-/// download on the admin page that carries a login secret. Below them,
-/// competitions come in from a bundle, all or nothing.
+/// download on the admin page that carries a login secret.
 export function ImportExport(props: {
   teams: TeamModelDto[], onImported: () => void, onOpenCompetitions: () => void,
   onCompetitionsImported: () => void,

@@ -5,7 +5,6 @@ import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { GameType } from 'schemas';
-import { readBundle } from 'problem-bank';
 import { TransportAPI } from '../socketio_botmoves';
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { allowedToViewStrategy, getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
@@ -36,7 +35,7 @@ import type { ContentSources } from './database_sources';
  *   hangs on the routes instead of on the prefix they share.
  * @param sources - Where the competitions and the relays' problems are read
  *   from, per request, so a competition the source starts returning later is
- *   served without a restart; and which of them the code holds.
+ *   served without a restart.
  */
 export function configureTeamsRouter(
   router: Router<DefaultState, Server.AppCtx>,
@@ -310,10 +309,7 @@ export function configureTeamsRouter(
    * report either way, as the team import's is.
    */
   router.post("/team/admin/competitions/import", adminAuth, requireJson, koaBody(), async (ctx) => {
-    const read = readBundle(ctx.request.body);
-    ctx.body = 'errors' in read
-      ? { written: false, competitions: [], problems: [], errors: read.errors }
-      : await importBundle(teams, read.bundle, sources);
+    ctx.body = await importBundle(teams, ctx.request.body, sources);
   });
 
   /**

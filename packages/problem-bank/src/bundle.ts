@@ -1,5 +1,5 @@
 import type { CompetitionConfig, Problem, ProblemId, StrategyGameId, StrategyGameInfo } from 'schemas';
-import { competitionShapeErrors, problemShapeErrors, validateCompetition, validateProblem } from 'schemas';
+import { competitionShapeErrors, isRecord, problemShapeErrors, validateCompetition, validateProblem } from 'schemas';
 import type { CompetitionBank, ProblemBank } from './sources';
 
 // A bundle is how competitions and problems move between servers, and into
@@ -7,18 +7,14 @@ import type { CompetitionBank, ProblemBank } from './sources';
 // with a header that says what the file is. So a bundle and a bank file are
 // the same data, and either one can be made from the other.
 
-export const BUNDLE_FORMAT = 'durer-competitions';
-export const BUNDLE_VERSION = 1;
+const BUNDLE_FORMAT = 'durer-competitions';
+const BUNDLE_VERSION = 1;
 
 export interface Bundle {
   format: typeof BUNDLE_FORMAT;
   version: typeof BUNDLE_VERSION;
   competitions: CompetitionBank;
   problems: ProblemBank;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /// The bundle `value` is, or every way it is not one, as messages. Only its

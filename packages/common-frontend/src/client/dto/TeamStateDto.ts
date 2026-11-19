@@ -61,7 +61,7 @@ export interface CompetitionSummaryDto {
   /// page replaces.
   configStartWindow?: StartWindow | null;
   /// Where the competition is held: one in code changes only with a deploy.
-  storedIn?: 'code' | 'database';
+  storedIn: 'code' | 'database';
 }
 
 /// What `POST /team/admin/competitions/import` answers: every competition and

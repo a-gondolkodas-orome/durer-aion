@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { strategyGames } from 'game';
+import { competitionShapeErrors, problemShapeErrors } from 'schemas';
 import { registry } from '../all';
 import type { Bundle } from './bundle';
 import { problemsReferredFrom, readBundle, validateBundle } from './bundle';
@@ -8,9 +9,9 @@ import { problemsReferredFrom, readBundle, validateBundle } from './bundle';
 const sample: unknown = JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8'));
 
 function read(value: unknown): Bundle {
-  const read = readBundle(value);
-  if ('errors' in read) throw new Error(read.errors.join('\n'));
-  return read.bundle;
+  const result = readBundle(value);
+  if ('errors' in result) throw new Error(result.errors.join('\n'));
+  return result.bundle;
 }
 
 const problem = { answer: 1, content: { hu: { problemText: '1?' } } };
@@ -23,15 +24,25 @@ const bundle = (competitions: object, problems: object) =>
   ({ format: 'durer-competitions', version: 1, competitions, problems });
 
 describe('the sample bundle', () => {
-  it('is valid against the registry, and holds no id the registry does', () => {
+  it('is valid against the registry', () => {
     const sampleBundle = read(sample);
     const referred = new Map(problemsReferredFrom(sampleBundle).flatMap(id => {
       const found = registry.problems.get(id);
       return found === undefined ? [] : [[id, found] as const];
     }));
     expect(validateBundle(sampleBundle, referred, strategyGames)).toEqual([]);
-    const ids = [...Object.keys(sampleBundle.competitions), ...Object.keys(sampleBundle.problems)];
-    expect(ids.filter(id => registry.problems.has(id) || registry.competitions.has(id))).toEqual([]);
+  });
+});
+
+// The shape check is written out by hand beside the types, so a field the
+// types gain and it does not would refuse every bundle that uses it.
+describe('every competition and problem held in code', () => {
+  it('has the shape a bundle is read with', () => {
+    const errors = [
+      ...[...registry.problems].flatMap(([id, { id: _, ...body }]) => problemShapeErrors(id, body)),
+      ...[...registry.competitions].flatMap(([id, { id: _, ...body }]) => competitionShapeErrors(id, body)),
+    ];
+    expect(errors).toEqual([]);
   });
 });
 

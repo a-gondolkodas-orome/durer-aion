@@ -33,7 +33,7 @@ interface CompetitionRow {
   storedIn: string;
 }
 
-const STORED_IN: Record<NonNullable<CompetitionSummaryDto['storedIn']>, string> = {
+const STORED_IN: Record<CompetitionSummaryDto['storedIn'], string> = {
   code: 'kód',
   database: 'adatbázis',
 };
@@ -42,7 +42,7 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   CompetitionRow {
   const window = {
     startWindow, windowSet: JSON.stringify(startWindow) !== JSON.stringify(configStartWindow),
-    storedIn: storedIn === undefined ? '' : STORED_IN[storedIn],
+    storedIn: STORED_IN[storedIn],
   };
   if (metadata.kind === 'competition') {
     return {
