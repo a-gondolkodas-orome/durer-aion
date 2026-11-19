@@ -154,6 +154,18 @@ it("writes nothing of a bundle with an id the database holds, and names it", asy
   expect(await storedIds()).toEqual([id]);
 });
 
+it("reports a stored problem the bundle builds on that breaks the rules, rather than failing", async () => {
+  const stored = "ssssssssss--tarolt-hibas";
+  await ProblemModel.create({ id: stored, body: { answer: 1.5, content: { hu: { problemText: "?" } } }, createdBy: null });
+  const relay = { durationMinutes: 30, problems: [{ problemId: stored, points: 3 }] };
+  const report = await importBundle({ ...sample, competitions: { [FULL]: { ...sample.competitions[FULL], relay } } });
+  expect(report.errors).toEqual([
+    `${stored}: a csomag ezt a már tárolt feladatot használja, de a tárolt feladat hibás`,
+    `feladat ${stored}: a válasz (1.5) nem egész szám`,
+  ]);
+  expect(await storedIds()).toEqual([stored]);
+});
+
 it("names every id of a bundle imported twice, and leaves the first import as it was", async () => {
   expect((await importBundle(sample)).written).toBe(true);
   const report = await importBundle(sample);

@@ -16,6 +16,15 @@ import { CompetitionModel, ProblemModel } from './model';
 // The competitions and problems held in the database, beside the ones held in
 // code. The models are initialised by `TeamsRepository`, with the rest.
 
+/** A stored problem that breaks the rules, as `databaseProblemSource` finds
+ *  it on reading: its message names the problem and lists the validator's
+ *  findings. */
+export class InvalidStoredProblemError extends Error {
+  constructor(readonly problemId: string, readonly errors: string[]) {
+    super(`A feladat hibás: ${problemId}\n${errors.map(error => `  - ${error}`).join('\n')}`);
+  }
+}
+
 /** A `ProblemSource` over the Problems table. A problem that breaks the rules
  *  is an error, so the competition that uses it is refused as an invalid one
  *  is (`validatingCompetitionSource`). */
@@ -26,9 +35,7 @@ export function databaseProblemSource(): ProblemSource {
       return new Map(rows.map(({ id, body }) => {
         const problem: Problem = { ...body, id };
         const errors = validateProblem(problem);
-        if (errors.length > 0) {
-          throw new Error(`A feladat hibás: ${id}\n${errors.map(error => `  - ${error}`).join('\n')}`);
-        }
+        if (errors.length > 0) throw new InvalidStoredProblemError(id, errors);
         return [id, problem];
       }));
     },
@@ -118,7 +125,19 @@ export async function importBundle(
   if (inCode.length > 0) {
     return refused(inCode.sort().map(id => `${id}: ez az azonosító már szerepel a kódban`));
   }
-  const errors = validateBundle(bundle, await problemSource.getProblems(problemsReferredFrom(bundle)), strategyGames);
+  let referred: Map<string, Problem>;
+  try {
+    referred = await problemSource.getProblems(problemsReferredFrom(bundle));
+  } catch (error) {
+    // A relay of the bundle uses a stored problem that no longer keeps the
+    // rules: the bundle cannot be played as it is, which is the report's to say.
+    if (!(error instanceof InvalidStoredProblemError)) throw error;
+    return refused([
+      `${error.problemId}: a csomag ezt a már tárolt feladatot használja, de a tárolt feladat hibás`,
+      ...error.errors,
+    ]);
+  }
+  const errors = validateBundle(bundle, referred, strategyGames);
   if (errors.length > 0) return refused(errors);
 
   try {
