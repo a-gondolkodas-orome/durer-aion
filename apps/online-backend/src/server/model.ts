@@ -5,7 +5,8 @@ import {
   Model,
   ModelAttributes,
 } from "sequelize";
-import { PageState } from "schemas";
+import { ENTITY_ID_PATTERN } from "schemas";
+import type { CompetitionConfig, PageState, Problem } from "schemas";
 
 // Sequelize adds the timestamp columns itself, and only for names the attribute
 // list leaves free. Omitting them from the attribute types therefore keeps them
@@ -218,3 +219,65 @@ export const competitionWindowAttributes: ModelAttributes<
     defaultValue: null,
   },
 };
+
+/** The columns a competition and a problem are stored in alike: the id, and
+ *  the rest of the entity as JSON, which is validated as it is read rather than
+ *  constrained here (database_sources.ts). `createdBy` is the organiser who
+ *  wrote the row, for the admin page to tell (#573); null for a row written
+ *  without one. It is a column already because `sync()` creates a missing
+ *  table but never adds a column to an existing one (#663). */
+function entityAttributes<M extends Model>() {
+  return {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+      validate: { is: { args: ENTITY_ID_PATTERN, msg: "The id is malformed." } },
+    },
+    body: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+    },
+    createdBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
+  } satisfies ModelAttributes<M>;
+}
+
+/** A competition held in the database, beside the ones held in code: its
+ *  config without the id, as `CompetitionBank` holds one. */
+export class CompetitionModel extends Model<
+  InferAttributes<CompetitionModel, OmitTimestamps>,
+  InferCreationAttributes<CompetitionModel, OmitTimestamps>
+> {
+  declare id: string;
+  declare body: Omit<CompetitionConfig, "id">;
+  declare createdBy: string | null;
+
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+}
+
+export const competitionAttributes: ModelAttributes<
+  CompetitionModel,
+  InferAttributes<CompetitionModel, OmitTimestamps>
+> = entityAttributes<CompetitionModel>();
+
+/** A problem held in the database, as `CompetitionModel` holds a competition. */
+export class ProblemModel extends Model<
+  InferAttributes<ProblemModel, OmitTimestamps>,
+  InferCreationAttributes<ProblemModel, OmitTimestamps>
+> {
+  declare id: string;
+  declare body: Omit<Problem, "id">;
+  declare createdBy: string | null;
+
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
+}
+
+export const problemAttributes: ModelAttributes<
+  ProblemModel,
+  InferAttributes<ProblemModel, OmitTimestamps>
+> = entityAttributes<ProblemModel>();

@@ -141,8 +141,10 @@ the match's *initial* state as stored, with no `playerView` applied, when its
 board connects.
 
 The backend reads competitions only through `CompetitionSource`, passed in by
-`server.ts`, the one module that picks where they come from; the registry is
-still validated whole at start, and a competition the source hands out is
+`server.ts`, the one module that picks where they come from: the registry in
+code and the database's `Competitions` and `Problems` tables together
+(`database_sources.ts`). The registry is still validated whole at start, an id
+both hold stops the server there, and a competition the source hands out is
 validated each time it is read (`validatingCompetitionSource`). An ESLint rule keeps every other backend module off
 `problem-bank/all`: only `server.ts` and the team import CLI pick the source.
 

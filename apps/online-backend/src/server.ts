@@ -4,10 +4,11 @@ import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import { hostedGames } from './games';
 import { strategyGames } from 'game';
-import { assertValidRegistry, validatingCompetitionSource } from 'problem-bank';
+import { assertValidRegistry } from 'problem-bank';
 import { registry } from 'problem-bank/all';
 import { configureTeamsRouter } from './server/router';
 import { getDb } from './server/db';
+import { openContentSources } from './server/database_sources';
 import { getAdminCredentials, getBotCredentials } from './server/common';
 import { requireAdmin } from './server/admin_session';
 
@@ -60,12 +61,14 @@ server.app.context.durer_transport = socketio;
 // publish it: only nginx, which sets them, can.
 server.app.proxy = true;
 
-// The organisers' login travels with the admin routes rather than being
-// mounted on the prefix they share — server/admin_session.ts says why.
-// The one place that picks where competitions and problems are read from.
-configureTeamsRouter(server.router, teams, games, requireAdmin(getAdminCredentials()), {
-  competitionSource: validatingCompetitionSource(registry.competitionSource, registry.problemSource, strategyGames),
-  problemSource: registry.problemSource,
+// The one place that picks where competitions and problems are read from: the
+// code and the database together. An id both hold stops the server here.
+openContentSources(teams, registry).then(async (sources) => {
+  // The organisers' login travels with the admin routes rather than being
+  // mounted on the prefix they share — server/admin_session.ts says why.
+  configureTeamsRouter(server.router, teams, games, requireAdmin(getAdminCredentials()), sources);
+  await server.run(PORT);
+}).catch((e: unknown) => {
+  console.error('the server failed to start', e);
+  exit(1);
 });
-
-void server.run(PORT);

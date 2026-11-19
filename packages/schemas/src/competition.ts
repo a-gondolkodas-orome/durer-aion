@@ -3,6 +3,16 @@
 // may start. Category, round and the like are metadata, which the platform
 // shows and never acts on. Where competitions and problems are stored is the
 // sources' business (`CompetitionSource`, `ProblemSource`), not this model's.
+//
+// Their shape is stored, though: the database holds each competition and
+// problem as JSON of `CompetitionConfig` and `Problem` (`CompetitionModel`,
+// `ProblemModel`), and the compiler, which keeps the banks in code in step
+// with a change here, never sees those rows. So a change to these types that
+// an existing body would no longer satisfy — a field made required, renamed or
+// narrowed — ships with a rewrite of the stored bodies, or every one of them
+// written before it is refused as invalid when read. The schema has no
+// migrations to carry that (docs/DEPLOYMENT.md), so the release applies it by
+// hand.
 
 export const LANGUAGES = ['hu', 'en'] as const;
 export type Language = typeof LANGUAGES[number];
@@ -46,6 +56,8 @@ export interface ProblemContent {
 /// where the problem has it and another one where it does not, field by field:
 /// `localizeProblem` is that rule. So an image the same in both languages is
 /// given once.
+///
+/// Stored in the database too: see the top of this file before changing it.
 export interface Problem {
   id: ProblemId;
   /// An integer, and the same in every language.
@@ -197,6 +209,7 @@ export function namesCompetition(text: string, metadata: CompetitionMetadata): b
     && category.replace(/\s+/gu, ' ') === metadata.category.trim().toLowerCase();
 }
 
+/// Stored in the database too: see the top of this file before changing it.
 export interface CompetitionConfig {
   id: CompetitionId;
   /// One language is fixed; with both, the team chooses and can switch at any

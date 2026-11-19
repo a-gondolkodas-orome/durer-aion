@@ -1,5 +1,12 @@
 import type { CompetitionConfig, Problem } from 'schemas';
-import { fromBanks, inCodeCompetitionSource, inCodeProblemSource, resolveRelay } from './sources';
+import {
+  combinedCompetitionSource,
+  combinedProblemSource,
+  fromBanks,
+  inCodeCompetitionSource,
+  inCodeProblemSource,
+  resolveRelay,
+} from './sources';
 
 const problem = (id: string, answer: number): Problem => ({
   id, answer, content: { hu: { problemText: `${answer}?` } },
@@ -42,6 +49,44 @@ describe('inCodeCompetitionSource', () => {
     expect(await competitions.getCompetition(competition.id)).toBe(competition);
     expect(await competitions.getCompetition('zzzzzzzzzz--missing')).toBeUndefined();
     expect(await competitions.listCompetitions()).toEqual([competition]);
+  });
+});
+
+describe('combinedProblemSource', () => {
+  const firstOnly = inCodeProblemSource(new Map([[first.id, first]]));
+  const secondOnly = inCodeProblemSource(new Map([[second.id, second]]));
+
+  it('serves the problems of every source', async () => {
+    const found = await combinedProblemSource([firstOnly, secondOnly]).getProblems([first.id, second.id, 'zzzzzzzzzz--missing']);
+    expect(found).toEqual(new Map([[first.id, first], [second.id, second]]));
+  });
+
+  it('refuses a problem two sources hold, naming it', async () => {
+    await expect(combinedProblemSource([source, firstOnly]).getProblems([first.id])).rejects.toThrow(first.id);
+  });
+});
+
+describe('combinedCompetitionSource', () => {
+  const other: CompetitionConfig = { ...competition, id: 'dddddddddd--other' };
+  const code = inCodeCompetitionSource(new Map([[competition.id, competition]]));
+  const database = inCodeCompetitionSource(new Map([[other.id, other]]));
+
+  it('finds a competition in any source and lists them all', async () => {
+    const combined = combinedCompetitionSource([code, database]);
+    expect(await combined.getCompetition(competition.id)).toBe(competition);
+    expect(await combined.getCompetition(other.id)).toBe(other);
+    expect(await combined.getCompetition('zzzzzzzzzz--missing')).toBeUndefined();
+    expect(await combined.listCompetitions()).toEqual([competition, other]);
+  });
+
+  it('refuses a competition two sources hold, naming it', async () => {
+    await expect(combinedCompetitionSource([code, code]).getCompetition(competition.id)).rejects.toThrow(competition.id);
+  });
+
+  it('lists the others and logs a competition two sources hold', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(await combinedCompetitionSource([code, database, code]).listCompetitions()).toEqual([other]);
+    expect(logged).toHaveBeenCalledWith(expect.stringContaining(competition.id));
   });
 });
 
