@@ -42,7 +42,7 @@ and the database behind it.
 | --- | --- |
 | `http://localhost` | the competition site — team login, chooser, relay and strategy matches |
 | `http://localhost/admin` | the admin pages; basic auth, user `admin`, password `ADMIN_CREDENTIALS` from `.env.docker` |
-| `localhost:5432` | postgres, not a web page: a database client or `psql -h localhost -U postgres`, password `POSTGRESQL_PASSWORD` from `.env.docker` |
+| `localhost:5432` | postgres, not a web page: `npm run stack:psql` for a psql inside its container, with no password and nothing to install; or a database client or `psql -h localhost -U postgres`, password `POSTGRESQL_PASSWORD` from `.env.docker`. The tables' names are capitalised, so SQL quotes them: `select * from "Teams";` |
 
 `stack:up` returns once the containers are actually up and fails if they are
 not, and it runs in the background. `npm run stack:logs` follows all three
