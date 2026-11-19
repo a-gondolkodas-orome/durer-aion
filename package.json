@@ -34,6 +34,7 @@
     "stack:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml --env-file=.env.docker down",
     "stack:logs": "docker compose --env-file=.env.docker logs -f",
     "stack:ps": "docker compose --env-file=.env.docker ps",
+    "stack:psql": "docker compose --env-file=.env.docker exec postgres psql -U postgres",
     "stack:prod": "npx turbo build --filter=online-frontend && docker compose --env-file=.env.docker up --build --wait",
     "teams:import": "docker compose --env-file=.env.docker exec -T backend ./scripts/import_teams.sh scripts/test.tsv > scripts/test.tsv.export",
     "teams:import:local": "npx turbo build --filter=online-backend && node apps/online-backend/dist/import_teams.js scripts/test.tsv > scripts/test.tsv.export",
