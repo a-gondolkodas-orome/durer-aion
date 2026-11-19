@@ -82,8 +82,9 @@ const COMPETITION_C = 'mkhi1nnoim--20-online-c';
 beforeEach(() => {
   repo = new MockClientRepository();
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
-    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' } },
-    { id: 'u4lw7pcca1--20-online-d', metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' } },
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
+    { id: 'u4lw7pcca1--20-online-d', metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' },
+      storedIn: 'code' },
   ]);
   // The open tab is read from the URL, which jsdom keeps between tests.
   window.history.replaceState(null, '', '/admin');
@@ -293,7 +294,8 @@ test('the team dialog names the competition window a team\'s own replaces', asyn
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
     { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
-      startWindow: { opensAt: '2026-11-20T15:00+01:00', closesAt: '2026-11-20T21:30+01:00' }, configStartWindow: null },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00', closesAt: '2026-11-20T21:30+01:00' }, configStartWindow: null,
+      storedIn: 'code' },
   ]);
   vi.spyOn(repo, 'setStartWindow')
     .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
@@ -590,7 +592,8 @@ test('the competitions tab sets a competition\'s start window, and lists it as s
   expect(within(table).getAllByText('bármikor')).toHaveLength(2);
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
     { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
-      startWindow: { opensAt: '2026-11-20T15:00+01:00' }, configStartWindow: null },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00' }, configStartWindow: null,
+      storedIn: 'code' },
   ]);
   fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
   fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00+01:00' } });

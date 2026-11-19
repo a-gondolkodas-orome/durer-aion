@@ -135,7 +135,7 @@ it("writes nothing of a bundle with an id the code holds, and names it", async (
 
 it("names a bundle problem whose id the database holds as a competition for what each is", async () => {
   const id = Object.keys(sample.problems)[0];
-  await CompetitionModel.create({ id, body: sample.competitions[FULL] as never, createdBy: null });
+  await CompetitionModel.create({ id, body: sample.competitions[FULL], createdBy: null });
   const report = await importBundle(sample);
   expect(report.errors).toEqual([`feladat ${id}: ez az azonosító az adatbázisban már egy versenyé`]);
 });
