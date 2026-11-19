@@ -120,11 +120,24 @@ export async function importBundle(
   const competitionIds = Object.keys(bundle.competitions);
   const problemIds = Object.keys(bundle.problems);
   const refused = (errors: string[]) => ({ written: false, competitions: [], problems: [], errors });
+  // An id clash, as the validators word a finding: what of the bundle it is
+  // about first, then what already holds the id, which can be the other kind.
+  // `validateBundle` has not run yet, so an id the bundle gives both kinds is
+  // named as a competition.
+  const clashes = (holders: ReadonlyMap<string, 'competition' | 'problem'>, where: string) =>
+    [...[...competitionIds].sort(), ...[...problemIds].sort()].flatMap((id) => {
+      const holder = holders.get(id);
+      if (holder === undefined) return [];
+      const kind = id in bundle.competitions ? 'verseny' : 'feladat';
+      return [`${kind} ${id}: ez az azonosító ${where} már egy ${holder === 'competition' ? 'versenyé' : 'feladaté'}`];
+    });
 
-  const inCode = [...competitionIds, ...problemIds].filter(id => competitions.has(id) || problems.has(id));
-  if (inCode.length > 0) {
-    return refused(inCode.sort().map(id => `${id}: ez az azonosító már szerepel a kódban`));
-  }
+  const inCode = new Map([
+    ...[...problems.keys()].map(id => [id, 'problem'] as const),
+    ...[...competitions.keys()].map(id => [id, 'competition'] as const),
+  ]);
+  const inCodeClashes = clashes(inCode, 'a kódban');
+  if (inCodeClashes.length > 0) return refused(inCodeClashes);
   let referred: Map<string, Problem>;
   try {
     referred = await problemSource.getProblems(problemsReferredFrom(bundle));
@@ -133,7 +146,7 @@ export async function importBundle(
     // rules: the bundle cannot be played as it is, which is the report's to say.
     if (!(error instanceof InvalidStoredProblemError)) throw error;
     return refused([
-      `${error.problemId}: a csomag ezt a már tárolt feladatot használja, de a tárolt feladat hibás`,
+      `feladat ${error.problemId}: a csomag ezt a már tárolt feladatot használja, de a tárolt feladat hibás`,
       ...error.errors,
     ]);
   }
@@ -143,13 +156,14 @@ export async function importBundle(
   try {
     return await teams.sequelize.transaction(async (transaction) => {
       const ids = { [Op.in]: [...competitionIds, ...problemIds] };
-      const inDatabase = [
-        ...await CompetitionModel.findAll({ attributes: ['id'], where: { id: ids }, transaction }),
-        ...await ProblemModel.findAll({ attributes: ['id'], where: { id: ids }, transaction }),
-      ].map(({ id }) => id);
-      if (inDatabase.length > 0) {
-        return refused([...new Set(inDatabase)].sort().map(id => `${id}: ez az azonosító már szerepel az adatbázisban`));
-      }
+      const inDatabase = new Map([
+        ...(await ProblemModel.findAll({ attributes: ['id'], where: { id: ids }, transaction }))
+          .map(({ id }) => [id, 'problem'] as const),
+        ...(await CompetitionModel.findAll({ attributes: ['id'], where: { id: ids }, transaction }))
+          .map(({ id }) => [id, 'competition'] as const),
+      ]);
+      const inDatabaseClashes = clashes(inDatabase, 'az adatbázisban');
+      if (inDatabaseClashes.length > 0) return refused(inDatabaseClashes);
       const rows = <T>(bank: Record<string, T>) => Object.entries(bank).map(([id, body]) => ({ id, body, createdBy: null }));
       await ProblemModel.bulkCreate(rows(bundle.problems), { transaction });
       await CompetitionModel.bulkCreate(rows(bundle.competitions), { transaction });
@@ -159,6 +173,9 @@ export async function importBundle(
     // Another import wrote the id after the check above; the transaction was
     // rolled back by the throw.
     if (!(error instanceof UniqueConstraintError)) throw error;
-    return refused(error.errors.map(({ value }) => `${String(value)}: ez az azonosító közben bekerült az adatbázisba`));
+    return refused(error.errors.map(({ value }) => {
+      const id = String(value);
+      return `${id in bundle.competitions ? 'verseny' : 'feladat'} ${id}: ez az azonosító közben bekerült az adatbázisba`;
+    }));
   }
 }

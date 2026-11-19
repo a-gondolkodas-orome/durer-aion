@@ -665,13 +665,13 @@ test('the competition import lists why nothing went in', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   vi.spyOn(repo, 'importCompetitions').mockResolvedValue({
     written: false, competitions: [], problems: [],
-    errors: ['roow9oo75t--csomag-paros: ez az azonosító már szerepel az adatbázisban'],
+    errors: ['feladat roow9oo75t--csomag-paros: ez az azonosító az adatbázisban már egy feladaté'],
   });
   renderAdmin();
 
   await importBundleFile('{}');
 
-  expect(await screen.findByText('roow9oo75t--csomag-paros: ez az azonosító már szerepel az adatbázisban'))
+  expect(await screen.findByText('feladat roow9oo75t--csomag-paros: ez az azonosító az adatbázisban már egy feladaté'))
     .toBeInTheDocument();
   expect(screen.getByText('Semmi sem került be.')).toBeInTheDocument();
 });

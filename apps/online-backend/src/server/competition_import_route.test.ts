@@ -142,7 +142,7 @@ it("writes nothing of a bundle with an id the code holds, and names it", async (
   const report = await importBundle({
     ...sample, problems: { ...sample.problems, [inCode]: { answer: 1, content: { hu: { problemText: "?" } } } },
   });
-  expect(report.errors).toEqual([`${inCode}: ez az azonosító már szerepel a kódban`]);
+  expect(report.errors).toEqual([`feladat ${inCode}: ez az azonosító a kódban már egy feladaté`]);
   expect(await storedIds()).toEqual([]);
 });
 
@@ -150,8 +150,15 @@ it("writes nothing of a bundle with an id the database holds, and names it", asy
   const [id, problem] = Object.entries(sample.problems)[0];
   await ProblemModel.create({ id, body: problem as never, createdBy: null });
   const report = await importBundle(sample);
-  expect(report.errors).toEqual([`${id}: ez az azonosító már szerepel az adatbázisban`]);
+  expect(report.errors).toEqual([`feladat ${id}: ez az azonosító az adatbázisban már egy feladaté`]);
   expect(await storedIds()).toEqual([id]);
+});
+
+it("names a bundle problem whose id the database holds as a competition for what each is", async () => {
+  const [id, problem] = Object.entries(sample.problems)[0];
+  await CompetitionModel.create({ id, body: sample.competitions[FULL] as never, createdBy: null });
+  const report = await importBundle({ ...sample, problems: { ...sample.problems, [id]: problem } });
+  expect(report.errors).toEqual([`feladat ${id}: ez az azonosító az adatbázisban már egy versenyé`]);
 });
 
 it("reports a stored problem the bundle builds on that breaks the rules, rather than failing", async () => {
@@ -160,7 +167,7 @@ it("reports a stored problem the bundle builds on that breaks the rules, rather 
   const relay = { durationMinutes: 30, problems: [{ problemId: stored, points: 3 }] };
   const report = await importBundle({ ...sample, competitions: { [FULL]: { ...sample.competitions[FULL], relay } } });
   expect(report.errors).toEqual([
-    `${stored}: a csomag ezt a már tárolt feladatot használja, de a tárolt feladat hibás`,
+    `feladat ${stored}: a csomag ezt a már tárolt feladatot használja, de a tárolt feladat hibás`,
     `feladat ${stored}: a válasz (1.5) nem egész szám`,
   ]);
   expect(await storedIds()).toEqual([stored]);
@@ -169,7 +176,10 @@ it("reports a stored problem the bundle builds on that breaks the rules, rather 
 it("names every id of a bundle imported twice, and leaves the first import as it was", async () => {
   expect((await importBundle(sample)).written).toBe(true);
   const report = await importBundle(sample);
-  expect(report.errors).toEqual(sampleIds.map(id => `${id}: ez az azonosító már szerepel az adatbázisban`));
+  expect(report.errors).toEqual([
+    ...Object.keys(sample.competitions).sort().map(id => `verseny ${id}: ez az azonosító az adatbázisban már egy versenyé`),
+    ...Object.keys(sample.problems).sort().map(id => `feladat ${id}: ez az azonosító az adatbázisban már egy feladaté`),
+  ]);
   expect(await storedIds()).toEqual(sampleIds);
 });
 
