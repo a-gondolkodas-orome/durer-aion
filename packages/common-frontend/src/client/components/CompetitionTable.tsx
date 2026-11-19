@@ -30,11 +30,20 @@ interface CompetitionRow {
   startWindow: StartWindow | null;
   /// Whether the window is one set on the admin page, not the config's.
   windowSet: boolean;
+  storedIn: string;
 }
 
-function competitionRow({ id, metadata, startWindow = null, configStartWindow = null }: CompetitionSummaryDto):
+const STORED_IN: Record<NonNullable<CompetitionSummaryDto['storedIn']>, string> = {
+  code: 'kód',
+  database: 'adatbázis',
+};
+
+function competitionRow({ id, metadata, startWindow = null, configStartWindow = null, storedIn }: CompetitionSummaryDto):
   CompetitionRow {
-  const window = { startWindow, windowSet: JSON.stringify(startWindow) !== JSON.stringify(configStartWindow) };
+  const window = {
+    startWindow, windowSet: JSON.stringify(startWindow) !== JSON.stringify(configStartWindow),
+    storedIn: storedIn === undefined ? '' : STORED_IN[storedIn],
+  };
   if (metadata.kind === 'competition') {
     return {
       id, importAs: competitionName(metadata) ?? id, edition: metadata.edition,
@@ -113,6 +122,13 @@ export function CompetitionTable(props: {
           { field: 'category', headerName: 'Kategória', width: 90 },
           { field: 'label', headerName: 'Címke', width: 160 },
           { field: 'teams', headerName: 'Csapatok', width: 90, type: 'number' },
+          {
+            field: 'storedIn',
+            headerName: 'Tárolás',
+            description: 'A kódban tárolt verseny csak telepítéssel változik; az adatbázisbeli az Import/export fülön '
+              + 'került be.',
+            width: 100,
+          },
           {
             field: 'startWindow',
             headerName: 'Indítási ablak',

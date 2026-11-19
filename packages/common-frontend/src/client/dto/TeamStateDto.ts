@@ -60,6 +60,18 @@ export interface CompetitionSummaryDto {
   /// The one the competition's config gives, which a window set on the admin
   /// page replaces.
   configStartWindow?: StartWindow | null;
+  /// Where the competition is held: one in code changes only with a deploy.
+  storedIn?: 'code' | 'database';
+}
+
+/// What `POST /team/admin/competitions/import` answers: every competition and
+/// problem of the bundle written, or none, with `errors` saying why, one
+/// Hungarian line each.
+export interface BundleImportResultDto {
+  written: boolean;
+  competitions: string[];
+  problems: string[];
+  errors: string[];
 }
 
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some

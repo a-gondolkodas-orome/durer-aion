@@ -363,7 +363,8 @@ export function Admin(props: { teamId?: string }) {
       </Stack>
       <Stack {...panelProps('import-export', tab)}>
         <ImportExport teams={teams} onImported={() => { void mutate(); }}
-          onOpenCompetitions={() => { openTab('versenyek'); }}/>
+          onOpenCompetitions={() => { openTab('versenyek'); }}
+          onCompetitionsImported={() => { void refetchCompetitions(); }}/>
       </Stack>
       </>}
     </Stack>

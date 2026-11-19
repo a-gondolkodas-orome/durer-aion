@@ -1,0 +1,114 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { strategyGames } from 'game';
+import { registry } from '../all';
+import type { Bundle } from './bundle';
+import { problemsReferredFrom, readBundle, validateBundle } from './bundle';
+
+const sample: unknown = JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8'));
+
+function read(value: unknown): Bundle {
+  const read = readBundle(value);
+  if ('errors' in read) throw new Error(read.errors.join('\n'));
+  return read.bundle;
+}
+
+const problem = { answer: 1, content: { hu: { problemText: '1?' } } };
+const competition = {
+  languages: ['hu'],
+  relay: { durationMinutes: 60, problems: [{ problemId: 'aaaaaaaaaa--first', points: 3 }] },
+  metadata: { kind: 'other', label: { hu: 'Próba' } },
+};
+const bundle = (competitions: object, problems: object) =>
+  ({ format: 'durer-competitions', version: 1, competitions, problems });
+
+describe('the sample bundle', () => {
+  it('is valid against the registry, and holds no id the registry does', () => {
+    const sampleBundle = read(sample);
+    const referred = new Map(problemsReferredFrom(sampleBundle).flatMap(id => {
+      const found = registry.problems.get(id);
+      return found === undefined ? [] : [[id, found] as const];
+    }));
+    expect(validateBundle(sampleBundle, referred, strategyGames)).toEqual([]);
+    const ids = [...Object.keys(sampleBundle.competitions), ...Object.keys(sampleBundle.problems)];
+    expect(ids.filter(id => registry.problems.has(id) || registry.competitions.has(id))).toEqual([]);
+  });
+});
+
+describe('readBundle', () => {
+  it('reads a bundle of the right shape', () => {
+    const value = bundle({ 'bbbbbbbbbb--set': competition }, { 'aaaaaaaaaa--first': problem });
+    expect(readBundle(value)).toEqual({ bundle: value });
+  });
+
+  it.each([
+    [[], 'A fájl nem egy JSON objektum.'],
+    [{ ...bundle({}, {}), format: 'other' }, 'A fájl nem versenycsomag: a format mezője „durer-competitions” kell legyen.'],
+    [{ ...bundle({}, {}), version: 2 }, 'A versenycsomag 2. változatát nem ismerjük, csak a 1.-et.'],
+    [bundle({}, {}), 'A versenycsomag üres: nincs benne sem verseny, sem feladat.'],
+    [bundle([], {}), 'A competitions mező nem objektum.'],
+  ])('refuses %j', (value, message) => {
+    expect(readBundle(value)).toEqual({ errors: [message] });
+  });
+
+  it('names every field of the wrong shape, missing or unknown', () => {
+    const value = {
+      ...bundle(
+        {
+          'bbbbbbbbbb--set': {
+            ...competition,
+            languages: 'hu',
+            advancingPoint: 10,
+            relay: { durationMinutes: '60', problems: [{ problemId: 'aaaaaaaaaa--first' }] },
+            metadata: { kind: 'round' },
+          },
+        },
+        {
+          'aaaaaaaaaa--first': { content: { hu: { problemText: 1, imageUrl: null } } },
+          'cccccccccc--second': 'text',
+        },
+      ),
+      extra: true,
+    };
+    expect(readBundle(value)).toEqual({
+      errors: [
+        'Ismeretlen mező a versenycsomagban: extra',
+        'feladat aaaaaaaaaa--first: hiányzik az answer',
+        'feladat aaaaaaaaaa--first: a content.hu.problemText nem szöveg',
+        'feladat aaaaaaaaaa--first: a content.hu.imageUrl nem szöveg',
+        'feladat cccccccccc--second: nem objektum',
+        'verseny bbbbbbbbbb--set: a languages nem lista',
+        'verseny bbbbbbbbbb--set: a relay.durationMinutes nem szám',
+        'verseny bbbbbbbbbb--set: hiányzik a relay.problems[0].points',
+        'verseny bbbbbbbbbb--set: a metadata.kind „competition” vagy „other” kell legyen',
+        'verseny bbbbbbbbbb--set: ismeretlen mező: advancingPoint',
+      ],
+    });
+  });
+});
+
+describe('validateBundle', () => {
+  it('reports what breaks the rules, with problems the server has as references', () => {
+    const value = read(bundle(
+      {
+        'bbbbbbbbbb--set': {
+          ...competition,
+          relay: { durationMinutes: 60, problems: [
+            { problemId: 'aaaaaaaaaa--first', points: 3 },
+            { problemId: 'dddddddddd--held', points: 3 },
+            { problemId: 'eeeeeeeeee--missing', points: 3 },
+          ] },
+        },
+        'aaaaaaaaaa--first': competition,
+      },
+      { 'aaaaaaaaaa--first': { ...problem, answer: 1.5 } },
+    ));
+    expect(problemsReferredFrom(value)).toEqual(['dddddddddd--held', 'eeeeeeeeee--missing']);
+    const held = new Map([['dddddddddd--held', { ...problem, id: 'dddddddddd--held' }]]);
+    expect(validateBundle(value, held, strategyGames)).toEqual([
+      'feladat aaaaaaaaaa--first: a válasz (1.5) nem egész szám',
+      'verseny bbbbbbbbbb--set: a váltó 3. feladata (eeeeeeeeee--missing) nem létezik',
+      'aaaaaaaaaa--first egy feladat és egy verseny azonosítója is',
+    ]);
+  });
+});

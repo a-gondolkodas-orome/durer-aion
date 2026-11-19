@@ -7,6 +7,7 @@ import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { InfoTip } from './InfoTip';
+import { CompetitionImport } from './CompetitionImport';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 import { useErrorMessage } from '../utils/error-message';
 
@@ -22,9 +23,11 @@ function summary(result: TeamImportResultDto): string {
 /// competition, so one file can fill the C, D and E competitions of a round at
 /// once; the Versenyek tab says what to write for each. The export is every
 /// team with its join code and credentials, in the import's own format: the one
-/// download on the admin page that carries a login secret.
+/// download on the admin page that carries a login secret. Below them,
+/// competitions come in from a bundle, all or nothing.
 export function ImportExport(props: {
   teams: TeamModelDto[], onImported: () => void, onOpenCompetitions: () => void,
+  onCompetitionsImported: () => void,
 }) {
   const theme = useTheme();
   const importTeams = useImportTeams();
@@ -141,6 +144,7 @@ export function ImportExport(props: {
           </Stack>
         </Stack>
       </Stack>
+      <CompetitionImport onImported={props.onCompetitionsImported}/>
     </Stack>
   );
 }

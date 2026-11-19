@@ -555,7 +555,7 @@ test('the competitions tab lists the competitions newest first, with what to imp
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect([...grids.columns].reverse().find(columns => columns.some(column => column.field === 'importAs'))
     ?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'startWindow']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'storedIn', 'startWindow']);
   if (row === null) throw new Error('no table row');
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
@@ -636,6 +636,55 @@ test('the import tab lists the server\'s errors and warnings', async () => {
   // Nothing went in, so there is nothing to save.
   expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
   expect(saved).toEqual([]);
+});
+
+/** Picks a bundle file on the import tab and starts the competition import. */
+const importBundleFile = async (text: string) => {
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.change(screen.getByTestId('importCompetitionsFile'),
+    { target: { files: [new File([text], 'csomag.json')] } });
+  fireEvent.click(screen.getByRole('button', { name: 'Versenyek importálása' }));
+};
+
+test('the competition import sends the bundle, and lists the competitions anew once it is in', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const getCompetitions = vi.spyOn(repo, 'getCompetitions');
+  const importCompetitions = vi.spyOn(repo, 'importCompetitions').mockResolvedValue({
+    written: true, competitions: ['aqvco71pta--csomag-teljes'], problems: ['roow9oo75t--csomag-paros'], errors: [],
+  });
+  renderAdmin();
+
+  await importBundleFile('{"format":"durer-competitions"}');
+
+  expect(await screen.findByText('1 verseny és 1 feladat került be.')).toBeInTheDocument();
+  expect(importCompetitions).toHaveBeenCalledWith({ format: 'durer-competitions' });
+  await waitFor(() => { expect(getCompetitions).toHaveBeenCalledTimes(2); });
+});
+
+test('the competition import lists why nothing went in', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importCompetitions').mockResolvedValue({
+    written: false, competitions: [], problems: [],
+    errors: ['roow9oo75t--csomag-paros: ez az azonosító már szerepel az adatbázisban'],
+  });
+  renderAdmin();
+
+  await importBundleFile('{}');
+
+  expect(await screen.findByText('roow9oo75t--csomag-paros: ez az azonosító már szerepel az adatbázisban'))
+    .toBeInTheDocument();
+  expect(screen.getByText('Semmi sem került be.')).toBeInTheDocument();
+});
+
+test('the competition import says a file is not JSON without sending it', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importCompetitions = vi.spyOn(repo, 'importCompetitions');
+  renderAdmin();
+
+  await importBundleFile('{ nem json');
+
+  expect(await screen.findByText('A fájl nem érvényes JSON: csomag.json')).toBeInTheDocument();
+  expect(importCompetitions).not.toHaveBeenCalled();
 });
 
 // Re-running a grown registration list is how late teams are added, so a file

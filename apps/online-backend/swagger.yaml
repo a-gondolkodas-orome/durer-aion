@@ -263,6 +263,69 @@ paths:
                       - $ref: "#/components/schemas/StartWindow"
                       nullable: true
                       description: The one the competition's config gives, which a window set through the route below replaces.
+                    storedIn:
+                      type: string
+                      enum: [code, database]
+                      description: Where the competition is held. One in code is never written to the database.
+  /team/admin/competitions/import:
+    post:
+      summary: Write the competitions and problems of a bundle to the database, all of them or none
+      description: >
+        The body is a bundle: the two maps a problem bank file exports, with a
+        header naming the format. Nothing is written if any part of it breaks
+        the rules, or has an id the code or the database already holds. The
+        answer is a report either way, its messages in Hungarian.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format, version, competitions, problems]
+              properties:
+                format:
+                  type: string
+                  enum: [durer-competitions]
+                version:
+                  type: integer
+                  enum: [1]
+                competitions:
+                  type: object
+                  description: Competitions by id, as `CompetitionBank` types them
+                problems:
+                  type: object
+                  description: Problems by id, as `ProblemBank` types them
+      responses:
+        "200":
+          description: What was written, or why nothing was
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  written:
+                    type: boolean
+                  competitions:
+                    type: array
+                    items:
+                      type: string
+                    description: The ids of the competitions written
+                  problems:
+                    type: array
+                    items:
+                      type: string
+                    description: The ids of the problems written
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    description: Why nothing was written, one line per finding, each naming what it is about
+        "415":
+          description: The body is not JSON, or there is none
   /team/admin/competitions/{competitionId}/start-window:
     put:
       summary: Set a competition's start window in place of its config's, or return it to its config's

@@ -10,7 +10,7 @@ import { strategyGames } from "game";
 import type { MyGameState } from "game";
 import { createRegistry, validatingCompetitionSource } from "problem-bank";
 import { registry as allBanks } from "problem-bank/all";
-import type { CompetitionConfig, CompetitionSource, Problem, ProblemSource } from "schemas";
+import type { CompetitionConfig, CompetitionSource, Problem } from "schemas";
 import { hostedGames } from "../games";
 import { requireAdmin } from "./admin_session";
 import { openContentSources } from "./database_sources";
@@ -126,17 +126,16 @@ describe("a competition held in the database", () => {
   let server: http.Server;
   let port: number;
   let source: CompetitionSource;
-  let problems: ProblemSource;
 
   beforeEach(async () => {
     await writeRows();
-    ({ competitionSource: source, problemSource: problems } = await openContentSources(database.teams, inCode));
+    const sources = await openContentSources(database.teams, inCode);
+    source = sources.competitionSource;
     const app = new Koa<Koa.DefaultState, Server.AppCtx>();
     app.silent = true;
     app.context.db = database.db;
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
-    configureTeamsRouter(router, database.teams, hosted.map(({ game }) => game), requireAdmin("unused-here"),
-      { competitionSource: source, problemSource: problems });
+    configureTeamsRouter(router, database.teams, hosted.map(({ game }) => game), requireAdmin("unused-here"), sources);
     app.use(router.routes());
     const handle = app.callback();
     server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");

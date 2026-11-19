@@ -1,9 +1,15 @@
 import { strategyGames } from 'game';
-import type { Registry } from 'problem-bank';
-import { combinedCompetitionSource, combinedProblemSource, validatingCompetitionSource } from 'problem-bank';
+import type { Bundle, Registry } from 'problem-bank';
+import {
+  combinedCompetitionSource,
+  combinedProblemSource,
+  problemsReferredFrom,
+  validateBundle,
+  validatingCompetitionSource,
+} from 'problem-bank';
 import type { CompetitionSource, Problem, ProblemSource } from 'schemas';
 import { validateProblem } from 'schemas';
-import { Op } from 'sequelize';
+import { Op, UniqueConstraintError } from 'sequelize';
 import type { TeamsRepository } from './db';
 import { CompetitionModel, ProblemModel } from './model';
 
@@ -59,14 +65,15 @@ export async function assertNoIdInCodeAndDatabase(registry: Registry): Promise<v
   }
 }
 
+/** Where the backend reads competitions and problems from, and which of them
+ *  are held in code: an id there is never written to the database. */
+export type ContentSources = Pick<Registry, 'competitionSource' | 'problemSource' | 'competitions' | 'problems'>;
+
 /** The sources the backend reads competitions and problems through: the
  *  registry's and the database's together, the competitions validated as they
  *  are read. Creates the tables if they are missing, and refuses an id both
  *  hold, so a composition root calls this before serving anything. */
-export async function openContentSources(teams: TeamsRepository, registry: Registry): Promise<{
-  competitionSource: CompetitionSource;
-  problemSource: ProblemSource;
-}> {
+export async function openContentSources(teams: TeamsRepository, registry: Registry): Promise<ContentSources> {
   await teams.connect();
   await assertNoIdInCodeAndDatabase(registry);
   const problemSource = combinedProblemSource([registry.problemSource, databaseProblemSource()]);
@@ -75,5 +82,64 @@ export async function openContentSources(teams: TeamsRepository, registry: Regis
     problemSource,
     strategyGames,
   );
-  return { competitionSource, problemSource };
+  return { competitionSource, problemSource, competitions: registry.competitions, problems: registry.problems };
+}
+
+/** What a bundle import did: every competition and problem written, or none
+ *  and the reasons, one Hungarian line each, naming what it is about. */
+export interface BundleImportReport {
+  written: boolean;
+  competitions: string[];
+  problems: string[];
+  errors: string[];
+}
+
+/** Writes every competition and problem of `bundle` to the database, or, if
+ *  any of them breaks the rules or has an id the code or the database already
+ *  holds, none of them.
+ *
+ *  The validation reads the problems the bundle builds on before the write's
+ *  transaction opens, since a read outside it would wait for the connection
+ *  the transaction holds where the pool has one (test_database.ts). The ids
+ *  are checked inside it, and an id another import writes after that check is
+ *  refused by the primary key. A problem and a competition two imports give
+ *  the same new id at the same moment are not, which only two organisers
+ *  importing at once with a hand-made clash would reach. */
+export async function importBundle(
+  teams: TeamsRepository,
+  bundle: Bundle,
+  { problemSource, competitions, problems }: ContentSources,
+): Promise<BundleImportReport> {
+  const competitionIds = Object.keys(bundle.competitions);
+  const problemIds = Object.keys(bundle.problems);
+  const refused = (errors: string[]) => ({ written: false, competitions: [], problems: [], errors });
+
+  const inCode = [...competitionIds, ...problemIds].filter(id => competitions.has(id) || problems.has(id));
+  if (inCode.length > 0) {
+    return refused(inCode.sort().map(id => `${id}: ez az azonosító már szerepel a kódban`));
+  }
+  const errors = validateBundle(bundle, await problemSource.getProblems(problemsReferredFrom(bundle)), strategyGames);
+  if (errors.length > 0) return refused(errors);
+
+  try {
+    return await teams.sequelize.transaction(async (transaction) => {
+      const ids = { [Op.in]: [...competitionIds, ...problemIds] };
+      const inDatabase = [
+        ...await CompetitionModel.findAll({ attributes: ['id'], where: { id: ids }, transaction }),
+        ...await ProblemModel.findAll({ attributes: ['id'], where: { id: ids }, transaction }),
+      ].map(({ id }) => id);
+      if (inDatabase.length > 0) {
+        return refused([...new Set(inDatabase)].sort().map(id => `${id}: ez az azonosító már szerepel az adatbázisban`));
+      }
+      const rows = <T>(bank: Record<string, T>) => Object.entries(bank).map(([id, body]) => ({ id, body, createdBy: null }));
+      await ProblemModel.bulkCreate(rows(bundle.problems), { transaction });
+      await CompetitionModel.bulkCreate(rows(bundle.competitions), { transaction });
+      return { written: true, competitions: competitionIds, problems: problemIds, errors: [] };
+    });
+  } catch (error) {
+    // Another import wrote the id after the check above; the transaction was
+    // rolled back by the throw.
+    if (!(error instanceof UniqueConstraintError)) throw error;
+    return refused(error.errors.map(({ value }) => `${String(value)}: ez az azonosító közben bekerült az adatbázisba`));
+  }
 }

@@ -501,6 +501,14 @@ Competitions and their problems live in code, one bank per file under
 at start. What follows is the code's way; `edition-20-online.ts` is the one to
 copy for a round of the Dürer, `reference.ts` for anything else.
 
+The database's way is a bundle, imported on the admin page's Import/export tab:
+a JSON file with the two maps a bank file exports, under a header,
+`{ "format": "durer-competitions", "version": 1, "competitions": …, "problems": … }`.
+Its relays may use problems the server already holds. The import writes all
+of it or none of it: an invalid competition or problem, or an id the code or
+the database already holds, writes nothing and is listed. `sample-bundle.json`
+(`packages/problem-bank/fixtures`) is one to try, on the reference games.
+
 1. **Ids.** `npm run new-id -- <slug>` prints one for each slug: ten random
    characters, `--`, then the slug, such as `mkhi1nnoim--20-online-c`. An id
    never changes once something refers to it, slug included, and a problem
