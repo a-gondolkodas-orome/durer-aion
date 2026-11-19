@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 import '../../common/i18n';
 import i18next from 'i18next';
 import { ThemeProvider } from '@mui/material/styles';
-import { ClientRepoProvider } from '../client-repo-context';
+import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { forgetTeamState } from '../hooks/team-state-store';
 import { mockTeamState } from '../hooks/mock-user-hooks';
@@ -18,6 +18,11 @@ import { Main } from './Main';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   tomorrow: {},
+}));
+
+// The real admin page renders a data grid jsdom cannot lay out.
+vi.mock('./Admin', () => ({
+  Admin: () => <div data-testid="adminRoot" />,
 }));
 
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
@@ -93,4 +98,22 @@ test('a team/me that never reached the server says so', async () => {
   await teamMe.fail(new I18nError('error.noConnection'));
 
   expect(await findByText(i18next.t('error.noConnection'))).toBeInTheDocument();
+});
+
+// An organiser who took a while over the basic-auth prompt got a timed-out
+// team/me, and a snackbar saying so that stayed until a reload.
+test('the admin page does not ask team/me', () => {
+  window.history.replaceState({}, '', '/admin');
+  onTestFinished(() => { window.history.replaceState({}, '', '/'); });
+  const teamMe = vi.spyOn(repo, 'getTeamState');
+  const { getByTestId } = render(
+    <ThemeProvider theme={outerTheme}>
+      <ClientRepoProvider value={repo}>
+        <AdminRepoProvider value={repo}><Main gitCommitHash="test"/></AdminRepoProvider>
+      </ClientRepoProvider>
+    </ThemeProvider>
+  );
+
+  expect(getByTestId('adminRoot')).toBeInTheDocument();
+  expect(teamMe).not.toHaveBeenCalled();
 });

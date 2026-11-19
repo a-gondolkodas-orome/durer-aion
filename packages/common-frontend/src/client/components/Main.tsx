@@ -53,9 +53,11 @@ export function Main(props: { gitCommitHash: string }) {
 
   return (
     <Layout>
-      <LoadTeamState />
-      <Header teamName={teamState?.teamName ?? null} heading={heading}
-        compact={teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY"} maxWidth={maxWidth}
+      {/* The admin pages are no team's: asking `team/me` there only costs a
+          request, and its error if the basic-auth prompt outlasts the timeout */}
+      {!admin && <LoadTeamState />}
+      <Header teamName={admin ? null : teamState?.teamName ?? null} heading={heading}
+        compact={!admin && (teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY")} maxWidth={maxWidth}
         languageSwitcher={languages !== undefined && languages.length > 1} onChooseLanguage={chooseLanguage}/>
       {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
           breakpoint, 1280px, at that width and up, overriding the sx below */}
