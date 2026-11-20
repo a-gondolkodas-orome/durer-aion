@@ -72,10 +72,24 @@ export function bundleOf(
   };
 }
 
+/// The ids of `bundle`'s competitions and problems that `held` holds just as
+/// the bundle has them: an exported bundle carries in-code ones, and those
+/// need no writing.
+export function heldAlike(
+  bundle: Bundle,
+  held: { competitions: ReadonlyMap<string, object>, problems: ReadonlyMap<string, object> },
+): Set<string> {
+  const alike = (bodies: Record<string, object>, holder: ReadonlyMap<string, object>) =>
+    Object.entries(bodies).flatMap(([id, body]) => {
+      const inCode = holder.get(id);
+      return inCode !== undefined && sameBody(body, inCode) ? [id] : [];
+    });
+  return new Set([...alike(bundle.competitions, held.competitions), ...alike(bundle.problems, held.problems)]);
+}
+
 /// Whether two competitions, or two problems, say the same, whatever order
-/// their fields were written in and whichever carries its id: an exported
-/// bundle carries in-code ones, and one the code holds as it is needs no writing.
-export function sameBody(a: object, b: object): boolean {
+/// their fields were written in and whichever carries its id.
+function sameBody(a: object, b: object): boolean {
   // JSON leaves out a field set to undefined, which an id then is.
   return canonical({ ...a, id: undefined }) === canonical({ ...b, id: undefined });
 }

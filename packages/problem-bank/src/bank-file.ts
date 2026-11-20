@@ -1,7 +1,7 @@
 import type { CompetitionConfig, CompetitionId, Problem, ProblemId } from 'schemas';
 import { competitionName } from 'schemas';
 import type { Bundle } from './bundle';
-import { sameBody } from './bundle';
+import { heldAlike } from './bundle';
 import type { Bank } from './registry';
 
 // A bundle made into a file under banks/: how a competition held in the
@@ -17,15 +17,14 @@ export function bankFromBundle(
   bundle: Bundle,
   registry: { problems: ReadonlyMap<ProblemId, Problem>, competitions: ReadonlyMap<CompetitionId, CompetitionConfig> },
 ): { bank: Bank, leftOut: string[] } | { errors: string[] } {
+  const alike = heldAlike(bundle, registry);
+  const leftOut = [...alike];
   const errors: string[] = [];
-  const leftOut: string[] = [];
   const notHeld = <T extends object>(kind: string, bodies: Record<string, T>, held: ReadonlyMap<string, object>) => {
     const kept: Record<string, T> = {};
     for (const [id, body] of Object.entries(bodies)) {
-      const inCode = held.get(id);
-      if (inCode === undefined) kept[id] = body;
-      else if (sameBody(body, inCode)) leftOut.push(id);
-      else errors.push(`The ${kind} ${id} is in code already, and differs from the bundle's`);
+      if (!held.has(id)) kept[id] = body;
+      else if (!alike.has(id)) errors.push(`The ${kind} ${id} is in code already, and differs from the bundle's`);
     }
     return kept;
   };

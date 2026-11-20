@@ -210,6 +210,13 @@ describe("the export", () => {
     const bundle = await (await exported("")).json() as Bundle;
     expect(Object.keys(bundle.competitions).sort())
       .toEqual([...registry.competitions.keys(), ...Object.keys(sample.competitions)].sort());
+
+    // What the code holds as the bundle does is not written, so it imports again.
+    await database.reset();
+    expect(await importBundle(bundle)).toEqual({
+      written: true, competitions: Object.keys(sample.competitions), problems: Object.keys(sample.problems), errors: [],
+    });
+    expect(await storedIds()).toEqual(sampleIds);
   });
 
   it("refuses an id no competition has, naming it", async () => {

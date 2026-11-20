@@ -332,8 +332,8 @@ paths:
       description: >
         The competitions with every problem their relays use, those held in
         code included, so that the bundle imports on a server that holds none
-        of them. The import does not write a problem the code holds as the
-        bundle has it.
+        of them. The import does not write a competition or problem the code
+        holds as the bundle has it.
       security:
       - basicAdminAuth: []
       tags:

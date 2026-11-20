@@ -540,9 +540,9 @@ first.
 **Moving one between servers.** Tick it in the **Versenyek** tab's table and
 export it: the bundle saved is JSON, a bank file's two maps under a header, with
 every problem its relays use, those held in code too, so it stands alone. The
-other server's **Import/export** tab writes all of it or none: a problem its
-code holds in the same form is not written, and any other id it already has
-refuses the bundle. An in-code competition exports too.
+other server's **Import/export** tab writes all of it or none: a competition or
+problem its code holds in the same form is not written, and any other id it
+already has refuses the bundle. An in-code competition exports too.
 
 **From a finished round to a practice set:**
 

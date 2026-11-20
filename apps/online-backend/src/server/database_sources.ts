@@ -4,10 +4,10 @@ import {
   bundleOf,
   combinedCompetitionSource,
   combinedProblemSource,
+  heldAlike,
   problemsReferredFrom,
   readBundle,
   relayProblemIds,
-  sameBody,
   validateBundle,
   validatingCompetitionSource,
 } from 'problem-bank';
@@ -107,9 +107,9 @@ export interface BundleImportReport {
 
 /** Writes every competition and problem of the bundle `value` is to the
  *  database, or, if it is no bundle, or any of it breaks the rules or has an
- *  id the code or the database already holds, none of them. A problem the
- *  code holds as the bundle has it is no clash, and is not written: an
- *  exported bundle carries the in-code problems its relays use.
+ *  id the code or the database already holds, none of them. A competition or
+ *  problem the code holds as the bundle has it is no clash, and is not
+ *  written (`heldAlike`).
  *
  *  The problems the bundle builds on are read before the write's transaction
  *  opens: a read outside it would wait for the connection the transaction
@@ -123,11 +123,8 @@ export async function importBundle(
   const read = readBundle(value);
   if ('errors' in read) return refused(read.errors);
   const { bundle } = read;
-  const competitionIds = Object.keys(bundle.competitions);
-  const inCodeAlike = new Set(Object.entries(bundle.problems).flatMap(([id, body]) => {
-    const held = problems.get(id);
-    return held !== undefined && sameBody(body, held) ? [id] : [];
-  }));
+  const inCodeAlike = heldAlike(bundle, { competitions, problems });
+  const competitionIds = Object.keys(bundle.competitions).filter(id => !inCodeAlike.has(id));
   const problemIds = Object.keys(bundle.problems).filter(id => !inCodeAlike.has(id));
   const sortedIds = [...[...competitionIds].sort(), ...[...problemIds].sort()];
   // What of the bundle the id is first, then what already holds it.
