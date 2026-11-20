@@ -9,8 +9,9 @@ type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
-  const selected = active ? G.selectedPile : null;
-  const most = selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
+  // The bot's choice shows too, between the two moves of its turn.
+  const selected = ctx.phase === PHASE.play ? G.selectedPile : null;
+  const most = !active || selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
 
   return (
     <Stack spacing={2} sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>
@@ -24,7 +25,12 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
             aria-label={`${pile + 1}. kupac: ${size} korong${justTaken > 0 ? `, a gép az imént ennyit vett el belőle: ${justTaken}` : ''}`}
             aria-pressed={selected === pile}
             onClick={() => moves.selectPile(pile)}
-            sx={{ justifyContent: 'flex-start', gap: 1, minHeight: 56, flexWrap: 'wrap', textTransform: 'none' }}
+            sx={{
+              justifyContent: 'flex-start', gap: 1, minHeight: 56, flexWrap: 'wrap', textTransform: 'none',
+              // On the bot's turn every pile is disabled, and MUI greys a
+              // disabled button: its chosen pile keeps the colour of a choice.
+              ...(selected === pile && { '&.Mui-disabled': { color: 'primary.contrastText', backgroundColor: 'primary.main' } }),
+            }}
           >
             <Box component="span" sx={{ fontWeight: 'bold', minWidth: '2.5em' }}>{size}</Box>
             <Box component="span" aria-hidden sx={{ letterSpacing: 2 }}>

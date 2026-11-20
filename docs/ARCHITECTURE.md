@@ -109,18 +109,29 @@ sequenceDiagram
     Note over T: second listener — stops here for getTime
     T->>Q: second listener
     Q->>S: re-read the match
-    alt bot's turn, in startNewGame or play
-        Q->>Bot: play(state), after 400 ms
-        Bot-->>Q: move
-        Q->>S: Master.onUpdate with the bot's credentials
+    loop while it is the bot's turn, in startNewGame or play
+        Q->>Bot: planTurn(state), unless moves are left of its plan
+        Bot-->>Q: its moves, in order
+        Q->>S: Master.onUpdate with the bot's credentials, for the next move
         Q-->>B: push the new state
     end
+    Note over B: shows each of the bot's moves 400 ms after the state before it
 ```
 
-The game package's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`
-— into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
-game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
-move land first. `hostedGames` (`games.ts`) lists each game beside its
+The game package's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`,
+or a list of those for a turn of several moves — into a boardgame.io `Bot`.
+`args` of `undefined` means a random move from the game's `possibleMoves`. The
+server plays the bot's whole turn at once, each move as its own update, asking
+the strategy again while the turn is still the bot's, and plays a random move
+for one the game refuses. boardgame.io's `Local` in the dry run asks the bot for
+one move at a time, and the bot keeps the rest of its plan between asks.
+
+Nothing on the server pauses. The client does: `pace-bot-moves.ts` in
+`common-frontend` wraps every bot-backed transport and holds each of the bot's
+moves until 400 ms after the state before it was shown, so the team sees its
+own move land, then each of the bot's in turn. A reload in the middle loses no
+move, only that view of them: the sync answers with the stored state, which has
+them all. `hostedGames` (`games.ts`) lists each game beside its
 bot, and `server.ts` builds both the game list and the bots from it.
 
 ## The two kinds of match

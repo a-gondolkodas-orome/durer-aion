@@ -1,4 +1,5 @@
 import { Local } from 'boardgame.io/multiplayer';
+import { pacer } from './pace-bot-moves';
 
 // boardgame.io does not export the transport types its own `Local` is written
 // against, so name them off what it does export, rather than off its build
@@ -37,15 +38,18 @@ type TransportData = Parameters<TransportOpts['transportDataCallback']>[0];
 /// the page's lifetime, and reads localStorage only when it creates it. A match
 /// remounted with the same game object comes back from memory even after its
 /// `bgio` keys are removed; only a reload or a new game object starts afresh.
+///
+/// The board sees the bot's moves at a pace a team can follow (`pacer`).
 export function localWithBots({ bots, storageKey }: Pick<LocalOpts, 'bots' | 'storageKey'>) {
   const makeTransport = Local({ bots, persist: true, storageKey });
   return (transportOpts: TransportOpts) => {
+    const show = pacer(transportOpts.transportDataCallback);
     const transport = makeTransport({
       ...transportOpts,
       // Only reached from `connect()`, which the client calls after this
       // factory has returned, so `transport` is assigned by then.
       transportDataCallback: (data: TransportData) => {
-        transportOpts.transportDataCallback(data);
+        show(data);
         if (data.type === 'sync') {
           const [matchID, { state }] = data.args;
           transport.master.subscribeCallback({ state, matchID });

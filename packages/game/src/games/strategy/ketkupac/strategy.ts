@@ -5,7 +5,9 @@ import { maxTake, possibleMoves, startingPosition } from './game';
 import type { MyGameState } from './game';
 
 type GameState = State<MyGameState & GameStateMixin>;
-type StrategyResult = [[number, number] | [MyGameState], string];
+type StrategyMove = [[number] | [number, number] | [MyGameState], string];
+/// One move, or the turn as the moves it is made of.
+type StrategyResult = StrategyMove | StrategyMove[];
 
 const memo = new Map<string, boolean>();
 
@@ -31,11 +33,19 @@ function pick<T>(choices: readonly T[]): T {
   return choices[Math.floor(Math.random() * choices.length)];
 }
 
+/// A take as the turn a team plays: choosing the pile, then taking from it, so
+/// the team sees which pile the bot chose before it takes. A pile chosen
+/// already — a turn picked up halfway, after a restart or a reload — is taken
+/// from straight away.
+export function asTurn(G: MyGameState, [pile, count]: [number, number]): StrategyResult {
+  const take: StrategyMove = [[pile, count], 'take'];
+  return G.selectedPile === pile ? take : [[[pile], 'selectPile'], take];
+}
+
 export function randomStrategy(state: GameState): StrategyResult {
   const moves = possibleMoves(state.G, state.ctx);
   if (moves.length === 0) throw new Error('No legal move in ketkupac');
-  const { move, args } = pick(moves);
-  return [args, move];
+  return asTurn(state.G, pick(moves).args);
 }
 
 /// A winning take if there is one, else any: a losing position has no better
@@ -49,8 +59,7 @@ export function winningStrategy(state: GameState): StrategyResult {
     return next.every(size => size === 0) || !wins(next, theirs, mine);
   });
   if (winning.length === 0) return randomStrategy(state);
-  const { move, args } = pick(winning);
-  return [args, move];
+  return asTurn(G, pick(winning).args);
 }
 
 export function strategyWrapper() {

@@ -78,7 +78,8 @@ describe('the two-pile game\'s bot', () => {
     state.G.difficulty = 'live';
     for (const piles of [[3, 6], [2, 5], [4, 4], [1, 7]]) {
       state.G.piles = piles;
-      const [[pile, count], name] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string];
+      const [select, [[pile, count], name]] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string][];
+      expect(select).toStrictEqual([[pile], 'selectPile']);
       expect(name).toBe('take');
       expect(isLegalTake(state.G, state.ctx, pile, count)).toBe(true);
       const next = piles.map((size, i) => i === pile ? size - count : size);
@@ -88,6 +89,28 @@ describe('the two-pile game\'s bot', () => {
       });
       if (winnable) expect(next.every(size => size === 0) || !wins(next, 3, 4)).toBe(true);
     }
+  });
+
+  // The turn is the two moves a team makes, so the bot's choice of pile
+  // reaches the board before its take (botwrapper.ts plays them in order).
+  test('names its turn as choosing a pile, then taking from it', () => {
+    for (const difficulty of ['test', 'live'] as const) {
+      const state = { ...teamFirst([...OPENING_PILES], difficulty), ctx: { phase: PHASE.play, currentPlayer: JUDGE_PLAYER } as Ctx };
+      const turn = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number] | [number, number], string][];
+      expect(turn.map(([, name]) => name)).toStrictEqual(['selectPile', 'take']);
+      const [[[chosen]], [[pile, count]]] = turn;
+      expect(move('selectPile', state, chosen).result).toBeUndefined();
+      expect(move('take', state, pile, count).result).toBeUndefined();
+    }
+  });
+
+  test('takes straight away from a pile it chose before a restart', () => {
+    const state = { ...teamFirst([3, 6], 'test'), ctx: { phase: PHASE.play, currentPlayer: JUDGE_PLAYER } as Ctx };
+    state.G.selectedPile = 1;
+    const [[pile, count], name] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string];
+    expect(name).toBe('take');
+    expect(pile).toBe(1);
+    expect(isLegalTake(state.G, state.ctx, pile, count)).toBe(true);
   });
 
   test('opens every game from the same piles', () => {
