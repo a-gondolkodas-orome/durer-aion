@@ -5,11 +5,13 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
-import { downloadTsv } from '../utils/download';
+import { download } from '../utils/download';
 import { InfoTip } from './InfoTip';
 import { CompetitionImport } from './CompetitionImport';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 import { useErrorMessage } from '../utils/error-message';
+
+const TSV = 'text/tab-separated-values';
 
 function summary(result: TeamImportResultDto): string {
   const updated = result.updated > 0 ? ` (${result.updated} frissült)` : '';
@@ -96,7 +98,7 @@ export function ImportExport(props: {
               {busy ? 'Importálás…' : 'Importálás indítása'}
             </Button>
             {codes.length > 0 && (
-              <Button variant="contained" color="primary" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(codes)); }}>
+              <Button variant="contained" color="primary" onClick={() => { download(joinCodesFileName(), teamsTsv(codes), TSV); }}>
                 Az importáltak belépőkódjainak letöltése
               </Button>
             )}
@@ -136,7 +138,7 @@ export function ImportExport(props: {
               variant="outlined"
               color="primary"
               disabled={props.teams.length === 0}
-              onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow))); }}
+              onClick={() => { download(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow)), TSV); }}
             >
               {`Mind a(z) ${props.teams.length} csapat letöltése belépőkódokkal`}
             </Button>

@@ -36,7 +36,9 @@ async function banksHolding(ids, written) {
 }
 
 /// Writes the bank the bundle at `bundlePath` makes to `<banks>/<name>.ts`,
-/// and returns its path with what registers it, as text to print.
+/// and returns its path with what registers it, as text to print. `banks` is
+/// only where the file goes: the banks it reuses problems of are looked up in
+/// the real banks/ whatever it is.
 export async function writeBank(bundlePath, name, banks = BANKS) {
   if (!NAME.test(name)) {
     throw new Error(`"${name}" is no bank name: lowercase ASCII letters and digits, single dashes between words, a letter first`);
@@ -61,7 +63,7 @@ export async function writeBank(bundlePath, name, banks = BANKS) {
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,
-    `  ${as},  (in the createRegistry list)`,
+    `  ${as},  (in the banks list)`,
     '',
     'To list it on the relay practice site once it is released, in apps/relay-practise-frontend/src/practice-sets.ts:',
     `  import * as ${as} from "problem-bank/banks/${name}";`,

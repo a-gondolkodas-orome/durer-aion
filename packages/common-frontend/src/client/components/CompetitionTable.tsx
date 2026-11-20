@@ -10,7 +10,7 @@ import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
 import { useExportCompetitions, useSetCompetitionWindow } from '../hooks/user-hooks';
-import { downloadJson } from '../utils/download';
+import { download } from '../utils/download';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { useErrorMessage } from '../utils/error-message';
 
@@ -84,7 +84,7 @@ export function CompetitionTable(props: {
   const runExport = async (ids: string[]) => {
     setExporting(true);
     try {
-      downloadJson(bundleFileName(ids), JSON.stringify(await exportCompetitions(ids), null, 2));
+      download(bundleFileName(ids), JSON.stringify(await exportCompetitions(ids), null, 2), 'application/json');
     } catch (e: unknown) {
       enqueueSnackbar(errorMessage(e), { variant: 'error' });
     } finally {

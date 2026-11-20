@@ -4,7 +4,7 @@ import requests
 from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 import unicodedata
 from tqdm import tqdm
@@ -192,7 +192,8 @@ def export_bundle():
   """
   query = f'?ids={",".join(COMPETITION_IDS)}' if COMPETITION_IDS else ''
   bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/team/admin/competitions/export{query}')
-  bundle_path = OUTPUT_DIR / f'durer-competitions-{date.today().year}.json'
+  # A run's own name, so that a later run does not write over it.
+  bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.json"
   with open(bundle_path, 'w', encoding='utf-8') as f:
     json.dump(bundle, f, ensure_ascii=False, indent=2)
   print(f"{len(bundle['competitions'])} competitions and their {len(bundle['problems'])} problems written to {bundle_path}")

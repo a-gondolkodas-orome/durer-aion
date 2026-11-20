@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { strategyGames } from 'game';
-import { registry } from '../all';
+import { banks, registry } from '../all';
 import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
 import { bundleOf, readBundle } from './bundle';
@@ -26,12 +26,6 @@ function made(bundle: Bundle) {
   return result;
 }
 
-/** Every bank of the registry as one, ids taken off again. */
-const everyBank = (): Bank => ({
-  problems: Object.fromEntries([...registry.problems].map(([id, { id: _, ...body }]) => [id, body])),
-  competitions: Object.fromEntries([...registry.competitions].map(([id, { id: _, ...body }]) => [id, body])),
-});
-
 describe('bankFromBundle', () => {
   let directory: string;
   beforeAll(() => { directory = mkdtempSync(join(tmpdir(), 'bank-file-')); });
@@ -46,7 +40,7 @@ describe('bankFromBundle', () => {
     writeFileSync(path, bankFile(bank));
     const { competitions, problems } = await import(path) as Bank;
     expect({ competitions, problems }).toEqual(bank);
-    expect(validateRegistry(createRegistry([everyBank(), bank]), strategyGames)).toEqual([]);
+    expect(validateRegistry(createRegistry([...banks, bank]), strategyGames)).toEqual([]);
   });
 
   // As admin.py exports a server's every competition, in-code ones too.

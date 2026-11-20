@@ -229,7 +229,7 @@ $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scrip
 
 It writes the match data (`match_data_*.json`), the results, one file per
 competition (`durer-results-<year>-<competition id>.tsv`), and the
-competitions' bundle (`durer-competitions-<year>.json`, § *In the database,
+competitions' bundle (`durer-competitions-<date and time>.json`, § *In the database,
 and back into code*), to
 `scripts/admin-output/`, wherever it is run from.
 
@@ -547,7 +547,8 @@ another form.
 
 **Moving one between servers.** Export it, then import it in the other
 server's **Import/export** tab. The import writes all of the bundle or none
-of it.
+of it. A start window set in the **Versenyek** tab stays behind: the bundle
+carries the config's, so set it again on the other server.
 
 **From a finished round to a practice set:**
 
