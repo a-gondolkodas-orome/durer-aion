@@ -18,8 +18,9 @@ import { import_teams_from_tsv } from "./team_import";
 import { TEAM_COOKIE } from "./team_session";
 import { startTestDatabase } from "./test_database";
 
-// POST /team/admin/competitions/import, over HTTP against PGlite: a bundle is
-// written whole or not at all (#813).
+// POST /team/admin/competitions/import and GET …/export, over HTTP against
+// PGlite: a bundle is written whole or not at all (#813), and one exported
+// imports again (#814).
 
 const sample = JSON.parse(readFileSync(
   join(__dirname, "..", "..", "..", "..", "packages", "problem-bank", "fixtures", "sample-bundle.json"), "utf8",
@@ -168,4 +169,66 @@ it.each([
 ])("refuses a bundle %s", async (_, headers, status) => {
   expect((await post(sample, headers)).status).toBe(status);
   expect(await storedIds()).toEqual([]);
+});
+
+async function exported(query: string) {
+  return await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export${query}`, { headers: admin });
+}
+
+describe("the export", () => {
+  it("makes a bundle that imports again on an empty database, and plays the same", async () => {
+    expect((await importBundle(sample)).written).toBe(true);
+    const response = await exported(`?ids=${Object.keys(sample.competitions).join(",")}`);
+    expect(response.status).toBe(200);
+    const bundle = await response.json() as Bundle;
+    expect(bundle.competitions).toEqual(sample.competitions);
+    // It stands alone: the in-code problem the relay reuses comes with it.
+    expect(bundle.problems).toEqual({ ...sample.problems, "k5g58wuf6h--minta-korongok": expect.anything() as unknown });
+
+    await database.reset();
+    expect(await importBundle(bundle)).toEqual({
+      written: true,
+      competitions: Object.keys(sample.competitions),
+      // The one the code holds as the bundle does is not written.
+      problems: Object.keys(sample.problems),
+      errors: [],
+    });
+    expect(await storedIds()).toEqual(sampleIds);
+    const again = await (await exported(`?ids=${Object.keys(sample.competitions).join(",")}`)).json() as Bundle;
+    expect(again).toEqual(bundle);
+  });
+
+  it("exports a competition held in code too", async () => {
+    const bundle = await (await exported("?ids=klmgbpb334--minta-teljes")).json() as Bundle;
+    expect(Object.keys(bundle.competitions)).toEqual(["klmgbpb334--minta-teljes"]);
+    expect(Object.keys(bundle.problems)).toEqual(
+      registry.competitions.get("klmgbpb334--minta-teljes")?.relay?.problems.map(({ problemId }) => problemId));
+  });
+
+  it("exports every competition without ids", async () => {
+    expect((await importBundle(sample)).written).toBe(true);
+    const bundle = await (await exported("")).json() as Bundle;
+    expect(Object.keys(bundle.competitions).sort())
+      .toEqual([...registry.competitions.keys(), ...Object.keys(sample.competitions)].sort());
+
+    // What the code holds as the bundle does is not written, so it imports again.
+    await database.reset();
+    expect(await importBundle(bundle)).toEqual({
+      written: true, competitions: Object.keys(sample.competitions), problems: Object.keys(sample.problems), errors: [],
+    });
+    expect(await storedIds()).toEqual(sampleIds);
+  });
+
+  it("refuses an id no competition has, naming it", async () => {
+    const response = await exported("?ids=klmgbpb334--minta-teljes,nnnnnnnnnn--nincs");
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({
+      code: "COMPETITION_NOT_FOUND", message: "No competition with id nnnnnnnnnn--nincs.",
+    });
+  });
+
+  it("refuses without the password", async () => {
+    const response = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export`);
+    expect(response.status).toBe(401);
+  });
 });

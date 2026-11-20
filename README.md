@@ -227,8 +227,10 @@ py -m venv .venv
 $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scripts\admin.py
 ```
 
-It writes the match data (`match_data_*.json`) and the results, one file per
-competition (`durer-results-<year>-<competition id>.tsv`), to
+It writes the match data (`match_data_*.json`), the results, one file per
+competition (`durer-results-<year>-<competition id>.tsv`), and the
+competitions' bundle (`durer-competitions-<date and time>.json`, § *In the database,
+and back into code*), to
 `scripts/admin-output/`, wherever it is run from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
@@ -525,6 +527,45 @@ copy for a round of the Dürer, `reference.ts` for anything else.
 
 This year's competitions are added in the year's private repo until the round
 is over, as its game is (§ *Competition secrecy*).
+
+## In the database, and back into code
+
+**Which goes where.** Code holds whatever outlives a round: the practice sets,
+and every round once it is over. The relay practice site serves banks only.
+The database holds what one server needs for a while: a round being prepared
+or held there, or one set up to try something. It is wiped after a
+competition, and the competitions and problems in it go too, unless they are
+exported first.
+
+**Exporting.** Tick competitions in the **Versenyek** tab and export them, or
+let `scripts/admin.py` do it (§ *Admin*). The JSON file, a *bundle*, carries
+every problem the competitions' relays use, those held in code too, so it
+imports on a server that has none of them. A bundle can hold what the code
+already holds: a relay reuses older problems, and an export of every
+competition includes the in-code ones. Both the import and the bank script
+below skip what the code holds in the same form, and refuse an id it holds in
+another form.
+
+**Moving one between servers.** Export it, then import it in the other
+server's **Import/export** tab. The import writes all of the bundle or none
+of it. A start window set in the **Versenyek** tab stays behind: the bundle
+carries the config's, so set it again on the other server.
+
+**From a finished round to a practice set:**
+
+1. **Export** the round's competitions.
+2. **Make the bank:** `npm run bank:from-bundle -- <bundle.json> <bank-name>`
+   writes `packages/problem-bank/banks/<bank-name>.ts`. Say in the file's
+   comment which round it is, as the other banks do.
+3. **Register it.** The script prints the lines to add:
+   - to `all.ts`, the import and the registry entry;
+   - to `practice-sets.ts`, the same, the competitions' `listedIds`, and the
+     banks whose problems its relays reuse, which must be registered there too.
+4. **Commit it** to the public repo once the round is over (§ *Competition
+   secrecy*); before then, to the year's private one.
+5. **Wipe the database before that build reaches the server.** A server whose
+   database holds an id its code holds too refuses to start. Removing a single
+   competition from the database is #823.
 
 # Debugging
 

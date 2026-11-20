@@ -29,7 +29,7 @@ import * as reference from './banks/reference';
 // This year's competitions, and the problems only they use, are added in the
 // year's private repo until the competition is over (README § Competition
 // secrecy); this public one holds rounds that are public already.
-export const registry = createRegistry([
+export const banks = [
   edition01Final,
   edition02Final,
   edition03Final,
@@ -51,4 +51,6 @@ export const registry = createRegistry([
   edition19Online,
   edition20Online,
   reference,
-]);
+];
+
+export const registry = createRegistry(banks);

@@ -45,13 +45,65 @@ export function readBundle(value: unknown): { bundle: Bundle } | { errors: strin
   return { bundle: value as unknown as Bundle };
 }
 
+/// The bundle of `competitions` and every problem their relays use, taken
+/// from `problems`, so that it stands alone: it imports on a server that
+/// holds none of them. Competitions keep the order given, and problems the
+/// order their relays first use them in.
+export function bundleOf(
+  competitions: readonly CompetitionConfig[],
+  problems: ReadonlyMap<ProblemId, Problem>,
+): Bundle {
+  return {
+    format: BUNDLE_FORMAT,
+    version: BUNDLE_VERSION,
+    competitions: Object.fromEntries(competitions.map(({ id, ...body }) => [id, body])),
+    problems: Object.fromEntries(relayProblemIds(competitions).map((problemId) => {
+      const problem = problems.get(problemId);
+      if (problem === undefined) throw new Error(`A relay uses the problem ${problemId}, which is missing`);
+      const { id, ...body } = problem;
+      return [id, body];
+    })),
+  };
+}
+
+/// The ids of `bundle`'s competitions and problems that `held` holds in the
+/// same form.
+export function heldAlike(
+  bundle: Bundle,
+  held: { competitions: ReadonlyMap<string, object>, problems: ReadonlyMap<string, object> },
+): Set<string> {
+  const alike = (bodies: Record<string, object>, holder: ReadonlyMap<string, object>) =>
+    Object.entries(bodies).flatMap(([id, body]) => {
+      const inCode = holder.get(id);
+      return inCode !== undefined && sameBody(body, inCode) ? [id] : [];
+    });
+  return new Set([...alike(bundle.competitions, held.competitions), ...alike(bundle.problems, held.problems)]);
+}
+
+/// Whether two competitions, or two problems, say the same, whatever order
+/// their fields were written in and whichever carries its id.
+function sameBody(a: object, b: object): boolean {
+  // JSON leaves out a field set to undefined, which an id then is.
+  return canonical({ ...a, id: undefined }) === canonical({ ...b, id: undefined });
+}
+
+/// JSON with every object's keys in order.
+function canonical(value: unknown): string {
+  return JSON.stringify(value, (_key, item: unknown) => isRecord(item)
+    ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+    : item);
+}
+
+/// The problems the relays of `competitions` use, each once, in the order
+/// they are first used.
+export function relayProblemIds(competitions: readonly Pick<CompetitionConfig, 'relay'>[]): ProblemId[] {
+  return [...new Set(competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []))];
+}
+
 /// The problems of `bundle`'s relays that it does not hold itself: a bundle
 /// may build on problems the server already has.
 export function problemsReferredFrom(bundle: Bundle): ProblemId[] {
-  const ids = Object.values(bundle.competitions)
-    .flatMap(competition => competition.relay?.problems.map(({ problemId }) => problemId) ?? [])
-    .filter(id => !(id in bundle.problems));
-  return [...new Set(ids)];
+  return relayProblemIds(Object.values(bundle.competitions)).filter(id => !(id in bundle.problems));
 }
 
 /// Every way `bundle` breaks the rules, as messages; none means it is valid.

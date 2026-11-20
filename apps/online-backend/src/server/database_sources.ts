@@ -1,14 +1,17 @@
 import { strategyGames } from 'game';
-import type { Registry } from 'problem-bank';
+import type { Bundle, Registry } from 'problem-bank';
 import {
+  bundleOf,
   combinedCompetitionSource,
   combinedProblemSource,
+  heldAlike,
   problemsReferredFrom,
   readBundle,
+  relayProblemIds,
   validateBundle,
   validatingCompetitionSource,
 } from 'problem-bank';
-import type { CompetitionSource, Problem, ProblemSource } from 'schemas';
+import type { CompetitionConfig, CompetitionSource, Problem, ProblemSource } from 'schemas';
 import { validateProblem } from 'schemas';
 import { Op } from 'sequelize';
 import type { TeamsRepository } from './db';
@@ -104,7 +107,8 @@ export interface BundleImportReport {
 
 /** Writes every competition and problem of the bundle `value` is to the
  *  database, or, if it is no bundle, or any of it breaks the rules or has an
- *  id the code or the database already holds, none of them.
+ *  id the code or the database already holds, none of them. What the code
+ *  holds in the same form is skipped (`heldAlike`).
  *
  *  The problems the bundle builds on are read before the write's transaction
  *  opens: a read outside it would wait for the connection the transaction
@@ -118,8 +122,9 @@ export async function importBundle(
   const read = readBundle(value);
   if ('errors' in read) return refused(read.errors);
   const { bundle } = read;
-  const competitionIds = Object.keys(bundle.competitions);
-  const problemIds = Object.keys(bundle.problems);
+  const inCodeAlike = heldAlike(bundle, { competitions, problems });
+  const competitionIds = Object.keys(bundle.competitions).filter(id => !inCodeAlike.has(id));
+  const problemIds = Object.keys(bundle.problems).filter(id => !inCodeAlike.has(id));
   const sortedIds = [...[...competitionIds].sort(), ...[...problemIds].sort()];
   // What of the bundle the id is first, then what already holds it.
   const clashes = (holders: ReadonlyMap<string, 'competition' | 'problem'>, where: string) =>
@@ -161,9 +166,32 @@ export async function importBundle(
     ]);
     const inDatabaseClashes = clashes(inDatabase, 'az adatbázisban');
     if (inDatabaseClashes.length > 0) return refused(inDatabaseClashes);
-    const rows = <T>(bank: Record<string, T>) => Object.entries(bank).map(([id, body]) => ({ id, body, createdBy: null }));
-    await ProblemModel.bulkCreate(rows(bundle.problems), { transaction });
-    await CompetitionModel.bulkCreate(rows(bundle.competitions), { transaction });
+    const rows = <T>(bank: Record<string, T>, ids: readonly string[]) =>
+      ids.map(id => ({ id, body: bank[id], createdBy: null }));
+    await ProblemModel.bulkCreate(rows(bundle.problems, problemIds), { transaction });
+    await CompetitionModel.bulkCreate(rows(bundle.competitions, competitionIds), { transaction });
     return { written: true, competitions: competitionIds, problems: problemIds, errors: [] };
   });
+}
+
+/** The bundle of the competitions `ids` names, in that order, or of every
+ *  competition for none, with every problem their relays use, wherever it is
+ *  held. `missing` names the ids no competition has. */
+export async function exportBundle(
+  ids: readonly string[],
+  { competitionSource, problemSource }: Pick<ContentSources, 'competitionSource' | 'problemSource'>,
+): Promise<{ bundle: Bundle } | { missing: string[] }> {
+  let competitions: CompetitionConfig[] = [];
+  const missing: string[] = [];
+  if (ids.length === 0) {
+    competitions = await competitionSource.listCompetitions();
+  } else {
+    for (const id of new Set(ids)) {
+      const competition = await competitionSource.getCompetition(id);
+      if (competition === undefined) missing.push(id);
+      else competitions.push(competition);
+    }
+  }
+  if (missing.length > 0) return { missing };
+  return { bundle: bundleOf(competitions, await problemSource.getProblems(relayProblemIds(competitions))) };
 }

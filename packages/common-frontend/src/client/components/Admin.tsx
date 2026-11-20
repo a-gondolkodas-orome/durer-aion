@@ -7,7 +7,8 @@ import { DataGrid, ExportCsv, QuickFilter, QuickFilterControl, Toolbar } from '@
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
-import { CompetitionTable, competitionTitle } from './CompetitionTable';
+import { CompetitionTable } from './CompetitionTable';
+import { competitionTitle } from 'schemas';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';

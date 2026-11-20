@@ -27,6 +27,7 @@
     "dev:strategy-practice": "npm run dev --workspace=strategy-practice",
     "setup": "node scripts/seed-env-files.mjs",
     "new-id": "node scripts/new-id.mjs",
+    "bank:from-bundle": "npx turbo build --filter=problem-bank --output-logs=errors-only && node scripts/bank-from-bundle.mjs",
     "report:outdated": "node scripts/dependency-report.mjs",
     "update:minors": "node scripts/dependency-report.mjs --write",
     "stack:build": "docker compose --env-file=.env.docker build",

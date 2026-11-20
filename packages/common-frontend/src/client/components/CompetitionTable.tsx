@@ -3,12 +3,14 @@ import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
 import { Box, Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
+import type { GridRowSelectionModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas';
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
-import { useSetCompetitionWindow } from '../hooks/user-hooks';
+import { useExportCompetitions, useSetCompetitionWindow } from '../hooks/user-hooks';
+import { download } from '../utils/download';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { useErrorMessage } from '../utils/error-message';
 
@@ -56,14 +58,14 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
-/// What the admin page calls a competition: its name where it has one, else
-/// its label, else its id.
-export function competitionTitle({ id, metadata }: CompetitionSummaryDto): string {
-  return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
+/// The name a bundle of `ids` is saved under: the competition's id for one.
+function bundleFileName(ids: readonly string[]): string {
+  return ids.length === 1 ? `${ids[0]}.json` : `durer-competitions-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 }
 
 /// Every registered competition, newest edition first, with what the import's
-/// Competition column takes for it, to copy, and its start window, to change.
+/// Competition column takes for it, to copy, and its start window, to change,
+/// and the ones ticked to export.
 export function CompetitionTable(props: {
   competitions: CompetitionSummaryDto[],
   /// How many teams each competition has, by its id.
@@ -72,6 +74,23 @@ export function CompetitionTable(props: {
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [editing, setEditing] = useState<CompetitionRow | null>(null);
+  const exportCompetitions = useExportCompetitions();
+  const errorMessage = useErrorMessage();
+  const [selection, setSelection] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
+  const [exporting, setExporting] = useState(false);
+  // Ticking the header box selects by exclusion: every row but the ones named.
+  const selected = props.competitions.map(({ id }) => id)
+    .filter(id => selection.ids.has(id) === (selection.type === 'include'));
+  const runExport = async (ids: string[]) => {
+    setExporting(true);
+    try {
+      download(bundleFileName(ids), JSON.stringify(await exportCompetitions(ids), null, 2), 'application/json');
+    } catch (e: unknown) {
+      enqueueSnackbar(errorMessage(e), { variant: 'error' });
+    } finally {
+      setExporting(false);
+    }
+  };
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -92,8 +111,19 @@ export function CompetitionTable(props: {
   );
 
   return (
-    <Stack sx={{ height: '600px' }} data-testid="competitionTable">
+    <Stack sx={{ height: '600px', gap: '8px' }} data-testid="competitionTable">
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+        <Button size="small" variant="outlined" disabled={exporting || selected.length === 0}
+          onClick={() => { void runExport(selected); }}>
+          {selected.length === 0 ? 'Exportálás' : `${selected.length} verseny exportálása`}
+        </Button>
+        <Box component="span" sx={{ fontSize: 14 }}>
+          A kijelölt versenyek a feladataikkal együtt egy versenycsomagba kerülnek, amelyet egy másik szerver
+          Import/export füle betölt.
+        </Box>
+      </Stack>
       <DataGrid
+        sx={{ flex: 1, minHeight: 0 }}
         rows={props.competitions.map(competition => ({
           ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
         }))}
@@ -159,6 +189,9 @@ export function CompetitionTable(props: {
           columns: { columnVisibilityModel: { label: false } },
         }}
         pageSizeOptions={[10, 25, 50]}
+        checkboxSelection
+        rowSelectionModel={selection}
+        onRowSelectionModelChange={setSelection}
         disableRowSelectionOnClick
       />
       {editing !== null && <CompetitionWindowDialog competition={editing}
