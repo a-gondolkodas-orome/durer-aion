@@ -25,7 +25,12 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
             aria-label={`${pile + 1}. kupac: ${size} korong${justTaken > 0 ? `, a gép az imént ennyit vett el belőle: ${justTaken}` : ''}`}
             aria-pressed={selected === pile}
             onClick={() => moves.selectPile(pile)}
-            sx={{ justifyContent: 'flex-start', gap: 1, minHeight: 56, flexWrap: 'wrap', textTransform: 'none' }}
+            sx={{
+              justifyContent: 'flex-start', gap: 1, minHeight: 56, flexWrap: 'wrap', textTransform: 'none',
+              // On the bot's turn every pile is disabled, and MUI greys a
+              // disabled button: its chosen pile keeps the colour of a choice.
+              ...(selected === pile && { '&.Mui-disabled': { color: 'primary.contrastText', backgroundColor: 'primary.main' } }),
+            }}
           >
             <Box component="span" sx={{ fontWeight: 'bold', minWidth: '2.5em' }}>{size}</Box>
             <Box component="span" aria-hidden sx={{ letterSpacing: 2 }}>
