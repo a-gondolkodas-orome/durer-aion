@@ -1,39 +1,41 @@
 import type { CompetitionConfig, CompetitionId, Problem, ProblemId } from 'schemas';
 import { competitionName } from 'schemas';
 import type { Bundle } from './bundle';
-import { sameProblem } from './bundle';
+import { sameBody } from './bundle';
 import type { Bank } from './registry';
 
 // A bundle made into a file under banks/: how a competition held in the
 // database goes back into code (README § Adding a competition).
 
-/// The bank a bundle makes, beside the banks `registry` holds: its
-/// competitions, and those of its problems the registry does not have, which
-/// are `leftOut`. A relay that reuses an older problem would otherwise repeat
-/// its id, which `createRegistry` refuses. A competition the registry has, or
-/// a problem it has in another form, is an error: the bundle is then not one
-/// exported from this registry's rounds.
+/// The bank a bundle makes, beside the banks `registry` holds: the
+/// competitions and problems of the bundle the registry does not have. Those
+/// it has as the bundle does are `leftOut`, since `createRegistry` refuses an
+/// id two banks hold: a relay reuses older problems, and a bundle of every
+/// competition on a server holds the in-code ones too. One the registry has in
+/// another form is an error, and so is a bundle with no competition left.
 export function bankFromBundle(
   bundle: Bundle,
   registry: { problems: ReadonlyMap<ProblemId, Problem>, competitions: ReadonlyMap<CompetitionId, CompetitionConfig> },
-): { bank: Bank, leftOut: ProblemId[] } | { errors: string[] } {
-  const errors = Object.keys(bundle.competitions)
-    .filter(id => registry.competitions.has(id))
-    .map(id => `The competition ${id} is in code already`);
-  const problems: Bank['problems'] = {};
-  const leftOut: ProblemId[] = [];
-  for (const [id, body] of Object.entries(bundle.problems)) {
-    const held = registry.problems.get(id);
-    if (held === undefined) {
-      problems[id] = body;
-    } else if (sameProblem(body, held)) {
-      leftOut.push(id);
-    } else {
-      errors.push(`The problem ${id} is in code already, and differs from the bundle's`);
+): { bank: Bank, leftOut: string[] } | { errors: string[] } {
+  const errors: string[] = [];
+  const leftOut: string[] = [];
+  const notHeld = <T extends object>(kind: string, bodies: Record<string, T>, held: ReadonlyMap<string, object>) => {
+    const kept: Record<string, T> = {};
+    for (const [id, body] of Object.entries(bodies)) {
+      const inCode = held.get(id);
+      if (inCode === undefined) kept[id] = body;
+      else if (sameBody(body, inCode)) leftOut.push(id);
+      else errors.push(`The ${kind} ${id} is in code already, and differs from the bundle's`);
     }
+    return kept;
+  };
+  const competitions = notHeld('competition', bundle.competitions, registry.competitions);
+  const problems = notHeld('problem', bundle.problems, registry.problems);
+  if (errors.length === 0 && Object.keys(competitions).length === 0) {
+    errors.push('Every competition of the bundle is in code already');
   }
   if (errors.length > 0) return { errors };
-  return { bank: { competitions: bundle.competitions, problems }, leftOut };
+  return { bank: { competitions, problems }, leftOut };
 }
 
 /// The source of a file under banks/ that exports `bank`, formatted as the

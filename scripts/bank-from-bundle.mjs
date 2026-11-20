@@ -4,8 +4,8 @@
 //
 //   npm run bank:from-bundle -- <bundle.json> <bank-name>
 //
-// writes packages/problem-bank/banks/<bank-name>.ts. The problems the banks
-// already hold are left out of it (`bankFromBundle`). README § Adding a
+// writes packages/problem-bank/banks/<bank-name>.ts. The competitions and
+// problems the banks already hold are left out of it (`bankFromBundle`). README § Adding a
 // competition says when to run it, and what to do with the database's copy.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -42,7 +42,7 @@ export function writeBank(bundlePath, name, banks = BANKS) {
   const ids = Object.keys(made.bank.competitions);
   return [
     `Wrote ${path}: ${ids.length} competitions, ${Object.keys(made.bank.problems).length} problems`
-      + (made.leftOut.length > 0 ? `, leaving out ${made.leftOut.length} that other banks hold.` : '.'),
+      + (made.leftOut.length > 0 ? `, leaving out ${made.leftOut.length} competitions and problems that other banks hold.` : '.'),
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,

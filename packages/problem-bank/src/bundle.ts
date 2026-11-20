@@ -73,10 +73,10 @@ export function bundleOf(
   };
 }
 
-/// Whether two problems say the same, whatever order their fields were
-/// written in: a bundle carries the in-code problems its relays use, and one
-/// the code holds as it is needs no writing.
-export function sameProblem(a: Omit<Problem, 'id'>, b: Omit<Problem, 'id'>): boolean {
+/// Whether two competitions, or two problems, say the same, whatever order
+/// their fields were written in and whichever carries its id: an exported
+/// bundle carries in-code ones, and one the code holds as it is needs no writing.
+export function sameBody(a: object, b: object): boolean {
   // JSON leaves out a field set to undefined, which an id then is.
   return canonical({ ...a, id: undefined }) === canonical({ ...b, id: undefined });
 }

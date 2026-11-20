@@ -6,7 +6,7 @@ import {
   combinedProblemSource,
   problemsReferredFrom,
   readBundle,
-  sameProblem,
+  sameBody,
   validateBundle,
   validatingCompetitionSource,
 } from 'problem-bank';
@@ -125,7 +125,7 @@ export async function importBundle(
   const competitionIds = Object.keys(bundle.competitions);
   const inCodeAlike = new Set(Object.entries(bundle.problems).flatMap(([id, body]) => {
     const held = problems.get(id);
-    return held !== undefined && sameProblem(body, held) ? [id] : [];
+    return held !== undefined && sameBody(body, held) ? [id] : [];
   }));
   const problemIds = Object.keys(bundle.problems).filter(id => !inCodeAlike.has(id));
   const sortedIds = [...[...competitionIds].sort(), ...[...problemIds].sort()];

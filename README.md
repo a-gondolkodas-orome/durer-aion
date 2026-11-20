@@ -550,10 +550,11 @@ refuses the bundle. An in-code competition exports too.
    beside their results (§ *Admin*), so the run that pulls the results also
    keeps the content; the **Versenyek** tab's export saves the same.
 2. **Make the bank.** `npm run bank:from-bundle -- <bundle.json> <bank-name>`
-   writes `packages/problem-bank/banks/<bank-name>.ts`, leaving out the problems
-   other banks already hold, as a relay that reuses an older problem would
-   otherwise repeat its id. It refuses a competition already in code. Say in
-   the file's comment which round it is, as the other banks do.
+   writes `packages/problem-bank/banks/<bank-name>.ts`, leaving out the
+   competitions and problems other banks already hold as the bundle does: a
+   relay reuses older problems, and a bundle of every competition holds the
+   in-code ones too. One held in another form refuses the bundle. Say in the
+   file's comment which round it is, as the other banks do.
 3. **Register it.** The script prints the lines for `all.ts`, and for
    `practice-sets.ts`: the import, the registry entry and the `listedIds`.
 4. **Commit it** to the public repo once the round is over (§ *Competition

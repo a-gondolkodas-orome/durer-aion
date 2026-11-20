@@ -28,12 +28,12 @@ describe('bank-from-bundle.mjs', () => {
     expect(() => writeBank(bundlePath, 'taken', directory)).toThrow('exists already');
   });
 
-  it('refuses a bundle with a competition the banks hold, writing nothing', () => {
+  it('refuses a bundle with a competition the banks hold in another form, writing nothing', () => {
     const bundle = JSON.parse(sample);
     bundle.competitions['klmgbpb334--minta-teljes'] = bundle.competitions['aqvco71pta--csomag-teljes'];
     const bundlePath = join(directory, 'bundle.json');
     writeFileSync(bundlePath, JSON.stringify(bundle));
-    expect(() => writeBank(bundlePath, 'clash', directory)).toThrow('klmgbpb334--minta-teljes is in code already');
+    expect(() => writeBank(bundlePath, 'clash', directory)).toThrow('klmgbpb334--minta-teljes is in code already, and differs');
     expect(existsSync(join(directory, 'clash.ts'))).toBe(false);
   });
 

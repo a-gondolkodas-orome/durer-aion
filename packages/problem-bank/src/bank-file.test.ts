@@ -13,13 +13,12 @@ const sample = readBundle(JSON.parse(readFileSync(join(__dirname, '..', 'fixture
 if ('errors' in sample) throw new Error(sample.errors.join('\n'));
 // The sample as the export would write it: standing alone, with the
 // reference problem its relay reuses.
-const sampleBundle = bundleOf(
-  Object.entries(sample.bundle.competitions).map(([id, body]) => ({ ...body, id })),
-  new Map([
-    ...registry.problems,
-    ...Object.entries(sample.bundle.problems).map(([id, body]) => [id, { ...body, id }] as const),
-  ]),
-);
+const sampleCompetitions = Object.entries(sample.bundle.competitions).map(([id, body]) => ({ ...body, id }));
+const everyProblem = new Map([
+  ...registry.problems,
+  ...Object.entries(sample.bundle.problems).map(([id, body]) => [id, { ...body, id }] as const),
+]);
+const sampleBundle = bundleOf(sampleCompetitions, everyProblem);
 
 let directory: string;
 beforeAll(() => { directory = mkdtempSync(join(tmpdir(), 'bank-file-')); });
@@ -57,16 +56,30 @@ describe('bankFromBundle', () => {
     expect(validateRegistry(createRegistry([everyBank(), bank]), strategyGames)).toEqual([]);
   });
 
-  it('refuses a competition the registry holds, and a problem it holds in another form', () => {
+  // As admin.py exports a server's every competition, in-code ones too.
+  it('leaves out the competitions the registry holds', () => {
+    const reference = held(registry.competitions, 'klmgbpb334--minta-teljes');
+    const made = bankFromBundle(bundleOf([reference, ...sampleCompetitions], everyProblem), registry);
+    if ('errors' in made) throw new Error(made.errors.join('\n'));
+    expect(made.leftOut).toContain('klmgbpb334--minta-teljes');
+    expect(bankFromBundle(sampleBundle, registry)).toMatchObject({ bank: made.bank });
+  });
+
+  it('refuses a competition or a problem the registry holds in another form, and a bundle of in-code ones only', () => {
     const reference = bundleOf([held(registry.competitions, 'klmgbpb334--minta-teljes')], registry.problems);
-    const changed: Bundle = { ...reference, problems: {
-      ...reference.problems,
-      'k5g58wuf6h--minta-korongok': { ...reference.problems['k5g58wuf6h--minta-korongok'], answer: 10 },
-    } };
+    const changed: Bundle = {
+      ...reference,
+      competitions: { 'klmgbpb334--minta-teljes': { ...reference.competitions['klmgbpb334--minta-teljes'], languages: ['en'] } },
+      problems: {
+        ...reference.problems,
+        'k5g58wuf6h--minta-korongok': { ...reference.problems['k5g58wuf6h--minta-korongok'], answer: 10 },
+      },
+    };
     expect(bankFromBundle(changed, registry)).toEqual({ errors: [
-      'The competition klmgbpb334--minta-teljes is in code already',
+      'The competition klmgbpb334--minta-teljes is in code already, and differs from the bundle\'s',
       'The problem k5g58wuf6h--minta-korongok is in code already, and differs from the bundle\'s',
     ] });
+    expect(bankFromBundle(reference, registry)).toEqual({ errors: ['Every competition of the bundle is in code already'] });
   });
 
   it('takes a problem the registry holds as the same whatever order its fields come in', () => {
