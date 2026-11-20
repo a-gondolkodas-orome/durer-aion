@@ -82,8 +82,9 @@ const COMPETITION_C = 'mkhi1nnoim--20-online-c';
 beforeEach(() => {
   repo = new MockClientRepository();
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
-    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' } },
-    { id: 'u4lw7pcca1--20-online-d', metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' } },
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
+    { id: 'u4lw7pcca1--20-online-d', metadata: { kind: 'competition', edition: 20, round: 'online', category: 'D' },
+      storedIn: 'code' },
   ]);
   // The open tab is read from the URL, which jsdom keeps between tests.
   window.history.replaceState(null, '', '/admin');
@@ -293,7 +294,8 @@ test('the team dialog names the competition window a team\'s own replaces', asyn
   vi.spyOn(repo, 'getAll').mockResolvedValue([alpha]);
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
     { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
-      startWindow: { opensAt: '2026-11-20T15:00+01:00', closesAt: '2026-11-20T21:30+01:00' }, configStartWindow: null },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00', closesAt: '2026-11-20T21:30+01:00' }, configStartWindow: null,
+      storedIn: 'code' },
   ]);
   vi.spyOn(repo, 'setStartWindow')
     .mockImplementation((_teamId, window) => Promise.resolve({ ...alpha, startOpensAt: window.opensAt, startClosesAt: window.closesAt }));
@@ -555,7 +557,7 @@ test('the competitions tab lists the competitions newest first, with what to imp
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect([...grids.columns].reverse().find(columns => columns.some(column => column.field === 'importAs'))
     ?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'startWindow']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'storedIn', 'startWindow']);
   if (row === null) throw new Error('no table row');
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
@@ -590,7 +592,8 @@ test('the competitions tab sets a competition\'s start window, and lists it as s
   expect(within(table).getAllByText('bármikor')).toHaveLength(2);
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
     { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' },
-      startWindow: { opensAt: '2026-11-20T15:00+01:00' }, configStartWindow: null },
+      startWindow: { opensAt: '2026-11-20T15:00+01:00' }, configStartWindow: null,
+      storedIn: 'code' },
   ]);
   fireEvent.click(within(table).getByRole('button', { name: 'Indítási ablak módosítása: 20 online C' }));
   fireEvent.change(await screen.findByLabelText('Kezdete'), { target: { value: '2026-11-20T15:00+01:00' } });
@@ -636,6 +639,55 @@ test('the import tab lists the server\'s errors and warnings', async () => {
   // Nothing went in, so there is nothing to save.
   expect(screen.getByText('0 csapat importálva, 1 sor hibás.')).toBeInTheDocument();
   expect(saved).toEqual([]);
+});
+
+/** Picks a bundle file on the import tab and starts the competition import. */
+const importBundleFile = async (text: string) => {
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.change(screen.getByTestId('importCompetitionsFile'),
+    { target: { files: [new File([text], 'csomag.json')] } });
+  fireEvent.click(screen.getByRole('button', { name: 'Versenyek importálása' }));
+};
+
+test('the competition import sends the bundle, and lists the competitions anew once it is in', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const getCompetitions = vi.spyOn(repo, 'getCompetitions');
+  const importCompetitions = vi.spyOn(repo, 'importCompetitions').mockResolvedValue({
+    written: true, competitions: ['aqvco71pta--csomag-teljes'], problems: ['roow9oo75t--csomag-paros'], errors: [],
+  });
+  renderAdmin();
+
+  await importBundleFile('{"format":"durer-competitions"}');
+
+  expect(await screen.findByText('1 verseny és 1 feladat került be.')).toBeInTheDocument();
+  expect(importCompetitions).toHaveBeenCalledWith({ format: 'durer-competitions' });
+  await waitFor(() => { expect(getCompetitions).toHaveBeenCalledTimes(2); });
+});
+
+test('the competition import lists why nothing went in', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'importCompetitions').mockResolvedValue({
+    written: false, competitions: [], problems: [],
+    errors: ['feladat roow9oo75t--csomag-paros: ez az azonosító az adatbázisban már egy feladaté'],
+  });
+  renderAdmin();
+
+  await importBundleFile('{}');
+
+  expect(await screen.findByText('feladat roow9oo75t--csomag-paros: ez az azonosító az adatbázisban már egy feladaté'))
+    .toBeInTheDocument();
+  expect(screen.getByText('Semmi sem került be.')).toBeInTheDocument();
+});
+
+test('the competition import says a file is not JSON without sending it', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const importCompetitions = vi.spyOn(repo, 'importCompetitions');
+  renderAdmin();
+
+  await importBundleFile('{ nem json');
+
+  expect(await screen.findByText('A fájl nem érvényes JSON: csomag.json')).toBeInTheDocument();
+  expect(importCompetitions).not.toHaveBeenCalled();
 });
 
 // Re-running a grown registration list is how late teams are added, so a file

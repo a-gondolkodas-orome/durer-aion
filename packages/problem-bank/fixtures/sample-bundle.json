@@ -1,0 +1,52 @@
+{
+  "format": "durer-competitions",
+  "version": 1,
+  "competitions": {
+    "903xajr9et--csomag-valto": {
+      "languages": ["hu", "en"],
+      "relay": {
+        "durationMinutes": 30,
+        "problems": [
+          { "problemId": "10iqp4vy6b--csomag-kockak", "points": 3 },
+          { "problemId": "7q1wniz55w--csomag-haromszog", "points": 4 },
+          { "problemId": "k5g58wuf6h--minta-korongok", "points": 5 }
+        ]
+      },
+      "metadata": { "kind": "other", "label": { "hu": "Csomag: váltó", "en": "Bundle: relay" } }
+    },
+    "aqvco71pta--csomag-teljes": {
+      "languages": ["hu"],
+      "relay": {
+        "durationMinutes": 30,
+        "problems": [
+          { "problemId": "roow9oo75t--csomag-paros", "points": 3 },
+          { "problemId": "10iqp4vy6b--csomag-kockak", "points": 4 }
+        ]
+      },
+      "strategy": { "durationMinutes": 20, "gameId": "minta-ketkupac" },
+      "advancingPoints": 10,
+      "metadata": { "kind": "other", "label": { "hu": "Csomag: teljes forduló" } }
+    }
+  },
+  "problems": {
+    "10iqp4vy6b--csomag-kockak": {
+      "answer": 27,
+      "content": {
+        "hu": { "problemText": "Hány kis kockából áll egy $3 \\times 3 \\times 3$-as kocka?" },
+        "en": { "problemText": "How many small cubes make up a $3 \\times 3 \\times 3$ cube?" }
+      }
+    },
+    "7q1wniz55w--csomag-haromszog": {
+      "answer": 180,
+      "content": {
+        "hu": { "problemText": "Hány fok egy háromszög szögeinek összege?" }
+      }
+    },
+    "roow9oo75t--csomag-paros": {
+      "answer": 50,
+      "content": {
+        "hu": { "problemText": "Hány páros szám van 1 és 100 között, a 100-at is beleértve?" }
+      }
+    }
+  }
+}

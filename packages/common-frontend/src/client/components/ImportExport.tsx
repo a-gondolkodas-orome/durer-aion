@@ -7,6 +7,7 @@ import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
 import { downloadTsv } from '../utils/download';
 import { InfoTip } from './InfoTip';
+import { CompetitionImport } from './CompetitionImport';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 import { useErrorMessage } from '../utils/error-message';
 
@@ -25,6 +26,7 @@ function summary(result: TeamImportResultDto): string {
 /// download on the admin page that carries a login secret.
 export function ImportExport(props: {
   teams: TeamModelDto[], onImported: () => void, onOpenCompetitions: () => void,
+  onCompetitionsImported: () => void,
 }) {
   const theme = useTheme();
   const importTeams = useImportTeams();
@@ -141,6 +143,7 @@ export function ImportExport(props: {
           </Stack>
         </Stack>
       </Stack>
+      <CompetitionImport onImported={props.onCompetitionsImported}/>
     </Stack>
   );
 }

@@ -175,15 +175,15 @@ export default defineConfig(
     },
   },
   // No hard-coded text between JSX tags — see eslint.i18n.mjs. Three things are left
-  // out. The admin page, which is for the organisers and Hungarian on purpose
-  // (#698), and is these five files. A live game's folder, which README.md
+  // out. The admin page's components, which are for the organisers and Hungarian
+  // on purpose (#698). A live game's folder, which README.md
   // § Creating a new game lets hold one language only: its rules text, and the
   // board and status line that go with them. And the suites, whose markup is a
   // stand-in, never shown to anyone.
   {
     files: ['**/*.tsx'],
     ignores: [
-      'packages/common-frontend/src/client/components/{Admin,CompetitionTable,ConfirmDialog,ImportExport,TeamDetailDialog}.tsx',
+      'packages/common-frontend/src/client/components/{Admin,CompetitionImport,CompetitionTable,ConfirmDialog,ImportExport,TeamDetailDialog}.tsx',
       'packages/game/src/games/**',
       '**/*.test.tsx',
     ],

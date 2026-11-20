@@ -193,6 +193,11 @@ export const useImportTeams = () => {
   return async (file: File) => await repo.importTeams(file);
 };
 
+export const useImportCompetitions = () => {
+  const repo = useAdminRepo();
+  return async (bundle: unknown) => await repo.importCompetitions(bundle);
+};
+
 export const useCompetitions = () => {
   const repo = useAdminRepo();
   return async () => await repo.getCompetitions();

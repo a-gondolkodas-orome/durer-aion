@@ -60,6 +60,7 @@ beírni
 beírt
 bejelentkezhettek
 bejelölgetni
+bekerült
 bekötötte
 beküldésével
 beküldött
@@ -316,6 +317,7 @@ huszárjait
 huszárok
 hússzorosánál
 húzhatunk
+importálása
 indítása
 indíthatja
 indulása
@@ -867,11 +869,13 @@ találkozások
 találkozásokat
 tanácskozást
 tányérok
+tárolásúak
 távolságok
 távolságokra
 távolságokról
 távolságunkra
 Tekinthetjük
+telepítéssel
 teletöltenénk
 tengelyesen
 téren

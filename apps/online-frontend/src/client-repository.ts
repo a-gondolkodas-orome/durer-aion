@@ -1,7 +1,7 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance } from 'axios';
 import { I18nError, apiRefusal } from "common-frontend/core";
-import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto } from "common-frontend";
+import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto } from "common-frontend";
 import type { Tracker } from "./tracking";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
@@ -164,6 +164,10 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     // t('error.importTimedOut')
     return await request(api => api.put<TeamImportResultDto>('/team/admin/import', body),
       { timeoutMs: IMPORT_TIMEOUT_MS, timedOutKey: 'error.importTimedOut' });
+  }
+
+  async importCompetitions(bundle: unknown): Promise<BundleImportResultDto> {
+    return await request(api => api.post<BundleImportResultDto>('/team/admin/competitions/import', bundle));
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {

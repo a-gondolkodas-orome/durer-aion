@@ -55,7 +55,8 @@ beforeAll(async () => {
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
   configureTeamsRouter(router, database.teams, hosted.map(({ game }) => game), requireAdmin("unused-here"),
-    { competitionSource: source, problemSource: problems });
+    // None of them in code: a late one is a database's, as far as the list goes.
+    { competitionSource: source, problemSource: problems, competitions: new Map(), problems: new Map() });
   app.use(router.routes());
   const handle = app.callback();
   server = http.createServer((req, res) => { void handle(req, res); }).listen(0, "127.0.0.1");

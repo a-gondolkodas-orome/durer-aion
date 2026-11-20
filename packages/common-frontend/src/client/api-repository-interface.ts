@@ -1,4 +1,4 @@
-import type { CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { BundleImportResultDto, CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -46,4 +46,7 @@ export interface AdminClientRepository {
    *  `opensAt` returns it to its config's. */
   setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void>
   importTeams(file: File): Promise<TeamImportResultDto>
+  /** Writes a bundle's competitions and problems to the database, all or none.
+   *  The bundle is sent as it was read from its file. */
+  importCompetitions(bundle: unknown): Promise<BundleImportResultDto>
 }

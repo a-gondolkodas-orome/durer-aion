@@ -202,6 +202,15 @@ describe("the team import", () => {
 });
 
 describe("the admin routes", () => {
+  test("a competition bundle is a POST of the bundle as JSON", async () => {
+    const calls = fakeAxios(ok);
+    const bundle = { format: "durer-competitions", version: 1, competitions: {}, problems: {} };
+
+    await new RealClientRepository().importCompetitions(bundle);
+
+    expect(calls).toStrictEqual([{ method: "post", url: "/team/admin/competitions/import", body: bundle }]);
+  });
+
   test("a team's own start window is a PUT of the window as JSON", async () => {
     const calls = fakeAxios(ok);
     const window = { opensAt: "2026-11-21T15:00+01:00", closesAt: null };
