@@ -556,7 +556,9 @@ already has refuses the bundle. An in-code competition exports too.
    in-code ones too. One held in another form refuses the bundle. Say in the
    file's comment which round it is, as the other banks do.
 3. **Register it.** The script prints the lines for `all.ts`, and for
-   `practice-sets.ts`: the import, the registry entry and the `listedIds`.
+   `practice-sets.ts`: the import, the registry entry and the `listedIds`, and
+   names the banks whose problems its relays reuse, which `practice-sets.ts`
+   must register too.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
 5. **Wipe the database before that build reaches the server.** A server whose
