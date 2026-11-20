@@ -10,6 +10,7 @@ import { Client } from 'boardgame.io/client';
 import { Bot } from 'boardgame.io/ai';
 import type { Ctx, Game, State } from 'boardgame.io';
 import { localWithBots } from './local-with-bots';
+import { BOT_MOVE_PAUSE_MS } from './pace-bot-moves';
 
 const MATCH_ID = 'match-under-test';
 
@@ -58,9 +59,10 @@ function clientPlaying(game: Game<TestState>, multiplayer: ReturnType<typeof tra
   });
 }
 
-/// boardgame.io waits 100ms before it lets a bot play, so nothing here is
-/// finished until the clock has moved.
-const letTheBotPlay = () => vi.advanceTimersByTimeAsync(200);
+/// boardgame.io waits 100ms before it lets a bot play, and the board shows the
+/// bot's move a pause after the state before it (pace-bot-moves.ts), so nothing
+/// here is finished until the clock has moved past both.
+const letTheBotPlay = () => vi.advanceTimersByTimeAsync(BOT_MOVE_PAUSE_MS + 200);
 
 const stateOf = (client: ReturnType<typeof clientPlaying>) =>
   client.getState() as unknown as { G: TestState, ctx: Ctx };

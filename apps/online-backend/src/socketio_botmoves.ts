@@ -271,11 +271,13 @@ export class SocketIOButBotMoves extends SocketIO {
       auth
     );
 
-    // The bot's whole turn, each move stored and pushed on its own: the moves
-    // its strategy named, then, while the turn is still its own, whatever it
-    // names when asked again (botwrapper.ts says why).
+    // The bot's whole turn at once, each move stored and pushed on its own:
+    // the moves its strategy named, then, while the turn is still its own,
+    // whatever it names when asked again. No pause between them: the board
+    // shows them apart (botwrapper.ts says why).
     let current = state;
     let planned: ReturnType<MatchBot["planTurn"]> = [];
+    let refused = false;
     for (let played = 0; ; played++) {
       if (played > 0 && !isBotsTurn(current)) {
         if (planned.length > 0 && !current.ctx.gameover) {
@@ -289,9 +291,11 @@ export class SocketIOButBotMoves extends SocketIO {
         console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${played} moves.`);
         return;
       }
-      const [action, ...rest] = planned.length > 0 ? planned : bot.planTurn(current, botPlayer, metadata?.setupData);
-      planned = rest;
-      await bot.wait();
+      if (!refused && planned.length === 0) {
+        planned = bot.planTurn(current, botPlayer, metadata?.setupData);
+      }
+      const action = refused ? bot.randomMove(current, botPlayer) : planned.shift();
+      if (action === undefined) return;
       await master.onUpdate(
         { ...action, payload: { ...action.payload, credentials: getBotCredentials() } },
         current._stateID,
@@ -299,11 +303,17 @@ export class SocketIOButBotMoves extends SocketIO {
         BOT_ID
       );
       const { state: after } = await fetch(db, matchID, { state: true } as const);
-      if (after === undefined || after._stateID === current._stateID) {
-        // boardgame.io refused the move and has logged why; asking the same
-        // strategy again from the same state would only be refused again.
-        return;
+      if (after === undefined) return;
+      if (after._stateID === current._stateID) {
+        // boardgame.io refused the move and has logged why. The strategy would
+        // name it again from the same state, and the match would wait on the
+        // bot for ever; a random move has failed only if the game allows none.
+        if (refused) return;
+        refused = true;
+        planned = [];
+        continue;
       }
+      refused = false;
       current = after;
     }
   }
