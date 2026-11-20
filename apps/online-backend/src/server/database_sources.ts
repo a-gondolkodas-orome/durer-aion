@@ -179,8 +179,8 @@ export async function importBundle(
 }
 
 /** The bundle of the competitions `ids` names, in that order, or of every
- *  competition for none, with every problem their relays use, in code or in
- *  the database. `missing` names the ids no competition has. */
+ *  competition for none, with every problem their relays use, wherever it is
+ *  held. `missing` names the ids no competition has. */
 export async function exportBundle(
   ids: readonly string[],
   { competitionSource, problemSource }: Pick<ContentSources, 'competitionSource' | 'problemSource'>,
