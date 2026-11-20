@@ -203,11 +203,17 @@ describe("the socket transport a browser talks to", () => {
     const halfway = await chosen;
     expect(halfway.ctx.currentPlayer).toBe(HUMAN_ID);
 
+    // The bot's turn is the same two moves, each pushed on its own (#374).
+    const botChose = updateMatching(socket, ({ G, ctx }) =>
+      ctx.currentPlayer === BOT_ID && G.selectedPile !== null);
     const botReplied = updateMatching(socket, ({ G, ctx }) =>
       G.piles[0] + G.piles[1] < 8 && ctx.currentPlayer === HUMAN_ID);
     socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), halfway._stateID, MATCH_ID, HUMAN_ID);
+    const chose = await botChose;
     const state = await botReplied;
 
+    expect(chose.G.piles).toStrictEqual([3, 5]);
+    expect(state._stateID).toBe(chose._stateID + 1);
     expect(state.G.piles[0] + state.G.piles[1]).toBeLessThan(8);
     expect(state.G.selectedPile).toBeNull();
   });

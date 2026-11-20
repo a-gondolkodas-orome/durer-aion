@@ -550,7 +550,8 @@ that before a competition.
    The reference games, which the reference competitions play
    (`reference.ts`), are the examples: `sablon/` is the one to copy, the
    least a game needs, in two languages, with an opening the bot draws;
-   `ketkupac/` adds a turn of two steps, named roles and a step description.
+   `ketkupac/` adds a turn of two steps, which its bot plays as two moves,
+   named roles and a step description.
    `20ocde/` is a game a round was held with. Each holds
 
    - `game.ts` — the boardgame.io game definition
@@ -599,7 +600,9 @@ the clock, the test/live choice, choosing who starts, tries and score.
   A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
   a "pick two values, then commit" turn.
 - **`strategy.ts`** exports `strategyWrapper(variant)`, returning
-  `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
+  `(state, botID) => [args, moveName]`, or a list of those for a turn of
+  several moves, played in order (`ketkupac/`; `BotTurn` in `botwrapper.ts`
+  is the contract). In the `startNewGame` phase it answers
   with `startingPositionMove(position)` — the bot is the only source of the
   opening position, which may name the game's own keys only. `[undefined, moveName]`
   makes the bot play a random move from `possibleMoves`.

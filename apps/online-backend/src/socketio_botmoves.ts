@@ -264,25 +264,56 @@ export class SocketIOButBotMoves extends SocketIO {
     if (state.ctx.phase !== PHASE.play && state.ctx.phase !== PHASE.startNewGame) {
       return;
     }
-    const botAction = await bot.play(state, botPlayer, metadata?.setupData);
-
     const master = new Master(
       game,
       db,
       TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub),
       auth
     );
-    await master.onUpdate(
-      {
-        type: "MAKE_MOVE",
-        payload: {
-          ...botAction.action.payload,
-          credentials: getBotCredentials(),
-        },
-      },
-      state._stateID,
-      matchID,
-      BOT_ID
-    );
+
+    // The bot's whole turn, each move stored and pushed on its own: the moves
+    // its strategy named, then, while the turn is still its own, whatever it
+    // names when asked again (botwrapper.ts says why).
+    let current = state;
+    let planned: ReturnType<MatchBot["planTurn"]> = [];
+    for (let played = 0; ; played++) {
+      if (played > 0 && !isBotsTurn(current)) {
+        if (planned.length > 0 && !current.ctx.gameover) {
+          console.error(`The bot of match ${JSON.stringify(matchID)} named ${planned.length} move(s) after its turn ended; dropped.`);
+        }
+        return;
+      }
+      // A strategy that keeps naming moves that keep the turn would loop for
+      // ever, and the match's queue with it.
+      if (played >= MAX_BOT_MOVES_PER_TURN) {
+        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${played} moves.`);
+        return;
+      }
+      const [action, ...rest] = planned.length > 0 ? planned : bot.planTurn(current, botPlayer, metadata?.setupData);
+      planned = rest;
+      await bot.wait();
+      await master.onUpdate(
+        { ...action, payload: { ...action.payload, credentials: getBotCredentials() } },
+        current._stateID,
+        matchID,
+        BOT_ID
+      );
+      const { state: after } = await fetch(db, matchID, { state: true } as const);
+      if (after === undefined || after._stateID === current._stateID) {
+        // boardgame.io refused the move and has logged why; asking the same
+        // strategy again from the same state would only be refused again.
+        return;
+      }
+      current = after;
+    }
   }
+}
+
+/** Generous: a turn of the games here is one or two moves. */
+const MAX_BOT_MOVES_PER_TURN = 20;
+
+/** Whether the match waits on the bot, in a phase the bot plays in. */
+function isBotsTurn(state: State): boolean {
+  return !state.ctx.gameover && currentPlayer(state.ctx) === BOT_ID
+    && (state.ctx.phase === PHASE.play || state.ctx.phase === PHASE.startNewGame);
 }

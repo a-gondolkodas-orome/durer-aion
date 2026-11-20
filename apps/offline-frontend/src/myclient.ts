@@ -5,14 +5,13 @@ import { localWithBots, matchStorageKey } from 'common-frontend/core';
 import type { RelayBoard, StrategyBoard, StrategyDescription } from 'common-frontend';
 import type { BotStrategy, MyGameState as RelayGameState, RelayMoveArgs, RelayOptions, StrategyOptions } from 'game';
 import { botWrapper, RelayWrapper } from 'game';
-import { State } from 'boardgame.io';
 import { handleGameReport } from './game-report';
 import type { ReactNode } from 'react';
 
 export function ClientWithBot<T_SpecificGameState, T_SpecificPosition>(
   game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
-  strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
+  strategy: BotStrategy<T_SpecificGameState & GameStateMixin, T_SpecificPosition>,
   description: StrategyDescription,
   options?: StrategyOptions,
   ) {

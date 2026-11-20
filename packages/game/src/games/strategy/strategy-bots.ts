@@ -5,12 +5,13 @@ import { strategyWrapper as StrategyKetkupac } from "./ketkupac/strategy";
 import { strategyWrapper as StrategySablon } from "./sablon/strategy";
 
 import type { State } from "boardgame.io";
+import type { BotTurn } from "../../common/botwrapper";
 import type { GameStateMixin } from "../../common/types";
 import type { StrategyGameKey, StrategyGameStates } from "./strategy-games";
 
-/// A game's bot: its move, or its opening position, as a move's arguments and
-/// name.
-export type StrategyBot<G> = (state: State<G & GameStateMixin>, botID: string) => [unknown, string];
+/// A game's bot: its moves, or its opening position, each as a move's
+/// arguments and name.
+export type StrategyBot<G> = (state: State<G & GameStateMixin>, botID: string) => BotTurn<unknown>;
 
 export const StrategyWrappers: { [K in StrategyGameKey]: () => StrategyBot<StrategyGameStates[K]> } = {
   "20o-c": () => Strategy20ocde("C"),

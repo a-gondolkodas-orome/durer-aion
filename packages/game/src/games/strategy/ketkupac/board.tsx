@@ -9,8 +9,9 @@ type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
-  const selected = active ? G.selectedPile : null;
-  const most = selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
+  // The bot's choice shows too, between the two moves of its turn.
+  const selected = ctx.phase === PHASE.play ? G.selectedPile : null;
+  const most = !active || selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
 
   return (
     <Stack spacing={2} sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>

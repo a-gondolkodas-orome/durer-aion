@@ -1,4 +1,3 @@
-import { State } from "boardgame.io";
 import { ClientRelayWithBot, ClientWithBot } from "./myclient";
 import { GameStateMixin, GameType } from "game";
 import type { RelayOptions, StrategyOptions } from "game";
@@ -11,7 +10,7 @@ T_SpecificGameState
 , T_SpecificPosition> (
   game: GameType<T_SpecificGameState> & { name: string },
   board: StrategyBoard<T_SpecificGameState>,
-  strategy: (state: State<T_SpecificGameState & GameStateMixin>, botID: string) => [T_SpecificPosition | undefined, string],
+  strategy: BotStrategy<T_SpecificGameState & GameStateMixin, T_SpecificPosition>,
   description: StrategyDescription,
   options?: StrategyOptions,
   ) {
