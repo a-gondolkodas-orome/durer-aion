@@ -1,5 +1,5 @@
 import type { CompetitionConfig, Problem, ProblemId, StrategyGameId, StrategyGameInfo } from 'schemas';
-import { competitionShapeErrors, isRecord, problemShapeErrors, validateCompetition, validateProblem } from 'schemas';
+import { competitionShapeErrors, problemShapeErrors, validateCompetition, validateProblem } from 'schemas';
 import type { CompetitionBank, ProblemBank } from './sources';
 
 // A bundle is how competitions and problems move between servers, and into
@@ -15,6 +15,12 @@ export interface Bundle {
   version: typeof BUNDLE_VERSION;
   competitions: CompetitionBank;
   problems: ProblemBank;
+}
+
+// Not the one in `schemas`: lint runs before `schemas` is built, and its
+// narrowing would then change what the cast below needs.
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /// The bundle `value` is, or every way it is not one, as messages. Only its
