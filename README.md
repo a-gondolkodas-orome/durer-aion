@@ -227,8 +227,10 @@ py -m venv .venv
 $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scripts\admin.py
 ```
 
-It writes the match data (`match_data_*.json`) and the results, one file per
-competition (`durer-results-<year>-<competition id>.tsv`), to
+It writes the match data (`match_data_*.json`), the results, one file per
+competition (`durer-results-<year>-<competition id>.tsv`), and the
+competitions' bundle with every problem their relays use
+(`durer-competitions-<year>.json`, § *Adding a competition*), to
 `scripts/admin-output/`, wherever it is run from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
@@ -524,6 +526,42 @@ copy for a round of the Dürer, `reference.ts` for anything else.
 
 This year's competitions are added in the year's private repo until the round
 is over, as its game is (§ *Competition secrecy*).
+
+## In the database, and back into code
+
+**Which goes where.** A competition that outlives its round belongs in code: a
+practice set, and every round once it is over, since the code is its record and
+the relay practice site serves banks only. The database holds what one server
+needs for a while: a round being prepared or held there, or one set up to try
+something. The database is wiped after a competition, teams and matches with
+it, and the competitions and problems written to it go too, unless exported
+first.
+
+**Moving one between servers.** Tick it in the **Versenyek** tab's table and
+export it: the bundle saved is JSON, a bank file's two maps under a header, with
+every problem its relays use, those held in code too, so it stands alone. The
+other server's **Import/export** tab writes all of it or none: a problem its
+code holds in the same form is not written, and any other id it already has
+refuses the bundle. An in-code competition exports too.
+
+**From a finished round to a practice set:**
+
+1. **Export.** `scripts/admin.py` writes the bundle of `DURER_COMPETITIONS`
+   beside their results (§ *Admin*), so the run that pulls the results also
+   keeps the content; the **Versenyek** tab's export saves the same.
+2. **Make the bank.** `npm run bank:from-bundle -- <bundle.json> <bank-name>`
+   writes `packages/problem-bank/banks/<bank-name>.ts`, leaving out the problems
+   other banks already hold, as a relay that reuses an older problem would
+   otherwise repeat its id. It refuses a competition already in code. Say in
+   the file's comment which round it is, as the other banks do.
+3. **Register it.** The script prints the lines for `all.ts`, and for
+   `practice-sets.ts`: the import, the registry entry and the `listedIds`.
+4. **Commit it** to the public repo once the round is over (§ *Competition
+   secrecy*); before then, to the year's private one.
+5. **Remove the database's copy before that build reaches the server.** A
+   server whose database holds an id its code holds too refuses to start. Wipe
+   the database, or delete the rows: `npm run stack:psql`, then
+   `DELETE FROM "Competitions" WHERE id IN (…);` and the same on `"Problems"`.
 
 # Debugging
 

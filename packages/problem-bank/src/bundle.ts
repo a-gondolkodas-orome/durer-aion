@@ -51,6 +51,43 @@ export function readBundle(value: unknown): { bundle: Bundle } | { errors: strin
   return { bundle: value as unknown as Bundle };
 }
 
+/// The bundle of `competitions` and every problem their relays use, taken
+/// from `problems`, so that it stands alone: it imports on a server that
+/// holds none of them. Competitions keep the order given, and problems the
+/// order their relays first use them in.
+export function bundleOf(
+  competitions: readonly CompetitionConfig[],
+  problems: ReadonlyMap<ProblemId, Problem>,
+): Bundle {
+  const problemIds = [...new Set(competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []))];
+  return {
+    format: BUNDLE_FORMAT,
+    version: BUNDLE_VERSION,
+    competitions: Object.fromEntries(competitions.map(({ id, ...body }) => [id, body])),
+    problems: Object.fromEntries(problemIds.map((problemId) => {
+      const problem = problems.get(problemId);
+      if (problem === undefined) throw new Error(`A ${problemId} feladat nincs meg, pedig egy váltó használja.`);
+      const { id, ...body } = problem;
+      return [id, body];
+    })),
+  };
+}
+
+/// Whether two problems say the same, whatever order their fields were
+/// written in: a bundle carries the in-code problems its relays use, and one
+/// the code holds as it is needs no writing.
+export function sameProblem(a: Omit<Problem, 'id'>, b: Omit<Problem, 'id'>): boolean {
+  // JSON leaves out a field set to undefined, which an id then is.
+  return canonical({ ...a, id: undefined }) === canonical({ ...b, id: undefined });
+}
+
+/// JSON with every object's keys in order.
+function canonical(value: unknown): string {
+  return JSON.stringify(value, (_key, item: unknown) => isRecord(item)
+    ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+    : item);
+}
+
 /// The problems of `bundle`'s relays that it does not hold itself: a bundle
 /// may build on problems the server already has.
 export function problemsReferredFrom(bundle: Bundle): ProblemId[] {

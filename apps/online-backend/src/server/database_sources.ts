@@ -1,10 +1,12 @@
 import { strategyGames } from 'game';
-import type { Registry } from 'problem-bank';
+import type { Bundle, Registry } from 'problem-bank';
 import {
+  bundleOf,
   combinedCompetitionSource,
   combinedProblemSource,
   problemsReferredFrom,
   readBundle,
+  sameProblem,
   validateBundle,
   validatingCompetitionSource,
 } from 'problem-bank';
@@ -104,7 +106,9 @@ export interface BundleImportReport {
 
 /** Writes every competition and problem of the bundle `value` is to the
  *  database, or, if it is no bundle, or any of it breaks the rules or has an
- *  id the code or the database already holds, none of them.
+ *  id the code or the database already holds, none of them. A problem the
+ *  code holds as the bundle has it is no clash, and is not written: an
+ *  exported bundle carries the in-code problems its relays use.
  *
  *  The problems the bundle builds on are read before the write's transaction
  *  opens: a read outside it would wait for the connection the transaction
@@ -119,7 +123,11 @@ export async function importBundle(
   if ('errors' in read) return refused(read.errors);
   const { bundle } = read;
   const competitionIds = Object.keys(bundle.competitions);
-  const problemIds = Object.keys(bundle.problems);
+  const inCodeAlike = new Set(Object.entries(bundle.problems).flatMap(([id, body]) => {
+    const held = problems.get(id);
+    return held !== undefined && sameProblem(body, held) ? [id] : [];
+  }));
+  const problemIds = Object.keys(bundle.problems).filter(id => !inCodeAlike.has(id));
   const sortedIds = [...[...competitionIds].sort(), ...[...problemIds].sort()];
   // What of the bundle the id is first, then what already holds it.
   const clashes = (holders: ReadonlyMap<string, 'competition' | 'problem'>, where: string) =>
@@ -161,9 +169,28 @@ export async function importBundle(
     ]);
     const inDatabaseClashes = clashes(inDatabase, 'az adatbázisban');
     if (inDatabaseClashes.length > 0) return refused(inDatabaseClashes);
-    const rows = <T>(bank: Record<string, T>) => Object.entries(bank).map(([id, body]) => ({ id, body, createdBy: null }));
-    await ProblemModel.bulkCreate(rows(bundle.problems), { transaction });
-    await CompetitionModel.bulkCreate(rows(bundle.competitions), { transaction });
+    const rows = <T>(bank: Record<string, T>, ids: readonly string[]) =>
+      ids.map(id => ({ id, body: bank[id], createdBy: null }));
+    await ProblemModel.bulkCreate(rows(bundle.problems, problemIds), { transaction });
+    await CompetitionModel.bulkCreate(rows(bundle.competitions, competitionIds), { transaction });
     return { written: true, competitions: competitionIds, problems: problemIds, errors: [] };
   });
+}
+
+/** The bundle of the competitions `ids` names, in that order, or of every
+ *  competition for none, with every problem their relays use: in code or in
+ *  the database, a bundle stands alone. `missing` names the ids no competition
+ *  has. */
+export async function exportBundle(
+  ids: readonly string[],
+  { competitionSource, problemSource }: Pick<ContentSources, 'competitionSource' | 'problemSource'>,
+): Promise<{ bundle: Bundle } | { missing: string[] }> {
+  const found = ids.length === 0
+    ? await competitionSource.listCompetitions()
+    : await Promise.all([...new Set(ids)].map(async id => await competitionSource.getCompetition(id) ?? id));
+  const missing = found.filter(competition => typeof competition === 'string');
+  if (missing.length > 0) return { missing };
+  const competitions = found.filter(competition => typeof competition !== 'string');
+  const problemIds = competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []);
+  return { bundle: bundleOf(competitions, await problemSource.getProblems([...new Set(problemIds)])) };
 }

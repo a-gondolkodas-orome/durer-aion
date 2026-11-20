@@ -49,4 +49,7 @@ export interface AdminClientRepository {
   /** Writes a bundle's competitions and problems to the database, all or none.
    *  The bundle is sent as it was read from its file. */
   importCompetitions(bundle: unknown): Promise<BundleImportResultDto>
+  /** The bundle of the competitions `ids` names, with every problem their
+   *  relays use: what `importCompetitions` takes, kept as the server sent it. */
+  exportCompetitions(ids: string[]): Promise<unknown>
 }

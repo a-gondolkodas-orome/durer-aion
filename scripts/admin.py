@@ -184,6 +184,22 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
 export_results_tsv(team_states_dict, relay_states, strategy_states)
 
 # %%
+def export_bundle():
+  """
+    The competitions' content beside their results: the bundle the admin
+    page's export makes, with every problem their relays use. A competition
+    held in the database is gone once the database is wiped; this file is how
+    it goes back into code (README § Adding a competition).
+  """
+  query = f'?ids={",".join(COMPETITION_IDS)}' if COMPETITION_IDS else ''
+  bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/team/admin/competitions/export{query}')
+  bundle_path = OUTPUT_DIR / f'durer-competitions-{date.today().year}.json'
+  with open(bundle_path, 'w', encoding='utf-8') as f:
+    json.dump(bundle, f, ensure_ascii=False, indent=2)
+  print(f"{len(bundle['competitions'])} competitions and their {len(bundle['problems'])} problems written to {bundle_path}")
+export_bundle()
+
+# %%
 # def add_minutes(minutes:int,type:str, user:str, passwd:str, baseurl:str = 'http://localhost:8000'):
 
 #   if type not in ['relay','strategy']:

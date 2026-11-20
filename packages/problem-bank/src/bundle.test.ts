@@ -4,7 +4,7 @@ import { strategyGames } from 'game';
 import { competitionShapeErrors, problemShapeErrors } from 'schemas';
 import { registry } from '../all';
 import type { Bundle } from './bundle';
-import { problemsReferredFrom, readBundle, validateBundle } from './bundle';
+import { bundleOf, problemsReferredFrom, readBundle, validateBundle } from './bundle';
 
 const sample: unknown = JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8'));
 
@@ -31,6 +31,32 @@ describe('the sample bundle', () => {
       return found === undefined ? [] : [[id, found] as const];
     }));
     expect(validateBundle(sampleBundle, referred, strategyGames)).toEqual([]);
+  });
+});
+
+describe('bundleOf', () => {
+  const inCode = (id: string) => {
+    const found = registry.competitions.get(id);
+    if (found === undefined) throw new Error(`The registry has no ${id}`);
+    return found;
+  };
+
+  it('makes a bundle that stands alone: valid with no problem from elsewhere', () => {
+    const competitions = ['klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto'].map(inCode);
+    const made = read(bundleOf(competitions, registry.problems));
+    expect(Object.keys(made.competitions)).toEqual(['klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto']);
+    // In the order the relays first use them, each once.
+    expect(Object.keys(made.problems)).toEqual([
+      'k5g58wuf6h--minta-korongok', '4gmwop64ms--minta-oszthato', '20c8027yvv--minta-kezfogasok',
+      'rnq4kflg46--minta-osszeg', 'e7grcn2cq9--minta-szamjegyosszeg', '242slejy21--minta-dobokocka',
+    ]);
+    expect(problemsReferredFrom(made)).toEqual([]);
+    expect(validateBundle(made, new Map(), strategyGames)).toEqual([]);
+  });
+
+  it('throws on a relay problem it is not given', () => {
+    expect(() => bundleOf([inCode('49tbhzl1jz--minta-valto')], new Map()))
+      .toThrow('k5g58wuf6h--minta-korongok');
   });
 });
 

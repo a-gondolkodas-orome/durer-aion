@@ -1,7 +1,16 @@
 /** Hands the browser a file to save: the viewer's own download, with no
  * server round trip. */
 export function downloadTsv(fileName: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'text/tab-separated-values' }));
+  download(fileName, text, 'text/tab-separated-values');
+}
+
+/** `downloadTsv`, for JSON. */
+export function downloadJson(fileName: string, text: string) {
+  download(fileName, text, 'application/json');
+}
+
+function download(fileName: string, text: string, type: string) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = fileName;
