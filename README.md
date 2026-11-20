@@ -321,7 +321,8 @@ build.
 Every workspace carries `lint` and `lint:fix`, which is what turbo runs; to lint
 one while you work in it, `npm run lint --workspace=<name>` is that one process,
 and `npx eslint .` from its directory is the same subtree under whichever config
-governs it. `eslint.stylistic.mjs` holds the character-level rules both configs import —
+governs it. Neither builds anything: they read the other packages' types from
+whatever their `dist` holds, which `npm run lint` builds first. `eslint.stylistic.mjs` holds the character-level rules both configs import —
 spacing, blank lines, final newlines — while the rules that decide where a line
 *breaks* stay per-workspace. `npm run lint:fix` applies them, and
 `.vscode/settings.json` runs the same fixes on save. They are `@stylistic` rules
