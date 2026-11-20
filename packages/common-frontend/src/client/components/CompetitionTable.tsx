@@ -2,11 +2,10 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, 
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
 import { Box, Stack } from '@mui/system';
-import { DataGrid, Toolbar } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import type { GridRowSelectionModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
-import type { ReactNode } from 'react';
 import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas';
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
@@ -57,26 +56,6 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
     id, importAs: id, edition: null, round: '', category: '', label: metadata.label.hu ?? metadata.label.en ?? '',
     ...window,
   };
-}
-
-declare module '@mui/x-data-grid' {
-  interface ToolbarPropsOverrides {
-    exportButton?: ReactNode;
-  }
-}
-
-/// The ticked competitions export as a bundle, which the Import/export tab
-/// takes on another server.
-function CompetitionsToolbar(props: { exportButton?: ReactNode }) {
-  return (
-    <Toolbar>
-      {props.exportButton}
-      <Box component="span" sx={{ fontSize: 14 }}>
-        A kijelölt versenyek a feladataikkal együtt egy versenycsomagba kerülnek, amelyet egy másik szerver
-        Import/export füle betölt.
-      </Box>
-    </Toolbar>
-  );
 }
 
 /// The name a bundle of `ids` is saved under: the competition's id for one.
@@ -132,8 +111,19 @@ export function CompetitionTable(props: {
   );
 
   return (
-    <Stack sx={{ height: '600px' }} data-testid="competitionTable">
+    <Stack sx={{ height: '600px', gap: '8px' }} data-testid="competitionTable">
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+        <Button size="small" variant="outlined" disabled={exporting || selected.length === 0}
+          onClick={() => { void runExport(selected); }}>
+          {selected.length === 0 ? 'Exportálás' : `${selected.length} verseny exportálása`}
+        </Button>
+        <Box component="span" sx={{ fontSize: 14 }}>
+          A kijelölt versenyek a feladataikkal együtt egy versenycsomagba kerülnek, amelyet egy másik szerver
+          Import/export füle betölt.
+        </Box>
+      </Stack>
       <DataGrid
+        sx={{ flex: 1, minHeight: 0 }}
         rows={props.competitions.map(competition => ({
           ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
         }))}
@@ -199,14 +189,6 @@ export function CompetitionTable(props: {
           columns: { columnVisibilityModel: { label: false } },
         }}
         pageSizeOptions={[10, 25, 50]}
-        showToolbar
-        slots={{ toolbar: CompetitionsToolbar }}
-        slotProps={{ toolbar: { exportButton: (
-          <Button size="small" disabled={exporting || selected.length === 0}
-            onClick={() => { void runExport(selected); }}>
-            {selected.length === 0 ? 'Exportálás' : `${selected.length} verseny exportálása`}
-          </Button>
-        ) } }}
         checkboxSelection
         rowSelectionModel={selection}
         onRowSelectionModelChange={setSelection}

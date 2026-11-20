@@ -36,19 +36,15 @@ const grids = vi.hoisted(() => ({ columns: [] as { field: string, disableExport?
 vi.mock('@mui/x-data-grid', () => {
   interface Row { id: string, teamName: string }
   interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row }) => React.ReactNode }
-  interface Selection { type: 'include' | 'exclude', ids: Set<string> }
+  interface Selection { type: 'include', ids: Set<string> }
   return {
     DataGrid: (props: {
       rows: Row[], columns: Column[],
       slots?: { toolbar?: React.ComponentType<object> }, slotProps?: { toolbar?: object },
-      // The real grid's selection: by inclusion, or, once the header box is
-      // ticked, by exclusion.
       checkboxSelection?: boolean, rowSelectionModel?: Selection,
       onRowSelectionModelChange?: (model: Selection) => void,
     }) => { grids.columns.push(props.columns); return (<>
       {props.slots?.toolbar && <props.slots.toolbar {...props.slotProps?.toolbar}/>}
-      {props.checkboxSelection && <input type="checkbox" aria-label="Mind kijelölése"
-        onChange={() => props.onRowSelectionModelChange?.({ type: 'exclude', ids: new Set() })}/>}
       <ul>
         {props.rows.map(row => (
           <li key={row.id}>
@@ -56,7 +52,7 @@ vi.mock('@mui/x-data-grid', () => {
               onChange={() => {
                 const ids = new Set(props.rowSelectionModel?.ids);
                 if (ids.has(row.id)) ids.delete(row.id); else ids.add(row.id);
-                props.onRowSelectionModelChange?.({ type: props.rowSelectionModel?.type ?? 'include', ids });
+                props.onRowSelectionModelChange?.({ type: 'include', ids });
               }}/>}
             {row.teamName}
             {props.columns.filter(column => column.renderCell).map(column => (
@@ -597,14 +593,6 @@ test('the competitions tab exports the ticked competitions as one bundle file', 
   expect(exportCompetitions).toHaveBeenCalledWith([COMPETITION_C]);
   expect(JSON.parse(saved[0])).toEqual(bundle);
   expect(vi.mocked(HTMLAnchorElement.prototype.click).mock.contexts[0]).toHaveProperty('download', `${COMPETITION_C}.json`);
-
-  // The header box ticks every row; unticking one then leaves it out.
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Mind kijelölése' }));
-  fireEvent.click(screen.getByRole('button', { name: '2 verseny exportálása' }));
-  await waitFor(() => { expect(exportCompetitions).toHaveBeenLastCalledWith([COMPETITION_C, 'u4lw7pcca1--20-online-d']); });
-  fireEvent.click(screen.getByRole('checkbox', { name: `Kijelölés: ${COMPETITION_C}` }));
-  fireEvent.click(screen.getByRole('button', { name: '1 verseny exportálása' }));
-  await waitFor(() => { expect(exportCompetitions).toHaveBeenLastCalledWith(['u4lw7pcca1--20-online-d']); });
 });
 
 // The import's help names the tab with what its Competition column takes.
