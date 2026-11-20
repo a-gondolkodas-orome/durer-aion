@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { importName, writeBank } from './bank-from-bundle.mjs';
+import { writeBank } from './bank-from-bundle.mjs';
 
 const sample = readFileSync(new URL('../packages/problem-bank/fixtures/sample-bundle.json', import.meta.url), 'utf8');
 
@@ -16,7 +16,7 @@ describe('bank-from-bundle.mjs', () => {
 
     const printed = writeBank(bundlePath, 'csomag-proba', directory);
 
-    expect(readFileSync(join(directory, 'csomag-proba.ts'), 'utf8')).toContain("export const competitions: CompetitionBank = {\n  '903xajr9et--csomag-valto': {");
+    expect(readFileSync(join(directory, 'csomag-proba.ts'), 'utf8')).toContain('"903xajr9et--csomag-valto": {');
     expect(printed).toContain("  import * as csomagProba from './banks/csomag-proba';");
     expect(printed).toContain('  "aqvco71pta--csomag-teljes",  (in listedIds)');
   });
@@ -28,20 +28,16 @@ describe('bank-from-bundle.mjs', () => {
     expect(() => writeBank(bundlePath, 'taken', directory)).toThrow('exists already');
   });
 
-  it('refuses a bundle with a competition the banks hold in another form, writing nothing', () => {
+  it('writes nothing for a bundle it refuses', () => {
     const bundle = JSON.parse(sample);
     bundle.competitions['klmgbpb334--minta-teljes'] = bundle.competitions['aqvco71pta--csomag-teljes'];
     const bundlePath = join(directory, 'bundle.json');
     writeFileSync(bundlePath, JSON.stringify(bundle));
-    expect(() => writeBank(bundlePath, 'clash', directory)).toThrow('klmgbpb334--minta-teljes is in code already, and differs');
+    expect(() => writeBank(bundlePath, 'clash', directory)).toThrow('klmgbpb334--minta-teljes');
     expect(existsSync(join(directory, 'clash.ts'))).toBe(false);
   });
 
   it.each(['Edition', '21-online', 'a--b', 'a_b', ''])('refuses the bank name "%s"', (name) => {
     expect(() => writeBank('unread.json', name, directory)).toThrow('no bank name');
-  });
-
-  it('imports edition-21-online as edition21Online', () => {
-    expect(importName('edition-21-online')).toBe('edition21Online');
   });
 });

@@ -20,7 +20,7 @@ const NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 /// The name the registries import the bank `name` as: edition-21-online is
 /// edition21Online.
-export function importName(name) {
+function importName(name) {
   return name.replace(/-([a-z0-9])/g, (_, char) => char.toUpperCase());
 }
 

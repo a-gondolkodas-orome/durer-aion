@@ -559,10 +559,9 @@ refuses the bundle. An in-code competition exports too.
    `practice-sets.ts`: the import, the registry entry and the `listedIds`.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
-5. **Remove the database's copy before that build reaches the server.** A
-   server whose database holds an id its code holds too refuses to start. Wipe
-   the database, or delete the rows: `npm run stack:psql`, then
-   `DELETE FROM "Competitions" WHERE id IN (…);` and the same on `"Problems"`.
+5. **Wipe the database before that build reaches the server.** A server whose
+   database holds an id its code holds too refuses to start. Removing a single
+   competition from the database is #823.
 
 # Debugging
 

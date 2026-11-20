@@ -312,11 +312,6 @@ export function configureTeamsRouter(
     ctx.body = await importBundle(teams, ctx.request.body, sources);
   });
 
-  /**
-   * The bundle of the competitions `ids` names, comma-separated, or of every
-   * competition without it: what the import above takes, with every problem
-   * their relays use, so that it imports on a server that holds none of them.
-   */
   router.get("/team/admin/competitions/export", adminAuth, async (ctx) => {
     const { ids } = ctx.query;
     const named = (Array.isArray(ids) ? ids : [ids ?? '']).flatMap(list => list.split(',')).filter(id => id !== '');

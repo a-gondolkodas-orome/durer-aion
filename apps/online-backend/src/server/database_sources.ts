@@ -6,11 +6,12 @@ import {
   combinedProblemSource,
   problemsReferredFrom,
   readBundle,
+  relayProblemIds,
   sameBody,
   validateBundle,
   validatingCompetitionSource,
 } from 'problem-bank';
-import type { CompetitionSource, Problem, ProblemSource } from 'schemas';
+import type { CompetitionConfig, CompetitionSource, Problem, ProblemSource } from 'schemas';
 import { validateProblem } from 'schemas';
 import { Op } from 'sequelize';
 import type { TeamsRepository } from './db';
@@ -178,19 +179,23 @@ export async function importBundle(
 }
 
 /** The bundle of the competitions `ids` names, in that order, or of every
- *  competition for none, with every problem their relays use: in code or in
- *  the database, a bundle stands alone. `missing` names the ids no competition
- *  has. */
+ *  competition for none, with every problem their relays use, in code or in
+ *  the database. `missing` names the ids no competition has. */
 export async function exportBundle(
   ids: readonly string[],
   { competitionSource, problemSource }: Pick<ContentSources, 'competitionSource' | 'problemSource'>,
 ): Promise<{ bundle: Bundle } | { missing: string[] }> {
-  const found = ids.length === 0
-    ? await competitionSource.listCompetitions()
-    : await Promise.all([...new Set(ids)].map(async id => await competitionSource.getCompetition(id) ?? id));
-  const missing = found.filter(competition => typeof competition === 'string');
+  let competitions: CompetitionConfig[] = [];
+  const missing: string[] = [];
+  if (ids.length === 0) {
+    competitions = await competitionSource.listCompetitions();
+  } else {
+    for (const id of new Set(ids)) {
+      const competition = await competitionSource.getCompetition(id);
+      if (competition === undefined) missing.push(id);
+      else competitions.push(competition);
+    }
+  }
   if (missing.length > 0) return { missing };
-  const competitions = found.filter(competition => typeof competition !== 'string');
-  const problemIds = competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []);
-  return { bundle: bundleOf(competitions, await problemSource.getProblems([...new Set(problemIds)])) };
+  return { bundle: bundleOf(competitions, await problemSource.getProblems(relayProblemIds(competitions))) };
 }

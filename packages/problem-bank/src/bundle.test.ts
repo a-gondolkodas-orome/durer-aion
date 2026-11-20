@@ -5,6 +5,7 @@ import { competitionShapeErrors, problemShapeErrors } from 'schemas';
 import { registry } from '../all';
 import type { Bundle } from './bundle';
 import { bundleOf, problemsReferredFrom, readBundle, validateBundle } from './bundle';
+import { inCode } from './in-code-for-testing';
 
 const sample: unknown = JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8'));
 
@@ -35,14 +36,8 @@ describe('the sample bundle', () => {
 });
 
 describe('bundleOf', () => {
-  const inCode = (id: string) => {
-    const found = registry.competitions.get(id);
-    if (found === undefined) throw new Error(`The registry has no ${id}`);
-    return found;
-  };
-
   it('makes a bundle that stands alone: valid with no problem from elsewhere', () => {
-    const competitions = ['klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto'].map(inCode);
+    const competitions = ['klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto'].map(id => inCode(registry.competitions, id));
     const made = read(bundleOf(competitions, registry.problems));
     expect(Object.keys(made.competitions)).toEqual(['klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto']);
     // In the order the relays first use them, each once.
@@ -55,7 +50,7 @@ describe('bundleOf', () => {
   });
 
   it('throws on a relay problem it is not given', () => {
-    expect(() => bundleOf([inCode('49tbhzl1jz--minta-valto')], new Map()))
+    expect(() => bundleOf([inCode(registry.competitions, '49tbhzl1jz--minta-valto')], new Map()))
       .toThrow('k5g58wuf6h--minta-korongok');
   });
 });

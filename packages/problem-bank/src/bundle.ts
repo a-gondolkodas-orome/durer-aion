@@ -59,14 +59,13 @@ export function bundleOf(
   competitions: readonly CompetitionConfig[],
   problems: ReadonlyMap<ProblemId, Problem>,
 ): Bundle {
-  const problemIds = [...new Set(competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []))];
   return {
     format: BUNDLE_FORMAT,
     version: BUNDLE_VERSION,
     competitions: Object.fromEntries(competitions.map(({ id, ...body }) => [id, body])),
-    problems: Object.fromEntries(problemIds.map((problemId) => {
+    problems: Object.fromEntries(relayProblemIds(competitions).map((problemId) => {
       const problem = problems.get(problemId);
-      if (problem === undefined) throw new Error(`A ${problemId} feladat nincs meg, pedig egy váltó használja.`);
+      if (problem === undefined) throw new Error(`A relay uses the problem ${problemId}, which is missing`);
       const { id, ...body } = problem;
       return [id, body];
     })),
@@ -88,13 +87,16 @@ function canonical(value: unknown): string {
     : item);
 }
 
+/// The problems the relays of `competitions` use, each once, in the order
+/// they are first used.
+export function relayProblemIds(competitions: readonly Pick<CompetitionConfig, 'relay'>[]): ProblemId[] {
+  return [...new Set(competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []))];
+}
+
 /// The problems of `bundle`'s relays that it does not hold itself: a bundle
 /// may build on problems the server already has.
 export function problemsReferredFrom(bundle: Bundle): ProblemId[] {
-  const ids = Object.values(bundle.competitions)
-    .flatMap(competition => competition.relay?.problems.map(({ problemId }) => problemId) ?? [])
-    .filter(id => !(id in bundle.problems));
-  return [...new Set(ids)];
+  return relayProblemIds(Object.values(bundle.competitions)).filter(id => !(id in bundle.problems));
 }
 
 /// Every way `bundle` breaks the rules, as messages; none means it is valid.
