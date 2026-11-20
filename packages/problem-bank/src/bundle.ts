@@ -72,9 +72,8 @@ export function bundleOf(
   };
 }
 
-/// The ids of `bundle`'s competitions and problems that `held` holds just as
-/// the bundle has them: an exported bundle carries in-code ones, and those
-/// need no writing.
+/// The ids of `bundle`'s competitions and problems that `held` holds in the
+/// same form.
 export function heldAlike(
   bundle: Bundle,
   held: { competitions: ReadonlyMap<string, object>, problems: ReadonlyMap<string, object> },

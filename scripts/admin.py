@@ -186,10 +186,9 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 # %%
 def export_bundle():
   """
-    The competitions' content beside their results: the bundle the admin
-    page's export makes, with every problem their relays use. A competition
-    held in the database is gone once the database is wiped; this file is how
-    it goes back into code (README § Adding a competition).
+    Saves the competitions and their problems, so that they can go back into
+    code after the database is wiped (README § In the database, and back into
+    code).
   """
   query = f'?ids={",".join(COMPETITION_IDS)}' if COMPETITION_IDS else ''
   bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/team/admin/competitions/export{query}')

@@ -107,9 +107,8 @@ export interface BundleImportReport {
 
 /** Writes every competition and problem of the bundle `value` is to the
  *  database, or, if it is no bundle, or any of it breaks the rules or has an
- *  id the code or the database already holds, none of them. A competition or
- *  problem the code holds as the bundle has it is no clash, and is not
- *  written (`heldAlike`).
+ *  id the code or the database already holds, none of them. What the code
+ *  holds in the same form is skipped (`heldAlike`).
  *
  *  The problems the bundle builds on are read before the write's transaction
  *  opens: a read outside it would wait for the connection the transaction

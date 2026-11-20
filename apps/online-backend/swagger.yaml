@@ -273,8 +273,9 @@ paths:
       description: >
         The body is a bundle: the two maps a problem bank file exports, with a
         header naming the format. Nothing is written if any part of it breaks
-        the rules, or has an id the code or the database already holds. The
-        answer is a report either way, its messages in Hungarian.
+        the rules, or has an id the code or the database already holds; what
+        the code holds in the same form is skipped. The answer is a report
+        either way, its messages in Hungarian.
       security:
       - basicAdminAuth: []
       tags:
@@ -332,8 +333,7 @@ paths:
       description: >
         The competitions with every problem their relays use, those held in
         code included, so that the bundle imports on a server that holds none
-        of them. The import does not write a competition or problem the code
-        holds as the bundle has it.
+        of them.
       security:
       - basicAdminAuth: []
       tags:

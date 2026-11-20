@@ -4,15 +4,13 @@ import type { Bundle } from './bundle';
 import { heldAlike } from './bundle';
 import type { Bank } from './registry';
 
-// A bundle made into a file under banks/: how a competition held in the
-// database goes back into code (README § Adding a competition).
+// A bundle made into a file under banks/ (README § In the database, and back
+// into code).
 
-/// The bank a bundle makes, beside the banks `registry` holds: the
-/// competitions and problems of the bundle the registry does not have. Those
-/// it has as the bundle does are `leftOut`, since `createRegistry` refuses an
-/// id two banks hold: a relay reuses older problems, and a bundle of every
-/// competition on a server holds the in-code ones too. One the registry has in
-/// another form is an error, and so is a bundle with no competition left.
+/// The bank a bundle makes beside `registry`: what the registry holds in the
+/// same form is `leftOut`, since `createRegistry` refuses an id two banks hold.
+/// An id the registry holds in another form is an error, and so is a bundle
+/// with no competition left.
 export function bankFromBundle(
   bundle: Bundle,
   registry: { problems: ReadonlyMap<ProblemId, Problem>, competitions: ReadonlyMap<CompetitionId, CompetitionConfig> },

@@ -229,8 +229,8 @@ $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scrip
 
 It writes the match data (`match_data_*.json`), the results, one file per
 competition (`durer-results-<year>-<competition id>.tsv`), and the
-competitions' bundle with every problem their relays use
-(`durer-competitions-<year>.json`, § *Adding a competition*), to
+competitions' bundle (`durer-competitions-<year>.json`, § *In the database,
+and back into code*), to
 `scripts/admin-output/`, wherever it is run from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
@@ -529,36 +529,36 @@ is over, as its game is (§ *Competition secrecy*).
 
 ## In the database, and back into code
 
-**Which goes where.** A competition that outlives its round belongs in code: a
-practice set, and every round once it is over, since the code is its record and
-the relay practice site serves banks only. The database holds what one server
-needs for a while: a round being prepared or held there, or one set up to try
-something. The database is wiped after a competition, teams and matches with
-it, and the competitions and problems written to it go too, unless exported
-first.
+**Which goes where.** Code holds whatever outlives a round: the practice sets,
+and every round once it is over. The relay practice site serves banks only.
+The database holds what one server needs for a while: a round being prepared
+or held there, or one set up to try something. It is wiped after a
+competition, and the competitions and problems in it go too, unless they are
+exported first.
 
-**Moving one between servers.** Tick it in the **Versenyek** tab's table and
-export it: the bundle saved is JSON, a bank file's two maps under a header, with
-every problem its relays use, those held in code too, so it stands alone. The
-other server's **Import/export** tab writes all of it or none: a competition or
-problem its code holds in the same form is not written, and any other id it
-already has refuses the bundle. An in-code competition exports too.
+**Exporting.** Tick competitions in the **Versenyek** tab and export them, or
+let `scripts/admin.py` do it (§ *Admin*). The JSON file, a *bundle*, carries
+every problem the competitions' relays use, those held in code too, so it
+imports on a server that has none of them. A bundle can hold what the code
+already holds: a relay reuses older problems, and an export of every
+competition includes the in-code ones. Both the import and the bank script
+below skip what the code holds in the same form, and refuse an id it holds in
+another form.
+
+**Moving one between servers.** Export it, then import it in the other
+server's **Import/export** tab. The import writes all of the bundle or none
+of it.
 
 **From a finished round to a practice set:**
 
-1. **Export.** `scripts/admin.py` writes the bundle of `DURER_COMPETITIONS`
-   beside their results (§ *Admin*), so the run that pulls the results also
-   keeps the content; the **Versenyek** tab's export saves the same.
-2. **Make the bank.** `npm run bank:from-bundle -- <bundle.json> <bank-name>`
-   writes `packages/problem-bank/banks/<bank-name>.ts`, leaving out the
-   competitions and problems other banks already hold as the bundle does: a
-   relay reuses older problems, and a bundle of every competition holds the
-   in-code ones too. One held in another form refuses the bundle. Say in the
-   file's comment which round it is, as the other banks do.
-3. **Register it.** The script prints the lines for `all.ts`, and for
-   `practice-sets.ts`: the import, the registry entry and the `listedIds`, and
-   names the banks whose problems its relays reuse, which `practice-sets.ts`
-   must register too.
+1. **Export** the round's competitions.
+2. **Make the bank:** `npm run bank:from-bundle -- <bundle.json> <bank-name>`
+   writes `packages/problem-bank/banks/<bank-name>.ts`. Say in the file's
+   comment which round it is, as the other banks do.
+3. **Register it.** The script prints the lines to add:
+   - to `all.ts`, the import and the registry entry;
+   - to `practice-sets.ts`, the same, the competitions' `listedIds`, and the
+     banks whose problems its relays reuse, which must be registered there too.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
 5. **Wipe the database before that build reaches the server.** A server whose

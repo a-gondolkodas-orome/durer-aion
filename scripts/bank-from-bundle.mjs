@@ -1,12 +1,10 @@
 #!/usr/bin/env node
-// Writes the bank file a bundle exported from the admin page makes, and prints
-// the lines that register it:
+// Writes packages/problem-bank/banks/<bank-name>.ts from an exported bundle,
+// and prints the lines that register it:
 //
 //   npm run bank:from-bundle -- <bundle.json> <bank-name>
 //
-// writes packages/problem-bank/banks/<bank-name>.ts. The competitions and
-// problems the banks already hold are left out of it (`bankFromBundle`). README § Adding a
-// competition says when to run it, and what to do with the database's copy.
+// README § In the database, and back into code says when to run it.
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
