@@ -59,12 +59,6 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
-/// What the admin page calls a competition: its name where it has one, else
-/// its label, else its id.
-export function competitionTitle({ id, metadata }: CompetitionSummaryDto): string {
-  return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
-}
-
 declare module '@mui/x-data-grid' {
   interface ToolbarPropsOverrides {
     exportButton?: ReactNode;
@@ -86,8 +80,8 @@ function CompetitionsToolbar(props: { exportButton?: ReactNode }) {
 }
 
 /// The name a bundle of `ids` is saved under: the competition's id for one.
-export function bundleFileName(ids: readonly string[]): string {
-  return ids.length === 1 ? `${ids[0]}.json` : `durer-versenyek-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+function bundleFileName(ids: readonly string[]): string {
+  return ids.length === 1 ? `${ids[0]}.json` : `durer-competitions-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 }
 
 /// Every registered competition, newest edition first, with what the import's

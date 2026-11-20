@@ -314,7 +314,7 @@ export function configureTeamsRouter(
 
   router.get("/team/admin/competitions/export", adminAuth, async (ctx) => {
     const { ids } = ctx.query;
-    const named = (Array.isArray(ids) ? ids : [ids ?? '']).flatMap(list => list.split(',')).filter(id => id !== '');
+    const named = typeof ids === 'string' ? ids.split(',').filter(id => id !== '') : [];
     const exported = await exportBundle(named, sources);
     if ('missing' in exported) {
       refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${exported.missing.join(', ')}.`);

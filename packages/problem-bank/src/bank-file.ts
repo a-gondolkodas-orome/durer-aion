@@ -1,5 +1,5 @@
 import type { CompetitionConfig, CompetitionId, Problem, ProblemId } from 'schemas';
-import { competitionName } from 'schemas';
+import { competitionTitle } from 'schemas';
 import type { Bundle } from './bundle';
 import { heldAlike } from './bundle';
 import type { Bank } from './registry';
@@ -40,8 +40,7 @@ export function bankFromBundle(
 /// The source of a file under banks/ that exports `bank`. The literals are
 /// JSON: valid TypeScript, which the banks' ESLint rules pass as it is.
 export function bankFile(bank: Bank): string {
-  const titles = Object.entries(bank.competitions).map(([id, { metadata }]) =>
-    competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id);
+  const titles = Object.entries(bank.competitions).map(([id, { metadata }]) => competitionTitle({ id, metadata }));
   return [
     "import type { CompetitionBank, ProblemBank } from '../src/sources';",
     '',

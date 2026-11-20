@@ -6,7 +6,6 @@ import { registry } from '../all';
 import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
 import { bundleOf, readBundle } from './bundle';
-import { inCode } from './in-code-for-testing';
 import type { Bank } from './registry';
 import { createRegistry, validateRegistry } from './registry';
 
@@ -16,7 +15,7 @@ const TELJES = 'klmgbpb334--minta-teljes';
 const sample = readBundle(JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8')));
 if ('errors' in sample) throw new Error(sample.errors.join('\n'));
 // A reference competition with its problems, as the export writes it.
-const reference = bundleOf([inCode(registry.competitions, TELJES)], registry.problems);
+const reference = bundleOf([TELJES].flatMap(id => registry.competitions.get(id) ?? []), registry.problems);
 const korongok = reference.problems[KORONGOK];
 // The sample as the export writes it: with the reference problem its relay reuses.
 const sampleBundle: Bundle = { ...sample.bundle, problems: { ...sample.bundle.problems, [KORONGOK]: korongok } };
