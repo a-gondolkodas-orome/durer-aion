@@ -126,8 +126,6 @@ export function RelayWrapper(
     onEnd: ({ G }) => recordFinish(G),
     setup: (_context, setupData) => {
       const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
-      // One clock read, so that end - start is the duration exactly.
-      const now = Date.now();
       return {
         currentProblem: 0,
         // The judge's firstProblem move fills in the problem fields: the game
@@ -142,8 +140,8 @@ export function RelayWrapper(
         maxPointsList: [],
         numberOfTry: 0,
         millisecondsRemaining: durationMs,
-        start: new Date(now).toISOString(),
-        end: new Date(now + durationMs).toISOString(),
+        start: new Date().toISOString(),
+        end: new Date(Date.now() + durationMs).toISOString(),
         imageUrl: "",
       };
     },

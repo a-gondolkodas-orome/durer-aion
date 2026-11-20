@@ -121,13 +121,11 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin, Record<string, unknown>, StrategySetupData | undefined> = {
     setup: (_context, setupData) => {
       const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
-      // One clock read, so that end - start is the duration exactly.
-      const now = Date.now();
       return {
         ...game.setup(),
         millisecondsRemaining: durationMs,
-        start: new Date(now).toISOString(),
-        end: new Date(now + durationMs).toISOString(),
+        start: new Date().toISOString(),
+        end: new Date(Date.now() + durationMs).toISOString(),
         firstPlayer: null,
         difficulty: null,
         winner: null,

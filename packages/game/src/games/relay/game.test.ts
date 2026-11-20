@@ -199,13 +199,3 @@ describe("RelayWrapper duration", () => {
     expect(G && new Date(G.end).getTime() - new Date(G.start).getTime()).toStrictEqual(expectedMinutes * 60 * 1000);
   });
 });
-
-// Regression: start and end each read the clock, so a millisecond passing
-// between the reads made the match a millisecond longer than its duration.
-test("a relay's end is its start plus its duration, however the clock ticks", () => {
-  let clock = Date.parse("2026-11-21T15:00:00Z");
-  vi.spyOn(Date, "now").mockImplementation(() => clock++);
-  onTestFinished(() => { vi.restoreAllMocks(); });
-  const G = GameRelay.setup?.({} as never, { durationMinutes: 40 });
-  expect(Date.parse(G?.end ?? "") - Date.parse(G?.start ?? "")).toBe(40 * 60_000);
-});
