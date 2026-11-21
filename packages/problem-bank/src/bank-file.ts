@@ -1,38 +1,30 @@
 import type { CompetitionConfig, CompetitionId, Problem, ProblemId } from 'schemas';
 import { competitionTitle } from 'schemas';
 import type { Bundle } from './bundle';
-import { heldAlike } from './bundle';
+import { problemsReferredFrom } from './bundle';
 import type { Bank } from './registry';
 
 // A bundle made into a file under banks/ (README § In the database, and back
 // into code).
 
-/// The bank a bundle makes beside `registry`: what the registry holds in the
-/// same form is `leftOut`, since `createRegistry` refuses an id two banks hold.
-/// An id the registry holds in another form is an error, and so is a bundle
-/// with no competition left.
+/// The bank a bundle makes beside `registry`, or why it makes none: an id the
+/// registry holds already, since `createRegistry` refuses an id two banks
+/// hold, a relay problem neither holds, or no competition.
 export function bankFromBundle(
   bundle: Bundle,
   registry: { problems: ReadonlyMap<ProblemId, Problem>, competitions: ReadonlyMap<CompetitionId, CompetitionConfig> },
-): { bank: Bank, leftOut: string[] } | { errors: string[] } {
-  const alike = heldAlike(bundle, registry);
-  const leftOut = [...alike];
-  const errors: string[] = [];
-  const notHeld = <T extends object>(kind: string, bodies: Record<string, T>, held: ReadonlyMap<string, object>) => {
-    const kept: Record<string, T> = {};
-    for (const [id, body] of Object.entries(bodies)) {
-      if (!held.has(id)) kept[id] = body;
-      else if (!alike.has(id)) errors.push(`The ${kind} ${id} is in code already, and differs from the bundle's`);
-    }
-    return kept;
-  };
-  const competitions = notHeld('competition', bundle.competitions, registry.competitions);
-  const problems = notHeld('problem', bundle.problems, registry.problems);
-  if (errors.length === 0 && Object.keys(competitions).length === 0) {
-    errors.push('Every competition of the bundle is in code already');
-  }
+): { bank: Bank } | { errors: string[] } {
+  const errors = [
+    ...Object.keys(bundle.competitions).filter(id => registry.competitions.has(id))
+      .map(id => `The competition ${id} is in code already`),
+    ...Object.keys(bundle.problems).filter(id => registry.problems.has(id))
+      .map(id => `The problem ${id} is in code already`),
+    ...problemsReferredFrom(bundle).filter(id => !registry.problems.has(id))
+      .map(id => `A relay uses the problem ${id}, which neither the bundle nor the code holds`),
+  ];
+  if (Object.keys(bundle.competitions).length === 0) errors.push('The bundle holds no competition');
   if (errors.length > 0) return { errors };
-  return { bank: { competitions, problems }, leftOut };
+  return { bank: { competitions: bundle.competitions, problems: bundle.problems } };
 }
 
 /// The source of a file under banks/ that exports `bank`. The literals are

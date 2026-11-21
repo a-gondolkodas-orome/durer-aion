@@ -176,54 +176,35 @@ async function exported(query: string) {
 }
 
 describe("the export", () => {
-  it("makes a bundle that imports again on an empty database, and plays the same", async () => {
+  const ids = `?ids=${Object.keys(sample.competitions).join(",")}`;
+
+  it("makes the bundle it was imported from, which imports again on an empty database", async () => {
     expect((await importBundle(sample)).written).toBe(true);
-    const response = await exported(`?ids=${Object.keys(sample.competitions).join(",")}`);
+    const response = await exported(ids);
     expect(response.status).toBe(200);
     const bundle = await response.json() as Bundle;
-    expect(bundle.competitions).toEqual(sample.competitions);
-    // It stands alone: the in-code problem the relay reuses comes with it.
-    expect(bundle.problems).toEqual({ ...sample.problems, "k5g58wuf6h--minta-korongok": expect.anything() as unknown });
+    // The in-code problem a relay reuses it refers to, as the sample does.
+    expect(bundle).toEqual(sample);
 
     await database.reset();
-    expect(await importBundle(bundle)).toEqual({
-      written: true,
-      competitions: Object.keys(sample.competitions),
-      // The one the code holds as the bundle does is not written.
-      problems: Object.keys(sample.problems),
-      errors: [],
-    });
+    expect((await importBundle(bundle)).written).toBe(true);
     expect(await storedIds()).toEqual(sampleIds);
-    const again = await (await exported(`?ids=${Object.keys(sample.competitions).join(",")}`)).json() as Bundle;
-    expect(again).toEqual(bundle);
   });
 
-  it("exports a competition held in code too", async () => {
-    const bundle = await (await exported("?ids=klmgbpb334--minta-teljes")).json() as Bundle;
-    expect(Object.keys(bundle.competitions)).toEqual(["klmgbpb334--minta-teljes"]);
-    expect(Object.keys(bundle.problems)).toEqual(
-      registry.competitions.get("klmgbpb334--minta-teljes")?.relay?.problems.map(({ problemId }) => problemId));
-  });
-
-  it("exports every competition without ids", async () => {
+  it("exports every competition the database holds without ids, and none held in code", async () => {
     expect((await importBundle(sample)).written).toBe(true);
     const bundle = await (await exported("")).json() as Bundle;
-    expect(Object.keys(bundle.competitions).sort())
-      .toEqual([...registry.competitions.keys(), ...Object.keys(sample.competitions)].sort());
-
-    // What the code holds as the bundle does is not written, so it imports again.
-    await database.reset();
-    expect(await importBundle(bundle)).toEqual({
-      written: true, competitions: Object.keys(sample.competitions), problems: Object.keys(sample.problems), errors: [],
-    });
-    expect(await storedIds()).toEqual(sampleIds);
+    expect(Object.keys(bundle.competitions)).toEqual(Object.keys(sample.competitions).sort());
+    expect(Object.keys(bundle.problems).sort()).toEqual(Object.keys(sample.problems).sort());
   });
 
-  it("refuses an id no competition has, naming it", async () => {
-    const response = await exported("?ids=klmgbpb334--minta-teljes,nnnnnnnnnn--nincs");
+  it("refuses an id the database holds no competition under, one held in code included, naming them", async () => {
+    expect((await importBundle(sample)).written).toBe(true);
+    const response = await exported(`${ids},klmgbpb334--minta-teljes,nnnnnnnnnn--nincs`);
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
-      code: "COMPETITION_NOT_FOUND", message: "No competition with id nnnnnnnnnn--nincs.",
+      code: "COMPETITION_NOT_FOUND",
+      message: "No competition in the database with id klmgbpb334--minta-teljes, nnnnnnnnnn--nincs.",
     });
   });
 

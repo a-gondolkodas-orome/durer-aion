@@ -273,9 +273,8 @@ paths:
       description: >
         The body is a bundle: the two maps a problem bank file exports, with a
         header naming the format. Nothing is written if any part of it breaks
-        the rules, or has an id the code or the database already holds; what
-        the code holds in the same form is skipped. The answer is a report
-        either way, its messages in Hungarian.
+        the rules, or has an id the code or the database already holds. The
+        answer is a report either way, its messages in Hungarian.
       security:
       - basicAdminAuth: []
       tags:
@@ -329,11 +328,11 @@ paths:
           description: The body is not JSON, or there is none
   /team/admin/competitions/export:
     get:
-      summary: The bundle of some competitions, or of all, which the import takes
+      summary: The bundle of some of the database's competitions, or of all, which the import takes
       description: >
-        The competitions with every problem their relays use, those held in
-        code included, so that the bundle imports on a server that holds none
-        of them.
+        The competitions with the problems their relays use that the code
+        does not hold. Those the code holds the bundle refers to, as the
+        import allows.
       security:
       - basicAdminAuth: []
       tags:
@@ -342,7 +341,7 @@ paths:
       - name: ids
         in: query
         required: false
-        description: The competitions' ids, comma-separated, in the order the bundle lists them. Without it, every competition.
+        description: The competitions' ids, comma-separated, in the order the bundle lists them. Without it, every competition the database holds.
         schema:
           type: string
       responses:
@@ -364,7 +363,7 @@ paths:
                   problems:
                     type: object
         "404":
-          description: No competition has one of the ids; the message names them
+          description: The database holds no competition under one of the ids, which may be one held in code; the message names them
   /team/admin/competitions/{competitionId}/start-window:
     put:
       summary: Set a competition's start window in place of its config's, or return it to its config's

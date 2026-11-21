@@ -65,7 +65,8 @@ function bundleFileName(ids: readonly string[]): string {
 
 /// Every registered competition, newest edition first, with what the import's
 /// Competition column takes for it, to copy, and its start window, to change,
-/// and the ones ticked to export.
+/// and the ones ticked to export: those held in the database, since a bundle
+/// refers to what the code holds.
 export function CompetitionTable(props: {
   competitions: CompetitionSummaryDto[],
   /// How many teams each competition has, by its id.
@@ -79,7 +80,7 @@ export function CompetitionTable(props: {
   const [selection, setSelection] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
   const [exporting, setExporting] = useState(false);
   // Ticking the header box selects by exclusion: every row but the ones named.
-  const selected = props.competitions.map(({ id }) => id)
+  const selected = props.competitions.filter(({ storedIn }) => storedIn === 'database').map(({ id }) => id)
     .filter(id => selection.ids.has(id) === (selection.type === 'include'));
   const runExport = async (ids: string[]) => {
     setExporting(true);
@@ -119,7 +120,8 @@ export function CompetitionTable(props: {
         </Button>
         <Box component="span" sx={{ fontSize: 14 }}>
           A kijelölt versenyek a feladataikkal együtt egy versenycsomagba kerülnek, amelyet egy másik szerver
-          Import/export füle betölt.
+          Import/export füle betölt. Csak az adatbázisban tárolt verseny jelölhető ki, és a kódban lévő feladatokra a
+          csomag csak hivatkozik.
         </Box>
       </Stack>
       <DataGrid
@@ -190,6 +192,7 @@ export function CompetitionTable(props: {
         }}
         pageSizeOptions={[10, 25, 50]}
         checkboxSelection
+        isRowSelectable={({ row }) => row.storedIn === STORED_IN.database}
         rowSelectionModel={selection}
         onRowSelectionModelChange={setSelection}
         disableRowSelectionOnClick

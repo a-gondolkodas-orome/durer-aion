@@ -57,9 +57,8 @@ export function CompetitionImport(props: { onImported: () => void }) {
       <Stack component="h3" sx={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Versenyek importálása</Stack>
       <Stack sx={{ fontSize: 14 }}>
         Versenycsomag: .json fájl a versenyekkel és a feladataikkal. Vagy minden bekerül belőle, vagy semmi: egy hibás
-        verseny vagy feladat, vagy egy már létező azonosító esetén semmi. A kódban már ugyanígy meglévő verseny vagy
-        feladat nem hiba. A bekerült versenyek a Versenyek fülön „adatbázis” tárolásúak, és rögtön lehet csapatokat importálni
-        beléjük.
+        verseny vagy feladat, vagy egy már létező azonosító esetén semmi. A bekerült versenyek a Versenyek fülön
+        „adatbázis” tárolásúak, és rögtön lehet csapatokat importálni beléjük.
       </Stack>
       <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <Button variant="outlined" color="primary" component="label" disabled={busy}>

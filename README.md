@@ -228,9 +228,9 @@ $env:DURER_BASE_URL = 'https://verseny.durerinfo.hu'; .venv\Scripts\python scrip
 ```
 
 It writes the match data (`match_data_*.json`), the results, one file per
-competition (`durer-results-<year>-<competition id>.tsv`), and the
-competitions' bundle (`durer-competitions-<date and time>.json`, § *In the database,
-and back into code*), to
+competition (`durer-results-<year>-<competition id>.tsv`), and the bundle of
+the competitions the database holds (`durer-competitions-<date and time>.json`,
+§ *In the database, and back into code*), to
 `scripts/admin-output/`, wherever it is run from.
 
 - `DURER_ADMIN_PASSWORD` — the backend's `ADMIN_CREDENTIALS`; the script holds
@@ -536,14 +536,12 @@ or held there, or one set up to try something. It is wiped after a
 competition, and the competitions and problems in it go too, unless they are
 exported first.
 
-**Exporting.** Tick competitions in the **Versenyek** tab and export them, or
-let `scripts/admin.py` do it (§ *Admin*). The JSON file, a *bundle*, carries
-every problem the competitions' relays use, those held in code too, so it
-imports on a server that has none of them. A bundle can hold what the code
-already holds: a relay reuses older problems, and an export of every
-competition includes the in-code ones. Both the import and the bank script
-below skip what the code holds in the same form, and refuse an id it holds in
-another form.
+**Exporting.** Tick competitions held in the database in the **Versenyek**
+tab and export them, or let `scripts/admin.py` do it (§ *Admin*). The JSON
+file, a *bundle*, carries the competitions and the problems their relays use
+that the code does not hold. A relay that reuses a problem held in code
+refers to it, as every server's code holds it too. What the code holds is in
+the repo already, so it is not exported.
 
 **Moving one between servers.** Export it, then import it in the other
 server's **Import/export** tab. The import writes all of the bundle or none

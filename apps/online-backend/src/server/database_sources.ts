@@ -4,7 +4,6 @@ import {
   bundleOf,
   combinedCompetitionSource,
   combinedProblemSource,
-  heldAlike,
   problemsReferredFrom,
   readBundle,
   relayProblemIds,
@@ -107,8 +106,7 @@ export interface BundleImportReport {
 
 /** Writes every competition and problem of the bundle `value` is to the
  *  database, or, if it is no bundle, or any of it breaks the rules or has an
- *  id the code or the database already holds, none of them. What the code
- *  holds in the same form is skipped (`heldAlike`).
+ *  id the code or the database already holds, none of them.
  *
  *  The problems the bundle builds on are read before the write's transaction
  *  opens: a read outside it would wait for the connection the transaction
@@ -122,9 +120,8 @@ export async function importBundle(
   const read = readBundle(value);
   if ('errors' in read) return refused(read.errors);
   const { bundle } = read;
-  const inCodeAlike = heldAlike(bundle, { competitions, problems });
-  const competitionIds = Object.keys(bundle.competitions).filter(id => !inCodeAlike.has(id));
-  const problemIds = Object.keys(bundle.problems).filter(id => !inCodeAlike.has(id));
+  const competitionIds = Object.keys(bundle.competitions);
+  const problemIds = Object.keys(bundle.problems);
   const sortedIds = [...[...competitionIds].sort(), ...[...problemIds].sort()];
   // What of the bundle the id is first, then what already holds it.
   const clashes = (holders: ReadonlyMap<string, 'competition' | 'problem'>, where: string) =>
@@ -166,32 +163,35 @@ export async function importBundle(
     ]);
     const inDatabaseClashes = clashes(inDatabase, 'az adatbázisban');
     if (inDatabaseClashes.length > 0) return refused(inDatabaseClashes);
-    const rows = <T>(bank: Record<string, T>, ids: readonly string[]) =>
-      ids.map(id => ({ id, body: bank[id], createdBy: null }));
-    await ProblemModel.bulkCreate(rows(bundle.problems, problemIds), { transaction });
-    await CompetitionModel.bulkCreate(rows(bundle.competitions, competitionIds), { transaction });
+    const rows = <T>(bank: Record<string, T>) => Object.entries(bank).map(([id, body]) => ({ id, body, createdBy: null }));
+    await ProblemModel.bulkCreate(rows(bundle.problems), { transaction });
+    await CompetitionModel.bulkCreate(rows(bundle.competitions), { transaction });
     return { written: true, competitions: competitionIds, problems: problemIds, errors: [] };
   });
 }
 
-/** The bundle of the competitions `ids` names, in that order, or of every
- *  competition for none, with every problem their relays use, wherever it is
- *  held. `missing` names the ids no competition has. */
+/** The bundle of the database's competitions `ids` names, in that order, or
+ *  of every one it holds for none, with the problems their relays use that
+ *  the code does not hold: the bundle refers to those, as the code holds them
+ *  on every server. `missing` names the ids the database holds no competition
+ *  under, one held in code included. */
 export async function exportBundle(
   ids: readonly string[],
-  { competitionSource, problemSource }: Pick<ContentSources, 'competitionSource' | 'problemSource'>,
+  { competitionSource, problemSource, competitions, problems }: ContentSources,
 ): Promise<{ bundle: Bundle } | { missing: string[] }> {
-  let competitions: CompetitionConfig[] = [];
+  const named = ids.length > 0
+    ? [...new Set(ids)]
+    : (await CompetitionModel.findAll({ attributes: ['id'], order: [['id', 'ASC']] })).map(({ id }) => id);
+  const found: CompetitionConfig[] = [];
   const missing: string[] = [];
-  if (ids.length === 0) {
-    competitions = await competitionSource.listCompetitions();
-  } else {
-    for (const id of new Set(ids)) {
-      const competition = await competitionSource.getCompetition(id);
-      if (competition === undefined) missing.push(id);
-      else competitions.push(competition);
-    }
+  for (const id of named) {
+    // Through the validating source, so that a stored competition that no
+    // longer keeps the rules fails the export instead of being left out.
+    const competition = competitions.has(id) ? undefined : await competitionSource.getCompetition(id);
+    if (competition === undefined) missing.push(id);
+    else found.push(competition);
   }
   if (missing.length > 0) return { missing };
-  return { bundle: bundleOf(competitions, await problemSource.getProblems(relayProblemIds(competitions))) };
+  const stored = relayProblemIds(found).filter(id => !problems.has(id));
+  return { bundle: bundleOf(found, await problemSource.getProblems(stored)) };
 }

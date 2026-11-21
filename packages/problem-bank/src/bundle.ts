@@ -51,9 +51,9 @@ export function readBundle(value: unknown): { bundle: Bundle } | { errors: strin
   return { bundle: value as unknown as Bundle };
 }
 
-/// The bundle of `competitions` and every problem their relays use, taken
-/// from `problems`, so that it stands alone: it imports on a server that
-/// holds none of them. Competitions keep the order given, and problems the
+/// The bundle of `competitions` and of the problems their relays use that
+/// `problems` holds; a relay problem it does not hold, the bundle refers to,
+/// as one held in code. Competitions keep the order given, and problems the
 /// order their relays first use them in.
 export function bundleOf(
   competitions: readonly CompetitionConfig[],
@@ -63,41 +63,13 @@ export function bundleOf(
     format: BUNDLE_FORMAT,
     version: BUNDLE_VERSION,
     competitions: Object.fromEntries(competitions.map(({ id, ...body }) => [id, body])),
-    problems: Object.fromEntries(relayProblemIds(competitions).map((problemId) => {
+    problems: Object.fromEntries(relayProblemIds(competitions).flatMap((problemId) => {
       const problem = problems.get(problemId);
-      if (problem === undefined) throw new Error(`A relay uses the problem ${problemId}, which is missing`);
+      if (problem === undefined) return [];
       const { id, ...body } = problem;
-      return [id, body];
+      return [[id, body]];
     })),
   };
-}
-
-/// The ids of `bundle`'s competitions and problems that `held` holds in the
-/// same form.
-export function heldAlike(
-  bundle: Bundle,
-  held: { competitions: ReadonlyMap<string, object>, problems: ReadonlyMap<string, object> },
-): Set<string> {
-  const alike = (bodies: Record<string, object>, holder: ReadonlyMap<string, object>) =>
-    Object.entries(bodies).flatMap(([id, body]) => {
-      const inCode = holder.get(id);
-      return inCode !== undefined && sameBody(body, inCode) ? [id] : [];
-    });
-  return new Set([...alike(bundle.competitions, held.competitions), ...alike(bundle.problems, held.problems)]);
-}
-
-/// Whether two competitions, or two problems, say the same, whatever order
-/// their fields were written in and whichever carries its id.
-function sameBody(a: object, b: object): boolean {
-  // JSON leaves out a field set to undefined, which an id then is.
-  return canonical({ ...a, id: undefined }) === canonical({ ...b, id: undefined });
-}
-
-/// JSON with every object's keys in order.
-function canonical(value: unknown): string {
-  return JSON.stringify(value, (_key, item: unknown) => isRecord(item)
-    ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
-    : item);
 }
 
 /// The problems the relays of `competitions` use, each once, in the order

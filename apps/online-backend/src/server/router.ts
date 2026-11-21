@@ -317,7 +317,7 @@ export function configureTeamsRouter(
     const named = typeof ids === 'string' ? ids.split(',').filter(id => id !== '') : [];
     const exported = await exportBundle(named, sources);
     if ('missing' in exported) {
-      refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${exported.missing.join(', ')}.`);
+      refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition in the database with id ${exported.missing.join(', ')}.`);
     }
     ctx.body = exported.bundle;
   });

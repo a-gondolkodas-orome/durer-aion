@@ -9,7 +9,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bankFile, bankFromBundle, readBundle, relayProblemIds } from 'problem-bank';
+import { bankFile, bankFromBundle, problemsReferredFrom, readBundle } from 'problem-bank';
 import { registry } from 'problem-bank/all';
 
 const BANKS = fileURLToPath(new URL('../packages/problem-bank/banks/', import.meta.url));
@@ -54,12 +54,10 @@ export async function writeBank(bundlePath, name, banks = BANKS) {
   const as = importName(name);
   const ids = Object.keys(made.bank.competitions);
   // A site registers only the banks it names, so one that lists this bank's
-  // competitions must name the banks holding the problems it leaves out.
-  const others = await banksHolding(
-    relayProblemIds(Object.values(made.bank.competitions)).filter(id => !(id in made.bank.problems)), name);
+  // competitions must name the banks holding the problems it refers to.
+  const others = await banksHolding(problemsReferredFrom(read.bundle), name);
   return [
-    `Wrote ${path}: ${ids.length} competitions, ${Object.keys(made.bank.problems).length} problems`
-      + (made.leftOut.length > 0 ? `, leaving out ${made.leftOut.length} competitions and problems that other banks hold.` : '.'),
+    `Wrote ${path}: ${ids.length} competitions, ${Object.keys(made.bank.problems).length} problems.`,
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,

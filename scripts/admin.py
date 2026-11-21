@@ -186,12 +186,16 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 # %%
 def export_bundle():
   """
-    Saves the competitions and their problems, so that they can go back into
-    code after the database is wiped (README § In the database, and back into
-    code).
+    Saves the competitions the database holds, of those chosen, and their
+    problems, so that they can go back into code after the database is wiped
+    (README § In the database, and back into code). One held in code is in
+    the repo already.
   """
-  query = f'?ids={",".join(COMPETITION_IDS)}' if COMPETITION_IDS else ''
-  bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/team/admin/competitions/export{query}')
+  ids = [cid for cid in (COMPETITION_IDS or competitions) if competitions[cid]['storedIn'] == 'database']
+  if not ids:
+    print('No competition to export to a bundle: the database holds none of them')
+    return
+  bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/team/admin/competitions/export?ids={",".join(ids)}')
   # A run's own name, so that a later run does not write over it.
   bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.json"
   with open(bundle_path, 'w', encoding='utf-8') as f:

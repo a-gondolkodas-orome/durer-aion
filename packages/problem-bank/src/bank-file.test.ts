@@ -12,18 +12,15 @@ import { createRegistry, validateRegistry } from './registry';
 const KORONGOK = 'k5g58wuf6h--minta-korongok';
 const TELJES = 'klmgbpb334--minta-teljes';
 
-const sample = readBundle(JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8')));
-if ('errors' in sample) throw new Error(sample.errors.join('\n'));
-// A reference competition with its problems, as the export writes it.
-const reference = bundleOf([TELJES].flatMap(id => registry.competitions.get(id) ?? []), registry.problems);
-const korongok = reference.problems[KORONGOK];
-// The sample as the export writes it: with the reference problem its relay reuses.
-const sampleBundle: Bundle = { ...sample.bundle, problems: { ...sample.bundle.problems, [KORONGOK]: korongok } };
+// As the export writes it: its relay refers to KORONGOK, which the code holds.
+const read = readBundle(JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8')));
+if ('errors' in read) throw new Error(read.errors.join('\n'));
+const sample = read.bundle;
 
 function made(bundle: Bundle) {
   const result = bankFromBundle(bundle, registry);
   if ('errors' in result) throw new Error(result.errors.join('\n'));
-  return result;
+  return result.bank;
 }
 
 describe('bankFromBundle', () => {
@@ -31,10 +28,9 @@ describe('bankFromBundle', () => {
   beforeAll(() => { directory = mkdtempSync(join(tmpdir(), 'bank-file-')); });
   afterAll(() => { rmSync(directory, { recursive: true, force: true }); });
 
-  it('leaves out the problems the registry holds, and makes a file that registers beside it', async () => {
-    const { bank, leftOut } = made(sampleBundle);
-    expect(leftOut).toEqual([KORONGOK]);
-    expect(Object.keys(bank.problems)).not.toContain(KORONGOK);
+  it('makes a file that registers beside the banks', async () => {
+    const bank = made(sample);
+    expect(bank).toEqual({ competitions: sample.competitions, problems: sample.problems });
 
     const path = join(directory, 'sample.ts');
     writeFileSync(path, bankFile(bank));
@@ -43,41 +39,38 @@ describe('bankFromBundle', () => {
     expect(validateRegistry(createRegistry([...banks, bank]), strategyGames)).toEqual([]);
   });
 
-  // As admin.py exports a server's every competition, in-code ones too.
-  it('leaves out the competitions the registry holds', () => {
-    const both: Bundle = {
-      ...sampleBundle,
-      competitions: { ...reference.competitions, ...sampleBundle.competitions },
-      problems: { ...reference.problems, ...sampleBundle.problems },
+  it('refuses an id the registry holds, and a relay problem neither holds', () => {
+    const inCode = bundleOf([TELJES].flatMap(id => registry.competitions.get(id) ?? []), registry.problems);
+    const relay = sample.competitions['903xajr9et--csomag-valto'].relay;
+    if (relay === undefined) throw new Error('The sample bundle has changed');
+    const bundle: Bundle = {
+      ...sample,
+      competitions: {
+        ...sample.competitions,
+        ...inCode.competitions,
+        '903xajr9et--csomag-valto': {
+          ...sample.competitions['903xajr9et--csomag-valto'],
+          relay: { ...relay, problems: [...relay.problems, { problemId: 'nnnnnnnnnn--nincs', points: 1 }] },
+        },
+      },
+      problems: { ...sample.problems, [KORONGOK]: inCode.problems[KORONGOK] },
     };
-    const { bank, leftOut } = made(both);
-    expect(leftOut).toContain(TELJES);
-    expect(bank).toEqual(made(sampleBundle).bank);
-  });
-
-  it('refuses a competition or a problem the registry holds in another form, and a bundle of in-code ones only', () => {
-    const changed: Bundle = {
-      ...reference,
-      competitions: { [TELJES]: { ...reference.competitions[TELJES], languages: ['en'] } },
-      problems: { ...reference.problems, [KORONGOK]: { ...korongok, answer: 10 } },
-    };
-    expect(bankFromBundle(changed, registry)).toEqual({ errors: [
-      `The competition ${TELJES} is in code already, and differs from the bundle's`,
-      `The problem ${KORONGOK} is in code already, and differs from the bundle's`,
+    expect(bankFromBundle(bundle, registry)).toEqual({ errors: [
+      `The competition ${TELJES} is in code already`,
+      `The problem ${KORONGOK} is in code already`,
+      'A relay uses the problem nnnnnnnnnn--nincs, which neither the bundle nor the code holds',
     ] });
-    expect(bankFromBundle(reference, registry)).toEqual({ errors: ['Every competition of the bundle is in code already'] });
   });
 
-  it('takes a problem the registry holds as the same whatever order its fields come in', () => {
-    const { answer, content } = korongok;
-    const bundle: Bundle = { ...sampleBundle, problems: { [KORONGOK]: { content, answer } } };
-    expect(made(bundle).leftOut).toEqual([KORONGOK]);
+  it('refuses a bundle with no competition', () => {
+    expect(bankFromBundle({ ...sample, competitions: {} }, registry))
+      .toEqual({ errors: ['The bundle holds no competition'] });
   });
 });
 
 describe('bankFile', () => {
   it('names the competitions in the file\'s comment', () => {
-    expect(bankFile(made(sampleBundle).bank))
+    expect(bankFile(made(sample)))
       .toContain('// Csomag: váltó, Csomag: teljes forduló: made from a bundle exported from the database,');
   });
 });

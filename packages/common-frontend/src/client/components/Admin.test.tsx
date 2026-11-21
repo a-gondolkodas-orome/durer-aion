@@ -41,14 +41,14 @@ vi.mock('@mui/x-data-grid', () => {
     DataGrid: (props: {
       rows: Row[], columns: Column[],
       slots?: { toolbar?: React.ComponentType<object> }, slotProps?: { toolbar?: object },
-      checkboxSelection?: boolean, rowSelectionModel?: Selection,
+      checkboxSelection?: boolean, isRowSelectable?: (params: { row: Row }) => boolean, rowSelectionModel?: Selection,
       onRowSelectionModelChange?: (model: Selection) => void,
     }) => { grids.columns.push(props.columns); return (<>
       {props.slots?.toolbar && <props.slots.toolbar {...props.slotProps?.toolbar}/>}
       <ul>
         {props.rows.map(row => (
           <li key={row.id}>
-            {props.checkboxSelection && <input type="checkbox" aria-label={`Kijelölés: ${row.id}`}
+            {props.checkboxSelection && (props.isRowSelectable?.({ row }) ?? true) && <input type="checkbox" aria-label={`Kijelölés: ${row.id}`}
               onChange={() => {
                 const ids = new Set(props.rowSelectionModel?.ids);
                 if (ids.has(row.id)) ids.delete(row.id); else ids.add(row.id);
@@ -576,7 +576,12 @@ test('the competitions tab lists the competitions newest first, with what to imp
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
-test('the competitions tab exports the ticked competitions as one bundle file', async () => {
+test('the competitions tab exports the ticked competitions held in the database as one bundle file', async () => {
+  const stored = 'aqvco71pta--csomag-teljes';
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
+    { id: stored, metadata: { kind: 'other', label: { hu: 'Csomag: teljes forduló' } }, storedIn: 'database' },
+  ]);
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const bundle = { format: 'durer-competitions', version: 1, competitions: {}, problems: {} };
   const exportCompetitions = vi.spyOn(repo, 'exportCompetitions').mockResolvedValue(bundle);
@@ -586,13 +591,15 @@ test('the competitions tab exports the ticked competitions as one bundle file', 
   fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
   await screen.findByText('20 online C');
   expect(screen.getByRole('button', { name: 'Exportálás' })).toBeDisabled();
-  fireEvent.click(screen.getByRole('checkbox', { name: `Kijelölés: ${COMPETITION_C}` }));
+  // One held in code is in the repo already.
+  expect(screen.queryByRole('checkbox', { name: `Kijelölés: ${COMPETITION_C}` })).toBeNull();
+  fireEvent.click(screen.getByRole('checkbox', { name: `Kijelölés: ${stored}` }));
   fireEvent.click(screen.getByRole('button', { name: '1 verseny exportálása' }));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
-  expect(exportCompetitions).toHaveBeenCalledWith([COMPETITION_C]);
+  expect(exportCompetitions).toHaveBeenCalledWith([stored]);
   expect(JSON.parse(saved[0])).toEqual(bundle);
-  expect(vi.mocked(HTMLAnchorElement.prototype.click).mock.contexts[0]).toHaveProperty('download', `${COMPETITION_C}.json`);
+  expect(vi.mocked(HTMLAnchorElement.prototype.click).mock.contexts[0]).toHaveProperty('download', `${stored}.json`);
 });
 
 // The import's help names the tab with what its Competition column takes.

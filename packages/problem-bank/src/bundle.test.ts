@@ -39,7 +39,7 @@ describe('the sample bundle', () => {
 });
 
 describe('bundleOf', () => {
-  it('makes a bundle that stands alone: valid with no problem from elsewhere', () => {
+  it('holds every relay problem it is given, each once', () => {
     const made = read(bundleOf(fromCode('klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto'), registry.problems));
     expect(Object.keys(made.competitions)).toEqual(['klmgbpb334--minta-teljes', '49tbhzl1jz--minta-valto']);
     // In the order the relays first use them, each once.
@@ -51,9 +51,11 @@ describe('bundleOf', () => {
     expect(validateBundle(made, new Map(), strategyGames)).toEqual([]);
   });
 
-  it('throws on a relay problem it is not given', () => {
-    expect(() => bundleOf(fromCode('49tbhzl1jz--minta-valto'), new Map()))
-      .toThrow('k5g58wuf6h--minta-korongok');
+  it('refers to a relay problem it is not given', () => {
+    const made = read(bundleOf(fromCode('49tbhzl1jz--minta-valto'), new Map()));
+    expect(made.problems).toEqual({});
+    expect(problemsReferredFrom(made)).toContain('k5g58wuf6h--minta-korongok');
+    expect(validateBundle(made, registry.problems, strategyGames)).toEqual([]);
   });
 });
 
