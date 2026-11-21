@@ -9,7 +9,7 @@ import { Relay } from "./teamstates/Relay";
 import { Strategy } from "./teamstates/Strategy";
 import { Disclaimer } from "./Disclaimer";
 import { Chooser } from "./Chooser";
-import { Admin } from "./Admin";
+import { Loading } from "./Loading";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { SiteFooter } from "./SiteFooter";
 import i18next from "i18next";
@@ -17,6 +17,13 @@ import { useClientRepo, useOptionalAdminRepo } from "../client-repo-context";
 import { useTranslation } from "react-i18next";
 import { competitionHeading } from "./competition-heading";
 import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenLanguage } from "../hooks/ui-language";
+
+// A chunk of its own, the data grid and the syntax highlighter with it: those
+// are over half of the page's JavaScript, and a team never needs them, on a
+// school network least of all (#715). Admin.tsx and TeamDetailDialog.tsx are
+// therefore not exported from the package, which would pull them back into
+// the entry chunk.
+const Admin = React.lazy(() => import("./Admin").then(module => ({ default: module.Admin })));
 
 export function Main(props: { gitCommitHash: string }) {
   const teamState = useTeamState();
@@ -86,7 +93,9 @@ export function Main(props: { gitCommitHash: string }) {
               to — the join-code login form for an organiser with no team cookie,
               or a live, playable board for one still holding a team's session
               from testing. */}
-          {admin ? <Admin teamId={window.location.pathname.split('/').at(2)}/> : <>
+          {admin ? <React.Suspense fallback={<Loading/>}>
+            <Admin teamId={window.location.pathname.split('/').at(2)}/>
+          </React.Suspense> : <>
             {/* `undefined`, not yet known, renders nothing: see the store */}
             {teamState === null && <LoginLayout><Login /></LoginLayout>}
             {teamState && teamState.pageState === "DISCLAIMER" && (
