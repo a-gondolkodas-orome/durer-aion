@@ -12,9 +12,12 @@ export type BotMove<T_Move> = [T_Move | undefined, string];
 /// strategy practice site's engine keeps (its components/AGENTS.md § Bot
 /// contract), in this package's tuple form.
 ///
-/// A plan does not outlive the process holding it — a backend restart or a
-/// reload of the dry run — so a strategy must answer a position halfway
-/// through its own turn too.
+/// The server holds a plan for as long as the turn takes, so a team reloading
+/// meanwhile loses none of it. A plan is lost only when the backend stops
+/// between two of its moves, or the dry run is reloaded in the bot's think
+/// time, and then the strategy is asked halfway through its own turn. A move
+/// the game refuses stalls the match rather than being replaced, and the
+/// server logs it (socketio_botmoves.ts says why).
 export type BotTurn<T_Move> = BotMove<T_Move> | BotMove<T_Move>[];
 
 /// A strategy names the moves to make. `setupData` is the match's setup data,
@@ -61,6 +64,8 @@ export function botWrapper<T_SpecificGameState, T_Move>(
       await new Promise(resolve => setTimeout(resolve, 400));
     }
 
+    /// Throws when a random move is asked for and the game allows none: there
+    /// is no move to make, which is a bug in the strategy or in `possibleMoves`.
     planTurn(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): BotAction[] {
       const named = asBotMoves(botstrategy(state, playerID, setupData));
       // Nothing named is no opinion, like an `undefined` move.
@@ -88,6 +93,9 @@ export function botWrapper<T_SpecificGameState, T_Move>(
 
     private randomMove(state: State<T_SpecificGameState>, playerID: string): BotAction {
       const possible_moves = this.enumerate(state.G, state.ctx, playerID);
+      if (possible_moves.length === 0) {
+        throw new Error(`The bot of player ${playerID} was to play a random move, and the game allows none.`);
+      }
       return possible_moves[Math.floor(Math.random() * possible_moves.length)];
     }
   }

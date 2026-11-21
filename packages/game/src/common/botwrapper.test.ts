@@ -35,6 +35,11 @@ describe('a bot\'s plan of its turn', () => {
     expect(named(botFor([undefined, 'a']).bot.planTurn(stateAt(0), JUDGE_PLAYER))).toStrictEqual([[[], 'random']]);
     expect(named(botFor([]).bot.planTurn(stateAt(0), JUDGE_PLAYER))).toStrictEqual([[[], 'random']]);
   });
+
+  test('fails aloud when it is to pick a random move and the game allows none', () => {
+    const bot = new (botWrapper(() => [undefined, 'a']))({ enumerate: () => [] });
+    expect(() => bot.planTurn(stateAt(0), JUDGE_PLAYER)).toThrow('the game allows none');
+  });
 });
 
 describe('a bot asked one move at a time', () => {
@@ -59,29 +64,32 @@ describe('a bot asked one move at a time', () => {
 
 // The dry run's host: boardgame.io's `Local` asks again after each of the bot's
 // moves while the turn is the bot's, so a turn named as two moves lands as two.
-test('a turn named as two moves is played as two in the browser', async () => {
-  vi.useFakeTimers();
-  const client = Client({
-    game: gameWrapper(Ketkupac()),
-    numPlayers: 2,
-    playerID: GUESSER_PLAYER,
-    multiplayer: Local({ bots: { [JUDGE_PLAYER]: botWrapper(ketkupacBot()) } }),
+describe('in the browser', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  test('a turn named as two moves is played as two', async () => {
+    const client = Client({
+      game: gameWrapper(Ketkupac()),
+      numPlayers: 2,
+      playerID: GUESSER_PLAYER,
+      multiplayer: Local({ bots: { [JUDGE_PLAYER]: botWrapper(ketkupacBot()) } }),
+    });
+    client.start();
+    const botMoves = () => (client.getState()?.log ?? [])
+      .filter(({ action }) => action.payload.playerID === JUDGE_PLAYER && action.type === 'MAKE_MOVE')
+      .map(({ action: { payload } }) => payload.type);
+
+    client.moves.chooseNewGameType('test');
+    await vi.advanceTimersByTimeAsync(1000);
+    client.moves.chooseRole(GUESSER_PLAYER);
+    client.moves.selectPile(0);
+    client.moves.take(0, 1);
+    await vi.advanceTimersByTimeAsync(2000);
+
+    expect(botMoves()).toStrictEqual(['setStartingPosition', 'selectPile', 'take']);
+    expect(client.getState()?.ctx.currentPlayer).toBe(GUESSER_PLAYER);
+    expect(client.getState()?.G.selectedPile).toBeNull();
+    client.stop();
   });
-  client.start();
-  const botMoves = () => (client.getState()?.log ?? [])
-    .filter(({ action }) => action.payload.playerID === JUDGE_PLAYER && action.type === 'MAKE_MOVE')
-    .map(({ action: { payload } }) => payload.type);
-
-  client.moves.chooseNewGameType('test');
-  await vi.advanceTimersByTimeAsync(1000);
-  client.moves.chooseRole(GUESSER_PLAYER);
-  client.moves.selectPile(0);
-  client.moves.take(0, 1);
-  await vi.advanceTimersByTimeAsync(2000);
-
-  expect(botMoves()).toStrictEqual(['setStartingPosition', 'selectPile', 'take']);
-  expect(client.getState()?.ctx.currentPlayer).toBe(GUESSER_PLAYER);
-  expect(client.getState()?.G.selectedPile).toBeNull();
-  client.stop();
-  vi.useRealTimers();
 });
