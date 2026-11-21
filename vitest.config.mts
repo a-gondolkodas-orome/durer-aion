@@ -26,6 +26,7 @@ export default defineConfig({
     // so `game` alone would send `game/bot` to `index.ts/bot`.
     alias: [
       { find: /^game$/, replacement: source('game/index.ts') },
+      { find: /^game\/strategy$/, replacement: source('game/strategy.ts') },
       { find: /^game\/bot$/, replacement: source('game/bot.ts') },
       { find: /^game\/client$/, replacement: source('game/client.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },

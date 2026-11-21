@@ -41,8 +41,8 @@ export function createRegistry(banks: readonly Bank[]): Registry {
 }
 
 /// Every way the registry breaks the rules, as messages; none means it is
-/// valid. The strategy games are the `game` package's `strategyGames`, passed
-/// in so that this package needs no game at run time.
+/// valid. The strategy games are the `game/strategy` entry's `strategyGames`,
+/// passed in so that this package needs no game at run time.
 export function validateRegistry(
   registry: Registry,
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,

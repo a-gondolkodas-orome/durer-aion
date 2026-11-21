@@ -31,6 +31,7 @@
     // up in both typechecks, and the game package must stay DOM-free.
     "paths": {
       "game": ["../../packages/game/index.ts"],
+      "game/strategy": ["../../packages/game/strategy.ts"],
       "game/bot": ["../../packages/game/bot.ts"],
       "game/client": ["../../packages/game/client.ts"],
       "schemas": ["../../packages/schemas/index.ts"],

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { strategyGames } from 'game';
+import { strategyGames } from 'game/strategy';
 import { competitionShapeErrors, problemShapeErrors } from 'schemas';
 import { registry } from '../all';
 import type { Bundle } from './bundle';
