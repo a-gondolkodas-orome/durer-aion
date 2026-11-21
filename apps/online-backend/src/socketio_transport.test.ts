@@ -32,6 +32,8 @@ const MATCH_ID = "match-under-test";
 const TEAM_CREDENTIALS = "the-team's";
 const BOT_CREDENTIALS = "bot-credentials-for-this-test";
 
+type KetkupacBot = ReturnType<typeof StrategyWrappers["minta-ketkupac"]>;
+
 /** How long a step may take before the test calls it a hang. The bot pauses
  *  400ms for UX (botwrapper.ts) and then the move travels back, so this is
  *  generous rather than tight — a broken transport does not answer at all. */
@@ -89,7 +91,12 @@ describe("the socket transport a browser talks to", () => {
   let url: string;
   const sockets: Socket[] = [];
 
+  /** The bot's strategy, which a test may replace before the bot plays. */
+  let strategy: KetkupacBot;
+  const botStrategy: KetkupacBot = (state, botID) => strategy(state, botID);
+
   beforeEach(async () => {
+    strategy = StrategyWrappers["minta-ketkupac"]();
     // boardgame.io announces the port it bound on, and the bot transport logs
     // each turn it takes. Both are the code under test talking, so the spy
     // stands in for the recorder in vitest/setup.mts for this file.
@@ -105,7 +112,7 @@ describe("the socket transport a browser talks to", () => {
       // is what this file is about, not what persists behind it.
       transport: new SocketIOButBotMoves(
         { https: undefined },
-        { [GAME_NAME]: new (botWrapper(StrategyWrappers["minta-ketkupac"]()))({ enumerate: game.ai?.enumerate }) },
+        { [GAME_NAME]: new (botWrapper(botStrategy))({ enumerate: game.ai?.enumerate }) },
       ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
@@ -216,6 +223,57 @@ describe("the socket transport a browser talks to", () => {
     expect(state._stateID).toBe(chose._stateID + 1);
     expect(state.G.piles[0] + state.G.piles[1]).toBeLessThan(8);
     expect(state.G.selectedPile).toBeNull();
+  });
+
+  /** Plays the team's way to its first take in a live game, and makes it:
+   *  the turn is then the bot's, in the play phase. */
+  async function teamTakes(socket: Socket): Promise<void> {
+    await createStoredMatch();
+    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
+    const playing = updateMatching(socket, ({ ctx }) => ctx.phase === "play");
+    socket.emit("update", makeMove("chooseRole", [HUMAN_ID], HUMAN_ID), live._stateID, MATCH_ID, HUMAN_ID);
+    const play = await playing;
+    const chosen = updateMatching(socket, ({ G }) => G.selectedPile === 1);
+    socket.emit("update", makeMove("selectPile", [1], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
+    const halfway = await chosen;
+    socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), halfway._stateID, MATCH_ID, HUMAN_ID);
+  }
+
+  it("stalls, and says why, when the game refuses the bot's move", async () => {
+    // More tokens than any pile holds.
+    strategy = (state, botID) => state.ctx.phase === "play" ? [[0, 9], "take"] : StrategyWrappers["minta-ketkupac"]()(state, botID);
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const socket = await connectClient();
+    const handedBack = vi.fn();
+    socket.on("update", (_matchID: string, state: BgioState) => {
+      if (state.ctx.phase === "play" && state.ctx.currentPlayer === HUMAN_ID && state.G.piles[1] === 5) handedBack();
+    });
+
+    await teamTakes(socket);
+    await vi.waitFor(() => expect(errors).toHaveBeenCalledWith(expect.stringMatching(/named take\(\[0,9\]\), which the game refused; the match waits on the bot/)), { timeout: REPLY_TIMEOUT });
+
+    const { state } = await server.db.fetch(MATCH_ID, { state: true });
+    expect(state.ctx.currentPlayer).toBe(BOT_ID);
+    expect(handedBack).not.toHaveBeenCalled();
+  });
+
+  it("drops, and reports, the moves a bot names after its turn has ended", async () => {
+    const ketkupac = StrategyWrappers["minta-ketkupac"]();
+    strategy = (state, botID) => {
+      const turn = ketkupac(state, botID);
+      if (state.ctx.phase !== "play") return turn;
+      return [...(typeof turn[1] === "string" ? [turn] : turn), [[0], "selectPile"]] as ReturnType<KetkupacBot>;
+    };
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const socket = await connectClient();
+    const botReplied = updateMatching(socket, ({ G, ctx }) =>
+      ctx.phase !== "chooseRole" && G.piles[0] + G.piles[1] < 8 && ctx.currentPlayer === HUMAN_ID);
+
+    await teamTakes(socket);
+    const state = await botReplied;
+
+    expect(state.G.selectedPile).toBeNull();
+    await vi.waitFor(() => expect(errors).toHaveBeenCalledWith(expect.stringMatching(/named 1 move\(s\) after its turn ended; dropped/)), { timeout: REPLY_TIMEOUT });
   });
 
   it("gives a reconnecting player the state their last one left", async () => {

@@ -275,13 +275,22 @@ export class SocketIOButBotMoves extends SocketIO {
     // its strategy named, then, while the turn is still its own, whatever it
     // names when asked again (botwrapper.ts says why).
     let current = state;
-    let planned: ReturnType<MatchBot["planTurn"]> = [];
+    let plan: { turn: number; phase: string; moves: ReturnType<MatchBot["planTurn"]> } | null = null;
+    const dropRest = (why: string) => {
+      if (plan !== null && plan.moves.length > 0) {
+        console.error(`The bot of match ${JSON.stringify(matchID)} named ${plan.moves.length} move(s) after ${why}; dropped.`);
+      }
+      plan = null;
+    };
     for (let played = 0; ; played++) {
       if (played > 0 && !isBotsTurn(current)) {
-        if (planned.length > 0 && !current.ctx.gameover) {
-          console.error(`The bot of match ${JSON.stringify(matchID)} named ${planned.length} move(s) after its turn ended; dropped.`);
-        }
+        if (!current.ctx.gameover) dropRest("its turn ended");
         return;
+      }
+      // A plan is the turn it was made in. Moves left of it once that turn is
+      // over are not the next turn's, even when the next turn is the bot's too.
+      if (plan !== null && (plan.turn !== current.ctx.turn || plan.phase !== current.ctx.phase)) {
+        dropRest("its turn ended");
       }
       // A strategy that keeps naming moves that keep the turn would loop for
       // ever, and the match's queue with it.
@@ -289,8 +298,15 @@ export class SocketIOButBotMoves extends SocketIO {
         console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${played} moves.`);
         return;
       }
-      const [action, ...rest] = planned.length > 0 ? planned : bot.planTurn(current, botPlayer, metadata?.setupData);
-      planned = rest;
+      if (plan === null || plan.moves.length === 0) {
+        plan = {
+          turn: current.ctx.turn,
+          phase: current.ctx.phase,
+          moves: bot.planTurn(current, botPlayer, metadata?.setupData),
+        };
+      }
+      const [action, ...rest] = plan.moves;
+      plan.moves = rest;
       await bot.wait();
       await master.onUpdate(
         { ...action, payload: { ...action.payload, credentials: getBotCredentials() } },
@@ -299,9 +315,15 @@ export class SocketIOButBotMoves extends SocketIO {
         BOT_ID
       );
       const { state: after } = await fetch(db, matchID, { state: true } as const);
-      if (after === undefined || after._stateID === current._stateID) {
-        // boardgame.io refused the move and has logged why; asking the same
-        // strategy again from the same state would only be refused again.
+      if (after === undefined) return;
+      if (after._stateID === current._stateID) {
+        // The match stalls on purpose: a refused move is a bug in the
+        // strategy, and anything played in its place, a random move say,
+        // could hand a live game to the team without anyone noticing. Asked
+        // again, by the next sync, the strategy would name the same move.
+        console.error(`The bot of match ${JSON.stringify(matchID)} named `
+          + `${action.payload.type}(${JSON.stringify(action.payload.args ?? [])}), which the game refused; `
+          + `the match waits on the bot.`);
         return;
       }
       current = after;

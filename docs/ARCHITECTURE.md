@@ -124,7 +124,16 @@ or a list of those for a turn of several moves — into a boardgame.io `Bot`.
 every move waits 400 ms so the team sees what came before it land. The server
 plays each move as its own update and asks the strategy again while the turn is
 still the bot's; boardgame.io's `Local` in the dry run asks the bot for one move
-at a time, and the bot keeps the rest of its plan between asks. `hostedGames` (`games.ts`) lists each game beside its
+at a time, and the bot keeps the rest of its plan between asks.
+
+**A bot move the game refuses stalls the match.** The server plays nothing in
+its place and logs the refused move (`socketio_botmoves.ts`): a refused move is
+a bug in the strategy, and a random move instead could hand a live game to the
+team unnoticed. A team reloading during the bot's turn cannot cause one, since
+the server holds the plan for the whole turn; only a backend stopping between
+two of its moves makes the strategy answer halfway through a turn.
+
+`hostedGames` (`games.ts`) lists each game beside its
 bot, and `server.ts` builds both the game list and the bots from it.
 
 ## The two kinds of match
