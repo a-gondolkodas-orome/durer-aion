@@ -12,13 +12,9 @@ export type BotMove<T_Move> = [T_Move | undefined, string];
 /// strategy practice site's engine keeps (its components/AGENTS.md § Bot
 /// contract), in this package's tuple form.
 ///
-/// The server plays a named turn at once, with no pause between its moves:
-/// the board shows them one by one (common-frontend's pace-bot-moves.ts), so a
-/// team reloading in between loses none. Only a backend that stops between two
-/// of them, a few milliseconds apart, or a dry run reloaded inside `Local`'s
-/// 100 ms before the next, asks a strategy halfway through its own turn. Its
-/// answer there need not be good, nor on the server even legal: the server
-/// replaces a move the game refuses with a random one.
+/// A plan does not outlive the process holding it — a backend restart or a
+/// reload of the dry run — so a strategy must answer a position halfway
+/// through its own turn too.
 export type BotTurn<T_Move> = BotMove<T_Move> | BotMove<T_Move>[];
 
 /// A strategy names the moves to make. `setupData` is the match's setup data,
@@ -39,13 +35,13 @@ function asBotMoves<T_Move>(turn: BotTurn<T_Move>): BotMove<T_Move>[] {
 /// reads its problems and answers from there.
 export type MatchBot = Bot & {
   /// The next move, for a host that asks for one at a time and asks again
-  /// while the turn is the bot's: boardgame.io's `Local`.
+  /// while the turn is the bot's: boardgame.io's `Local`. Waits first.
   play(state: State, playerID: string, setupData?: unknown): ReturnType<Bot['play']>;
   /// Every move the strategy names from this position, in order, for a host
-  /// that plays them out itself: the server.
+  /// that plays them out itself: the server. Does not wait.
   planTurn(state: State, playerID: string, setupData?: unknown): BotAction[];
-  /// Any move the game allows, for one it refused; none if it allows none.
-  randomMove(state: State, playerID: string): BotAction | undefined;
+  /// The pause before each move, so the team sees what came before it land.
+  wait(): Promise<void>;
 };
 
 /// Wraps a strategy into a boardgame.io Bot class. The return type is spelled
@@ -60,6 +56,11 @@ export function botWrapper<T_SpecificGameState, T_Move>(
     /// shares a bot between matches and calls `planTurn` instead.
     private plan: { after: Pick<State, '_stateID'> & Pick<State['ctx'], 'turn' | 'phase'>; rest: BotAction[] } | null = null;
 
+    // waits 400 ms for UX
+    async wait(): Promise<void> {
+      await new Promise(resolve => setTimeout(resolve, 400));
+    }
+
     planTurn(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): BotAction[] {
       const named = asBotMoves(botstrategy(state, playerID, setupData));
       // Nothing named is no opinion, like an `undefined` move.
@@ -70,6 +71,7 @@ export function botWrapper<T_SpecificGameState, T_Move>(
     }
 
     async play(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): ReturnType<Bot['play']> {
+      await this.wait();
       // A move boardgame.io accepts advances `_stateID` by one, so the plan
       // goes on only from the state its previous move made. Any other state —
       // a move rejected, the turn over, a reloaded match — is planned afresh.
@@ -84,7 +86,7 @@ export function botWrapper<T_SpecificGameState, T_Move>(
       return { action };
     }
 
-    randomMove(state: State<T_SpecificGameState>, playerID: string): BotAction {
+    private randomMove(state: State<T_SpecificGameState>, playerID: string): BotAction {
       const possible_moves = this.enumerate(state.G, state.ctx, playerID);
       return possible_moves[Math.floor(Math.random() * possible_moves.length)];
     }

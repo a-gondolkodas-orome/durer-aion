@@ -3,7 +3,6 @@ import type { BoardProps } from 'boardgame.io/react';
 import { SocketIO } from 'boardgame.io/multiplayer';
 import { gameWrapper, GameType } from 'game';
 import { boardWrapper } from './boardwrapper';
-import { paceBotMoves } from './pace-bot-moves';
 import { withConnectionAlert } from '../client/components/ConnectionAlert';
 import { Loading } from '../client/components/Loading';
 import type { StrategyBoard, StrategyDescription } from './boardwrapper';
@@ -31,7 +30,7 @@ export function MyOnlineClient<T_SpecificGameState>(
   return Client({
     game: gameWrapper(game),
     board: withConnectionAlert(boardWrapper(board, description, game)),
-    multiplayer: paceBotMoves(SocketIO({ server: serverUrl, socketOpts })),
+    multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
 }
@@ -45,7 +44,7 @@ export function MyOnlineRelayClient(
   return Client({
     game: game,
     board: withConnectionAlert(board),
-    multiplayer: paceBotMoves(SocketIO({ server: serverUrl, socketOpts })),
+    multiplayer: SocketIO({ server: serverUrl, socketOpts }),
     loading: Loading,
   });
 }

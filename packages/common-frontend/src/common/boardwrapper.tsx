@@ -581,8 +581,8 @@ function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
   );
 }
 
-/// The bot's moves are shown 400 ms apart on purpose (pace-bot-moves.ts), and
-/// "A gép lép…" already says it is its turn. The spinner
+/// The bot pauses on purpose before each move (400 ms, botwrapper.ts in the
+/// game package), and "A gép lép…" already says it is its turn. The spinner
 /// is for a server slow to answer, so it waits well past that pause: shown any
 /// sooner, it would flash briefly on every one of the bot's moves.
 const BOT_SLOW_MS = 1500;

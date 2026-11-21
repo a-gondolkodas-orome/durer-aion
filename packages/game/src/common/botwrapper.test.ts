@@ -13,6 +13,7 @@ const enumerate = () => [{ move: 'random', args: [] }];
 function botFor(turn: BotTurn<number[]>) {
   const strategy = vi.fn(() => turn);
   const bot = new (botWrapper(strategy))({ enumerate });
+  bot.wait = () => Promise.resolve();
   return { bot, strategy };
 }
 
@@ -72,11 +73,11 @@ test('a turn named as two moves is played as two in the browser', async () => {
     .map(({ action: { payload } }) => payload.type);
 
   client.moves.chooseNewGameType('test');
-  await vi.advanceTimersByTimeAsync(500);
+  await vi.advanceTimersByTimeAsync(1000);
   client.moves.chooseRole(GUESSER_PLAYER);
   client.moves.selectPile(0);
   client.moves.take(0, 1);
-  await vi.advanceTimersByTimeAsync(500);
+  await vi.advanceTimersByTimeAsync(2000);
 
   expect(botMoves()).toStrictEqual(['setStartingPosition', 'selectPile', 'take']);
   expect(client.getState()?.ctx.currentPlayer).toBe(GUESSER_PLAYER);

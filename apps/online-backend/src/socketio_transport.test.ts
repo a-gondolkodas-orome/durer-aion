@@ -32,11 +32,9 @@ const MATCH_ID = "match-under-test";
 const TEAM_CREDENTIALS = "the-team's";
 const BOT_CREDENTIALS = "bot-credentials-for-this-test";
 
-type KetkupacBot = ReturnType<typeof StrategyWrappers["minta-ketkupac"]>;
-
-/** How long a step may take before the test calls it a hang. The bot answers
- *  at once, so this is generous rather than tight — a broken transport does
- *  not answer at all. */
+/** How long a step may take before the test calls it a hang. The bot pauses
+ *  400ms for UX (botwrapper.ts) and then the move travels back, so this is
+ *  generous rather than tight — a broken transport does not answer at all. */
 const REPLY_TIMEOUT = 3000;
 
 type BgioServer = ReturnType<typeof Server>;
@@ -91,12 +89,7 @@ describe("the socket transport a browser talks to", () => {
   let url: string;
   const sockets: Socket[] = [];
 
-  /** The bot's strategy, which a test may replace before the bot plays. */
-  let strategy: KetkupacBot;
-  const botStrategy: KetkupacBot = (state, botID) => strategy(state, botID);
-
   beforeEach(async () => {
-    strategy = StrategyWrappers["minta-ketkupac"]();
     // boardgame.io announces the port it bound on, and the bot transport logs
     // each turn it takes. Both are the code under test talking, so the spy
     // stands in for the recorder in vitest/setup.mts for this file.
@@ -112,7 +105,7 @@ describe("the socket transport a browser talks to", () => {
       // is what this file is about, not what persists behind it.
       transport: new SocketIOButBotMoves(
         { https: undefined },
-        { [GAME_NAME]: new (botWrapper(botStrategy))({ enumerate: game.ai?.enumerate }) },
+        { [GAME_NAME]: new (botWrapper(StrategyWrappers["minta-ketkupac"]()))({ enumerate: game.ai?.enumerate }) },
       ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
@@ -223,25 +216,6 @@ describe("the socket transport a browser talks to", () => {
     expect(state._stateID).toBe(chose._stateID + 1);
     expect(state.G.piles[0] + state.G.piles[1]).toBeLessThan(8);
     expect(state.G.selectedPile).toBeNull();
-  });
-
-  it("plays a random move for one the game refuses, rather than leave the turn the bot's", async () => {
-    await createStoredMatch();
-    const socket = await connectClient();
-    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
-    const playing = updateMatching(socket, ({ ctx }) => ctx.phase === "play");
-    socket.emit("update", makeMove("chooseRole", [HUMAN_ID], HUMAN_ID), live._stateID, MATCH_ID, HUMAN_ID);
-    const play = await playing;
-    // What a strategy asked halfway through its turn may name: here, more
-    // tokens than any pile holds.
-    strategy = () => [[0, 9], "take"];
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    const botReplied = updateMatching(socket, ({ ctx }) => ctx.currentPlayer === HUMAN_ID && ctx.phase === "play");
-    socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
-    const state = await botReplied;
-
-    expect(state.G.piles[0] + state.G.piles[1]).toBeLessThan(8);
   });
 
   it("gives a reconnecting player the state their last one left", async () => {
