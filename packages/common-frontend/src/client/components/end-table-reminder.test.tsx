@@ -22,7 +22,7 @@ const both: PublicCompetition = {
   id: 'aaaaaaaaaa--both',
   languages: ['hu'],
   relay: { durationMinutes: 30, problemPoints: [3] },
-  strategy: { durationMinutes: 20, gameId: 'some-game' },
+  strategy: { durationMinutes: 20 },
   metadata: { kind: 'other', label: { hu: 'Mindkettő' } },
 };
 const relayOnly: PublicCompetition = { ...both, strategy: undefined };

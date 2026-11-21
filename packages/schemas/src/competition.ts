@@ -249,9 +249,28 @@ export interface CompetitionSource {
 /// § *The two kinds of match*).
 export const RELAY_GAME_NAME = 'relay';
 
+const STRATEGY_GAME_PREFIX = 'strategy--';
+
 /// The game a strategy game is played as, as `RELAY_GAME_NAME`.
 export function strategyGameName(gameId: StrategyGameId): string {
-  return `strategy--${gameId}`;
+  return `${STRATEGY_GAME_PREFIX}${gameId}`;
+}
+
+/// The game id a strategy match's game name holds, the inverse of
+/// `strategyGameName`; undefined for a name that is not a strategy game's.
+export function strategyGameIdOf(gameName: string): StrategyGameId | undefined {
+  return gameName.startsWith(STRATEGY_GAME_PREFIX) && gameName.length > STRATEGY_GAME_PREFIX.length
+    ? gameName.slice(STRATEGY_GAME_PREFIX.length)
+    : undefined;
+}
+
+/// The strategy game a team has started, read from the match rather than
+/// from its competition, which an organiser may have changed since. The
+/// client plays it as `strategyGameName(gameId)`, with the game folder's
+/// client.tsx called with `variant`.
+export interface StartedStrategyGame {
+  gameId: StrategyGameId;
+  variant?: string;
 }
 
 /// What a team is served of its competition: everything but the relay's
@@ -265,7 +284,11 @@ export interface PublicCompetition {
     /// Each problem's points, in play order; so its length is the number of problems.
     problemPoints: number[];
   };
-  strategy?: StrategyConfig;
+  /// No game id: which game a competition plays is secret until the team
+  /// starts it (#643), and then `StartedStrategyGame` says it.
+  strategy?: {
+    durationMinutes: number;
+  };
   advancingPoints?: number;
   finishMessage?: LocalizedLabel;
   metadata: CompetitionMetadata;
@@ -282,7 +305,7 @@ export function publicCompetition(competition: CompetitionConfig): PublicCompeti
     ...(relay !== undefined && {
       relay: { durationMinutes: relay.durationMinutes, problemPoints: relay.problems.map(problem => problem.points) },
     }),
-    ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes, gameId: strategy.gameId } }),
+    ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes } }),
     ...(advancingPoints !== undefined && { advancingPoints }),
     ...(finishMessage !== undefined && { finishMessage }),
     metadata,

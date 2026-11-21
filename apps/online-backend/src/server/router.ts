@@ -8,8 +8,10 @@ import { GameType } from 'schemas';
 import type { SocketIOButBotMoves } from '../socketio_botmoves';
 import { allowedToViewStrategy, getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
+import type { TeamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
+import { GATED_STRATEGY_PATH, publicStrategyGame, startedStrategyGame } from './strategy_client';
 import { readStartWindowBody, withCompetitionWindow } from './start_window';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
@@ -59,6 +61,11 @@ export function configureTeamsRouter(
   // read per request, since an organiser may change one mid-round.
   async function competitionNow(team: TeamModel) {
     return withCompetitionWindow(await competitions.getCompetition(team.competitionId), await teams.competitionWindows());
+  }
+
+  // What the team is served of itself, as its matches stand.
+  async function teamView(ctx: Server.AppCtx, team: TeamModel, matches: TeamMatches) {
+    return publicTeamView(team, matches, await competitionNow(team), await publicStrategyGame(ctx.db, matches.strategyMatch));
   }
 
   // Overlapping starts can both pass `allowedToStart`; the conditional write
@@ -397,7 +404,25 @@ export function configureTeamsRouter(
    */
   router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
-    ctx.body = publicTeamView(team, await teamMatches(ctx.db, team), await competitionNow(team));
+    ctx.body = await teamView(ctx, team, await teamMatches(ctx.db, team));
+  });
+
+  /**
+   * The logged-in team's strategy game, as the browser plays it: the built
+   * client.tsx of the game folder that plays the team's started match. The
+   * answer is empty; nginx serves the file the `X-Accel-Redirect` names from
+   * a location nothing else reaches (issue #643). A team that has not started
+   * gets nothing, since a game's code names the game.
+   */
+  router.get<TeamState>("/team/me/strategy-client.js", requireTeam(teams), async (ctx) => {
+    const team = ctx.state.team;
+    const game = await startedStrategyGame(ctx.db, (await teamMatches(ctx.db, team)).strategyMatch)
+      ?? refuse(ctx, 404, "MATCH_NOT_FOUND", "The team has not started its strategy match.");
+    ctx.set("X-Accel-Redirect", `${GATED_STRATEGY_PATH}${game.folder}.js`);
+    // Teams share school computers: no cache may hand one team's game to the next.
+    ctx.set("Cache-Control", "private, no-cache");
+    ctx.status = 200;
+    ctx.body = "";
   });
 
   /**
@@ -444,7 +469,7 @@ export function configureTeamsRouter(
       refuse(ctx, 403, "VIEW_NOT_ALLOWED", "Team is not allowed to view the strategy match.");
 
     team.set({ pageState: "STRATEGY" });
-    ctx.body = publicTeamView(team, matches, await competitionNow(team));
+    ctx.body = await teamView(ctx, team, matches);
   });
 
   /**
@@ -460,6 +485,6 @@ export function configureTeamsRouter(
       refuse(ctx, 403, "MATCH_IN_PROGRESS", "Not allowed, match in progress.");
 
     team.set({ pageState: "HOME" });
-    ctx.body = publicTeamView(team, matches, await competitionNow(team));
+    ctx.body = await teamView(ctx, team, matches);
   });
 }
