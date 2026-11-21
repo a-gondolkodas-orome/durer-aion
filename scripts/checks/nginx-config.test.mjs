@@ -35,4 +35,11 @@ describe(configPath, () => {
   it('does not append to the address the client claimed', () => {
     expect(directives).not.toContain('$proxy_add_x_forwarded_for');
   });
+
+  // The official image ships gzip commented out, so losing this line serves the bundle at three
+  // times its size, and nothing else notices (#715).
+  it('compresses the JavaScript bundle', () => {
+    expect(directives).toMatch(/^\s*gzip\s+on;/m);
+    expect(directives).toMatch(/^\s*gzip_types\s[^;]*\bapplication\/javascript\b/m);
+  });
 });
