@@ -102,11 +102,11 @@ test('a team/me that never reached the server says so', async () => {
 
 // An organiser who took a while over the basic-auth prompt got a timed-out
 // team/me, and a snackbar saying so that stayed until a reload.
-test('the admin page does not ask team/me', () => {
+test('the admin page does not ask team/me', async () => {
   window.history.replaceState({}, '', '/admin');
   onTestFinished(() => { window.history.replaceState({}, '', '/'); });
   const teamMe = vi.spyOn(repo, 'getTeamState');
-  const { getByTestId } = render(
+  const { findByTestId } = render(
     <ThemeProvider theme={outerTheme}>
       <ClientRepoProvider value={repo}>
         <AdminRepoProvider value={repo}><Main gitCommitHash="test"/></AdminRepoProvider>
@@ -114,6 +114,6 @@ test('the admin page does not ask team/me', () => {
     </ThemeProvider>
   );
 
-  expect(getByTestId('adminRoot')).toBeInTheDocument();
+  expect(await findByTestId('adminRoot')).toBeInTheDocument();
   expect(teamMe).not.toHaveBeenCalled();
 });
