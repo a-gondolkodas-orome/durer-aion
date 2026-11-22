@@ -578,7 +578,7 @@ test('the import/export tab exports what the database holds as one bundle file',
   renderAdmin();
 
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Az adatbázis exportálása' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Versenyek exportálása' }));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
   expect(exportCompetitions).toHaveBeenCalledWith();
@@ -595,7 +595,7 @@ test('the import/export tab saves no file for an empty database, and says so', a
   renderAdmin();
 
   fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Az adatbázis exportálása' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Versenyek exportálása' }));
 
   expect(await screen.findByText('Az adatbázisban nincs sem verseny, sem feladat, így nincs mit exportálni.')).toBeInTheDocument();
   expect(saved).toHaveLength(0);

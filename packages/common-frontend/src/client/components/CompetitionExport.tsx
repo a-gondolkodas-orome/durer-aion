@@ -46,7 +46,7 @@ export function CompetitionExport() {
       </Stack>
       <Stack sx={{ flexDirection: 'row' }}>
         <Button variant="outlined" color="primary" disabled={busy} onClick={() => { void runExport(); }}>
-          Az adatbázis exportálása
+          Versenyek exportálása
         </Button>
       </Stack>
     </Stack>
