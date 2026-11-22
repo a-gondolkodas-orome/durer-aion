@@ -8,9 +8,11 @@ import type { MyGameState } from './game';
 type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
-  const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
-  // The bot's choice shows too, between the two moves of its turn.
-  const selected = ctx.phase === PHASE.play ? G.selectedPile : null;
+  const playing = ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
+  const active = isActive && playing;
+  // The bot's choice shows too, between the two moves of its turn, but not
+  // once the game is over: a game timed out mid-turn keeps its pile chosen.
+  const selected = playing ? G.selectedPile : null;
   const most = !active || selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
 
   return (
