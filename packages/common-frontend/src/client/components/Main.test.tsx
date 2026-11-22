@@ -95,25 +95,25 @@ test('main renders Strategy if team is in STRATEGY state', () => {
 
 // These two were independent conditions, so `/admin` rendered the admin page
 // *and* whatever the browser's own session was entitled to underneath it.
-test('the admin page is the whole page, not a panel above the login form', () => {
+test('the admin page is the whole page, not a panel above the login form', async () => {
   MockTeamState.mockLoggedOut();
   window.history.replaceState({}, '', '/admin');
 
-  const { getByTestId, queryByTestId } = renderMain();
+  const { findByTestId, queryByTestId } = renderMain();
 
-  expect(getByTestId('adminRoot')).toBeInTheDocument();
+  expect(await findByTestId('adminRoot')).toBeInTheDocument();
   expect(queryByTestId('loginRoot')).not.toBeInTheDocument();
 });
 
 // The worse half: an organiser who tested a team account still holds its
 // session, and the team's board is live and playable when it renders.
-test('an organiser still holding a team session is not handed that team\'s board', () => {
+test('an organiser still holding a team session is not handed that team\'s board', async () => {
   MockTeamState.mockRelay();
   window.history.replaceState({}, '', '/admin/8eae8669-125c-42e5-8b49-89afbac31679');
 
-  const { getByTestId, queryByTestId } = renderMain();
+  const { findByTestId, queryByTestId } = renderMain();
 
-  expect(getByTestId('adminRoot')).toBeInTheDocument();
+  expect(await findByTestId('adminRoot')).toBeInTheDocument();
   expect(queryByTestId('relayRoot')).not.toBeInTheDocument();
 });
 
@@ -140,10 +140,11 @@ test('a team away from /admin still gets its own page', () => {
 
 // The admin pages are written in Hungarian only; switching to English turned
 // the header and the team dialog's result tables English, and nothing else.
-test('the admin page offers no language switcher', () => {
+test('the admin page offers no language switcher', async () => {
   window.history.replaceState({}, '', '/admin');
 
-  const { queryByText } = renderMain();
+  const { findByTestId, queryByText } = renderMain();
+  await findByTestId('adminRoot');
 
   expect(queryByText('Magyar')).not.toBeInTheDocument();
 });
@@ -199,10 +200,11 @@ test('a ?lang= link outranks the stored choice, on the login page and after it',
   expect(i18next.language).toBe('en');
 });
 
-test('the admin page stays Hungarian under a team session in an English competition', () => {
+test('the admin page stays Hungarian under a team session in an English competition', async () => {
   MockTeamState.mockHomeIn(['en', 'hu']);
   window.history.replaceState({}, '', '/admin');
-  const { queryByText } = renderMain();
+  const { findByTestId, queryByText } = renderMain();
+  await findByTestId('adminRoot');
   expect(i18next.language).toBe('hu');
   expect(queryByText('English')).not.toBeInTheDocument();
 });
@@ -246,8 +248,9 @@ test('a team past the login page keeps the version but not the tracking note', (
 });
 
 // An admin page loads no tracker (tracking.ts), so it has nothing to note.
-test('the admin page carries no tracking note', () => {
+test('the admin page carries no tracking note', async () => {
   window.history.replaceState({}, '', '/admin');
-  const { queryByText } = renderMain();
+  const { findByTestId, queryByText } = renderMain();
+  await findByTestId('adminRoot');
   expect(queryByText(trackingNote)).not.toBeInTheDocument();
 });
