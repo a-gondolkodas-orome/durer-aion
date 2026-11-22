@@ -606,7 +606,7 @@ that before a competition.
      only. The board wrapper ends every description with what all the games
      share, the choice of role and the two wins in a row (`strategy.rulesCommon`),
      so a description that says it too shows it twice
-   - `client.tsx` — `strategyClient(variant)`, the three above without the bot
+   - `client.tsx` — `strategyClient(gameId)`, the three above without the bot
 
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are
@@ -623,7 +623,7 @@ that before a competition.
    Each is keyed by the game id a competition names (`StrategyConfig.gameId`),
    one per game and variant, e.g. `20o-c`; `strategyGames` lists the ids and
    the languages each one's board and description exist in, and
-   `strategyGameClients` the folder and variant whose `client.tsx` plays it.
+   `strategyGameFolders` the folder whose `client.tsx` plays it.
    The server's `games.ts`, which lists each game beside its bot, imports
    `game/strategy` and `game/bot`; the live client `game/client`; the offline
    dry run all three.

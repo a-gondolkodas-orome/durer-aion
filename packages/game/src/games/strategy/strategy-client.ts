@@ -16,9 +16,9 @@ export interface StrategyClientParts<G> {
 }
 
 const clients: { [K in StrategyGameKey]: () => StrategyClientParts<StrategyGameStates[K]> } = {
-  "20o-c": () => client20ocde("C"),
-  "20o-d": () => client20ocde("D"),
-  "20o-e": () => client20ocde("E"),
+  "20o-c": () => client20ocde("20o-c"),
+  "20o-d": () => client20ocde("20o-d"),
+  "20o-e": () => client20ocde("20o-e"),
   "minta-ketkupac": () => clientKetkupac(),
   "minta-sablon": () => clientSablon(),
 };

@@ -29,14 +29,14 @@ export const strategyGames = {
 
 export type StrategyGameKey = keyof typeof strategyGames;
 
-// The game folder whose client.tsx plays each id, and its variant (#643).
-export const strategyGameClients = {
-  "20o-c": { folder: "20ocde", variant: "C" },
-  "20o-d": { folder: "20ocde", variant: "D" },
-  "20o-e": { folder: "20ocde", variant: "E" },
-  "minta-ketkupac": { folder: "ketkupac" },
-  "minta-sablon": { folder: "sablon" },
-} satisfies Record<StrategyGameKey, { folder: string; variant?: string }>;
+// The game folder whose client.tsx plays each id (#643).
+export const strategyGameFolders = {
+  "20o-c": "20ocde",
+  "20o-d": "20ocde",
+  "20o-e": "20ocde",
+  "minta-ketkupac": "ketkupac",
+  "minta-sablon": "sablon",
+} satisfies Record<StrategyGameKey, string>;
 
 // Each game's own state type. The registries below, and the other two entries,
 // are typed by it, so that a caller generic over the game id keeps one game's
