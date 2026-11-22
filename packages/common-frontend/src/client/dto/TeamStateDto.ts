@@ -74,6 +74,16 @@ export interface BundleImportResultDto {
   errors: string[];
 }
 
+/// What `GET /team/admin/competitions/export` answers: the bundle the import
+/// takes, its competitions and problems as stored, which this page does not
+/// read but to tell an empty one.
+export interface ExportedBundleDto {
+  format: string;
+  version: number;
+  competitions: Record<string, unknown>;
+  problems: Record<string, unknown>;
+}
+
 /// What `PUT /team/admin/import` answers: the import goes row by row, so some
 /// rows can land while others fail. `logs` holds one Hungarian line per
 /// problem, `sev` and `value` index-aligned.

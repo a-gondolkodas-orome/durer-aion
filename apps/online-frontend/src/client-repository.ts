@@ -1,7 +1,7 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance } from 'axios';
 import { I18nError, apiRefusal } from "common-frontend/core";
-import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto } from "common-frontend";
+import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, ExportedBundleDto } from "common-frontend";
 import type { Tracker } from "./tracking";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
@@ -170,8 +170,8 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return await request(api => api.post<BundleImportResultDto>('/team/admin/competitions/import', bundle));
   }
 
-  async exportCompetitions(): Promise<unknown> {
-    return await request(api => api.get<unknown>('/team/admin/competitions/export'));
+  async exportCompetitions(): Promise<ExportedBundleDto> {
+    return await request(api => api.get<ExportedBundleDto>('/team/admin/competitions/export'));
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {

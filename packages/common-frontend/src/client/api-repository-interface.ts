@@ -1,4 +1,4 @@
-import type { BundleImportResultDto, CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { BundleImportResultDto, CompetitionSummaryDto, ExportedBundleDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -51,5 +51,5 @@ export interface AdminClientRepository {
   importCompetitions(bundle: unknown): Promise<BundleImportResultDto>
   /** The bundle of every competition and problem the database holds: what
    *  `importCompetitions` takes, kept as the server sent it. */
-  exportCompetitions(): Promise<unknown>
+  exportCompetitions(): Promise<ExportedBundleDto>
 }
