@@ -4,7 +4,7 @@ import * as reference from "problem-bank/banks/reference";
 import { judgeProblems } from "relay-bot";
 import type { Problem } from "relay-bot";
 import { publicCompetition } from "schemas";
-import type { CompetitionId, PublicCompetition, StrategyConfig } from "schemas";
+import type { CompetitionId, PublicCompetition } from "schemas";
 import { referenceTeams } from "./reference-teams";
 import { teamData } from "./teamData";
 
@@ -25,11 +25,6 @@ export const dryRunTeams = servesReference ? referenceTeams : teamData;
 export function dryRunCompetition(id: CompetitionId): PublicCompetition | undefined {
   const competition = registry.competitions.get(id);
   return competition && publicCompetition(competition);
-}
-
-/// A competition's strategy game, which `PublicCompetition` leaves out.
-export function dryRunStrategy(id: CompetitionId): StrategyConfig | undefined {
-  return registry.competitions.get(id)?.strategy;
 }
 
 /// The problems the bot judges a competition's relay by.

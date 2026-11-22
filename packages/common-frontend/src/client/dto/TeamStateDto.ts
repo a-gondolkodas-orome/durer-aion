@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartedStrategyGame, StartWindow } from "schemas";
+import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartWindow } from "schemas";
 import { I18nError } from "../utils/i18n-error";
 
 export { isPageState, type PageState } from "schemas";
@@ -35,8 +35,6 @@ export interface TeamModelDto {
   pageState: PageState
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
-  /// The started strategy game; the online round's only.
-  strategyGame?: StartedStrategyGame | null;
 }
 
 /// The GUID of a team an admin page is acting on. Optional on the DTO because

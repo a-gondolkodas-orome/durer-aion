@@ -1,11 +1,9 @@
 import { createContext, useContext } from "react";
-import type { PublicCompetition, StartedStrategyGame } from "schemas";
+import type { PublicCompetition } from "schemas";
 
 interface ClientProps {
   /// The team's: its boards are built from it.
   competition?: PublicCompetition | null;
-  /// The online round's started strategy game.
-  strategyGame?: StartedStrategyGame | null;
   teamName?: string;
   matchID?: string;
   credentials?: string;

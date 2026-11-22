@@ -264,12 +264,6 @@ export function strategyGameIdOf(gameName: string): StrategyGameId | undefined {
     : undefined;
 }
 
-/// The strategy game a team has started, read from its match.
-export interface StartedStrategyGame {
-  gameId: StrategyGameId;
-  variant?: string;
-}
-
 /// What a team is served of its competition: everything but the relay's
 /// problems, whose answers the client must never see. Their points are not
 /// secret, and the home screen tells them.
@@ -281,10 +275,7 @@ export interface PublicCompetition {
     /// Each problem's points, in play order; so its length is the number of problems.
     problemPoints: number[];
   };
-  /// No game id: it is secret until the team starts (#643).
-  strategy?: {
-    durationMinutes: number;
-  };
+  strategy?: StrategyConfig;
   advancingPoints?: number;
   finishMessage?: LocalizedLabel;
   metadata: CompetitionMetadata;
@@ -301,7 +292,7 @@ export function publicCompetition(competition: CompetitionConfig): PublicCompeti
     ...(relay !== undefined && {
       relay: { durationMinutes: relay.durationMinutes, problemPoints: relay.problems.map(problem => problem.points) },
     }),
-    ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes } }),
+    ...(strategy !== undefined && { strategy: { durationMinutes: strategy.durationMinutes, gameId: strategy.gameId } }),
     ...(advancingPoints !== undefined && { advancingPoints }),
     ...(finishMessage !== undefined && { finishMessage }),
     metadata,

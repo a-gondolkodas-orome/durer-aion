@@ -740,8 +740,8 @@ components:
           nullable: true
           description: >
             The team's competition without its relay's problems: id, languages,
-            the relay's duration, the strategy game's duration (not the game),
-            and metadata. Null for a competition the server no longer has.
+            the relay's duration, the strategy game and its duration, and
+            metadata. Null for a competition the server no longer has.
         startWindow:
           allOf:
           - $ref: "#/components/schemas/StartWindow"
@@ -764,15 +764,6 @@ components:
           $ref: "#/components/schemas/MatchStatus"
         strategyMatch:
           $ref: "#/components/schemas/MatchStatus"
-        strategyGame:
-          type: object
-          nullable: true
-          description: The started strategy match's game; null before the start.
-          properties:
-            gameId:
-              type: string
-            variant:
-              type: string
 
     TeamModel:
       type: object

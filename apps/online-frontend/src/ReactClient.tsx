@@ -2,7 +2,7 @@ import { GameRelay } from "game";
 import { strategyClientFor } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
 import { strategyGameName } from "schemas";
-import type { PublicCompetition, StartedStrategyGame } from "schemas";
+import type { PublicCompetition } from "schemas";
 import { useTranslation } from "react-i18next";
 
 const description = <p className="text-justify"></p>
@@ -26,8 +26,10 @@ function relayClient(competition: PublicCompetition): OnlineClient | null {
   return relayOnlineClient;
 }
 
-function strategyClient({ gameId: startedId }: StartedStrategyGame): OnlineClient {
-  const gameId = startedId as StrategyGameKey;
+function strategyClient(competition: PublicCompetition): OnlineClient | null {
+  const { strategy } = competition;
+  if (strategy === undefined) return null;
+  const gameId = strategy.gameId as StrategyGameKey;
   let client = strategyClients.get(gameId);
   if (client === undefined) {
     client = gameClient(gameId);
@@ -44,13 +46,12 @@ function gameClient<K extends StrategyGameKey>(gameId: K): OnlineClient {
 
 interface ClientProps {
   competition?: PublicCompetition | null,
-  strategyGame?: StartedStrategyGame | null,
   matchID?: string,
   credentials?: string,
 }
 
-// The team's competition decides the relay's board, its started match the
-// strategy game's; without them there is none.
+// The team's competition decides the board; one without the match (which the
+// chooser does not offer) or a team without a competition has none.
 function NoMatch() {
   const { t } = useTranslation();
   return <p>{t('relay.error.noMatch')}</p>;
@@ -61,7 +62,7 @@ export function RelayClient({ competition, matchID, credentials }: ClientProps) 
   return Client ? <Client {...{ credentials, matchID }}/> : <NoMatch/>;
 }
 
-export function StrategyClient({ strategyGame, matchID, credentials }: ClientProps) {
-  const Client = strategyGame ? strategyClient(strategyGame) : null;
+export function StrategyClient({ competition, matchID, credentials }: ClientProps) {
+  const Client = competition ? strategyClient(competition) : null;
   return Client ? <Client {...{ credentials, matchID }}/> : <NoMatch/>;
 }

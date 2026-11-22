@@ -26,9 +26,9 @@ const matches: TeamMatches = { relayMatch: { state: "NOT STARTED" }, strategyMat
 // Whatever this returns is readable by any script on the page.
 describe("publicTeamView", () => {
   it("keeps out the login code, the address and the organisers' notes", () => {
-    expect(publicTeamView(team, matches, competition, null)).not.toHaveProperty("joinCode");
-    expect(publicTeamView(team, matches, competition, null)).not.toHaveProperty("email");
-    expect(publicTeamView(team, matches, competition, null)).not.toHaveProperty("other");
+    expect(publicTeamView(team, matches, competition)).not.toHaveProperty("joinCode");
+    expect(publicTeamView(team, matches, competition)).not.toHaveProperty("email");
+    expect(publicTeamView(team, matches, competition)).not.toHaveProperty("other");
   });
 
   // Regression: the GUID is the session cookie's value, and a browser sets
@@ -36,32 +36,32 @@ describe("publicTeamView", () => {
   // script on the page. boardgame.io discloses the same GUID once a match
   // exists (issue #434), so this narrows the window rather than closing it.
   it("keeps out the GUID, which is the session itself", () => {
-    expect(publicTeamView(team, matches, competition, null)).not.toHaveProperty("teamId");
+    expect(publicTeamView(team, matches, competition)).not.toHaveProperty("teamId");
   });
 
   // The relay's problems carry their answers.
   it("serves the competition without its problems", () => {
-    expect(JSON.stringify(publicTeamView(team, matches, competition, null))).not.toContain("problemId");
+    expect(JSON.stringify(publicTeamView(team, matches, competition))).not.toContain("problemId");
   });
 
   it("serves no competition for a row naming one the server does not have", () => {
-    expect(publicTeamView({ ...team, competitionId: "gone" } as TeamModel, matches, undefined, null).competition).toBeNull();
+    expect(publicTeamView({ ...team, competitionId: "gone" } as TeamModel, matches, undefined).competition).toBeNull();
   });
 
   it("serves the team's own start window over its competition's", () => {
     const own = { ...team, startOpensAt: "2026-10-21T15:00:00+02:00", startClosesAt: null } as TeamModel;
-    expect(publicTeamView(own, matches, competition, null).startWindow).toStrictEqual({ opensAt: "2026-10-21T15:00:00+02:00" });
+    expect(publicTeamView(own, matches, competition).startWindow).toStrictEqual({ opensAt: "2026-10-21T15:00:00+02:00" });
   });
 
   it("serves what the client plays with", () => {
     const now = new Date("2026-10-20T13:00:00Z");
-    expect(publicTeamView(team, matches, competition, null, now)).toStrictEqual({
+    expect(publicTeamView(team, matches, competition, now)).toStrictEqual({
       teamName: "Csapat",
       competition: {
         id: "klmgbpb334--minta-teljes",
         languages: ["hu"],
         relay: { durationMinutes: 30, problemPoints: [3, 4, 5] },
-        strategy: { durationMinutes: 20 },
+        strategy: { durationMinutes: 20, gameId: "minta-ketkupac" },
         advancingPoints: 15,
         metadata: { kind: "other", label: { hu: "Minta: teljes forduló", en: "Reference: full round" } },
       },
@@ -71,13 +71,6 @@ describe("publicTeamView", () => {
       pageState: "HOME",
       relayMatch: { state: "NOT STARTED" },
       strategyMatch: { state: "NOT STARTED" },
-      strategyGame: null,
     });
-  });
-
-  // A game id can name the game (#643).
-  it("names no strategy game before the team starts it", () => {
-    expect(competition?.strategy?.gameId).toBe("minta-ketkupac");
-    expect(JSON.stringify(publicTeamView(team, matches, competition, null))).not.toContain("minta-ketkupac");
   });
 });

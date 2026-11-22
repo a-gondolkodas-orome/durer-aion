@@ -3,7 +3,7 @@ import { StrategyWrappers } from "game/bot";
 import { strategyClientFor } from "game/client";
 import { relayStrategy } from "relay-bot";
 import type { CompetitionId, PublicCompetition } from "schemas";
-import { dryRunCompetition, dryRunRelay, dryRunStrategy } from "./rehearsed-round";
+import { dryRunCompetition, dryRunRelay } from "./rehearsed-round";
 import { InProgressRelay } from "common-frontend";
 import { perStoredSession } from "common-frontend/core";
 import { ClientFactory, ClientFactoryRelay } from "./client_factory";
@@ -20,7 +20,7 @@ function relayClient(competition: PublicCompetition) {
 }
 
 function strategyClient(competition: PublicCompetition) {
-  const strategy = dryRunStrategy(competition.id);
+  const { strategy } = competition;
   if (strategy === undefined) return null;
   return gameClient(strategy.gameId as StrategyGameKey, competition.id, strategy.durationMinutes);
 }

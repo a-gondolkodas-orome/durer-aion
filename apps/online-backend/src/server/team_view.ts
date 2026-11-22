@@ -1,6 +1,6 @@
 import { TeamModel } from "./model";
 import { MatchStatus, publicCompetition } from "schemas";
-import type { CompetitionConfig, PublicCompetition, StartedStrategyGame, StartWindow } from "schemas";
+import type { CompetitionConfig, PublicCompetition, StartWindow } from "schemas";
 import { teamStartWindow } from "./start_window";
 import type { TeamMatches } from "./match_status";
 
@@ -38,8 +38,6 @@ export interface PublicTeamView {
   pageState: TeamModel["pageState"];
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
-  /** Null until the strategy match starts (#643). */
-  strategyGame: StartedStrategyGame | null;
 }
 
 /** Narrows a team row, with its matches as they stand, to {@link PublicTeamView}.
@@ -52,7 +50,6 @@ export function publicTeamView(
   team: TeamModel,
   matches: TeamMatches,
   competition: CompetitionConfig | undefined,
-  strategyGame: StartedStrategyGame | null,
   now: Date = new Date(),
 ): PublicTeamView {
   return {
@@ -64,6 +61,5 @@ export function publicTeamView(
     pageState: team.pageState,
     relayMatch: matches.relayMatch,
     strategyMatch: matches.strategyMatch,
-    strategyGame,
   };
 }
