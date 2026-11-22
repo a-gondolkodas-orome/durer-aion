@@ -316,6 +316,10 @@ export class SocketIOButBotMoves extends SocketIO {
       );
       const { state: after } = await fetch(db, matchID, { state: true } as const);
       if (after === undefined) return;
+      // Whether the move was taken is read off the state ID alone, which
+      // holds because every write of a match runs on its queue, and this
+      // whole turn is one job on it. A write from outside the queue that
+      // landed in the bot's pause would look exactly like its move (#655).
       if (after._stateID === current._stateID) {
         // The match stalls on purpose: a refused move is a bug in the
         // strategy, and anything played in its place, a random move say,
