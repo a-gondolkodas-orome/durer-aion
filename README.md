@@ -605,7 +605,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
   is the contract). In the `startNewGame` phase it answers
   with `startingPositionMove(position)` — the bot is the only source of the
   opening position, which may name the game's own keys only. `[undefined, moveName]`
-  makes the bot play a random move from `possibleMoves`.
+  makes the bot play a random move from `possibleMoves`, as a turn of its own:
+  in a list of several it throws.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`

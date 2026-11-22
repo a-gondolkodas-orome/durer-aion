@@ -2,7 +2,10 @@ import { State } from 'boardgame.io';
 import { Bot } from 'boardgame.io/ai';
 
 /// One move a strategy names: its arguments and its name. Arguments of
-/// `undefined` ask for a random move from the game's `possibleMoves`.
+/// `undefined` ask for a random move from the game's `possibleMoves`, which
+/// makes a turn of its own: the moves of a list are drawn up from the state
+/// the turn starts in, and a random move is drawn from the state it is
+/// played in.
 export type BotMove<T_Move> = [T_Move | undefined, string];
 
 /// What a strategy answers on its turn: one move, or several, played in order.
@@ -72,10 +75,14 @@ export function botWrapper<T_SpecificGameState, T_Move>(
 
     /// Throws when a random move is asked for and the game allows none: there
     /// is no move to make, which is a bug in the strategy or in `possibleMoves`.
+    /// Throws too for a random move in a list of several (`BotMove` says why).
     planTurn(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): BotAction[] {
       const named = asBotMoves(botstrategy(state, playerID, setupData));
       // Nothing named is no opinion, like an `undefined` move.
       if (named.length === 0) return [this.randomMove(state, playerID)];
+      if (named.length > 1 && named.some(([move]) => move === undefined)) {
+        throw new Error(`The bot of player ${playerID} named a random move among ${named.length}; a random move is a turn of its own.`);
+      }
       return named.map(([move, moveName]) => move === undefined
         ? this.randomMove(state, playerID)
         : { type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } });

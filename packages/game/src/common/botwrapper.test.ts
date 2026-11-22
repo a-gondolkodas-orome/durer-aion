@@ -36,6 +36,14 @@ describe('a bot\'s plan of its turn', () => {
     expect(named(botFor([]).bot.planTurn(stateAt(0), JUDGE_PLAYER))).toStrictEqual([[[], 'random']]);
   });
 
+  // Every move of a list is drawn up from the state the turn starts in, and a
+  // random move from that state may not be one the state before it allows.
+  test('fails aloud on a random move among several', () => {
+    expect(() => botFor([[[1], 'a'], [undefined, 'b']]).bot.planTurn(stateAt(0), JUDGE_PLAYER))
+      .toThrow('a random move is a turn of its own');
+    expect(named(botFor([[undefined, 'a']]).bot.planTurn(stateAt(0), JUDGE_PLAYER))).toStrictEqual([[[], 'random']]);
+  });
+
   test('fails aloud when it is to pick a random move and the game allows none', () => {
     const bot = new (botWrapper(() => [undefined, 'a']))({ enumerate: () => [] });
     expect(() => bot.planTurn(stateAt(0), JUDGE_PLAYER)).toThrow('the game allows none');
