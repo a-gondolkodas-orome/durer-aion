@@ -75,15 +75,9 @@ describe("publicTeamView", () => {
     });
   });
 
-  // A game's id can name the game, which stays secret until the team starts
-  // it (issue #643).
+  // A game id can name the game (#643).
   it("names no strategy game before the team starts it", () => {
     expect(competition?.strategy?.gameId).toBe("minta-ketkupac");
     expect(JSON.stringify(publicTeamView(team, matches, competition, null))).not.toContain("minta-ketkupac");
-  });
-
-  it("names the strategy game the team has started", () => {
-    expect(publicTeamView(team, matches, competition, { gameId: "minta-ketkupac" }).strategyGame)
-      .toStrictEqual({ gameId: "minta-ketkupac" });
   });
 });

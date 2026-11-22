@@ -4,7 +4,7 @@ import type { PublicCompetition, StartedStrategyGame } from "schemas";
 interface ClientProps {
   /// The team's: its boards are built from it.
   competition?: PublicCompetition | null;
-  /// The team's started strategy game, which the online round's board is built from.
+  /// The online round's started strategy game.
   strategyGame?: StartedStrategyGame | null;
   teamName?: string;
   matchID?: string;

@@ -39,10 +39,9 @@ and from `HOME` back to a finished `STRATEGY` (step 7).
    `logout` then loads the team through `requireTeam`.
 3. **The team's view.** `GET /team/me` answers `publicTeamView` (`team_view.ts`)
    with both matches' status and the team's competition without its
-   problems, from which the client builds its relay board and the chooser shows
-   only the matches the competition has. The competition does not say which
-   strategy game it plays: `strategyGame` does, once the team has started it,
-   read from the match's own metadata (`strategy_client.ts`, #643). It also serves the team's start
+   problems, from which the client builds its boards and the chooser shows
+   only the matches the competition has; the strategy game only once started
+   (`strategyGame`, #643). It also serves the team's start
    window (`teamStartWindow` in `start_window.ts`: the team's own, else its
    competition's, the one set on the admin page before the config's) and the
    server's time, by which the page keeps Start disabled outside the window. The frontend keeps that one object in

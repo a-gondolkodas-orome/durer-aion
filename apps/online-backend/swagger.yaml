@@ -537,37 +537,18 @@ paths:
 
   /team/me/strategy-client.js:
     get:
-      summary: The logged-in team's started strategy game, as the browser plays it
-      description: >
-        The answer is empty: its X-Accel-Redirect names the game folder's built
-        client, which nginx serves from an internal location (issue #643). Only
-        a team that has started its strategy match gets one, and it is that
-        match's game.
+      summary: The team's started strategy game, served by nginx through X-Accel-Redirect (#643)
       security:
       - teamSession: []
       tags:
       - user
-      parameters:
-      - in: query
-        name: match
-        required: false
-        schema:
-          type: string
-        description: The match id, which the server ignores; it keys the browser's module per match.
       responses:
         "200":
-          description: The game's client, by X-Accel-Redirect
-          headers:
-            X-Accel-Redirect:
-              schema:
-                type: string
-              description: /gated/strategy/<folder>.js
+          description: Empty; X-Accel-Redirect names the game's file
         "401":
           description: No session
         "404":
           description: The team has not started its strategy match
-        "500":
-          description: The match is of a game no game folder plays
 
   /team/me/relay/play:
     post:
@@ -759,9 +740,8 @@ components:
           nullable: true
           description: >
             The team's competition without its relay's problems: id, languages,
-            the relay's duration, the strategy game's duration, and metadata.
-            Not which strategy game it plays: strategyGame says that once the
-            team has started it. Null for a competition the server no longer has.
+            the relay's duration, the strategy game's duration (not the game),
+            and metadata. Null for a competition the server no longer has.
         startWindow:
           allOf:
           - $ref: "#/components/schemas/StartWindow"
@@ -787,10 +767,7 @@ components:
         strategyGame:
           type: object
           nullable: true
-          description: >
-            The game of the started strategy match, read from the match: its
-            game id, and the variant its client is built in. Null before the
-            team starts it, and for a match of a game the server does not play.
+          description: The started strategy match's game; null before the start.
           properties:
             gameId:
               type: string

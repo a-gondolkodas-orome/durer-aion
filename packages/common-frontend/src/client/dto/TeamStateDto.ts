@@ -35,9 +35,7 @@ export interface TeamModelDto {
   pageState: PageState
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
-  /// The game of the strategy match once it has started, which the online
-  /// round's board is built from. The dry run serves none: its competition
-  /// names its game.
+  /// The started strategy game; the online round's only.
   strategyGame?: StartedStrategyGame | null;
 }
 

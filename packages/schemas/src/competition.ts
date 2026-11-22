@@ -264,10 +264,7 @@ export function strategyGameIdOf(gameName: string): StrategyGameId | undefined {
     : undefined;
 }
 
-/// The strategy game a team has started, read from the match rather than
-/// from its competition, which an organiser may have changed since. The
-/// client plays it as `strategyGameName(gameId)`, with the game folder's
-/// client.tsx called with `variant`.
+/// The strategy game a team has started, read from its match.
 export interface StartedStrategyGame {
   gameId: StrategyGameId;
   variant?: string;
@@ -284,8 +281,7 @@ export interface PublicCompetition {
     /// Each problem's points, in play order; so its length is the number of problems.
     problemPoints: number[];
   };
-  /// No game id: which game a competition plays is secret until the team
-  /// starts it (#643), and then `StartedStrategyGame` says it.
+  /// No game id: it is secret until the team starts (#643).
   strategy?: {
     durationMinutes: number;
   };

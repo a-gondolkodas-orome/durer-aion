@@ -38,8 +38,7 @@ export interface PublicTeamView {
   pageState: TeamModel["pageState"];
   relayMatch: MatchStatus;
   strategyMatch: MatchStatus;
-  /** The game of the strategy match, once it has started: until then the
-   *  team is told nothing that names it (issue #643). */
+  /** Null until the strategy match starts (#643). */
   strategyGame: StartedStrategyGame | null;
 }
 

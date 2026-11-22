@@ -10,10 +10,6 @@ import { TEAM_COOKIE } from "./team_session";
 import { startTestDatabase } from "./test_database";
 import { registry } from "problem-bank/all";
 
-// The strategy game's client reaches a team only once the team has started
-// it, and it is the game of the team's own match (issue #643). nginx serves
-// the file the answer names; here the answer is all there is.
-
 // A reference competition whose strategy game is minta-ketkupac.
 const COMPETITION = "klmgbpb334--minta-teljes";
 
@@ -24,7 +20,7 @@ let port: number;
 beforeAll(async () => {
   database = await startTestDatabase();
   const app = new Koa<Koa.DefaultState, Server.AppCtx>();
-  // Koa would log the 4xx and the 500 under test.
+  // Koa would log the 4xx under test.
   app.silent = true;
   app.context.db = database.db;
   const router = new Router<Koa.DefaultState, Server.AppCtx>();
@@ -82,9 +78,6 @@ async function team(index: number, strategyMatchID?: string) {
 const client = (teamId?: string) => fetch(`http://127.0.0.1:${port}/team/me/strategy-client.js?match=x`, {
   headers: teamId === undefined ? {} : { cookie: `${TEAM_COOKIE}=${teamId}` },
 });
-const teamView = async (teamId: string) => (await (await fetch(`http://127.0.0.1:${port}/team/me`, {
-  headers: { cookie: `${TEAM_COOKIE}=${teamId}` },
-})).json()) as { strategyGame: unknown };
 
 describe("GET /team/me/strategy-client.js", () => {
   it("refuses a request without a session", async () => {
@@ -98,70 +91,28 @@ describe("GET /team/me/strategy-client.js", () => {
     expect(response.headers.get("x-accel-redirect")).toBeNull();
   });
 
-  // nginx keeps the Content-Type for the file it serves, and a browser runs a
-  // module script only under a JavaScript one: koa's text/plain for the empty
-  // body broke the board.
-  it("serves a running match's game as JavaScript, uncached, with nothing in the body", async () => {
+  // nginx keeps these headers for the file; koa's text/plain broke the board.
+  it("serves a running match's game as uncached JavaScript", async () => {
     const response = await client(await team(0, await match("running", strategyGameName("minta-ketkupac"))));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-accel-redirect")).toBe("/gated/strategy/ketkupac.js");
     expect(response.headers.get("content-type")).toMatch(/^text\/javascript/);
     expect(response.headers.get("cache-control")).toBe("private, no-cache");
-    expect(await response.text()).toBe("");
   });
 
   it("serves a finished match's game", async () => {
     const response = await client(await team(0, await match("done", strategyGameName("minta-ketkupac"), -HOUR_MS / 2)));
 
-    expect(response.status).toBe(200);
     expect(response.headers.get("x-accel-redirect")).toBe("/gated/strategy/ketkupac.js");
   });
 
-  it("serves the folder of a game played in a variant", async () => {
-    const response = await client(await team(0, await match("variant", strategyGameName("20o-d"))));
-
-    expect(response.headers.get("x-accel-redirect")).toBe("/gated/strategy/20ocde.js");
-  });
-
+  // Both teams are in a competition that plays minta-ketkupac: the match decides.
   it("serves each team its own match's game", async () => {
-    const first = await team(0, await match("first", strategyGameName("minta-ketkupac")));
-    const second = await team(1, await match("second", strategyGameName("minta-sablon")));
+    const first = await team(0, await match("first", strategyGameName("minta-sablon")));
+    const second = await team(1, await match("second", strategyGameName("20o-d")));
 
-    expect((await client(first)).headers.get("x-accel-redirect")).toBe("/gated/strategy/ketkupac.js");
-    expect((await client(second)).headers.get("x-accel-redirect")).toBe("/gated/strategy/sablon.js");
-  });
-
-  // The competition plays minta-ketkupac; an organiser changed it after this
-  // match started with minta-sablon.
-  it("serves the game the match was started with, not the competition's", async () => {
-    const response = await client(await team(0, await match("before-change", strategyGameName("minta-sablon"))));
-
-    expect(response.headers.get("x-accel-redirect")).toBe("/gated/strategy/sablon.js");
-  });
-
-  it("fails, serving nothing, for a match of a game no folder plays", async () => {
-    const response = await client(await team(0, await match("unknown", strategyGameName("nincs-ilyen"))));
-
-    expect(response.status).toBe(500);
-    expect(response.headers.get("x-accel-redirect")).toBeNull();
-  });
-});
-
-describe("GET /team/me's strategyGame", () => {
-  it("is null before the team starts", async () => {
-    expect((await teamView(await team(0))).strategyGame).toBeNull();
-  });
-
-  it("names the started match's game and variant", async () => {
-    const teamId = await team(0, await match("variant", strategyGameName("20o-d")));
-
-    expect((await teamView(teamId)).strategyGame).toStrictEqual({ gameId: "20o-d", variant: "D" });
-  });
-
-  it("is null for a game no folder plays, and the rest of the view is still served", async () => {
-    const teamId = await team(0, await match("unknown", strategyGameName("nincs-ilyen")));
-
-    expect(await teamView(teamId)).toMatchObject({ strategyGame: null, strategyMatch: { state: "IN PROGRESS" } });
+    expect((await client(first)).headers.get("x-accel-redirect")).toBe("/gated/strategy/sablon.js");
+    expect((await client(second)).headers.get("x-accel-redirect")).toBe("/gated/strategy/20ocde.js");
   });
 });

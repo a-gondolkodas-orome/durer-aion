@@ -26,8 +26,6 @@ function relayClient(competition: PublicCompetition): OnlineClient | null {
   return relayOnlineClient;
 }
 
-// The game comes from the team's started match, never from its competition,
-// which names no game (issue #643).
 function strategyClient({ gameId: startedId }: StartedStrategyGame): OnlineClient {
   const gameId = startedId as StrategyGameKey;
   let client = strategyClients.get(gameId);
@@ -51,10 +49,8 @@ interface ClientProps {
   credentials?: string,
 }
 
-// The relay's board comes from the team's competition, the strategy game's
-// from its started match. A competition without the match (which the chooser
-// does not offer), a team without a competition, or a started match of a game
-// the server does not play has none.
+// The team's competition decides the relay's board, its started match the
+// strategy game's; without them there is none.
 function NoMatch() {
   const { t } = useTranslation();
   return <p>{t('relay.error.noMatch')}</p>;

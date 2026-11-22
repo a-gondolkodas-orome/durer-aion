@@ -63,7 +63,6 @@ export function configureTeamsRouter(
     return withCompetitionWindow(await competitions.getCompetition(team.competitionId), await teams.competitionWindows());
   }
 
-  // What the team is served of itself, as its matches stand.
   async function teamView(ctx: Server.AppCtx, team: TeamModel, matches: TeamMatches) {
     return publicTeamView(team, matches, await competitionNow(team), await publicStrategyGame(ctx.db, matches.strategyMatch));
   }
@@ -408,21 +407,16 @@ export function configureTeamsRouter(
   });
 
   /**
-   * The logged-in team's strategy game, as the browser plays it: the built
-   * client.tsx of the game folder that plays the team's started match. The
-   * answer is empty; nginx serves the file the `X-Accel-Redirect` names from
-   * a location nothing else reaches (issue #643). A team that has not started
-   * gets nothing, since a game's code names the game.
+   * The team's started strategy game: nginx serves the file the
+   * X-Accel-Redirect names (#643). Nothing before the start.
    */
   router.get<TeamState>("/team/me/strategy-client.js", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
     const game = await startedStrategyGame(ctx.db, (await teamMatches(ctx.db, team)).strategyMatch)
       ?? refuse(ctx, 404, "MATCH_NOT_FOUND", "The team has not started its strategy match.");
     ctx.set("X-Accel-Redirect", `${GATED_STRATEGY_PATH}${game.folder}.js`);
-    // nginx keeps this answer's Content-Type and Cache-Control for the file it
-    // serves, so they are the file's: a module script, which the browser runs
-    // only under a JavaScript type, and kept by no cache, since teams share
-    // school computers and the one URL serves every game.
+    // nginx keeps these two headers for the file. A module script needs a
+    // JavaScript type; no-cache, as teams share computers and this one URL.
     ctx.status = 200;
     ctx.body = "";
     ctx.type = "text/javascript";

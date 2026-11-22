@@ -27,8 +27,7 @@ export function dryRunCompetition(id: CompetitionId): PublicCompetition | undefi
   return competition && publicCompetition(competition);
 }
 
-/// A competition's strategy game, which the team's view of it does not name:
-/// the dry run's game is public, and its bot runs in the browser.
+/// A competition's strategy game, which `PublicCompetition` leaves out.
 export function dryRunStrategy(id: CompetitionId): StrategyConfig | undefined {
   return registry.competitions.get(id)?.strategy;
 }
