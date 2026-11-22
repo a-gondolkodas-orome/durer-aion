@@ -625,8 +625,9 @@ that before a competition.
    the languages each one's board and description exist in, and
    `strategyGameFolders` the folder whose `client.tsx` plays it.
    The server's `games.ts`, which lists each game beside its bot, imports
-   `game/strategy` and `game/bot`; the live client `game/client`; the offline
-   dry run all three.
+   `game/strategy` and `game/bot`; the offline dry run all three. The live client
+   imports none: it loads one game's built `client.tsx` from the backend
+   ([`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) § *The strategy games' gate*).
 
 What each file provides — the names are the ones the registries import. The
 game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and

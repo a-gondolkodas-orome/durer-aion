@@ -36,6 +36,14 @@ describe(configPath, () => {
     expect(directives).not.toContain('$proxy_add_x_forwarded_for');
   });
 
+  // Without `internal`, anyone could load every game by its path (#643).
+  it('serves the gated strategy games only through the backend\'s X-Accel-Redirect', () => {
+    const gated = directives.match(/location\s+\/gated\/\s*\{([^}]*)\}/)?.[1];
+
+    expect(gated, 'no location /gated/ found').toBeDefined();
+    expect(gated).toMatch(/^\s*internal;/m);
+  });
+
   // The official image ships gzip commented out, so losing this line serves the bundle at three
   // times its size, and nothing else notices (#715).
   it('compresses the JavaScript bundle', () => {

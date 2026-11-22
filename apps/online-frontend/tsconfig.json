@@ -2,8 +2,8 @@
   "extends": "../../tsconfig.frontend.json",
   "compilerOptions": {
     "paths": {
-      // No entry for the game package: it resolves through its exports map, to
-      // the declarations in its dist, for tsc and Vite alike.
+      // No entry for the game package: tsc resolves it through its exports map,
+      // to the declarations in its dist; Vite builds it from source.
       // urlcat 3.1.0's exports map has no types condition, so bundler resolution
       // finds index.mjs but no declarations (node10 read the legacy top-level
       // `types` field instead). Point tsc at the shipped d.ts; Vite resolves the
