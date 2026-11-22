@@ -33,12 +33,6 @@ describe('bank-from-bundle.mjs', () => {
     expect(printed).toContain(`  "${VALTO}",  (in listedIds)`);
   });
 
-  // The sample's relay reuses k5g58wuf6h--minta-korongok of reference.ts.
-  it('names the banks whose problems its relays reuse', () => {
-    expect(writeBank(bundlePath, 'csomag-proba', [VALTO], directory))
-      .toContain('Its relays reuse problems of reference, which the createRegistry list must hold too.');
-  });
-
   // practice-sets.ts throws on a listed competition with no relay.
   it('lists only the competitions with a relay', () => {
     withBundle(bundle => { delete bundle.competitions[TELJES].relay; });

@@ -1,4 +1,4 @@
-import type { CompetitionId, ProblemId } from 'schemas';
+import type { CompetitionId } from 'schemas';
 import { competitionTitle } from 'schemas';
 import type { Bundle } from './bundle';
 import { problemsReferredFrom } from './bundle';
@@ -26,12 +26,11 @@ function sameJson(a: unknown, b: unknown): boolean {
 /// the registry holds otherwise than the bundle does, or a relay problem
 /// neither holds. A problem the registry holds as the bundle does is left to
 /// it, as when the competitions of one round are banked one at a time.
-/// `referred` are the relays' problems the registry holds.
 export function bankFromBundle(
   bundle: Bundle,
   ids: readonly CompetitionId[],
   registry: Pick<Registry, 'competitions' | 'problems'>,
-): { bank: Bank, referred: ProblemId[] } | { errors: string[] } {
+): { bank: Bank } | { errors: string[] } {
   if (ids.length === 0) return { errors: ['No competition is named'] };
   const missing = ids.filter(id => !(id in bundle.competitions));
   if (missing.length > 0) {
@@ -55,7 +54,7 @@ export function bankFromBundle(
       .map(id => `A relay uses the problem ${id}, which neither the bundle nor the code holds`),
   ];
   if (errors.length > 0) return { errors };
-  return { bank: { competitions, problems }, referred };
+  return { bank: { competitions, problems } };
 }
 
 /// The source of a file under banks/ that exports `bank`. The literals are

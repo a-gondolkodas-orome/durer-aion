@@ -10,7 +10,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bankFile, bankFromBundle, readBundle } from 'problem-bank';
-import { banks, registry } from 'problem-bank/all';
+import { registry } from 'problem-bank/all';
 
 const BANKS = fileURLToPath(new URL('../packages/problem-bank/banks/', import.meta.url));
 // A file name that is also an identifier once camel-cased, as the banks' are.
@@ -45,24 +45,18 @@ export function writeBank(bundlePath, name, ids, directory = BANKS) {
   // The practice site lists relays only, and throws on any other competition.
   const listed = competitions.filter(([, competition]) => competition.relay !== undefined).map(([id]) => id);
   const unlisted = competitions.filter(([, competition]) => competition.relay === undefined).map(([id]) => id);
-  const reused = Object.entries(banks)
-    .filter(([, bank]) => made.referred.some(id => id in bank.problems))
-    .map(([bankName]) => bankName);
   return [
     `Wrote ${path}: ${competitions.length} competitions, ${Object.keys(made.bank.problems).length} problems.`,
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,
-    `  ${as},  (in banks)`,
+    `  ${as},  (in the createRegistry list)`,
     '',
     'To list it on the relay practice site once it is released, in apps/relay-practise-frontend/src/practice-sets.ts:',
     `  import * as ${as} from "problem-bank/banks/${name}";`,
     `  ${as},  (in the createRegistry list)`,
     ...listed.map(id => `  "${id}",  (in listedIds)`),
     ...unlisted.length > 0 ? [`Not in listedIds, having no relay: ${unlisted.join(', ')}`] : [],
-    ...reused.length > 0
-      ? [`Its relays reuse problems of ${reused.join(', ')}, which the createRegistry list must hold too.`]
-      : [],
   ].join('\n');
 }
 

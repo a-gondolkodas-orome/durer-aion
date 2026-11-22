@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { strategyGames } from 'game';
-import { banks, registry } from '../all';
+import { registry } from '../all';
 import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
 import { readBundle } from './bundle';
@@ -20,6 +20,12 @@ const read = readBundle(JSON.parse(readFileSync(join(__dirname, '..', 'fixtures'
 if ('errors' in read) throw new Error(read.errors.join('\n'));
 const sample = read.bundle;
 
+// Every bank of all.ts as one, to register a new bank beside.
+const inCode: Bank = {
+  competitions: Object.fromEntries(registry.competitions),
+  problems: Object.fromEntries(registry.problems),
+};
+
 function made(bundle: Bundle, ids: string[]) {
   const result = bankFromBundle(bundle, ids, registry);
   if ('errors' in result) throw new Error(result.errors.join('\n'));
@@ -32,15 +38,14 @@ describe('bankFromBundle', () => {
   afterAll(() => { rmSync(directory, { recursive: true, force: true }); });
 
   it('makes a file that registers beside the banks', async () => {
-    const { bank, referred } = made(sample, [VALTO, CSOMAG_TELJES]);
+    const { bank } = made(sample, [VALTO, CSOMAG_TELJES]);
     expect(bank).toEqual({ competitions: sample.competitions, problems: sample.problems });
-    expect(referred).toEqual([KORONGOK]);
 
     const path = join(directory, 'sample.ts');
     writeFileSync(path, bankFile(bank));
     const { competitions, problems } = await import(path) as Bank;
     expect({ competitions, problems }).toEqual(bank);
-    expect(validateRegistry(createRegistry([...Object.values(banks), bank]), strategyGames)).toEqual([]);
+    expect(validateRegistry(createRegistry([inCode, bank]), strategyGames)).toEqual([]);
   });
 
   it('takes the named competitions, and only the problems their relays use', () => {
@@ -48,7 +53,7 @@ describe('bankFromBundle', () => {
     expect(Object.keys(bank.competitions)).toEqual([VALTO]);
     // roow9oo75t--csomag-paros is the other competition's alone.
     expect(Object.keys(bank.problems).sort()).toEqual(['10iqp4vy6b--csomag-kockak', '7q1wniz55w--csomag-haromszog']);
-    expect(validateRegistry(createRegistry([...Object.values(banks), bank]), strategyGames)).toEqual([]);
+    expect(validateRegistry(createRegistry([inCode, bank]), strategyGames)).toEqual([]);
   });
 
   it('refuses a competition the registry holds, a problem it holds otherwise, and a relay problem neither holds', () => {
@@ -79,11 +84,10 @@ describe('bankFromBundle', () => {
     const banked = made(sample, [VALTO]).bank;
     const kockak = Object.fromEntries(Object.entries(banked.problems['10iqp4vy6b--csomag-kockak']).reverse()) as ProblemBank[string];
     const first: Bank = { ...banked, problems: { ...banked.problems, '10iqp4vy6b--csomag-kockak': kockak } };
-    const { bank, referred } = made(sample, [CSOMAG_TELJES]);
-    const second = bankFromBundle(sample, [CSOMAG_TELJES], createRegistry([...Object.values(banks), first]));
+    const { bank } = made(sample, [CSOMAG_TELJES]);
+    const second = bankFromBundle(sample, [CSOMAG_TELJES], createRegistry([inCode, first]));
     expect(second).toEqual({
       bank: { competitions: bank.competitions, problems: { 'roow9oo75t--csomag-paros': bank.problems['roow9oo75t--csomag-paros'] } },
-      referred: [...referred, '10iqp4vy6b--csomag-kockak'],
     });
   });
 
