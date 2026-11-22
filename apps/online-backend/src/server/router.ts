@@ -120,67 +120,75 @@ export function configureTeamsRouter(
   router.post("/game/admin/:matchId/addminutes/:minutes", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
-    const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
-      matchID,
-      {
-      state: true,
-        metadata: true,
+    // The read, the checks and the write are one job on the match's queue,
+    // which every move and bot turn also runs on: built from a state a move
+    // then replaced, the write would drop that move or itself (#655). The
+    // queue is per process, so this holds only while one backend serves a
+    // match; with several, the extension would have to go through Master.
+    const { team, newEndDate } = await ctx.durer_transport.getMatchQueue(matchID).add(async () => {
+      const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
+        matchID,
+        {
+        state: true,
+          metadata: true,
+        }
+      );
+      if (!state) {
+        refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
       }
-    );
-    if (!state) {
-      refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
-    }
-    const teamId = metadata.players[0].name;
-    const team = await teams.getTeam({ teamId });
+      const teamId = metadata.players[0].name;
+      const team = await teams.getTeam({ teamId });
 
-    if (!team) {
-      ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
-      return;
-    }
-
-    const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
-    if (gameType === null) {
-      refuse(ctx, 409, "STALE_MATCH_ID", `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
-    }
-    if (deriveMatchStatus(gameType, matchID, state, new Date()).state !== 'IN PROGRESS') {
-      refuse(ctx, 409, "MATCH_FINISHED", 'Restarting an already finished match is not supported right now.');
-    }
-
-    // Before the state is written, so a match no hosted game plays (one
-    // stored under a game name the server no longer hosts) is refused
-    // unchanged, and a retry does not add the minutes twice.
-    const game = games.find(g => g.name === metadata.gameName);
-    if (!game) {
-      refuse(ctx, 404, "GAME_NOT_FOUND", `Match found, but game ${metadata.gameName} was not found.`);
-    }
-
-    const new_state = {
-      ...state,
-      _stateID: state._stateID + 1
-    }
-
-    const newEndDate = new Date(state.G.end)
-    newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
-    new_state.G.end = newEndDate.toISOString();
-    new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
-
-    await ctx.db.setState(matchID, new_state);
-
-    /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
-    This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
-    This is generally equal to what would happen if multiple players play the game, and one does some actions.
-    The other players would see the updated gamestate, and the frontend would update accordingly.
-    The normal way to use this, is to create a Master authoritative object, which handles validations, and other logics.
-    Here we already handled the validation, and uploaded it to the database, so we can just send the updated gamestate to the frontend.
-    This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
-    const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
-
-    my_transportAPI.sendAll(
-      {
-        type: 'update',
-        args: [matchID, new_state]
+      if (!team) {
+        ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
+        return;
       }
-    )
+
+      const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
+      if (gameType === null) {
+        refuse(ctx, 409, "STALE_MATCH_ID", `Match ${matchID} is not the team's current match. (Probably you are using an old matchID.)`);
+      }
+      if (deriveMatchStatus(gameType, matchID, state, new Date()).state !== 'IN PROGRESS') {
+        refuse(ctx, 409, "MATCH_FINISHED", 'Restarting an already finished match is not supported right now.');
+      }
+
+      // Before the state is written, so a match no hosted game plays (one
+      // stored under a game name the server no longer hosts) is refused
+      // unchanged, and a retry does not add the minutes twice.
+      const game = games.find(g => g.name === metadata.gameName);
+      if (!game) {
+        refuse(ctx, 404, "GAME_NOT_FOUND", `Match found, but game ${metadata.gameName} was not found.`);
+      }
+
+      const new_state = {
+        ...state,
+        _stateID: state._stateID + 1
+      }
+
+      const newEndDate = new Date(state.G.end)
+      newEndDate.setMinutes(newEndDate.getMinutes() + minutes)
+      new_state.G.end = newEndDate.toISOString();
+      new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
+
+      await ctx.db.setState(matchID, new_state);
+
+      /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
+      This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
+      This is generally equal to what would happen if multiple players play the game, and one does some actions.
+      The other players would see the updated gamestate, and the frontend would update accordingly.
+      The normal way to use this, is to create a Master authoritative object, which handles validations, and other logics.
+      Here we already handled the validation, and uploaded it to the database, so we can just send the updated gamestate to the frontend.
+      This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
+      const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
+
+      my_transportAPI.sendAll(
+        {
+          type: 'update',
+          args: [matchID, new_state]
+        }
+      )
+      return { team, newEndDate };
+    });
 
     team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
     await team.save();
