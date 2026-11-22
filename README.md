@@ -556,7 +556,9 @@ carries the config's, so set it again on the other server.
    `npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...`
    writes `packages/problem-bank/banks/<bank-name>.ts` with the round's
    competitions and the bundle's problems their relays use, leaving out the
-   rest, such as a try-out's. Named no competition, it lists those the bundle
+   rest, such as a try-out's. It writes nothing if the rules refuse the bank
+   beside those in code, as they may a stored competition since the export
+   does not check it. Named no competition, it lists those the bundle
    holds. Say in the file's comment which round it is, as the other banks do.
 3. **Register it** in `all.ts`, and in `practice-sets.ts` to list it on the
    relay practice site, with the lines the script prints.

@@ -1,8 +1,8 @@
-import type { CompetitionId } from 'schemas';
+import type { CompetitionId, StrategyGameId, StrategyGameInfo } from 'schemas';
 import { competitionTitle } from 'schemas';
 import type { Bundle } from './bundle';
-import { problemsReferredFrom } from './bundle';
 import type { Bank, Registry } from './registry';
+import { createRegistry, validateRegistry } from './registry';
 import type { CompetitionBank, ProblemBank } from './sources';
 
 // A bundle made into a file under banks/ (README § In the database, and back
@@ -23,13 +23,17 @@ function sameJson(a: unknown, b: unknown): boolean {
 /// with the bundle's problems their relays use and no other, or why it makes
 /// none: an id the bundle does not hold, a competition the registry holds
 /// already, since `createRegistry` refuses an id two banks hold, a problem
-/// the registry holds otherwise than the bundle does, or a relay problem
-/// neither holds. A problem the registry holds as the bundle does is left to
-/// it, as when the competitions of one round are banked one at a time.
+/// the registry holds otherwise than the bundle does, or anything
+/// `validateRegistry` refuses of the two together. The export does not
+/// validate, so this is where a stored competition the rules have come to
+/// refuse is caught, before it is a file. A problem the registry holds as the
+/// bundle does is left to it, as when the competitions of one round are
+/// banked one at a time. `strategyGames` is the `game` package's.
 export function bankFromBundle(
   bundle: Bundle,
   ids: readonly CompetitionId[],
   registry: Pick<Registry, 'competitions' | 'problems'>,
+  strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
 ): { bank: Bank } | { errors: string[] } {
   if (ids.length === 0) return { errors: ['No competition is named'] };
   const missing = ids.filter(id => !(id in bundle.competitions));
@@ -45,16 +49,19 @@ export function bankFromBundle(
     return held !== undefined && !sameJson(held, { ...body, id });
   }).map(([id]) => id);
   const problems: ProblemBank = Object.fromEntries(usedProblems.filter(([id]) => !registry.problems.has(id)));
-  const referred = problemsReferredFrom({ ...bundle, competitions, problems });
   const errors = [
     ...Object.keys(competitions).filter(id => registry.competitions.has(id))
       .map(id => `The competition ${id} is in code already`),
     ...differing.map(id => `The problem ${id} is in code already, and differs there`),
-    ...referred.filter(id => !registry.problems.has(id))
-      .map(id => `A relay uses the problem ${id}, which neither the bundle nor the code holds`),
   ];
   if (errors.length > 0) return { errors };
-  return { bank: { competitions, problems } };
+  const bank = { competitions, problems };
+  const inCode: Bank = {
+    competitions: Object.fromEntries(registry.competitions),
+    problems: Object.fromEntries(registry.problems),
+  };
+  const invalid = validateRegistry(createRegistry([inCode, bank]), strategyGames);
+  return invalid.length > 0 ? { errors: invalid } : { bank };
 }
 
 /// The source of a file under banks/ that exports `bank`. The literals are

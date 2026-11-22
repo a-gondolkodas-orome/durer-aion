@@ -4,11 +4,14 @@
 //
 //   npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...
 //
-// README § In the database, and back into code says when to run it.
+// README § In the database, and back into code says when to run it. It runs
+// under jiti, not plain Node: the `game` package's build imports
+// `boardgame.io/core`, a directory, which only a bundler or jiti resolves.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { strategyGames } from 'game';
 import { bankFile, bankFromBundle, readBundle } from 'problem-bank';
 import { registry } from 'problem-bank/all';
 
@@ -33,7 +36,7 @@ export function writeBank(bundlePath, name, ids, directory = BANKS) {
   if (existsSync(path)) throw new Error(`${path} exists already`);
   const read = readBundle(JSON.parse(readFileSync(bundlePath, 'utf8')));
   if ('errors' in read) throw new Error(read.errors.join('\n'));
-  const made = bankFromBundle(read.bundle, ids, registry);
+  const made = bankFromBundle(read.bundle, ids, registry, strategyGames);
   if ('errors' in made) {
     const held = Object.keys(read.bundle.competitions).map(id => `  ${id}`);
     throw new Error([...made.errors, 'The bundle holds the competitions', ...held].join('\n'));
