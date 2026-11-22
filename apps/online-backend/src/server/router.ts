@@ -5,8 +5,7 @@ import type { DefaultState } from 'koa';
 import type { LobbyAPI, Server, StorageAPI } from 'boardgame.io';
 import { TeamsRepository } from './db';
 import { GameType } from 'schemas';
-import { TransportAPI } from '../socketio_botmoves';
-import { getFilterPlayerView } from "boardgame.io/internal";
+import type { SocketIOButBotMoves } from '../socketio_botmoves';
 import { allowedToViewStrategy, getNewGame, createGame, injectBot, injectPlayer } from './team_manage';
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
@@ -20,6 +19,10 @@ import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
 import { importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
+
+/** What the routes use of the socket transport `server.ts` puts on the
+ *  context, which koa's context types as `any`. */
+type MatchTransport = Pick<SocketIOButBotMoves, "getMatchQueue" | "publishUpdate">;
 
 /**
  *
@@ -120,16 +123,17 @@ export function configureTeamsRouter(
   router.post("/game/admin/:matchId/addminutes/:minutes", adminAuth, async (ctx) => {
     const matchID = ctx.params.matchId;
     const minutes = Number(ctx.params.minutes);
-    // The read, the checks and the write are one job on the match's queue,
-    // which every move and bot turn also runs on: built from a state a move
-    // then replaced, the write would drop that move or itself (#655). The
-    // queue is per process, so this holds only while one backend serves a
-    // match; with several, the extension would have to go through Master.
-    const { team, newEndDate } = await ctx.durer_transport.getMatchQueue(matchID).add(async () => {
+    // The read, the checks, the write and the team's note are one job on the
+    // match's queue, which every move and bot turn also runs on: built from a
+    // state a move then replaced, the write would drop that move or itself
+    // (#655). The queue is per process, so this holds only while one backend
+    // serves a match; with several, the extension would have to go through Master.
+    const transport = ctx.durer_transport as MatchTransport;
+    const { team, newEndDate } = await transport.getMatchQueue(matchID).add(async () => {
       const { state, metadata } = await (ctx.db as StorageAPI.Async).fetch(
         matchID,
         {
-        state: true,
+          state: true,
           metadata: true,
         }
       );
@@ -140,8 +144,7 @@ export function configureTeamsRouter(
       const team = await teams.getTeam({ teamId });
 
       if (!team) {
-        ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
-        return;
+        throw ctx.throw(500, `Match found, but assigned team ${teamId} was not found.`);
       }
 
       const gameType = team.relayMatchID === matchID ? 'RELAY' : team.strategyMatchID === matchID ? 'STRATEGY' : null;
@@ -155,8 +158,7 @@ export function configureTeamsRouter(
       // Before the state is written, so a match no hosted game plays (one
       // stored under a game name the server no longer hosts) is refused
       // unchanged, and a retry does not add the minutes twice.
-      const game = games.find(g => g.name === metadata.gameName);
-      if (!game) {
+      if (!games.some(g => g.name === metadata.gameName)) {
         refuse(ctx, 404, "GAME_NOT_FOUND", `Match found, but game ${metadata.gameName} was not found.`);
       }
 
@@ -171,27 +173,13 @@ export function configureTeamsRouter(
       new_state.G.millisecondsRemaining = newEndDate.getTime() - new Date().getTime();
 
       await ctx.db.setState(matchID, new_state);
+      // The boards learn the new end the way they learn of another player's move.
+      transport.publishUpdate(matchID, new_state);
 
-      /* Hijacking the internal transport API used ot send backend updates to the frontend to send an update to the frontend
-      This is a bit hacky, but it mainly simulates a similar effect as what would happen if a different user changes teh gamestate irl
-      This is generally equal to what would happen if multiple players play the game, and one does some actions.
-      The other players would see the updated gamestate, and the frontend would update accordingly.
-      The normal way to use this, is to create a Master authoritative object, which handles validations, and other logics.
-      Here we already handled the validation, and uploaded it to the database, so we can just send the updated gamestate to the frontend.
-      This is possible, because the publish functionality of the PubSub implementation,if we use a SendAll function, can be reconstructed easily from the transport layer we defined from the botmoves already. */
-      const my_transportAPI = TransportAPI(matchID, null /* we are only using sendAll */, getFilterPlayerView(game), ctx.durer_transport.pubSub)
-
-      my_transportAPI.sendAll(
-        {
-          type: 'update',
-          args: [matchID, new_state]
-        }
-      )
+      team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
+      await team.save();
       return { team, newEndDate };
     });
-
-    team.other = appendOtherNote(team.other, `te[${matchID}]:${minutes}`);
-    await team.save();
 
     ctx.body = { updatedEndTime: newEndDate, matchID: matchID, team: await adminTeamView(ctx.db, team) };
 

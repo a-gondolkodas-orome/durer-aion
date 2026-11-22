@@ -44,7 +44,9 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
   async function serve(
     team: Partial<TeamModel>,
     end: string,
-    { db, queue = serialQueue(), games = [] }: { db?: unknown; queue?: SerialQueue; games?: { name: string }[] } = {},
+    { db, queue = serialQueue(), games = [], onQueue = () => undefined }: {
+      db?: unknown; queue?: SerialQueue; games?: { name: string }[]; onQueue?: (matchID: string) => void;
+    } = {},
   ) {
     const teams = { getTeam: vi.fn().mockResolvedValue(team) } as unknown as TeamsRepository;
     const app = new Koa<Koa.DefaultState, Server.AppCtx>();
@@ -52,8 +54,12 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
     const metadata = { players: { 0: { name: TEAM_ID } }, gameName: GAME_NAME };
     app.context.db = (db ?? { fetch: () => ({ state, metadata }), setState }) as Server.AppCtx["db"];
     // What the route takes from the socket transport: the match's queue, and
-    // the channel a match's updates are published on.
-    Object.assign(app.context, { durer_transport: { getMatchQueue: () => queue, pubSub: { publish: vi.fn() } } });
+    // the broadcast of the state it wrote.
+    const durer_transport = {
+      getMatchQueue: (matchID: string) => { onQueue(matchID); return queue; },
+      publishUpdate: vi.fn(),
+    };
+    Object.assign(app.context, { durer_transport });
     const router = new Router<Koa.DefaultState, Server.AppCtx>();
     configureTeamsRouter(router, teams, games as never, requireAdmin(PASSWORD), registry);
     app.use(router.routes());
@@ -103,6 +109,7 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
       // bgio-postgres's rule: a write lands only over a lower state ID.
       setState: (_matchID: string, state: typeof stored) => { if (state._stateID > stored._stateID) stored = state; },
     };
+    const fetched = vi.spyOn(db, "fetch");
     const queue = serialQueue();
     let finishMove: () => void = () => undefined;
     const moveDone = queue.add(async () => {
@@ -111,13 +118,17 @@ describe("POST /game/admin/:matchId/addminutes/:minutes", () => {
       db.setState(MATCH_ID, { ...read, G: { ...read.G, moved: true }, _stateID: read._stateID + 1 });
     });
 
+    let reachedQueue: (matchID: string) => void = () => undefined;
+    const queued = new Promise<string>(resolve => { reachedQueue = resolve; });
     const response = serve(
       { relayMatchID: MATCH_ID, strategyMatchID: null, other: "", save: vi.fn(), toJSON: () => ({}) },
       stored.G.end,
-      { db, queue, games: [{ name: GAME_NAME }] },
+      { db, queue, games: [{ name: GAME_NAME }], onQueue: reachedQueue },
     );
-    // Long enough for an unqueued route to read and write.
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // A route that does not queue answers before it would reach the queue.
+    expect(await Promise.race([queued, response.then(() => "answered")])).toBe(MATCH_ID);
+    // Queued behind the move, the route has not read yet: only the move has.
+    expect(fetched).toHaveBeenCalledTimes(1);
     finishMove();
     await moveDone;
 
