@@ -4,14 +4,13 @@
 // socketio_transport.test.ts fails if they split (#461).
 import type IOTypes from 'socket.io';
 import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
-import type { Bot } from "boardgame.io/ai";
 import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
 import { SocketGuard, socketClientKey, type GuardLimits } from "./server/socket_guard";
-import type { MatchBot } from "game";
+import type { ServerBot } from "game";
 import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.
@@ -23,7 +22,7 @@ type TransportData = ReturnType<ReturnType<typeof getFilterPlayerView>>;
 type SocketOpts = NonNullable<ConstructorParameters<typeof SocketIO>[0]>;
 
 /** Copied from boardgame.io/dist/src/client/transport/local.ts */
-function GetBotPlayer(state: State, bots: Record<PlayerID, Bot>) {
+function GetBotPlayer(state: State, bots: Record<PlayerID, unknown>) {
   if (state.ctx.gameover !== undefined) {
     return null;
   }
@@ -112,12 +111,12 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
-  bots: Record<string, MatchBot>;
+  bots: Record<string, ServerBot>;
   // The suite's way to reach a limit in a few packets.
   private readonly guardLimits: GuardLimits;
   constructor(
     socketOpts: SocketOpts,
-    bots: Record<string, MatchBot>,
+    bots: Record<string, ServerBot>,
     guardLimits: GuardLimits = {},
   ) {
     super({ ...socketOpts });
@@ -212,7 +211,7 @@ export class SocketIOButBotMoves extends SocketIO {
   private async onPlayerUpdate(
     context: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    bot: MatchBot,
+    bot: ServerBot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
     // Typed as boardgame.io's action, but it is whatever the client sent.
@@ -240,7 +239,7 @@ export class SocketIOButBotMoves extends SocketIO {
   private async playBotTurn(
     { db, auth }: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    bot: MatchBot,
+    bot: ServerBot,
     matchID: string
   ): Promise<void> {
     // The metadata too: the relay's judge reads its problems from the setup data.
@@ -275,7 +274,7 @@ export class SocketIOButBotMoves extends SocketIO {
     // its strategy named, then, while the turn is still its own, whatever it
     // names when asked again (botwrapper.ts says why).
     let current = state;
-    let plan: { turn: number; phase: string; moves: ReturnType<MatchBot["planTurn"]> } | null = null;
+    let plan: { turn: number; phase: string; moves: ReturnType<ServerBot["planTurn"]> } | null = null;
     const dropRest = (why: string) => {
       if (plan !== null && plan.moves.length > 0) {
         console.error(`The bot of match ${JSON.stringify(matchID)} named ${plan.moves.length} move(s) after ${why}; dropped.`);

@@ -47,6 +47,12 @@ export type MatchBot = Bot & {
   wait(): Promise<void>;
 };
 
+/// The bot as the server holds it. One instance serves every match of its
+/// game, and `play` keeps a plan between calls, so a server calling it would
+/// hand one match's plan to another that reached the same state ID, turn and
+/// phase: which matches started together do.
+export type ServerBot = Pick<MatchBot, 'planTurn' | 'wait'>;
+
 /// Wraps a strategy into a boardgame.io Bot class. The return type is spelled
 /// out because a declaration file cannot name the class itself: it inherits
 /// Bot's private members.
@@ -56,7 +62,7 @@ export function botWrapper<T_SpecificGameState, T_Move>(
   class _Bot extends Bot {
     /// What is left of the turn `play` last planned, and the state it goes on
     /// from. `Local` keeps one bot per match, so one plan is enough; the server
-    /// shares a bot between matches and calls `planTurn` instead.
+    /// shares a bot between matches, and `ServerBot` gives it no `play`.
     private plan: { after: Pick<State, '_stateID'> & Pick<State['ctx'], 'turn' | 'phase'>; rest: BotAction[] } | null = null;
 
     // waits 400 ms for UX
