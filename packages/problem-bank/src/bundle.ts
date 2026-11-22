@@ -51,37 +51,13 @@ export function readBundle(value: unknown): { bundle: Bundle } | { errors: strin
   return { bundle: value as unknown as Bundle };
 }
 
-/// The bundle of `competitions` and of the problems their relays use that
-/// `problems` holds; a relay problem it does not hold, the bundle refers to,
-/// as one held in code. Competitions keep the order given, and problems the
-/// order their relays first use them in.
-export function bundleOf(
-  competitions: readonly CompetitionConfig[],
-  problems: ReadonlyMap<ProblemId, Problem>,
-): Bundle {
-  return {
-    format: BUNDLE_FORMAT,
-    version: BUNDLE_VERSION,
-    competitions: Object.fromEntries(competitions.map(({ id, ...body }) => [id, body])),
-    problems: Object.fromEntries(relayProblemIds(competitions).flatMap((problemId) => {
-      const problem = problems.get(problemId);
-      if (problem === undefined) return [];
-      const { id, ...body } = problem;
-      return [[id, body]];
-    })),
-  };
-}
-
-/// The problems the relays of `competitions` use, each once, in the order
-/// they are first used.
-export function relayProblemIds(competitions: readonly Pick<CompetitionConfig, 'relay'>[]): ProblemId[] {
-  return [...new Set(competitions.flatMap(({ relay }) => relay?.problems.map(({ problemId }) => problemId) ?? []))];
-}
-
 /// The problems of `bundle`'s relays that it does not hold itself: a bundle
 /// may build on problems the server already has.
 export function problemsReferredFrom(bundle: Bundle): ProblemId[] {
-  return relayProblemIds(Object.values(bundle.competitions)).filter(id => !(id in bundle.problems));
+  const ids = Object.values(bundle.competitions)
+    .flatMap(competition => competition.relay?.problems.map(({ problemId }) => problemId) ?? [])
+    .filter(id => !(id in bundle.problems));
+  return [...new Set(ids)];
 }
 
 /// Every way `bundle` breaks the rules, as messages; none means it is valid.

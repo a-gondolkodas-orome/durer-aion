@@ -1,16 +1,14 @@
 import { strategyGames } from 'game';
 import type { Bundle, Registry } from 'problem-bank';
 import {
-  bundleOf,
   combinedCompetitionSource,
   combinedProblemSource,
   problemsReferredFrom,
   readBundle,
-  relayProblemIds,
   validateBundle,
   validatingCompetitionSource,
 } from 'problem-bank';
-import type { CompetitionConfig, CompetitionSource, Problem, ProblemSource } from 'schemas';
+import type { CompetitionSource, Problem, ProblemSource } from 'schemas';
 import { validateProblem } from 'schemas';
 import { Op } from 'sequelize';
 import type { TeamsRepository } from './db';
@@ -170,28 +168,19 @@ export async function importBundle(
   });
 }
 
-/** The bundle of the database's competitions `ids` names, in that order, or
- *  of every one it holds for none, with the problems their relays use that
- *  the code does not hold: the bundle refers to those, as the code holds them
- *  on every server. `missing` names the ids the database holds no competition
- *  under, one held in code included. */
-export async function exportBundle(
-  ids: readonly string[],
-  { competitionSource, problemSource, competitions, problems }: ContentSources,
-): Promise<{ bundle: Bundle } | { missing: string[] }> {
-  const named = ids.length > 0
-    ? [...new Set(ids)]
-    : (await CompetitionModel.findAll({ attributes: ['id'], order: [['id', 'ASC']] })).map(({ id }) => id);
-  const found: CompetitionConfig[] = [];
-  const missing: string[] = [];
-  for (const id of named) {
-    // Through the validating source, so that a stored competition that no
-    // longer keeps the rules fails the export instead of being left out.
-    const competition = competitions.has(id) ? undefined : await competitionSource.getCompetition(id);
-    if (competition === undefined) missing.push(id);
-    else found.push(competition);
-  }
-  if (missing.length > 0) return { missing };
-  const stored = relayProblemIds(found).filter(id => !problems.has(id));
-  return { bundle: bundleOf(found, await problemSource.getProblems(stored)) };
+/** The bundle of every competition and problem the database holds, as they
+ *  are stored: the relays' problems held in code it refers to. Nothing is
+ *  validated, so that a stored competition the rules have since come to
+ *  refuse can still be taken out and mended; the import validates it. All of
+ *  it at once, since two bundles that share a stored problem would clash on
+ *  import. */
+export async function exportBundle(): Promise<Bundle> {
+  const competitions = await CompetitionModel.findAll({ order: [['id', 'ASC']] });
+  const problems = await ProblemModel.findAll({ order: [['id', 'ASC']] });
+  return {
+    format: 'durer-competitions',
+    version: 1,
+    competitions: Object.fromEntries(competitions.map(({ id, body }) => [id, body])),
+    problems: Object.fromEntries(problems.map(({ id, body }) => [id, body])),
+  };
 }

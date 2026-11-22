@@ -328,22 +328,15 @@ paths:
           description: The body is not JSON, or there is none
   /team/admin/competitions/export:
     get:
-      summary: The bundle of some of the database's competitions, or of all, which the import takes
+      summary: The bundle of every competition and problem the database holds, which the import takes
       description: >
-        The competitions with the problems their relays use that the code
-        does not hold. Those the code holds the bundle refers to, as the
-        import allows.
+        As they are stored, unvalidated, so that one the rules have since come
+        to refuse can still be taken out; the import validates it. The relays'
+        problems held in code the bundle refers to, as the import allows.
       security:
       - basicAdminAuth: []
       tags:
       - admin
-      parameters:
-      - name: ids
-        in: query
-        required: false
-        description: The competitions' ids, comma-separated, in the order the bundle lists them. Without it, every competition the database holds.
-        schema:
-          type: string
       responses:
         "200":
           description: The bundle, in the shape the import's body takes
@@ -362,8 +355,6 @@ paths:
                     type: object
                   problems:
                     type: object
-        "404":
-          description: The database holds no competition under one of the ids, which may be one held in code; the message names them
   /team/admin/competitions/{competitionId}/start-window:
     put:
       summary: Set a competition's start window in place of its config's, or return it to its config's

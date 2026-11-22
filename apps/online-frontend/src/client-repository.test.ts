@@ -211,14 +211,12 @@ describe("the admin routes", () => {
     expect(calls).toStrictEqual([{ method: "post", url: "/team/admin/competitions/import", body: bundle }]);
   });
 
-  test("a competition export is a GET of the ids, comma-separated", async () => {
+  test("a competition export is a GET", async () => {
     const calls = fakeAxios(ok);
 
-    await new RealClientRepository().exportCompetitions(["aaaaaaaaaa--c", "bbbbbbbbbb--d"]);
+    await new RealClientRepository().exportCompetitions();
 
-    expect(calls).toStrictEqual([
-      { method: "get", url: "/team/admin/competitions/export?ids=aaaaaaaaaa--c%2Cbbbbbbbbbb--d" },
-    ]);
+    expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/export" }]);
   });
 
   test("a team's own start window is a PUT of the window as JSON", async () => {

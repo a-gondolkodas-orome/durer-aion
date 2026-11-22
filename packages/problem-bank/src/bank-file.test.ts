@@ -5,7 +5,7 @@ import { strategyGames } from 'game';
 import { banks, registry } from '../all';
 import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
-import { bundleOf, readBundle } from './bundle';
+import { readBundle } from './bundle';
 import type { Bank } from './registry';
 import { createRegistry, validateRegistry } from './registry';
 
@@ -40,20 +40,19 @@ describe('bankFromBundle', () => {
   });
 
   it('refuses an id the registry holds, and a relay problem neither holds', () => {
-    const inCode = bundleOf([TELJES].flatMap(id => registry.competitions.get(id) ?? []), registry.problems);
     const relay = sample.competitions['903xajr9et--csomag-valto'].relay;
     if (relay === undefined) throw new Error('The sample bundle has changed');
     const bundle: Bundle = {
       ...sample,
       competitions: {
         ...sample.competitions,
-        ...inCode.competitions,
+        [TELJES]: sample.competitions['aqvco71pta--csomag-teljes'],
         '903xajr9et--csomag-valto': {
           ...sample.competitions['903xajr9et--csomag-valto'],
           relay: { ...relay, problems: [...relay.problems, { problemId: 'nnnnnnnnnn--nincs', points: 1 }] },
         },
       },
-      problems: { ...sample.problems, [KORONGOK]: inCode.problems[KORONGOK] },
+      problems: { ...sample.problems, [KORONGOK]: sample.problems['10iqp4vy6b--csomag-kockak'] },
     };
     expect(bankFromBundle(bundle, registry)).toEqual({ errors: [
       `The competition ${TELJES} is in code already`,

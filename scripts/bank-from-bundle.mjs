@@ -6,10 +6,10 @@
 //
 // README § In the database, and back into code says when to run it.
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bankFile, bankFromBundle, problemsReferredFrom, readBundle } from 'problem-bank';
+import { bankFile, bankFromBundle, readBundle } from 'problem-bank';
 import { registry } from 'problem-bank/all';
 
 const BANKS = fileURLToPath(new URL('../packages/problem-bank/banks/', import.meta.url));
@@ -22,24 +22,9 @@ function importName(name) {
   return name.replace(/-([a-z0-9])/g, (_, char) => char.toUpperCase());
 }
 
-/// The names of the banks under banks/ but `written` that hold any of the
-/// problems `ids`.
-async function banksHolding(ids, written) {
-  const names = readdirSync(BANKS).filter(file => file.endsWith('.ts')).map(file => file.slice(0, -'.ts'.length))
-    .filter(name => name !== written);
-  const holding = await Promise.all(names.map(async (name) => {
-    // A specifier built at run time, which Vite must not try to resolve ahead.
-    const { problems } = await import(/* @vite-ignore */ `problem-bank/banks/${name}`);
-    return ids.some(id => id in problems) ? [name] : [];
-  }));
-  return holding.flat();
-}
-
 /// Writes the bank the bundle at `bundlePath` makes to `<banks>/<name>.ts`,
-/// and returns its path with what registers it, as text to print. `banks` is
-/// only where the file goes: the banks it reuses problems of are looked up in
-/// the real banks/ whatever it is.
-export async function writeBank(bundlePath, name, banks = BANKS) {
+/// and returns its path with what registers it, as text to print.
+export function writeBank(bundlePath, name, banks = BANKS) {
   if (!NAME.test(name)) {
     throw new Error(`"${name}" is no bank name: lowercase ASCII letters and digits, single dashes between words, a letter first`);
   }
@@ -53,11 +38,9 @@ export async function writeBank(bundlePath, name, banks = BANKS) {
 
   const as = importName(name);
   const ids = Object.keys(made.bank.competitions);
-  // A site registers only the banks it names, so one that lists this bank's
-  // competitions must name the banks holding the problems it refers to.
-  const others = await banksHolding(problemsReferredFrom(read.bundle), name);
   return [
     `Wrote ${path}: ${ids.length} competitions, ${Object.keys(made.bank.problems).length} problems.`,
+    'It holds all of the bundle: delete what does not belong in the bank.',
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,
@@ -67,9 +50,6 @@ export async function writeBank(bundlePath, name, banks = BANKS) {
     `  import * as ${as} from "problem-bank/banks/${name}";`,
     `  ${as},  (in the createRegistry list)`,
     ...ids.map(id => `  "${id}",  (in listedIds)`),
-    ...(others.length > 0
-      ? ['', `Its relays use problems of ${others.join(', ')}, which practice-sets.ts must register too.`]
-      : []),
   ].join('\n');
 }
 
@@ -80,7 +60,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(1);
   }
   try {
-    console.log(await writeBank(bundlePath, name));
+    console.log(writeBank(bundlePath, name));
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);

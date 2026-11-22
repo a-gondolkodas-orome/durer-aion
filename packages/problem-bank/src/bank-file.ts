@@ -35,7 +35,7 @@ export function bankFile(bank: Bank): string {
     "import type { CompetitionBank, ProblemBank } from '../src/sources';",
     '',
     `// ${titles.join(', ')}: made from a bundle exported from the database,`,
-    '// with the problems their relays use that no other bank holds.',
+    '// with the problems it held that no other bank holds.',
     '',
     `export const competitions: CompetitionBank = ${JSON.stringify(bank.competitions, null, 2)};`,
     '',

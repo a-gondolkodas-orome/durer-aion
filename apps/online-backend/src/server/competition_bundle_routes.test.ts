@@ -171,16 +171,14 @@ it.each([
   expect(await storedIds()).toEqual([]);
 });
 
-async function exported(query: string) {
-  return await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export${query}`, { headers: admin });
+async function exported(headers: Record<string, string> = admin) {
+  return await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export`, { headers });
 }
 
 describe("the export", () => {
-  const ids = `?ids=${Object.keys(sample.competitions).join(",")}`;
-
   it("makes the bundle it was imported from, which imports again on an empty database", async () => {
     expect((await importBundle(sample)).written).toBe(true);
-    const response = await exported(ids);
+    const response = await exported();
     expect(response.status).toBe(200);
     const bundle = await response.json() as Bundle;
     // The in-code problem a relay reuses it refers to, as the sample does.
@@ -191,25 +189,21 @@ describe("the export", () => {
     expect(await storedIds()).toEqual(sampleIds);
   });
 
-  it("exports every competition the database holds without ids, and none held in code", async () => {
-    expect((await importBundle(sample)).written).toBe(true);
-    const bundle = await (await exported("")).json() as Bundle;
-    expect(Object.keys(bundle.competitions)).toEqual(Object.keys(sample.competitions).sort());
-    expect(Object.keys(bundle.problems).sort()).toEqual(Object.keys(sample.problems).sort());
-  });
+  it("holds what the rules refuse, and a problem no relay uses, as they are stored", async () => {
+    // Its relay uses a problem no one holds.
+    const refused = { ...sample.competitions[FULL], relay: { durationMinutes: 30, problems: [{ problemId: "nnnnnnnnnn--nincs", points: 3 }] } };
+    const unused = { answer: 1, content: { hu: { problemText: "Mennyi 1?" } } };
+    await CompetitionModel.create({ id: FULL, body: refused, createdBy: null });
+    await ProblemModel.create({ id: "nnnnnnnnnn--magaban", body: unused, createdBy: null });
 
-  it("refuses an id the database holds no competition under, one held in code included, naming them", async () => {
-    expect((await importBundle(sample)).written).toBe(true);
-    const response = await exported(`${ids},klmgbpb334--minta-teljes,nnnnnnnnnn--nincs`);
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({
-      code: "COMPETITION_NOT_FOUND",
-      message: "No competition in the database with id klmgbpb334--minta-teljes, nnnnnnnnnn--nincs.",
+    expect(await (await exported()).json()).toEqual({
+      format: "durer-competitions", version: 1,
+      competitions: { [FULL]: refused },
+      problems: { "nnnnnnnnnn--magaban": unused },
     });
   });
 
   it("refuses without the password", async () => {
-    const response = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export`);
-    expect(response.status).toBe(401);
+    expect((await exported({})).status).toBe(401);
   });
 });

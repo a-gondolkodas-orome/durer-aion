@@ -200,7 +200,7 @@ export const useImportCompetitions = () => {
 
 export const useExportCompetitions = () => {
   const repo = useAdminRepo();
-  return async (ids: string[]) => await repo.exportCompetitions(ids);
+  return async () => await repo.exportCompetitions();
 };
 
 export const useCompetitions = () => {

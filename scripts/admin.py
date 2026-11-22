@@ -4,7 +4,7 @@ import requests
 from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 import unicodedata
 from tqdm import tqdm
@@ -186,21 +186,21 @@ export_results_tsv(team_states_dict, relay_states, strategy_states)
 # %%
 def export_bundle():
   """
-    Saves the competitions the database holds, of those chosen, and their
-    problems, so that they can go back into code after the database is wiped
-    (README § In the database, and back into code). One held in code is in
-    the repo already.
+    Saves every competition and problem the database holds, so that they can
+    go back into code after the database is wiped (README § In the database,
+    and back into code). All of them, whatever DURER_COMPETITIONS names: two
+    bundles that share a stored problem would clash on import.
   """
-  ids = [cid for cid in (COMPETITION_IDS or competitions) if competitions[cid]['storedIn'] == 'database']
-  if not ids:
-    print('No competition to export to a bundle: the database holds none of them')
+  bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, '/team/admin/competitions/export')
+  if not bundle['competitions'] and not bundle['problems']:
+    print('No bundle written: the database holds no competition or problem')
     return
-  bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, f'/team/admin/competitions/export?ids={",".join(ids)}')
-  # A run's own name, so that a later run does not write over it.
-  bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.json"
+  # A run's own name, so that a later run does not write over it; the Versenyek
+  # tab names its file the same way.
+  bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H-%M-%S')}.json"
   with open(bundle_path, 'w', encoding='utf-8') as f:
     json.dump(bundle, f, ensure_ascii=False, indent=2)
-  print(f"{len(bundle['competitions'])} competitions and their {len(bundle['problems'])} problems written to {bundle_path}")
+  print(f"{len(bundle['competitions'])} competitions and {len(bundle['problems'])} problems written to {bundle_path}")
 export_bundle()
 
 # %%

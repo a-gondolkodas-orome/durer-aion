@@ -36,24 +36,15 @@ const grids = vi.hoisted(() => ({ columns: [] as { field: string, disableExport?
 vi.mock('@mui/x-data-grid', () => {
   interface Row { id: string, teamName: string }
   interface Column { field: string, disableExport?: boolean, renderCell?: (params: { row: Row }) => React.ReactNode }
-  interface Selection { type: 'include', ids: Set<string> }
   return {
     DataGrid: (props: {
       rows: Row[], columns: Column[],
       slots?: { toolbar?: React.ComponentType<object> }, slotProps?: { toolbar?: object },
-      checkboxSelection?: boolean, isRowSelectable?: (params: { row: Row }) => boolean, rowSelectionModel?: Selection,
-      onRowSelectionModelChange?: (model: Selection) => void,
     }) => { grids.columns.push(props.columns); return (<>
       {props.slots?.toolbar && <props.slots.toolbar {...props.slotProps?.toolbar}/>}
       <ul>
         {props.rows.map(row => (
           <li key={row.id}>
-            {props.checkboxSelection && (props.isRowSelectable?.({ row }) ?? true) && <input type="checkbox" aria-label={`Kijelölés: ${row.id}`}
-              onChange={() => {
-                const ids = new Set(props.rowSelectionModel?.ids);
-                if (ids.has(row.id)) ids.delete(row.id); else ids.add(row.id);
-                props.onRowSelectionModelChange?.({ type: 'include', ids });
-              }}/>}
             {row.teamName}
             {props.columns.filter(column => column.renderCell).map(column => (
               <span key={column.field}>{column.renderCell?.({ row })}</span>
@@ -576,11 +567,9 @@ test('the competitions tab lists the competitions newest first, with what to imp
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
-test('the competitions tab exports the ticked competitions held in the database as one bundle file', async () => {
-  const stored = 'aqvco71pta--csomag-teljes';
+test('the competitions tab exports what the database holds as one bundle file', async () => {
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
     { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
-    { id: stored, metadata: { kind: 'other', label: { hu: 'Csomag: teljes forduló' } }, storedIn: 'database' },
   ]);
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   const bundle = { format: 'durer-competitions', version: 1, competitions: {}, problems: {} };
@@ -589,17 +578,13 @@ test('the competitions tab exports the ticked competitions held in the database 
   renderAdmin();
 
   fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
-  await screen.findByText('20 online C');
-  expect(screen.getByRole('button', { name: 'Exportálás' })).toBeDisabled();
-  // One held in code is in the repo already.
-  expect(screen.queryByRole('checkbox', { name: `Kijelölés: ${COMPETITION_C}` })).toBeNull();
-  fireEvent.click(screen.getByRole('checkbox', { name: `Kijelölés: ${stored}` }));
-  fireEvent.click(screen.getByRole('button', { name: '1 verseny exportálása' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Az adatbázis exportálása' }));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
-  expect(exportCompetitions).toHaveBeenCalledWith([stored]);
+  expect(exportCompetitions).toHaveBeenCalledWith();
   expect(JSON.parse(saved[0])).toEqual(bundle);
-  expect(vi.mocked(HTMLAnchorElement.prototype.click).mock.contexts[0]).toHaveProperty('download', `${stored}.json`);
+  expect(vi.mocked(HTMLAnchorElement.prototype.click).mock.contexts[0])
+    .toHaveProperty('download', expect.stringMatching(/^durer-competitions-\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d\.json$/));
 });
 
 // The import's help names the tab with what its Competition column takes.
