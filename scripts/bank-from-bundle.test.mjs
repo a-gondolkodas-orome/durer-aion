@@ -3,41 +3,63 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { writeBank } from './bank-from-bundle.mjs';
 
+const VALTO = '903xajr9et--csomag-valto';
+const TELJES = 'aqvco71pta--csomag-teljes';
 const sample = readFileSync(new URL('../packages/problem-bank/fixtures/sample-bundle.json', import.meta.url), 'utf8');
 
 let directory;
-beforeEach(() => { directory = mkdtempSync(join(tmpdir(), 'bank-from-bundle-')); });
+let bundlePath;
+beforeEach(() => {
+  directory = mkdtempSync(join(tmpdir(), 'bank-from-bundle-'));
+  bundlePath = join(directory, 'bundle.json');
+  writeFileSync(bundlePath, sample);
+});
 afterEach(() => { rmSync(directory, { recursive: true, force: true }); });
 
+function withBundle(change) {
+  const bundle = JSON.parse(sample);
+  change(bundle);
+  writeFileSync(bundlePath, JSON.stringify(bundle));
+}
+
 describe('bank-from-bundle.mjs', () => {
-  it('writes the bank, and prints what registers it', () => {
-    const bundlePath = join(directory, 'bundle.json');
-    writeFileSync(bundlePath, sample);
+  it('writes the named competitions\' bank, and prints what registers it', () => {
+    const printed = writeBank(bundlePath, 'csomag-proba', [VALTO], directory);
 
-    const printed = writeBank(bundlePath, 'csomag-proba', directory);
-
-    expect(readFileSync(join(directory, 'csomag-proba.ts'), 'utf8')).toContain('"903xajr9et--csomag-valto": {');
+    const written = readFileSync(join(directory, 'csomag-proba.ts'), 'utf8');
+    expect(written).toContain(`"${VALTO}": {`);
+    expect(written).not.toContain(TELJES);
     expect(printed).toContain("  import * as csomagProba from './banks/csomag-proba';");
-    expect(printed).toContain('  "aqvco71pta--csomag-teljes",  (in listedIds)');
+    expect(printed).toContain(`  "${VALTO}",  (in listedIds)`);
+  });
+
+  // The sample's relay reuses k5g58wuf6h--minta-korongok of reference.ts.
+  it('names the banks whose problems its relays reuse', () => {
+    expect(writeBank(bundlePath, 'csomag-proba', [VALTO], directory))
+      .toContain('Its relays reuse problems of reference, which the createRegistry list must hold too.');
+  });
+
+  // practice-sets.ts throws on a listed competition with no relay.
+  it('lists only the competitions with a relay', () => {
+    withBundle(bundle => { delete bundle.competitions[TELJES].relay; });
+    const printed = writeBank(bundlePath, 'csomag-proba', [VALTO, TELJES], directory);
+    expect(printed).not.toContain(`"${TELJES}",  (in listedIds)`);
+    expect(printed).toContain(`Not in listedIds, having no relay: ${TELJES}`);
   });
 
   it('refuses to write over a bank', () => {
-    const bundlePath = join(directory, 'bundle.json');
-    writeFileSync(bundlePath, sample);
     writeFileSync(join(directory, 'taken.ts'), '');
-    expect(() => writeBank(bundlePath, 'taken', directory)).toThrow('exists already');
+    expect(() => writeBank(bundlePath, 'taken', [VALTO], directory)).toThrow('exists already');
   });
 
-  it('writes nothing for a bundle it refuses', () => {
-    const bundle = JSON.parse(sample);
-    bundle.competitions['klmgbpb334--minta-teljes'] = bundle.competitions['aqvco71pta--csomag-teljes'];
-    const bundlePath = join(directory, 'bundle.json');
-    writeFileSync(bundlePath, JSON.stringify(bundle));
-    expect(() => writeBank(bundlePath, 'clash', directory)).toThrow('klmgbpb334--minta-teljes');
+  it('writes nothing for a bundle it refuses, and names the competitions it holds', () => {
+    withBundle(bundle => { bundle.competitions['klmgbpb334--minta-teljes'] = bundle.competitions[TELJES]; });
+    expect(() => writeBank(bundlePath, 'clash', ['klmgbpb334--minta-teljes'], directory))
+      .toThrow(`klmgbpb334--minta-teljes is in code already\nThe bundle holds the competitions\n  ${VALTO}`);
     expect(existsSync(join(directory, 'clash.ts'))).toBe(false);
   });
 
   it.each(['Edition', '21-online', 'a--b', 'a_b', ''])('refuses the bank name "%s"', (name) => {
-    expect(() => writeBank('unread.json', name, directory)).toThrow('no bank name');
+    expect(() => writeBank('unread.json', name, [VALTO], directory)).toThrow('no bank name');
   });
 });

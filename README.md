@@ -551,16 +551,18 @@ carries the config's, so set it again on the other server.
 
 **From a finished round to a practice set:**
 
-1. **Export** the round's competitions.
-2. **Make the bank:** `npm run bank:from-bundle -- <bundle.json> <bank-name>`
-   writes `packages/problem-bank/banks/<bank-name>.ts`, holding all of the
-   bundle. Delete the competitions and problems that are not the round's, such
-   as a try-out's, and say in the file's comment which round it is, as the
-   other banks do.
+1. **Export** the database.
+2. **Make the bank:**
+   `npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...`
+   writes `packages/problem-bank/banks/<bank-name>.ts` with the round's
+   competitions and the bundle's problems their relays use, leaving out the
+   rest, such as a try-out's. Named no competition, it lists those the bundle
+   holds. Say in the file's comment which round it is, as the other banks do.
 3. **Register it.** The script prints the lines to add: to `all.ts`, the
-   import and the registry entry; to `practice-sets.ts`, the same and the
-   competitions' `listedIds`. A bank whose problems its relays reuse must be
-   registered there too, which `practice-sets.test.ts` checks.
+   import and the `banks` entry; to `practice-sets.ts`, the same and the
+   `listedIds` of the competitions with a relay. It also names the banks
+   whose problems the relays reuse, which `practice-sets.ts` must register
+   too, as `practice-sets.test.ts` checks.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
 5. **Wipe the database before that build reaches the server.** A server whose

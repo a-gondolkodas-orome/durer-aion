@@ -29,7 +29,10 @@ import * as reference from './banks/reference';
 // This year's competitions, and the problems only they use, are added in the
 // year's private repo until the competition is over (README § Competition
 // secrecy); this public one holds rounds that are public already.
-export const banks = [
+//
+// Keyed by the name each is imported as, which is how bank-from-bundle.mjs
+// names the banks a new one's relays reuse problems of.
+export const banks = {
   edition01Final,
   edition02Final,
   edition03Final,
@@ -51,6 +54,6 @@ export const banks = [
   edition19Online,
   edition20Online,
   reference,
-];
+};
 
-export const registry = createRegistry(banks);
+export const registry = createRegistry(Object.values(banks));

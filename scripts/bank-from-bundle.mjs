@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Writes packages/problem-bank/banks/<bank-name>.ts from an exported bundle,
-// and prints the lines that register it:
+// Writes packages/problem-bank/banks/<bank-name>.ts from the named
+// competitions of an exported bundle, and prints the lines that register it:
 //
-//   npm run bank:from-bundle -- <bundle.json> <bank-name>
+//   npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...
 //
 // README § In the database, and back into code says when to run it.
 
@@ -10,7 +10,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bankFile, bankFromBundle, readBundle } from 'problem-bank';
-import { registry } from 'problem-bank/all';
+import { banks, registry } from 'problem-bank/all';
 
 const BANKS = fileURLToPath(new URL('../packages/problem-bank/banks/', import.meta.url));
 // A file name that is also an identifier once camel-cased, as the banks' are.
@@ -22,45 +22,58 @@ function importName(name) {
   return name.replace(/-([a-z0-9])/g, (_, char) => char.toUpperCase());
 }
 
-/// Writes the bank the bundle at `bundlePath` makes to `<banks>/<name>.ts`,
-/// and returns its path with what registers it, as text to print.
-export function writeBank(bundlePath, name, banks = BANKS) {
+/// Writes the bank the competitions `ids` of the bundle at `bundlePath` make
+/// to `<directory>/<name>.ts`, and returns its path with what registers it,
+/// as text to print.
+export function writeBank(bundlePath, name, ids, directory = BANKS) {
   if (!NAME.test(name)) {
     throw new Error(`"${name}" is no bank name: lowercase ASCII letters and digits, single dashes between words, a letter first`);
   }
-  const path = join(banks, `${name}.ts`);
+  const path = join(directory, `${name}.ts`);
   if (existsSync(path)) throw new Error(`${path} exists already`);
   const read = readBundle(JSON.parse(readFileSync(bundlePath, 'utf8')));
   if ('errors' in read) throw new Error(read.errors.join('\n'));
-  const made = bankFromBundle(read.bundle, registry);
-  if ('errors' in made) throw new Error(made.errors.join('\n'));
+  const made = bankFromBundle(read.bundle, ids, registry);
+  if ('errors' in made) {
+    const held = Object.keys(read.bundle.competitions).map(id => `  ${id}`);
+    throw new Error([...made.errors, 'The bundle holds the competitions', ...held].join('\n'));
+  }
   writeFileSync(path, bankFile(made.bank));
 
   const as = importName(name);
-  const ids = Object.keys(made.bank.competitions);
+  const competitions = Object.entries(made.bank.competitions);
+  // The practice site lists relays only, and throws on any other competition.
+  const listed = competitions.filter(([, competition]) => competition.relay !== undefined).map(([id]) => id);
+  const unlisted = competitions.filter(([, competition]) => competition.relay === undefined).map(([id]) => id);
+  const reused = Object.entries(banks)
+    .filter(([, bank]) => made.referred.some(id => id in bank.problems))
+    .map(([bankName]) => bankName);
   return [
-    `Wrote ${path}: ${ids.length} competitions, ${Object.keys(made.bank.problems).length} problems.`,
-    'It holds all of the bundle: delete what does not belong in the bank.',
+    `Wrote ${path}: ${competitions.length} competitions, ${Object.keys(made.bank.problems).length} problems.`,
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,
-    `  ${as},  (in the banks list)`,
+    `  ${as},  (in banks)`,
     '',
     'To list it on the relay practice site once it is released, in apps/relay-practise-frontend/src/practice-sets.ts:',
     `  import * as ${as} from "problem-bank/banks/${name}";`,
     `  ${as},  (in the createRegistry list)`,
-    ...ids.map(id => `  "${id}",  (in listedIds)`),
+    ...listed.map(id => `  "${id}",  (in listedIds)`),
+    ...unlisted.length > 0 ? [`Not in listedIds, having no relay: ${unlisted.join(', ')}`] : [],
+    ...reused.length > 0
+      ? [`Its relays reuse problems of ${reused.join(', ')}, which the createRegistry list must hold too.`]
+      : [],
   ].join('\n');
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [bundlePath, name, ...rest] = process.argv.slice(2);
-  if (bundlePath === undefined || name === undefined || rest.length > 0) {
-    console.error('Usage: npm run bank:from-bundle -- <bundle.json> <bank-name>');
+  const [bundlePath, name, ...ids] = process.argv.slice(2);
+  if (bundlePath === undefined || name === undefined) {
+    console.error('Usage: npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...');
     process.exit(1);
   }
   try {
-    console.log(writeBank(bundlePath, name));
+    console.log(writeBank(bundlePath, name, ids));
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exit(1);
