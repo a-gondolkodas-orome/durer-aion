@@ -98,11 +98,15 @@ describe("GET /team/me/strategy-client.js", () => {
     expect(response.headers.get("x-accel-redirect")).toBeNull();
   });
 
-  it("serves a running match's game, uncached, with nothing in the body", async () => {
+  // nginx keeps the Content-Type for the file it serves, and a browser runs a
+  // module script only under a JavaScript one: koa's text/plain for the empty
+  // body broke the board.
+  it("serves a running match's game as JavaScript, uncached, with nothing in the body", async () => {
     const response = await client(await team(0, await match("running", strategyGameName("minta-ketkupac"))));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-accel-redirect")).toBe("/gated/strategy/ketkupac.js");
+    expect(response.headers.get("content-type")).toMatch(/^text\/javascript/);
     expect(response.headers.get("cache-control")).toBe("private, no-cache");
     expect(await response.text()).toBe("");
   });

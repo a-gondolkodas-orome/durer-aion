@@ -419,10 +419,14 @@ export function configureTeamsRouter(
     const game = await startedStrategyGame(ctx.db, (await teamMatches(ctx.db, team)).strategyMatch)
       ?? refuse(ctx, 404, "MATCH_NOT_FOUND", "The team has not started its strategy match.");
     ctx.set("X-Accel-Redirect", `${GATED_STRATEGY_PATH}${game.folder}.js`);
-    // Teams share school computers: no cache may hand one team's game to the next.
-    ctx.set("Cache-Control", "private, no-cache");
+    // nginx keeps this answer's Content-Type and Cache-Control for the file it
+    // serves, so they are the file's: a module script, which the browser runs
+    // only under a JavaScript type, and kept by no cache, since teams share
+    // school computers and the one URL serves every game.
     ctx.status = 200;
     ctx.body = "";
+    ctx.type = "text/javascript";
+    ctx.set("Cache-Control", "private, no-cache");
   });
 
   /**
