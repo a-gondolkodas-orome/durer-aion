@@ -11,6 +11,9 @@ class InspectedTransport extends SocketIOButBotMoves {
   queueFor(matchID: string) {
     return this.perMatchQueue.get(matchID);
   }
+  hasBoards(matchID: string) {
+    return this.roomInfo.has(matchID);
+  }
 }
 
 const game: Game = {
@@ -352,5 +355,42 @@ describe("the socket transport", () => {
 
     expect(rejections).toEqual([]);
     expect(hookFailures()).toEqual([]);
+  });
+
+  // boardgame.io drops a match's queue when its last board leaves. With a job
+  // still on it, the next job would start a second queue beside it (#655).
+  describe("a match's queue, once its last board has left", () => {
+    async function leaveWithJobRunning() {
+      const served = await serve();
+      createKnownMatch(served.db);
+      const socket = served.client();
+      await syncBehind(socket);
+      await served.drained(KNOWN_MATCH);
+      const queue = served.transport.getMatchQueue(KNOWN_MATCH);
+      let finish: () => void = () => undefined;
+      void queue.add(() => new Promise<void>(resolve => { finish = resolve; }));
+      socket.disconnect();
+      await vi.waitFor(() => { expect(served.transport.hasBoards(KNOWN_MATCH)).toBe(false); });
+      return { ...served, queue, finish };
+    }
+
+    it("is kept while a job on it runs, and dropped once it is idle", async () => {
+      const { transport, queue, finish } = await leaveWithJobRunning();
+
+      expect(transport.getMatchQueue(KNOWN_MATCH)).toBe(queue);
+      finish();
+      await vi.waitFor(() => { expect(transport.queueFor(KNOWN_MATCH)).toBeUndefined(); });
+    });
+
+    it("is kept for a board that rejoined before it was idle", async () => {
+      const { transport, client, queue, finish } = await leaveWithJobRunning();
+      await syncBehind(client());
+      await vi.waitFor(() => { expect(transport.hasBoards(KNOWN_MATCH)).toBe(true); });
+
+      finish();
+      await queue.onIdle();
+      await new Promise(resolve => setImmediate(resolve));
+      expect(transport.queueFor(KNOWN_MATCH)).toBe(queue);
+    });
   });
 });

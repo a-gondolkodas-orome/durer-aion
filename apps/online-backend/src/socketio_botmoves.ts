@@ -207,6 +207,24 @@ export class SocketIOButBotMoves extends SocketIO {
     }
   }
 
+  /** boardgame.io drops a match's queue when its last socket leaves, even with
+   *  a job still on it, and the next job for the match then starts a second
+   *  queue that runs beside the first. This one is kept until it is idle, so
+   *  no move runs beside a bot turn or an extension still in flight (#655). */
+  override deleteMatchQueue(matchID: string): void {
+    const queue = this.perMatchQueue.get(matchID);
+    if (queue === undefined || (queue.size === 0 && queue.pending === 0)) {
+      super.deleteMatchQueue(matchID);
+      return;
+    }
+    void queue.onIdle().then(() => {
+      // A board that rejoined meanwhile is using this queue again.
+      if (this.perMatchQueue.get(matchID) === queue && !this.roomInfo.has(matchID)) {
+        super.deleteMatchQueue(matchID);
+      }
+    });
+  }
+
   /** Sends every board of the match a state written outside a move, as
    *  `Master` sends one after a move. */
   publishUpdate(matchID: string, state: State): void {
