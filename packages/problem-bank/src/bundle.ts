@@ -56,7 +56,7 @@ export function problemsReferredFrom(bundle: Bundle): ProblemId[] {
 
 /// Every way `bundle` breaks the rules, as messages; none means it is valid.
 /// `problems` are those of `problemsReferredFrom` that the server has, and
-/// the strategy games are the `game/strategy` entry's `strategyGames`, as
+/// the strategy games are the `game` package's `strategyGames`, as
 /// `validateRegistry` takes them.
 export function validateBundle(
   bundle: Bundle,

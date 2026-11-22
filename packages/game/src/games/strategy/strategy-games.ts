@@ -1,8 +1,5 @@
-// The strategy games' registries, one per package entry. This one, the
-// `game/strategy` entry, is the game definitions, which the server and the
-// offline dry run need alike; the live client is to load its one game on its
-// own once its team starts it (#643), so the `game` entry it imports carries
-// none. The bots live in strategy-bots.ts (the `game/bot` entry) and the
+// The strategy games' registries, one per package entry. This one is the game
+// definitions (`game/strategy`). The bots live in strategy-bots.ts (the `game/bot` entry) and the
 // boards and descriptions in strategy-client.ts (`game/client`), and each
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
@@ -32,9 +29,7 @@ export const strategyGames = {
 
 export type StrategyGameKey = keyof typeof strategyGames;
 
-// Which game folder's client.tsx plays each game id, and the variant it builds
-// the game in: what the live round's gate serves a team that has started the
-// game, and what that file is called with (#643).
+// The game folder whose client.tsx plays each id, and its variant (#643).
 export const strategyGameClients = {
   "20o-c": { folder: "20ocde", variant: "C" },
   "20o-d": { folder: "20ocde", variant: "D" },

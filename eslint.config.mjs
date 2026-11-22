@@ -32,29 +32,6 @@ const noDynamicBotImport = {
   message: noBotMessage,
 };
 
-const noStrategyMessage =
-  "A strategy game reaches the live client only from the game's own file, served once its team has started it (#643): import `game` alone.";
-
-// The `game/strategy` and `game/client` entries hold every strategy game, so the
-// live client's shared code must name neither, by the package or by a relative
-// path to either entry (as noBotInTheClient above, whose patterns already cover
-// the package's `src/` and `dist/`). Applied to packages/common-frontend, whose
-// code the live client's public bundle carries.
-const noStrategyGamesInTheClient = {
-  group: [
-    'game/strategy', 'game/client',
-    '**/game/strategy', '**/game/strategy.*',
-    '**/game/client', '**/game/client.*',
-  ],
-  message: noStrategyMessage,
-};
-
-// The same spellings for `import()` — see the note on noDynamicBotImport above.
-const noDynamicStrategyImport = {
-  selector: 'ImportExpression > Literal[value=/(^|\\/)game\\/(strategy|client)($|\\.)/]',
-  message: noStrategyMessage,
-};
-
 const noProblemsMessage =
   'The live client must not ship the relay problems: `relay-bot` and `problem-bank` carry their answers.';
 
@@ -250,27 +227,12 @@ export default defineConfig(
   // the bot ban, in a block of its own.
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
-    ignores: [
-      'apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**',
-      'packages/common-frontend/**', '!packages/common-frontend/**/*.test.{ts,tsx}',
-    ],
+    ignores: ['apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [noBotInTheClient, noProblemsInTheClient],
       }],
       'no-restricted-syntax': ['error', noDynamicBotImport, noDynamicProblemsImport],
-    },
-  },
-  // packages/common-frontend's sources keep both bans above and add the strategy
-  // games': its suites may build a game to play, and stay in the block above.
-  {
-    files: ['packages/common-frontend/**/*.{js,mjs,cjs,mts,ts,tsx}'],
-    ignores: ['**/*.test.{ts,tsx}'],
-    rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [noBotInTheClient, noProblemsInTheClient, noStrategyGamesInTheClient],
-      }],
-      'no-restricted-syntax': ['error', noDynamicBotImport, noDynamicProblemsImport, noDynamicStrategyImport],
     },
   },
   {
@@ -299,31 +261,18 @@ export default defineConfig(
   },
   // Inside packages/game, the same boundary as import allowlists: only strategy-bots.ts
   // names a bot, so nothing the `game` and `game/client` entries reach can be one. In a
-  // game folder the rules and the board import nothing from beside them but ./game and
-  // ./board, which covers a lookup table under any name; the shared registry imports
+  // game folder the rules, the board and the client import nothing from beside them
+  // but ./game, ./board and ./main, which covers a lookup table under any name; the shared registry imports
   // only game.ts, which keeps the boards out of the server too. These ride the
   // typescript-eslint rule because the block above already sets the core one for
   // these files, and a second block would replace its options.
-  // A game folder's client.tsx is the one file the live round is to serve of the
-  // game (#643): its rules, board and description, so nothing beside it but those.
   {
-    files: ['packages/game/src/games/strategy/*/client.tsx'],
+    files: ['packages/game/src/games/strategy/*/{game.ts,board.tsx,main.tsx,client.tsx}'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
           regex: '^\\./(?!(game|board|main)(\\.jsx?)?$)',
-          message: "A game's client.tsx imports only ./game, ./board and ./main from beside it.",
-        }],
-      }],
-    },
-  },
-  {
-    files: ['packages/game/src/games/strategy/*/{game.ts,board.tsx,main.tsx}'],
-    rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
-          regex: '^\\./(?!(game|board)(\\.jsx?)?$)',
-          message: "A game folder's rules and board import only ./game and ./board from beside them; what the bot and the board both need goes in game.ts.",
+          message: "A game folder's rules, board and client import only ./game, ./board and ./main from beside them; what the bot and the board both need goes in game.ts.",
         }],
       }],
     },
@@ -345,20 +294,7 @@ export default defineConfig(
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
           regex: '^\\./[^/]+/(?!client(\\.jsx?)?$)',
-          message: "The `game/client` entry's registry imports only a game folder's client.tsx, which keeps the bot out.",
-        }],
-      }],
-    },
-  },
-  // The `game` entry is what the live client's public bundle carries, so it names no
-  // strategy game: those are behind `game/strategy` and `game/client` (#643).
-  {
-    files: ['packages/game/index.ts'],
-    rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['./src/games/strategy', './src/games/strategy/**'],
-          message: 'The `game` entry carries no strategy game: export it from `game/strategy` or `game/client`.',
+          message: 'Only strategy-bots.ts imports a bot.',
         }],
       }],
     },
