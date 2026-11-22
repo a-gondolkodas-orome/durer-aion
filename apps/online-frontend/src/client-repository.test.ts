@@ -107,6 +107,21 @@ describe("the team routes", () => {
     expect(state?.clockOffsetMs).toBe(3600_000);
   });
 
+  // A school network's first request shares the line with the page's own
+  // JavaScript, and a timed-out `team/me` stays on screen until a reload (#715).
+  test.each([
+    ["reading the team's state", (repo: RealClientRepository) => repo.getTeamState()],
+    ["joining with a code", (repo: RealClientRepository) => repo.joinWithCode("000-0000-000")],
+  ])("%s waits longer than the default", async (_, send) => {
+    fakeAxios(() => Promise.resolve({ data: { relayMatch: { state: "NOT STARTED" }, strategyMatch: { state: "NOT STARTED" } } }));
+
+    await send(new RealClientRepository());
+
+    const created = vi.mocked(axios.create).mock.calls.at(-1)?.[0];
+    expect(created?.timeout).toBeGreaterThanOrEqual(30_000);
+    expect(created?.timeout).toBeLessThan(60_000);
+  });
+
   test("a browser with no session has no team", async () => {
     fakeAxios(() => refused(401, "NOT_LOGGED_IN"));
 
