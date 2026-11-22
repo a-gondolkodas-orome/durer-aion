@@ -558,11 +558,8 @@ carries the config's, so set it again on the other server.
    competitions and the bundle's problems their relays use, leaving out the
    rest, such as a try-out's. Named no competition, it lists those the bundle
    holds. Say in the file's comment which round it is, as the other banks do.
-3. **Register it.** The script prints the lines to add: to `all.ts`, the
-   import and the `banks` entry; to `practice-sets.ts`, the same and the
-   `listedIds` of the competitions with a relay. It also names the banks
-   whose problems the relays reuse, which `practice-sets.ts` must register
-   too, as `practice-sets.test.ts` checks.
+3. **Register it** in `all.ts`, and in `practice-sets.ts` to list it on the
+   relay practice site, with the lines the script prints.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
 5. **Before that build reaches the server, wipe its database.** This is a
