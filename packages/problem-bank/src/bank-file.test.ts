@@ -7,6 +7,7 @@ import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
 import { readBundle } from './bundle';
 import type { Bank } from './registry';
+import type { ProblemBank } from './sources';
 import { createRegistry, validateRegistry } from './registry';
 
 const KORONGOK = 'k5g58wuf6h--minta-korongok';
@@ -50,7 +51,7 @@ describe('bankFromBundle', () => {
     expect(validateRegistry(createRegistry([...Object.values(banks), bank]), strategyGames)).toEqual([]);
   });
 
-  it('refuses an id the registry holds, and a relay problem neither holds', () => {
+  it('refuses a competition the registry holds, a problem it holds otherwise, and a relay problem neither holds', () => {
     const relay = sample.competitions[VALTO].relay;
     if (relay === undefined) throw new Error('The sample bundle has changed');
     const bundle: Bundle = {
@@ -67,9 +68,23 @@ describe('bankFromBundle', () => {
     };
     expect(bankFromBundle(bundle, [TELJES, VALTO], registry)).toEqual({ errors: [
       `The competition ${TELJES} is in code already`,
-      `The problem ${KORONGOK} is in code already`,
+      `The problem ${KORONGOK} is in code already, and differs there`,
       'A relay uses the problem nnnnnnnnnn--nincs, which neither the bundle nor the code holds',
     ] });
+  });
+
+  // The second competition's relay shares kockak with the first's, banked
+  // already, and with its keys in another order, as jsonb may store them.
+  it('leaves to the registry a problem it holds as the bundle does', () => {
+    const banked = made(sample, [VALTO]).bank;
+    const kockak = Object.fromEntries(Object.entries(banked.problems['10iqp4vy6b--csomag-kockak']).reverse()) as ProblemBank[string];
+    const first: Bank = { ...banked, problems: { ...banked.problems, '10iqp4vy6b--csomag-kockak': kockak } };
+    const { bank, referred } = made(sample, [CSOMAG_TELJES]);
+    const second = bankFromBundle(sample, [CSOMAG_TELJES], createRegistry([...Object.values(banks), first]));
+    expect(second).toEqual({
+      bank: { competitions: bank.competitions, problems: { 'roow9oo75t--csomag-paros': bank.problems['roow9oo75t--csomag-paros'] } },
+      referred: [...referred, '10iqp4vy6b--csomag-kockak'],
+    });
   });
 
   it('leaves out a clash among the competitions it is not given', () => {
