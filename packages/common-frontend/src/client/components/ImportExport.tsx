@@ -8,6 +8,7 @@ import { useImportTeams } from '../hooks/user-hooks';
 import { download } from '../utils/download';
 import { InfoTip } from './InfoTip';
 import { CompetitionImport } from './CompetitionImport';
+import { CompetitionExport } from './CompetitionExport';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 import { useErrorMessage } from '../utils/error-message';
 
@@ -25,7 +26,8 @@ function summary(result: TeamImportResultDto): string {
 /// competition, so one file can fill the C, D and E competitions of a round at
 /// once; the Versenyek tab says what to write for each. The export is every
 /// team with its join code and credentials, in the import's own format: the one
-/// download on the admin page that carries a login secret.
+/// download on the admin page that carries a login secret. Below them, the
+/// competitions' own import and export, a bundle file each way.
 export function ImportExport(props: {
   teams: TeamModelDto[], onImported: () => void, onOpenCompetitions: () => void,
   onCompetitionsImported: () => void,
@@ -145,7 +147,14 @@ export function ImportExport(props: {
           </Stack>
         </Stack>
       </Stack>
-      <CompetitionImport onImported={props.onCompetitionsImported}/>
+      <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '32px' }}>
+        <Stack sx={{ flex: '1 1 0', minWidth: 0 }}>
+          <CompetitionImport onImported={props.onCompetitionsImported}/>
+        </Stack>
+        <Stack sx={{ flex: '1 1 0', minWidth: 0 }}>
+          <CompetitionExport/>
+        </Stack>
+      </Stack>
     </Stack>
   );
 }

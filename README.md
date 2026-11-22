@@ -536,7 +536,7 @@ or held there, or one set up to try something. It is wiped after a
 competition, and the competitions and problems in it go too, unless they are
 exported first.
 
-**Exporting.** Export the database from the **Versenyek** tab, or let
+**Exporting.** Export the database from the **Import/export** tab, or let
 `scripts/admin.py` do it (§ *Admin*). The JSON file, a *bundle*, carries every
 competition and problem the database holds, as stored: one the rules have
 since come to refuse is in it too, to be mended before it is imported again.

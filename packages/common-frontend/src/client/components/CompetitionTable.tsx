@@ -8,8 +8,7 @@ import { useState } from 'react';
 import { competitionName, editionSchoolYear, validateStartWindow } from 'schemas';
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
-import { useExportCompetitions, useSetCompetitionWindow } from '../hooks/user-hooks';
-import { download } from '../utils/download';
+import { useSetCompetitionWindow } from '../hooks/user-hooks';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { useErrorMessage } from '../utils/error-message';
 
@@ -57,15 +56,8 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
-/// The name a bundle is saved under, as scripts/admin.py names one: the UTC
-/// time to the second.
-function bundleFileName(): string {
-  return `durer-competitions-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
-}
-
 /// Every registered competition, newest edition first, with what the import's
-/// Competition column takes for it, to copy, and its start window, to change;
-/// above them, the export of what the database holds.
+/// Competition column takes for it, to copy, and its start window, to change.
 export function CompetitionTable(props: {
   competitions: CompetitionSummaryDto[],
   /// How many teams each competition has, by its id.
@@ -74,19 +66,6 @@ export function CompetitionTable(props: {
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [editing, setEditing] = useState<CompetitionRow | null>(null);
-  const exportCompetitions = useExportCompetitions();
-  const errorMessage = useErrorMessage();
-  const [exporting, setExporting] = useState(false);
-  const runExport = async () => {
-    setExporting(true);
-    try {
-      download(bundleFileName(), JSON.stringify(await exportCompetitions(), null, 2), 'application/json');
-    } catch (e: unknown) {
-      enqueueSnackbar(errorMessage(e), { variant: 'error' });
-    } finally {
-      setExporting(false);
-    }
-  };
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -107,18 +86,8 @@ export function CompetitionTable(props: {
   );
 
   return (
-    <Stack sx={{ height: '600px', gap: '8px' }} data-testid="competitionTable">
-      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-        <Button size="small" variant="outlined" disabled={exporting} onClick={() => { void runExport(); }}>
-          Az adatbázis exportálása
-        </Button>
-        <Box component="span" sx={{ fontSize: 14 }}>
-          Az adatbázisban tárolt összes verseny és feladat egy versenycsomagba kerül, amelyet egy másik szerver
-          Import/export füle betölt. A kódban lévő feladatokra a csomag csak hivatkozik.
-        </Box>
-      </Stack>
+    <Stack sx={{ height: '600px' }} data-testid="competitionTable">
       <DataGrid
-        sx={{ flex: 1, minHeight: 0 }}
         rows={props.competitions.map(competition => ({
           ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
         }))}

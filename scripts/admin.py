@@ -195,7 +195,7 @@ def export_bundle():
   if not bundle['competitions'] and not bundle['problems']:
     print('No bundle written: the database holds no competition or problem')
     return
-  # A run's own name, so that a later run does not write over it; the Versenyek
+  # A run's own name, so that a later run does not write over it; the Import/export
   # tab names its file the same way.
   bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H-%M-%S')}.json"
   with open(bundle_path, 'w', encoding='utf-8') as f:

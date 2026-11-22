@@ -567,7 +567,7 @@ test('the competitions tab lists the competitions newest first, with what to imp
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
-test('the competitions tab exports what the database holds as one bundle file', async () => {
+test('the import/export tab exports what the database holds as one bundle file', async () => {
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
     { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
   ]);
@@ -577,7 +577,7 @@ test('the competitions tab exports what the database holds as one bundle file', 
   const saved = savedDownloads();
   renderAdmin();
 
-  fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Az adatbázis exportálása' }));
 
   await waitFor(() => { expect(saved).toHaveLength(1); });
