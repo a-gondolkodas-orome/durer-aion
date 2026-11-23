@@ -1,34 +1,36 @@
 #!/usr/bin/env node
-// Writes packages/problem-bank/banks/<bank-name>.ts from the named
-// competitions of an exported bundle, and prints the lines that register it:
+// Writes banks/<bank-name>.ts from the named competitions of an exported
+// bundle, and prints the lines that register it:
 //
 //   npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...
 //
 // README § In the database, and back into code says when to run it. It runs
-// under jiti, not plain Node: the `game` package's build imports
-// `boardgame.io/core`, a directory, which only a bundler or jiti resolves.
+// under jiti, which reads this package from its source; `game` it reads from
+// the build, since that build imports `boardgame.io/core`, a directory, which
+// only a bundler or jiti resolves. No entry of this package's build imports it.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { strategyGames } from 'game';
-import { bankFile, bankFromBundle, readBundle } from 'problem-bank';
-import { registry } from 'problem-bank/all';
+import { registry } from '../all';
+import { bankFile, bankFromBundle } from './bank-file';
+import { readBundle } from './bundle';
 
-const BANKS = fileURLToPath(new URL('../packages/problem-bank/banks/', import.meta.url));
+const BANKS = fileURLToPath(new URL('../banks/', import.meta.url));
 // A file name that is also an identifier once camel-cased, as the banks' are.
 const NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 /// The name the registries import the bank `name` as: edition-21-online is
 /// edition21Online.
-function importName(name) {
-  return name.replace(/-([a-z0-9])/g, (_, char) => char.toUpperCase());
+function importName(name: string): string {
+  return name.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase());
 }
 
 /// Writes the bank the competitions `ids` of the bundle at `bundlePath` make
 /// to `<directory>/<name>.ts`, and returns its path with what registers it,
 /// as text to print.
-export function writeBank(bundlePath, name, ids, directory = BANKS) {
+export function writeBank(bundlePath: string, name: string, ids: readonly string[], directory = BANKS): string {
   if (!NAME.test(name)) {
     throw new Error(`"${name}" is no bank name: lowercase ASCII letters and digits, single dashes between words, a letter first`);
   }

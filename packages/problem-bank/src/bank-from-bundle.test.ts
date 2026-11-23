@@ -1,14 +1,15 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { writeBank } from './bank-from-bundle.mjs';
+import type { Bundle } from './bundle';
+import { writeBank } from './bank-from-bundle';
 
 const VALTO = '903xajr9et--csomag-valto';
 const TELJES = 'aqvco71pta--csomag-teljes';
-const sample = readFileSync(new URL('../packages/problem-bank/fixtures/sample-bundle.json', import.meta.url), 'utf8');
+const sample = readFileSync(new URL('../fixtures/sample-bundle.json', import.meta.url), 'utf8');
 
-let directory;
-let bundlePath;
+let directory: string;
+let bundlePath: string;
 beforeEach(() => {
   directory = mkdtempSync(join(tmpdir(), 'bank-from-bundle-'));
   bundlePath = join(directory, 'bundle.json');
@@ -16,13 +17,13 @@ beforeEach(() => {
 });
 afterEach(() => { rmSync(directory, { recursive: true, force: true }); });
 
-function withBundle(change) {
-  const bundle = JSON.parse(sample);
+function withBundle(change: (bundle: Bundle) => void) {
+  const bundle = JSON.parse(sample) as Bundle;
   change(bundle);
   writeFileSync(bundlePath, JSON.stringify(bundle));
 }
 
-describe('bank-from-bundle.mjs', () => {
+describe('bank-from-bundle.ts', () => {
   it('writes the named competitions\' bank, and prints what registers it', () => {
     const printed = writeBank(bundlePath, 'csomag-proba', [VALTO], directory);
 

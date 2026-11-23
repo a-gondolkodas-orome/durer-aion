@@ -224,14 +224,10 @@ export default defineConfig(
   // The relay problems ride the same ban, for the same reason, with one more exempt
   // app: relay-practise-frontend is the public practice site, which serves past
   // years' problem sets, public already, so it names `relay-bot` on purpose. It keeps
-  // the bot ban, in a block of its own. bank-from-bundle.mjs reads the banks to write
-  // one, and runs in Node only.
+  // the bot ban, in a block of its own.
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
-    ignores: [
-      'apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**',
-      'scripts/bank-from-bundle.mjs',
-    ],
+    ignores: ['apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [noBotInTheClient, noProblemsInTheClient],
