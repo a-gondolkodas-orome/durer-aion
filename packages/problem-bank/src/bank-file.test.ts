@@ -8,7 +8,6 @@ import type { Bundle } from './bundle';
 import { readBundle } from './bundle';
 import type { Bank } from './registry';
 import type { ProblemBank } from './sources';
-import { createRegistry } from './registry';
 
 const KORONGOK = 'k5g58wuf6h--minta-korongok';
 const TELJES = 'klmgbpb334--minta-teljes';
@@ -19,12 +18,6 @@ const CSOMAG_TELJES = 'aqvco71pta--csomag-teljes';
 const read = readBundle(JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8')));
 if ('errors' in read) throw new Error(read.errors.join('\n'));
 const sample = read.bundle;
-
-// Every bank of all.ts as one, to register a new bank beside.
-const inCode: Bank = {
-  competitions: Object.fromEntries(registry.competitions),
-  problems: Object.fromEntries(registry.problems),
-};
 
 function made(bundle: Bundle, ids: string[]) {
   const result = bankFromBundle(bundle, ids, registry, strategyGames);
@@ -94,7 +87,8 @@ describe('bankFromBundle', () => {
     const kockak = Object.fromEntries(Object.entries(banked.problems['10iqp4vy6b--csomag-kockak']).reverse()) as ProblemBank[string];
     const first: Bank = { ...banked, problems: { ...banked.problems, '10iqp4vy6b--csomag-kockak': kockak } };
     const { bank } = made(sample, [CSOMAG_TELJES]);
-    const second = bankFromBundle(sample, [CSOMAG_TELJES], createRegistry([inCode, first]), strategyGames);
+    const problems = new Map([...registry.problems, ...Object.entries(first.problems).map(([id, body]) => [id, { id, ...body }] as const)]);
+    const second = bankFromBundle(sample, [CSOMAG_TELJES], { competitions: registry.competitions, problems }, strategyGames);
     expect(second).toEqual({
       bank: { competitions: bank.competitions, problems: { 'roow9oo75t--csomag-paros': bank.problems['roow9oo75t--csomag-paros'] } },
     });

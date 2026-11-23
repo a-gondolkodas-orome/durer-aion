@@ -1,8 +1,8 @@
 import type { CompetitionId, StrategyGameId, StrategyGameInfo } from 'schemas';
 import { competitionTitle } from 'schemas';
 import type { Bundle } from './bundle';
+import { validateBundle } from './bundle';
 import type { Bank, Registry } from './registry';
-import { createRegistry, validateRegistry } from './registry';
 import type { CompetitionBank, ProblemBank } from './sources';
 
 // A bundle made into a file under banks/ (README § In the database, and back
@@ -23,10 +23,10 @@ function sameJson(a: unknown, b: unknown): boolean {
 /// with the bundle's problems their relays use and no other, or why it makes
 /// none: an id the bundle does not hold, a competition the registry holds
 /// already, since `createRegistry` refuses an id two banks hold, a problem
-/// the registry holds otherwise than the bundle does, or anything
-/// `validateRegistry` refuses of the two together. The export does not
-/// validate, so this is where a stored competition the rules have come to
-/// refuse is caught, before it is a file. A problem the registry holds as the
+/// the registry holds otherwise than the bundle does, or anything the import's
+/// `validateBundle` refuses of the bank, its relays' problems in code looked up
+/// in `registry`. The export does not validate, so this is where a stored
+/// competition the rules have come to refuse is caught, before it is a file. A problem the registry holds as the
 /// bundle does is left to it, as when the competitions of one round are
 /// banked one at a time. `strategyGames` is the `game` package's.
 export function bankFromBundle(
@@ -55,13 +55,8 @@ export function bankFromBundle(
     ...differing.map(id => `The problem ${id} is in code already, and differs there`),
   ];
   if (errors.length > 0) return { errors };
-  const bank = { competitions, problems };
-  const inCode: Bank = {
-    competitions: Object.fromEntries(registry.competitions),
-    problems: Object.fromEntries(registry.problems),
-  };
-  const invalid = validateRegistry(createRegistry([inCode, bank]), strategyGames);
-  return invalid.length > 0 ? { errors: invalid } : { bank };
+  const invalid = validateBundle({ ...bundle, competitions, problems }, registry.problems, strategyGames);
+  return invalid.length > 0 ? { errors: invalid } : { bank: { competitions, problems } };
 }
 
 /// The source of a file under banks/ that exports `bank`. The literals are
