@@ -10,7 +10,8 @@ import { strategyWrapper as ketkupacBot } from '../games/strategy/ketkupac/strat
 import { MyGameWrapper as TwentyOCDE } from '../games/strategy/20ocde/game';
 import { strategyWrapper as twentyOCDEBot } from '../games/strategy/20ocde/strategy';
 
-const enumerate = () => [{ move: 'random', args: [] }];
+// boardgame.io's Bot takes an enumerate function, which this wrapper never calls.
+const enumerate = () => [];
 
 function botFor(turn: BotTurn<number[]>) {
   const strategy = vi.fn(() => turn);
@@ -34,15 +35,8 @@ describe('a bot\'s turn', () => {
     expect(named([await playFrom(botFor([[1], 'a']).bot, 0)])).toStrictEqual([[[1], 'a']]);
   });
 
-  test('picks a random move for an undefined one', async () => {
-    expect(named([await playFrom(botFor([undefined, 'a']).bot, 0)])).toStrictEqual([[[], 'random']]);
-  });
-
-  test('fails aloud when the strategy names no move, or a random one the game has none for', async () => {
+  test('fails aloud when the strategy names no move', async () => {
     await expect(playFrom(botFor([]).bot, 0)).rejects.toThrow('named no move');
-    const bot = new (botWrapper(() => [undefined, 'a']))({ enumerate: () => [] });
-    bot.wait = () => Promise.resolve();
-    await expect(bot.play(stateAt(0), JUDGE_PLAYER)).rejects.toThrow('the game allows none');
   });
 });
 

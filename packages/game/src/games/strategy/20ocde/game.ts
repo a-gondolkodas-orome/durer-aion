@@ -53,8 +53,7 @@ export function isLegalPlacement(G: Position, ctx: Pick<Ctx, 'phase'>, index: un
     && G.cells[index] === null;
 }
 
-/// Every placement: the X player's is one of its two, and a bot playing a
-/// random move is asked again for the second.
+/// Every placement: the X player's is one of its two.
 export function possibleMoves(G: Position, ctx: Ctx): { move: string; args: [number] }[] {
   return G.cells.flatMap((_, index) => isLegalPlacement(G, ctx, index) ? [{ move: 'placeMark', args: [index] as [number] }] : []);
 }

@@ -56,9 +56,8 @@ export function isLegalTake(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer
 }
 
 /// Every take the player may make now, from the chosen pile once one is
-/// chosen: what the bot picks from for a random move. A take with no pile
-/// chosen is a whole turn; the bot's strategy names the two steps instead, as
-/// a team plays them.
+/// chosen: what the bot's strategy picks from. A take with no pile chosen is a
+/// whole turn; the strategy names the two steps instead, as a team plays them.
 export function possibleMoves(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer'>): { move: string; args: [number, number] }[] {
   return G.piles.flatMap((size, pile) =>
     Array.from({ length: Math.min(size, maxTake(G, ctx.currentPlayer)) }, (_, i) => ({ move: 'take', args: [pile, i + 1] as [number, number] })))

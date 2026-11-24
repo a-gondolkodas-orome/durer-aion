@@ -606,11 +606,7 @@ the clock, the test/live choice, choosing who starts, tries and score.
   own, so naming one move at a time works too (`ketkupac/`). `BotTurn` in
   `botwrapper.ts` is the contract. In the `startNewGame` phase it answers
   with `startingPositionMove(position)` — the bot is the only source of the
-  opening position, which may name the game's own keys only. `[undefined, moveName]`
-  makes the bot play a random move from `possibleMoves`, so a move that takes
-  no arguments is `[[], moveName]`. A game whose turn has several steps lists
-  in `possibleMoves` only the moves legal halfway through one: a strategy can
-  be asked there.
+  opening position, which may name the game's own keys only.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`

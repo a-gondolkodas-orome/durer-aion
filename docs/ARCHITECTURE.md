@@ -120,8 +120,7 @@ sequenceDiagram
 
 The game package's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`,
 or a list of those for a whole turn (`BotTurn` is the contract) — into a
-boardgame.io `Bot`. `args` of `undefined` means a random move from the game's
-`possibleMoves`. boardgame.io asks a bot for one move at a time, and the bot
+boardgame.io `Bot`. boardgame.io asks a bot for one move at a time, and the bot
 keeps the rest of its plan between asks, so a bot serves one match: `Local` in
 the dry run keeps one per match, and the server makes one for each turn the bot
 plays and plays that turn out as one job on the match's queue. Every move waits

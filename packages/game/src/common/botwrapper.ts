@@ -1,14 +1,9 @@
 import { State } from 'boardgame.io';
 import { Bot } from 'boardgame.io/ai';
 
-/// One move a strategy names: its arguments and its name. A move that takes no
-/// arguments is `[[], name]`: `undefined` arguments are a `RandomMove`.
+/// One move a strategy names: its arguments and its name. A strategy that
+/// plays at random picks the move itself.
 export type BotMove<T_Move> = [T_Move, string];
-
-/// A random move from the game's `possibleMoves`. It is a turn of its own,
-/// never one move of a list: a list is drawn up from the state its turn starts
-/// in, and a random move is drawn from the state it is played in.
-export type RandomMove = [undefined, string];
 
 /// What a strategy answers on its turn: one move, or several, played in order.
 /// Naming a whole turn is the right shape when the turn is one decision made of
@@ -18,7 +13,7 @@ export type RandomMove = [undefined, string];
 /// state as it is: docs/ARCHITECTURE.md says when a plan is lost. The contract
 /// is the strategy practice site's engine's (its components/AGENTS.md § Bot
 /// contract), in this package's tuple form.
-export type BotTurn<T_Move> = BotMove<T_Move> | RandomMove | BotMove<T_Move>[];
+export type BotTurn<T_Move> = BotMove<T_Move> | BotMove<T_Move>[];
 
 /// A strategy names the moves to make. `setupData` is the match's setup data,
 /// which only the server has and hands on; in the browser, `Local` calls a bot
@@ -80,29 +75,11 @@ export function botWrapper<T_SpecificGameState, T_Move>(
     private planTurn(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): BotAction[] {
       const turn = botstrategy(state, playerID, setupData);
       // A single move's name is a string where a list holds its second move.
-      if (typeof turn[1] === 'string') {
-        const [move, moveName] = turn as BotMove<T_Move> | RandomMove;
-        return [move === undefined ? this.randomMove(state, playerID) : this.action(move, moveName, playerID)];
-      }
-      const moves = turn as BotMove<T_Move>[];
+      const moves = typeof turn[1] === 'string' ? [turn as BotMove<T_Move>] : turn as BotMove<T_Move>[];
       if (moves.length === 0) {
         throw new Error(`The bot of player ${playerID} named no move.`);
       }
-      return moves.map(([move, moveName]) => this.action(move, moveName, playerID));
-    }
-
-    private action(move: T_Move, moveName: string, playerID: string): BotAction {
-      return { type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } };
-    }
-
-    /// Throws when the game allows none: there is no move to make, which is a
-    /// bug in the strategy or in `possibleMoves`.
-    private randomMove(state: State<T_SpecificGameState>, playerID: string): BotAction {
-      const possible_moves = this.enumerate(state.G, state.ctx, playerID);
-      if (possible_moves.length === 0) {
-        throw new Error(`The bot of player ${playerID} was to play a random move, and the game allows none.`);
-      }
-      return possible_moves[Math.floor(Math.random() * possible_moves.length)];
+      return moves.map(([move, moveName]) => ({ type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } }));
     }
   }
   return _Bot;
