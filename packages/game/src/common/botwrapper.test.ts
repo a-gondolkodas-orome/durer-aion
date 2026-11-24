@@ -56,6 +56,18 @@ describe('a bot asked one move at a time', () => {
     expect(bot.movesLeft()).toBe(0);
   });
 
+  // The strategy practice site's coins-in-3-piles: taking a coin is the whole
+  // turn or its first half, and the second half may be a move with no arguments.
+  test('plays a turn as long as its strategy names, a move with no arguments too', async () => {
+    const twoHalves = botFor([[[3], 'removeCoin'], [[], 'passAddition']]).bot;
+    expect(named([await playFrom(twoHalves, 4), await playFrom(twoHalves, 5)] as never))
+      .toStrictEqual([[[3], 'removeCoin'], [[], 'passAddition']]);
+
+    const oneHalf = botFor([[[1], 'removeCoin']]).bot;
+    expect(named([await playFrom(oneHalf, 4)] as never)).toStrictEqual([[[1], 'removeCoin']]);
+    expect(oneHalf.movesLeft()).toBe(0);
+  });
+
   test('plans afresh from any other state', async () => {
     const { bot, strategy } = botFor([[[1], 'a'], [[2], 'b']]);
     await playFrom(bot, 4);
