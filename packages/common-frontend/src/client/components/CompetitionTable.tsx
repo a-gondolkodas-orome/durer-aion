@@ -56,6 +56,12 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
+/// What the admin page calls a competition: its name where it has one, else
+/// its label, else its id.
+export function competitionTitle({ id, metadata }: CompetitionSummaryDto): string {
+  return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
+}
+
 /// Every registered competition, newest edition first, with what the import's
 /// Competition column takes for it, to copy, and its start window, to change.
 export function CompetitionTable(props: {

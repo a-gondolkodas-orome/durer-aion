@@ -195,12 +195,6 @@ export function competitionName(metadata: CompetitionMetadata): string | undefin
   return metadata.kind === 'competition' ? `${metadata.edition} ${metadata.round} ${metadata.category}` : undefined;
 }
 
-/// What a competition is called where it is listed: its name where it has
-/// one, else its label, else its id.
-export function competitionTitle({ id, metadata }: { id: string, metadata: CompetitionMetadata }): string {
-  return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
-}
-
 /// Whether `text` names the competition with this metadata, the way
 /// `competitionName` writes it or close to it: any case and spacing, a dot
 /// after the edition (`20.`), and the round in Hungarian too (`internetes`,
