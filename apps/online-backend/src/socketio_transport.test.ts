@@ -258,12 +258,10 @@ describe("the socket transport a browser talks to", () => {
   });
 
   it("drops, and reports, the moves a bot names after its turn has ended", async () => {
-    const ketkupac = StrategyWrappers["minta-ketkupac"]();
-    strategy = (state, botID) => {
-      const turn = ketkupac(state, botID);
-      if (state.ctx.phase !== "play") return turn;
-      return [...(typeof turn[1] === "string" ? [turn] : turn), [[0], "selectPile"]] as ReturnType<KetkupacBot>;
-    };
+    // The take ends the turn, so the choice after it is past the turn's end.
+    strategy = (state, botID) => state.ctx.phase === "play"
+      ? [[[1], "selectPile"], [[1, 1], "take"], [[0], "selectPile"]]
+      : StrategyWrappers["minta-ketkupac"]()(state, botID);
     const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const socket = await connectClient();
     const botReplied = updateMatching(socket, ({ G, ctx }) =>

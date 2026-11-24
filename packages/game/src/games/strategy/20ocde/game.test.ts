@@ -15,10 +15,10 @@ function teamAsX(): { G: State, ctx: Ctx } {
   return { G, ctx };
 }
 
-function place({ G, ctx }: { G: State, ctx: Ctx }, indices: number[]) {
+function place({ G, ctx }: { G: State, ctx: Ctx }, index: number) {
   const events = { endTurn: vi.fn(), endGame: vi.fn() };
-  const placeMarks = MyGameWrapper('E').moves?.placeMarks as (context: unknown, indices: unknown) => unknown;
-  placeMarks({ G, ctx, events }, indices);
+  const placeMark = MyGameWrapper('E').moves?.placeMark as (context: unknown, index: unknown) => unknown;
+  placeMark({ G, ctx, events }, index);
   return events;
 }
 
@@ -26,30 +26,38 @@ describe('the 5×5 game\'s X turn', () => {
   test('takes the two X\'s one at a time, ending the turn with the second', () => {
     const state = teamAsX();
 
-    expect(place(state, [0]).endTurn).not.toHaveBeenCalled();
+    expect(place(state, 0).endTurn).not.toHaveBeenCalled();
     expect(state.G.xsThisTurn).toStrictEqual([0]);
-    expect(isLegalPlacement(state.G, state.ctx, [1, 2])).toBe(false);
 
-    expect(place(state, [1]).endTurn).toHaveBeenCalled();
+    expect(place(state, 1).endTurn).toHaveBeenCalled();
     expect(state.G.xsThisTurn).toStrictEqual([]);
   });
 
-  test('takes both X\'s at once, as the bot plays them', () => {
+  test('ends with a first X that completes a line', () => {
     const state = teamAsX();
+    for (const index of [0, 1, 2, 3]) state.G.cells[index] = 'X';
 
-    expect(place(state, [0, 1]).endTurn).toHaveBeenCalled();
-    expect(state.G.cells.filter(cell => cell === 'X')).toHaveLength(2);
+    expect(place(state, 4).endTurn).toHaveBeenCalled();
+    expect(state.G.xsThisTurn).toStrictEqual([]);
   });
 
-  test('offers the bots only placements that finish the turn', () => {
+  test('keeps the bot\'s X\'s of its turn for the board, the first as soon as it lands', () => {
     const state = teamAsX();
-    state.G.cells[0] = 'X';
-    state.G.cells[1] = 'X';
-    state.G.cells[2] = 'X';
-    state.G.cells[3] = 'X';
+    state.G.firstPlayer = GUESSER_PLAYER;
+    state.ctx = { ...state.ctx, currentPlayer: JUDGE_PLAYER };
 
-    const singles = possibleMoves(state.G, state.ctx).filter(({ args: [indices] }) => indices.length === 1);
-    expect(singles).toStrictEqual([{ move: 'placeMarks', args: [[4]] }]);
+    place(state, 0);
+    expect(state.G.lastMachineMove).toStrictEqual([0]);
+    place(state, 6);
+    expect(state.G.lastMachineMove).toStrictEqual([0, 6]);
+  });
+
+  test('offers every empty cell, one at a time', () => {
+    const state = teamAsX();
+    state.G.cells = state.G.cells.map((_, index) => index < 23 ? 'O' : null);
+
+    expect(possibleMoves(state.G, state.ctx)).toStrictEqual([{ move: 'placeMark', args: [23] }, { move: 'placeMark', args: [24] }]);
+    expect(isLegalPlacement(state.G, state.ctx, 0)).toBe(false);
   });
 });
 
@@ -63,7 +71,7 @@ describe('the 5×5 game\'s step description', () => {
   test('asks for the first X, then the second once one is down', () => {
     const state = teamAsX();
     expect(getPlayerStepDescription(state)).toBe('Tegyétek le az első X-et!');
-    place(state, [0]);
+    place(state, 0);
     expect(getPlayerStepDescription(state)).toBe('Tegyétek le a második X-et!');
   });
 });

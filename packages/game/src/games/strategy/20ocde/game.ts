@@ -11,6 +11,7 @@ export type Category = 'C' | 'D' | 'E';
 export interface MyGameState {
   cells: (Mark | null)[];
   category?: Category;
+  /// The bot's marks of its latest turn, which the board highlights.
   lastMachineMove?: number[];
   /// The X's placed so far in the current turn. A team places its two one at a
   /// time, each a move of its own, so the first is kept here until the second
@@ -45,37 +46,17 @@ function marksLeft(G: Position, currentPlayer: string): number {
   return markForPlayer(G, currentPlayer) === 'O' ? 1 : 2 - (G.xsThisTurn?.length ?? 0);
 }
 
-/// Some or all of the marks left this turn. A single X is legal on its own: the
-/// turn then waits for the second.
-export function isLegalPlacement(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer'>, indices: unknown): indices is number[] {
+/// A mark on an empty cell, for whoever is to move.
+export function isLegalPlacement(G: Position, ctx: Pick<Ctx, 'phase'>, index: unknown): index is number {
   if (ctx.phase !== PHASE.play || G.firstPlayer == null || G.winner != null) return false;
-  if (!Array.isArray(indices) || indices.length === 0 || indices.length > marksLeft(G, ctx.currentPlayer)) return false;
-  if (!indices.every((index: unknown) => typeof index === 'number'
-    && Number.isInteger(index) && index >= 0 && index < G.cells.length && G.cells[index] === null)) return false;
-  return new Set(indices).size === indices.length;
+  return typeof index === 'number' && Number.isInteger(index) && index >= 0 && index < G.cells.length
+    && G.cells[index] === null;
 }
 
-/// Whether placing these ends the turn: all of its marks, a line of X's, or the
-/// last empty cell.
-function endsTurn(G: Position, currentPlayer: string, indices: number[]): boolean {
-  if (indices.length === marksLeft(G, currentPlayer)) return true;
-  const next = [...G.cells];
-  for (const index of indices) next[index] = markForPlayer(G, currentPlayer);
-  return winningLine(next).length > 0 || next.every(cell => cell !== null);
-}
-
-/// The placements that finish the turn: the bots play a turn as one move, so
-/// they are asked only for those.
-export function possibleMoves(G: Position, ctx: Ctx): { move: string; args: [number[]] }[] {
-  const empty = G.cells.flatMap((cell, index) => cell === null ? [index] : []);
-  const choices: number[][] = empty.map(index => [index]);
-  if (marksLeft(G, ctx.currentPlayer) === 2) {
-    for (let i = 0; i < empty.length; i++) {
-      for (let j = i + 1; j < empty.length; j++) choices.push([empty[i], empty[j]]);
-    }
-  }
-  return choices.filter(indices => isLegalPlacement(G, ctx, indices) && endsTurn(G, ctx.currentPlayer, indices))
-    .map(indices => ({ move: 'placeMarks', args: [indices] }));
+/// Every placement: the X player's is one of its two, and a bot playing a
+/// random move is asked again for the second.
+export function possibleMoves(G: Position, ctx: Ctx): { move: string; args: [number] }[] {
+  return G.cells.flatMap((_, index) => isLegalPlacement(G, ctx, index) ? [{ move: 'placeMark', args: [index] as [number] }] : []);
 }
 
 /// The team's next step on its turn: one O, or two X's one at a time.
@@ -95,18 +76,15 @@ export function MyGameWrapper(category: Category): GameType<MyGameState> {
     // The game ends each turn itself, after one O or two X's.
     turn: { minMoves: 1 },
     moves: {
-      placeMarks: ({ G, ctx, events }, indices: unknown) => {
-        if (!isLegalPlacement(G, ctx, indices) || G.firstPlayer === null) return INVALID_MOVE;
-        const mark = markForPlayer(G, ctx.currentPlayer);
-        const turnEnds = endsTurn(G, ctx.currentPlayer, indices);
-        const placed: number[] = [];
-        for (const index of indices) {
-          G.cells[index] = mark;
-          placed.push(index);
-          if (mark === 'X' && winningLine(G.cells).length > 0) break;
-        }
+      placeMark: ({ G, ctx, events }, index: unknown) => {
+        if (!isLegalPlacement(G, ctx, index) || G.firstPlayer === null) return INVALID_MOVE;
+        const lastOfTurn = marksLeft(G, ctx.currentPlayer) === 1;
+        G.cells[index] = markForPlayer(G, ctx.currentPlayer);
+        // A line of X's, or the last empty cell, ends the turn early.
+        const turnEnds = lastOfTurn || winningLine(G.cells).length > 0 || G.cells.every(cell => cell !== null);
+        const placed = [...G.xsThisTurn ?? [], index];
         if (ctx.currentPlayer === JUDGE_PLAYER) G.lastMachineMove = placed;
-        G.xsThisTurn = turnEnds ? [] : [...G.xsThisTurn ?? [], ...placed];
+        G.xsThisTurn = turnEnds ? [] : placed;
         const oPlayer = markForPlayer(G, G.firstPlayer) === 'O' ? G.firstPlayer : otherPlayer(G.firstPlayer);
         const winner = winningLine(G.cells).length > 0
           ? otherPlayer(oPlayer)

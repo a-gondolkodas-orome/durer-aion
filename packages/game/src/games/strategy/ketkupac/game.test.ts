@@ -78,39 +78,35 @@ describe('the two-pile game\'s bot', () => {
     state.G.difficulty = 'live';
     for (const piles of [[3, 6], [2, 5], [4, 4], [1, 7]]) {
       state.G.piles = piles;
-      const [select, [[pile, count], name]] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string][];
-      expect(select).toStrictEqual([[pile], 'selectPile']);
-      expect(name).toBe('take');
-      expect(isLegalTake(state.G, state.ctx, pile, count)).toBe(true);
-      const next = piles.map((size, i) => i === pile ? size - count : size);
+      state.G.selectedPile = null;
       const winnable = possibleMoves(state.G, state.ctx).some(({ args: [p, c] }) => {
         const after = piles.map((size, i) => i === p ? size - c : size);
         return after.every(size => size === 0) || !wins(after, 3, 4);
       });
+      const [[chosen], selectName] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number], string];
+      expect(selectName).toBe('selectPile');
+      state.G.selectedPile = chosen;
+      const [[pile, count], name] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string];
+      expect(name).toBe('take');
+      expect(pile).toBe(chosen);
+      expect(isLegalTake(state.G, state.ctx, pile, count)).toBe(true);
+      const next = piles.map((size, i) => i === pile ? size - count : size);
       if (winnable) expect(next.every(size => size === 0) || !wins(next, 3, 4)).toBe(true);
     }
   });
 
   // The turn is the two moves a team makes, so the bot's choice of pile
-  // reaches the board before its take (botwrapper.ts plays them in order).
-  test('names its turn as choosing a pile, then taking from it', () => {
+  // reaches the board before its take: it is asked again once it has chosen.
+  test('chooses a pile, then takes from the pile chosen', () => {
     for (const difficulty of ['test', 'live'] as const) {
       const state = { ...teamFirst([...OPENING_PILES], difficulty), ctx: { phase: PHASE.play, currentPlayer: JUDGE_PLAYER } as Ctx };
-      const turn = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number] | [number, number], string][];
-      expect(turn.map(([, name]) => name)).toStrictEqual(['selectPile', 'take']);
-      const [[[chosen]], [[pile, count]]] = turn;
+      const [[chosen], selectName] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number], string];
+      expect(selectName).toBe('selectPile');
       expect(move('selectPile', state, chosen).result).toBeUndefined();
+      const [[pile, count], name] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string];
+      expect([pile, name]).toStrictEqual([chosen, 'take']);
       expect(move('take', state, pile, count).result).toBeUndefined();
     }
-  });
-
-  test('takes straight away from a pile it chose before a restart', () => {
-    const state = { ...teamFirst([3, 6], 'test'), ctx: { phase: PHASE.play, currentPlayer: JUDGE_PLAYER } as Ctx };
-    state.G.selectedPile = 1;
-    const [[pile, count], name] = strategyWrapper()(state as never, JUDGE_PLAYER) as [[number, number], string];
-    expect(name).toBe('take');
-    expect(pile).toBe(1);
-    expect(isLegalTake(state.G, state.ctx, pile, count)).toBe(true);
   });
 
   test('opens every game from the same piles', () => {

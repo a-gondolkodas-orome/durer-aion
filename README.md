@@ -550,9 +550,10 @@ that before a competition.
    The reference games, which the reference competitions play
    (`reference.ts`), are the examples: `sablon/` is the one to copy, the
    least a game needs, in two languages, with an opening the bot draws;
-   `ketkupac/` adds a turn of two steps, which its bot plays as two moves,
+   `ketkupac/` adds a turn of two steps, which its bot names one at a time,
    named roles and a step description.
-   `20ocde/` is a game a round was held with. Each holds
+   `20ocde/` is a game a round was held with, whose bot names its turn of two
+   X's as a whole. Each holds
 
    - `game.ts` — the boardgame.io game definition
    - `strategy.ts` — the server bot, plus any lookup tables it imports
@@ -600,13 +601,16 @@ the clock, the test/live choice, choosing who starts, tries and score.
   A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
   a "pick two values, then commit" turn.
 - **`strategy.ts`** exports `strategyWrapper(variant)`, returning
-  `(state, botID) => [args, moveName]`, or a list of those for a turn of
-  several moves, played in order (`ketkupac/`; `BotTurn` in `botwrapper.ts`
-  is the contract). In the `startNewGame` phase it answers
+  `(state, botID) => [args, moveName]`, or a list of those for a whole turn,
+  played in order (`20ocde/`); the bot is asked again while the turn is its
+  own, so naming one move at a time works too (`ketkupac/`). `BotTurn` in
+  `botwrapper.ts` is the contract. In the `startNewGame` phase it answers
   with `startingPositionMove(position)` — the bot is the only source of the
   opening position, which may name the game's own keys only. `[undefined, moveName]`
-  makes the bot play a random move from `possibleMoves`, as a turn of its own:
-  in a list of several it throws.
+  makes the bot play a random move from `possibleMoves`, so a move that takes
+  no arguments is `[[], moveName]`. A game whose turn has several steps lists
+  in `possibleMoves` only the moves legal halfway through one: a strategy can
+  be asked there.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`
