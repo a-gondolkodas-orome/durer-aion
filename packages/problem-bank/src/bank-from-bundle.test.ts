@@ -50,7 +50,7 @@ describe('bank-from-bundle.ts', () => {
   it('writes nothing for a bundle it refuses, and names the competitions it holds', () => {
     withBundle(bundle => { bundle.competitions['klmgbpb334--minta-teljes'] = bundle.competitions[TELJES]; });
     expect(() => writeBank(bundlePath, 'clash', ['klmgbpb334--minta-teljes'], directory))
-      .toThrow(`klmgbpb334--minta-teljes is in code already\nThe bundle holds the competitions\n  ${VALTO}`);
+      .toThrow(`Two banks hold the id klmgbpb334--minta-teljes\nThe bundle holds the competitions\n  ${VALTO}`);
     expect(existsSync(join(directory, 'clash.ts'))).toBe(false);
   });
 

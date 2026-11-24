@@ -13,7 +13,8 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { strategyGames } from 'game';
-import { registry } from '../all';
+import type { CompetitionId } from 'schemas';
+import { banks } from '../all';
 import { bankFile, bankFromBundle } from './bank-file';
 import { readBundle } from './bundle';
 
@@ -30,7 +31,7 @@ function importName(name: string): string {
 /// Writes the bank the competitions `ids` of the bundle at `bundlePath` make
 /// to `<directory>/<name>.ts`, and returns its path with what registers it,
 /// as text to print.
-export function writeBank(bundlePath: string, name: string, ids: readonly string[], directory = BANKS): string {
+export function writeBank(bundlePath: string, name: string, ids: readonly CompetitionId[], directory = BANKS): string {
   if (!NAME.test(name)) {
     throw new Error(`"${name}" is no bank name: lowercase ASCII letters and digits, single dashes between words, a letter first`);
   }
@@ -38,7 +39,7 @@ export function writeBank(bundlePath: string, name: string, ids: readonly string
   if (existsSync(path)) throw new Error(`${path} exists already`);
   const read = readBundle(JSON.parse(readFileSync(bundlePath, 'utf8')));
   if ('errors' in read) throw new Error(read.errors.join('\n'));
-  const made = bankFromBundle(read.bundle, ids, registry, strategyGames);
+  const made = bankFromBundle(read.bundle, ids, banks, strategyGames);
   if ('errors' in made) {
     const held = Object.keys(read.bundle.competitions).map(id => `  ${id}`);
     throw new Error([...made.errors, 'The bundle holds the competitions', ...held].join('\n'));

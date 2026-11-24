@@ -1,9 +1,9 @@
 import type { CompetitionId, StrategyGameId, StrategyGameInfo } from 'schemas';
 import { competitionTitle } from 'schemas';
 import type { Bundle } from './bundle';
-import { validateBundle } from './bundle';
 import type { Bank, Registry } from './registry';
-import type { CompetitionBank, ProblemBank } from './sources';
+import { createRegistry, validateRegistry } from './registry';
+import type { CompetitionBank } from './sources';
 
 // A bundle made into a file under banks/ (README § In the database, and back
 // into code).
@@ -19,20 +19,19 @@ function sameJson(a: unknown, b: unknown): boolean {
     && aKeys.every(key => key in b && sameJson((a as Record<string, unknown>)[key], bValues[key]));
 }
 
-/// The bank that the competitions `ids` of `bundle` make beside `registry`,
-/// with the bundle's problems their relays use and no other, or why it makes
-/// none: an id the bundle does not hold, a competition the registry holds
-/// already, since `createRegistry` refuses an id two banks hold, a problem
-/// the registry holds otherwise than the bundle does, or anything the import's
-/// `validateBundle` refuses of the bank, its relays' problems in code looked up
-/// in `registry`. The export does not validate, so this is where a stored
-/// competition the rules have come to refuse is caught, before it is a file. A problem the registry holds as the
-/// bundle does is left to it, as when the competitions of one round are
-/// banked one at a time. `strategyGames` is the `game` package's.
+/// The bank that the competitions `ids` of `bundle` make beside `banks`, with
+/// the bundle's problems their relays use and no other, or why it makes none:
+/// an id the bundle does not hold, a problem `banks` hold otherwise than the
+/// bundle does, or anything the registry of `banks` and the new bank breaks,
+/// as the server would find it at start. The export does not validate, so this
+/// is where a stored competition the rules have come to refuse is caught,
+/// before it is a file. A problem `banks` hold as the bundle does is left to
+/// them, as when the competitions of one round are banked one at a time.
+/// `strategyGames` is the `game` package's.
 export function bankFromBundle(
   bundle: Bundle,
   ids: readonly CompetitionId[],
-  registry: Pick<Registry, 'competitions' | 'problems'>,
+  banks: readonly Bank[],
   strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
 ): { bank: Bank } | { errors: string[] } {
   if (ids.length === 0) return { errors: ['No competition is named'] };
@@ -40,23 +39,25 @@ export function bankFromBundle(
   if (missing.length > 0) {
     return { errors: missing.map(id => `The bundle holds no competition ${id}`) };
   }
+  const inCode = createRegistry(banks).problems;
   const competitions: CompetitionBank = Object.fromEntries(ids.map(id => [id, bundle.competitions[id]]));
   const used = new Set(Object.values(competitions)
     .flatMap(competition => competition.relay?.problems.map(({ problemId }) => problemId) ?? []));
   const usedProblems = Object.entries(bundle.problems).filter(([id]) => used.has(id));
   const differing = usedProblems.filter(([id, body]) => {
-    const held = registry.problems.get(id);
+    const held = inCode.get(id);
     return held !== undefined && !sameJson(held, { ...body, id });
-  }).map(([id]) => id);
-  const problems: ProblemBank = Object.fromEntries(usedProblems.filter(([id]) => !registry.problems.has(id)));
-  const errors = [
-    ...Object.keys(competitions).filter(id => registry.competitions.has(id))
-      .map(id => `The competition ${id} is in code already`),
-    ...differing.map(id => `The problem ${id} is in code already, and differs there`),
-  ];
-  if (errors.length > 0) return { errors };
-  const invalid = validateBundle({ ...bundle, competitions, problems }, registry.problems, strategyGames);
-  return invalid.length > 0 ? { errors: invalid } : { bank: { competitions, problems } };
+  }).map(([id]) => `The problem ${id} is in code already, and differs there`);
+  if (differing.length > 0) return { errors: differing };
+  const bank: Bank = { competitions, problems: Object.fromEntries(usedProblems.filter(([id]) => !inCode.has(id))) };
+  let registry: Registry;
+  try {
+    registry = createRegistry([...banks, bank]);
+  } catch (error) {
+    return { errors: [error instanceof Error ? error.message : String(error)] };
+  }
+  const invalid = validateRegistry(registry, strategyGames);
+  return invalid.length > 0 ? { errors: invalid } : { bank };
 }
 
 /// The source of a file under banks/ that exports `bank`. The literals are

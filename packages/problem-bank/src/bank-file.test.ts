@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { strategyGames } from 'game';
-import { registry } from '../all';
+import { banks } from '../all';
 import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
 import { readBundle } from './bundle';
@@ -20,7 +20,7 @@ if ('errors' in read) throw new Error(read.errors.join('\n'));
 const sample = read.bundle;
 
 function made(bundle: Bundle, ids: string[]) {
-  const result = bankFromBundle(bundle, ids, registry, strategyGames);
+  const result = bankFromBundle(bundle, ids, banks, strategyGames);
   if ('errors' in result) throw new Error(result.errors.join('\n'));
   return result;
 }
@@ -47,16 +47,23 @@ describe('bankFromBundle', () => {
     expect(Object.keys(bank.problems).sort()).toEqual(['10iqp4vy6b--csomag-kockak', '7q1wniz55w--csomag-haromszog']);
   });
 
-  it('refuses a competition the registry holds, and a problem it holds otherwise', () => {
-    const bundle: Bundle = {
-      ...sample,
-      competitions: { ...sample.competitions, [TELJES]: sample.competitions[CSOMAG_TELJES] },
-      problems: { ...sample.problems, [KORONGOK]: sample.problems['10iqp4vy6b--csomag-kockak'] },
-    };
-    expect(bankFromBundle(bundle, [TELJES, VALTO], registry, strategyGames)).toEqual({ errors: [
-      `The competition ${TELJES} is in code already`,
-      `The problem ${KORONGOK} is in code already, and differs there`,
-    ] });
+  it('refuses a competition the code holds', () => {
+    const bundle: Bundle = { ...sample, competitions: { ...sample.competitions, [TELJES]: sample.competitions[CSOMAG_TELJES] } };
+    expect(bankFromBundle(bundle, [TELJES, VALTO], banks, strategyGames))
+      .toEqual({ errors: [`Two banks hold the id ${TELJES}`] });
+  });
+
+  it('refuses a problem the code holds otherwise', () => {
+    const bundle: Bundle = { ...sample, problems: { ...sample.problems, [KORONGOK]: sample.problems['10iqp4vy6b--csomag-kockak'] } };
+    expect(bankFromBundle(bundle, [VALTO], banks, strategyGames))
+      .toEqual({ errors: [`The problem ${KORONGOK} is in code already, and differs there`] });
+  });
+
+  // An id names one thing wherever it is read, a competition and a problem alike.
+  it('refuses a competition whose id the code holds for a problem', () => {
+    const bundle: Bundle = { ...sample, competitions: { [KORONGOK]: sample.competitions[VALTO] } };
+    expect(bankFromBundle(bundle, [KORONGOK], banks, strategyGames))
+      .toEqual({ errors: [expect.stringContaining(`${KORONGOK} egy feladat és egy verseny azonosítója is`)] });
   });
 
   // The export does not validate, so the rules are first applied here.
@@ -73,7 +80,7 @@ describe('bankFromBundle', () => {
         },
       },
     };
-    const result = bankFromBundle(bundle, [VALTO], registry, strategyGames);
+    const result = bankFromBundle(bundle, [VALTO], banks, strategyGames);
     expect(result).toEqual({ errors: [
       expect.stringContaining('a váltó hossza (0) nem pozitív egész számú perc'),
       expect.stringContaining('(nnnnnnnnnn--nincs) nem létezik'),
@@ -82,13 +89,12 @@ describe('bankFromBundle', () => {
 
   // The second competition's relay shares kockak with the first's, banked
   // already, and with its keys in another order, as jsonb may store them.
-  it('leaves to the registry a problem it holds as the bundle does', () => {
+  it('leaves to the code a problem it holds as the bundle does', () => {
     const banked = made(sample, [VALTO]).bank;
     const kockak = Object.fromEntries(Object.entries(banked.problems['10iqp4vy6b--csomag-kockak']).reverse()) as ProblemBank[string];
     const first: Bank = { ...banked, problems: { ...banked.problems, '10iqp4vy6b--csomag-kockak': kockak } };
     const { bank } = made(sample, [CSOMAG_TELJES]);
-    const problems = new Map([...registry.problems, ...Object.entries(first.problems).map(([id, body]) => [id, { id, ...body }] as const)]);
-    const second = bankFromBundle(sample, [CSOMAG_TELJES], { competitions: registry.competitions, problems }, strategyGames);
+    const second = bankFromBundle(sample, [CSOMAG_TELJES], [...banks, first], strategyGames);
     expect(second).toEqual({
       bank: { competitions: bank.competitions, problems: { 'roow9oo75t--csomag-paros': bank.problems['roow9oo75t--csomag-paros'] } },
     });
@@ -100,8 +106,8 @@ describe('bankFromBundle', () => {
   });
 
   it('refuses no competition, and one the bundle does not hold', () => {
-    expect(bankFromBundle(sample, [], registry, strategyGames)).toEqual({ errors: ['No competition is named'] });
-    expect(bankFromBundle(sample, [VALTO, 'nnnnnnnnnn--nincs'], registry, strategyGames))
+    expect(bankFromBundle(sample, [], banks, strategyGames)).toEqual({ errors: ['No competition is named'] });
+    expect(bankFromBundle(sample, [VALTO, 'nnnnnnnnnn--nincs'], banks, strategyGames))
       .toEqual({ errors: ['The bundle holds no competition nnnnnnnnnn--nincs'] });
   });
 });
