@@ -191,10 +191,12 @@ def export_bundle():
     and back into code). All of them, whatever DURER_COMPETITIONS names: two
     bundles that share a stored problem would clash on import.
   """
-  bundle = get_request('admin', ADMIN_PASSWORD, BASE_URL, '/team/admin/competitions/export')
-  if not bundle['competitions'] and not bundle['problems']:
+  response = requests.get(BASE_URL + '/team/admin/competitions/export', auth=HTTPBasicAuth('admin', ADMIN_PASSWORD))
+  if response.status_code == 204:
     print('No bundle written: the database holds no competition or problem')
     return
+  response.raise_for_status()
+  bundle = response.json()
   # A run's own name, so that a later run does not write over it; the Import/export
   # tab names its file the same way.
   bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H-%M-%S')}.json"

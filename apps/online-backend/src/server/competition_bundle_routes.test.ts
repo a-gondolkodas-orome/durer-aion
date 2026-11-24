@@ -203,6 +203,12 @@ describe("the export", () => {
     });
   });
 
+  it("answers no bundle for an empty database", async () => {
+    const response = await exported();
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe("");
+  });
+
   it("refuses without the password", async () => {
     expect((await exported({})).status).toBe(401);
   });

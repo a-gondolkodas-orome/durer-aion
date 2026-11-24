@@ -313,7 +313,12 @@ export function configureTeamsRouter(
   });
 
   router.get("/team/admin/competitions/export", adminAuth, async (ctx) => {
-    ctx.body = await exportBundle();
+    const bundle = await exportBundle();
+    if (bundle === null) {
+      ctx.status = 204;
+    } else {
+      ctx.body = bundle;
+    }
   });
 
   /**

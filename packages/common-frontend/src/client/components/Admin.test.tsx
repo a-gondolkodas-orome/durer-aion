@@ -590,7 +590,7 @@ test('the import/export tab exports what the database holds as one bundle file',
 test('the import/export tab saves no file for an empty database, and says so', async () => {
   vi.spyOn(repo, 'getCompetitions').mockResolvedValue([]);
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  vi.spyOn(repo, 'exportCompetitions').mockResolvedValue({ format: 'durer-competitions', version: 1, competitions: {}, problems: {} });
+  vi.spyOn(repo, 'exportCompetitions').mockResolvedValue(null);
   const saved = savedDownloads();
   renderAdmin();
 

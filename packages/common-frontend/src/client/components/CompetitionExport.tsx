@@ -24,8 +24,7 @@ export function CompetitionExport() {
     setBusy(true);
     try {
       const bundle = await exportCompetitions();
-      // The import refuses an empty bundle, so there is no file to save.
-      if (Object.keys(bundle.competitions).length === 0 && Object.keys(bundle.problems).length === 0) {
+      if (bundle === null) {
         enqueueSnackbar('Az adatbázisban nincs sem verseny, sem feladat, így nincs mit exportálni.', { variant: 'info' });
         return;
       }
