@@ -110,28 +110,33 @@ sequenceDiagram
     T->>Q: second listener
     Q->>S: re-read the match
     loop while it is the bot's turn, in startNewGame or play
-        Q->>Bot: planTurn(state), unless moves are left of its plan
-        Bot-->>Q: its moves, in order
-        Note over Q: 400 ms
-        Q->>S: Master.onUpdate with the bot's credentials, for the next move
+        Q->>Bot: play(state), on a bot made for this turn
+        Note over Bot: 400 ms
+        Bot-->>Q: the next move of its plan
+        Q->>S: Master.onUpdate with the bot's credentials
         Q-->>B: push the new state
     end
 ```
 
 The game package's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`,
-or a list of those for a turn of several moves — into a boardgame.io `Bot`.
-`args` of `undefined` means a random move from the game's `possibleMoves`, and
-every move waits 400 ms so the team sees what came before it land. The server
-plays each move as its own update and asks the strategy again while the turn is
-still the bot's; boardgame.io's `Local` in the dry run asks the bot for one move
-at a time, and the bot keeps the rest of its plan between asks.
+or a list of those for a whole turn (`BotTurn` is the contract) — into a
+boardgame.io `Bot`. `args` of `undefined` means a random move from the game's
+`possibleMoves`. boardgame.io asks a bot for one move at a time, and the bot
+keeps the rest of its plan between asks, so a bot serves one match: `Local` in
+the dry run keeps one per match, and the server makes one for each turn the bot
+plays and plays that turn out as one job on the match's queue. Every move waits
+400 ms, so the team sees what came before it land.
+
+A plan is lost only when the backend stops between two of its moves, or the dry
+run is reloaded in the bot's think time; the strategy is then asked halfway
+through its own turn. A team reloading meanwhile loses nothing, since the plan
+lives in the job, not in the team's connection.
 
 **A bot move the game refuses stalls the match.** The server plays nothing in
 its place and logs the refused move (`socketio_botmoves.ts`): a refused move is
 a bug in the strategy, and a random move instead could hand a live game to the
-team unnoticed. A team reloading during the bot's turn cannot cause one, since
-the server holds the plan for the whole turn; only a backend stopping between
-two of its moves makes the strategy answer halfway through a turn.
+team unnoticed. Moves a plan names past the end of its turn are dropped and
+logged, unless the game was decided, which makes them moot.
 
 `hostedGames` (`games.ts`) lists each game beside its
 bot, and `server.ts` builds both the game list and the bots from it.

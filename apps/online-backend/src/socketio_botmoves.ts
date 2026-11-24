@@ -3,14 +3,14 @@
 // root package.json's `overrides` block is what makes them one install, and
 // socketio_transport.test.ts fails if they split (#461).
 import type IOTypes from 'socket.io';
-import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
+import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
 import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType } from "game";
 import { getBotCredentials } from "./server/common";
 import { SocketGuard, socketClientKey, type GuardLimits } from "./server/socket_guard";
-import type { ServerBot } from "game";
+import type { MatchBot } from "game";
 import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.
@@ -20,25 +20,6 @@ type MasterTransport = ConstructorParameters<typeof Master>[2];
 type IntermediateTransportData = Parameters<MasterTransport['sendAll']>[0];
 type TransportData = ReturnType<ReturnType<typeof getFilterPlayerView>>;
 type SocketOpts = NonNullable<ConstructorParameters<typeof SocketIO>[0]>;
-
-/** Copied from boardgame.io/dist/src/client/transport/local.ts */
-function GetBotPlayer(state: State, bots: Record<PlayerID, unknown>) {
-  if (state.ctx.gameover !== undefined) {
-    return null;
-  }
-
-  if (state.ctx.activePlayers) {
-    for (const key of Object.keys(bots)) {
-      if (key in state.ctx.activePlayers) {
-        return key;
-      }
-    }
-  } else if (state.ctx.currentPlayer in bots) {
-    return state.ctx.currentPlayer;
-  }
-
-  return null;
-}
 
 /** Copied from boardgame.io/dist/src/server/transport.ts. The `Type` enum the
  *  comparison needs is not exported, so the sync value is read off the `Sync`
@@ -111,12 +92,14 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
-  bots: Record<string, ServerBot>;
+  /** Makes a game's bot, which keeps its plan between moves: one for each
+   *  turn it plays, so no match sees another's plan. */
+  bots: Record<string, () => MatchBot>;
   // The suite's way to reach a limit in a few packets.
   private readonly guardLimits: GuardLimits;
   constructor(
     socketOpts: SocketOpts,
-    bots: Record<string, ServerBot>,
+    bots: Record<string, () => MatchBot>,
     guardLimits: GuardLimits = {},
   ) {
     super({ ...socketOpts });
@@ -142,7 +125,7 @@ export class SocketIOButBotMoves extends SocketIO {
         continue
       }
       const nsp = app._io?.of(game.name);
-      const bot = this.bots[game.name];
+      const makeBot = this.bots[game.name];
 
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
@@ -172,7 +155,7 @@ export class SocketIOButBotMoves extends SocketIO {
 
         socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
           const matchID = args[2];
-          void this.onPlayerUpdate(app.context, game, bot, args)
+          void this.onPlayerUpdate(app.context, game, makeBot, args)
             .catch(logListenerFailure("update", matchID));
         });
 
@@ -193,7 +176,7 @@ export class SocketIOButBotMoves extends SocketIO {
          * failed its credential check is sent nothing. */
         socket.on("sync", (matchID: string) => {
           void this.getMatchQueue(matchID).add(async () => {
-            await this.playBotTurn(app.context, game, bot, matchID);
+            await this.playBotTurn(app.context, game, makeBot, matchID);
             const client = this.clientInfo.get(socket.id);
             if (client?.matchID !== matchID) {
               return;
@@ -211,7 +194,7 @@ export class SocketIOButBotMoves extends SocketIO {
   private async onPlayerUpdate(
     context: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    bot: ServerBot,
+    makeBot: () => MatchBot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
     // Typed as boardgame.io's action, but it is whatever the client sent.
@@ -224,7 +207,7 @@ export class SocketIOButBotMoves extends SocketIO {
     // The player's move is already stored and pushed; the bot answers
     // in a push of its own, or the move and its reply land as one
     // update. See #346.
-    await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, bot, matchID));
+    await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, makeBot, matchID));
   }
 
   /** Plays the bot's turn if the match is waiting on one. Callers run it on
@@ -239,28 +222,13 @@ export class SocketIOButBotMoves extends SocketIO {
   private async playBotTurn(
     { db, auth }: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    bot: ServerBot,
+    makeBot: () => MatchBot,
     matchID: string
   ): Promise<void> {
     // The metadata too: the relay's judge reads its problems from the setup data.
     const { state, metadata } = await fetch(db, matchID, { state: true, metadata: true } as const);
-    if (state === undefined) {
-      return;
-    }
-    if (currentPlayer(state.ctx) !== BOT_ID) {
-      // Not a real action, possibly a failed move.
-      return;
-    }
-    if (state.ctx.gameover) {
-      return;
-    }
-    const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
-    if (botPlayer === null) {
-      // Only reachable with ctx.gameover set to something falsy, which
-      // the check above lets through and which no game here produces.
-      return;
-    }
-    if (state.ctx.phase !== PHASE.play && state.ctx.phase !== PHASE.startNewGame) {
+    // Not a real action, possibly a failed move.
+    if (state === undefined || !isBotsTurn(state)) {
       return;
     }
     const master = new Master(
@@ -270,43 +238,20 @@ export class SocketIOButBotMoves extends SocketIO {
       auth
     );
 
-    // The bot's whole turn, each move stored and pushed on its own: the moves
-    // its strategy named, then, while the turn is still its own, whatever it
-    // names when asked again (botwrapper.ts says why).
+    // The bot's whole turn, each move stored and pushed on its own, as long as
+    // the turn is the bot's: a turn of several moves, and a bot that plays two
+    // turns running, the opening position and then the first move.
+    const bot = makeBot();
     let current = state;
-    let plan: { turn: number; phase: string; moves: ReturnType<ServerBot["planTurn"]> } | null = null;
-    const dropRest = (why: string) => {
-      if (plan !== null && plan.moves.length > 0) {
-        console.error(`The bot of match ${JSON.stringify(matchID)} named ${plan.moves.length} move(s) after ${why}; dropped.`);
-      }
-      plan = null;
-    };
-    for (let played = 0; ; played++) {
-      if (played > 0 && !isBotsTurn(current)) {
-        if (!current.ctx.gameover) dropRest("its turn ended");
-        return;
-      }
-      // A plan is the turn it was made in. Moves left of it once that turn is
-      // over are not the next turn's, even when the next turn is the bot's too.
-      if (plan !== null && (plan.turn !== current.ctx.turn || plan.phase !== current.ctx.phase)) {
-        dropRest("its turn ended");
-      }
+    let movesThisTurn = 0;
+    while (isBotsTurn(current)) {
       // A strategy that keeps naming moves that keep the turn would loop for
       // ever, and the match's queue with it.
-      if (played >= MAX_BOT_MOVES_PER_TURN) {
-        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${played} moves.`);
+      if (movesThisTurn >= MAX_BOT_MOVES_PER_TURN) {
+        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${movesThisTurn} moves.`);
         return;
       }
-      if (plan === null || plan.moves.length === 0) {
-        plan = {
-          turn: current.ctx.turn,
-          phase: current.ctx.phase,
-          moves: bot.planTurn(current, botPlayer, metadata?.setupData),
-        };
-      }
-      const [action, ...rest] = plan.moves;
-      plan.moves = rest;
-      await bot.wait();
+      const { action } = await bot.play(current, BOT_ID, metadata?.setupData);
       await master.onUpdate(
         { ...action, payload: { ...action.payload, credentials: getBotCredentials() } },
         current._stateID,
@@ -320,21 +265,24 @@ export class SocketIOButBotMoves extends SocketIO {
       // whole turn is one job on it. A write from outside the queue that
       // landed in the bot's pause would look exactly like its move (#655).
       if (after._stateID === current._stateID) {
-        // The match stalls on purpose: a refused move is a bug in the
-        // strategy, and anything played in its place, a random move say,
-        // could hand a live game to the team without anyone noticing. Asked
-        // again, by the next sync, the strategy would name the same move.
+        // Nothing is played in its place: docs/ARCHITECTURE.md says why.
         console.error(`The bot of match ${JSON.stringify(matchID)} named `
           + `${action.payload.type}(${JSON.stringify(action.payload.args ?? [])}), which the game refused; `
           + `the match waits on the bot.`);
         return;
       }
+      const sameTurn = after.ctx.turn === current.ctx.turn && after.ctx.phase === current.ctx.phase;
+      movesThisTurn = sameTurn ? movesThisTurn + 1 : 0;
       current = after;
+    }
+    // A game decided leaves the play phase, and the moves it made moot.
+    if (current.ctx.phase === PHASE.play && !current.ctx.gameover && bot.movesLeft() > 0) {
+      console.error(`The bot of match ${JSON.stringify(matchID)} named ${bot.movesLeft()} move(s) after its turn ended; dropped.`);
     }
   }
 }
 
-/** Generous: a turn of the games here is one or two moves. */
+/** Generous: a turn of the games here is at most two moves. */
 const MAX_BOT_MOVES_PER_TURN = 20;
 
 /** Whether the match waits on the bot, in a phase the bot plays in. */
