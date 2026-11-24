@@ -594,7 +594,8 @@ the clock, the test/live choice, choosing who starts, tries and score.
     `events.endTurn()`. Each live game also scores the sub-game in its move
     (#459); `recordWinner` (`packages/game/src/common/types.ts`) does both,
     and says when the match is won
-  - `possibleMoves`, every legal move, from which the bot picks at random
+  - `possibleMoves`, every legal move: what a strategy picks from, and boardgame.io's
+    `ai.enumerate`
   - optionally `turn`, boardgame.io's turn hooks. Not for the end of time:
     in the play phase `gameWrapper` ends a match on the first move past it
 
