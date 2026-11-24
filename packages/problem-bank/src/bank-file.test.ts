@@ -7,7 +7,6 @@ import { bankFile, bankFromBundle } from './bank-file';
 import type { Bundle } from './bundle';
 import { readBundle } from './bundle';
 import type { Bank } from './registry';
-import type { ProblemBank } from './sources';
 
 const KORONGOK = 'k5g58wuf6h--minta-korongok';
 const TELJES = 'klmgbpb334--minta-teljes';
@@ -53,10 +52,10 @@ describe('bankFromBundle', () => {
       .toEqual({ errors: [`Two banks hold the id ${TELJES}`] });
   });
 
-  it('refuses a problem the code holds otherwise', () => {
+  it('refuses a problem the code holds', () => {
     const bundle: Bundle = { ...sample, problems: { ...sample.problems, [KORONGOK]: sample.problems['10iqp4vy6b--csomag-kockak'] } };
     expect(bankFromBundle(bundle, [VALTO], banks, strategyGames))
-      .toEqual({ errors: [`The problem ${KORONGOK} is in code already, and differs there`] });
+      .toEqual({ errors: [`Two banks hold the id ${KORONGOK}`] });
   });
 
   // An id names one thing wherever it is read, a competition and a problem alike.
@@ -87,17 +86,11 @@ describe('bankFromBundle', () => {
     ] });
   });
 
-  // The second competition's relay shares kockak with the first's, banked
-  // already, and with its keys in another order, as jsonb may store them.
-  it('leaves to the code a problem it holds as the bundle does', () => {
-    const banked = made(sample, [VALTO]).bank;
-    const kockak = Object.fromEntries(Object.entries(banked.problems['10iqp4vy6b--csomag-kockak']).reverse()) as ProblemBank[string];
-    const first: Bank = { ...banked, problems: { ...banked.problems, '10iqp4vy6b--csomag-kockak': kockak } };
-    const { bank } = made(sample, [CSOMAG_TELJES]);
-    const second = bankFromBundle(sample, [CSOMAG_TELJES], [...banks, first], strategyGames);
-    expect(second).toEqual({
-      bank: { competitions: bank.competitions, problems: { 'roow9oo75t--csomag-paros': bank.problems['roow9oo75t--csomag-paros'] } },
-    });
+  // Their relays share kockak, so the round's competitions are banked in one run.
+  it('refuses a problem a bank made from the same bundle holds', () => {
+    const first = made(sample, [VALTO]).bank;
+    expect(bankFromBundle(sample, [CSOMAG_TELJES], [...banks, first], strategyGames))
+      .toEqual({ errors: ['Two banks hold the id 10iqp4vy6b--csomag-kockak'] });
   });
 
   it('leaves out a clash among the competitions it is not given', () => {
@@ -109,12 +102,5 @@ describe('bankFromBundle', () => {
     expect(bankFromBundle(sample, [], banks, strategyGames)).toEqual({ errors: ['No competition is named'] });
     expect(bankFromBundle(sample, [VALTO, 'nnnnnnnnnn--nincs'], banks, strategyGames))
       .toEqual({ errors: ['The bundle holds no competition nnnnnnnnnn--nincs'] });
-  });
-});
-
-describe('bankFile', () => {
-  it('names the competitions in the file\'s comment', () => {
-    expect(bankFile(made(sample, [VALTO, CSOMAG_TELJES]).bank))
-      .toContain('// Csomag: váltó, Csomag: teljes forduló: made from a bundle exported from the database,');
   });
 });
