@@ -48,6 +48,7 @@ describe('bank-from-bundle.ts', () => {
     expect(written).toContain(`"${VALTO}": {`);
     expect(written).not.toContain(TELJES);
     expect(printed).toContain("  import * as csomagProba from './banks/csomag-proba';");
+    expect(printed).toContain('  csomagProba,  (in the banks list)');
     expect(printed).toContain(`  "${VALTO}",  (in listedIds)`);
   });
 

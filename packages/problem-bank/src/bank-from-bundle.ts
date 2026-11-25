@@ -107,7 +107,7 @@ export function writeBank(bundlePath: string, name: string, ids: readonly Compet
     '',
     'Register it in packages/problem-bank/all.ts, which the live round serves:',
     `  import * as ${as} from './banks/${name}';`,
-    `  ${as},  (in the createRegistry list)`,
+    `  ${as},  (in the banks list)`,
     '',
     'To list it on the relay practice site once it is released, in apps/relay-practise-frontend/src/practice-sets.ts:',
     `  import * as ${as} from "problem-bank/banks/${name}";`,
