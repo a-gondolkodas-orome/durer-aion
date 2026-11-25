@@ -112,7 +112,7 @@ describe("the socket transport a browser talks to", () => {
       // is what this file is about, not what persists behind it.
       transport: new SocketIOButBotMoves(
         { https: undefined },
-        { [GAME_NAME]: () => new (botWrapper(botStrategy))({ enumerate: game.ai?.enumerate }) },
+        { [GAME_NAME]: new (botWrapper(botStrategy))({ enumerate: game.ai?.enumerate }) },
       ),
       // Set, rather than left out, so the server does not warn about CORS.
       origins: [],
@@ -255,23 +255,6 @@ describe("the socket transport a browser talks to", () => {
     const { state } = await server.db.fetch(MATCH_ID, { state: true });
     expect(state.ctx.currentPlayer).toBe(BOT_ID);
     expect(handedBack).not.toHaveBeenCalled();
-  });
-
-  it("drops, and reports, the moves a bot names after its turn has ended", async () => {
-    // The take ends the turn, so the choice after it is past the turn's end.
-    strategy = (state, botID) => state.ctx.phase === "play"
-      ? [[[1], "selectPile"], [[1, 1], "take"], [[0], "selectPile"]]
-      : StrategyWrappers["minta-ketkupac"]()(state, botID);
-    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const socket = await connectClient();
-    const botReplied = updateMatching(socket, ({ G, ctx }) =>
-      ctx.phase !== "chooseRole" && G.piles[0] + G.piles[1] < 8 && ctx.currentPlayer === HUMAN_ID);
-
-    await teamTakes(socket);
-    const state = await botReplied;
-
-    expect(state.G.selectedPile).toBeNull();
-    await vi.waitFor(() => expect(errors).toHaveBeenCalledWith(expect.stringMatching(/named 1 move\(s\) after its turn ended; dropped/)), { timeout: REPLY_TIMEOUT });
   });
 
   it("gives a reconnecting player the state their last one left", async () => {

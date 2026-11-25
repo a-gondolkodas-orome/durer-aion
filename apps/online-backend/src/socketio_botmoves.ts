@@ -92,14 +92,12 @@ const logListenerFailure = (event: string, matchID: string) => (error: unknown) 
  * Modifying the server is also needed to fill the bot's slot in the lobby (see injectBots()).
  */
 export class SocketIOButBotMoves extends SocketIO {
-  /** Makes a game's bot, which keeps its plan between moves: one for each
-   *  turn it plays, so no match sees another's plan. */
-  bots: Record<string, () => MatchBot>;
+  bots: Record<string, MatchBot>;
   // The suite's way to reach a limit in a few packets.
   private readonly guardLimits: GuardLimits;
   constructor(
     socketOpts: SocketOpts,
-    bots: Record<string, () => MatchBot>,
+    bots: Record<string, MatchBot>,
     guardLimits: GuardLimits = {},
   ) {
     super({ ...socketOpts });
@@ -125,7 +123,7 @@ export class SocketIOButBotMoves extends SocketIO {
         continue
       }
       const nsp = app._io?.of(game.name);
-      const makeBot = this.bots[game.name];
+      const bot = this.bots[game.name];
 
       /** This should be in sync with how socket data is communicated.
        * See boardgame.io/dist/src/server/transport/socketio.ts
@@ -155,7 +153,7 @@ export class SocketIOButBotMoves extends SocketIO {
 
         socket.on("update", (...args: Parameters<Master['onUpdate']>) => {
           const matchID = args[2];
-          void this.onPlayerUpdate(app.context, game, makeBot, args)
+          void this.onPlayerUpdate(app.context, game, bot, args)
             .catch(logListenerFailure("update", matchID));
         });
 
@@ -176,7 +174,7 @@ export class SocketIOButBotMoves extends SocketIO {
          * failed its credential check is sent nothing. */
         socket.on("sync", (matchID: string) => {
           void this.getMatchQueue(matchID).add(async () => {
-            await this.playBotTurn(app.context, game, makeBot, matchID);
+            await this.playBotTurn(app.context, game, bot, matchID);
             const client = this.clientInfo.get(socket.id);
             if (client?.matchID !== matchID) {
               return;
@@ -194,7 +192,7 @@ export class SocketIOButBotMoves extends SocketIO {
   private async onPlayerUpdate(
     context: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    makeBot: () => MatchBot,
+    bot: MatchBot,
     [actionData, , matchID, stalePlayerID]: Parameters<Master['onUpdate']>
   ): Promise<void> {
     // Typed as boardgame.io's action, but it is whatever the client sent.
@@ -207,7 +205,7 @@ export class SocketIOButBotMoves extends SocketIO {
     // The player's move is already stored and pushed; the bot answers
     // in a push of its own, or the move and its reply land as one
     // update. See #346.
-    await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, makeBot, matchID));
+    await this.getMatchQueue(matchID).add(() => this.playBotTurn(context, game, bot, matchID));
   }
 
   /** Plays the bot's turn if the match is waiting on one. Callers run it on
@@ -222,7 +220,7 @@ export class SocketIOButBotMoves extends SocketIO {
   private async playBotTurn(
     { db, auth }: Pick<Server.AppCtx, "db" | "auth">,
     game: Game,
-    makeBot: () => MatchBot,
+    bot: MatchBot,
     matchID: string
   ): Promise<void> {
     // The metadata too: the relay's judge reads its problems from the setup data.
@@ -241,7 +239,6 @@ export class SocketIOButBotMoves extends SocketIO {
     // The bot's whole turn, each move stored and pushed on its own, as long as
     // the turn is the bot's: a turn of several moves, and a bot that plays two
     // turns running, the opening position and then the first move.
-    const bot = makeBot();
     let current = state;
     let movesThisTurn = 0;
     while (isBotsTurn(current)) {
@@ -274,10 +271,6 @@ export class SocketIOButBotMoves extends SocketIO {
       const sameTurn = after.ctx.turn === current.ctx.turn && after.ctx.phase === current.ctx.phase;
       movesThisTurn = sameTurn ? movesThisTurn + 1 : 0;
       current = after;
-    }
-    // A game decided leaves the play phase, and the moves it made moot.
-    if (current.ctx.phase === PHASE.play && !current.ctx.gameover && bot.movesLeft() > 0) {
-      console.error(`The bot of match ${JSON.stringify(matchID)} named ${bot.movesLeft()} move(s) after its turn ended; dropped.`);
     }
   }
 }

@@ -33,7 +33,7 @@ const { db, teams } = getDb();
 const botSetup = Object.fromEntries(
   hosted.map(({ game, bot }) =>
     [game.name,
-    () => new bot({
+    new bot({
       enumerate: game.ai?.enumerate,
       seed: game.seed,
     })]
