@@ -219,12 +219,6 @@ describe("the admin routes", () => {
     expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/export" }]);
   });
 
-  test("an empty database's export is no bundle", async () => {
-    fakeAxios(() => Promise.resolve({ status: 204, data: "" }));
-
-    expect(await new RealClientRepository().exportCompetitions()).toBeNull();
-  });
-
   test("a team's own start window is a PUT of the window as JSON", async () => {
     const calls = fakeAxios(ok);
     const window = { opensAt: "2026-11-21T15:00+01:00", closesAt: null };

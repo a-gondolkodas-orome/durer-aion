@@ -100,7 +100,7 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
   importCompetitions(_bundle: unknown): Promise<BundleImportResultDto> {
     throw Error("NOT call this");
   }
-  exportCompetitions(): Promise<object | null> {
+  exportCompetitions(): Promise<object> {
     throw Error("NOT call this");
   }
 }

@@ -173,11 +173,10 @@ export async function importBundle(
  *  validated, so that a stored competition the rules have since come to
  *  refuse can still be taken out and mended; the import validates it. All of
  *  it at once, since two bundles that share a stored problem would clash on
- *  import. None for an empty database, as the import refuses an empty bundle. */
-export async function exportBundle(): Promise<Bundle | null> {
+ *  import. */
+export async function exportBundle(): Promise<Bundle> {
   const competitions = await CompetitionModel.findAll({ order: [['id', 'ASC']] });
   const problems = await ProblemModel.findAll({ order: [['id', 'ASC']] });
-  if (competitions.length === 0 && problems.length === 0) return null;
   return {
     format: 'durer-competitions',
     version: 1,

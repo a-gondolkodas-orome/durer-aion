@@ -50,7 +50,6 @@ export interface AdminClientRepository {
    *  The bundle is sent as it was read from its file. */
   importCompetitions(bundle: unknown): Promise<BundleImportResultDto>
   /** The bundle of every competition and problem the database holds: what
-   *  `importCompetitions` takes, kept as the server sent it. Null for an empty
-   *  database, since the import refuses an empty bundle. */
-  exportCompetitions(): Promise<object | null>
+   *  `importCompetitions` takes, kept as the server sent it. */
+  exportCompetitions(): Promise<object>
 }

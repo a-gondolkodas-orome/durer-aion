@@ -355,8 +355,6 @@ paths:
                     type: object
                   problems:
                     type: object
-        "204":
-          description: The database holds no competition or problem, and the import refuses an empty bundle
   /team/admin/competitions/{competitionId}/start-window:
     put:
       summary: Set a competition's start window in place of its config's, or return it to its config's

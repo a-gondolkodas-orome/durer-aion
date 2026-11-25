@@ -203,10 +203,9 @@ describe("the export", () => {
     });
   });
 
-  it("answers no bundle for an empty database", async () => {
-    const response = await exported();
-    expect(response.status).toBe(204);
-    expect(await response.text()).toBe("");
+  it("is an empty bundle for an empty database", async () => {
+    expect(await (await exported()).json())
+      .toEqual({ format: "durer-competitions", version: 1, competitions: {}, problems: {} });
   });
 
   it("refuses without the password", async () => {

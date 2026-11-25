@@ -23,12 +23,7 @@ export function CompetitionExport() {
   const runExport = async () => {
     setBusy(true);
     try {
-      const bundle = await exportCompetitions();
-      if (bundle === null) {
-        enqueueSnackbar('Az adatbázisban nincs sem verseny, sem feladat, így nincs mit exportálni.', { variant: 'info' });
-        return;
-      }
-      download(bundleFileName(), JSON.stringify(bundle, null, 2), 'application/json');
+      download(bundleFileName(), JSON.stringify(await exportCompetitions(), null, 2), 'application/json');
     } catch (e: unknown) {
       enqueueSnackbar(errorMessage(e), { variant: 'error' });
     } finally {

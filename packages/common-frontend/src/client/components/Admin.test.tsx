@@ -587,20 +587,6 @@ test('the import/export tab exports what the database holds as one bundle file',
     .toHaveProperty('download', expect.stringMatching(/^durer-competitions-\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d\.json$/));
 });
 
-test('the import/export tab saves no file for an empty database, and says so', async () => {
-  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([]);
-  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
-  vi.spyOn(repo, 'exportCompetitions').mockResolvedValue(null);
-  const saved = savedDownloads();
-  renderAdmin();
-
-  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Versenyek exportálása' }));
-
-  expect(await screen.findByText('Az adatbázisban nincs sem verseny, sem feladat, így nincs mit exportálni.')).toBeInTheDocument();
-  expect(saved).toHaveLength(0);
-});
-
 // The import's help names the tab with what its Competition column takes.
 test('the import tab links to the competitions tab', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);

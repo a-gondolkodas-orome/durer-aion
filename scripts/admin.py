@@ -192,9 +192,6 @@ def export_bundle():
     bundles that share a stored problem would clash on import.
   """
   response = requests.get(BASE_URL + '/team/admin/competitions/export', auth=HTTPBasicAuth('admin', ADMIN_PASSWORD))
-  if response.status_code == 204:
-    print('No bundle written: the database holds no competition or problem')
-    return
   response.raise_for_status()
   bundle = response.json()
   # A run's own name, so that a later run does not write over it; the Import/export
