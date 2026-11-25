@@ -1,26 +1,22 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { strategyGames } from 'game';
-import { banks } from '../all';
 import type { Bundle } from './bundle';
 import { readBundle } from './bundle';
 import { bankFile, bankFromBundle, writeBank } from './bank-from-bundle';
 import type { Bank } from './registry';
 
-const KORONGOK = 'k5g58wuf6h--minta-korongok';
-const MINTA_TELJES = 'klmgbpb334--minta-teljes';
 const VALTO = '903xajr9et--csomag-valto';
 const TELJES = 'aqvco71pta--csomag-teljes';
 
-// As the export writes it: its relay refers to KORONGOK, which the code holds.
+// As the export writes it: its relay refers to k5g58wuf6h--minta-korongok, which the code holds.
 const sample = readFileSync(join(__dirname, '..', 'fixtures', 'sample-bundle.json'), 'utf8');
 const read = readBundle(JSON.parse(sample));
 if ('errors' in read) throw new Error(read.errors.join('\n'));
 const bundled = read.bundle;
 
 function made(bundle: Bundle, ids: string[]) {
-  const result = bankFromBundle(bundle, ids, banks, strategyGames);
+  const result = bankFromBundle(bundle, ids);
   if ('errors' in result) throw new Error(result.errors.join('\n'));
   return result;
 }
@@ -65,11 +61,15 @@ describe('bank-from-bundle.ts', () => {
     expect(() => writeBank(bundlePath, 'taken', [VALTO], directory)).toThrow('exists already');
   });
 
-  it('writes nothing for a bundle it refuses, and names the competitions it holds', () => {
-    withBundle(bundle => { bundle.competitions[MINTA_TELJES] = bundle.competitions[TELJES]; });
-    expect(() => writeBank(bundlePath, 'clash', [MINTA_TELJES], directory))
-      .toThrow(`Two banks hold the id ${MINTA_TELJES}\nThe bundle holds the competitions\n  ${VALTO}`);
-    expect(existsSync(join(directory, 'clash.ts'))).toBe(false);
+  it('writes nothing for a competition the bundle does not hold, and names those it does', () => {
+    expect(() => writeBank(bundlePath, 'hianyzo', ['nnnnnnnnnn--nincs'], directory))
+      .toThrow(`The bundle holds no competition nnnnnnnnnn--nincs\nThe bundle holds the competitions\n  ${VALTO}`);
+    expect(existsSync(join(directory, 'hianyzo.ts'))).toBe(false);
+  });
+
+  it('refuses a file that is no bundle', () => {
+    writeFileSync(bundlePath, '{}');
+    expect(() => writeBank(bundlePath, 'csomag-proba', [VALTO], directory)).toThrow('is no exported bundle');
   });
 
   it.each(['Edition', '21-online', 'a--b', 'a_b', ''])('refuses the bank name "%s"', (name) => {
@@ -82,7 +82,7 @@ describe('bankFromBundle', () => {
   beforeAll(() => { directory = mkdtempSync(join(tmpdir(), 'bank-file-')); });
   afterAll(() => { rmSync(directory, { recursive: true, force: true }); });
 
-  it('makes a file that registers beside the banks', async () => {
+  it('makes a file that exports the bank', async () => {
     const { bank } = made(bundled, [VALTO, TELJES]);
     expect(bank).toEqual({ competitions: bundled.competitions, problems: bundled.problems });
 
@@ -99,61 +99,9 @@ describe('bankFromBundle', () => {
     expect(Object.keys(bank.problems).sort()).toEqual(['10iqp4vy6b--csomag-kockak', '7q1wniz55w--csomag-haromszog']);
   });
 
-  it('refuses a competition the code holds', () => {
-    const bundle: Bundle = { ...bundled, competitions: { ...bundled.competitions, [MINTA_TELJES]: bundled.competitions[TELJES] } };
-    expect(bankFromBundle(bundle, [MINTA_TELJES, VALTO], banks, strategyGames))
-      .toEqual({ errors: [`Two banks hold the id ${MINTA_TELJES}`] });
-  });
-
-  it('refuses a problem the code holds', () => {
-    const bundle: Bundle = { ...bundled, problems: { ...bundled.problems, [KORONGOK]: bundled.problems['10iqp4vy6b--csomag-kockak'] } };
-    expect(bankFromBundle(bundle, [VALTO], banks, strategyGames))
-      .toEqual({ errors: [`Two banks hold the id ${KORONGOK}`] });
-  });
-
-  // An id names one thing wherever it is read, a competition and a problem alike.
-  it('refuses a competition whose id the code holds for a problem', () => {
-    const bundle: Bundle = { ...bundled, competitions: { [KORONGOK]: bundled.competitions[VALTO] } };
-    expect(bankFromBundle(bundle, [KORONGOK], banks, strategyGames))
-      .toEqual({ errors: [expect.stringContaining(`${KORONGOK} egy feladat és egy verseny azonosítója is`)] });
-  });
-
-  // The export does not validate, so the rules are first applied here.
-  it('refuses what the rules refuse, a relay problem neither holds included', () => {
-    const relay = bundled.competitions[VALTO].relay;
-    if (relay === undefined) throw new Error('The sample bundle has changed');
-    const bundle: Bundle = {
-      ...bundled,
-      competitions: {
-        ...bundled.competitions,
-        [VALTO]: {
-          ...bundled.competitions[VALTO],
-          relay: { ...relay, durationMinutes: 0, problems: [...relay.problems, { problemId: 'nnnnnnnnnn--nincs', points: 1 }] },
-        },
-      },
-    };
-    const result = bankFromBundle(bundle, [VALTO], banks, strategyGames);
-    expect(result).toEqual({ errors: [
-      expect.stringContaining('a váltó hossza (0) nem pozitív egész számú perc'),
-      expect.stringContaining('(nnnnnnnnnn--nincs) nem létezik'),
-    ] });
-  });
-
-  // Their relays share kockak, so the round's competitions are banked in one run.
-  it('refuses a problem a bank made from the same bundle holds', () => {
-    const first = made(bundled, [VALTO]).bank;
-    expect(bankFromBundle(bundled, [TELJES], [...banks, first], strategyGames))
-      .toEqual({ errors: ['Two banks hold the id 10iqp4vy6b--csomag-kockak'] });
-  });
-
-  it('leaves out a clash among the competitions it is not given', () => {
-    const bundle: Bundle = { ...bundled, competitions: { ...bundled.competitions, [MINTA_TELJES]: bundled.competitions[TELJES] } };
-    expect(Object.keys(made(bundle, [VALTO]).bank.competitions)).toEqual([VALTO]);
-  });
-
   it('refuses no competition, and one the bundle does not hold', () => {
-    expect(bankFromBundle(bundled, [], banks, strategyGames)).toEqual({ errors: ['No competition is named'] });
-    expect(bankFromBundle(bundled, [VALTO, 'nnnnnnnnnn--nincs'], banks, strategyGames))
+    expect(bankFromBundle(bundled, [])).toEqual({ errors: ['No competition is named'] });
+    expect(bankFromBundle(bundled, [VALTO, 'nnnnnnnnnn--nincs']))
       .toEqual({ errors: ['The bundle holds no competition nnnnnnnnnn--nincs'] });
   });
 });

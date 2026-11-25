@@ -557,13 +557,14 @@ carries the config's, so set it again on the other server.
    writes `packages/problem-bank/banks/<bank-name>.ts` with the round's
    competitions and the bundle's problems their relays use, leaving out the
    rest, such as a try-out's. Name all of a round's competitions in one run:
-   a problem their relays share goes into the one bank. It writes nothing if
-   the rules refuse the bank beside those in code, as they may a stored
-   competition since the export does not check it. Named no competition, it
-   lists those the bundle holds. Replace the file's `TODO` comment with which
-   round it is, as the other banks say.
+   a problem their relays share goes into the one bank. Named no competition,
+   it lists those the bundle holds. Replace the file's `TODO` comment with
+   which round it is, as the other banks say.
 3. **Register it** in `all.ts`, and in `practice-sets.ts` to list it on the
-   relay practice site, with the lines the script prints.
+   relay practice site, with the lines the script prints, then run
+   `npm run check`. The script checks none of the rules, so this is where a
+   bank they refuse is caught: a stored competition they have come to refuse,
+   since the export does not check it either, or an id another bank holds.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
 5. **Before that build reaches the server, wipe its database.** This is a

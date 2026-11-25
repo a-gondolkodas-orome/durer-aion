@@ -4,41 +4,27 @@
 //
 //   npm run bank:from-bundle -- <bundle.json> <bank-name> <competition id>...
 //
-// README § In the database, and back into code says when to run it. It runs
-// under jiti, which reads this package from its source; `game` it reads from
-// the build, since that build imports `boardgame.io/core`, a directory, which
-// only a bundler or jiti resolves. No entry of this package's build imports it.
+// README § In the database, and back into code says when to run it. It checks
+// none of the rules: registered, the bank is validated as every bank is, by
+// the registry suite and the server at start. So Node runs it as it is,
+// stripping its types, and it imports nothing at run time but Node's own.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { strategyGames } from 'game';
-import type { CompetitionId, StrategyGameId, StrategyGameInfo } from 'schemas';
-import { banks } from '../all';
+import type { CompetitionId } from 'schemas';
 import type { Bundle } from './bundle';
-import { readBundle } from './bundle';
-import type { Bank, Registry } from './registry';
-import { createRegistry, validateRegistry } from './registry';
+import type { Bank } from './registry';
 import type { CompetitionBank } from './sources';
 
 const BANKS = fileURLToPath(new URL('../banks/', import.meta.url));
 // A file name that is also an identifier once camel-cased, as the banks' are.
 const NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
-/// The bank that the competitions `ids` of `bundle` make beside `banks`, with
-/// the bundle's problems their relays use and no other, or why it makes none:
-/// an id the bundle does not hold, or anything the registry of `banks` and the
-/// new bank breaks, as the server would find it at start — an id both hold
-/// among it, so a round's competitions that share a problem are banked in one
-/// run. The export does not validate, so this is where a stored competition
-/// the rules have come to refuse is caught, before it is a file.
-/// `strategyGames` is the `game` package's.
-export function bankFromBundle(
-  bundle: Bundle,
-  ids: readonly CompetitionId[],
-  banks: readonly Bank[],
-  strategyGames: Readonly<Record<StrategyGameId, StrategyGameInfo>>,
-): { bank: Bank } | { errors: string[] } {
+/// The bank of the competitions `ids` of `bundle`, with the bundle's problems
+/// their relays use and no other, or why it makes none. A problem two of a
+/// round's competitions share goes into the one bank, so name them together.
+export function bankFromBundle(bundle: Bundle, ids: readonly CompetitionId[]): { bank: Bank } | { errors: string[] } {
   if (ids.length === 0) return { errors: ['No competition is named'] };
   const missing = ids.filter(id => !(id in bundle.competitions));
   if (missing.length > 0) {
@@ -47,15 +33,7 @@ export function bankFromBundle(
   const competitions: CompetitionBank = Object.fromEntries(ids.map(id => [id, bundle.competitions[id]]));
   const used = new Set(Object.values(competitions)
     .flatMap(competition => competition.relay?.problems.map(({ problemId }) => problemId) ?? []));
-  const bank: Bank = { competitions, problems: Object.fromEntries(Object.entries(bundle.problems).filter(([id]) => used.has(id))) };
-  let registry: Registry;
-  try {
-    registry = createRegistry([...banks, bank]);
-  } catch (error) {
-    return { errors: [error instanceof Error ? error.message : String(error)] };
-  }
-  const invalid = validateRegistry(registry, strategyGames);
-  return invalid.length > 0 ? { errors: invalid } : { bank };
+  return { bank: { competitions, problems: Object.fromEntries(Object.entries(bundle.problems).filter(([id]) => used.has(id))) } };
 }
 
 /// The source of a file under banks/ that exports `bank`. The literals are
@@ -88,11 +66,11 @@ export function writeBank(bundlePath: string, name: string, ids: readonly Compet
   }
   const path = join(directory, `${name}.ts`);
   if (existsSync(path)) throw new Error(`${path} exists already`);
-  const read = readBundle(JSON.parse(readFileSync(bundlePath, 'utf8')));
-  if ('errors' in read) throw new Error(read.errors.join('\n'));
-  const made = bankFromBundle(read.bundle, ids, banks, strategyGames);
+  const bundle = JSON.parse(readFileSync(bundlePath, 'utf8')) as Bundle;
+  if (bundle.format !== 'durer-competitions') throw new Error(`${bundlePath} is no exported bundle`);
+  const made = bankFromBundle(bundle, ids);
   if ('errors' in made) {
-    const held = Object.keys(read.bundle.competitions).map(id => `  ${id}`);
+    const held = Object.keys(bundle.competitions).map(id => `  ${id}`);
     throw new Error([...made.errors, 'The bundle holds the competitions', ...held].join('\n'));
   }
   writeFileSync(path, bankFile(made.bank));

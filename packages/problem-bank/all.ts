@@ -1,4 +1,3 @@
-import type { Bank } from './src/registry';
 import { createRegistry } from './src/registry';
 import * as edition01Final from './banks/edition-01-final';
 import * as edition02Final from './banks/edition-02-final';
@@ -30,7 +29,7 @@ import * as reference from './banks/reference';
 // This year's competitions, and the problems only they use, are added in the
 // year's private repo until the competition is over (README § Competition
 // secrecy); this public one holds rounds that are public already.
-export const banks: readonly Bank[] = [
+export const registry = createRegistry([
   edition01Final,
   edition02Final,
   edition03Final,
@@ -52,6 +51,4 @@ export const banks: readonly Bank[] = [
   edition19Online,
   edition20Online,
   reference,
-];
-
-export const registry = createRegistry(banks);
+]);
