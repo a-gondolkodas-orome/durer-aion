@@ -43,7 +43,7 @@ function getPubSubChannelId(matchID: string): string {
 export const TransportAPI = (
   matchID: string,
   // Null where the caller only needs sendAll and has no socket to send a
-  // per-player message on — see the router's add-minutes handler.
+  // per-player message on: the bot's turn.
   socket: IOTypes.Socket | null,
   filterPlayerView: ReturnType<typeof getFilterPlayerView>,
   pubSub: GenericPubSub<IntermediateTransportData>
@@ -185,6 +185,14 @@ export class SocketIOButBotMoves extends SocketIO {
         });
       });
     }
+  }
+
+  /** Sends every board of the match a state written outside a move, as
+   *  `Master` sends one after a move. */
+  publishUpdate(matchID: string, state: State): void {
+    // What `TransportAPI(...).sendAll` does; each board's view is filtered by
+    // the channel's subscriber, which boardgame.io set up for the match's game.
+    this.pubSub.publish(getPubSubChannelId(matchID), { type: "update", args: [matchID, state] });
   }
 
   /** Has the bot answer a player's move. The arguments are stale: boardgame.io's

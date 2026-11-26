@@ -107,6 +107,21 @@ describe("the team routes", () => {
     expect(state?.clockOffsetMs).toBe(3600_000);
   });
 
+  // A school network's first request shares the line with the page's own
+  // JavaScript, and a timed-out `team/me` stays on screen until a reload (#715).
+  test.each([
+    ["reading the team's state", (repo: RealClientRepository) => repo.getTeamState()],
+    ["joining with a code", (repo: RealClientRepository) => repo.joinWithCode("000-0000-000")],
+  ])("%s waits longer than the default", async (_, send) => {
+    fakeAxios(() => Promise.resolve({ data: { relayMatch: { state: "NOT STARTED" }, strategyMatch: { state: "NOT STARTED" } } }));
+
+    await send(new RealClientRepository());
+
+    const created = vi.mocked(axios.create).mock.calls.at(-1)?.[0];
+    expect(created?.timeout).toBeGreaterThanOrEqual(30_000);
+    expect(created?.timeout).toBeLessThan(60_000);
+  });
+
   test("a browser with no session has no team", async () => {
     fakeAxios(() => refused(401, "NOT_LOGGED_IN"));
 
@@ -209,6 +224,14 @@ describe("the admin routes", () => {
     await new RealClientRepository().importCompetitions(bundle);
 
     expect(calls).toStrictEqual([{ method: "post", url: "/team/admin/competitions/import", body: bundle }]);
+  });
+
+  test("a competition export is a GET", async () => {
+    const calls = fakeAxios(() => Promise.resolve({ status: 200, data: { format: "durer-competitions" } }));
+
+    expect(await new RealClientRepository().exportCompetitions()).toStrictEqual({ format: "durer-competitions" });
+
+    expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/export" }]);
   });
 
   test("a team's own start window is a PUT of the window as JSON", async () => {

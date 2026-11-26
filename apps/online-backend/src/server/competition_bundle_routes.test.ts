@@ -18,8 +18,9 @@ import { import_teams_from_tsv } from "./team_import";
 import { TEAM_COOKIE } from "./team_session";
 import { startTestDatabase } from "./test_database";
 
-// POST /team/admin/competitions/import, over HTTP against PGlite: a bundle is
-// written whole or not at all (#813).
+// POST /team/admin/competitions/import and GET …/export, over HTTP against
+// PGlite: a bundle is written whole or not at all (#813), and one exported
+// imports again (#814).
 
 const sample = JSON.parse(readFileSync(
   join(__dirname, "..", "..", "..", "..", "packages", "problem-bank", "fixtures", "sample-bundle.json"), "utf8",
@@ -168,4 +169,46 @@ it.each([
 ])("refuses a bundle %s", async (_, headers, status) => {
   expect((await post(sample, headers)).status).toBe(status);
   expect(await storedIds()).toEqual([]);
+});
+
+async function exported(headers: Record<string, string> = admin) {
+  return await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export`, { headers });
+}
+
+describe("the export", () => {
+  it("makes the bundle it was imported from, which imports again on an empty database", async () => {
+    expect((await importBundle(sample)).written).toBe(true);
+    const response = await exported();
+    expect(response.status).toBe(200);
+    const bundle = await response.json() as Bundle;
+    // The in-code problem a relay reuses it refers to, as the sample does.
+    expect(bundle).toEqual(sample);
+
+    await database.reset();
+    expect((await importBundle(bundle)).written).toBe(true);
+    expect(await storedIds()).toEqual(sampleIds);
+  });
+
+  it("holds what the rules refuse, and a problem no relay uses, as they are stored", async () => {
+    // Its relay uses a problem no one holds.
+    const refused = { ...sample.competitions[FULL], relay: { durationMinutes: 30, problems: [{ problemId: "nnnnnnnnnn--nincs", points: 3 }] } };
+    const unused = { answer: 1, content: { hu: { problemText: "Mennyi 1?" } } };
+    await CompetitionModel.create({ id: FULL, body: refused, createdBy: null });
+    await ProblemModel.create({ id: "nnnnnnnnnn--magaban", body: unused, createdBy: null });
+
+    expect(await (await exported()).json()).toEqual({
+      format: "durer-competitions", version: 1,
+      competitions: { [FULL]: refused },
+      problems: { "nnnnnnnnnn--magaban": unused },
+    });
+  });
+
+  it("is an empty bundle for an empty database", async () => {
+    expect(await (await exported()).json())
+      .toEqual({ format: "durer-competitions", version: 1, competitions: {}, problems: {} });
+  });
+
+  it("refuses without the password", async () => {
+    expect((await exported({})).status).toBe(401);
+  });
 });

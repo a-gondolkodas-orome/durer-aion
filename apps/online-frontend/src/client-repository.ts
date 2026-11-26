@@ -21,6 +21,14 @@ function apiAxiosInstance(timeoutMs = 10000): AxiosInstance {
 // `proxy_read_timeout`: past that the codes are lost either way.
 const IMPORT_TIMEOUT_MS = 90_000;
 
+// What the login page waits on: `team/me`, which decides whether it is the
+// login page at all, and the join itself. On a school network the first
+// `team/me` shares the line with the page's own JavaScript, and a timeout here
+// leaves an error that stays until a reload, so it waits three times the
+// default (#715). Both are reads or idempotent, and still under nginx's
+// 60-second `proxy_read_timeout`.
+const LOGIN_TIMEOUT_MS = 30_000;
+
 /**
  * Sends a request and answers its data, or throws an `I18nError` saying why it
  * failed: the server's code when it refused, otherwise what the browser saw.
@@ -72,7 +80,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async getTeamState(): Promise<TeamModelDto | null> {
     let data;
     try {
-      data = await request(api => api.get<TeamModelDto & { serverTime?: string }>('team/me'));
+      data = await request(api => api.get<TeamModelDto & { serverTime?: string }>('team/me'), { timeoutMs: LOGIN_TIMEOUT_MS });
     } catch (e: unknown) {
       // No session — a browser that never logged in, or whose cookie expired.
       if (e instanceof I18nError && e.code === 'NOT_LOGGED_IN') {
@@ -97,7 +105,7 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
 
   // The code goes in the body, never in the URL: it is the team's login secret.
   async joinWithCode(code: string): Promise<void> {
-    await request(api => api.post('team/join', { code }));
+    await request(api => api.post('team/join', { code }), { timeoutMs: LOGIN_TIMEOUT_MS });
     this.tracker?.login();
   }
 
@@ -168,6 +176,10 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
 
   async importCompetitions(bundle: unknown): Promise<BundleImportResultDto> {
     return await request(api => api.post<BundleImportResultDto>('/team/admin/competitions/import', bundle));
+  }
+
+  async exportCompetitions(): Promise<object> {
+    return await request(api => api.get<object>('/team/admin/competitions/export'));
   }
 
   async getMatchState(matchId: string): Promise<MatchStateDto> {
