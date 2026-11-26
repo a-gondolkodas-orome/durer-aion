@@ -240,12 +240,11 @@ export class SocketIOButBotMoves extends SocketIO {
     // the turn is the bot's: a turn of several moves, and a bot that plays two
     // turns running, the opening position and then the first move.
     let current = state;
-    let movesThisTurn = 0;
-    while (isBotsTurn(current)) {
+    for (let moves = 0; isBotsTurn(current); moves++) {
       // A strategy that keeps naming moves that keep the turn would loop for
       // ever, and the match's queue with it.
-      if (movesThisTurn >= MAX_BOT_MOVES_PER_TURN) {
-        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${movesThisTurn} moves.`);
+      if (moves === MAX_BOT_MOVES) {
+        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${moves} moves.`);
         return;
       }
       const { action } = await bot.play(current, BOT_ID, metadata?.setupData);
@@ -268,15 +267,14 @@ export class SocketIOButBotMoves extends SocketIO {
           + `the match waits on the bot.`);
         return;
       }
-      const sameTurn = after.ctx.turn === current.ctx.turn && after.ctx.phase === current.ctx.phase;
-      movesThisTurn = sameTurn ? movesThisTurn + 1 : 0;
       current = after;
     }
   }
 }
 
-/** Generous: a turn of the games here is at most two moves. */
-const MAX_BOT_MOVES_PER_TURN = 20;
+/** How many moves one bot job may play. Generous: a turn of the games here is
+ *  at most two moves, and a job plays at most two turns. */
+const MAX_BOT_MOVES = 20;
 
 /** Whether the match waits on the bot, in a phase the bot plays in. */
 function isBotsTurn(state: State): boolean {

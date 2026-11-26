@@ -17,8 +17,6 @@ export type BotStrategy<T_SpecificGameState, T_Move> =
 /// reads its problems and answers from there.
 export type MatchBot = Bot & {
   play(state: State, playerID: string, setupData?: unknown): ReturnType<Bot['play']>;
-  /// The pause before each move, so the team sees what came before it land.
-  wait(): Promise<void>;
 };
 
 /// Wraps a strategy into a boardgame.io Bot class. The return type is spelled
