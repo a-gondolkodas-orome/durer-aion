@@ -331,6 +331,7 @@ járásával
 járhasson
 járhatnak
 járhatunk
+javítása
 jelölései
 jelöléssel
 jelölést

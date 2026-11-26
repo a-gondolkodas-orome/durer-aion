@@ -9,6 +9,10 @@ export interface ExerciseTaskProps {
   serial: number;
   availablePoints: number;
   pictureUrl: string | null;
+  /** The language of the words around the task, where it is not the page's:
+   *  the admin page, in Hungarian, shows a task as a team of another language
+   *  sees it. */
+  language?: string;
 }
 
 // Both sizes stretch small figures, at the cost of some blur: in the panel to
@@ -19,11 +23,11 @@ const enlargedImage: React.CSSProperties = { display: 'block', width: '100%', he
 export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: ExerciseTaskProps) => {
   const completestring = `<latex-js hyphenate="false">${props.task}
 </latex-js>`;
-  const { t } = useTranslation();
+  const { t } = useTranslation(undefined, props.language === undefined ? undefined : { lng: props.language });
   const [enlarged, setEnlarged] = useState(false);
   const close = () => setEnlarged(false);
   return <Stack>
-    <Trans sx={{ fontSize: '20px' }}
+    <Trans t={t} sx={{ fontSize: '20px' }}
       i18nKey='relay.task'
       values={{ num: props.serial, availablePoints: t('general.points', { count: props.availablePoints }) }}
       />

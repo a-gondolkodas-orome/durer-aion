@@ -153,7 +153,9 @@ touches the `Dockerfile`, nginx or the routes.
 ## Admin
 
 The admin pages are at `http://localhost/admin`, user `admin`, password from
-`.env.docker`; `/admin/<teamId>` opens one team directly.
+`.env.docker`; `/admin/<teamId>` opens one team directly, and
+`/admin/verseny/<competitionId>` one competition, with its relay's problems and
+answers, linked from the **Versenyek** tab.
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container and redirects the export it

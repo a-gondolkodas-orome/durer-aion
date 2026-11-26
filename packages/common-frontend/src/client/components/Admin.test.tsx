@@ -557,8 +557,10 @@ test('the competitions tab lists the competitions newest first, with what to imp
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect([...grids.columns].reverse().find(columns => columns.some(column => column.field === 'importAs'))
     ?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'storedIn', 'startWindow']);
+    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'storedIn', 'startWindow', 'open']);
   if (row === null) throw new Error('no table row');
+  expect(within(row).getByRole('link', { name: 'Megtekintés: 20 online C' }))
+    .toHaveAttribute('href', `/admin/verseny/${COMPETITION_C}`);
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
   expect(await screen.findByText('Vágólapra másolva: 20 online C')).toBeInTheDocument();

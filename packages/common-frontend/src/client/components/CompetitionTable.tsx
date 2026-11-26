@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Link, TextField } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
 import { Box, Stack } from '@mui/system';
@@ -12,7 +12,7 @@ import { useSetCompetitionWindow } from '../hooks/user-hooks';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { useErrorMessage } from '../utils/error-message';
 
-const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
+export const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
   online: 'internetes',
   local: 'helyi',
   final: 'döntő',
@@ -33,7 +33,7 @@ interface CompetitionRow {
   storedIn: string;
 }
 
-const STORED_IN: Record<CompetitionSummaryDto['storedIn'], string> = {
+export const STORED_IN: Record<CompetitionSummaryDto['storedIn'], string> = {
   code: 'kód',
   database: 'adatbázis',
 };
@@ -56,9 +56,15 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
+/// Where a competition's own page is (CompetitionPage.tsx): what `adminPath`
+/// in Main.tsx reads back.
+export function competitionPath(competitionId: string): string {
+  return `/admin/verseny/${encodeURIComponent(competitionId)}`;
+}
+
 /// What the admin page calls a competition: its name where it has one, else
 /// its label, else its id.
-export function competitionTitle({ id, metadata }: CompetitionSummaryDto): string {
+export function competitionTitle({ id, metadata }: Pick<CompetitionSummaryDto, 'id' | 'metadata'>): string {
   return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
 }
 
@@ -149,6 +155,16 @@ export function CompetitionTable(props: {
                   {windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}
                 </Box>
               </Stack>
+            ),
+          },
+          {
+            field: 'open',
+            headerName: '',
+            width: 120,
+            sortable: false,
+            // Its settings, relay and problems, answers included.
+            renderCell: ({ row }: { row: CompetitionRow }) => (
+              <Link href={competitionPath(row.id)} aria-label={`Megtekintés: ${row.importAs}`}>Megtekintés</Link>
             ),
           },
         ]}

@@ -8,6 +8,7 @@ import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
 import { CompetitionTable, competitionTitle } from './CompetitionTable';
+import { CompetitionPage } from './CompetitionPage';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -82,7 +83,12 @@ const panelProps = (panel: AdminTab, open: AdminTab) => ({
   sx: panel === open ? {} : { visibility: 'hidden', height: 0, overflow: 'hidden' },
 });
 
-export function Admin(props: { teamId?: string }) {
+export function Admin(props: { teamId?: string, competitionId?: string }) {
+  return props.competitionId === undefined ? <AdminTabs teamId={props.teamId}/>
+    : <CompetitionPage competitionId={props.competitionId}/>;
+}
+
+function AdminTabs(props: { teamId?: string }) {
   const errorMessage = useErrorMessage();
   const theme = useTheme();
   const getAll = useAll();

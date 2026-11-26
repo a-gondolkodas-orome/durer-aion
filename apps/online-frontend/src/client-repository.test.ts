@@ -234,6 +234,15 @@ describe("the admin routes", () => {
     expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/export" }]);
   });
 
+  test("a competition's own page is a GET by its id", async () => {
+    const calls = fakeAxios(() => Promise.resolve({ status: 200, data: { id: "aqvco71pta--csomag-teljes" } }));
+
+    expect(await new RealClientRepository().getCompetition("aqvco71pta--csomag-teljes"))
+      .toStrictEqual({ id: "aqvco71pta--csomag-teljes" });
+
+    expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/aqvco71pta--csomag-teljes" }]);
+  });
+
   test("a team's own start window is a PUT of the window as JSON", async () => {
     const calls = fakeAxios(ok);
     const window = { opensAt: "2026-11-21T15:00+01:00", closesAt: null };

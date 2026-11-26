@@ -1,5 +1,5 @@
 import type { AdminClientRepository, ClientRepository } from "./api-repository-interface";
-import type { BundleImportResultDto, CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { AdminCompetitionDto, BundleImportResultDto, CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
 // build the apps bundle.
@@ -93,6 +93,9 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
   }
   getCompetitions(): Promise<CompetitionSummaryDto[]> {
     return Promise.resolve([]);
+  }
+  getCompetition(_competitionId: string): Promise<AdminCompetitionDto> {
+    throw Error("NOT call this");
   }
   importTeams(_file: File): Promise<TeamImportResultDto> {
     throw Error("NOT call this");
