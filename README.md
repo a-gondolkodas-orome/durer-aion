@@ -567,10 +567,8 @@ carries the config's, so set it again on the other server.
    since the export does not check it either, or an id another bank holds.
 4. **Commit it** to the public repo once the round is over (§ *Competition
    secrecy*); before then, to the year's private one.
-5. **Before that build reaches the server, wipe its database.** This is a
-   standing limitation, not part of the method: a server whose database holds
-   an id its code holds too refuses to start, until #861 lets the database's
-   copy win. Removing a single competition from the database is #823.
+5. **Wipe the server's database before that build reaches it**: a server
+   refuses to start while its database holds an id its code holds (#861).
 
 # Debugging
 
