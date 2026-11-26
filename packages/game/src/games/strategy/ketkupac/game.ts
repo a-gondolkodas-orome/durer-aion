@@ -46,8 +46,8 @@ export function isLegalSelection(G: Position, ctx: Pick<Ctx, 'phase'>, pile: unk
   return isPlaying(G, ctx) && isPile(G, pile);
 }
 
-/// The second step, or the whole turn at once as the bot plays it: the chosen
-/// pile, if one is chosen, and as many tokens as the player may take.
+/// The second step, or the whole turn at once when no pile is chosen: the
+/// chosen pile, if one is chosen, and as many tokens as the player may take.
 export function isLegalTake(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer'>, pile: unknown, count: unknown): boolean {
   if (!isPlaying(G, ctx) || !isPile(G, pile)) return false;
   if (G.selectedPile != null && G.selectedPile !== pile) return false;
@@ -55,7 +55,9 @@ export function isLegalTake(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer
     && count >= 1 && count <= Math.min(maxTake(G, ctx.currentPlayer), G.piles[pile]);
 }
 
-/// Whole turns only: the bots play a turn as one move.
+/// Every take the player may make now, from the chosen pile once one is
+/// chosen: what the bot's strategy picks from. A take with no pile chosen is a
+/// whole turn; the strategy names the two steps instead, as a team plays them.
 export function possibleMoves(G: Position, ctx: Pick<Ctx, 'phase' | 'currentPlayer'>): { move: string; args: [number, number] }[] {
   return G.piles.flatMap((size, pile) =>
     Array.from({ length: Math.min(size, maxTake(G, ctx.currentPlayer)) }, (_, i) => ({ move: 'take', args: [pile, i + 1] as [number, number] })))

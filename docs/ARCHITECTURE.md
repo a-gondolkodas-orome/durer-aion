@@ -109,18 +109,34 @@ sequenceDiagram
     Note over T: second listener — stops here for getTime
     T->>Q: second listener
     Q->>S: re-read the match
-    alt bot's turn, in startNewGame or play
-        Q->>Bot: play(state), after 400 ms
-        Bot-->>Q: move
+    loop while it is the bot's turn, in startNewGame or play
+        Q->>Bot: play(state)
+        Note over Bot: 400 ms
+        Bot-->>Q: its next move
         Q->>S: Master.onUpdate with the bot's credentials
         Q-->>B: push the new state
     end
 ```
 
 The game package's `botwrapper.ts` turns a strategy function — `(state, botID, setupData) => [args, moveName]`
-— into a boardgame.io `Bot`. `args` of `undefined` means a random move from the
-game's `possibleMoves`, and every answer waits 400 ms so the team sees its own
-move land first. `hostedGames` (`games.ts`) lists each game beside its
+— into a boardgame.io `Bot`. boardgame.io asks a bot for one move at a time,
+and the strategy names the next move from the state it is handed, so a bot
+keeps nothing between asks and one serves every match. The server plays the
+bot's whole turn, asking again while the turn is the bot's, as one job on the
+match's queue; `Local` in the dry run asks again after each accepted move.
+Every move waits 400 ms, so the team sees what came before it land.
+
+Since a strategy reads nothing but the state, a backend restart or a dry-run
+reload halfway through the bot's turn costs nothing: the next ask continues the
+turn. A turn planned as a whole, like `20ocde`'s two X's, is planned again from
+the board as the turn found it, which the game keeps (`xsThisTurn`).
+
+**A bot move the game refuses stalls the match.** The server plays nothing in
+its place and logs the refused move (`socketio_botmoves.ts`): a refused move is
+a bug in the strategy, and a random move instead could hand a live game to the
+team unnoticed.
+
+`hostedGames` (`games.ts`) lists each game beside its
 bot, and `server.ts` builds both the game list and the bots from it.
 
 ## The two kinds of match

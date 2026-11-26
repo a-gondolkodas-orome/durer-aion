@@ -1,11 +1,16 @@
 import { State } from 'boardgame.io';
 import { Bot } from 'boardgame.io/ai';
 
-/// A strategy names the move to make, or `undefined` for a random one.
+/// A strategy names the bot's next move: its arguments and its name. The bot is
+/// asked again while the turn is still its own, so a turn of several moves is
+/// named one move at a time, each from the state the move before it made — and
+/// a strategy may be asked halfway through its own turn, by any host. A
+/// strategy that plays at random picks the move itself.
+///
 /// `setupData` is the match's setup data, which only the server has and hands
-/// on (see MatchBot); in the browser, `Local` calls a bot without it.
+/// on; in the browser, `Local` calls a bot without it.
 export type BotStrategy<T_SpecificGameState, T_Move> =
-  (state: State<T_SpecificGameState>, botID: string, setupData?: unknown) => [T_Move | undefined, string];
+  (state: State<T_SpecificGameState>, botID: string, setupData?: unknown) => [T_Move, string];
 
 /// A bot that is also handed the match's setup data, which boardgame.io keeps
 /// in the match's metadata, out of every client's reach: the relay's judge
@@ -29,21 +34,7 @@ export function botWrapper<T_SpecificGameState, T_Move>(
     async play(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): ReturnType<Bot['play']> {
       await this.wait();
       const [move, moveName] = botstrategy(state, playerID, setupData);
-      if (move === undefined) {
-        const possible_moves = this.enumerate(state.G, state.ctx, playerID);
-        const randomIndex = Math.floor(Math.random() * possible_moves.length);
-        return { action: possible_moves[randomIndex] };
-      }
-      return {
-        action: {
-          type: 'MAKE_MOVE',
-          payload: {
-            type: moveName,
-            args: move,
-            playerID
-          },
-        },
-      };
+      return { action: { type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } } };
     }
   }
   return _Bot;

@@ -8,8 +8,8 @@ import type { State } from "boardgame.io";
 import type { GameStateMixin } from "../../common/types";
 import type { StrategyGameKey, StrategyGameStates } from "./strategy-games";
 
-/// A game's bot: its move, or its opening position, as a move's arguments and
-/// name.
+/// A game's bot: its next move, or its opening position, as a move's arguments
+/// and name.
 export type StrategyBot<G> = (state: State<G & GameStateMixin>, botID: string) => [unknown, string];
 
 export const StrategyWrappers: { [K in StrategyGameKey]: () => StrategyBot<StrategyGameStates[K]> } = {

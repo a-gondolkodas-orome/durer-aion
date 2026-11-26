@@ -3,8 +3,7 @@
 // root package.json's `overrides` block is what makes them one install, and
 // socketio_transport.test.ts fails if they split (#461).
 import type IOTypes from 'socket.io';
-import type { Game, PlayerID, Server, State, StorageAPI } from "boardgame.io";
-import type { Bot } from "boardgame.io/ai";
+import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
@@ -21,25 +20,6 @@ type MasterTransport = ConstructorParameters<typeof Master>[2];
 type IntermediateTransportData = Parameters<MasterTransport['sendAll']>[0];
 type TransportData = ReturnType<ReturnType<typeof getFilterPlayerView>>;
 type SocketOpts = NonNullable<ConstructorParameters<typeof SocketIO>[0]>;
-
-/** Copied from boardgame.io/dist/src/client/transport/local.ts */
-function GetBotPlayer(state: State, bots: Record<PlayerID, Bot>) {
-  if (state.ctx.gameover !== undefined) {
-    return null;
-  }
-
-  if (state.ctx.activePlayers) {
-    for (const key of Object.keys(bots)) {
-      if (key in state.ctx.activePlayers) {
-        return key;
-      }
-    }
-  } else if (state.ctx.currentPlayer in bots) {
-    return state.ctx.currentPlayer;
-  }
-
-  return null;
-}
 
 /** Copied from boardgame.io/dist/src/server/transport.ts. The `Type` enum the
  *  comparison needs is not exported, so the sync value is read off the `Sync`
@@ -253,44 +233,59 @@ export class SocketIOButBotMoves extends SocketIO {
   ): Promise<void> {
     // The metadata too: the relay's judge reads its problems from the setup data.
     const { state, metadata } = await fetch(db, matchID, { state: true, metadata: true } as const);
-    if (state === undefined) {
+    // Not a real action, possibly a failed move.
+    if (state === undefined || !isBotsTurn(state)) {
       return;
     }
-    if (currentPlayer(state.ctx) !== BOT_ID) {
-      // Not a real action, possibly a failed move.
-      return;
-    }
-    if (state.ctx.gameover) {
-      return;
-    }
-    const botPlayer = GetBotPlayer(state, { [BOT_ID]: bot });
-    if (botPlayer === null) {
-      // Only reachable with ctx.gameover set to something falsy, which
-      // the check above lets through and which no game here produces.
-      return;
-    }
-    if (state.ctx.phase !== PHASE.play && state.ctx.phase !== PHASE.startNewGame) {
-      return;
-    }
-    const botAction = await bot.play(state, botPlayer, metadata?.setupData);
-
     const master = new Master(
       game,
       db,
       TransportAPI(matchID, null, getFilterPlayerView(game), this.pubSub),
       auth
     );
-    await master.onUpdate(
-      {
-        type: "MAKE_MOVE",
-        payload: {
-          ...botAction.action.payload,
-          credentials: getBotCredentials(),
-        },
-      },
-      state._stateID,
-      matchID,
-      BOT_ID
-    );
+
+    // The bot's whole turn, each move stored and pushed on its own, as long as
+    // the turn is the bot's: a turn of several moves, and a bot that plays two
+    // turns running, the opening position and then the first move.
+    let current = state;
+    for (let moves = 0; isBotsTurn(current); moves++) {
+      // A strategy that keeps naming moves that keep the turn would loop for
+      // ever, and the match's queue with it.
+      if (moves === MAX_BOT_MOVES) {
+        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${moves} moves.`);
+        return;
+      }
+      const { action } = await bot.play(current, BOT_ID, metadata?.setupData);
+      await master.onUpdate(
+        { ...action, payload: { ...action.payload, credentials: getBotCredentials() } },
+        current._stateID,
+        matchID,
+        BOT_ID
+      );
+      const { state: after } = await fetch(db, matchID, { state: true } as const);
+      if (after === undefined) return;
+      // Whether the move was taken is read off the state ID alone, which
+      // holds because every write of a match runs on its queue, and this
+      // whole turn is one job on it. A write from outside the queue that
+      // landed in the bot's pause would look exactly like its move (#655).
+      if (after._stateID === current._stateID) {
+        // Nothing is played in its place: docs/ARCHITECTURE.md says why.
+        console.error(`The bot of match ${JSON.stringify(matchID)} named `
+          + `${action.payload.type}(${JSON.stringify(action.payload.args ?? [])}), which the game refused; `
+          + `the match waits on the bot.`);
+        return;
+      }
+      current = after;
+    }
   }
+}
+
+/** How many moves one bot job may play. Generous: a turn of the games here is
+ *  at most two moves, and a job plays at most two turns. */
+const MAX_BOT_MOVES = 20;
+
+/** Whether the match waits on the bot, in a phase the bot plays in. */
+function isBotsTurn(state: State): boolean {
+  return !state.ctx.gameover && currentPlayer(state.ctx) === BOT_ID
+    && (state.ctx.phase === PHASE.play || state.ctx.phase === PHASE.startNewGame);
 }

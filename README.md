@@ -596,7 +596,8 @@ that before a competition.
    (`reference.ts`), are the examples: `sablon/` is the one to copy, the
    least a game needs, in two languages, with an opening the bot draws;
    `ketkupac/` adds a turn of two steps, named roles and a step description.
-   `20ocde/` is a game a round was held with. Each holds
+   `20ocde/` is a game a round was held with, whose bot plans its turn of two
+   X's as a whole and names them one at a time. Each holds
 
    - `game.ts` — the boardgame.io game definition
    - `strategy.ts` — the server bot, plus any lookup tables it imports
@@ -637,17 +638,20 @@ the clock, the test/live choice, choosing who starts, tries and score.
     `events.endTurn()`. Each live game also scores the sub-game in its move
     (#459); `recordWinner` (`packages/game/src/common/types.ts`) does both,
     and says when the match is won
-  - `possibleMoves`, every legal move, from which the bot picks at random
+  - `possibleMoves`, every legal move: what a strategy picks from, and boardgame.io's
+    `ai.enumerate`
   - optionally `turn`, boardgame.io's turn hooks. Not for the end of time:
     in the play phase `gameWrapper` ends a match on the first move past it
 
   A move takes as many arguments as you give it: `moves.changeCoins(K, L)` for
   a "pick two values, then commit" turn.
 - **`strategy.ts`** exports `strategyWrapper(variant)`, returning
-  `(state, botID) => [args, moveName]`. In the `startNewGame` phase it answers
+  `(state, botID) => [args, moveName]`: the bot's next move. The bot is asked
+  again while the turn is its own, so a turn of several moves is named one move
+  at a time, from the state as it is — which may be halfway through the bot's
+  own turn (`BotStrategy` in `botwrapper.ts`). In the `startNewGame` phase it answers
   with `startingPositionMove(position)` — the bot is the only source of the
-  opening position, which may name the game's own keys only. `[undefined, moveName]`
-  makes the bot play a random move from `possibleMoves`.
+  opening position, which may name the game's own keys only.
 - **`board.tsx`** exports `MyBoard`, which takes boardgame.io's `BoardProps` and
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`

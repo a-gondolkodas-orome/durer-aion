@@ -5,7 +5,7 @@ import { BOARD_SIZE, markForPlayer, possibleMoves, startingPosition } from './ga
 import type { Category, MyGameState } from './game';
 
 type GameState = State<MyGameState & GameStateMixin>;
-type StrategyResult = [[number[]] | [MyGameState], string];
+type StrategyResult = [[number] | [MyGameState], string];
 
 export function randomStrategy(state: GameState): StrategyResult {
   const moves = possibleMoves(state.G, state.ctx);
@@ -16,7 +16,7 @@ export function randomStrategy(state: GameState): StrategyResult {
 
 export function winningStrategyForO(state: GameState): StrategyResult {
   const moves = possibleMoves(state.G, state.ctx);
-  const winningMoves = moves.filter(({ args: [[index]] }) => {
+  const winningMoves = moves.filter(({ args: [index] }) => {
     const cells = [...state.G.cells];
     cells[index] = 'O';
     return solveOPosition(boardToOPosition(cells), false);
@@ -1168,7 +1168,7 @@ function fallbackStrategyForO(state: GameState): StrategyResult {
   // A line containing O is already blocked, regardless of its number of Xs.
   const uncoveredLines = lines.filter(line => line.every(index => state.G.cells[index] !== 'O'));
   const pairPriorities = [[2, 2], [2, 1], [1, 1], [2, 0], [1, 0], [0, 0]];
-  const priorities = moves.map(({ args: [[index]] }) => {
+  const priorities = moves.map(({ args: [index] }) => {
     const counts = uncoveredLines.filter(line => line.includes(index))
       .map(line => line.filter(cell => state.G.cells[cell] === 'X').length)
       .sort((a, b) => b - a);
@@ -1193,30 +1193,53 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => [
   Array.from({ length: BOARD_SIZE }, (_, j) => j * BOARD_SIZE + i),
 ]).flat();
 
+/// The X player's next X, one of the two its turn plans. The plan is made
+/// from the board as the turn found it, with this turn's X's taken back off:
+/// it depends on the board's X count, which is even only where a turn starts.
+/// So the second X is the rest of the plan the first was part of, whoever asks.
 export function winningStrategyForX(state: GameState): StrategyResult {
-  const { cells } = state.G;
+  const placed = state.G.xsThisTurn ?? [];
+  const before = state.G.cells.map((cell, index) => placed.includes(index) ? null : cell);
+  for (const turn of xTurns(before)) {
+    const next = turn.find(index => !placed.includes(index));
+    if (next !== undefined && placed.every(index => turn.includes(index))) return [[next], 'placeMark'];
+  }
+  // Positions outside this opening sequence still need a legal move.
+  return randomStrategy(state);
+}
+
+function shuffled<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/// The X player's turns from these cells, best first, each as the cells of its
+/// X's. Empty where the opening sequence below has nothing to say.
+function* xTurns(cells: MyGameState['cells']): Generator<number[]> {
   const countX = (indices: number[]) => indices.filter(index => cells[index] === 'X').length;
   const empty = (indices: number[]) => indices.filter(index => cells[index] === null);
   const clearLines = lines.filter(line => line.every(index => cells[index] !== 'O'));
   const numberOfX = cells.filter(cell => cell === 'X').length;
-  const place = (indices: number[]): StrategyResult => [[indices], 'placeMarks'];
 
-  // Take an immediate win before building the next shape.
-  for (const line of clearLines) {
-    const remaining = empty(line);
-    if (remaining.length > 0 && remaining.length <= 2) return place(remaining);
-  }
+  // Take an immediate win before building the next shape, with one X where
+  // one does: a first X that wins already leaves the second unplayed.
+  const wins = clearLines.map(empty).filter(remaining => remaining.length > 0 && remaining.length <= 2)
+    .sort((a, b) => a.length - b.length);
+  yield* wins;
 
   if (numberOfX === 0) {
     // Both Xs, and the opening O when present, occupy distinct rows and columns.
-    const openings = possibleMoves(state.G, state.ctx).filter(({ args: [indices] }) => {
-      const occupied = [...indices, ...cells.flatMap((cell, index) => cell === 'O' ? [index] : [])];
-      return new Set(occupied.map(index => Math.floor(index / BOARD_SIZE))).size === occupied.length
-        && new Set(occupied.map(index => index % BOARD_SIZE)).size === occupied.length;
-    });
-    if (openings.length > 0) {
-      const selected = openings[Math.floor(Math.random() * openings.length)];
-      return [selected.args, selected.move];
+    const os = cells.flatMap((cell, index) => cell === 'O' ? [index] : []);
+    const free = (index: number, taken: number[]) => cells[index] === null && taken.every(other =>
+      Math.floor(other / BOARD_SIZE) !== Math.floor(index / BOARD_SIZE) && other % BOARD_SIZE !== index % BOARD_SIZE);
+    for (const first of shuffled(cells.flatMap((_, index) => free(index, os) ? [index] : []))) {
+      for (const second of shuffled(cells.flatMap((_, index) => free(index, [...os, first]) ? [index] : []))) {
+        yield [first, second];
+      }
     }
   }
 
@@ -1231,7 +1254,7 @@ export function winningStrategyForX(state: GameState): StrategyResult {
         if (corner === undefined || cells[corner] !== null) continue;
         const tip = main.find(index => index !== corner && cells[index] === null
           && clearLines.some(line => line !== main && line.includes(index)));
-        if (tip !== undefined) return place([corner, tip]);
+        if (tip !== undefined) yield [corner, tip];
       }
     }
   }
@@ -1250,7 +1273,7 @@ export function winningStrategyForX(state: GameState): StrategyResult {
             const first = stem.find(index => opposite.includes(index));
             const second = side.find(index => opposite.includes(index));
             if (first !== undefined && second !== undefined && first !== second
-              && cells[first] === null && cells[second] === null) return place([first, second]);
+              && cells[first] === null && cells[second] === null) yield [first, second];
           }
         }
       }
@@ -1265,14 +1288,11 @@ export function winningStrategyForX(state: GameState): StrategyResult {
       for (const second of pairs) {
         const corner = first.find(index => second.includes(index));
         if (first !== second && corner !== undefined && cells[corner] === 'X') {
-          return place([empty(first)[0], empty(second)[0]]);
+          yield [empty(first)[0], empty(second)[0]];
         }
       }
     }
   }
-
-  // Positions outside this opening sequence still need a legal move.
-  return randomStrategy(state);
 }
 
 export function winningStrategy(state: GameState): StrategyResult {
