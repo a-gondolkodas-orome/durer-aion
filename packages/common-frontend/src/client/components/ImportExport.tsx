@@ -5,11 +5,14 @@ import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { TeamImportResultDto, TeamModelDto } from '../dto/TeamStateDto';
 import { useImportTeams } from '../hooks/user-hooks';
-import { downloadTsv } from '../utils/download';
+import { download } from '../utils/download';
 import { InfoTip } from './InfoTip';
 import { CompetitionImport } from './CompetitionImport';
+import { CompetitionExport } from './CompetitionExport';
 import { joinCodesFileName, teamTsvRow, teamsTsv } from '../utils/team-tsv';
 import { useErrorMessage } from '../utils/error-message';
+
+const TSV = 'text/tab-separated-values';
 
 function summary(result: TeamImportResultDto): string {
   const updated = result.updated > 0 ? ` (${result.updated} frissült)` : '';
@@ -23,7 +26,8 @@ function summary(result: TeamImportResultDto): string {
 /// competition, so one file can fill the C, D and E competitions of a round at
 /// once; the Versenyek tab says what to write for each. The export is every
 /// team with its join code and credentials, in the import's own format: the one
-/// download on the admin page that carries a login secret.
+/// download on the admin page that carries a login secret. Below them, the
+/// competitions' own import and export, a bundle file each way.
 export function ImportExport(props: {
   teams: TeamModelDto[], onImported: () => void, onOpenCompetitions: () => void,
   onCompetitionsImported: () => void,
@@ -96,7 +100,7 @@ export function ImportExport(props: {
               {busy ? 'Importálás…' : 'Importálás indítása'}
             </Button>
             {codes.length > 0 && (
-              <Button variant="contained" color="primary" onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(codes)); }}>
+              <Button variant="contained" color="primary" onClick={() => { download(joinCodesFileName(), teamsTsv(codes), TSV); }}>
                 Az importáltak belépőkódjainak letöltése
               </Button>
             )}
@@ -136,14 +140,21 @@ export function ImportExport(props: {
               variant="outlined"
               color="primary"
               disabled={props.teams.length === 0}
-              onClick={() => { downloadTsv(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow))); }}
+              onClick={() => { download(joinCodesFileName(), teamsTsv(props.teams.map(teamTsvRow)), TSV); }}
             >
               {`Mind a(z) ${props.teams.length} csapat letöltése belépőkódokkal`}
             </Button>
           </Stack>
         </Stack>
       </Stack>
-      <CompetitionImport onImported={props.onCompetitionsImported}/>
+      <Stack sx={{ flexDirection: { xs: 'column', md: 'row' }, gap: '32px' }}>
+        <Stack sx={{ flex: '1 1 0', minWidth: 0 }}>
+          <CompetitionImport onImported={props.onCompetitionsImported}/>
+        </Stack>
+        <Stack sx={{ flex: '1 1 0', minWidth: 0 }}>
+          <CompetitionExport/>
+        </Stack>
+      </Stack>
     </Stack>
   );
 }

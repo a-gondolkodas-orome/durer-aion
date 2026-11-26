@@ -198,6 +198,11 @@ export const useImportCompetitions = () => {
   return async (bundle: unknown) => await repo.importCompetitions(bundle);
 };
 
+export const useExportCompetitions = () => {
+  const repo = useAdminRepo();
+  return async () => await repo.exportCompetitions();
+};
+
 export const useCompetitions = () => {
   const repo = useAdminRepo();
   return async () => await repo.getCompetitions();

@@ -4,7 +4,7 @@ import requests
 from getpass import getpass
 from requests.auth import HTTPBasicAuth
 import json
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 import unicodedata
 from tqdm import tqdm
@@ -182,6 +182,25 @@ def export_results_tsv(team_states_dict, relay_states, strategy_states):
         ] + detailed + [""] * (relay_columns - len(detailed))) + "\n")
     print(f"Results of {len(codes)} teams of {competition_title(competition_id)} written to {results_path}")
 export_results_tsv(team_states_dict, relay_states, strategy_states)
+
+# %%
+def export_bundle():
+  """
+    Saves every competition and problem the database holds, so that they can
+    go back into code after the database is wiped (README § In the database,
+    and back into code). All of them, whatever DURER_COMPETITIONS names: two
+    bundles that share a stored problem would clash on import.
+  """
+  response = requests.get(BASE_URL + '/team/admin/competitions/export', auth=HTTPBasicAuth('admin', ADMIN_PASSWORD))
+  response.raise_for_status()
+  bundle = response.json()
+  # A run's own name, so that a later run does not write over it; the Import/export
+  # tab names its file the same way.
+  bundle_path = OUTPUT_DIR / f"durer-competitions-{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H-%M-%S')}.json"
+  with open(bundle_path, 'w', encoding='utf-8') as f:
+    json.dump(bundle, f, ensure_ascii=False, indent=2)
+  print(f"{len(bundle['competitions'])} competitions and {len(bundle['problems'])} problems written to {bundle_path}")
+export_bundle()
 
 # %%
 # def add_minutes(minutes:int,type:str, user:str, passwd:str, baseurl:str = 'http://localhost:8000'):

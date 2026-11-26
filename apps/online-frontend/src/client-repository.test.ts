@@ -226,6 +226,14 @@ describe("the admin routes", () => {
     expect(calls).toStrictEqual([{ method: "post", url: "/team/admin/competitions/import", body: bundle }]);
   });
 
+  test("a competition export is a GET", async () => {
+    const calls = fakeAxios(() => Promise.resolve({ status: 200, data: { format: "durer-competitions" } }));
+
+    expect(await new RealClientRepository().exportCompetitions()).toStrictEqual({ format: "durer-competitions" });
+
+    expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/export" }]);
+  });
+
   test("a team's own start window is a PUT of the window as JSON", async () => {
     const calls = fakeAxios(ok);
     const window = { opensAt: "2026-11-21T15:00+01:00", closesAt: null };

@@ -1,5 +1,5 @@
 import { strategyGames } from 'game';
-import type { Registry } from 'problem-bank';
+import type { Bundle, Registry } from 'problem-bank';
 import {
   combinedCompetitionSource,
   combinedProblemSource,
@@ -166,4 +166,21 @@ export async function importBundle(
     await CompetitionModel.bulkCreate(rows(bundle.competitions), { transaction });
     return { written: true, competitions: competitionIds, problems: problemIds, errors: [] };
   });
+}
+
+/** The bundle of every competition and problem the database holds, as they
+ *  are stored: the relays' problems held in code it refers to. Nothing is
+ *  validated, so that a stored competition the rules have since come to
+ *  refuse can still be taken out and mended; the import validates it. All of
+ *  it at once, since two bundles that share a stored problem would clash on
+ *  import. */
+export async function exportBundle(): Promise<Bundle> {
+  const competitions = await CompetitionModel.findAll({ order: [['id', 'ASC']] });
+  const problems = await ProblemModel.findAll({ order: [['id', 'ASC']] });
+  return {
+    format: 'durer-competitions',
+    version: 1,
+    competitions: Object.fromEntries(competitions.map(({ id, body }) => [id, body])),
+    problems: Object.fromEntries(problems.map(({ id, body }) => [id, body])),
+  };
 }

@@ -567,6 +567,26 @@ test('the competitions tab lists the competitions newest first, with what to imp
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith(COMPETITION_C); });
 });
 
+test('the import/export tab exports what the database holds as one bundle file', async () => {
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
+  ]);
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  const bundle = { format: 'durer-competitions', version: 1, competitions: {}, problems: { 'nnnnnnnnnn--magaban': { answer: 1 } } };
+  const exportCompetitions = vi.spyOn(repo, 'exportCompetitions').mockResolvedValue(bundle);
+  const saved = savedDownloads();
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Import/export' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Versenyek exportálása' }));
+
+  await waitFor(() => { expect(saved).toHaveLength(1); });
+  expect(exportCompetitions).toHaveBeenCalledWith();
+  expect(JSON.parse(saved[0])).toEqual(bundle);
+  expect(vi.mocked(HTMLAnchorElement.prototype.click).mock.contexts[0])
+    .toHaveProperty('download', expect.stringMatching(/^durer-competitions-\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d\.json$/));
+});
+
 // The import's help names the tab with what its Competition column takes.
 test('the import tab links to the competitions tab', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);

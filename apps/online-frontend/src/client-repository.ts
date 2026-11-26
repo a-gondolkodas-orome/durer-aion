@@ -178,6 +178,10 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return await request(api => api.post<BundleImportResultDto>('/team/admin/competitions/import', bundle));
   }
 
+  async exportCompetitions(): Promise<object> {
+    return await request(api => api.get<object>('/team/admin/competitions/export'));
+  }
+
   async getMatchState(matchId: string): Promise<MatchStateDto> {
     const url = urlcat('/game/admin/:matchId/state', { matchId });
     return await request(api => api.get<MatchStateDto>(url));
