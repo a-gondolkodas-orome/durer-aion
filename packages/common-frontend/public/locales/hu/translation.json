@@ -181,6 +181,23 @@
       "unanswered": "nincs válasz"
     }
   },
+  "rounds": {
+    "label": "Fordulók",
+    "title": "A verseny két fordulóból áll",
+    "short": {
+      "relay": "Váltó",
+      "strategy": "Stratégia"
+    },
+    "now": "most",
+    "notStarted": "még hátra",
+    "finishedPoints": "kész · {{points}}",
+    "hint": {
+      "relayLeft": "Ha itt végeztetek, a váltót a kezdőlapról indíthatjátok.",
+      "strategyLeft": "Ha itt végeztetek, a stratégiás játékot a kezdőlapról indíthatjátok.",
+      "last": "Ez az utolsó fordulótok. A végeredmény a két forduló pontjainak összege.",
+      "total": "A végeredmény a két forduló pontjainak összege."
+    }
+  },
   "strategy": {
     "endTable": {
       "lost": "Vereség",

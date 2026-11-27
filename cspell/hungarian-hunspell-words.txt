@@ -80,7 +80,6 @@ beszínezve
 beszúrni
 betartásával
 Betöltés
-betöltése
 beválthatjuk
 beváltotok
 bevezetett
@@ -321,6 +320,7 @@ húzhatunk
 importálása
 indítása
 indíthatja
+indíthatjátok
 indulása
 írhattunk
 írhatunk

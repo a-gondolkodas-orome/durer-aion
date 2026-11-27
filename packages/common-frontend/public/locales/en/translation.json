@@ -185,6 +185,23 @@
       "unanswered": "no answer"
     }
   },
+  "rounds": {
+    "label": "Rounds",
+    "title": "The competition has two rounds",
+    "short": {
+      "relay": "Relay",
+      "strategy": "Strategy"
+    },
+    "now": "now",
+    "notStarted": "still to play",
+    "finishedPoints": "done · {{points}}",
+    "hint": {
+      "relayLeft": "When you are done here, start the relay from the home page.",
+      "strategyLeft": "When you are done here, start the strategy game from the home page.",
+      "last": "This is your last round. Your final score is the sum of both rounds.",
+      "total": "Your final score is the sum of both rounds."
+    }
+  },
   "strategy": {
     "endTable": {
       "lost": "Loss",
