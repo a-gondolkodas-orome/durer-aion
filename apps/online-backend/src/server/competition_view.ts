@@ -1,3 +1,4 @@
+import { strategyGames } from 'game/strategy';
 import type { CompetitionConfig, CompetitionId, CompetitionMetadata, Problem, ProblemId, StartWindow } from 'schemas';
 
 // What the admin page is served of competitions: the Versenyek tab's row of
@@ -65,6 +66,8 @@ export interface AdminRelayProblem {
 export interface AdminCompetitionView extends CompetitionSummary {
   competition: CompetitionConfig;
   relayProblems: AdminRelayProblem[];
+  /** Every strategy game a competition can name: what the edit form offers. */
+  strategyGameIds: string[];
 }
 
 export function adminCompetitionView(
@@ -77,6 +80,7 @@ export function adminCompetitionView(
   return {
     ...summary,
     competition,
+    strategyGameIds: Object.keys(strategyGames),
     relayProblems: (competition.relay?.problems ?? []).map(({ problemId, points }) => {
       // The source validates a competition as it reads it, and the validator
       // refuses a relay referring to a problem no one holds.

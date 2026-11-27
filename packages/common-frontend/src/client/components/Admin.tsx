@@ -9,6 +9,7 @@ import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
 import { CompetitionPageLink, CompetitionTable, competitionTitle } from './CompetitionTable';
 import { CompetitionPage } from './CompetitionPage';
+import { CompetitionEditPage } from './CompetitionEditPage';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -83,8 +84,9 @@ const panelProps = (panel: AdminTab, open: AdminTab) => ({
   sx: panel === open ? {} : { visibility: 'hidden', height: 0, overflow: 'hidden' },
 });
 
-export function Admin(props: { teamId?: string, competitionId?: string }) {
-  return props.competitionId === undefined ? <AdminTabs teamId={props.teamId}/>
+export function Admin(props: { teamId?: string, competitionId?: string, edit?: true }) {
+  if (props.competitionId === undefined) return <AdminTabs teamId={props.teamId}/>;
+  return props.edit ? <CompetitionEditPage competitionId={props.competitionId}/>
     : <CompetitionPage competitionId={props.competitionId}/>;
 }
 

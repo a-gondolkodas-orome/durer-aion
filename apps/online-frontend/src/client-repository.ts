@@ -1,7 +1,8 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance } from 'axios';
 import { I18nError, apiRefusal } from "common-frontend/core";
-import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, AdminCompetitionDto } from "common-frontend";
+import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, AdminCompetitionDto, CompetitionWriteResultDto } from "common-frontend";
+import type { CompetitionConfig } from "schemas";
 import type { Tracker } from "./tracking";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
@@ -163,6 +164,11 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async getCompetition(competitionId: string): Promise<AdminCompetitionDto> {
     const url = urlcat('/team/admin/competitions/:competitionId', { competitionId });
     return await request(api => api.get<AdminCompetitionDto>(url));
+  }
+
+  async saveCompetition(competition: CompetitionConfig, { dryRun }: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
+    const url = urlcat('/team/admin/competitions/:competitionId', { competitionId: competition.id, ...(dryRun && { dryRun: 1 }) });
+    return await request(api => api.put<CompetitionWriteResultDto>(url, { competition }));
   }
 
   async setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void> {

@@ -1,6 +1,7 @@
 import { UserModel } from "./user-model";
 import { currentTeamState, setTeamState, useTeamStateValue } from "./team-state-store";
 import { TeamModelDto } from "../dto/TeamStateDto";
+import type { CompetitionConfig } from "schemas";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { useAdminRepo, useClientRepo } from "../client-repo-context";
@@ -211,6 +212,12 @@ export const useCompetitions = () => {
 export const useCompetition = () => {
   const repo = useAdminRepo();
   return async (competitionId: string) => await repo.getCompetition(competitionId);
+};
+
+export const useSaveCompetition = () => {
+  const repo = useAdminRepo();
+  return async (competition: CompetitionConfig, options: { dryRun: boolean }) =>
+    await repo.saveCompetition(competition, options);
 };
 
 export const useSetCompetitionWindow = () => {

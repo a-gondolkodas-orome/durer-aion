@@ -50,6 +50,7 @@ const competition: AdminCompetitionDto = {
       ],
     },
   ],
+  strategyGameIds: ['minta-ketkupac'],
 };
 
 let repo: MockClientRepository;
@@ -135,4 +136,16 @@ test('says so when the server has no such competition', async () => {
 
   expect(await screen.findByRole('alert')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Versenyek' })).toHaveAttribute('href', '/admin?tab=versenyek');
+});
+
+test('links a database competition to its edit page, and not one held in code', async () => {
+  renderPage();
+  expect(await screen.findByRole('link', { name: 'Szerkesztés' })).toHaveAttribute('href', `/admin/verseny/${ID}/edit`);
+});
+
+test('offers no edit page for a competition held in code', async () => {
+  vi.spyOn(repo, 'getCompetition').mockResolvedValue({ ...competition, storedIn: 'code' });
+  renderPage();
+  await screen.findByRole('heading', { name: '21 online C' });
+  expect(screen.queryByRole('link', { name: 'Szerkesztés' })).not.toBeInTheDocument();
 });

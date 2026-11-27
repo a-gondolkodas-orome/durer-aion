@@ -411,10 +411,79 @@ paths:
                                 description: 1-based, in play order
                               points:
                                 type: integer
+                  strategyGameIds:
+                    type: array
+                    description: Every strategy game a competition can name, for the edit form to offer
+                    items:
+                      type: string
         "401":
           description: Not an organiser
         "404":
           description: No competition with this id
+    put:
+      summary: Replace a competition held in the database, or, with dryRun, say what that would do
+      description: >
+        The body is the competition whole, its id unchanged. It is written only
+        if it keeps the validator's rules and, once a team of it has started a
+        match, the locks: no language taken away, no match added or taken away,
+        and the relay's problems, their order and points as they are. The
+        answer is the report either way; the messages are Hungarian.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: competitionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: dryRun
+        in: query
+        required: false
+        description: "1: write nothing, answer what the write would do"
+        schema:
+          type: string
+          enum: ["1"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                competition:
+                  type: object
+                  description: The competition's config, as `CompetitionConfig` types it
+      responses:
+        "200":
+          description: The report, written or not
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  written:
+                    type: boolean
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                  started:
+                    type: boolean
+                    description: Whether a team of the competition has started a match, which the locks follow
+        "401":
+          description: Not an organiser
+        "403":
+          description: The competition is held in code (COMPETITION_IN_CODE)
+        "404":
+          description: No competition with this id
+        "415":
+          description: The body is not JSON
   /team/admin/competitions/{competitionId}/start-window:
     put:
       summary: Set a competition's start window in place of its config's, or return it to its config's
@@ -718,6 +787,7 @@ components:
             - COMPETITION_OVER
             - VIEW_NOT_ALLOWED
             - MATCH_IN_PROGRESS
+            - COMPETITION_IN_CODE
             - UNKNOWN_JOIN_CODE
             - TEAM_NOT_FOUND
             - MATCH_NOT_FOUND

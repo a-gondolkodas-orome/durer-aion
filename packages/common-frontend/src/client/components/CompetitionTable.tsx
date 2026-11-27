@@ -63,6 +63,11 @@ export function competitionPath(competitionId: string): string {
   return `/admin/verseny/${encodeURIComponent(competitionId)}`;
 }
 
+/// Where a database competition's edit page is (CompetitionEditPage.tsx).
+export function competitionEditPath(competitionId: string): string {
+  return `${competitionPath(competitionId)}/edit`;
+}
+
 /// An eye icon opening the competition's own page.
 export function CompetitionPageLink(props: { id: string, title: string }) {
   return (

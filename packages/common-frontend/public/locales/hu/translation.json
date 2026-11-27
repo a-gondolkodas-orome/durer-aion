@@ -48,6 +48,7 @@
   },
   "error": {
     "competitionNotFound": "Nincs ilyen verseny.",
+    "competitionInCode": "A kódban tárolt verseny csak telepítéssel változik.",
     "competitionNotStarted": "A verseny még nem kezdődött el.",
     "competitionOver": "A versenybe már nem lehet belekezdeni.",
     "fileTooLarge": "A fájl túl nagy.",

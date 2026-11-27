@@ -26,10 +26,14 @@ import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenL
 const Admin = React.lazy(() => import("./Admin").then(module => ({ default: module.Admin })));
 
 /// What an admin path opens: `/admin/verseny/<id>` a competition's page,
-/// `/admin/<teamId>` a team's, anything else the tabs.
-export function adminPath(pathname: string): { teamId?: string, competitionId?: string } {
-  const [, , first, second] = pathname.split('/');
-  if (first === 'verseny') return second ? { competitionId: decodeURIComponent(second) } : {};
+/// `/admin/verseny/<id>/edit` its edit page, `/admin/<teamId>` a team's,
+/// anything else the tabs.
+export function adminPath(pathname: string): { teamId?: string, competitionId?: string, edit?: true } {
+  const [, , first, second, third] = pathname.split('/');
+  if (first === 'verseny') {
+    if (!second) return {};
+    return { competitionId: decodeURIComponent(second), ...(third === 'edit' && { edit: true }) };
+  }
   return first ? { teamId: first } : {};
 }
 

@@ -18,6 +18,7 @@ import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
+import { writeCompetition } from './competition_edit';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
 import { adminCompetitionView, competitionSummary, problemUses } from './competition_view';
@@ -324,6 +325,25 @@ export function configureTeamsRouter(
     const summary = competitionSummary(competition, await teams.competitionWindows(), sources.competitions);
     ctx.body = adminCompetitionView(summary, competition, await problems.getProblems(problemIds), sources.problems,
       problemUses(await competitions.listCompetitions()));
+  });
+
+  /**
+   * Replace a competition held in the database: the body is `{ competition }`,
+   * the competition whole, its id the same. Written only if it keeps the rules
+   * and, once a team of it has started a match, the locks (`lockErrors`); the
+   * answer is the report either way, as the bundle import's is. `?dryRun=1`
+   * writes nothing and answers what would happen. One held in code changes
+   * only with a deploy, its start window aside.
+   *
+   * @param {string} competitionId - The id of the competition.
+   */
+  router.put("/team/admin/competitions/:competitionId", adminAuth, requireJson, koaBody(), async (ctx) => {
+    const { competitionId } = ctx.params;
+    if (sources.competitions.has(competitionId)) {
+      refuse(ctx, 403, "COMPETITION_IN_CODE", `The competition ${competitionId} is held in code.`);
+    }
+    ctx.body = await writeCompetition(teams, competitionId, ctx.request.body, sources, { dryRun: ctx.query.dryRun === "1" })
+      ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
   });
 
   /**

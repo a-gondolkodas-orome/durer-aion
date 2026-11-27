@@ -1,4 +1,4 @@
-import { Box, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import { Box, Button, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
 import Code from '@mui/icons-material/Code';
 import Storage from '@mui/icons-material/Storage';
 import { Stack } from '@mui/system';
@@ -11,13 +11,14 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, competitionPath, competitionTitle } from './CompetitionTable';
+import { ROUND_NAMES, competitionEditPath, competitionPath, competitionTitle } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
 // A competition's own admin page, /admin/verseny/:id: its settings, its
 // relay's problems with their answers, and each problem as a team sees it.
-// Read-only, for in-code and database competitions alike.
+// Read-only, for in-code and database competitions alike; a database one
+// links to its edit page.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'Magyar', en: 'Angol' };
 
@@ -66,7 +67,10 @@ function CompetitionDetails({ data }: { data: AdminCompetitionDto }) {
   const { competition } = data;
   const [language, setLanguage] = useState<Language>(competition.languages[0] ?? 'hu');
   return <>
-    <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
+    <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
+      {data.storedIn === 'database' && <Button variant="contained" href={competitionEditPath(data.id)}>Szerkesztés</Button>}
+    </Stack>
     <Settings data={data}/>
     {competition.relay !== undefined && <>
       <Stack>

@@ -48,6 +48,7 @@
   },
   "error": {
     "competitionNotFound": "No such competition.",
+    "competitionInCode": "A competition held in code changes only with a deploy.",
     "competitionNotStarted": "The competition hasn't started yet.",
     "competitionOver": "It is too late to start the competition.",
     "fileTooLarge": "The file is too large.",
