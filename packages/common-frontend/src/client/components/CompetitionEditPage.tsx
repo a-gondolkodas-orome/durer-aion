@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { Stack } from '@mui/system';
 import { useSnackbar } from 'notistack';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
 import type { CompetitionConfig, Language } from 'schemas';
 import { LANGUAGES, ROUNDS, editionSchoolYear } from 'schemas';
@@ -67,12 +67,15 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const dirty = !saved && JSON.stringify(form) !== JSON.stringify(initial);
+  // Set on Save just before the page is left: the navigation comes before the
+  // render that would take the warning below away.
+  const leaving = useRef(false);
 
   // Every way off the page is a page load, the breadcrumb's links included,
   // so the browser's own prompt is the warning.
   useEffect(() => {
     if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); };
+    const warn = (event: BeforeUnloadEvent) => { if (!leaving.current) event.preventDefault(); };
     window.addEventListener('beforeunload', warn);
     return () => { window.removeEventListener('beforeunload', warn); };
   }, [dirty]);
@@ -113,6 +116,7 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
     }
     setSaved(true);
     enqueueSnackbar('Mentve', { variant: 'success' });
+    leaving.current = true;
     window.location.assign(competitionPath(data.id));
   };
 

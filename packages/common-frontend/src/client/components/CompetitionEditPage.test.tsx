@@ -62,6 +62,12 @@ const renderPage = () => render(
 
 const field = (name: string) => screen.getByRole('textbox', { name });
 const type = (name: string, value: string) => { fireEvent.change(field(name), { target: { value } }); };
+/// Whether the page asks the browser to confirm leaving it.
+const leavePrevented = () => {
+  const event = new Event('beforeunload', { cancelable: true });
+  window.dispatchEvent(event);
+  return event.defaultPrevented;
+};
 const next = () => { fireEvent.click(screen.getByRole('button', { name: 'Tovább: ellenőrzés' })); };
 
 test('fills the form from the competition, and sends the changes on to a dry run, then a save', async () => {
@@ -86,9 +92,13 @@ test('fills the form from the competition, and sends the changes on to a dry run
   expect(within(rules).getByText('1 feladat, 30 perc, összesen 3 pont (3)')).toBeInTheDocument();
   expect(within(rules).getByText('12 ponttól')).toBeInTheDocument();
 
+  let promptedOnSave: boolean | undefined;
+  assign.mockImplementation(() => { promptedOnSave = leavePrevented(); });
   fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
   expect(await screen.findByText('Mentve')).toBeInTheDocument();
   expect(assign).toHaveBeenCalledWith(`/admin/verseny/${ID}`);
+  // Asked as the page is left, before React renders the saved state.
+  expect(promptedOnSave).toBe(false);
   expect(repo.saveCompetition).toHaveBeenLastCalledWith(changed, { dryRun: false });
 });
 
@@ -144,14 +154,9 @@ test('stays on the form, naming the field, while a number field holds no number'
 test('warns before leaving with unsaved changes, and not without', async () => {
   renderPage();
   await screen.findByRole('heading', { name: '21 online C' });
-  const leave = () => {
-    const event = new Event('beforeunload', { cancelable: true });
-    window.dispatchEvent(event);
-    return event.defaultPrevented;
-  };
-  expect(leave()).toBe(false);
+  expect(leavePrevented()).toBe(false);
   type('Kategória', 'D');
-  expect(leave()).toBe(true);
+  expect(leavePrevented()).toBe(true);
 });
 
 test('of a competition held in code, offers its start window alone, starting from the one in force', async () => {
