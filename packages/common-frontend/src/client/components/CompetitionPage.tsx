@@ -187,15 +187,13 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
 }
 
 function ProblemPreview(props: { problem: Problem, points: number, serial: number, language: Language }) {
-  const { problemText, imageUrl, help1, help2 } = localizeProblem(props.problem, props.language);
+  const { problemText, imageUrl } = localizeProblem(props.problem, props.language);
   return (
     <Stack id={`feladat-${props.serial}`} sx={{ backgroundColor: '#fff', border: `1px solid ${BORDER}`, borderRadius: '10px',
       padding: '22px', gap: '12px' }}>
       <ExerciseTask task={problemText} serial={props.serial} availablePoints={props.points} pictureUrl={imageUrl ?? null}
         language={props.language}/>
       <Typography sx={{ fontSize: '14px' }}>Válasz: <strong>{props.problem.answer}</strong></Typography>
-      {help1 !== undefined && <Typography sx={{ fontSize: '14px', color: MUTED }}>1. segítség: {help1}</Typography>}
-      {help2 !== undefined && <Typography sx={{ fontSize: '14px', color: MUTED }}>2. segítség: {help2}</Typography>}
     </Stack>
   );
 }
