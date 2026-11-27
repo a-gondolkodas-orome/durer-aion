@@ -56,6 +56,7 @@ let repo: MockClientRepository;
 
 beforeEach(() => {
   repo = new MockClientRepository();
+  vi.spyOn(repo, 'getCompetition').mockResolvedValue(competition);
 });
 
 afterEach(() => {
@@ -79,23 +80,19 @@ const renderPage = () => render(
 
 const relayRows = () => within(screen.getByRole('table', { name: 'A váltó feladatai' })).getAllByRole('row').slice(1);
 
-test('lists the relay\'s problems in play order, with points, answer and storage', async () => {
-  const getCompetition = vi.spyOn(repo, 'getCompetition').mockResolvedValue(competition);
+test('lists the relay\'s problems in play order, with points, answer, storage and missing languages', async () => {
   renderPage();
 
-  expect(await screen.findByRole('heading', { name: '21 online C' })).toBeInTheDocument();
-  expect(getCompetition).toHaveBeenCalledWith(ID);
+  await screen.findByRole('heading', { name: '21 online C' });
+  expect(repo.getCompetition).toHaveBeenCalledWith(ID);
   expect(screen.getByText('Váltó · 2 feladat · 30 perc')).toBeInTheDocument();
   const [first, second] = relayRows();
-  expect(within(first).getByText('csomag-paros')).toBeInTheDocument();
-  expect(within(first).getByText('50')).toBeInTheDocument();
-  expect(within(second).getByText('csomag-kockak')).toBeInTheDocument();
-  expect(within(second).getByText('27')).toBeInTheDocument();
-  expect(within(second).getByText('kód')).toBeInTheDocument();
+  for (const text of ['csomag-paros', '50', 'EN hiányzik']) expect(within(first).getByText(text)).toBeInTheDocument();
+  for (const text of ['csomag-kockak', '27', 'kód']) expect(within(second).getByText(text)).toBeInTheDocument();
+  expect(within(second).queryByText('EN hiányzik')).not.toBeInTheDocument();
 });
 
 test('shows the settings, the strategy game and the advancing points among them', async () => {
-  vi.spyOn(repo, 'getCompetition').mockResolvedValue(competition);
   renderPage();
 
   const settings = await screen.findByRole('table', { name: 'Beállítások' });
@@ -106,7 +103,6 @@ test('shows the settings, the strategy game and the advancing points among them'
 });
 
 test('"Használja" lists every use, linking each other competition to its page', async () => {
-  vi.spyOn(repo, 'getCompetition').mockResolvedValue(competition);
   renderPage();
 
   await screen.findByRole('heading', { name: '21 online C' });
@@ -117,18 +113,7 @@ test('"Használja" lists every use, linking each other competition to its page',
   expect(within(second).queryByRole('link', { name: /21 online C/ })).not.toBeInTheDocument();
 });
 
-test('flags a language a problem has no text in', async () => {
-  vi.spyOn(repo, 'getCompetition').mockResolvedValue(competition);
-  renderPage();
-
-  await screen.findByRole('heading', { name: '21 online C' });
-  const [first, second] = relayRows();
-  expect(within(first).getByText('EN hiányzik')).toBeInTheDocument();
-  expect(within(second).queryByText('EN hiányzik')).not.toBeInTheDocument();
-});
-
 test('shows every problem as a team sees it, in each of the competition\'s languages', async () => {
-  vi.spyOn(repo, 'getCompetition').mockResolvedValue(competition);
   const { container } = renderPage();
 
   await screen.findByRole('heading', { name: 'Így látja a csapat' });

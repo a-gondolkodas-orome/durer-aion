@@ -162,7 +162,6 @@ export function CompetitionTable(props: {
             headerName: '',
             width: 120,
             sortable: false,
-            // Its settings, relay and problems, answers included.
             renderCell: ({ row }: { row: CompetitionRow }) => (
               <Link href={competitionPath(row.id)} aria-label={`Megtekintés: ${row.importAs}`}>Megtekintés</Link>
             ),

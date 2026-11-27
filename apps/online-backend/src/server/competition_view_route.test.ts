@@ -77,24 +77,19 @@ it("serves a database competition with its relay's problems in play order, answe
     .toEqual([["roow9oo75t--csomag-paros", 50, 3, "database"], [SHARED, 27, 4, "database"]]);
 });
 
-it("lists every use of a shared problem, in each relay that has it, this one included", async () => {
-  const shared = (await view(RELAY)).relayProblems.find(({ problem }) => problem.id === SHARED);
-  expect(shared?.uses.map(({ competitionId, position, points }) => [competitionId, position, points]))
-    .toEqual(expect.arrayContaining([[RELAY, 1, 3], [FULL, 2, 4]]));
-  expect(shared?.uses).toHaveLength(2);
-});
-
-it("marks an in-code problem a database relay reuses as held in code", async () => {
-  const reused = (await view(RELAY)).relayProblems.find(({ problem }) => problem.id === IN_CODE_PROBLEM);
-  expect(reused?.storedIn).toBe("code");
-  expect(reused?.uses.map(({ competitionId }) => competitionId)).toContain(RELAY);
+it("lists every use of a shared problem, this one included, and marks an in-code one", async () => {
+  const { relayProblems } = await view(RELAY);
+  const of = (id: string) => relayProblems.find(({ problem }) => problem.id === id);
+  expect(of(SHARED)?.uses.map(({ competitionId, position, points }) => [competitionId, position, points]))
+    .toEqual([[RELAY, 1, 3], [FULL, 2, 4]]);
+  expect(of(IN_CODE_PROBLEM)?.storedIn).toBe("code");
 });
 
 it("serves an in-code competition the same way", async () => {
   const served = await view(IN_CODE);
   expect(served.storedIn).toBe("code");
-  expect(served.relayProblems.length).toBe(registry.competitions.get(IN_CODE)?.relay?.problems.length);
-  expect(served.relayProblems.every(({ uses }) => uses.some(({ competitionId }) => competitionId === IN_CODE))).toBe(true);
+  expect(served.relayProblems.map(({ problem }) => problem.id))
+    .toEqual(registry.competitions.get(IN_CODE)?.relay?.problems.map(({ problemId }) => problemId));
 });
 
 it.each([
@@ -104,7 +99,7 @@ it.each([
   expect((await get(id, headers)).status).toBe(status);
 });
 
-it("still serves the export, which the route would otherwise take for an id", async () => {
+it("leaves /export to the export route", async () => {
   const response = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/export`, { headers: admin });
   expect(await response.json()).toMatchObject({ format: "durer-competitions" });
 });

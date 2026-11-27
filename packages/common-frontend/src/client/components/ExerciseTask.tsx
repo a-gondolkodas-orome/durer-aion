@@ -9,9 +9,7 @@ export interface ExerciseTaskProps {
   serial: number;
   availablePoints: number;
   pictureUrl: string | null;
-  /** The language of the words around the task, where it is not the page's:
-   *  the admin page, in Hungarian, shows a task as a team of another language
-   *  sees it. */
+  /** The heading's language where it is not the page's, as on the admin page. */
   language?: string;
 }
 

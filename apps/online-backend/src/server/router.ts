@@ -310,10 +310,8 @@ export function configureTeamsRouter(
   });
 
   /**
-   * One competition whole, for its page on the admin site: its row of the
-   * list above, its config, and its relay's problems in play order, answers
-   * included, each with every use any listed competition's relay makes of it.
-   * Declared after `…/export`, which this would otherwise take for an id.
+   * One competition whole, answers included, for its admin page
+   * (`AdminCompetitionView`). After `…/export`, which it would take for an id.
    *
    * @param {string} competitionId - The id of the competition.
    */

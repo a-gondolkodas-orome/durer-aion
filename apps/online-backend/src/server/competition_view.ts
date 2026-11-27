@@ -60,9 +60,8 @@ export interface AdminRelayProblem {
   uses: ProblemUse[];
 }
 
-/** A competition as its admin page shows it: the Versenyek tab's row of it,
- *  the config, and the relay's problems, answers included, which no team is
- *  ever served. */
+/** A competition as its admin page shows it: answers included, which no team
+ *  is ever served. */
 export interface AdminCompetitionView extends CompetitionSummary {
   competition: CompetitionConfig;
   relayProblems: AdminRelayProblem[];
