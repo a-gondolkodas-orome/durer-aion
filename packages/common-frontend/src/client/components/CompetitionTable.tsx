@@ -34,7 +34,7 @@ interface CompetitionRow {
   storedIn: string;
 }
 
-export const STORED_IN: Record<CompetitionSummaryDto['storedIn'], string> = {
+const STORED_IN: Record<CompetitionSummaryDto['storedIn'], string> = {
   code: 'kód',
   database: 'adatbázis',
 };

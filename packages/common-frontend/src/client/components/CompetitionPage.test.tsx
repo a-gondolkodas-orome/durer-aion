@@ -88,7 +88,10 @@ test('lists the relay\'s problems in play order, with points, answer, storage an
   expect(screen.getByText('Váltó · 2 feladat · 30 perc')).toBeInTheDocument();
   const [first, second] = relayRows();
   for (const text of ['csomag-paros', '50', 'EN hiányzik']) expect(within(first).getByText(text)).toBeInTheDocument();
-  for (const text of ['csomag-kockak', '27', 'kód']) expect(within(second).getByText(text)).toBeInTheDocument();
+  for (const text of ['csomag-kockak', '27']) expect(within(second).getByText(text)).toBeInTheDocument();
+  // Marked only where it is held elsewhere than the competition.
+  expect(within(first).queryByRole('img')).not.toBeInTheDocument();
+  expect(within(second).getByRole('img', { name: 'Kódban tárolt feladat' })).toBeInTheDocument();
   expect(within(second).queryByText('EN hiányzik')).not.toBeInTheDocument();
 });
 
@@ -97,6 +100,7 @@ test('shows the settings, the strategy game and the advancing points among them'
 
   const settings = await screen.findByRole('table', { name: 'Beállítások' });
   expect(within(settings).getByText(ID)).toBeInTheDocument();
+  expect(within(settings).getByText('adatbázis (az Import/export fülön került be)')).toBeInTheDocument();
   expect(within(settings).getByText('minta-ketkupac · 20 perc')).toBeInTheDocument();
   expect(within(settings).getByText('10 pont')).toBeInTheDocument();
   expect(within(settings).getByText('Magyar, Angol')).toBeInTheDocument();

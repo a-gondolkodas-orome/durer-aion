@@ -1,4 +1,6 @@
 import { Box, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import Code from '@mui/icons-material/Code';
+import Storage from '@mui/icons-material/Storage';
 import { Stack } from '@mui/system';
 import { useState } from 'react';
 import useSWR from 'swr';
@@ -9,7 +11,7 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, STORED_IN, competitionPath, competitionTitle } from './CompetitionTable';
+import { ROUND_NAMES, competitionPath, competitionTitle } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
@@ -18,6 +20,20 @@ import { Loading } from './Loading';
 // Read-only, for in-code and database competitions alike.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'Magyar', en: 'Angol' };
+
+/// Where a competition is held, and what that means for changing it.
+const STORAGE: Record<AdminCompetitionDto['storedIn'], string> = {
+  code: 'kód (csak telepítéssel változik)',
+  database: 'adatbázis (az Import/export fülön került be)',
+};
+
+/// A relay's problem held elsewhere than its competition: an icon, named by
+/// its tooltip.
+function StoredElsewhere({ storedIn }: { storedIn: AdminCompetitionDto['storedIn'] }) {
+  const Icon = storedIn === 'code' ? Code : Storage;
+  return <Icon fontSize="small" sx={{ color: MUTED }}
+    titleAccess={storedIn === 'code' ? 'Kódban tárolt feladat' : 'Adatbázisban tárolt feladat'}/>;
+}
 
 /// The part of an id people recognise a problem by: its slug.
 function slug(id: string): string {
@@ -50,10 +66,7 @@ function CompetitionDetails({ data }: { data: AdminCompetitionDto }) {
   const { competition } = data;
   const [language, setLanguage] = useState<Language>(competition.languages[0] ?? 'hu');
   return <>
-    <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-      <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
-      <Chip size="small" label={STORED_IN[data.storedIn]}/>
-    </Stack>
+    <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
     <Settings data={data}/>
     {competition.relay !== undefined && <>
       <Stack>
@@ -87,6 +100,7 @@ function Settings({ data }: { data: AdminCompetitionDto }) {
   const windowSet = JSON.stringify(data.startWindow ?? null) !== JSON.stringify(data.configStartWindow ?? null);
   const rows: [string, string][] = [
     ['Azonosító', competition.id],
+    ['Tárolás', STORAGE[data.storedIn]],
     ...(metadata.kind === 'competition' ? [
       ['Kiadás', `${metadata.edition}. (${editionSchoolYear(metadata.edition)})`],
       ['Forduló', ROUND_NAMES[metadata.round]],
@@ -152,7 +166,9 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
               <TableCell>
                 <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
                   <span title={problem.id} style={{ fontWeight: 500 }}>{slug(problem.id)}</span>
-                  <Chip size="small" label={STORED_IN[storedIn]}/>
+                  {/* Only where it differs from the competition's: in a relay held
+                      in one place throughout, a mark on every row says nothing */}
+                  {storedIn !== data.storedIn && <StoredElsewhere storedIn={storedIn}/>}
                 </Stack>
                 <Box sx={{ fontSize: '12px', color: MUTED, maxWidth: '330px', whiteSpace: 'nowrap', overflow: 'hidden',
                   textOverflow: 'ellipsis' }}>
