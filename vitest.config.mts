@@ -29,8 +29,8 @@ export default defineConfig({
       { find: /^game\/strategy$/, replacement: source('game/strategy.ts') },
       { find: /^game\/bot$/, replacement: source('game/bot.ts') },
       { find: /^game\/client$/, replacement: source('game/client.ts') },
+      { find: /^game\/relay-judge$/, replacement: source('game/relay-judge.ts') },
       { find: /^schemas$/, replacement: source('schemas/index.ts') },
-      { find: /^relay-bot$/, replacement: source('relay-bot/index.ts') },
       { find: /^problem-bank$/, replacement: source('problem-bank/index.ts') },
       { find: /^problem-bank\/(.*)$/, replacement: source('problem-bank/$1.ts') },
       // The full entry loads React, MUI and the i18next setup; a node suite that

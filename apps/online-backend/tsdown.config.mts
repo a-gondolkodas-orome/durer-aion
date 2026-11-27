@@ -40,7 +40,7 @@ export default defineConfig({
     // runs on the bare specifier first, and they all belong to declared
     // dependencies; this is what makes `paths` win. Without it they stay
     // `require()`s of a `dist` the image never builds.
-    alwaysBundle: ['game', 'game/strategy', 'game/bot', 'schemas', 'relay-bot', 'problem-bank', 'problem-bank/all'],
+    alwaysBundle: ['game', 'game/strategy', 'game/bot', 'game/relay-judge', 'schemas', 'problem-bank', 'problem-bank/all'],
     // Keep `boardgame.io/server` and the like as written, so the bundle
     // requires what the source imports rather than a `dist/cjs/...` path.
     resolveDepSubpath: false,

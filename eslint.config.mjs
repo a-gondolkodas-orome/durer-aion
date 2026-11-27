@@ -33,28 +33,30 @@ const noDynamicBotImport = {
 };
 
 const noProblemsMessage =
-  'The live client must not ship the relay problems: `relay-bot` and `problem-bank` carry their answers.';
+  'The live client must not ship the relay problems: `problem-bank` carries their answers, and `game/relay-judge` serves them.';
 
-// `relay-bot` and `problem-bank` both hold relay problems — each problem's text,
-// its answer and what it is worth — so the live competition client must name
-// neither, by the package, by a sub-entry (`problem-bank/all`,
-// `problem-bank/banks/…`) or by any path to it. Neither is behind a sub-entry
-// the way packages/game's bots are: the package *is* the secret, so the ban is
-// on the package itself. The names are specific enough to ban any path segment
+// `problem-bank` holds the relay problems — each problem's text, its answer and
+// what it is worth — and `game/relay-judge` is what hands them out and checks
+// the team's answers, so the live competition client must name neither, by the
+// package or entry, by a sub-entry (`problem-bank/all`, `problem-bank/banks/…`)
+// or by any path to it. problem-bank is not behind a sub-entry the way
+// packages/game's bots are: the package *is* the secret, so the ban is on the
+// package itself. The names are specific enough to ban any path segment
 // spelled so: a generic one such as `competitions` would also catch the live
-// client's own `./competitions/…` folder.
+// client's own `./competitions/…` folder. A path into packages/game's source
+// is already the bot ban's.
 const noProblemsInTheClient = {
-  group: ['relay-bot', 'problem-bank'].flatMap(name => [
-    name, `${name}/**`,
-    `**/${name}`, `**/${name}/**`,
-  ]),
+  group: [
+    'problem-bank', 'problem-bank/**', '**/problem-bank', '**/problem-bank/**',
+    'game/relay-judge', '**/game/relay-judge', '**/game/relay-judge.*',
+  ],
   message: noProblemsMessage,
 };
 
 // The same spellings for `import()`, which the core rule does not read at all —
 // see the note on noDynamicBotImport above.
 const noDynamicProblemsImport = {
-  selector: 'ImportExpression > Literal[value=/(^|\\/)(relay-bot|problem-bank)($|\\/)/]',
+  selector: 'ImportExpression > Literal[value=/(^|\\/)problem-bank($|\\/)|(^|\\/)game\\/relay-judge($|\\.)/]',
   message: noProblemsMessage,
 };
 
@@ -223,8 +225,8 @@ export default defineConfig(
   //
   // The relay problems ride the same ban, for the same reason, with one more exempt
   // app: relay-practise-frontend is the public practice site, which serves past
-  // years' problem sets, public already, so it names `relay-bot` on purpose. It keeps
-  // the bot ban, in a block of its own.
+  // years' problem sets, public already, so it names `problem-bank` and the judge on
+  // purpose. It keeps the bot ban, in a block of its own.
   {
     files: ['**/*.{js,mjs,cjs,mts,ts,tsx}'],
     ignores: ['apps/online-backend/**', 'apps/offline-frontend/**', 'apps/relay-practise-frontend/**'],

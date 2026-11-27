@@ -1,7 +1,7 @@
 import type { StrategyGameKey } from "game/strategy";
 import { StrategyWrappers } from "game/bot";
 import { strategyClientFor } from "game/client";
-import { relayStrategy } from "relay-bot";
+import { relayStrategy } from "game/relay-judge";
 import type { CompetitionId, PublicCompetition } from "schemas";
 import { dryRunCompetition, dryRunRelay } from "./rehearsed-round";
 import { InProgressRelay } from "common-frontend";

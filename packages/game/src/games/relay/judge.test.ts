@@ -1,7 +1,8 @@
 import { State } from "boardgame.io";
 import { Client } from "boardgame.io/client";
-import { GameRelay, MyGameState } from "game";
-import { judgeProblems, relayStrategy, Problem } from "./strategy";
+import { GameRelay } from "./game";
+import type { MyGameState } from "./game";
+import { judgeProblems, relayStrategy, Problem } from "./judge";
 
 const problemList: Problem[] = [
   { problemText: "first", answer: 120, points: 2 },

@@ -18,10 +18,12 @@ Every match, relay or strategy, is a two-player boardgame.io match.
   other side.
 
 `PlayerIDType` in `packages/game/src/common/types.ts` defines both. The client
-gets the game's rules but never the bot: what the bot knows (the relay's
-answers, a strategy's lookup tables) lives in `relay-bot` and the `game/bot`
-entry. The server and the dry run import both; the relay practice site imports
-`relay-bot` for its judge.
+gets the game's rules but never the bot: the relay's judge is the
+`game/relay-judge` entry, and the strategy bots with their lookup tables the
+`game/bot` entry. The judge holds no problems; the relay's answers reach it from
+`problem-bank` or the database, in the match's setup data. The server and the
+dry run import both entries; the relay practice site imports `game/relay-judge`
+for its judge.
 
 ## A team's way through the round
 
@@ -186,7 +188,7 @@ It is not wrapped, and has its own clock (60 minutes). The team starts it, and
 the judge's `firstProblem` serves the first problem, with every problem's points.
 After that the turns alternate: the team's `submitAnswer`, then the judge's
 `nextTry`, `newProblem` or `endGame`. The judge — `relayStrategy` in
-`relay-bot`, over the match's own problems — decides which, and what a later
+`game/relay-judge`, over the match's own problems — decides which, and what a later
 try is worth.
 
 ## A match's status and score
@@ -229,7 +231,7 @@ elsewhere `/admin` is an ordinary path.
   wrappers' report callbacks — `sendStrategyFunction` and `sendRelayFunction` —
   are how it uploads each step.
 - **The relay practice site** (`/valto/`) runs the relay game in the browser,
-  also on `localWithBots`, with `relay-bot`'s judge (`relayStrategy`) over its
+  also on `localWithBots`, with the `game/relay-judge` judge (`relayStrategy`) over its
   own problem sets — so a change to the judge's scoring changes this site too.
 - **The strategy practice site** (`/jatekok/`) shares none of this: it runs on
   `strategy-engine`, without boardgame.io. Its own

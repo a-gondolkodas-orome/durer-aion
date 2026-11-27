@@ -24,7 +24,6 @@
     "nanoid": "6.0.2",
     "problem-bank": "*",
     "rate-limiter-flexible": "11.2.3",
-    "relay-bot": "*",
     "schemas": "*",
     "sequelize": "6.37.8",
     "socket.io": "4.8.4"

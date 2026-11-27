@@ -19,7 +19,7 @@ import * as edition12Final from "problem-bank/banks/edition-12-final";
 import * as edition12Local from "problem-bank/banks/edition-12-local";
 import * as edition19Online from "problem-bank/banks/edition-19-online";
 import * as edition20Online from "problem-bank/banks/edition-20-online";
-import type { Problem } from "relay-bot";
+import type { Problem } from "game/relay-judge";
 import { localizeProblem } from "schemas";
 import type { CompetitionConfig, CompetitionId, Language, RelayConfig } from "schemas";
 

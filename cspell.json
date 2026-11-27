@@ -178,7 +178,6 @@
   "overrides": [
     {
       "filename": [
-        "packages/relay-bot/src/games/relay/strategy.ts",
         "packages/problem-bank/banks/**"
       ],
       "ignoreRegExpList": [

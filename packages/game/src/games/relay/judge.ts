@@ -1,6 +1,6 @@
 import { State } from 'boardgame.io';
-import { MyGameState, RELAY_MAX_TRIES, RelayMoveArgs } from 'game';
-import type { RelayJudgeProblem } from 'game';
+import { RELAY_MAX_TRIES } from './game';
+import type { MyGameState, RelayJudgeProblem, RelayMoveArgs } from './game';
 import { localizeProblem } from 'schemas';
 import type { Language, Problem as BankProblem, ProblemId, RelayConfig } from 'schemas';
 
