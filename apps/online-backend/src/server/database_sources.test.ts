@@ -6,7 +6,7 @@ import { join } from "node:path";
 import Koa from "koa";
 import Router from "@koa/router";
 import type { Server, State } from "boardgame.io";
-import { strategyGames } from "game";
+import { strategyGames } from "game/strategy";
 import type { MyGameState } from "game";
 import { createRegistry, validatingCompetitionSource } from "problem-bank";
 import { registry as allBanks } from "problem-bank/all";

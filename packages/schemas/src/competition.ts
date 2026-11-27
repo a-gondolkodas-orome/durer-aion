@@ -249,9 +249,19 @@ export interface CompetitionSource {
 /// § *The two kinds of match*).
 export const RELAY_GAME_NAME = 'relay';
 
+const STRATEGY_GAME_PREFIX = 'strategy--';
+
 /// The game a strategy game is played as, as `RELAY_GAME_NAME`.
 export function strategyGameName(gameId: StrategyGameId): string {
-  return `strategy--${gameId}`;
+  return `${STRATEGY_GAME_PREFIX}${gameId}`;
+}
+
+/// The game id a strategy match's game name holds, the inverse of
+/// `strategyGameName`; undefined for a name that is not a strategy game's.
+export function strategyGameIdOf(gameName: string): StrategyGameId | undefined {
+  return gameName.startsWith(STRATEGY_GAME_PREFIX) && gameName.length > STRATEGY_GAME_PREFIX.length
+    ? gameName.slice(STRATEGY_GAME_PREFIX.length)
+    : undefined;
 }
 
 /// What a team is served of its competition: everything but the relay's

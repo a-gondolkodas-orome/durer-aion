@@ -1,4 +1,4 @@
-import { strategyGames } from 'game';
+import { strategyGames } from 'game/strategy';
 import type { CompetitionConfig } from 'schemas';
 import { registry } from '../all';
 import { assertValidRegistry, createRegistry, validateRegistry, validatingCompetitionSource } from './registry';

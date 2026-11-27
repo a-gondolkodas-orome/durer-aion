@@ -3,7 +3,7 @@ import { argv, env, exit } from 'process';
 import { SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import { hostedGames } from './games';
-import { strategyGames } from 'game';
+import { strategyGames } from 'game/strategy';
 import { assertValidRegistry } from 'problem-bank';
 import { registry } from 'problem-bank/all';
 import { configureTeamsRouter } from './server/router';

@@ -9,6 +9,10 @@
       "types": "./dist/index.d.mts",
       "default": "./dist/index.mjs"
     },
+    "./strategy": {
+      "types": "./dist/strategy.d.mts",
+      "default": "./dist/strategy.mjs"
+    },
     "./bot": {
       "types": "./dist/bot.d.mts",
       "default": "./dist/bot.mjs"
