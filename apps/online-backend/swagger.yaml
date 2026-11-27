@@ -421,13 +421,16 @@ paths:
         "404":
           description: No competition with this id
     put:
-      summary: Replace a competition held in the database, or, with dryRun, say what that would do
+      summary: Replace a competition, or, with dryRun, say what that would do
       description: >
-        The body is the competition whole, its id unchanged. It is written only
-        if it keeps the validator's rules and, once a team of it has started a
-        match, the locks: no language taken away, no match added or taken away,
-        and the relay's problems, their order and points as they are. The
-        answer is the report either way; the messages are Hungarian.
+        The body is the competition whole, its id unchanged. One held in the
+        database is written only if it keeps the validator's rules and, once a
+        team of it has started a match, the locks: no language taken away, no
+        match added or taken away, and the relay's problems, their order and
+        points as they are. Its window replaces any set apart from it. Of one
+        held in code only the start window may change: it is stored apart, and
+        the code's own window given back takes that away. The answer is the
+        report either way; the messages are Hungarian.
       security:
       - basicAdminAuth: []
       tags:
@@ -478,55 +481,10 @@ paths:
                     description: Whether a team of the competition has started a match, which the locks follow
         "401":
           description: Not an organiser
-        "403":
-          description: The competition is held in code (COMPETITION_IN_CODE)
         "404":
           description: No competition with this id
         "415":
           description: The body is not JSON
-  /team/admin/competitions/{competitionId}/start-window:
-    put:
-      summary: Set a competition's start window in place of its config's, or return it to its config's
-      description: >
-        A team with a window of its own keeps that one. Only the start of a
-        match is held to the window: a match started in it runs its full time.
-      security:
-      - basicAdminAuth: []
-      tags:
-      - admin
-      parameters:
-      - name: competitionId
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                opensAt:
-                  type: string
-                  nullable: true
-                  description: ISO 8601 with an offset; null returns the competition to its config's window.
-                  example: "2026-11-20T15:00+01:00"
-                closesAt:
-                  type: string
-                  nullable: true
-                  description: ISO 8601 with an offset, after opensAt; left out or null, the window stays open.
-      responses:
-        "204":
-          description: Set
-        "400":
-          description: Not a window, or a time without an offset, or one closing before it opens
-        "401":
-          description: Not an organiser
-        "404":
-          description: No competition with this id
-        "415":
-          description: The body is not JSON, or there is none
   /team/admin/import:
     put:
       summary: Import teams from a TSV file
@@ -787,7 +745,6 @@ components:
             - COMPETITION_OVER
             - VIEW_NOT_ALLOWED
             - MATCH_IN_PROGRESS
-            - COMPETITION_IN_CODE
             - UNKNOWN_JOIN_CODE
             - TEAM_NOT_FOUND
             - MATCH_NOT_FOUND

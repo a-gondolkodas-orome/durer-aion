@@ -40,7 +40,6 @@ const API_ERROR_KEYS: Record<ApiErrorCode, string> = {
   COMPETITION_OVER: t("error.competitionOver"),
   VIEW_NOT_ALLOWED: t("error.viewNotAllowed"),
   MATCH_IN_PROGRESS: t("error.matchInProgress"),
-  COMPETITION_IN_CODE: t("error.competitionInCode"),
   UNKNOWN_JOIN_CODE: t("login.error.wrongid"),
   TEAM_NOT_FOUND: t("error.teamNotFound"),
   MATCH_NOT_FOUND: t("error.matchNotFound"),

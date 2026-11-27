@@ -171,10 +171,6 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return await request(api => api.put<CompetitionWriteResultDto>(url, { competition }));
   }
 
-  async setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void> {
-    const url = urlcat('/team/admin/competitions/:competitionId/start-window', { competitionId });
-    await request(api => api.put(url, window));
-  }
 
   async importTeams(file: File): Promise<TeamImportResultDto> {
     const body = new FormData();

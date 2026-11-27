@@ -17,8 +17,8 @@ import { Loading } from './Loading';
 
 // A competition's own admin page, /admin/verseny/:id: its settings, its
 // relay's problems with their answers, and each problem as a team sees it.
-// Read-only, for in-code and database competitions alike; a database one
-// links to its edit page.
+// Read-only, for in-code and database competitions alike, linking to the
+// edit page.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'Magyar', en: 'Angol' };
 
@@ -69,7 +69,7 @@ function CompetitionDetails({ data }: { data: AdminCompetitionDto }) {
   return <>
     <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
       <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
-      {data.storedIn === 'database' && <Button variant="contained" href={competitionEditPath(data.id)}>Szerkesztés</Button>}
+      <Button variant="contained" href={competitionEditPath(data.id)}>Szerkesztés</Button>
     </Stack>
     <Settings data={data}/>
     {competition.relay !== undefined && <>

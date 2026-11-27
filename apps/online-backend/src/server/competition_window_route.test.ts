@@ -10,8 +10,9 @@ import { configureTeamsRouter } from "./router";
 import { TEAM_COOKIE } from "./team_session";
 import { startTestDatabase } from "./test_database";
 
-// A competition's window set on the admin page, against a real postgres: it is
-// stored, served to the admin page and the team, and holds the team's starts.
+// An in-code competition's window set on its edit page, against a real
+// postgres: it is stored apart from the code, served to the admin page and
+// the team, and holds the team's starts. Nothing else of it may change there.
 
 const TEAM_ID = "8eae8669-125c-42e5-8b49-89afbac31679";
 const COMPETITION_ID = "klmgbpb334--minta-teljes";
@@ -60,12 +61,22 @@ beforeEach(async () => {
   await team.update({ pageState: "HOME" });
 });
 
-const setWindow = (body: unknown, competitionId = COMPETITION_ID) =>
-  fetch(`http://127.0.0.1:${port}/team/admin/competitions/${competitionId}/start-window`, {
+const config = registry.competitions.get(COMPETITION_ID);
+if (config === undefined) throw new Error(`No ${COMPETITION_ID} in the registry`);
+
+/** Saves the in-code competition with `startWindow` in place of its own,
+ *  as its edit page does. */
+const setWindow = (startWindow: unknown, competitionId = COMPETITION_ID) =>
+  fetch(`http://127.0.0.1:${port}/team/admin/competitions/${competitionId}`, {
     method: "PUT",
     headers: { authorization: ADMIN, "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ competition: { ...config, id: competitionId, startWindow } }),
   });
+
+const report = async (answer: Response) => {
+  expect(answer.status).toBe(200);
+  return await answer.json() as { written: boolean, errors: string[] };
+};
 
 const competitionWindow = async () => {
   const answer = await fetch(`http://127.0.0.1:${port}/team/admin/competitions`, { headers: { authorization: ADMIN } });
@@ -76,7 +87,7 @@ const competitionWindow = async () => {
 const asTeam = { cookie: `${TEAM_COOKIE}=${TEAM_ID}` };
 
 it("holds the competition's teams to the window an organiser sets", async () => {
-  expect((await setWindow(FUTURE)).status).toBe(204);
+  expect((await report(await setWindow(FUTURE))).written).toBe(true);
 
   expect(await competitionWindow()).toMatchObject({ startWindow: FUTURE, configStartWindow: null });
   const view = await (await fetch(`http://127.0.0.1:${port}/team/me`, { headers: asTeam })).json() as
@@ -86,25 +97,34 @@ it("holds the competition's teams to the window an organiser sets", async () => 
   expect(started.status).toBe(403);
 });
 
-it("returns the competition to its config's window on a null opensAt", async () => {
+it("returns the competition to its config's window when given that back", async () => {
   await setWindow(FUTURE);
 
-  expect((await setWindow({ opensAt: null })).status).toBe(204);
+  expect((await report(await setWindow(undefined))).written).toBe(true);
 
   expect(await competitionWindow()).toMatchObject({ startWindow: null, configStartWindow: null });
   const started = await fetch(`http://127.0.0.1:${port}/team/me/relay/play`, { method: "POST", headers: asTeam });
   expect(started.status).toBe(200);
 });
 
-it("refuses a window the rules refuse, and a competition the server does not have", async () => {
-  expect((await setWindow({ opensAt: "2099-01-01T00:00" })).status).toBe(400);
+it("refuses a window the rules refuse, any other change, and a competition the server does not have", async () => {
+  const noOffset = await report(await setWindow({ opensAt: "2099-01-01T00:00" }));
+  expect(noOffset).toMatchObject({ written: false, errors: [expect.stringContaining(COMPETITION_ID)] });
+  const otherChange = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${COMPETITION_ID}`, {
+    method: "PUT",
+    headers: { authorization: ADMIN, "content-type": "application/json" },
+    body: JSON.stringify({ competition: { ...config, startWindow: FUTURE, advancingPoints: 99 } }),
+  });
+  expect(await report(otherChange)).toEqual({ written: false, warnings: [], started: false, errors: [
+    `verseny ${COMPETITION_ID}: a kódban tárolt versenynek csak az indítási ablaka változhat, a többi csak telepítéssel`,
+  ] });
   expect((await setWindow(FUTURE, "nonexistent--competition")).status).toBe(404);
   expect(await competitionWindow()).toMatchObject({ startWindow: null });
 });
 
 it("is for organisers only", async () => {
-  const answer = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${COMPETITION_ID}/start-window`, {
-    method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(FUTURE),
+  const answer = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${COMPETITION_ID}`, {
+    method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ competition: config }),
   });
   expect(answer.status).toBe(401);
 });

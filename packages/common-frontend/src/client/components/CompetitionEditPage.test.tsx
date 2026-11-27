@@ -134,9 +134,26 @@ test('warns before leaving with unsaved changes, and not without', async () => {
   expect(leave()).toBe(true);
 });
 
-test('offers no form for a competition held in code', async () => {
-  vi.spyOn(repo, 'getCompetition').mockResolvedValue({ ...competition, storedIn: 'code' });
+test('of a competition held in code, offers its start window alone, starting from the one in force', async () => {
+  const codeWindow = { opensAt: '2099-01-01T14:00+01:00' };
+  const setApart = { opensAt: '2099-02-01T14:00+01:00' };
+  vi.spyOn(repo, 'getCompetition').mockResolvedValue({
+    ...competition, storedIn: 'code', competition: { ...config, startWindow: codeWindow },
+    startWindow: setApart, configStartWindow: codeWindow,
+  });
   renderPage();
-  expect(await screen.findByText(/csak telepítéssel változik/)).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Tovább: ellenőrzés' })).not.toBeInTheDocument();
+  await screen.findByRole('heading', { name: '21 online C' });
+  expect(screen.getByRole('note')).toHaveTextContent('csak telepítéssel változik');
+  for (const name of ['Kiadás', 'Kategória', 'Továbbjutási pontszám (nem kötelező)']) expect(field(name)).toBeDisabled();
+  expect(screen.getByRole('checkbox', { name: 'Van stratégiás játék' })).toBeDisabled();
+  expect(field('Indítás ettől')).toHaveValue(setApart.opensAt);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Vissza a kódbeli ablakhoz' }));
+  expect(field('Indítás ettől')).toHaveValue(codeWindow.opensAt);
+  type('Indítás ettől', '2099-03-01T14:00+01:00');
+  next();
+
+  await screen.findByRole('region', { name: 'Amit a csapat a szabályok oldalon lát' });
+  expect(repo.saveCompetition).toHaveBeenLastCalledWith(
+    { ...config, startWindow: { opensAt: '2099-03-01T14:00+01:00' } }, { dryRun: true });
 });

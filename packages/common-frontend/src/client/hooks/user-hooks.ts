@@ -220,9 +220,3 @@ export const useSaveCompetition = () => {
     await repo.saveCompetition(competition, options);
 };
 
-export const useSetCompetitionWindow = () => {
-  const repo = useAdminRepo();
-  return async (competitionId: string, window: { opensAt: string | null, closesAt: string | null }) => {
-    await repo.setCompetitionWindow(competitionId, window);
-  };
-};

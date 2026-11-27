@@ -1,14 +1,15 @@
 import { strategyGames } from 'game/strategy';
 import type { CompetitionConfig, Language } from 'schemas';
-import { competitionShapeErrors, isRecord, validateCompetition } from 'schemas';
+import { competitionShapeErrors, isRecord, validateCompetition, validateStartWindow } from 'schemas';
 import { Op, type Transaction } from 'sequelize';
 import type { TeamsRepository } from './db';
 import type { ContentSources } from './database_sources';
 import { InvalidStoredProblemError } from './database_sources';
-import { CompetitionModel, TeamModel } from './model';
+import { CompetitionModel, CompetitionWindowModel, TeamModel } from './model';
 
-// Changing a competition held in the database: the body is the competition
-// whole, which replaces the stored one once it keeps the rules and the locks.
+// Changing a competition on its admin page: the body is the competition
+// whole. One held in the database is replaced by it once it keeps the rules
+// and the locks; of one held in code only the start window changes.
 
 /** What an edit did, or, in a dry run, would do: written or not, and why not,
  *  one Hungarian line each. `started` says whether a team of the competition
@@ -60,31 +61,61 @@ async function hasStarted(competitionId: string, transaction?: Transaction): Pro
   return count > 0;
 }
 
-/** Replaces the stored competition `competitionId` with the one `value`
- *  holds, as `{ competition }`, or, if it breaks the rules or a lock, does
- *  not; with `dryRun`, says what it would do and writes nothing. Undefined
- *  for an id the database does not hold: one held in code is the caller's to
- *  refuse.
+/** The competition as JSON with every object's keys sorted: two configs
+ *  compare equal whatever order their keys were written in. */
+function canonical(value: unknown): string {
+  return JSON.stringify(value, (_, each: unknown) => isRecord(each) && !Array.isArray(each)
+    ? Object.fromEntries(Object.entries(each).sort(([a], [b]) => a.localeCompare(b)))
+    : each);
+}
+
+/** Replaces the competition `competitionId` with the one `value` holds, as
+ *  `{ competition }`, or, if it breaks the rules or a lock, does not; with
+ *  `dryRun`, says what it would do and writes nothing. Undefined for an id
+ *  no one holds.
  *
- *  The stored competition is read as it is, unvalidated, so one the rules
- *  have since come to refuse can be mended here. The problems are read before
- *  the transaction opens, for the reason `importBundle` gives. */
+ *  One held in the database is replaced whole, and its window is the one the
+ *  body gives: a window set for it apart, by an earlier admin page, is
+ *  dropped. One held in code changes only with a deploy, its start window
+ *  aside, which is stored apart from it (`setCompetitionWindow`); its own
+ *  window given back takes that one away.
+ *
+ *  A stored competition is read as it is, unvalidated, so one the rules have
+ *  since come to refuse can be mended here. The problems are read before the
+ *  transaction opens, for the reason `importBundle` gives. */
 export async function writeCompetition(
   teams: TeamsRepository,
   competitionId: string,
   value: unknown,
-  { problemSource }: Pick<ContentSources, 'problemSource'>,
+  { problemSource, competitions }: Pick<ContentSources, 'problemSource' | 'competitions'>,
   { dryRun }: { dryRun: boolean },
 ): Promise<CompetitionWriteReport | undefined> {
-  const row = await CompetitionModel.findByPk(competitionId);
-  if (row === null) return undefined;
-  const before: CompetitionConfig = { ...row.body, id: competitionId };
+  const inCode = competitions.get(competitionId);
+  const row = inCode === undefined ? await CompetitionModel.findByPk(competitionId) : null;
+  const before: CompetitionConfig | undefined = inCode ?? (row === null ? undefined : { ...row.body, id: competitionId });
+  if (before === undefined) return undefined;
   const report = (errors: string[], warnings: string[], started: boolean, written = false) =>
     ({ written, errors, warnings, started });
 
   const shape = readCompetitionBody(competitionId, value);
   if ('errors' in shape) return report(shape.errors, [], await hasStarted(competitionId));
   const after = shape.competition;
+
+  if (inCode !== undefined) {
+    const where = `verseny ${competitionId}`;
+    const errors = [
+      ...canonical({ ...inCode, startWindow: undefined }) === canonical({ ...after, startWindow: undefined }) ? []
+        : [`${where}: a kódban tárolt versenynek csak az indítási ablaka változhat, a többi csak telepítéssel`],
+      ...after.startWindow === undefined
+        ? inCode.startWindow === undefined ? [] : [`${where}: a kódban tárolt verseny indítási ablaka nem hagyható üresen`]
+        : validateStartWindow(after.startWindow).map(error => `${where}: ${error}`),
+    ];
+    const started = await hasStarted(competitionId);
+    if (errors.length > 0 || dryRun) return report(errors, [], started);
+    await teams.setCompetitionWindow(competitionId,
+      sameWindow(inCode.startWindow, after.startWindow) ? null : after.startWindow ?? null);
+    return report([], [], started, true);
+  }
 
   let errors: string[];
   try {
@@ -95,21 +126,16 @@ export async function writeCompetition(
     errors = [`feladat ${error.problemId}: a váltó ezt a tárolt feladatot használja, de a tárolt feladat hibás`,
       ...error.errors];
   }
-  const windowSet = (await teams.competitionWindows()).has(competitionId);
 
   return await teams.sequelize.transaction(async (transaction) => {
     const started = await hasStarted(competitionId, transaction);
     const allErrors = [...errors, ...(started ? lockErrors(before, after) : [])];
-    const warnings = [
-      ...(started ? ['Már indult csapat ebben a versenyben: a futó meccsek a régi beállításokkal mennek tovább, '
-        + 'a változás az ezután indulókra érvényes.'] : []),
-      ...(windowSet && !sameWindow(before.startWindow, after.startWindow)
-        ? ['A Versenyek fülön külön indítási ablakot adtak meg ennek a versenynek: amíg az érvényben van, '
-          + 'az itt megadott ablak nem számít.'] : []),
-    ];
+    const warnings = started ? ['Már indult csapat ebben a versenyben: a futó meccsek a régi beállításokkal mennek '
+      + 'tovább, a változás az ezután indulókra érvényes.'] : [];
     if (allErrors.length > 0 || dryRun) return report(allErrors, warnings, started);
     const { id, ...body } = after;
     await CompetitionModel.update({ body }, { where: { id }, transaction });
+    await CompetitionWindowModel.destroy({ where: { competitionId: id }, transaction });
     return report([], warnings, started, true);
   });
 }

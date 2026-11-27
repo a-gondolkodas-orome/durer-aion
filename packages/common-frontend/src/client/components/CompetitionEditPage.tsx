@@ -17,11 +17,12 @@ import { ROUND_NAMES, competitionPath, competitionTitle } from './CompetitionTab
 import { type FieldErrors, type SettingsForm, competitionFromForm, settingsForm } from './competition-form';
 import { Loading } from './Loading';
 
-// A database competition's edit page, /admin/verseny/:id/edit: its settings,
+// A competition's edit page, /admin/verseny/:id/edit: its settings,
 // then a review of what the server says of them, then Save. Nothing is
 // written before Save, and the draft lives in this page alone. The relay's
 // problems are not edited here (#818–#819). One held in code changes only
-// with a deploy, its start window aside, which the Versenyek tab sets.
+// with a deploy, its start window aside: the same form shows it, every field
+// but the window's read-only, so a window is set in one place for both.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'magyar', en: 'angol' };
 const WARNING = '#7a4b00';
@@ -36,13 +37,7 @@ export function CompetitionEditPage(props: { competitionId: string }) {
     <Stack sx={{ padding: '10px', gap: '20px' }} data-testid="competitionEditPage">
       {error !== undefined && <Typography role="alert" color="error">{errorMessage(error)}</Typography>}
       {data === undefined && error === undefined && <Loading/>}
-      {data?.storedIn === 'code' && <>
-        <Breadcrumb data={data} dirty={false}/>
-        <Typography>
-          A kódban tárolt verseny csak telepítéssel változik. Az indítási ablaka a Versenyek fülön állítható.
-        </Typography>
-      </>}
-      {data?.storedIn === 'database' && <CompetitionEditor data={data}/>}
+      {data !== undefined && <CompetitionEditor data={data}/>}
     </Stack>
   );
 }
@@ -63,7 +58,9 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   const errorMessage = useErrorMessage();
   const saveCompetition = useSaveCompetition();
   const { enqueueSnackbar } = useSnackbar();
-  const [initial] = useState(() => settingsForm(data.competition));
+  // The window in force: for one held in code, the one set apart from its
+  // config where there is one.
+  const [initial] = useState(() => settingsForm({ ...data.competition, startWindow: data.startWindow ?? undefined }));
   const [form, setForm] = useState(initial);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [review, setReview] = useState<{ competition: CompetitionConfig, result: CompetitionWriteResultDto } | null>(null);
@@ -182,7 +179,9 @@ function SettingsStep(props: {
   // The stored id, should it name a game no longer registered: the validator
   // says so in the review, and the select still shows what is stored.
   const gameIds = [...new Set([...props.data.strategyGameIds, ...form.gameId === '' ? [] : [form.gameId]])].sort();
-  const windowSet = JSON.stringify(props.data.startWindow ?? null) !== JSON.stringify(props.data.configStartWindow ?? null);
+  const inCode = props.data.storedIn === 'code';
+  const codeWindow = props.data.configStartWindow ?? null;
+  const showsCodeWindow = form.opensAt === (codeWindow?.opensAt ?? '') && form.closesAt === (codeWindow?.closesAt ?? '');
   const languageText = (field: 'label' | 'finishMessage', language: Language, value: string) => {
     update({ [field]: { ...form[field], [language]: value } });
   };
@@ -190,28 +189,32 @@ function SettingsStep(props: {
   return (
     <Stack component="form" sx={{ gap: '20px' }} noValidate
       onSubmit={(event) => { event.preventDefault(); props.onNext(); }}>
+      {inCode && <Typography role="note" sx={{ fontSize: '14px', backgroundColor: '#fff', border: `1px solid ${BORDER}`,
+        borderRadius: '8px', padding: '16px 24px' }}>
+        A kódban tárolt verseny csak telepítéssel változik, az indítási ablaka kivételével: itt csak az módosítható.
+      </Typography>}
       <Card title="Alapadatok">
         <Stack sx={{ flexDirection: 'row', gap: '12px', alignItems: 'center', flexWrap: 'wrap', fontSize: '14px' }}>
           <Box component="span" id="kind-label" sx={{ color: MUTED }}>Fajta</Box>
-          <ToggleButtonGroup exclusive size="small" color="primary" value={form.kind} aria-labelledby="kind-label"
+          <ToggleButtonGroup exclusive size="small" color="primary" value={form.kind} aria-labelledby="kind-label" disabled={inCode}
             onChange={(_, kind: SettingsForm['kind'] | null) => { if (kind !== null) update({ kind }); }}>
             <ToggleButton value="competition">Dürer-forduló</ToggleButton>
             <ToggleButton value="other">Egyéb</ToggleButton>
           </ToggleButtonGroup>
         </Stack>
         {form.kind === 'competition' && <Box sx={fieldRow}>
-          <TextField label="Kiadás" value={form.edition} error={fieldErrors.edition !== undefined}
+          <TextField label="Kiadás" value={form.edition} disabled={inCode} error={fieldErrors.edition !== undefined}
             helperText={fieldErrors.edition ?? (/^\d+$/.test(form.edition) ? editionSchoolYear(Number(form.edition)) : ' ')}
             onChange={(event) => { update({ edition: event.target.value }); }}/>
-          <TextField select label="Forduló" value={form.round}
+          <TextField select label="Forduló" value={form.round} disabled={inCode}
             onChange={(event) => { update({ round: event.target.value as SettingsForm['round'] }); }}>
             {ROUNDS.map(round => <MenuItem key={round} value={round}>{ROUND_NAMES[round]}</MenuItem>)}
           </TextField>
-          <TextField label="Kategória" value={form.category} onChange={(event) => { update({ category: event.target.value }); }}/>
+          <TextField label="Kategória" value={form.category} disabled={inCode} onChange={(event) => { update({ category: event.target.value }); }}/>
         </Box>}
         <Box sx={{ ...fieldRow, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' } }}>
           {LANGUAGES.map(language => (
-            <TextField key={language} value={form.label[language]}
+            <TextField key={language} value={form.label[language]} disabled={inCode}
               label={`Címke, ${LANGUAGE_NAMES[language]}${form.kind === 'competition' ? ' (nem kötelező)' : ''}`}
               onChange={(event) => { languageText('label', language, event.target.value); }}/>
           ))}
@@ -222,7 +225,7 @@ function SettingsStep(props: {
             <FormGroup row>
               {LANGUAGES.map(language => (
                 <FormControlLabel key={language} label={LANGUAGE_NAMES[language]} control={
-                  <Checkbox checked={form.languages.includes(language)} onChange={(event) => {
+                  <Checkbox checked={form.languages.includes(language)} disabled={inCode} onChange={(event) => {
                     update({ languages: event.target.checked ? [...form.languages, language]
                       : form.languages.filter(each => each !== language) });
                   }}/>
@@ -237,11 +240,11 @@ function SettingsStep(props: {
 
       <Card title="Váltó" action={
         <FormControlLabel label="Van váltó" control={
-          <Checkbox checked={form.hasRelay} onChange={(event) => { update({ hasRelay: event.target.checked }); }}/>
+          <Checkbox checked={form.hasRelay} disabled={inCode} onChange={(event) => { update({ hasRelay: event.target.checked }); }}/>
         }/>
       }>
         {form.hasRelay && <Box sx={fieldRow}>
-          <TextField label="Időtartam (perc)" value={form.relayMinutes} error={fieldErrors.relayMinutes !== undefined}
+          <TextField label="Időtartam (perc)" value={form.relayMinutes} disabled={inCode} error={fieldErrors.relayMinutes !== undefined}
             helperText={fieldErrors.relayMinutes} onChange={(event) => { update({ relayMinutes: event.target.value }); }}/>
           <Typography sx={{ gridColumn: { md: 'span 3' }, fontSize: '14px', alignSelf: 'center' }}>
             {props.data.competition.relay?.problems.length ?? 0} feladat. A feladatok itt még nem szerkeszthetők.
@@ -251,38 +254,41 @@ function SettingsStep(props: {
 
       <Card title="Stratégiás játék" action={
         <FormControlLabel label="Van stratégiás játék" control={
-          <Checkbox checked={form.hasStrategy} onChange={(event) => { update({ hasStrategy: event.target.checked }); }}/>
+          <Checkbox checked={form.hasStrategy} disabled={inCode} onChange={(event) => { update({ hasStrategy: event.target.checked }); }}/>
         }/>
       }>
         {form.hasStrategy && <Box sx={fieldRow}>
-          <TextField select label="Játék azonosítója" value={form.gameId} sx={{ gridColumn: { md: 'span 2' } }}
+          <TextField select label="Játék azonosítója" value={form.gameId} disabled={inCode} sx={{ gridColumn: { md: 'span 2' } }}
             onChange={(event) => { update({ gameId: event.target.value }); }}>
             {gameIds.map(id => <MenuItem key={id} value={id}>{id}</MenuItem>)}
           </TextField>
-          <TextField label="Időtartam (perc)" value={form.strategyMinutes} error={fieldErrors.strategyMinutes !== undefined}
+          <TextField label="Időtartam (perc)" value={form.strategyMinutes} disabled={inCode} error={fieldErrors.strategyMinutes !== undefined}
             helperText={fieldErrors.strategyMinutes}
             onChange={(event) => { update({ strategyMinutes: event.target.value }); }}/>
         </Box>}
       </Card>
 
-      <Card title="Forduló menete">
+      <Card title="Forduló menete" action={inCode && !showsCodeWindow &&
+        <Button size="small" onClick={() => { update({ opensAt: codeWindow?.opensAt ?? '', closesAt: codeWindow?.closesAt ?? '' }); }}>
+          Vissza a kódbeli ablakhoz
+        </Button>}>
         <Box sx={fieldRow}>
           <TextField label="Indítás ettől" value={form.opensAt} placeholder={example}
             onChange={(event) => { update({ opensAt: event.target.value }); }}/>
           <TextField label="Indítás eddig (nem kötelező)" value={form.closesAt} placeholder={example}
             onChange={(event) => { update({ closesAt: event.target.value }); }}/>
-          <TextField label="Továbbjutási pontszám (nem kötelező)" value={form.advancingPoints}
+          <TextField label="Továbbjutási pontszám (nem kötelező)" value={form.advancingPoints} disabled={inCode}
             error={fieldErrors.advancingPoints !== undefined}
             helperText={fieldErrors.advancingPoints ?? 'A szabályok oldal írja ki, más nem dönt belőle.'}
             onChange={(event) => { update({ advancingPoints: event.target.value }); }}/>
         </Box>
         <Typography sx={{ fontSize: '12px', color: MUTED }}>
           Időzónás időpont, például {example}. Üresen hagyva bármikor indítható.
-          {windowSet && ' A Versenyek fülön külön ablakot adtak meg: amíg az érvényben van, ez nem számít.'}
+          {inCode && (showsCodeWindow ? ' Ez a kódbeli ablak.' : ` A kódbeli ablak: ${windowText(codeWindow)}.`)}
         </Typography>
         <Box sx={{ ...fieldRow, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' } }}>
           {LANGUAGES.map(language => (
-            <TextField key={language} multiline minRows={3} value={form.finishMessage[language]}
+            <TextField key={language} multiline minRows={3} value={form.finishMessage[language]} disabled={inCode}
               label={`Záróüzenet, ${LANGUAGE_NAMES[language]} (nem kötelező)`}
               placeholder={language === 'hu' ? 'Üres: az online forduló szokásos köszönete és az eredmények csütörtöki közzététele.'
                 : 'Üres: a másik nyelvé látszik.'}

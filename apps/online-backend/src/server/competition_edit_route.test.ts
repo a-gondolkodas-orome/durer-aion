@@ -25,7 +25,6 @@ const sample = JSON.parse(readFileSync(
   join(__dirname, "..", "..", "..", "..", "packages", "problem-bank", "fixtures", "sample-bundle.json"), "utf8",
 )) as Bundle;
 const FULL = "aqvco71pta--csomag-teljes";
-const IN_CODE = "klmgbpb334--minta-teljes";
 const PASSWORD = "pw";
 const stored: CompetitionConfig = { ...sample.competitions[FULL], id: FULL };
 const { relay, strategy } = stored;
@@ -154,16 +153,13 @@ it("keeps a started competition's languages, matches and relay problems, and let
   expect(allowed.warnings).toEqual([expect.stringContaining("a futó meccsek a régi beállításokkal")]);
 });
 
-it("warns that a window set on the Versenyek tab outranks the one given here", async () => {
+it("drops a window set apart from the competition, so the one saved with it is the one in force", async () => {
   await database.teams.setCompetitionWindow(FULL, { opensAt: "2099-02-01T14:00+01:00" });
-  expect((await report(changed, { dryRun: true })).warnings)
-    .toEqual([expect.stringContaining("külön indítási ablakot adtak meg")]);
+  expect((await report(changed)).written).toBe(true);
+  expect((await database.teams.competitionWindows()).has(FULL)).toBe(false);
 });
 
-it("refuses a competition held in code, and one no one holds", async () => {
-  const inCode = await put({ ...stored, id: IN_CODE }, { id: IN_CODE });
-  expect(inCode.status).toBe(403);
-  expect(await inCode.json()).toMatchObject({ code: "COMPETITION_IN_CODE" });
+it("refuses a competition no one holds", async () => {
   const missing = await put({ ...stored, id: "zzzzzzzzzz--nincs" }, { id: "zzzzzzzzzz--nincs" });
   expect(missing.status).toBe(404);
 });

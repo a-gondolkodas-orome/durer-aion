@@ -362,8 +362,7 @@ function AdminTabs(props: { teamId?: string }) {
       </Stack>
       <Stack {...panelProps('versenyek', tab)}>
         <Stack sx={{ padding: '10px' }}>
-          <CompetitionTable competitions={competitions ?? []} teamCounts={teamCounts}
-            onWindowChanged={() => { void refetchCompetitions(); }}/>
+          <CompetitionTable competitions={competitions ?? []} teamCounts={teamCounts}/>
         </Stack>
       </Stack>
       <Stack {...panelProps('statisztika', tab)}>

@@ -312,8 +312,9 @@ admin page's **Versenyek** tab lists the competitions with what to write.
 
 **Start windows.** Before codes go out, check on the same tab when each
 competition's teams may start their matches (*Indítási ablak*), and set the
-round's window there if its config in code gives none: without one, a team can
-start at any time. Give a testing code a wide window of its own, such as 2001
+round's window on the competition's edit page, which the column links to, if
+it has none: without one, a team can start at any time. A competition held in
+code keeps its config there, and its window alone can be changed. Give a testing code a wide window of its own, such as 2001
 to 2099, in the TSV's `Opens At` and `Closes At` columns, so it can play before
 and after the round; a team writing the round late gets its own day the same
 way. README § *Admin* says how the windows combine.
