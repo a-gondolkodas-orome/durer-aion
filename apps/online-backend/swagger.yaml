@@ -100,29 +100,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
-  /game/admin/{matchId}/metadata:
-    get:
-      summary: Get metadata for a specific match
-      parameters:
-        - name: matchId
-          in: path
-          required: true
-          schema:
-            type: string
-      security:
-      - basicAdminAuth: []
-      tags:
-      - admin
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MatchData"
-        "404":
-          description: Match not found
-
   /team/admin/{teamID}/reset/strategy:
     post:
       summary: Reset team's strategy
@@ -981,49 +958,3 @@ components:
       properties:
         matchID:
           type: string
-
-    PlayerMetadata:
-      type: object
-      additionalProperties: true
-      description: Player metadata. Structure depends on the specific game implementation.
-
-    MatchData:
-      type: object
-      properties:
-        gameName:
-          type: string
-          description: The name of the game.
-        players:
-          type: object
-          additionalProperties:
-            $ref: "#/components/schemas/PlayerMetadata"
-          description: A map of player IDs to their metadata.
-        setupData:
-          type: object
-          nullable: true
-          description: Optional setup data for the game.
-        gameover:
-          type: object
-          nullable: true
-          description: Information about the game end state, if the game is over.
-        nextMatchID:
-          type: string
-          nullable: true
-          description: ID of the next match, if applicable.
-        unlisted:
-          type: boolean
-          nullable: true
-          description: Whether the match is unlisted.
-        createdAt:
-          type: integer
-          format: int64
-          description: Timestamp of when the match was created.
-        updatedAt:
-          type: integer
-          format: int64
-          description: Timestamp of when the match was last updated.
-      required:
-        - gameName
-        - players
-        - createdAt
-        - updatedAt

@@ -188,23 +188,6 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Get metadata about a specific match.
-   *
-   * @param {string} matchId - The ID of the match.
-   * @returns {Server.MatchData} - A match object.
-   */
-  router.get("/game/admin/:matchId/metadata", adminAuth, async (ctx) => {
-    const matchID = ctx.params.matchId;
-    const { metadata } = await (ctx.db as StorageAPI.Async).fetch(matchID, {
-      metadata: true,
-    });
-    if (!metadata) {
-      refuse(ctx, 404, "MATCH_NOT_FOUND", "Match " + matchID + " not found");
-    }
-    ctx.body = metadata;
-  });
-
-  /**
      * Reset teams's strategy
      *
      * @param {string} teamID - The ID of the team.
