@@ -1,6 +1,6 @@
 import { ComponentProps, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { relayStrategy, Problem } from "relay-bot";
+import { relayStrategy, Problem } from "game/relay-judge";
 import { InProgressRelay } from "common-frontend";
 import { ClientFactoryRelay } from "./client_factory";
 import { isLanguage } from "schemas";

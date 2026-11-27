@@ -24,7 +24,6 @@
     "react-dom": "19.3.1",
     "react-i18next": "17.1.8",
     "problem-bank": "*",
-    "relay-bot": "*",
     "schemas": "*"
   },
   "devDependencies": {

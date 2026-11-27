@@ -23,8 +23,7 @@ apps/
   relay-practise-frontend/  # the public relay practice site, served at /valto/
   strategy-practice/  # the public strategy game practice site (from the durer-jatekok repo), served at /jatekok/
 packages/
-  game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder
-  relay-bot/          # the relay game's judge, and what each try is worth; it serves a relay's problems from problem-bank, holding none of its own
+  game/               # Game logic (boardgame.io games); strategy games carry their bot and board in their own folder, and the relay's judge is the `game/relay-judge` entry, serving a relay's problems from problem-bank and holding none of its own
   problem-bank/       # the competitions held in code and the problems their relays refer to by id (#137), one bank per file under banks/; the server validates it at start, and the relay practice site serves its relays
   common-frontend/    # Shared React components
   schemas/            # TypeScript models/types

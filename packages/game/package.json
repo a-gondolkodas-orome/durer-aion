@@ -20,6 +20,10 @@
     "./client": {
       "types": "./dist/client.d.mts",
       "default": "./dist/client.mjs"
+    },
+    "./relay-judge": {
+      "types": "./dist/relay-judge.d.mts",
+      "default": "./dist/relay-judge.mjs"
     }
   },
   "main": "./dist/index.mjs",

@@ -1,8 +1,8 @@
 import { createRegistry } from "problem-bank";
 import * as rehearsedRound from "problem-bank/banks/edition-20-online";
 import * as reference from "problem-bank/banks/reference";
-import { judgeProblems } from "relay-bot";
-import type { Problem } from "relay-bot";
+import { judgeProblems } from "game/relay-judge";
+import type { Problem } from "game/relay-judge";
 import { publicCompetition } from "schemas";
 import type { CompetitionId, PublicCompetition } from "schemas";
 import { referenceTeams } from "./reference-teams";

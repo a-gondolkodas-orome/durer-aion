@@ -4,7 +4,7 @@ import { MyGameWrappers as strategyGameWrappers } from 'game/strategy';
 import type { StrategyGameKey } from 'game/strategy';
 import { StrategyWrappers as StrategyStrategy } from 'game/bot';
 import type { State } from 'boardgame.io';
-import { judgeProblems, relayStrategy } from 'relay-bot';
+import { judgeProblems, relayStrategy } from 'game/relay-judge';
 import { strategyGameName } from 'schemas';
 import type { Language, ProblemSource, RelayConfig } from 'schemas';
 

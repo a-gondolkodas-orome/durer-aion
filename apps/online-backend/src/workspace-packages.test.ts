@@ -8,7 +8,7 @@ import { join } from "node:path";
 // in the source, and every entry the server reads from source (`game`,
 // `game/bot`) is a file the map names, so the two views of a package cannot
 // drift apart.
-const packages = ["game", "problem-bank", "relay-bot", "schemas"] as const;
+const packages = ["game", "problem-bank", "schemas"] as const;
 
 function packageDir(name: string) {
   return join(__dirname, "..", "..", "..", "packages", name);
