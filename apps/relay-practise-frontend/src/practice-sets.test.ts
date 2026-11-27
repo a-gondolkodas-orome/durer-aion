@@ -1,4 +1,4 @@
-import { strategyGames } from 'game';
+import { strategyGames } from 'game/strategy';
 import { validateRegistry } from 'problem-bank';
 import { practiceSets, registry } from './practice-sets';
 

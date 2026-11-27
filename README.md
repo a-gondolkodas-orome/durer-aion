@@ -606,24 +606,27 @@ that before a competition.
      only. The board wrapper ends every description with what all the games
      share, the choice of role and the two wins in a row (`strategy.rulesCommon`),
      so a description that says it too shows it twice
+   - `client.tsx` — `strategyClient(gameId)`, the three above without the bot
 
    No `index.ts` barrel: the three files are registered separately, below, and a
    barrel re-exporting the bot next to the board would undo that. More files are
    fine — a bot can keep its lookup tables in a file beside it — but what the bot and
    the board *both* need goes in `game.ts`. ESLint enforces it: `game.ts`,
-   `board.tsx` and `main.tsx` may import nothing from beside them but `./game`
-   and `./board`, so a helper they share with the bot fails `npm run lint`.
+   `board.tsx`, `main.tsx` and `client.tsx` may import nothing from beside them
+   but `./game`, `./board` and `./main`, so a helper they share with the bot
+   fails `npm run lint`.
 
 2. Register it in the three registries under
    `packages/game/src/games/strategy/`, one per package entry:
-   `strategy-games.ts` (the game definition — the `game` entry),
+   `strategy-games.ts` (the game definition — `game/strategy`),
    `strategy-bots.ts` (`game/bot`) and `strategy-client.ts` (`game/client`).
    Each is keyed by the game id a competition names (`StrategyConfig.gameId`),
    one per game and variant, e.g. `20o-c`; `strategyGames` lists the ids and
-   the languages each one's board and description exist in.
-   The server's `games.ts`, which lists each game beside its bot, imports `game`
-   and `game/bot`; the live client `game` and `game/client`; the offline dry run
-   all three.
+   the languages each one's board and description exist in, and
+   `strategyGameFolders` the folder whose `client.tsx` plays it.
+   The server's `games.ts`, which lists each game beside its bot, imports
+   `game/strategy` and `game/bot`; the live client `game/client`; the offline
+   dry run all three.
 
 What each file provides — the names are the ones the registries import. The
 game's shape is typed as `GameType` in `packages/game/src/common/types.ts`, and
@@ -656,10 +659,9 @@ the clock, the test/live choice, choosing who starts, tries and score.
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`
   (`packages/common-frontend/src/common/boardwrapper.tsx`).
-- **`main.tsx`** exports the rules text shown above the board, which
-  `strategyDescriptions` registers per game id: one element for every
-  language, or `{ hu, en }` for a game in both, of which the board shows the
-  page's.
+- **`main.tsx`** exports the rules text shown above the board: one element
+  for every language, or `{ hu, en }` for a game in both, of which the board
+  shows the page's.
 
 A relay is not a new game but a problem list: a competition's relay in
 `packages/problem-bank/banks/`, which the live round's judge reads (the

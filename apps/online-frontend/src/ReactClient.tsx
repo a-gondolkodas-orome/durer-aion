@@ -1,6 +1,5 @@
-import { GameRelay, MyGameWrappers } from "game";
-import type { StrategyGameKey } from "game";
-import { boardFor, strategyDescriptions } from "game/client";
+import { GameRelay } from "game";
+import { strategyClientFor } from "game/client";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
 import { strategyGameName } from "schemas";
 import type { PublicCompetition } from "schemas";
@@ -18,6 +17,7 @@ type OnlineClient = ReturnType<typeof ClientFactoryRelay>;
 // No server URL: the socket connects to the page's own origin, in dev through
 // the Vite proxy (vite.config.ts), in the stack through nginx.
 let relayOnlineClient: OnlineClient | undefined;
+type StrategyGameKey = Parameters<typeof strategyClientFor>[0];
 const strategyClients = new Map<StrategyGameKey, OnlineClient>();
 
 function relayClient(competition: PublicCompetition): OnlineClient | null {
@@ -40,8 +40,8 @@ function strategyClient(competition: PublicCompetition): OnlineClient | null {
 
 // Generic over the game, so that its rules and board are one game's.
 function gameClient<K extends StrategyGameKey>(gameId: K): OnlineClient {
-  const game = { ...MyGameWrappers[gameId](), name: strategyGameName(gameId) };
-  return ClientFactory(game, boardFor(gameId), strategyDescriptions[gameId]);
+  const { game, board, description } = strategyClientFor(gameId);
+  return ClientFactory({ ...game, name: strategyGameName(gameId) }, board, description);
 }
 
 interface ClientProps {

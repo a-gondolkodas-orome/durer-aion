@@ -1,5 +1,6 @@
 import { Client } from "boardgame.io/client";
-import { gameWrapper, GameRelay, MyGameWrappers } from "game";
+import { gameWrapper, GameRelay } from "game";
+import { MyGameWrappers } from "game/strategy";
 import { asRelayMoves, asStrategyWrapperMoves } from "./match-moves";
 
 // A move renamed in the game fails here, not mid-round.

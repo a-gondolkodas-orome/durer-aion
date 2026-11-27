@@ -1,4 +1,4 @@
-import { strategyGames } from 'game';
+import { strategyGames } from 'game/strategy';
 import type { Bundle, Registry } from 'problem-bank';
 import {
   combinedCompetitionSource,

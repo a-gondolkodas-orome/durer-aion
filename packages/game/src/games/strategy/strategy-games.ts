@@ -1,6 +1,5 @@
-// The strategy games' registries, one per package entry. This one is the shared
-// half: the game definitions, which the server and every client need alike.
-// The bots live in strategy-bots.ts (the `game/bot` entry) and the
+// The strategy games' registries, one per package entry. This one is the game
+// definitions (`game/strategy`). The bots live in strategy-bots.ts (the `game/bot` entry) and the
 // boards and descriptions in strategy-client.ts (`game/client`), and each
 // registry imports a game folder's *files*, never a folder barrel — a barrel
 // re-exporting `strategy` next to `board` is what would hand the bot to the
@@ -29,6 +28,15 @@ export const strategyGames = {
 } satisfies Record<StrategyGameId, StrategyGameInfo>;
 
 export type StrategyGameKey = keyof typeof strategyGames;
+
+// The game folder whose client.tsx plays each id (#643).
+export const strategyGameFolders = {
+  "20o-c": "20ocde",
+  "20o-d": "20ocde",
+  "20o-e": "20ocde",
+  "minta-ketkupac": "ketkupac",
+  "minta-sablon": "sablon",
+} satisfies Record<StrategyGameKey, string>;
 
 // Each game's own state type. The registries below, and the other two entries,
 // are typed by it, so that a caller generic over the game id keeps one game's

@@ -261,18 +261,18 @@ export default defineConfig(
   },
   // Inside packages/game, the same boundary as import allowlists: only strategy-bots.ts
   // names a bot, so nothing the `game` and `game/client` entries reach can be one. In a
-  // game folder the rules and the board import nothing from beside them but ./game and
-  // ./board, which covers a lookup table under any name; the shared registry imports
+  // game folder the rules, the board and the client import nothing from beside them
+  // but ./game, ./board and ./main, which covers a lookup table under any name; the shared registry imports
   // only game.ts, which keeps the boards out of the server too. These ride the
   // typescript-eslint rule because the block above already sets the core one for
   // these files, and a second block would replace its options.
   {
-    files: ['packages/game/src/games/strategy/*/{game.ts,board.tsx,main.tsx}'],
+    files: ['packages/game/src/games/strategy/*/{game.ts,board.tsx,main.tsx,client.tsx}'],
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
-          regex: '^\\./(?!(game|board)(\\.jsx?)?$)',
-          message: "A game folder's rules and board import only ./game and ./board from beside them; what the bot and the board both need goes in game.ts.",
+          regex: '^\\./(?!(game|board|main)(\\.jsx?)?$)',
+          message: "A game folder's rules, board and client import only ./game, ./board and ./main from beside them; what the bot and the board both need goes in game.ts.",
         }],
       }],
     },
@@ -293,7 +293,7 @@ export default defineConfig(
     rules: {
       '@typescript-eslint/no-restricted-imports': ['error', {
         patterns: [{
-          regex: '^\\./[^/]+/(?!(game|board|main)(\\.jsx?)?$)',
+          regex: '^\\./[^/]+/(?!client(\\.jsx?)?$)',
           message: 'Only strategy-bots.ts imports a bot.',
         }],
       }],
