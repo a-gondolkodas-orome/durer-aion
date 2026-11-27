@@ -63,6 +63,15 @@ export function competitionPath(competitionId: string): string {
   return `/admin/verseny/${encodeURIComponent(competitionId)}`;
 }
 
+/// An eye icon opening the competition's own page.
+export function CompetitionPageLink(props: { id: string, title: string }) {
+  return (
+    <IconButton size="small" href={competitionPath(props.id)} aria-label={`Megtekintés: ${props.title}`} title="Megtekintés">
+      <Visibility fontSize="inherit"/>
+    </IconButton>
+  );
+}
+
 /// What the admin page calls a competition: its name where it has one, else
 /// its label, else its id.
 export function competitionTitle({ id, metadata }: Pick<CompetitionSummaryDto, 'id' | 'metadata'>): string {
@@ -110,12 +119,7 @@ export function CompetitionTable(props: {
             headerName: '',
             width: 56,
             sortable: false,
-            renderCell: ({ row }: { row: CompetitionRow }) => (
-              <IconButton size="small" href={competitionPath(row.id)} aria-label={`Megtekintés: ${row.importAs}`}
-                title="Megtekintés">
-                <Visibility fontSize="inherit"/>
-              </IconButton>
-            ),
+            renderCell: ({ row }: { row: CompetitionRow }) => <CompetitionPageLink id={row.id} title={row.importAs}/>,
           },
           {
             field: 'importAs',
