@@ -1,6 +1,7 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Link, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
+import Visibility from '@mui/icons-material/Visibility';
 import { Box, Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
@@ -105,6 +106,18 @@ export function CompetitionTable(props: {
         }))}
         columns={[
           {
+            field: 'open',
+            headerName: '',
+            width: 56,
+            sortable: false,
+            renderCell: ({ row }: { row: CompetitionRow }) => (
+              <IconButton size="small" href={competitionPath(row.id)} aria-label={`Megtekintés: ${row.importAs}`}
+                title="Megtekintés">
+                <Visibility fontSize="inherit"/>
+              </IconButton>
+            ),
+          },
+          {
             field: 'importAs',
             headerName: 'Competition',
             description: 'Ezt kell a csapat sorában a Competition oszlopba írni. Az azonosító is jó.',
@@ -155,15 +168,6 @@ export function CompetitionTable(props: {
                   {windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}
                 </Box>
               </Stack>
-            ),
-          },
-          {
-            field: 'open',
-            headerName: '',
-            width: 120,
-            sortable: false,
-            renderCell: ({ row }: { row: CompetitionRow }) => (
-              <Link href={competitionPath(row.id)} aria-label={`Megtekintés: ${row.importAs}`}>Megtekintés</Link>
             ),
           },
         ]}
