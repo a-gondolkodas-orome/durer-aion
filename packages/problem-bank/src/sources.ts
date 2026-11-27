@@ -5,7 +5,6 @@ import type {
   Problem,
   ProblemId,
   ProblemSource,
-  RelayConfig,
 } from 'schemas';
 
 /// Problems as the code holds them: keyed by id, so a file states each id once
@@ -101,22 +100,4 @@ export function combinedCompetitionSource(sources: readonly CompetitionSource[])
       return all.filter(({ id }) => !twice.has(id));
     },
   };
-}
-
-/// One problem of a relay, in play order, with what it is worth there.
-export interface RelayProblem {
-  problem: Problem;
-  points: number;
-}
-
-/// The relay's problems, fetched from the source. A problem the source does
-/// not have is an error: the validator refuses such a relay, so reaching one
-/// here means a competition went out unvalidated.
-export async function resolveRelay(relay: RelayConfig, source: ProblemSource): Promise<RelayProblem[]> {
-  const problems = await source.getProblems(relay.problems.map(({ problemId }) => problemId));
-  return relay.problems.map(({ problemId, points }) => {
-    const problem = problems.get(problemId);
-    if (problem === undefined) throw new Error(`The relay refers to the problem ${problemId}, which does not exist`);
-    return { problem, points };
-  });
 }
