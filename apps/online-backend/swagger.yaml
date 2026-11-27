@@ -355,6 +355,66 @@ paths:
                     type: object
                   problems:
                     type: object
+  /team/admin/competitions/{competitionId}:
+    get:
+      summary: One competition whole, for its admin page, its relay's answers included
+      description: >
+        In-code and database competitions alike. The relay's problems are in
+        play order, and each lists every use any listed competition's relay
+        makes of it, this one's included: what a fix to the problem reaches.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: competitionId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The competition's row of the list above, its config, and its relay's problems
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The list's fields (id, metadata, startWindow, configStartWindow, storedIn), and these
+                properties:
+                  competition:
+                    type: object
+                    description: The competition's config, as `CompetitionConfig` types it
+                  relayProblems:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        problem:
+                          type: object
+                          description: The problem, answer included, as `Problem` types it
+                        points:
+                          type: integer
+                        storedIn:
+                          type: string
+                          enum: [code, database]
+                        uses:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              competitionId:
+                                type: string
+                              metadata:
+                                type: object
+                              position:
+                                type: integer
+                                description: 1-based, in play order
+                              points:
+                                type: integer
+        "401":
+          description: Not an organiser
+        "404":
+          description: No competition with this id
   /team/admin/competitions/{competitionId}/start-window:
     put:
       summary: Set a competition's start window in place of its config's, or return it to its config's

@@ -78,7 +78,7 @@
   "general": {
     "backHome": "Back to the home page",
     "close": "Close",
-    "loading": "Loading game or task…",
+    "loading": "Loading…",
     "points_one": "1 point",
     "points_other": "{{count}} points",
     "pointsUnit_one": "point",

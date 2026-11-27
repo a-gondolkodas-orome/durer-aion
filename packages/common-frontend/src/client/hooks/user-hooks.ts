@@ -208,6 +208,11 @@ export const useCompetitions = () => {
   return async () => await repo.getCompetitions();
 };
 
+export const useCompetition = () => {
+  const repo = useAdminRepo();
+  return async (competitionId: string) => await repo.getCompetition(competitionId);
+};
+
 export const useSetCompetitionWindow = () => {
   const repo = useAdminRepo();
   return async (competitionId: string, window: { opensAt: string | null, closesAt: string | null }) => {

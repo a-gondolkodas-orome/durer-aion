@@ -20,6 +20,7 @@ import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
+import { adminCompetitionView, competitionSummary, problemUses } from './competition_view';
 
 /** What the routes use of the socket transport `server.ts` puts on the
  *  context, which koa's context types as `any`. */
@@ -291,12 +292,8 @@ export function configureTeamsRouter(
    */
   router.get("/team/admin/competitions", adminAuth, async (ctx) => {
     const windows = await teams.competitionWindows();
-    ctx.body = (await competitions.listCompetitions()).map(({ id, metadata, startWindow }) => ({
-      id, metadata,
-      startWindow: windows.get(id) ?? startWindow ?? null,
-      configStartWindow: startWindow ?? null,
-      storedIn: sources.competitions.has(id) ? 'code' : 'database',
-    }));
+    ctx.body = (await competitions.listCompetitions())
+      .map(competition => competitionSummary(competition, windows, sources.competitions));
   });
 
   /**
@@ -311,6 +308,22 @@ export function configureTeamsRouter(
 
   router.get("/team/admin/competitions/export", adminAuth, async (ctx) => {
     ctx.body = await exportBundle();
+  });
+
+  /**
+   * One competition whole, answers included, for its admin page
+   * (`AdminCompetitionView`). After `…/export`, which it would take for an id.
+   *
+   * @param {string} competitionId - The id of the competition.
+   */
+  router.get("/team/admin/competitions/:competitionId", adminAuth, async (ctx) => {
+    const { competitionId } = ctx.params;
+    const competition = await competitions.getCompetition(competitionId)
+      ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
+    const problemIds = competition.relay?.problems.map(({ problemId }) => problemId) ?? [];
+    const summary = competitionSummary(competition, await teams.competitionWindows(), sources.competitions);
+    ctx.body = adminCompetitionView(summary, competition, await problems.getProblems(problemIds), sources.problems,
+      problemUses(await competitions.listCompetitions()));
   });
 
   /**

@@ -452,8 +452,12 @@ test('the stats have a row per competition, by its name', async () => {
   ]);
   renderAdmin();
 
-  const rows = (await screen.findAllByRole('row')).slice(1).map(row => within(row).getAllByRole('cell')[0].textContent);
-  expect(rows).toEqual(['20 online C', '20 online D', 'zzzzzzzzzz--gone']);
+  const rows = (await screen.findAllByRole('row')).slice(1).map(row => within(row).getAllByRole('cell')[0]);
+  expect(rows.map(cell => cell.textContent)).toEqual(['20 online C', '20 online D', 'zzzzzzzzzz--gone']);
+  // Only a competition the server has has a page to open.
+  expect(within(rows[0]).getByRole('link', { name: 'Megtekintés: 20 online C' }))
+    .toHaveAttribute('href', `/admin/verseny/${COMPETITION_C}`);
+  expect(within(rows[2]).queryByRole('link')).not.toBeInTheDocument();
 });
 
 test('the stats say what the numbers in each triple count', async () => {
@@ -557,8 +561,10 @@ test('the competitions tab lists the competitions newest first, with what to imp
   expect(within(table).getByText('20 online D')).toBeInTheDocument();
   expect([...grids.columns].reverse().find(columns => columns.some(column => column.field === 'importAs'))
     ?.map(column => column.field))
-    .toEqual(['importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'storedIn', 'startWindow']);
+    .toEqual(['open', 'importAs', 'id', 'edition', 'round', 'category', 'label', 'teams', 'storedIn', 'startWindow']);
   if (row === null) throw new Error('no table row');
+  expect(within(row).getByRole('link', { name: 'Megtekintés: 20 online C' }))
+    .toHaveAttribute('href', `/admin/verseny/${COMPETITION_C}`);
   fireEvent.click(within(row).getByRole('button', { name: 'Másolás: 20 online C' }));
   await waitFor(() => { expect(writeText).toHaveBeenCalledWith('20 online C'); });
   expect(await screen.findByText('Vágólapra másolva: 20 online C')).toBeInTheDocument();

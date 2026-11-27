@@ -10,7 +10,7 @@ import '../../common/i18n';
 import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import { ThemeProvider } from '@mui/material/styles';
-import { Main } from './Main';
+import { Main, adminPath } from './Main';
 import i18next from 'i18next';
 
 vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
@@ -253,4 +253,13 @@ test('the admin page carries no tracking note', async () => {
   const { findByTestId, queryByText } = renderMain();
   await findByTestId('adminRoot');
   expect(queryByText(trackingNote)).not.toBeInTheDocument();
+});
+
+test.each([
+  ['/admin', {}],
+  ['/admin/8eae8669-125c-42e5-8b49-89afbac31679', { teamId: '8eae8669-125c-42e5-8b49-89afbac31679' }],
+  ['/admin/verseny/aqvco71pta--csomag-teljes', { competitionId: 'aqvco71pta--csomag-teljes' }],
+  ['/admin/verseny', {}],
+])('the admin path %s opens %o', (pathname, opened) => {
+  expect(adminPath(pathname)).toEqual(opened);
 });

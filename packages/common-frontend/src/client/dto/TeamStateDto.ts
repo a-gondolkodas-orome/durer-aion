@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import type { GameStateMixin, MyGameState as RelayGameState } from "game";
-import type { CompetitionMetadata, MatchStatus, PageState, PublicCompetition, StartWindow } from "schemas";
+import type { CompetitionConfig, CompetitionMetadata, MatchStatus, PageState, Problem, PublicCompetition, StartWindow } from "schemas";
 import { I18nError } from "../utils/i18n-error";
 
 export { isPageState, type PageState } from "schemas";
@@ -62,6 +62,29 @@ export interface CompetitionSummaryDto {
   configStartWindow?: StartWindow | null;
   /// Where the competition is held: one in code changes only with a deploy.
   storedIn: 'code' | 'database';
+}
+
+/// One place a relay uses a problem: what a fix to the problem reaches.
+export interface ProblemUseDto {
+  competitionId: string;
+  metadata: CompetitionMetadata;
+  /// 1-based, in play order.
+  position: number;
+  points: number;
+}
+
+/// One competition whole, as `GET /team/admin/competitions/:id` serves it: its
+/// row of the list, its config, and its relay's problems in play order,
+/// answers included.
+export interface AdminCompetitionDto extends CompetitionSummaryDto {
+  competition: CompetitionConfig;
+  relayProblems: {
+    problem: Problem;
+    points: number;
+    storedIn: 'code' | 'database';
+    /// Every use of the problem, this competition's included.
+    uses: ProblemUseDto[];
+  }[];
 }
 
 /// What `POST /team/admin/competitions/import` answers: every competition and

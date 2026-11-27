@@ -25,6 +25,14 @@ import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenL
 // the entry chunk.
 const Admin = React.lazy(() => import("./Admin").then(module => ({ default: module.Admin })));
 
+/// What an admin path opens: `/admin/verseny/<id>` a competition's page,
+/// `/admin/<teamId>` a team's, anything else the tabs.
+export function adminPath(pathname: string): { teamId?: string, competitionId?: string } {
+  const [, , first, second] = pathname.split('/');
+  if (first === 'verseny') return second ? { competitionId: decodeURIComponent(second) } : {};
+  return first ? { teamId: first } : {};
+}
+
 export function Main(props: { gitCommitHash: string }) {
   const teamState = useTeamState();
   // Only the online app provides an admin repository; elsewhere `/admin` is
@@ -94,7 +102,7 @@ export function Main(props: { gitCommitHash: string }) {
               or a live, playable board for one still holding a team's session
               from testing. */}
           {admin ? <React.Suspense fallback={<Loading/>}>
-            <Admin teamId={window.location.pathname.split('/').at(2)}/>
+            <Admin {...adminPath(window.location.pathname)}/>
           </React.Suspense> : <>
             {/* `undefined`, not yet known, renders nothing: see the store */}
             {teamState === null && <LoginLayout><Login /></LoginLayout>}

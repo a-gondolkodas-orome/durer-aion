@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
+import Visibility from '@mui/icons-material/Visibility';
 import { Box, Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
@@ -12,7 +13,7 @@ import { useSetCompetitionWindow } from '../hooks/user-hooks';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { useErrorMessage } from '../utils/error-message';
 
-const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
+export const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
   online: 'internetes',
   local: 'helyi',
   final: 'döntő',
@@ -56,9 +57,24 @@ function competitionRow({ id, metadata, startWindow = null, configStartWindow = 
   };
 }
 
+/// Where a competition's own page is (CompetitionPage.tsx): what `adminPath`
+/// in Main.tsx reads back.
+export function competitionPath(competitionId: string): string {
+  return `/admin/verseny/${encodeURIComponent(competitionId)}`;
+}
+
+/// An eye icon opening the competition's own page.
+export function CompetitionPageLink(props: { id: string, title: string }) {
+  return (
+    <IconButton size="small" href={competitionPath(props.id)} aria-label={`Megtekintés: ${props.title}`} title="Megtekintés">
+      <Visibility fontSize="inherit"/>
+    </IconButton>
+  );
+}
+
 /// What the admin page calls a competition: its name where it has one, else
 /// its label, else its id.
-export function competitionTitle({ id, metadata }: CompetitionSummaryDto): string {
+export function competitionTitle({ id, metadata }: Pick<CompetitionSummaryDto, 'id' | 'metadata'>): string {
   return competitionName(metadata) ?? (metadata.kind === 'other' ? metadata.label.hu ?? metadata.label.en : undefined) ?? id;
 }
 
@@ -98,6 +114,13 @@ export function CompetitionTable(props: {
           ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
         }))}
         columns={[
+          {
+            field: 'open',
+            headerName: '',
+            width: 56,
+            sortable: false,
+            renderCell: ({ row }: { row: CompetitionRow }) => <CompetitionPageLink id={row.id} title={row.importAs}/>,
+          },
           {
             field: 'importAs',
             headerName: 'Competition',

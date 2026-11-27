@@ -7,7 +7,8 @@ import { DataGrid, ExportCsv, QuickFilter, QuickFilterControl, Toolbar } from '@
 import { TeamModelDto } from '../dto/TeamStateDto';
 import { TEAM_DIALOG_TITLE_ID, TeamDetailDialog } from './TeamDetailDialog';
 import { ImportExport } from './ImportExport';
-import { CompetitionTable, competitionTitle } from './CompetitionTable';
+import { CompetitionPageLink, CompetitionTable, competitionTitle } from './CompetitionTable';
+import { CompetitionPage } from './CompetitionPage';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -82,7 +83,12 @@ const panelProps = (panel: AdminTab, open: AdminTab) => ({
   sx: panel === open ? {} : { visibility: 'hidden', height: 0, overflow: 'hidden' },
 });
 
-export function Admin(props: { teamId?: string }) {
+export function Admin(props: { teamId?: string, competitionId?: string }) {
+  return props.competitionId === undefined ? <AdminTabs teamId={props.teamId}/>
+    : <CompetitionPage competitionId={props.competitionId}/>;
+}
+
+function AdminTabs(props: { teamId?: string }) {
   const errorMessage = useErrorMessage();
   const theme = useTheme();
   const getAll = useAll();
@@ -359,7 +365,7 @@ export function Admin(props: { teamId?: string }) {
         </Stack>
       </Stack>
       <Stack {...panelProps('statisztika', tab)}>
-        <Stats data={teams} titleOf={titleOf}/>
+        <Stats data={teams} titleOf={titleOf} known={titles}/>
       </Stack>
       <Stack {...panelProps('import-export', tab)}>
         <ImportExport teams={teams} onImported={() => { void mutate(); }}
@@ -372,7 +378,12 @@ export function Admin(props: { teamId?: string }) {
 }
 
 /// One row per competition, in the order of their names.
-function Stats(props: { data: TeamModelDto[], titleOf: (competitionId: string) => string }) {
+function Stats(props: {
+  data: TeamModelDto[],
+  titleOf: (competitionId: string) => string,
+  /// The competitions the server has, which alone have a page to link to.
+  known: ReadonlyMap<string, string>,
+}) {
   const competitionIds = Array.from(new Set(props.data.map(it => it.competitionId ?? '')))
     .sort((a, b) => props.titleOf(a).localeCompare(props.titleOf(b), 'hu'));
   const stat = competitionIds.map(competitionId => {
@@ -426,7 +437,10 @@ function Stats(props: { data: TeamModelDto[], titleOf: (competitionId: string) =
     <TableBody>
       {stat.map(s => (
         <TableRow key={s.competitionId}>
-          <TableCell>{s.competition}</TableCell>
+          <TableCell>
+            {props.known.has(s.competitionId) && <CompetitionPageLink id={s.competitionId} title={s.competition}/>}
+            {s.competition}
+          </TableCell>
           <TableCell>{s.all}</TableCell>
           <TableCell><Progress notStarted={s.all - s.relayInProgress - s.relay} inProgress={s.relayInProgress} finished={s.relay}/></TableCell>
           <TableCell><Progress notStarted={s.all - s.strategyInProgress - s.strategy} inProgress={s.strategyInProgress} finished={s.strategy}/></TableCell>

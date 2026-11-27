@@ -1,4 +1,4 @@
-import type { BundleImportResultDto, CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { AdminCompetitionDto, BundleImportResultDto, CompetitionSummaryDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -42,6 +42,8 @@ export interface AdminClientRepository {
   setStartWindow(teamId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<TeamModelDto>
   addMinutes(matchId: string, minutes: number): Promise<string>
   getCompetitions(): Promise<CompetitionSummaryDto[]>
+  /** One competition with its relay's problems, answers included. */
+  getCompetition(competitionId: string): Promise<AdminCompetitionDto>
   /** Sets the competition's start window in place of its config's; a null
    *  `opensAt` returns it to its config's. */
   setCompetitionWindow(competitionId: string, window: { opensAt: string | null, closesAt: string | null }): Promise<void>
