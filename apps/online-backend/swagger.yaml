@@ -535,6 +535,21 @@ paths:
         "401":
           description: No session
 
+  /team/me/strategy-client.js:
+    get:
+      summary: The team's started strategy game, served by nginx through X-Accel-Redirect (#643)
+      security:
+      - teamSession: []
+      tags:
+      - user
+      responses:
+        "200":
+          description: Empty; X-Accel-Redirect names the game's file
+        "401":
+          description: No session
+        "404":
+          description: The team has not started its strategy match
+
   /team/me/relay/play:
     post:
       summary: Let the logged-in team start a RELAY match

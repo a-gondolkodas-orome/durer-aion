@@ -1,4 +1,4 @@
-import { startWindowState } from './competition';
+import { startWindowState, strategyGameIdOf, strategyGameName } from './competition';
 
 describe('startWindowState', () => {
   const window = { opensAt: '2026-10-20T15:00:00+02:00', closesAt: '2026-10-20T21:30:00+02:00' };
@@ -19,5 +19,16 @@ describe('startWindowState', () => {
 
   it('stays open without a closesAt', () => {
     expect(startWindowState({ opensAt: window.opensAt }, new Date('2099-01-01T00:00:00Z'))).toBe('open');
+  });
+});
+
+describe('strategyGameIdOf', () => {
+  it('reads back the game id strategyGameName put in', () => {
+    expect(strategyGameIdOf(strategyGameName('minta-sablon'))).toBe('minta-sablon');
+  });
+
+  it('reads no game id from the relay or an empty one', () => {
+    expect(strategyGameIdOf('relay')).toBeUndefined();
+    expect(strategyGameIdOf('strategy--')).toBeUndefined();
   });
 });

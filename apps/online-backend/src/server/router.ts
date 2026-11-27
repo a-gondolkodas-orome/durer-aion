@@ -10,6 +10,7 @@ import { allowedToViewStrategy, getNewGame, createGame, injectBot, injectPlayer 
 import { adminTeamView, adminTeamViews, deriveMatchStatus, teamMatches } from './match_status';
 import { import_teams_from_tsv } from './team_import';
 import { publicTeamView } from './team_view';
+import { GATED_STRATEGY_PATH, startedStrategyFolder } from './strategy_client';
 import { readStartWindowBody, withCompetitionWindow } from './start_window';
 import { TeamState, clearTeamCookie, requireJson, requireTeam, setTeamCookie } from './team_session';
 import { JOIN_ATTEMPT_LIMIT, JOIN_ATTEMPT_WINDOW_SECONDS, rateLimit } from './rate_limit';
@@ -398,6 +399,23 @@ export function configureTeamsRouter(
   router.get<TeamState>("/team/me", requireTeam(teams), async (ctx) => {
     const team = ctx.state.team;
     ctx.body = publicTeamView(team, await teamMatches(ctx.db, team), await competitionNow(team));
+  });
+
+  /**
+   * The team's started strategy game: nginx serves the file the
+   * X-Accel-Redirect names (#643). Nothing before the start.
+   */
+  router.get<TeamState>("/team/me/strategy-client.js", requireTeam(teams), async (ctx) => {
+    const team = ctx.state.team;
+    const folder = await startedStrategyFolder(ctx.db, (await teamMatches(ctx.db, team)).strategyMatch)
+      ?? refuse(ctx, 404, "MATCH_NOT_FOUND", "The team has not started its strategy match.");
+    ctx.set("X-Accel-Redirect", `${GATED_STRATEGY_PATH}${folder}.js`);
+    // nginx keeps these two headers for the file. A module script needs a
+    // JavaScript type; no-cache, as teams share computers and this one URL.
+    ctx.status = 200;
+    ctx.body = "";
+    ctx.type = "text/javascript";
+    ctx.set("Cache-Control", "private, no-cache");
   });
 
   /**
