@@ -1,5 +1,7 @@
 import { Box, Button, Stack } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
+import { useEffect, useRef } from 'react';
+import { useBoardKeys } from '../../../common/board-keys';
 import { PHASE } from '../../../common/gamewrapper';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalSelection, isLegalTake, maxTake } from './game';
@@ -13,10 +15,16 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   // The bot's choice shows too, between the two moves of its turn, but not
   // once the game is over: a game timed out mid-turn keeps its pile chosen.
   const selected = playing ? G.selectedPile : null;
+  const keys = useBoardKeys({ active });
+  // A pile chosen, the keyboard goes on to how many to take from it.
+  const takes = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (active && selected !== null) takes.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus();
+  }, [active, selected]);
   const most = !active || selected === null ? 0 : Math.min(maxTake(G, ctx.currentPlayer), G.piles[selected]);
 
   return (
-    <Stack spacing={2} sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>
+    <Stack spacing={2} {...keys} sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>
       {G.piles.map((size, pile) => {
         const justTaken = G.lastJudgeTake?.pile === pile ? G.lastJudgeTake.count : 0;
         return (
@@ -42,7 +50,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
           </Button>
         );
       })}
-      <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', minHeight: 40 }}>
+      <Stack ref={takes} direction="row" spacing={1} sx={{ justifyContent: 'center', minHeight: 40 }}>
         {selected !== null && Array.from({ length: most }, (_, i) => i + 1).map(count => (
           <Button
             key={count}

@@ -1,5 +1,6 @@
 import { Box, Button, Stack } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
+import { useBoardKeys } from '../../../common/board-keys';
 import { PHASE } from '../../../common/gamewrapper';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalTake, TAKES } from './game';
@@ -13,6 +14,8 @@ type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
   const justTaken = active ? G.lastJudgeTake ?? 0 : 0;
+  // Every board is played from the keyboard too: the arrows choose, Enter moves.
+  const keys = useBoardKeys({ active });
 
   return (
     <Stack spacing={2} sx={{ alignItems: 'center', width: '100%', maxWidth: 440, mx: 'auto' }}>
@@ -21,7 +24,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
         {'●'.repeat(G.pile)}
         <Box component="span" sx={{ opacity: 0.3 }}>{'○'.repeat(justTaken)}</Box>
       </Box>
-      <Stack direction="row" spacing={1}>
+      <Stack direction="row" spacing={1} {...keys}>
         {TAKES.map(count => (
           <Button key={count} variant="contained" disabled={!active || !isLegalTake(G, ctx, count)} onClick={() => moves.take(count)}>
             {`−${count}`}

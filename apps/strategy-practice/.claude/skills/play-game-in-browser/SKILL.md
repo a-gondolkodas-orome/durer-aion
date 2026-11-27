@@ -106,6 +106,9 @@ Worth a playthrough whenever the diff touches a board:
 - **Hover previews**, which no headless test can see at all. Hover state
   survives clicks that are not moves (picking a pile to discard), so check it
   after such a click, not only before.
+- **The keyboard alone** — Tab to the board, arrows to choose, Enter to move —
+  through a whole game, the bot's turns included: a board that loses focus
+  when its buttons disable makes the team start over with Tab each turn.
 - **Dark mode** (☀ / ◑ / ☾ in the header) if any colour class changed. Which of
   two `bg-` utilities wins is Tailwind's emit order, not the order written.
 

@@ -215,12 +215,14 @@ skill, which drives it in a real browser and says what to look at.
 Before declaring the game done, walk [src/components/AGENTS.md § New game
 checklist](../../../src/components/AGENTS.md#new-game-checklist) and verify each
 item against the running game, not against your intent to have satisfied it.
-Two of them are worth naming here because they are the ones that quietly go
+Three of them are worth naming here because they are the ones that quietly go
 unchecked:
 
 - the optimality claim must be backed by the `runMatch` test from step 7, not by
   eyeballing a few of the bot's moves
 - the game must be played through in **both** `vsComputer` and `vsHuman` mode
+- the game must be playable from the keyboard alone — the arrows between
+  choices, Enter to move — and stay so across the bot's turn
 
 ### 9. Offer a test bot variant (only if optimal AI was implemented)
 If the optimal AI strategy was implemented in step 2, ask the user:

@@ -662,6 +662,14 @@ the clock, the test/live choice, choosing who starts, tries and score.
   draws the board alone. The countdown, the test/live and role buttons, the
   status line and the end table come from `boardWrapper`
   (`packages/common-frontend/src/common/boardwrapper.tsx`).
+
+  A board is played from the keyboard as well as the mouse (#709): teams find
+  the arrows and Enter much faster than clicking. Make every move a `<button>`
+  and spread `useBoardKeys({ active })` (`board-keys.ts`) on what holds them —
+  the arrows then step between the enabled ones, a grid's with
+  `columns`, and focus comes back to the board once the bot has moved, since
+  its turn disables every button. A turn of two steps moves focus on to the
+  second itself, as `ketkupac/` does.
 - **`main.tsx`** exports the rules text shown above the board: one element
   for every language, or `{ hu, en }` for a game in both, of which the board
   shows the page's.
