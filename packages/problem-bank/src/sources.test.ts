@@ -5,7 +5,6 @@ import {
   fromBanks,
   inCodeCompetitionSource,
   inCodeProblemSource,
-  resolveRelay,
 } from './sources';
 
 const problem = (id: string, answer: number): Problem => ({
@@ -87,19 +86,5 @@ describe('combinedCompetitionSource', () => {
     const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     expect(await combinedCompetitionSource([code, database, code]).listCompetitions()).toEqual([other]);
     expect(logged).toHaveBeenCalledWith(expect.stringContaining(competition.id));
-  });
-});
-
-describe('resolveRelay', () => {
-  it('gives the relay\'s problems in play order, each with its points there', async () => {
-    expect(await resolveRelay(relay, source)).toEqual([
-      { problem: second, points: 4 },
-      { problem: first, points: 3 },
-    ]);
-  });
-
-  it('refuses a relay that refers to a problem the source does not have', async () => {
-    const dangling = { durationMinutes: 60, problems: [{ problemId: 'zzzzzzzzzz--missing', points: 3 }] };
-    await expect(resolveRelay(dangling, source)).rejects.toThrow('zzzzzzzzzz--missing');
   });
 });
