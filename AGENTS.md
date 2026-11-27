@@ -84,15 +84,19 @@ For a game on the *strategy practice* site, the `new-game` skill,
 `apps/strategy-practice/.claude/skills/new-game/`, is the route. For the *live competition*
 (boardgame.io), [`README.md`](README.md) § *Creating a new game* is the recipe:
 one self-contained folder under `packages/game/src/games/strategy/<game-name>/`
-holding `game.ts`, `strategy.ts`, `board.tsx` and `main.tsx`, registered in the
-three registries beside it — one per package entry. Two rules there decide
-whether the change is safe, and both fail late if you get them wrong:
+holding `game.ts`, `strategy.ts`, `board.tsx`, `main.tsx` and `client.tsx`,
+registered in the three registries beside it — one per package entry. Three rules
+there decide whether the change is safe, and all fail late if you get them
+wrong:
 
 - **No `index.ts` barrel, and nothing shared between the bot and the board
   outside `game.ts`.** A helper beside them is a file the `game/bot` entry and
   the client entry have in common. ESLint allows a game folder's `game.ts`,
-  `board.tsx` and `main.tsx` no import from beside them but `./game` and
-  `./board`, and only `strategy-bots.ts` may import a bot (`eslint.config.mjs`)
+  `board.tsx`, `main.tsx` and `client.tsx` no import from beside them but
+  `./game`, `./board` and `./main`, and only `strategy-bots.ts` may import a bot (`eslint.config.mjs`)
+- **The live client loads a strategy game only from the backend's gate**
+  (#643): each `client.tsx` builds to `dist/gated/`, and the build fails if a
+  game's code lands elsewhere ([`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md))
 - **The live client must not ship the bot.** ESLint forbids the `game/bot`
   specifier everywhere but the server and the offline dry run — the dry run
   imports it on purpose, since its bot runs in the browser after the game is

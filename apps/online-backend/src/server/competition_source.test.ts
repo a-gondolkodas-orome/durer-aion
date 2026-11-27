@@ -8,7 +8,7 @@ import Router from "@koa/router";
 import type { Server, State } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
-import { strategyGames } from "game";
+import { strategyGames } from "game/strategy";
 import type { MyGameState } from "game";
 import { validatingCompetitionSource } from "problem-bank";
 import type { CompetitionConfig, CompetitionSource, Problem, ProblemSource } from "schemas";

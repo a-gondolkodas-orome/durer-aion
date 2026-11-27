@@ -1,5 +1,7 @@
-import { MyGameWrappers as strategyGameWrappers, RelayWrapper, botWrapper, gameWrapper } from 'game';
-import type { MyGameState, RelaySetupData, StrategyGameKey } from 'game';
+import { RelayWrapper, botWrapper, gameWrapper } from 'game';
+import type { MyGameState, RelaySetupData } from 'game';
+import { MyGameWrappers as strategyGameWrappers } from 'game/strategy';
+import type { StrategyGameKey } from 'game/strategy';
 import { StrategyWrappers as StrategyStrategy } from 'game/bot';
 import type { State } from 'boardgame.io';
 import { judgeProblems, relayStrategy } from 'relay-bot';

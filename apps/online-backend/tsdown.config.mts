@@ -4,8 +4,8 @@ import { defineConfig } from 'tsdown'
 // build needs no `packages/*/dist` and cannot go stale against one. Where that
 // source is comes from tsconfig.json's `paths`, which tsdown reads as its alias
 // map — the one list the bundle and the typecheck share. The server imports
-// `game` and `game/bot`, never `game/client`, so the bundle carries no board
-// and requires neither React nor MUI.
+// `game`, `game/strategy` and `game/bot`, never `game/client`, so the bundle
+// carries no board and requires neither React nor MUI.
 
 export default defineConfig({
   // Two entries: the server and the team import. rolldown puts what they share
@@ -40,7 +40,7 @@ export default defineConfig({
     // runs on the bare specifier first, and they all belong to declared
     // dependencies; this is what makes `paths` win. Without it they stay
     // `require()`s of a `dist` the image never builds.
-    alwaysBundle: ['game', 'game/bot', 'schemas', 'relay-bot', 'problem-bank', 'problem-bank/all'],
+    alwaysBundle: ['game', 'game/strategy', 'game/bot', 'schemas', 'relay-bot', 'problem-bank', 'problem-bank/all'],
     // Keep `boardgame.io/server` and the like as written, so the bundle
     // requires what the source imports rather than a `dist/cjs/...` path.
     resolveDepSubpath: false,
