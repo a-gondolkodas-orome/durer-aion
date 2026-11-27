@@ -112,6 +112,26 @@ test('shows the server\'s errors and warnings, and saves nothing while there is 
   expect(screen.getByRole('checkbox', { name: 'Van stratégiás játék' })).not.toBeChecked();
 });
 
+test('goes on to the review only once something has changed', async () => {
+  renderPage();
+  await screen.findByRole('heading', { name: '21 online C' });
+  const nextButton = screen.getByRole('button', { name: 'Tovább: ellenőrzés' });
+  expect(nextButton).toBeDisabled();
+  expect(screen.getByText('Még nincs mit menteni.')).toBeInTheDocument();
+
+  type('Kategória', 'D');
+  expect(nextButton).toBeEnabled();
+  type('Kategória', 'C');
+  expect(nextButton).toBeDisabled();
+});
+
+test('fills a window field with the current time', async () => {
+  renderPage();
+  await screen.findByRole('heading', { name: '21 online C' });
+  fireEvent.click(screen.getByRole('button', { name: 'Indítás ettől: most' }));
+  expect((field('Indítás ettől') as HTMLInputElement).value).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d[+-]\d\d:\d\d$/);
+});
+
 test('stays on the form, naming the field, while a number field holds no number', async () => {
   renderPage();
   await screen.findByRole('heading', { name: '21 online C' });

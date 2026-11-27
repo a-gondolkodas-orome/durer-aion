@@ -1,5 +1,5 @@
 import {
-  Box, Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Link, MenuItem, TextField, ToggleButton,
+  Box, Button, Checkbox, FormControlLabel, FormGroup, FormLabel, InputAdornment, Link, MenuItem, TextField, ToggleButton,
   ToggleButtonGroup, Typography,
 } from '@mui/material';
 import { Stack } from '@mui/system';
@@ -121,7 +121,7 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
     <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
     <Steps step={review === null ? 1 : 2}/>
     {review === null
-      ? <SettingsStep form={form} update={update} fieldErrors={fieldErrors} data={data} busy={busy}
+      ? <SettingsStep form={form} update={update} fieldErrors={fieldErrors} data={data} busy={busy} dirty={dirty}
         onNext={() => { void toReview(); }}/>
       : <ReviewStep competition={review.competition} result={review.result} busy={busy}
         onBack={() => { setReview(null); }} onSave={() => { void save(); }}/>}
@@ -172,7 +172,7 @@ const fieldRow = { display: 'grid', gap: '16px', gridTemplateColumns: { xs: '1fr
 
 function SettingsStep(props: {
   form: SettingsForm, update: (change: Partial<SettingsForm>) => void, fieldErrors: FieldErrors,
-  data: AdminCompetitionDto, busy: boolean, onNext: () => void,
+  data: AdminCompetitionDto, busy: boolean, dirty: boolean, onNext: () => void,
 }) {
   const { form, update, fieldErrors } = props;
   const example = windowTimeNow();
@@ -182,13 +182,21 @@ function SettingsStep(props: {
   const inCode = props.data.storedIn === 'code';
   const codeWindow = props.data.configStartWindow ?? null;
   const showsCodeWindow = form.opensAt === (codeWindow?.opensAt ?? '') && form.closesAt === (codeWindow?.closesAt ?? '');
+  // The current time, in the format the fields take: a value to start from,
+  // since the placeholder goes once typing starts.
+  const fillNow = (name: string, field: 'opensAt' | 'closesAt') => (
+    <InputAdornment position="end">
+      <Button size="small" aria-label={`${name}: most`} sx={{ textTransform: 'none' }}
+        onClick={() => { update({ [field]: windowTimeNow() }); }}>Most</Button>
+    </InputAdornment>
+  );
   const languageText = (field: 'label' | 'finishMessage', language: Language, value: string) => {
     update({ [field]: { ...form[field], [language]: value } });
   };
 
   return (
     <Stack component="form" sx={{ gap: '20px' }} noValidate
-      onSubmit={(event) => { event.preventDefault(); props.onNext(); }}>
+      onSubmit={(event) => { event.preventDefault(); if (props.dirty) props.onNext(); }}>
       {inCode && <Typography role="note" sx={{ fontSize: '14px', backgroundColor: '#fff', border: `1px solid ${BORDER}`,
         borderRadius: '8px', padding: '16px 24px' }}>
         A kódban tárolt verseny csak telepítéssel változik, az indítási ablaka kivételével: itt csak az módosítható.
@@ -215,6 +223,7 @@ function SettingsStep(props: {
         <Box sx={{ ...fieldRow, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' } }}>
           {LANGUAGES.map(language => (
             <TextField key={language} value={form.label[language]} disabled={inCode}
+              slotProps={{ inputLabel: { shrink: true } }}
               label={`Címke, ${LANGUAGE_NAMES[language]}${form.kind === 'competition' ? ' (nem kötelező)' : ''}`}
               onChange={(event) => { languageText('label', language, event.target.value); }}/>
           ))}
@@ -272,23 +281,28 @@ function SettingsStep(props: {
         <Button size="small" onClick={() => { update({ opensAt: codeWindow?.opensAt ?? '', closesAt: codeWindow?.closesAt ?? '' }); }}>
           Vissza a kódbeli ablakhoz
         </Button>}>
-        <Box sx={fieldRow}>
+        <Box sx={{ ...fieldRow, gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' } }}>
           <TextField label="Indítás ettől" value={form.opensAt} placeholder={example}
+            helperText="Időzónás időpont. Üresen: bármikor indítható."
+            slotProps={{ inputLabel: { shrink: true }, input: { endAdornment: fillNow('Indítás ettől', 'opensAt') } }}
             onChange={(event) => { update({ opensAt: event.target.value }); }}/>
           <TextField label="Indítás eddig (nem kötelező)" value={form.closesAt} placeholder={example}
+            helperText="Üresen: a kezdete után bármikor."
+            slotProps={{ inputLabel: { shrink: true }, input: { endAdornment: fillNow('Indítás eddig', 'closesAt') } }}
             onChange={(event) => { update({ closesAt: event.target.value }); }}/>
           <TextField label="Továbbjutási pontszám (nem kötelező)" value={form.advancingPoints} disabled={inCode}
             error={fieldErrors.advancingPoints !== undefined}
             helperText={fieldErrors.advancingPoints ?? 'A szabályok oldal írja ki, más nem dönt belőle.'}
+            slotProps={{ inputLabel: { shrink: true } }}
             onChange={(event) => { update({ advancingPoints: event.target.value }); }}/>
         </Box>
-        <Typography sx={{ fontSize: '12px', color: MUTED }}>
-          Időzónás időpont, például {example}. Üresen hagyva bármikor indítható.
-          {inCode && (showsCodeWindow ? ' Ez a kódbeli ablak.' : ` A kódbeli ablak: ${windowText(codeWindow)}.`)}
-        </Typography>
+        {inCode && <Typography sx={{ fontSize: '12px', color: MUTED }}>
+          {showsCodeWindow ? 'Ez a kódbeli ablak.' : `A kódbeli ablak: ${windowText(codeWindow)}.`}
+        </Typography>}
         <Box sx={{ ...fieldRow, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' } }}>
           {LANGUAGES.map(language => (
             <TextField key={language} multiline minRows={3} value={form.finishMessage[language]} disabled={inCode}
+              slotProps={{ inputLabel: { shrink: true } }}
               label={`Záróüzenet, ${LANGUAGE_NAMES[language]} (nem kötelező)`}
               placeholder={language === 'hu' ? 'Üres: az online forduló szokásos köszönete és az eredmények csütörtöki közzététele.'
                 : 'Üres: a másik nyelvé látszik.'}
@@ -299,7 +313,10 @@ function SettingsStep(props: {
 
       <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
         <Button variant="outlined" href={competitionPath(props.data.id)}>Mégse</Button>
-        <Button variant="contained" type="submit" disabled={props.busy}>Tovább: ellenőrzés</Button>
+        <Stack sx={{ flexDirection: 'row', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {!props.dirty && <Typography sx={{ fontSize: '13px', color: MUTED }}>Még nincs mit menteni.</Typography>}
+          <Button variant="contained" type="submit" disabled={props.busy || !props.dirty}>Tovább: ellenőrzés</Button>
+        </Stack>
       </Stack>
       <Typography sx={{ fontSize: '12px', color: MUTED }}>
         Semmi nem kerül az adatbázisba a mentésig. A félkész változtatás csak ezen az oldalon marad meg.
