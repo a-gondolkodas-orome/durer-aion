@@ -1,6 +1,9 @@
+import { lazy } from "react";
+import type { ComponentType } from "react";
 import { GameRelay } from "game";
-import { strategyClientFor } from "game/client";
+import type { GameType } from "game";
 import { ClientFactory, ClientFactoryRelay, InProgressRelay } from "common-frontend";
+import type { StrategyBoard, StrategyDescription } from "common-frontend";
 import { strategyGameName } from "schemas";
 import type { PublicCompetition } from "schemas";
 import { useTranslation } from "react-i18next";
@@ -17,8 +20,6 @@ type OnlineClient = ReturnType<typeof ClientFactoryRelay>;
 // No server URL: the socket connects to the page's own origin, in dev through
 // the Vite proxy (vite.config.ts), in the stack through nginx.
 let relayOnlineClient: OnlineClient | undefined;
-type StrategyGameKey = Parameters<typeof strategyClientFor>[0];
-const strategyClients = new Map<StrategyGameKey, OnlineClient>();
 
 function relayClient(competition: PublicCompetition): OnlineClient | null {
   if (competition.relay === undefined) return null;
@@ -26,28 +27,41 @@ function relayClient(competition: PublicCompetition): OnlineClient | null {
   return relayOnlineClient;
 }
 
-function strategyClient(competition: PublicCompetition): OnlineClient | null {
-  const { strategy } = competition;
-  if (strategy === undefined) return null;
-  const gameId = strategy.gameId as StrategyGameKey;
-  let client = strategyClients.get(gameId);
+/// A game folder's client.tsx, as the gate serves it built.
+interface StrategyClientModule {
+  strategyClient: (gameId: string) => {
+    game: GameType<unknown>;
+    board: StrategyBoard<unknown>;
+    description: StrategyDescription;
+  };
+}
+
+// The strategy game is not in this build: the backend's gate serves the team's
+// own (#643). One module per match, so the next team on the tab gets its own
+// game; at module scope, so the lazy component keeps its identity (App.tsx).
+const strategyClients = new Map<string, ComponentType<ClientRenderProps>>();
+
+function strategyClient(matchID: string, gameId: string): ComponentType<ClientRenderProps> {
+  let client = strategyClients.get(matchID);
   if (client === undefined) {
-    client = gameClient(gameId);
-    strategyClients.set(gameId, client);
+    client = lazy(async () => {
+      const url = `/team/me/strategy-client.js?match=${encodeURIComponent(matchID)}`;
+      const loaded = await import(/* @vite-ignore */ url) as StrategyClientModule;
+      const { game, board, description } = loaded.strategyClient(gameId);
+      return { default: ClientFactory({ ...game, name: strategyGameName(gameId) }, board, description) };
+    });
+    strategyClients.set(matchID, client);
   }
   return client;
 }
 
-// Generic over the game, so that its rules and board are one game's.
-function gameClient<K extends StrategyGameKey>(gameId: K): OnlineClient {
-  const { game, board, description } = strategyClientFor(gameId);
-  return ClientFactory({ ...game, name: strategyGameName(gameId) }, board, description);
-}
-
-interface ClientProps {
-  competition?: PublicCompetition | null,
+interface ClientRenderProps {
   matchID?: string,
   credentials?: string,
+}
+
+interface ClientProps extends ClientRenderProps {
+  competition?: PublicCompetition | null,
 }
 
 // The team's competition decides the board; one without the match (which the
@@ -63,6 +77,7 @@ export function RelayClient({ competition, matchID, credentials }: ClientProps) 
 }
 
 export function StrategyClient({ competition, matchID, credentials }: ClientProps) {
-  const Client = competition ? strategyClient(competition) : null;
+  const gameId = competition?.strategy?.gameId;
+  const Client = gameId && matchID ? strategyClient(matchID, gameId) : null;
   return Client ? <Client {...{ credentials, matchID }}/> : <NoMatch/>;
 }

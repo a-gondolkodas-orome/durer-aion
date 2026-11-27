@@ -268,6 +268,28 @@ npm run stack:ps
 npm run stack:logs   # Ctrl-C stops following, not the stack
 ```
 
+### The strategy games' gate
+
+A strategy game's code reaches a browser only once its team has started the game (#643).
+The build writes each game to `dist/gated/strategy/<folder>.js`, and fails if a game's code
+lands anywhere else in `dist`. The page loads its game from `/team/me/strategy-client.js`,
+which the backend answers only for a started match, with an `X-Accel-Redirect` to that
+game's file; nginx's `location /gated/` is `internal`, so nothing else reaches it.
+After bringing the stack up, check that both ways in are shut to a visitor:
+
+```bash
+curl -i https://verseny.durerinfo.hu/team/me/strategy-client.js
+```
+
+answers `401` (no session), and
+
+```bash
+curl -i https://verseny.durerinfo.hu/gated/strategy/sablon.js
+```
+
+answers `404`, though the file is in `dist/gated/strategy/`. On the local stack, use
+`http://localhost` instead of the domain.
+
 ## 7. Import the teams
 
 Drop the TSV into `scripts/` on the host — that directory is bind-mounted into the
