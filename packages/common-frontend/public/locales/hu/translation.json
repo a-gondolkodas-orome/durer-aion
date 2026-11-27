@@ -78,7 +78,7 @@
   "general": {
     "backHome": "Vissza a kezdőlapra",
     "close": "Bezárás",
-    "loading": "Játék vagy feladat betöltése…",
+    "loading": "Betöltés…",
     "points": "{{count}} pont",
     "pointsUnit": "pont",
     "remainingTime": "Hátralevő idő",
