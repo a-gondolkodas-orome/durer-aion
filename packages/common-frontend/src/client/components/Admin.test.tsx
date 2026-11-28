@@ -624,6 +624,24 @@ test('the competitions tab lists each window, and links it to the competition\'s
     .toHaveAttribute('href', `/admin/verseny/${COMPETITION_C}/edit`);
 });
 
+test('the competitions tab opens a new competition, and shows the other kind only on asking', async () => {
+  vi.spyOn(repo, 'getAll').mockResolvedValue([]);
+  vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+    { id: COMPETITION_C, metadata: { kind: 'competition', edition: 20, round: 'online', category: 'C' }, storedIn: 'code' },
+    { id: 'gyak0rl0as--osz', metadata: { kind: 'other', label: { hu: 'Őszi gyakorló' } }, storedIn: 'database' },
+  ]);
+  renderAdmin();
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Versenyek' }));
+  expect(screen.getByRole('link', { name: '+ Új verseny' })).toHaveAttribute('href', '/admin/verseny/new');
+  const table = await screen.findByTestId('competitionTable');
+  await within(table).findByText('20 online C');
+  const other = { name: 'Megtekintés: gyak0rl0as--osz' };
+  expect(within(table).queryByRole('link', other)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Egyéb versenyek mutatása (1)' }));
+  expect(await within(table).findByRole('link', other)).toBeInTheDocument();
+});
+
 test('the import tab lists the server\'s errors and warnings', async () => {
   vi.spyOn(repo, 'getAll').mockResolvedValue([]);
   vi.spyOn(repo, 'importTeams').mockResolvedValue(importAnswer({

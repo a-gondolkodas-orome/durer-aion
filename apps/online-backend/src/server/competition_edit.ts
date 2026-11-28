@@ -10,10 +10,11 @@ import type { ContentSources } from './database_sources';
 import { InvalidStoredProblemError } from './database_sources';
 import { CompetitionModel, CompetitionWindowModel, ProblemModel, TeamModel } from './model';
 
-// Changing a competition on its admin page: the body is the competition
-// whole, with the new problems its relay brings. One held in the database is
-// replaced by it once it keeps the rules and the locks, and the new problems
-// are written with it; of one held in code only the start window changes.
+// Creating and changing a competition on its admin page: the body is the
+// competition whole, with the new problems its relay brings. A new one is
+// written to the database, and one held there is replaced by it, once it
+// keeps the rules and the locks, the new problems with it; of one held in
+// code only the start window changes.
 
 /** What an edit did, or, in a dry run, would do: written or not, and why not,
  *  one Hungarian line each. `started` says whether a team of the competition
@@ -93,16 +94,15 @@ function canonical(value: unknown): string {
  *  window given back takes that one away.
  *
  *  A stored competition is read as it is, unvalidated, so one the rules have
- *  since come to refuse can be mended here. The problems are read before the
- *  transaction opens, for the reason `importBundle` gives. */
+ *  since come to refuse can be mended here. */
 export async function writeCompetition(
   teams: TeamsRepository,
   competitionId: string,
   value: unknown,
-  { problemSource, competitions, problems: problemsInCode }: Pick<ContentSources, 'problemSource' | 'competitions' | 'problems'>,
+  sources: Pick<ContentSources, 'problemSource' | 'competitions' | 'problems'>,
   { dryRun }: { dryRun: boolean },
 ): Promise<CompetitionWriteReport | undefined> {
-  const inCode = competitions.get(competitionId);
+  const inCode = sources.competitions.get(competitionId);
   const row = inCode === undefined ? await CompetitionModel.findByPk(competitionId) : null;
   const before: CompetitionConfig | undefined = inCode ?? (row === null ? undefined : { ...row.body, id: competitionId });
   if (before === undefined) return undefined;
@@ -131,38 +131,13 @@ export async function writeCompetition(
     return report([], [], started, true);
   }
 
-  const newIds = new Set(newProblems.map(({ id }) => id));
-  const used = new Set(after.relay?.problems.map(({ problemId }) => problemId) ?? []);
-  let errors: string[] = [
-    ...newProblems.flatMap(validateProblem),
-    ...newProblems.filter(({ id }) => !used.has(id)).map(({ id }) => `feladat ${id}: új feladat, de a váltó nem használja`),
-    ...newProblems.filter(({ id }) => problemsInCode.has(id) || competitions.has(id)).map(({ id }) =>
-      `feladat ${id}: ez az azonosító a kódban már egy ${problemsInCode.has(id) ? 'feladaté' : 'versenyé'}`),
-  ];
-  try {
-    const problems = new Map([
-      ...await problemSource.getProblems([...used].filter(id => !newIds.has(id))),
-      ...newProblems.map(problem => [problem.id, problem] as const),
-    ]);
-    errors = [...errors,
-      ...validateCompetition(after, { problems, strategyGames: new Map(Object.entries(strategyGames)) })];
-  } catch (error) {
-    if (!(error instanceof InvalidStoredProblemError)) throw error;
-    errors = [...errors,
-      `feladat ${error.problemId}: a váltó ezt a tárolt feladatot használja, de a tárolt feladat hibás`, ...error.errors];
-  }
+  const errors = await contentErrors(after, newProblems, sources);
 
   return await teams.sequelize.transaction(async (transaction) => {
     const started = await hasStarted(competitionId, transaction);
-    // Ids are one namespace, as in a bundle (`importBundle`).
-    const byId = { attributes: ['id'], where: { id: [...newIds] }, order: [['id', 'ASC']] as [string, string][], transaction };
-    const taken = newIds.size === 0 ? [] : [
-      ...(await ProblemModel.findAll(byId)).map(({ id }) => `feladat ${id}: ez az azonosító az adatbázisban már egy feladaté`),
-      ...(await CompetitionModel.findAll(byId)).map(({ id }) => `feladat ${id}: ez az azonosító az adatbázisban már egy versenyé`),
-    ];
     const allErrors = [
       ...errors,
-      ...taken,
+      ...await takenInDatabase('feladat', newProblems.map(({ id }) => id), transaction),
       ...(started ? lockErrors(before, after) : []),
     ];
     const warnings = [
@@ -177,6 +152,87 @@ export async function writeCompetition(
     await CompetitionModel.update({ body }, { where: { id }, transaction });
     await CompetitionWindowModel.destroy({ where: { competitionId: id }, transaction });
     return report([], warnings, started, true);
+  });
+}
+
+/** What keeps `competition` and the new problems its relay brings from being
+ *  written, the database aside: the rules, a new problem the relay does not
+ *  use, and an id the code holds. The problems are read before a transaction
+ *  opens, for the reason `importBundle` gives. */
+async function contentErrors(
+  competition: CompetitionConfig,
+  newProblems: Problem[],
+  { problemSource, competitions, problems: problemsInCode }: Pick<ContentSources, 'problemSource' | 'competitions' | 'problems'>,
+): Promise<string[]> {
+  const newIds = new Set(newProblems.map(({ id }) => id));
+  const used = new Set(competition.relay?.problems.map(({ problemId }) => problemId) ?? []);
+  const errors: string[] = [
+    ...newProblems.flatMap(validateProblem),
+    ...newProblems.filter(({ id }) => !used.has(id)).map(({ id }) => `feladat ${id}: új feladat, de a váltó nem használja`),
+    ...newProblems.filter(({ id }) => problemsInCode.has(id) || competitions.has(id)).map(({ id }) =>
+      `feladat ${id}: ez az azonosító a kódban már egy ${problemsInCode.has(id) ? 'feladaté' : 'versenyé'}`),
+  ];
+  try {
+    const problems = new Map([
+      ...await problemSource.getProblems([...used].filter(id => !newIds.has(id))),
+      ...newProblems.map(problem => [problem.id, problem] as const),
+    ]);
+    return [...errors,
+      ...validateCompetition(competition, { problems, strategyGames: new Map(Object.entries(strategyGames)) })];
+  } catch (error) {
+    if (!(error instanceof InvalidStoredProblemError)) throw error;
+    return [...errors,
+      `feladat ${error.problemId}: a váltó ezt a tárolt feladatot használja, de a tárolt feladat hibás`, ...error.errors];
+  }
+}
+
+/** One line for each of `ids` the database already holds, as a problem or a
+ *  competition: ids are one namespace, as in a bundle (`importBundle`). */
+async function takenInDatabase(kind: 'verseny' | 'feladat', ids: string[], transaction: Transaction): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const byId = { attributes: ['id'], where: { id: ids }, order: [['id', 'ASC']] as [string, string][], transaction };
+  return [
+    ...(await ProblemModel.findAll(byId)).map(({ id }) => `${kind} ${id}: ez az azonosító az adatbázisban már egy feladaté`),
+    ...(await CompetitionModel.findAll(byId)).map(({ id }) => `${kind} ${id}: ez az azonosító az adatbázisban már egy versenyé`),
+  ];
+}
+
+/** Creates the competition `value` holds, as `{ competition, problems? }`,
+ *  with the new problems its relay brings, in the database; or, if it breaks
+ *  the rules or its id or a problem's is taken, does not. With `dryRun`, says
+ *  what it would do and writes nothing. No team can have started one yet, so
+ *  no lock applies. */
+export async function createCompetition(
+  teams: TeamsRepository,
+  value: unknown,
+  sources: Pick<ContentSources, 'problemSource' | 'competitions' | 'problems'>,
+  { dryRun }: { dryRun: boolean },
+): Promise<CompetitionWriteReport> {
+  const report = (errors: string[], warnings: string[], written = false) => ({ written, errors, warnings, started: false });
+  const id = isRecord(value) && isRecord(value.competition) ? value.competition.id : undefined;
+  if (typeof id !== 'string') return report(['A kérésben a verseny azonosítója nem szöveg.'], []);
+  const shape = readCompetitionBody(id, value);
+  if ('errors' in shape) return report(shape.errors, []);
+  const { competition, problems: newProblems } = shape;
+  const errors = [
+    ...sources.competitions.has(id) || sources.problems.has(id)
+      ? [`verseny ${id}: ez az azonosító a kódban már egy ${sources.competitions.has(id) ? 'versenyé' : 'feladaté'}`] : [],
+    ...newProblems.some(problem => problem.id === id) ? [`verseny ${id}: egy új feladat is ezt az azonosítót kapná`] : [],
+    ...await contentErrors(competition, newProblems, sources),
+  ];
+  return await teams.sequelize.transaction(async (transaction) => {
+    const allErrors = [
+      ...errors,
+      ...await takenInDatabase('verseny', [id], transaction),
+      ...await takenInDatabase('feladat', newProblems.map(problem => problem.id), transaction),
+    ];
+    const warnings = newProblems.flatMap(problemImageWarnings);
+    if (allErrors.length > 0 || dryRun) return report(allErrors, warnings);
+    const { id: competitionId, ...body } = competition;
+    await ProblemModel.bulkCreate(newProblems.map(({ id: problemId, ...problem }) => ({ id: problemId, body: problem, createdBy: null })),
+      { transaction });
+    await CompetitionModel.create({ id: competitionId, body, createdBy: null }, { transaction });
+    return report([], warnings, true);
   });
 }
 

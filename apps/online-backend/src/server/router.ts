@@ -18,12 +18,13 @@ import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
-import { hasStarted, writeCompetition } from './competition_edit';
+import { createCompetition, hasStarted, writeCompetition } from './competition_edit';
 import { adminProblemView, writeProblem } from './problem_edit';
 import { searchProblems } from './problem_search';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
 import { adminCompetitionView, competitionSummary, problemUses } from './competition_view';
+import { strategyGames } from 'game/strategy';
 
 /** What the routes use of the socket transport `server.ts` puts on the
  *  context, which koa's context types as `any`. */
@@ -290,6 +291,22 @@ export function configureTeamsRouter(
    */
   router.post("/team/admin/competitions/import", adminAuth, requireJson, koaBody(), async (ctx) => {
     ctx.body = await importBundle(teams, ctx.request.body, sources);
+  });
+
+  /**
+   * Create a competition in the database: the body is `{ competition,
+   * problems }`, as `PUT …/:competitionId` takes it, the id a fresh one. It
+   * is written only if it keeps the rules and neither its id nor a new
+   * problem's is taken; the answer is the report either way. `?dryRun=1`
+   * writes nothing and answers what would happen.
+   */
+  router.post("/team/admin/competitions", adminAuth, requireJson, koaBody(), async (ctx) => {
+    ctx.body = await createCompetition(teams, ctx.request.body, sources, { dryRun: ctx.query.dryRun === "1" });
+  });
+
+  /** Every strategy game a competition can name, for the new competition's form. */
+  router.get("/team/admin/strategy-games", adminAuth, (ctx) => {
+    ctx.body = Object.keys(strategyGames);
   });
 
   router.get("/team/admin/competitions/export", adminAuth, async (ctx) => {

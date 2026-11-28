@@ -165,7 +165,12 @@ shared one, which replaces it in that relay only, is written with the
 competition on its save, under an id from the same generator as
 `npm run new-id`. **+ Meglévő feladat** picks problems the database already
 holds, by id or slug or by a competition using them: they join by id, so a fix
-to one reaches every relay that picked it.
+to one reaches every relay that picked it. **+ Új verseny** on the
+**Versenyek** tab opens the same page with an empty draft, at
+`/admin/verseny/new`: its id's slug follows the edition, round and category
+until one is typed, and is fixed by the save. The tab shows competitions of the
+`other` kind, practice sets and the like, only once **Egyéb versenyek
+mutatása** is ticked.
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container and redirects the export it
@@ -518,7 +523,8 @@ may share a category, and a practice set has none. `CompetitionConfig` in
 Competitions and their problems live in code, one bank per file under
 `packages/problem-bank/banks/`, or in the database's `Competitions` and
 `Problems` tables, which the server serves beside them; an id in both stops it
-at start. What follows is the code's way; `edition-20-online.ts` is the one to
+at start. One made on the admin page (§ *Admin*) is in the database from its
+save, with no deploy. What follows is the code's way; `edition-20-online.ts` is the one to
 copy for a round of the Dürer, `reference.ts` for anything else.
 
 1. **Ids.** `npm run new-id -- <slug>` prints one for each slug: ten random

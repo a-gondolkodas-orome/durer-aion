@@ -107,3 +107,32 @@ export function competitionFromForm(
   };
   return { competition };
 }
+
+/// The form a new competition starts from: a Hungarian online round with both
+/// matches, at the lengths the games default to, for the organiser to fill in.
+export function newSettingsForm(): SettingsForm {
+  return {
+    ...settingsForm({ id: '', languages: ['hu'], metadata: { kind: 'competition', edition: 0, round: 'online', category: '' } }),
+    edition: '',
+    hasRelay: true,
+    relayMinutes: '60',
+    hasStrategy: true,
+    strategyMinutes: '30',
+  };
+}
+
+/// Text as a slug, as far as it can be: accents dropped, lowercase, anything
+/// but a letter or digit a single dash between words.
+export function slugify(text: string): string {
+  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+/// The slug a new competition's id is offered, until the organiser types one:
+/// edition, round and category, as the bank files name theirs
+/// (`04-final-b`), or a practice set's label.
+export function suggestedSlug(form: SettingsForm): string {
+  if (form.kind === 'other') return slugify(form.label.hu || form.label.en);
+  const edition = form.edition.trim();
+  return slugify([/^\d$/.test(edition) ? `0${edition}` : edition, form.round, form.category].join(' '));
+}

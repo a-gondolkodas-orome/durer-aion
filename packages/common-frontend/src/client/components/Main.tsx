@@ -28,12 +28,14 @@ import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenL
 // the entry chunk.
 const Admin = React.lazy(() => import("./Admin").then(module => ({ default: module.Admin })));
 
-/// What an admin path opens: `/admin/verseny/<id>` a competition's page,
-/// `/admin/verseny/<id>/edit` its edit page, `/admin/feladat/<problemId>` a
+/// What an admin path opens: `/admin/verseny/new` the page making a new
+/// competition, which no id can clash with since an id holds `--`,
+/// `/admin/verseny/<id>` a competition's page, `/admin/verseny/<id>/edit` its
+/// edit page, `/admin/feladat/<problemId>` a
 /// problem's editor, with `?verseny=<id>` the competition it was opened from,
 /// `/admin/<teamId>` a team's, anything else the tabs.
 export function adminPath(pathname: string, search = ''):
-  { teamId?: string, competitionId?: string, edit?: true, problemId?: string } {
+  { teamId?: string, competitionId?: string, edit?: true, problemId?: string, newCompetition?: true } {
   const [, , first, second, third] = pathname.split('/');
   if (first === 'feladat') {
     if (!second) return {};
@@ -42,6 +44,7 @@ export function adminPath(pathname: string, search = ''):
   }
   if (first === 'verseny') {
     if (!second) return {};
+    if (second === 'new' && third === undefined) return { newCompetition: true };
     return { competitionId: decodeURIComponent(second), ...(third === 'edit' && { edit: true }) };
   }
   return first ? { teamId: first } : {};

@@ -49,6 +49,12 @@ export interface AdminClientRepository {
    *  `problems` its relay brings, or, with `dryRun`, only says what that would
    *  do. Of one held in code only the start window changes. */
   saveCompetition(change: CompetitionChangeDto, options: { dryRun: boolean }): Promise<CompetitionWriteResultDto>
+  /** Creates `competition` in the database, its id a fresh one, with the new
+   *  `problems` its relay brings, or, with `dryRun`, only says what that
+   *  would do. */
+  createCompetition(change: CompetitionChangeDto, options: { dryRun: boolean }): Promise<CompetitionWriteResultDto>
+  /** Every strategy game a competition can name. */
+  getStrategyGameIds(): Promise<string[]>
   /** The database's problems whose id holds `q`, and, given `competition`,
    *  which its relay uses: what the relay editor's picker offers. */
   searchProblems(query: { q: string, competition?: string }): Promise<ProblemSearchDto>

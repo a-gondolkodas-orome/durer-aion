@@ -1,5 +1,5 @@
 import type { CompetitionConfig, Language } from 'schemas';
-import { competitionFromForm, settingsForm } from './competition-form';
+import { competitionFromForm, newSettingsForm, settingsForm, slugify, suggestedSlug } from './competition-form';
 
 const ID = 'aqvco71pta--csomag-teljes';
 const full: CompetitionConfig = {
@@ -64,4 +64,31 @@ test('names each number field that holds no whole number, and checks only the on
 test('sends a practice set an empty label where it has none, for the validator to name', () => {
   const form = { ...settingsForm(full), kind: 'other' as const, label: { hu: '', en: '' } };
   expect(competitionFromForm(form, full)).toMatchObject({ competition: { metadata: { kind: 'other', label: {} } } });
+});
+
+describe('a new competition', () => {
+  const form = newSettingsForm();
+
+  test('suggests the slug the bank files name a round by, until there is nothing to go by', () => {
+    expect(suggestedSlug(form)).toBe('online');
+    expect(suggestedSlug({ ...form, edition: '4', round: 'final', category: 'B' })).toBe('04-final-b');
+    expect(suggestedSlug({ ...form, edition: '21', category: 'E+' })).toBe('21-online-e');
+    expect(suggestedSlug({ ...form, kind: 'other', label: { hu: '', en: '' } })).toBe('');
+    expect(suggestedSlug({ ...form, kind: 'other', label: { hu: '', en: 'Warm-up set' } })).toBe('warm-up-set');
+  });
+
+  test('turns text into a slug, accents and all', () => {
+    expect(slugify('Gyakorló feladatsor, ősz!')).toBe('gyakorlo-feladatsor-osz');
+    expect(slugify('  --  ')).toBe('');
+  });
+
+  test('reads an untouched draft as a competition with both matches but no edition, which the form refuses', () => {
+    expect(competitionFromForm(form, { id: ID, languages: [], metadata: full.metadata }))
+      .toEqual({ fieldErrors: { edition: 'Egész számot írj ide.' } });
+    expect(competitionFromForm({ ...form, edition: '22', category: 'C' }, { id: ID, languages: [], metadata: full.metadata }, []))
+      .toEqual({ competition: {
+        id: ID, languages: ['hu'], relay: { durationMinutes: 60, problems: [] }, strategy: { durationMinutes: 30, gameId: '' },
+        metadata: { kind: 'competition', edition: 22, round: 'online', category: 'C' },
+      } });
+  });
 });

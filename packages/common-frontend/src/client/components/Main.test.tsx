@@ -262,6 +262,7 @@ test.each([
   ['/admin/verseny/aqvco71pta--csomag-teljes/edit', { competitionId: 'aqvco71pta--csomag-teljes', edit: true }],
   ['/admin/feladat/10iqp4vy6b--csomag-kockak', { problemId: '10iqp4vy6b--csomag-kockak' }],
   ['/admin/verseny', {}],
+  ['/admin/verseny/new', { newCompetition: true }],
 ])('the admin path %s opens %o', (pathname, opened) => {
   expect(adminPath(pathname)).toEqual(opened);
 });

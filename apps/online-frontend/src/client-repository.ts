@@ -171,6 +171,15 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
     return await request(api => api.put<CompetitionWriteResultDto>(url, change));
   }
 
+  async createCompetition(change: CompetitionChangeDto, { dryRun }: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
+    const url = urlcat('/team/admin/competitions', { ...(dryRun && { dryRun: 1 }) });
+    return await request(api => api.post<CompetitionWriteResultDto>(url, change));
+  }
+
+  async getStrategyGameIds(): Promise<string[]> {
+    return await request(api => api.get<string[]>('/team/admin/strategy-games'));
+  }
+
   async searchProblems({ q, competition }: { q: string, competition?: string }): Promise<ProblemSearchDto> {
     const url = urlcat('/team/admin/problems', { q, ...(competition !== undefined && { competition }) });
     return await request(api => api.get<ProblemSearchDto>(url));
