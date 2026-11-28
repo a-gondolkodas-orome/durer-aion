@@ -312,6 +312,19 @@ describe('during a game', () => {
     expect(play).not.toHaveBeenCalled();
   });
 
+  // A bot that cannot move would otherwise look like one thinking until the
+  // clock runs out.
+  test('says the bot is stuck, and ignores clicks', () => {
+    renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER }, { botStuck: true });
+
+    expect(status()).toHaveTextContent('strategy.status.botStuck');
+    expect(screen.getByText('strategy.status.botStuckNote')).toBeInTheDocument();
+    expect(boardArea()).toHaveAttribute('data-state', 'locked');
+    play.mockClear();
+    fireEvent.click(screen.getByTestId('cell'));
+    expect(play).not.toHaveBeenCalled();
+  });
+
   // Shown at once, the spinner would flash on every one of the bot's moves.
   test('shows a spinner only once the bot is slow to answer', async () => {
     renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER });

@@ -1,6 +1,6 @@
-import { Ctx, FnContext, Game, PhaseConfig, PlayerID } from 'boardgame.io';
+import { Ctx, FnContext, Game, MoveFn, MoveMap, PhaseConfig, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
-import { timestampMoves } from './timestamp';
+import { timestampMoves, type MoveLogMetadata } from './timestamp';
 import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
@@ -47,6 +47,48 @@ function setStartingPosition({ G, playerID, events }: MoveContext, startingPosit
   // deliberately blind to — the judge (the bot) is the one that knows it.
   Object.assign(G, startingPosition);
 };
+
+/// How much of a failure's reason the match log keeps: a strategy's error
+/// message can be of any length, and the log is stored with the match.
+export const BOT_FAILURE_REASON_MAX_LENGTH = 500;
+
+/// What a bot failure adds to its entry in the match log, beside the time.
+export interface BotFailureLogMetadata extends MoveLogMetadata {
+  botFailure: string;
+}
+
+/// The server's note that the bot's strategy failed: what failed, in the
+/// match's own log for the organisers, and with `stuck`, that nothing was
+/// played in its place, which the team's board then says. Only the server
+/// sends it, as the judge; docs/ARCHITECTURE.md says when.
+function noteBotFailure({ G, playerID, log }: MoveContext, reason: unknown, stuck: unknown) {
+  if (playerID !== JUDGE_PLAYER || typeof reason !== 'string' || typeof stuck !== 'boolean') {
+    return INVALID_MOVE;
+  };
+  log.setMetadata({
+    time: new Date().toISOString(),
+    botFailure: reason.slice(0, BOT_FAILURE_REASON_MAX_LENGTH),
+  } satisfies BotFailureLogMetadata);
+  if (stuck) G.botStuck = true;
+}
+
+/// A note is not a step of the game, so it may come in the middle of a turn
+/// of several moves without using one up.
+const botFailureNote = { move: noteBotFailure, noLimit: true };
+
+/// Wraps each move the bot may play so that the bot playing one is not stuck
+/// any more: a strategy fixed and redeployed frees the match it stalled. A
+/// refused move leaves the flag, since boardgame.io discards its draft.
+function clearingBotStuck<G extends GameStateMixin>(moves: MoveMap<G>): MoveMap<G> {
+  const clearing = (move: MoveFn<G>): MoveFn<G> => (context, ...args) => {
+    if (context.playerID === JUDGE_PLAYER) delete context.G.botStuck;
+    return move(context, ...args);
+  };
+  return Object.fromEntries(Object.entries(moves).map(([name, move]) => [
+    name,
+    typeof move === 'function' ? clearing(move) : { ...move, move: clearing(move.move) },
+  ]));
+}
 
 export const STRATEGY_DEFAULT_DURATION_MINUTES = 30;
 
@@ -148,7 +190,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     maxPlayers: 2,
     phases: {
       [PHASE.startNewGame]: {
-        moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
+        moves: { ...timestampMoves(clearingBotStuck({ chooseNewGameType, setStartingPosition })), getTime: clockPoll, noteBotFailure: botFailureNote },
         next: PHASE.chooseRole,
         // The team picks the difficulty, the bot answers with the position,
         // and the phase ends with that one round of turns. Coming back for
@@ -172,7 +214,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       [PHASE.play]: {
-        moves: { ...timestampMoves(game.moves ?? {}), getTime: clockPoll },
+        moves: { ...timestampMoves(clearingBotStuck(game.moves ?? {})), getTime: clockPoll, noteBotFailure: botFailureNote },
         endIf: ({ G }) => { return G.winner !== null },
         next: PHASE.startNewGame,
         turn: {

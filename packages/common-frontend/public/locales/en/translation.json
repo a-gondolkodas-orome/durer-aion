@@ -295,6 +295,8 @@
       "won": "Live game {{n}}: won"
     },
     "status": {
+      "botStuck": "Something went wrong: the computer cannot move.",
+      "botStuckNote": "Tell the organisers!",
       "botTurn": "The computer is moving…",
       "lookAtPosition": "Look at the position!",
       "newStart": "Another starting position",

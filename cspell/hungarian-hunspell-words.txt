@@ -840,6 +840,7 @@ szerese
 szeresét
 szerkeszthetők
 szervezője
+szervezőknek
 szervezőt
 szétdarabolni
 szétosztja

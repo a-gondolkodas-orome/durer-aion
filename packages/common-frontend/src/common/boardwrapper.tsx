@@ -16,7 +16,7 @@ import { useBackToHome, useTeamState } from "../client/hooks/user-hooks";
 import { useClientRepo } from "../client/client-repo-context";
 import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
-import { GUESSER_PLAYER, JUDGE_PLAYER, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
+import { GUESSER_PLAYER, JUDGE_PLAYER, PHASE, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
 import type { Difficulty, GamePresentation, GameStateMixin } from "game";
 import type { LiveGameResult } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
@@ -155,9 +155,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // only ever asks whether it is `true`.
     const finished = msRemaining < - 5000 || ctx.gameover === true;
     const stage = matchStage(G, ctx, finished);
-    const teamToMove = stage.kind !== 'ended' && stage.teamToMove;
-    // A game is under way once its role is being chosen.
-    const inGame = stage.kind === 'chooseRole' || stage.kind === 'play';
+    const teamToMove = 'teamToMove' in stage && stage.teamToMove;
+    // A game is under way once its role is being chosen, and still is while
+    // the bot is stuck in it.
+    const inGame = stage.kind === 'chooseRole' || stage.kind === 'play'
+      || (stage.kind === 'stuck' && ctx.phase === PHASE.play);
     // Between games, the last game's mode (matchStage says why).
     const difficulty = G.difficulty ?? null;
     const rulesFirst = difficulty === null && !rulesRead && !finished;
@@ -203,6 +205,11 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
           status = t('strategy.result.timeUp');
           sub = stage.unfinished ? t('strategy.result.unfinished') : '';
         }
+        break;
+      case 'stuck':
+        status = t('strategy.status.botStuck');
+        tone = 'lost';
+        sub = t('strategy.status.botStuckNote');
         break;
       case 'intro':
         status = t('strategy.intro.title');

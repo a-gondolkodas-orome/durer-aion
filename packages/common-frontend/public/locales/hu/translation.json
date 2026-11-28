@@ -291,6 +291,8 @@
       "won": "{{n}}. éles játszma: győzelem"
     },
     "status": {
+      "botStuck": "Hiba történt, a gép nem tud lépni.",
+      "botStuckNote": "Szóljatok a szervezőknek!",
       "botTurn": "A gép lép…",
       "lookAtPosition": "Nézzétek meg az állást!",
       "newStart": "Másik kezdőállást kérünk",

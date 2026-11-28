@@ -56,6 +56,12 @@ describe('matchStage', () => {
     expect(matchStage(state(), { phase: PHASE.play, ...team }, false)).toStrictEqual({ kind: 'play', teamToMove: true });
     expect(matchStage(state(), { phase: PHASE.play, ...bot }, false)).toStrictEqual({ kind: 'play', teamToMove: false });
   });
+
+  test('a stuck bot, in a game or placing its opening, until the clock ends the match', () => {
+    expect(matchStage(state({ botStuck: true }), { phase: PHASE.play, ...bot }, false)).toStrictEqual({ kind: 'stuck' });
+    expect(matchStage(state({ botStuck: true }), { phase: PHASE.startNewGame, ...bot }, false)).toStrictEqual({ kind: 'stuck' });
+    expect(matchStage(state({ botStuck: true }), { phase: PHASE.play, ...bot }, true)).toStrictEqual({ kind: 'ended', by: 'time', unfinished: true });
+  });
 });
 
 test('the board is live on the team\'s turn and shows a position it may not move on locked', () => {
