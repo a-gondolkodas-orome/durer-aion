@@ -21,7 +21,7 @@ import { botWrapper, gameWrapper } from "game";
 import { MyGameWrappers } from "game/strategy";
 import { StrategyWrappers } from "game/bot";
 import { strategyGameName } from "schemas";
-import { BOT_ID, SocketIOButBotMoves } from "./socketio_botmoves";
+import { BOT_ID, SocketIOButBotMoves, type BotFailureMode } from "./socketio_botmoves";
 
 const GAME_NAME = strategyGameName("minta-ketkupac");
 const game = { ...gameWrapper(MyGameWrappers["minta-ketkupac"]()), name: GAME_NAME };
@@ -96,6 +96,33 @@ describe("the socket transport a browser talks to", () => {
   let strategy: KetkupacBot;
   const botStrategy: KetkupacBot = (state, botID) => strategy(state, botID);
 
+  /** Starts the server, by default as the competition runs it. */
+  async function startServer(botFailure: BotFailureMode = "recover", served = game): Promise<void> {
+    server = Server({
+      games: [served],
+      // No `db`, so boardgame.io hands us its in-memory store — the transport
+      // is what this file is about, not what persists behind it.
+      transport: new SocketIOButBotMoves(
+        { https: undefined },
+        { [GAME_NAME]: new (botWrapper(botStrategy))({ enumerate: served.ai?.enumerate }) },
+        {},
+        botFailure,
+      ),
+      // Set, rather than left out, so the server does not warn about CORS.
+      origins: [],
+    });
+    // Port 0: the OS picks a free one, so a developer's own stack on :8000 is
+    // not something this suite can collide with.
+    running = await server.run(0);
+    url = `http://localhost:${(running.appServer.address() as AddressInfo).port}`;
+  }
+
+  /** The same, in another mode or with another game. */
+  async function restartServer(botFailure: BotFailureMode, served = game): Promise<void> {
+    server.kill(running);
+    await startServer(botFailure, served);
+  }
+
   beforeEach(async () => {
     strategy = StrategyWrappers["minta-ketkupac"]();
     // boardgame.io announces the port it bound on, and the bot transport logs
@@ -106,22 +133,7 @@ describe("the socket transport a browser talks to", () => {
     // What the bot signs its moves with; the server reads it from the
     // environment (server/common.ts) and refuses to start without it.
     vi.stubEnv("BOT_CREDENTIALS", BOT_CREDENTIALS);
-
-    server = Server({
-      games: [game],
-      // No `db`, so boardgame.io hands us its in-memory store — the transport
-      // is what this file is about, not what persists behind it.
-      transport: new SocketIOButBotMoves(
-        { https: undefined },
-        { [GAME_NAME]: new (botWrapper(botStrategy))({ enumerate: game.ai?.enumerate }) },
-      ),
-      // Set, rather than left out, so the server does not warn about CORS.
-      origins: [],
-    });
-    // Port 0: the OS picks a free one, so a developer's own stack on :8000 is
-    // not something this suite can collide with.
-    running = await server.run(0);
-    url = `http://localhost:${(running.appServer.address() as AddressInfo).port}`;
+    await startServer();
   });
 
   afterEach(() => {
@@ -240,22 +252,113 @@ describe("the socket transport a browser talks to", () => {
     socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), halfway._stateID, MATCH_ID, HUMAN_ID);
   }
 
-  it("stalls, and says why, when the game refuses the bot's move", async () => {
-    // More tokens than any pile holds.
-    strategy = (state, botID) => state.ctx.phase === "play" ? [[0, 9], "take"] : StrategyWrappers["minta-ketkupac"]()(state, botID);
+  /** The bot's strategy in play only, the real one for the opening. */
+  function inPlay(play: KetkupacBot): KetkupacBot {
+    const real = StrategyWrappers["minta-ketkupac"]();
+    return (state, botID) => state.ctx.phase === "play" ? play(state, botID) : real(state, botID);
+  }
+  // More tokens than any pile holds.
+  const refusedTake = inPlay(() => [[0, 9], "take"]);
+  const throwing = inPlay(() => { throw new Error("no entry for this position"); });
+
+  /** The bot's failure notes in the stored match log, oldest first. */
+  async function failureNotes(): Promise<unknown[]> {
+    const { log } = await server.db.fetch(MATCH_ID, { log: true });
+    return (log ?? []).filter(entry => entry.action.payload?.type === "noteBotFailure")
+      .map(entry => (entry.metadata as { botFailure?: string } | undefined)?.botFailure);
+  }
+
+  /** The team's first take, and the state once the turn is the team's again. */
+  async function teamTakesAndBotAnswers(socket: Socket): Promise<BgioState> {
+    const answered = updateMatching(socket, ({ G, ctx }) =>
+      ctx.phase === "play" && ctx.currentPlayer === HUMAN_ID && G.piles[0] + G.piles[1] < 8);
+    await teamTakes(socket);
+    return await answered;
+  }
+
+  it.each([
+    ["names a move the game refuses", refusedTake, /named take\(\[0,9\]\), which the game refused/],
+    ["throws", throwing, /threw no entry for this position/],
+  ])("plays a random legal move when the bot %s, and notes it in the match log", async (_case, failing, reason) => {
+    strategy = failing;
+    // boardgame.io reports every move it rejects.
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const warnings = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const socket = await connectClient();
+
+    const state = await teamTakesAndBotAnswers(socket);
+
+    expect(state.G.selectedPile).toBeNull();
+    expect(await failureNotes()).toStrictEqual([expect.stringMatching(reason)]);
+    expect(warnings).toHaveBeenCalledWith(expect.stringMatching(/played take\(\[\d,\d\]\) instead/));
+  });
+
+  it.each([
+    ["names a move the game refuses", refusedTake, /named take\(\[0,9\]\), which the game refused; the match waits on the bot/],
+    ["throws", throwing, /threw no entry for this position; the match waits on the bot/],
+  ])("stalls, and says so on the board, when the bot %s and the server is set to stall", async (_case, failing, reason) => {
+    await restartServer("stall");
+    strategy = failing;
     const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const socket = await connectClient();
-    const handedBack = vi.fn();
-    socket.on("update", (_matchID: string, state: BgioState) => {
-      if (state.ctx.phase === "play" && state.ctx.currentPlayer === HUMAN_ID && state.G.piles[1] === 5) handedBack();
-    });
+    const stuck = updateMatching(socket, ({ G }) => (G as { botStuck?: boolean }).botStuck === true);
 
     await teamTakes(socket);
-    await vi.waitFor(() => expect(errors).toHaveBeenCalledWith(expect.stringMatching(/named take\(\[0,9\]\), which the game refused; the match waits on the bot/)), { timeout: REPLY_TIMEOUT });
+    const state = await stuck;
 
-    const { state } = await server.db.fetch(MATCH_ID, { state: true });
     expect(state.ctx.currentPlayer).toBe(BOT_ID);
-    expect(handedBack).not.toHaveBeenCalled();
+    expect(state.G.piles).toStrictEqual([3, 5]);
+    expect(errors).toHaveBeenCalledWith(expect.stringMatching(reason));
+    expect(await failureNotes()).toHaveLength(1);
+  });
+
+  it("stalls when the game lists no move to play instead", async () => {
+    await restartServer("recover", { ...game, ai: { enumerate: () => [] } });
+    strategy = refusedTake;
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const socket = await connectClient();
+    const stuck = updateMatching(socket, ({ G }) => (G as { botStuck?: boolean }).botStuck === true);
+
+    await teamTakes(socket);
+    await stuck;
+
+    expect(errors).toHaveBeenCalledWith(expect.stringMatching(/which the game refused; the match waits on the bot/));
+  });
+
+  it("frees a stuck match once the bot moves again", async () => {
+    await restartServer("stall");
+    strategy = throwing;
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const first = await connectClient();
+    const stuck = updateMatching(first, ({ G }) => (G as { botStuck?: boolean }).botStuck === true);
+    await teamTakes(first);
+    await stuck;
+
+    // The fix deployed: the team reloads, and the sync asks the bot again.
+    strategy = StrategyWrappers["minta-ketkupac"]();
+    const reloaded = await connectClient();
+    const freed = updateMatching(reloaded, ({ ctx }) => ctx.currentPlayer === HUMAN_ID);
+    await syncAs(reloaded, MATCH_ID, HUMAN_ID);
+
+    expect((await freed).G).not.toHaveProperty("botStuck");
+  });
+
+  it("warns when the strategy takes longer than its budget, and plays its move", async () => {
+    const real = StrategyWrappers["minta-ketkupac"]();
+    strategy = (state, botID) => {
+      if (state.ctx.phase === "play") {
+        const until = Date.now() + 150;
+        while (Date.now() < until) { /* the slow corner of a search */ }
+      }
+      return real(state, botID);
+    };
+    const warnings = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const socket = await connectClient();
+
+    await teamTakesAndBotAnswers(socket);
+
+    expect(warnings).toHaveBeenCalledWith(expect.stringMatching(/took \d+ ms to name a move, over its 100 ms/));
+    expect(await failureNotes()).toStrictEqual([]);
   });
 
   it("gives a reconnecting player the state their last one left", async () => {

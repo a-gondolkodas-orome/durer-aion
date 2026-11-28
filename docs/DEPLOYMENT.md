@@ -237,6 +237,10 @@ Edit `.env.docker` before the first `up`:
 - `POSTGRESQL_PASSWORD` — sample value `postgres_passwd`. It is also in the backend's
   `DATABASE_URL`, so change it here and nowhere else.
 
+`BOT_FAILURE` is in no sample and stays unset for a competition: a bot whose strategy fails
+then gets a random legal move played for it, noted in the match log. Add `BOT_FAILURE=stall`
+on a test drive, so the failure stalls the match where a tester sees it.
+
 The other files `npm run setup` creates are frontend build settings; the samples are fine.
 [`README.md`](../README.md), under *Configuration you may want to change*, says what reads
 which.
@@ -560,6 +564,11 @@ sudo chown -R `whoami` node_modules
 **The site loads but every request 502s.** The backend is not healthy; `npm run stack:logs`
 says why. Usually a missing variable in `.env.docker` — the server validates them at boot
 and exits.
+
+**A team's board says the computer cannot move.** Its bot failed with no move to play
+instead (docs/ARCHITECTURE.md). `npm run stack:logs` has a line ending `the match waits on the
+bot` with the match id and what failed. Reset the team's strategy match from its detail dialog
+on the admin page: it starts a fresh match, and adding minutes does not help.
 
 ### Restarting the backend
 

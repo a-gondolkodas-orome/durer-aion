@@ -133,10 +133,27 @@ reload halfway through the bot's turn costs nothing: the next ask continues the
 turn. A turn planned as a whole, like `20ocde`'s two X's, is planned again from
 the board as the turn found it, which the game keeps (`xsThisTurn`).
 
-**A bot move the game refuses stalls the match.** The server plays nothing in
-its place and logs the refused move (`socketio_botmoves.ts`): a refused move is
-a bug in the strategy, and a random move instead could hand a live game to the
-team unnoticed.
+**A bot whose strategy fails gets a random legal move played for it.** A
+strategy fails by throwing or by naming a move the game refuses, either way a
+bug in it. In `play` the server then sends the judge's `noteBotFailure`, which
+puts what failed in the match's own log for the organisers, and plays one of
+the moves the game's `possibleMoves` lists, at random (`socketio_botmoves.ts`).
+The game goes on within its rules, so the team needs no explanation; in a live
+game the move may cost the bot the game, which the log shows. A forfeit
+instead would end a game short of every end its rules state, with a winner the
+framework cannot know: in `20ocde` a full board is O's, which can be the bot's.
+
+What has no move to play instead — no legal move listed, that move refused
+too, or a failed opening — stalls the match: the note marks the bot stuck, the
+team's board says the computer cannot move and to tell the organisers, and an
+organiser resets the team's strategy match. The bot's next accepted move
+clears the mark, so a fixed strategy, deployed, frees the match on the team's
+next reload. `BOT_FAILURE=stall` stalls on every failure: for a test drive,
+where a failure should be impossible to miss.
+
+A strategy is synchronous, and runs on the server's only thread, so no timer
+can stop one: one that takes longer than `STRATEGY_BUDGET_MS` (`botwrapper.ts`)
+is only reported, with its move still played.
 
 `hostedGames` (`games.ts`) lists each game beside its
 bot, and `server.ts` builds both the game list and the bots from it.

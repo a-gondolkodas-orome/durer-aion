@@ -1,6 +1,6 @@
 import './env';
 import { argv, env, exit } from 'process';
-import { SocketIOButBotMoves } from './socketio_botmoves';
+import { botFailureMode, SocketIOButBotMoves } from './socketio_botmoves';
 import { Server } from 'boardgame.io/server';
 import { hostedGames } from './games';
 import { strategyGames } from 'game/strategy';
@@ -27,6 +27,7 @@ if (argv[2] === "sanity-check") {
 
 getBotCredentials(); // give love if no creds are supplied
 getAdminCredentials(); // give love if no creds are supplied
+const botFailure = botFailureMode(env.BOT_FAILURE);
 
 const { db, teams } = getDb();
 
@@ -42,6 +43,8 @@ const botSetup = Object.fromEntries(
 const socketio = new SocketIOButBotMoves(
   { https: undefined },
   botSetup,
+  {},
+  botFailure,
 );
 const server = Server({
   games: games,

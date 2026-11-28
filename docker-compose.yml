@@ -32,6 +32,9 @@ services:
       - PORT=8000
       - BOT_CREDENTIALS=${BOT_CREDENTIALS}
       - ADMIN_CREDENTIALS=${ADMIN_CREDENTIALS}
+      # Unset is `recover`, what a competition wants; a test drive sets `stall`
+      # (docs/DEPLOYMENT.md § Configure).
+      - BOT_FAILURE=${BOT_FAILURE:-}
     volumes:
       # Team import TSVs are dropped here on the host and run with `docker exec`,
       # so this is mounted in production too.
