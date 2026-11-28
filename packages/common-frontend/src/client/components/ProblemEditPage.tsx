@@ -9,7 +9,7 @@ import type { AdminProblemDto, ProblemUseDto, ProblemWriteResultDto } from '../d
 import { useProblem, useSaveProblem } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { BORDER, DANGER, MUTED } from './adminStyles';
-import { SAVED_PARAM, competitionPath, competitionTitle } from './CompetitionTable';
+import { SAVED_PARAM, competitionPath, competitionTitle, slug } from './CompetitionTable';
 import { Card, ReviewMessages, Steps, WARNING, useLeaveWarning } from './EditPageParts';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
@@ -18,12 +18,9 @@ import {
   problemFromForm,
 } from './problem-form';
 
-// A problem's edit page, /admin/verseny/:competitionId/feladat/:problemId:
-// each language's LaTeX beside what a team sees, then a review of what the
-// server says, then Save. The problem is shared by id, so the change reaches
-// every relay using it, which both steps list; the competition in the path
-// is only where the page was opened from and goes back to. One held in code
-// changes only with a deploy, and is shown read-only.
+// A problem's edit page, opened from a competition's page and going back to
+// it: each language's LaTeX beside what a team sees, then the server's
+// review, then Save. A problem held in code is shown read-only.
 
 const STEPS = ['Feladat', 'Ellenőrzés és mentés'];
 
@@ -41,11 +38,6 @@ export function ProblemEditPage(props: { competitionId: string, problemId: strin
   );
 }
 
-/// The part of an id people recognise a problem by: its slug.
-function slug(id: string): string {
-  return id.split('--').slice(1).join('--') || id;
-}
-
 function describeUse(use: ProblemUseDto): string {
   return `${competitionTitle({ id: use.competitionId, metadata: use.metadata })} · ${use.position}. feladat · ${use.points} pont`;
 }
@@ -60,7 +52,7 @@ function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competi
   const [review, setReview] = useState<{ problem: Problem, result: ProblemWriteResultDto } | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
-  // Whether each image URL loaded in the preview, the browser's say alone.
+  // Whether each image URL loaded in the preview.
   const [loads, setLoads] = useState<Record<string, boolean>>({});
   const dirty = !saved && JSON.stringify(form) !== JSON.stringify(initial);
   const leaving = useLeaveWarning(dirty);
@@ -164,9 +156,7 @@ function ProblemStep(props: {
       ...current, content: { ...current.content, [language]: { ...current.content[language], ...change } },
     }));
   };
-  // What a team sees, from the draft: a language left without content shows
-  // another one's, as `localizeProblem` falls back. A draft with no content
-  // in any language has nothing to show.
+  // A language without content shows another one's, as for a team.
   const draft: Problem = {
     id: data.problem.id, answer: 0,
     content: Object.fromEntries(LANGUAGES.filter(each => hasContent(form.content[each]))

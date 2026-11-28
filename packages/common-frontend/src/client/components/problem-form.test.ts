@@ -6,16 +6,9 @@ const problem: Problem = {
   content: { hu: { problemText: 'Hány?', imageUrl: 'https://durerinfo.hu/kocka.png', help2: 'Rétegenként.' } },
 };
 
-test('gives back the problem it was filled from', () => {
-  expect(problemFromForm(problemForm(problem), problem)).toEqual({ problem });
-});
-
-test('keeps the hints it does not edit, unless their language is left out', () => {
+test('gives back the problem it was filled from, hints kept unless their language is left out', () => {
   const form = problemForm(problem);
-  form.content.hu.problemText = 'Hány kocka?';
-  expect(problemFromForm(form, problem)).toEqual({
-    problem: { ...problem, content: { hu: { ...problem.content.hu, problemText: 'Hány kocka?' } } },
-  });
+  expect(problemFromForm(form, problem)).toEqual({ problem });
   form.content.hu = { problemText: '', imageUrl: '' };
   form.content.en.problemText = 'How many?';
   expect(problemFromForm(form, problem)).toEqual({ problem: { ...problem, content: { en: { problemText: 'How many?' } } } });

@@ -15,7 +15,7 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle, problemEditPath } from './CompetitionTable';
+import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle, problemEditPath, slug } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
@@ -38,11 +38,6 @@ function StoredElsewhere({ storedIn }: { storedIn: AdminCompetitionDto['storedIn
   const Icon = storedIn === 'code' ? Code : Storage;
   return <Icon fontSize="small" sx={{ color: MUTED }}
     titleAccess={storedIn === 'code' ? 'Kódban tárolt feladat' : 'Adatbázisban tárolt feladat'}/>;
-}
-
-/// The part of an id people recognise a problem by: its slug.
-function slug(id: string): string {
-  return id.split('--').slice(1).join('--') || id;
 }
 
 function describeUse(use: ProblemUseDto): string {

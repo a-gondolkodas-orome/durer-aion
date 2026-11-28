@@ -69,9 +69,13 @@ export function competitionEditPath(competitionId: string): string {
   return `${competitionPath(competitionId)}/edit`;
 }
 
-/// Where the editor of one of the competition's problems is
-/// (ProblemEditPage.tsx): under the competition it is opened from, which it
-/// goes back to, though the problem is shared.
+/// The part of an id people recognise a problem by: its slug.
+export function slug(id: string): string {
+  return id.split('--').slice(1).join('--') || id;
+}
+
+/// Where a problem's editor is (ProblemEditPage.tsx), under the competition
+/// it is opened from.
 export function problemEditPath(competitionId: string, problemId: string): string {
   return `${competitionPath(competitionId)}/feladat/${encodeURIComponent(problemId)}`;
 }

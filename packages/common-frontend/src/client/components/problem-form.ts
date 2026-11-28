@@ -1,15 +1,10 @@
 import type { Language, Problem, ProblemContent } from 'schemas';
 import { LANGUAGES } from 'schemas';
 
-// The problem editor's form: the answer and each language's content as the
-// fields hold them, text as typed. The validator on the server decides what
-// is valid; the form only refuses an answer that is no whole number, which it
-// cannot turn into a problem at all.
-//
-// The hints (`help1`, `help2`) are not edited: nothing shows them to a team.
-// A language's stored ones are kept as they are.
+// The problem editor's form, as typed. The server validates; the form only
+// refuses an answer that is no number. The hints are not edited, as nothing
+// shows them to a team: stored ones are kept.
 
-/// The fields the editor shows.
 const FIELDS = ['problemText', 'imageUrl'] as const satisfies readonly (keyof ProblemContent)[];
 
 export type ContentForm = Record<typeof FIELDS[number], string>;
@@ -28,17 +23,13 @@ export function problemForm(problem: Problem): ProblemForm {
   };
 }
 
-/// Whether the form gives the language any content: one with every field
-/// empty is left out of the problem, and a team sees another language there.
+/// Whether the language has content: one without is left out of the problem.
 export function hasContent(form: ContentForm): boolean {
   return FIELDS.some(field => form[field].trim() !== '');
 }
 
-/// The problem the form describes, `original` changed by it. An empty image
-/// URL is left out, the way a bank leaves out what it has not; a text is kept
-/// as typed, since LaTeX is whitespace-sensitive in places. A language with an
-/// image but no text is sent with an empty one, for the validator to name. A
-/// language left out takes its hints with it.
+/// `original` changed by the form. The text is kept as typed, since LaTeX can
+/// be whitespace-sensitive. A language left out takes its hints with it.
 export function problemFromForm(form: ProblemForm, original: Problem): { problem: Problem } | { answerError: string } {
   const answer = form.answer.trim();
   if (!/^-?\d+$/.test(answer)) return { answerError: 'Egész számot írj ide.' };
@@ -55,9 +46,7 @@ export function problemFromForm(form: ProblemForm, original: Problem): { problem
   return { problem: { id: original.id, answer: Number(answer), content } };
 }
 
-/// What the save changes, field by field, in the order the editor shows
-/// them: the field's name, and its text before and after, '' for none. The
-/// hints are among them, which a language left out takes away.
+/// What the save changes, field by field, hints included; '' for none.
 export function problemChanges(before: Problem, after: Problem): { name: string, before: string, after: string }[] {
   const changes: { name: string, before: string, after: string }[] = [];
   if (before.answer !== after.answer) changes.push({ name: 'Válasz', before: String(before.answer), after: String(after.answer) });

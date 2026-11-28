@@ -3,17 +3,13 @@ import { Stack } from '@mui/system';
 import { type ReactNode, useEffect, useRef } from 'react';
 import { BORDER, DANGER, DANGER_BORDER, MUTED } from './adminStyles';
 
-// What the admin page's edit pages share: the steps from a form to its
-// review, the cards they are laid out in, and the warning on leaving a draft.
+// What the admin page's edit pages share.
 
 export const WARNING = '#7a4b00';
 export const WARNING_BORDER = '#f0d49a';
 
-/** Warns on leaving the page while `dirty`; the ref, set just before a save
- *  leaves it, lets that navigation go, since it comes before the render that
- *  would take the warning away. Every way off an edit page is a page load,
- *  its breadcrumb's links included, so the browser's own prompt is the
- *  warning. */
+/** Warns on leaving the page while `dirty`. Set the ref just before a save
+ *  navigates away, which comes before the render that clears `dirty`. */
 export function useLeaveWarning(dirty: boolean) {
   const leaving = useRef(false);
   useEffect(() => {
@@ -72,8 +68,6 @@ export function MessageList({ messages }: { messages: string[] }) {
   );
 }
 
-/** The review's blocking errors and warnings, each in its card where there
- *  are any. */
 export function ReviewMessages({ errors, warnings }: { errors: string[], warnings: string[] }) {
   return <>
     {errors.length > 0 && <Card tone="danger" title={`${errors.length} hiba, ezek miatt még nem menthető`}>

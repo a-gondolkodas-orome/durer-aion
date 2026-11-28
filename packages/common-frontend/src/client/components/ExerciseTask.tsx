@@ -11,8 +11,7 @@ export interface ExerciseTaskProps {
   pictureUrl: string | null;
   /** The heading's language where it is not the page's, as on the admin page. */
   language?: string;
-  /** Told whether the picture loaded, as the problem editor warns of one that
-   *  does not; the browser is the only one to try. */
+  /** Whether the picture loaded, for the problem editor to warn of one that does not. */
   onPictureLoad?: (loaded: boolean) => void;
 }
 

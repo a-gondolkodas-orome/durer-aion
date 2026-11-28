@@ -74,19 +74,15 @@ function validateLabel(label: LocalizedLabel, where: string, what = 'a felirat')
   return errors;
 }
 
-// An absolute `https:` URL, its host the first group. A team's browser loads
-// the image from wherever it points, and a plain `http:` one is blocked on the
-// competition's `https:` page.
+// An absolute `https:` URL, its host the first group: the page is served over
+// https, which blocks a plain `http:` image.
 const HTTPS_URL = /^https:\/\/([^\s/?#@]+)(?:[/?#]\S*)?$/i;
 
-/// Where the banks keep their images. One elsewhere is allowed, but nobody of
-/// the competition looks after it, so `problemImageWarnings` says so.
+/// Where the banks keep their images.
 export const IMAGE_HOSTS: readonly string[] = ['durerinfo.hu', 'durerimages.s3.eu-north-1.amazonaws.com'];
 
-/// What is allowed of the problem's images but worth a look before it is
-/// saved, as messages: an image held on a host other than `IMAGE_HOSTS`.
-/// Whether the image loads at all is for a browser to find out, not the
-/// server, which fetches nothing.
+/// An image on a host other than `IMAGE_HOSTS`, as a message per language:
+/// allowed, but nobody of the competition looks after it.
 export function problemImageWarnings(problem: Problem): string[] {
   return Object.entries(problem.content).flatMap(([language, content]) => {
     const host = content?.imageUrl === undefined ? undefined : HTTPS_URL.exec(content.imageUrl)?.[1]?.toLowerCase();

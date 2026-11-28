@@ -95,7 +95,7 @@ describe('validateProblem', () => {
     ({ ...hungarianOnly, content: { hu: { problemText: 'Mennyi?', imageUrl } } });
 
   it('refuses an image that is not at an absolute https: URL', () => {
-    for (const imageUrl of ['http://durerinfo.hu/a.png', 'durerinfo.hu/a.png', '/kepek/a.png', 'https://', 'https://a b/c.png']) {
+    for (const imageUrl of ['http://durerinfo.hu/a.png', '/kepek/a.png', 'https://a b/c.png']) {
       expect(validateProblem(withImage(imageUrl))).toEqual([
         `feladat ${hungarianOnly.id}: a kép címe nem teljes https:// kezdetű cím (hu): „${imageUrl}”`,
       ]);

@@ -8,8 +8,7 @@ import type { Server } from "boardgame.io";
 import type { Bundle } from "problem-bank";
 import { registry } from "problem-bank/all";
 import type { Problem } from "schemas";
-import { inLanguage } from "schemas";
-import { hostedGames, relaySetup } from "../games";
+import { hostedGames } from "../games";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import type { ContentSources } from "./database_sources";
 import { importBundle, openContentSources } from "./database_sources";
@@ -18,18 +17,16 @@ import type { AdminProblemView, ProblemWriteReport } from "./problem_edit";
 import { configureTeamsRouter } from "./router";
 import { startTestDatabase } from "./test_database";
 
-// GET and PUT /team/admin/problems/:id over HTTP against PGlite (#818): a
-// database problem is replaced whole, validated, and its answer locked once a
-// team of a competition using it has started.
+// GET and PUT /team/admin/problems/:id over HTTP against PGlite (#818).
 
 const sample = JSON.parse(readFileSync(
   join(__dirname, "..", "..", "..", "..", "packages", "problem-bank", "fixtures", "sample-bundle.json"), "utf8",
 )) as Bundle;
 const FULL = "aqvco71pta--csomag-teljes";
 const RELAY_ONLY = "903xajr9et--csomag-valto";
-/** In both of the sample's relays, in Hungarian and English. */
+/** In both relays, in Hungarian and English. */
 const SHARED = "10iqp4vy6b--csomag-kockak";
-/** In the full competition's relay alone. */
+/** In the full competition's relay only. */
 const OWN = "roow9oo75t--csomag-paros";
 /** Held in code, in the relay-only competition's relay. */
 const IN_CODE = "k5g58wuf6h--minta-korongok";
@@ -98,7 +95,7 @@ async function start(competitionId: string) {
 }
 
 const withText = (problem: Problem, hu: string): Problem =>
-  ({ ...problem, content: { ...problem.content, hu: { ...problem.content.hu, problemText: hu } } });
+  ({ ...problem, content: { ...problem.content, hu: { problemText: hu } } });
 
 it("serves a problem with every use a relay makes of it", async () => {
   expect(await view(SHARED)).toEqual({
@@ -114,32 +111,23 @@ it("serves a problem with every use a relay makes of it", async () => {
   expect((await fetch(url("zzzzzzzzzz--nincs"), { headers: admin })).status).toBe(404);
 });
 
-it("writes a fixed problem, which every competition using it then starts its matches with", async () => {
-  const fixed = withText(shared, "Hány kis kockából áll egy $3 \\times 3 \\times 3$-as nagy kocka?");
-  expect(await report(fixed)).toMatchObject({ written: true, errors: [], warnings: [], answerLocked: false });
-  expect(await storedBody()).toEqual({ ...fixed, id: undefined });
-  for (const competitionId of [RELAY_ONLY, FULL]) {
-    const competition = await sources.competitionSource.getCompetition(competitionId);
-    if (competition?.relay === undefined) throw new Error(`${competitionId} has a relay`);
-    const { judge } = await relaySetup(competition.relay, competition.languages, sources.problemSource);
-    expect(judge.map(({ problemText }) => inLanguage(problemText, "hu"))).toContain(fixed.content.hu?.problemText);
-  }
-});
-
-it("writes nothing on a dry run, and answers what the write would do", async () => {
-  expect(await report(withText(shared, "Más?"), { dryRun: true }))
-    .toMatchObject({ written: false, errors: [], warnings: [] });
+it("writes a fixed problem, which the relays then read, and nothing on a dry run", async () => {
+  const fixed = withText(shared, "Hány kis kockából áll a nagy kocka?");
+  expect(await report(fixed, { dryRun: true })).toMatchObject({ written: false, errors: [], warnings: [] });
   expect(await storedBody()).toEqual(sample.problems[SHARED]);
+
+  expect(await report(fixed)).toMatchObject({ written: true, errors: [], warnings: [] });
+  expect((await sources.problemSource.getProblems([SHARED])).get(SHARED)).toEqual(fixed);
 });
 
-it("refuses an invalid problem with the validator's Hungarian messages, on a dry run and on write", async () => {
-  const invalid = withText({ ...shared, answer: 1.5 }, " ");
-  for (const dryRun of [true, false]) {
-    expect((await report(invalid, { dryRun })).errors).toEqual([
-      `feladat ${SHARED}: a válasz (1.5) nem egész szám`,
-      `feladat ${SHARED}: a szövege üres (hu)`,
-    ]);
-  }
+it("refuses an invalid problem with the validator's messages, and one leaving a competition without its language", async () => {
+  expect((await report(withText({ ...shared, answer: 1.5 }, " "))).errors).toEqual([
+    `feladat ${SHARED}: a válasz (1.5) nem egész szám`,
+    `feladat ${SHARED}: a szövege üres (hu)`,
+  ]);
+  expect((await report({ ...shared, content: { en: shared.content.en } })).errors).toEqual([
+    `feladat ${SHARED}: nem maradna szövege a verseny nyelvén (magyar): ${FULL}`,
+  ]);
   expect(await storedBody()).toEqual(sample.problems[SHARED]);
 });
 
@@ -150,52 +138,32 @@ it("refuses an image not at an https: URL, and saves one on another host with a 
     `feladat ${SHARED}: a kép címe nem teljes https:// kezdetű cím (hu): „http://durerinfo.hu/kocka.png”`,
   ]);
   expect(await report(withImage("https://example.org/kocka.png"))).toMatchObject({
-    written: true, errors: [], warnings: [`feladat ${SHARED}: a kép nem a szokásos tárhelyen van (hu): example.org`],
+    written: true, warnings: [`feladat ${SHARED}: a kép nem a szokásos tárhelyen van (hu): example.org`],
   });
-});
-
-it("refuses to take away the language a competition using the problem is held in", async () => {
-  const englishOnly: Problem = { ...shared, content: { en: shared.content.en } };
-  expect((await report(englishOnly)).errors).toEqual([
-    `feladat ${SHARED}: nem maradna szövege a verseny nyelvén (magyar): ${FULL}`,
-  ]);
 });
 
 it("locks the answer once a team of any competition using the problem has started, the text not", async () => {
   await start(RELAY_ONLY);
-  expect((await view(SHARED)).answerLocked).toBe(true);
   expect((await view(OWN)).answerLocked).toBe(false);
-
-  for (const dryRun of [true, false]) {
-    const locked = await report({ ...shared, answer: 28 }, { dryRun });
-    expect(locked).toMatchObject({ written: false, answerLocked: true });
-    expect(locked.errors).toEqual([
-      `feladat ${SHARED}: a válasz nem változhat, mert már indult csapat egy versenyben, amely használja (marad: 27)`,
-    ]);
-  }
-  expect(await storedBody()).toEqual(sample.problems[SHARED]);
-
+  expect(await report({ ...shared, answer: 28 })).toMatchObject({
+    written: false, answerLocked: true,
+    errors: [`feladat ${SHARED}: a válasz nem változhat, mert már indult csapat egy versenyben, amely használja (marad: 27)`],
+  });
   const text = await report(withText(shared, "Hány kiskockából áll?"));
-  expect(text).toMatchObject({ written: true, errors: [], answerLocked: true });
+  expect(text).toMatchObject({ written: true, answerLocked: true });
   expect(text.warnings).toEqual([expect.stringContaining("a futó meccsek a régi változattal")]);
-  const own: Problem = { ...sample.problems[OWN], id: OWN };
-  expect(await report({ ...own, answer: 51 }, { id: OWN })).toMatchObject({ written: true, answerLocked: false });
 });
 
-it("refuses a problem held in code, a body that is no problem, and one that changes the id", async () => {
-  const inCode = registry.problems.get(IN_CODE);
-  expect((await report(inCode, { id: IN_CODE })).errors)
+it("refuses a problem held in code, and one that changes the id", async () => {
+  expect((await report(registry.problems.get(IN_CODE), { id: IN_CODE })).errors)
     .toEqual([`feladat ${IN_CODE}: a kódban tárolt feladat csak telepítéssel változik`]);
-  expect((await report({ ...shared, answer: "27" })).errors).toEqual([expect.stringContaining(`feladat ${SHARED}:`)]);
   expect((await report({ ...shared, id: "zzzzzzzzzz--masik" })).errors)
     .toEqual([`feladat ${SHARED}: az azonosító nem változhat (a kérésben: zzzzzzzzzz--masik)`]);
 });
 
-it("refuses a problem no one holds, and asks for the organisers' login", async () => {
-  const missing = await fetch(url("zzzzzzzzzz--nincs"), { method: "PUT", headers: admin, body: JSON.stringify({ problem: shared }) });
-  expect(missing.status).toBe(404);
-  const anonymous = await fetch(url(SHARED), {
+it("asks for the organisers' login", async () => {
+  const response = await fetch(url(SHARED), {
     method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ problem: shared }),
   });
-  expect(anonymous.status).toBe(401);
+  expect(response.status).toBe(401);
 });

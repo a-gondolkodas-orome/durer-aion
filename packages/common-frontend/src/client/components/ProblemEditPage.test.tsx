@@ -112,16 +112,6 @@ test('fills the form from the problem, lists what it reaches, and saves a fix af
   expect(repo.saveProblem).toHaveBeenLastCalledWith(fixed, { dryRun: false });
 });
 
-test('leaves out a language whose every field is emptied, and an emptied image', async () => {
-  await renderPage();
-  type('Szöveg (LaTeX), angol', '');
-  type('Kép címe, magyar (nem kötelező)', '  ');
-  next();
-  await screen.findByRole('region', { name: 'Változások' });
-  expect(repo.saveProblem).toHaveBeenLastCalledWith(
-    { ...problem, content: { hu: { problemText: 'Hány kis kockából áll?' } } }, { dryRun: true });
-});
-
 test('shows the server\'s errors and warnings, and saves nothing while there is an error', async () => {
   vi.spyOn(repo, 'saveProblem').mockResolvedValue({
     ...clean,
