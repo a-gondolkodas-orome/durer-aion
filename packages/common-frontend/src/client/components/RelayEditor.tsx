@@ -25,6 +25,9 @@ import { type EntryErrors, type RelayEntryForm, copyEntry, entryProblemId, move,
 // using it; a problem this relay brings is written out here, and saved with
 // the competition.
 
+/** What a problem picked from those already held starts at. */
+const PICKED_POINTS = '3';
+
 export type RelayEntriesUpdate = (change: (entries: RelayEntryForm[]) => RelayEntryForm[]) => void;
 
 export function RelayEditor(props: {
@@ -141,9 +144,9 @@ export function RelayEditor(props: {
         <Button variant="outlined" onClick={() => { setPicking(true); }}>+ Meglévő feladat</Button>
       </Stack>}
       <ProblemPicker open={picking} onClose={() => { setPicking(false); }} language={language} competitionId={data.id}
-        inRelay={new Set(entries.map(entryProblemId))} serial={entries.length + 1} points={Number(nextPoints) || 0}
+        inRelay={new Set(entries.map(entryProblemId))} serial={entries.length + 1} points={Number(PICKED_POINTS)}
         onAdd={(picked) => {
-          setEntries(current => [...current, ...pickedEntries(picked, nextPoints)]);
+          setEntries(current => [...current, ...pickedEntries(picked, PICKED_POINTS)]);
           setPicking(false);
         }}/>
     </Stack>

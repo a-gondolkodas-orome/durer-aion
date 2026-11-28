@@ -328,13 +328,13 @@ describe('composing the relay', () => {
     const added = within(relayList()).getByRole('listitem', { name: '3. feladat' });
     expect(within(added).getByText('hozzáadva')).toBeInTheDocument();
     expect(within(added).getByText('Hány háromszög van?')).toBeInTheDocument();
-    expect(field('Pont, 3. feladat')).toHaveValue('4');
+    expect(field('Pont, 3. feladat')).toHaveValue('3');
     next();
     const review = await screen.findByRole('region', { name: 'A váltó feladatai a mentés után' });
     expect(within(review).getByText('· meglévő feladat, hozzáadva')).toBeInTheDocument();
     expect(lastChange()).toEqual({
       competition: { ...relayConfig, relay: { durationMinutes: 30,
-        problems: [...relayConfig.relay?.problems ?? [], { problemId: HAROMSZOG, points: 4 }] } },
+        problems: [...relayConfig.relay?.problems ?? [], { problemId: HAROMSZOG, points: 3 }] } },
       problems: [],
     });
   });
