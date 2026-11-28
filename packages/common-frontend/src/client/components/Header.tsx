@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from 'notistack';
 import { LanguageDropdown } from './Langswitcher';
 import type { Heading } from './competition-heading';
+import { RoundsBadge, RoundsList } from './RoundsBadge';
+import type { RoundsView } from './rounds-view';
 
 /// How wide a page gets. The strategy page is wider, as the game's rules sit
 /// beside its board.
@@ -24,6 +26,9 @@ export const STRATEGY_PAGE_MAX_WIDTH = 1320;
 /// leaving, such as the relay practice, where it goes back to the round
 /// selector; the button then shows a back arrow instead of the exit icon. On
 /// a wide screen the button is the icon alone, the label its tooltip.
+/// `rounds` is the team's two rounds while it is on one of them, for the
+/// badge that names the other. A phone has no room for it beside the language
+/// switcher: there the account menu lists the rounds instead.
 export function Header(props: {
   teamName: string | null,
   leaveLabel?: string,
@@ -33,7 +38,8 @@ export function Header(props: {
   heading?: Heading,
   teamLabel?: string,
   homeAddress?: string,
-  onChooseLanguage?: (language: string) => void
+  onChooseLanguage?: (language: string) => void,
+  rounds?: RoundsView,
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -133,7 +139,19 @@ export function Header(props: {
             whiteSpace: 'nowrap',
           }}>{subtitle}</Box>}
         </Stack>
-        <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
+        <Stack direction="row" sx={{ justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+          {props.rounds && <>
+            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+              <RoundsBadge view={props.rounds}/>
+            </Box>
+            {!props.languageSwitcher && <Box sx={{ display: { xs: 'flex', md: 'none' }, minWidth: 0 }}>
+              <RoundsBadge view={props.rounds} compact/>
+            </Box>}
+            {props.languageSwitcher && <Box aria-hidden sx={{
+              display: { xs: 'none', md: 'block' }, width: '1px', height: '24px',
+              backgroundColor: alpha(theme.palette.primary.contrastText, 0.35),
+            }}/>}
+          </>}
           {props.languageSwitcher && <>
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>
               <LanguageDropdown fontColor={theme.palette.primary.contrastText} onChoose={props.onChooseLanguage} />
@@ -169,6 +187,11 @@ export function Header(props: {
               display: 'flex',
               alignItems: 'center'
             }}>{teamLabel}</Stack>
+            {props.rounds && <Box sx={{
+              border: '1px solid #eef0f2', borderRadius: '12px', padding: '6px 14px 10px', marginBottom: '20px',
+            }}>
+              <RoundsList view={props.rounds}/>
+            </Box>}
             <Button onClick={() => {
               setMobileMenuOpen(false);
               onLogout();

@@ -320,6 +320,7 @@ húzhatunk
 importálása
 indítása
 indíthatja
+indíthatjátok
 indulása
 írhattunk
 írhatunk

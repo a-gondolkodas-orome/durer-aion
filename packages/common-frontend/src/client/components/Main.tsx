@@ -16,6 +16,7 @@ import i18next from "i18next";
 import { useClientRepo, useOptionalAdminRepo } from "../client-repo-context";
 import { useTranslation } from "react-i18next";
 import { competitionHeading } from "./competition-heading";
+import { roundsView } from "./rounds-view";
 import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenLanguage } from "../hooks/ui-language";
 
 // A chunk of its own, the data grid and the syntax highlighter with it: those
@@ -77,7 +78,8 @@ export function Main(props: { gitCommitHash: string }) {
       {!admin && <LoadTeamState />}
       <Header teamName={admin ? null : teamState?.teamName ?? null} heading={heading}
         compact={!admin && (teamState?.pageState === "RELAY" || teamState?.pageState === "STRATEGY")} maxWidth={maxWidth}
-        languageSwitcher={languages !== undefined && languages.length > 1} onChooseLanguage={chooseLanguage}/>
+        languageSwitcher={languages !== undefined && languages.length > 1} onChooseLanguage={chooseLanguage}
+        rounds={admin ? undefined : roundsView(teamState)}/>
       {/* `maxWidth={false}`: MUI's default `maxWidth="lg"` sets the theme's lg
           breakpoint, 1280px, at that width and up, overriding the sx below */}
       <Container
