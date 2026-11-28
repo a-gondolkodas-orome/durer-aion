@@ -10,6 +10,7 @@ import { ImportExport } from './ImportExport';
 import { CompetitionPageLink, CompetitionTable, competitionTitle } from './CompetitionTable';
 import { CompetitionPage } from './CompetitionPage';
 import { CompetitionEditPage } from './CompetitionEditPage';
+import { ProblemEditPage } from './ProblemEditPage';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -84,8 +85,9 @@ const panelProps = (panel: AdminTab, open: AdminTab) => ({
   sx: panel === open ? {} : { visibility: 'hidden', height: 0, overflow: 'hidden' },
 });
 
-export function Admin(props: { teamId?: string, competitionId?: string, edit?: true }) {
+export function Admin(props: { teamId?: string, competitionId?: string, edit?: true, problemId?: string }) {
   if (props.competitionId === undefined) return <AdminTabs teamId={props.teamId}/>;
+  if (props.problemId !== undefined) return <ProblemEditPage competitionId={props.competitionId} problemId={props.problemId}/>;
   return props.edit ? <CompetitionEditPage competitionId={props.competitionId}/>
     : <CompetitionPage competitionId={props.competitionId}/>;
 }

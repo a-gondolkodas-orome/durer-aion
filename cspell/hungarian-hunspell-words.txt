@@ -88,6 +88,7 @@ bizonyítása
 bizonyításhoz
 bizonyítást
 bonthatjuk
+böngészőben
 böngészőkben
 bújhatnak
 cikcakkosabb
@@ -322,6 +323,7 @@ indítása
 indíthatja
 indíthatjátok
 indulása
+indulásakor
 írhattunk
 írhatunk
 ismerők
@@ -838,7 +840,6 @@ szedhetünk
 szélességét
 szerese
 szeresét
-szerkeszthetők
 szervezője
 szervezőt
 szétdarabolni

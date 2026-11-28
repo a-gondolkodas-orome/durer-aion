@@ -1,4 +1,7 @@
-import { Box, Button, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import { Box, Button, Chip, IconButton, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
+import Edit from '@mui/icons-material/Edit';
+import Visibility from '@mui/icons-material/Visibility';
 import Code from '@mui/icons-material/Code';
 import Storage from '@mui/icons-material/Storage';
 import { Stack } from '@mui/system';
@@ -12,7 +15,7 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle } from './CompetitionTable';
+import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle, problemEditPath } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
@@ -171,6 +174,7 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
             <TableCell>Válasz</TableCell>
             <TableCell>Nyelvek</TableCell>
             <TableCell>Használja</TableCell>
+            <TableCell><Box component="span" sx={visuallyHidden}>Szerkesztés</Box></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -207,6 +211,14 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
                       : <Link href={competitionPath(use.competitionId)}>{describeUse(use)}</Link>}
                   </Box>
                 ))}
+              </TableCell>
+              <TableCell>
+                {/* An in-code problem's editor shows it read-only */}
+                <IconButton size="small" href={problemEditPath(data.id, problem.id)}
+                  aria-label={`${storedIn === 'code' ? 'Megnyitás' : 'Szerkesztés'}: ${slug(problem.id)}`}
+                  title={storedIn === 'code' ? 'Megnyitás (kódban tárolt, nem szerkeszthető)' : 'Szerkesztés'}>
+                  {storedIn === 'code' ? <Visibility fontSize="inherit"/> : <Edit fontSize="inherit"/>}
+                </IconButton>
               </TableCell>
             </TableRow>
           ))}

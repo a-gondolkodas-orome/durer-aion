@@ -155,7 +155,10 @@ touches the `Dockerfile`, nginx or the routes.
 The admin pages are at `http://localhost/admin`, user `admin`, password from
 `.env.docker`; `/admin/<teamId>` opens one team directly, and
 `/admin/verseny/<competitionId>` one competition, with its relay's problems and
-answers, linked from the **Versenyek** tab.
+answers, linked from the **Versenyek** tab. Each problem there opens its editor,
+whose fix reaches every relay using the problem, for the matches started after
+it. Once a team of any of those competitions has started, the answer no longer
+changes, and a problem held in code only with a deploy.
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container and redirects the export it

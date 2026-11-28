@@ -74,8 +74,29 @@ function validateLabel(label: LocalizedLabel, where: string, what = 'a felirat')
   return errors;
 }
 
+// An absolute `https:` URL, its host the first group. A team's browser loads
+// the image from wherever it points, and a plain `http:` one is blocked on the
+// competition's `https:` page.
+const HTTPS_URL = /^https:\/\/([^\s/?#@]+)(?:[/?#]\S*)?$/i;
+
+/// Where the banks keep their images. One elsewhere is allowed, but nobody of
+/// the competition looks after it, so `problemImageWarnings` says so.
+export const IMAGE_HOSTS: readonly string[] = ['durerinfo.hu', 'durerimages.s3.eu-north-1.amazonaws.com'];
+
+/// What is allowed of the problem's images but worth a look before it is
+/// saved, as messages: an image held on a host other than `IMAGE_HOSTS`.
+/// Whether the image loads at all is for a browser to find out, not the
+/// server, which fetches nothing.
+export function problemImageWarnings(problem: Problem): string[] {
+  return Object.entries(problem.content).flatMap(([language, content]) => {
+    const host = content?.imageUrl === undefined ? undefined : HTTPS_URL.exec(content.imageUrl)?.[1]?.toLowerCase();
+    return host === undefined || IMAGE_HOSTS.includes(host) ? []
+      : [`feladat ${problem.id}: a kép nem a szokásos tárhelyen van (${language}): ${host}`];
+  });
+}
+
 /// Every way the problem breaks the rules `Problem` states, as messages; none
-/// means it is valid.
+/// means it is valid. An image is given by an absolute `https:` URL.
 export function validateProblem(problem: Problem): string[] {
   const errors: string[] = [];
   const where = `feladat ${problem.id}`;
@@ -96,6 +117,10 @@ export function validateProblem(problem: Problem): string[] {
       errors.push(`${where}: ismeretlen nyelvű szövege van: „${language}”`);
     } else if (problem.content[language]?.problemText.trim() === '') {
       errors.push(`${where}: a szövege üres (${language})`);
+    }
+    const imageUrl = problem.content[language as Language]?.imageUrl;
+    if (imageUrl !== undefined && !HTTPS_URL.test(imageUrl)) {
+      errors.push(`${where}: a kép címe nem teljes https:// kezdetű cím (${language}): „${imageUrl}”`);
     }
   }
 

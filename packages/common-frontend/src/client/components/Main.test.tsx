@@ -260,6 +260,8 @@ test.each([
   ['/admin/8eae8669-125c-42e5-8b49-89afbac31679', { teamId: '8eae8669-125c-42e5-8b49-89afbac31679' }],
   ['/admin/verseny/aqvco71pta--csomag-teljes', { competitionId: 'aqvco71pta--csomag-teljes' }],
   ['/admin/verseny/aqvco71pta--csomag-teljes/edit', { competitionId: 'aqvco71pta--csomag-teljes', edit: true }],
+  ['/admin/verseny/aqvco71pta--csomag-teljes/feladat/10iqp4vy6b--csomag-kockak',
+    { competitionId: 'aqvco71pta--csomag-teljes', problemId: '10iqp4vy6b--csomag-kockak' }],
   ['/admin/verseny', {}],
 ])('the admin path %s opens %o', (pathname, opened) => {
   expect(adminPath(pathname)).toEqual(opened);

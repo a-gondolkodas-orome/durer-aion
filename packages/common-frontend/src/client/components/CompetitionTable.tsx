@@ -69,6 +69,13 @@ export function competitionEditPath(competitionId: string): string {
   return `${competitionPath(competitionId)}/edit`;
 }
 
+/// Where the editor of one of the competition's problems is
+/// (ProblemEditPage.tsx): under the competition it is opened from, which it
+/// goes back to, though the problem is shared.
+export function problemEditPath(competitionId: string, problemId: string): string {
+  return `${competitionPath(competitionId)}/feladat/${encodeURIComponent(problemId)}`;
+}
+
 /// An eye icon opening the competition's own page.
 export function CompetitionPageLink(props: { id: string, title: string }) {
   return (
