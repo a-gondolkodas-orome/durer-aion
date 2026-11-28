@@ -697,6 +697,9 @@ function BoardArea(props: { state: BoardState, children: ReactNode }) {
         border: 0, margin: 0, padding: 0, minWidth: 0,
         display: 'flex', justifyContent: 'center',
         '& > *': { width: '100%', maxWidth: BOARD_MAX_WIDTH },
+        // A team playing from the keyboard (#709) must see where it is: MUI's
+        // own focus ripple is too faint on a board's cell.
+        '& .Mui-focusVisible': { outline: '3px solid', outlineColor: 'primary.main', outlineOffset: '2px' },
         ...(state !== 'live' && { '& *': { cursor: 'default' } }),
         ...(state === 'empty' && { opacity: 0.4, filter: 'grayscale(1)' }),
         transition: 'opacity 0.3s',

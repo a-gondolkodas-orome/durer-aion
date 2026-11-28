@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import type { BoardProps } from 'boardgame.io/react';
 import { PHASE } from '../../../common/gamewrapper';
 import { GUESSER_PLAYER, JUDGE_PLAYER } from '../../../common/types';
@@ -32,4 +32,11 @@ describe('the two-pile board', () => {
   test('shows no chosen pile once the game is over', () => {
     expect(showBoard({}, { currentPlayer: GUESSER_PLAYER, gameover: true }, false)).toStrictEqual(['false', 'false']);
   });
+});
+
+test('a pile chosen, the keyboard goes on to how many to take from it', async () => {
+  showBoard({ firstPlayer: GUESSER_PLAYER }, { currentPlayer: GUESSER_PLAYER }, true);
+  // The focus ripple MUI starts on the button settles after the render.
+  await act(() => Promise.resolve());
+  expect(document.activeElement).toBe(screen.getByRole('button', { name: '1 korong elvétele' }));
 });

@@ -370,7 +370,9 @@ Two conventions to keep in mind:
   the engine, the `BoardClient`'s `disabled` state and the bot)
 - Clear what the player should do next (`getPlayerStepDescription`)
 - Interactions disabled during the other player's turn (`ctx.isClientMoveAllowed`)
-- Mobile-friendly and keyboard-navigable
+- Mobile-friendly and playable from the keyboard alone: Tab reaches the board,
+  the arrow keys move between its piles, cells or pieces, and Enter (or Space)
+  makes the move (#709) — teams find it much faster than the mouse
 - Player can undo within a multi-move turn where that applies
 - Neither `board` nor `ctx` is ever modified in place
 - Watching the bot play does not give the winning strategy away outright

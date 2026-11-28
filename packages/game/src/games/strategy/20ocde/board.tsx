@@ -1,5 +1,6 @@
 import { Box, Button } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
+import { useBoardKeys } from '../../../common/board-keys';
 import { PHASE } from '../../../common/gamewrapper';
 import { JUDGE_PLAYER } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
@@ -16,6 +17,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   const line = winningLine(G.cells);
   // The team's first X of a turn stands out until the second ends the turn.
   const xsThisTurn = ctx.currentPlayer === JUDGE_PLAYER ? [] : G.xsThisTurn ?? [];
+  const keys = useBoardKeys({ active, columns: BOARD_SIZE });
 
   const chooseCell = (index: number) => {
     if (active && isLegalPlacement(G, ctx, index)) moves.placeMark(index);
@@ -25,7 +27,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
     // The marks scale with the board, not the window, so a board narrowed to
     // fit a short window keeps square cells.
     <Box sx={{ width: '100%', maxWidth: 440, mx: 'auto', containerType: 'inline-size' }}>
-      <Box role="group" aria-label="5 × 5-ös játéktábla" sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0.5 }}>
+      <Box role="group" aria-label="5 × 5-ös játéktábla" {...keys} sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0.5 }}>
         {G.cells.map((cell, index) => (
           <Button
             key={index}
