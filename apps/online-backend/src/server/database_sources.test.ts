@@ -7,6 +7,7 @@ import Koa from "koa";
 import Router from "@koa/router";
 import type { Server, State } from "boardgame.io";
 import { strategyGames } from "game/strategy";
+import { botWrapper } from "game";
 import type { MyGameState } from "game";
 import { createRegistry, validatingCompetitionSource } from "problem-bank";
 import { registry as allBanks } from "problem-bank/all";
@@ -176,7 +177,7 @@ describe("a competition held in the database", () => {
 
     const relay = hosted.find(({ game }) => game.name === "relay");
     if (relay === undefined) throw new Error("no relay game is hosted");
-    const judge = new relay.bot({ enumerate: () => [] });
+    const judge = new (botWrapper(relay.strategy))({ enumerate: () => [] });
     const first = { type: "firstProblem", args: [{ hu: "Mennyi?" }, [6], { hu: "" }] };
     expect((await judge.play(state as never, "1", fetched.metadata?.setupData)).action.payload).toMatchObject(first);
   });

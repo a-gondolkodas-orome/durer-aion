@@ -9,6 +9,7 @@ import type { Server, State } from "boardgame.io";
 import { getFilterPlayerView } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { strategyGames } from "game/strategy";
+import { botWrapper } from "game";
 import type { MyGameState } from "game";
 import { validatingCompetitionSource } from "problem-bank";
 import type { CompetitionConfig, CompetitionSource, Problem, ProblemSource } from "schemas";
@@ -115,7 +116,7 @@ describe("a competition the source starts returning after the server started", (
     // with the setup data from the match's metadata.
     const relay = hosted.find(({ game }) => game.name === "relay");
     if (relay === undefined) throw new Error("no relay game is hosted");
-    const judge = new relay.bot({ enumerate: () => [] });
+    const judge = new (botWrapper(relay.strategy))({ enumerate: () => [] });
     const first = { type: "firstProblem", args: [{ hu: "Hány?" }, [5], { hu: "" }] };
     expect((await judge.play(state as never, "1", fetched.metadata?.setupData)).action.payload).toMatchObject(first);
   });

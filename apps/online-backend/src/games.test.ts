@@ -1,6 +1,7 @@
 import { registry } from "problem-bank/all";
 import { RELAY_GAME_NAME, strategyGameName } from "schemas";
 import { hostedGames } from "./games";
+import { hostedStrategies } from "./strategies";
 
 describe("hostedGames", () => {
   const games = hostedGames();
@@ -10,6 +11,12 @@ describe("hostedGames", () => {
   // one of the two games playing the other's bot.
   it("names each game once", () => {
     expect(new Set(names).size).toBe(names.length);
+  });
+
+  // The bot worker looks a strategy up by the game's name, so a strategy no
+  // game is played as is one a rename left behind.
+  it("has a strategy for each game, and none for a game it does not host", () => {
+    expect(Object.keys(hostedStrategies()).sort()).toStrictEqual([...names].sort());
   });
 
   // The start routes look a team's game up by these names (team_manage.ts),

@@ -12,6 +12,7 @@ import { getBotCredentials } from "./server/common";
 import { SocketGuard, socketClientKey, type GuardLimits } from "./server/socket_guard";
 import type { BotPlayMetadata, MatchBot } from "game";
 import type { CorsOptionsDelegate } from "cors";
+import { StrategyWorkerFailure } from "./bot_pool";
 
 // boardgame.io does not export the types its own transport is written against.
 // Naming them off what it does export keeps this file out of the package's
@@ -280,7 +281,9 @@ export class SocketIOButBotMoves extends SocketIO {
       const answer = await bot.play(current, BOT_ID, metadata?.setupData)
         .then(played => ({ played }), (error: unknown) => ({ error }));
       let failure: string;
-      if ("error" in answer) {
+      if ("error" in answer && answer.error instanceof StrategyWorkerFailure) {
+        failure = answer.error.message;
+      } else if ("error" in answer) {
         failure = `threw ${answer.error instanceof Error ? answer.error.message : String(answer.error)}`;
       } else {
         const { action, metadata: timing } = answer.played;

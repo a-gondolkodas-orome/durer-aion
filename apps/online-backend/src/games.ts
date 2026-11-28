@@ -1,38 +1,31 @@
-import { RelayWrapper, botWrapper, gameWrapper } from 'game';
-import type { MyGameState, RelaySetupData } from 'game';
+import { RelayWrapper, gameWrapper } from 'game';
+import type { RelaySetupData } from 'game';
 import { MyGameWrappers as strategyGameWrappers } from 'game/strategy';
 import type { StrategyGameKey } from 'game/strategy';
-import { StrategyWrappers as StrategyStrategy } from 'game/bot';
-import type { State } from 'boardgame.io';
-import { judgeProblems, relayStrategy } from 'game/relay-judge';
-import { strategyGameName } from 'schemas';
+import { judgeProblems } from 'game/relay-judge';
+import { RELAY_GAME_NAME, strategyGameName } from 'schemas';
 import type { Language, ProblemSource, RelayConfig } from 'schemas';
+import { hostedStrategies } from './strategies';
 
-/** The relay's judge, over the problems in its match's setup data. */
-function relayJudge(state: State<MyGameState>, botID: string, setupData: unknown) {
-  const judge = (setupData as Partial<RelaySetupData> | undefined)?.judge;
-  if (judge === undefined) {
-    throw new Error('This relay match has no problems in its setup data (started before #797).');
-  }
-  return relayStrategy(judge)(state, botID);
-}
-
-/** Each game the server hosts beside the bot that plays it, so a game cannot
- *  end up with another game's bot. None belongs to a competition
- *  (docs/ARCHITECTURE.md § *The two kinds of match*). */
+/** Each game the server hosts beside the strategy that plays its bot, looked
+ *  up by the game's name as the bot worker looks it up (strategies.ts). None
+ *  belongs to a competition (docs/ARCHITECTURE.md § *The two kinds of match*). */
 export function hostedGames() {
-  return [
-    { game: RelayWrapper(), bot: botWrapper(relayJudge) },
+  const strategies = hostedStrategies();
+  const games = [
+    { ...RelayWrapper(), name: RELAY_GAME_NAME },
     ...(Object.keys(strategyGameWrappers) as StrategyGameKey[]).map(hostedStrategyGame),
   ];
+  return games.map(game => {
+    const strategy = strategies[game.name];
+    if (strategy === undefined) throw new Error(`The game ${JSON.stringify(game.name)} has no strategy to play its bot.`);
+    return { game, strategy };
+  });
 }
 
-// Generic over the game, so that its rules and its bot are one game's.
+// Generic over the game, so that its rules are one game's.
 function hostedStrategyGame<K extends StrategyGameKey>(gameId: K) {
-  return {
-    game: { ...gameWrapper(strategyGameWrappers[gameId]()), name: strategyGameName(gameId) },
-    bot: botWrapper(StrategyStrategy[gameId]()),
-  };
+  return { ...gameWrapper(strategyGameWrappers[gameId]()), name: strategyGameName(gameId) };
 }
 
 /** A relay match's setup: the duration, and the problems with their answers

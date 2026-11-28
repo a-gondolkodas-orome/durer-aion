@@ -20,9 +20,8 @@ export type MatchBot = Bot & {
 };
 
 /// How long one call of a strategy may take before the server warns, in
-/// milliseconds. The call runs on the server's only thread, so this is also
-/// the most one bot move may hold up every other match; the live bots take a
-/// few milliseconds at worst (#116).
+/// milliseconds; the live bots take a few milliseconds at worst (#116). The
+/// server's hard limit is a deadline twenty times this (bot_pool.ts).
 export const STRATEGY_BUDGET_MS = 100;
 
 /// What `play` reports beside the move: how long the strategy took, for the
@@ -31,12 +30,27 @@ export interface BotPlayMetadata {
   strategyMs: number;
 }
 
-/// Wraps a strategy into a boardgame.io Bot class. The return type is spelled
-/// out because a declaration file cannot name the class itself: it inherits
-/// Bot's private members.
-export function botWrapper<T_SpecificGameState, T_Move>(
-  botstrategy: BotStrategy<T_SpecificGameState, T_Move>,
-): new (...args: ConstructorParameters<typeof Bot>) => MatchBot {
+/// A strategy run somewhere else — on the server, in a worker thread — as its
+/// host reports it: the move it named, and how long it took to name it.
+export interface StrategyAnswer<T_Move> {
+  move: [T_Move, string];
+  strategyMs: number;
+}
+
+/// Asks a strategy run elsewhere for the bot's next move. A failed strategy,
+/// or one its host gave up on, is a rejection.
+export type StrategyAsker<T_SpecificGameState, T_Move> =
+  (state: State<T_SpecificGameState>, botID: string, setupData?: unknown) => Promise<StrategyAnswer<T_Move>>;
+
+/// The class both wrappers return. Spelled out because a declaration file
+/// cannot name the class itself: it inherits Bot's private members.
+export type MatchBotClass = new (...args: ConstructorParameters<typeof Bot>) => MatchBot;
+
+/// Wraps a strategy run elsewhere into a boardgame.io Bot class: what the
+/// server plays its bots through, each strategy in a worker (bot_pool.ts).
+export function askingBotWrapper<T_SpecificGameState, T_Move>(
+  ask: StrategyAsker<T_SpecificGameState, T_Move>,
+): MatchBotClass {
   class _Bot extends Bot {
     // waits 400 ms for UX
     async wait(): Promise<void> {
@@ -45,11 +59,30 @@ export function botWrapper<T_SpecificGameState, T_Move>(
 
     async play(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): ReturnType<Bot['play']> {
       await this.wait();
-      const started = Date.now();
-      const [move, moveName] = botstrategy(state, playerID, setupData);
-      const metadata: BotPlayMetadata = { strategyMs: Date.now() - started };
+      const { move: [move, moveName], strategyMs } = await ask(state, playerID, setupData);
+      const metadata: BotPlayMetadata = { strategyMs };
       return { action: { type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } }, metadata };
     }
   }
   return _Bot;
+}
+
+/// Wraps a strategy into a boardgame.io Bot class that runs it in-process:
+/// the browser's, and the suites'.
+export function botWrapper<T_SpecificGameState, T_Move>(
+  botstrategy: BotStrategy<T_SpecificGameState, T_Move>,
+): MatchBotClass {
+  return askingBotWrapper<T_SpecificGameState, T_Move>(async (state, botID, setupData) => runStrategy(botstrategy, state, botID, setupData));
+}
+
+/// Calls a strategy and times it, for whichever host runs it.
+export function runStrategy<T_SpecificGameState, T_Move>(
+  strategy: BotStrategy<T_SpecificGameState, T_Move>,
+  state: State<T_SpecificGameState>,
+  botID: string,
+  setupData?: unknown,
+): StrategyAnswer<T_Move> {
+  const started = Date.now();
+  const move = strategy(state, botID, setupData);
+  return { move, strategyMs: Date.now() - started };
 }

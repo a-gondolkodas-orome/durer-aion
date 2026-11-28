@@ -8,10 +8,11 @@ import { defineConfig } from 'tsdown'
 // carries no board and requires neither React nor MUI.
 
 export default defineConfig({
-  // Two entries: the server and the team import. rolldown puts what they share
-  // — the database and the team repository — in a chunk beside them, which each
-  // `require`s by name.
-  entry: ['src/server.ts', 'src/import_teams.ts'],
+  // Three entries: the server, the bot worker it starts (bot_pool.ts), and the
+  // team import. rolldown puts what they share — the database and the team
+  // repository, the strategies — in chunks beside them, which each `require`s
+  // by name.
+  entry: ['src/server.ts', 'src/bot_worker.ts', 'src/import_teams.ts'],
   // CommonJS, not ESM: every dependency stays a bare `require()` below, and
   // boardgame.io ships no `exports` map — its subpaths are directories, which
   // Node's ESM loader refuses (ERR_UNSUPPORTED_DIR_IMPORT on

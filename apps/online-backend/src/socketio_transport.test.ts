@@ -13,21 +13,26 @@
  * built frontend are not in front of this, and postgres is not behind it.
  */
 import { AddressInfo } from "node:net";
+import { join } from "node:path";
 import { io as connect, Socket } from "socket.io-client";
 import { createMatch } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { Server } from "boardgame.io/server";
-import { botWrapper, gameWrapper } from "game";
+import { askingBotWrapper, botWrapper, gameWrapper } from "game";
+import type { MatchBot } from "game";
 import { MyGameWrappers } from "game/strategy";
 import { StrategyWrappers } from "game/bot";
 import { strategyGameName } from "schemas";
 import { BOT_ID, SocketIOButBotMoves, type BotFailureMode } from "./socketio_botmoves";
+import { BotPool } from "./bot_pool";
 
 const GAME_NAME = strategyGameName("minta-ketkupac");
 const game = { ...gameWrapper(MyGameWrappers["minta-ketkupac"]()), name: GAME_NAME };
 const HUMAN_ID = "0";
-// Each test gets its own server and its own store, so one id is enough.
+// Each test gets its own server and its own store, so one id is enough — and
+// a second, for a test of one match holding up another.
 const MATCH_ID = "match-under-test";
+const OTHER_MATCH_ID = "another-team's-match";
 /** What the router puts on the team's seat of every match it creates; the
  *  socket guard lets nothing through without it. */
 const TEAM_CREDENTIALS = "the-team's";
@@ -96,15 +101,20 @@ describe("the socket transport a browser talks to", () => {
   let strategy: KetkupacBot;
   const botStrategy: KetkupacBot = (state, botID) => strategy(state, botID);
 
-  /** Starts the server, by default as the competition runs it. */
-  async function startServer(botFailure: BotFailureMode = "recover", served = game): Promise<void> {
+  /** Starts the server, by default as the competition runs it. The bot runs
+   *  its strategy in-process unless a test hands it another. */
+  async function startServer(
+    botFailure: BotFailureMode = "recover",
+    served = game,
+    bot: MatchBot = new (botWrapper(botStrategy))({ enumerate: served.ai?.enumerate }),
+  ): Promise<void> {
     server = Server({
       games: [served],
       // No `db`, so boardgame.io hands us its in-memory store — the transport
       // is what this file is about, not what persists behind it.
       transport: new SocketIOButBotMoves(
         { https: undefined },
-        { [GAME_NAME]: new (botWrapper(botStrategy))({ enumerate: served.ai?.enumerate }) },
+        { [GAME_NAME]: bot },
         {},
         botFailure,
       ),
@@ -117,10 +127,10 @@ describe("the socket transport a browser talks to", () => {
     url = `http://localhost:${(running.appServer.address() as AddressInfo).port}`;
   }
 
-  /** The same, in another mode or with another game. */
-  async function restartServer(botFailure: BotFailureMode, served = game): Promise<void> {
+  /** The same, in another mode, with another game or another bot. */
+  async function restartServer(botFailure: BotFailureMode, served = game, bot?: MatchBot): Promise<void> {
     server.kill(running);
-    await startServer(botFailure, served);
+    await startServer(botFailure, served, bot);
   }
 
   beforeEach(async () => {
@@ -151,12 +161,12 @@ describe("the socket transport a browser talks to", () => {
   }
 
   /** A match as the router makes one, straight into the server's store. */
-  async function createStoredMatch(): Promise<void> {
-    const match = createMatch({ game, numPlayers: 2, setupData: undefined, unlisted: true });
+  async function createStoredMatch(matchID = MATCH_ID, setupData: unknown = undefined): Promise<void> {
+    const match = createMatch({ game, numPlayers: 2, setupData, unlisted: true });
     if ("setupDataError" in match) throw new Error(match.setupDataError);
     match.metadata.players[0].credentials = TEAM_CREDENTIALS;
     match.metadata.players[1].credentials = BOT_CREDENTIALS;
-    await server.db.createMatch(MATCH_ID, match);
+    await server.db.createMatch(matchID, match);
   }
 
   async function syncAs(socket: Socket, matchID: string, playerID: string): Promise<BgioState> {
@@ -170,7 +180,7 @@ describe("the socket transport a browser talks to", () => {
    *  position, which is the first thing it decides in a match. So the state
    *  this resolves with is a whole round trip: player packet in, state through
    *  the game, bot packet out. */
-  async function startLiveGame(socket: Socket, from: BgioState): Promise<BgioState> {
+  async function startLiveGame(socket: Socket, from: BgioState, matchID = MATCH_ID): Promise<BgioState> {
     const botAnswered = updateMatching(
       socket,
       ({ ctx }) => ctx.phase === "chooseRole" && ctx.currentPlayer === HUMAN_ID,
@@ -179,7 +189,7 @@ describe("the socket transport a browser talks to", () => {
       "update",
       makeMove("chooseNewGameType", ["live"], HUMAN_ID),
       from._stateID,
-      MATCH_ID,
+      matchID,
       HUMAN_ID
     );
     return await botAnswered;
@@ -240,16 +250,16 @@ describe("the socket transport a browser talks to", () => {
 
   /** Plays the team's way to its first take in a live game, and makes it:
    *  the turn is then the bot's, in the play phase. */
-  async function teamTakes(socket: Socket): Promise<void> {
-    await createStoredMatch();
-    const live = await startLiveGame(socket, await syncAs(socket, MATCH_ID, HUMAN_ID));
+  async function teamTakes(socket: Socket, matchID = MATCH_ID, setupData?: unknown): Promise<void> {
+    await createStoredMatch(matchID, setupData);
+    const live = await startLiveGame(socket, await syncAs(socket, matchID, HUMAN_ID), matchID);
     const playing = updateMatching(socket, ({ ctx }) => ctx.phase === "play");
-    socket.emit("update", makeMove("chooseRole", [HUMAN_ID], HUMAN_ID), live._stateID, MATCH_ID, HUMAN_ID);
+    socket.emit("update", makeMove("chooseRole", [HUMAN_ID], HUMAN_ID), live._stateID, matchID, HUMAN_ID);
     const play = await playing;
     const chosen = updateMatching(socket, ({ G }) => G.selectedPile === 1);
-    socket.emit("update", makeMove("selectPile", [1], HUMAN_ID), play._stateID, MATCH_ID, HUMAN_ID);
+    socket.emit("update", makeMove("selectPile", [1], HUMAN_ID), play._stateID, matchID, HUMAN_ID);
     const halfway = await chosen;
-    socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), halfway._stateID, MATCH_ID, HUMAN_ID);
+    socket.emit("update", makeMove("take", [1, 1], HUMAN_ID), halfway._stateID, matchID, HUMAN_ID);
   }
 
   /** The bot's strategy in play only, the real one for the opening. */
@@ -269,10 +279,10 @@ describe("the socket transport a browser talks to", () => {
   }
 
   /** The team's first take, and the state once the turn is the team's again. */
-  async function teamTakesAndBotAnswers(socket: Socket): Promise<BgioState> {
+  async function teamTakesAndBotAnswers(socket: Socket, matchID = MATCH_ID, setupData?: unknown): Promise<BgioState> {
     const answered = updateMatching(socket, ({ G, ctx }) =>
       ctx.phase === "play" && ctx.currentPlayer === HUMAN_ID && G.piles[0] + G.piles[1] < 8);
-    await teamTakes(socket);
+    await teamTakes(socket, matchID, setupData);
     return await answered;
   }
 
@@ -359,6 +369,68 @@ describe("the socket transport a browser talks to", () => {
 
     expect(warnings).toHaveBeenCalledWith(expect.stringMatching(/took \d+ ms to name a move, over its 100 ms/));
     expect(await failureNotes()).toStrictEqual([]);
+  });
+
+  /** A bot as the server runs one, its strategy in a worker, in play only:
+   *  the fixture worker plays nothing else, so the opening is the real
+   *  strategy's, in-process. The fixture does what the match's setup data
+   *  says (fixtures/strategy_worker.mjs). */
+  async function startServerWithWorkers(deadlineMs: number): Promise<void> {
+    const pool = new BotPool({
+      worker: join(__dirname, "fixtures", "strategy_worker.mjs"),
+      deadlineMs,
+      workerData: { mode: "ketkupac" },
+    });
+    await pool.start();
+    onTestFinished(() => pool.close());
+    const opening = new (botWrapper(StrategyWrappers["minta-ketkupac"]()))({ enumerate: game.ai?.enumerate });
+    class InPlay extends askingBotWrapper((state, botID, setupData) => pool.ask(GAME_NAME, state, botID, setupData)) {
+      override play(...args: Parameters<MatchBot["play"]>): ReturnType<MatchBot["play"]> {
+        return args[0].ctx.phase === "play" ? super.play(...args) : opening.play(...args);
+      }
+    }
+    await restartServer("recover", game, new InPlay({ enumerate: game.ai?.enumerate }));
+  }
+
+  it("serves another match while a strategy loops, and takes the failure path at its deadline", async () => {
+    await startServerWithWorkers(1000);
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const warnings = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await createStoredMatch(OTHER_MATCH_ID);
+    const looping = await connectClient();
+    const other = await connectClient();
+    let recovered = false;
+
+    const answered = teamTakesAndBotAnswers(looping, MATCH_ID, { loop: true })
+      .then(state => { recovered = true; return state; });
+    // Past the bot's pause, into the loop.
+    await new Promise(resolve => setTimeout(resolve, 700));
+    const started = Date.now();
+    await syncAs(other, OTHER_MATCH_ID, HUMAN_ID);
+
+    expect(Date.now() - started).toBeLessThan(300);
+    expect(recovered).toBe(false);
+    expect((await answered).G.selectedPile).toBeNull();
+    expect(await failureNotes()).toStrictEqual([
+      expect.stringMatching(/missed its 1000 ms deadline, and its worker was replaced/),
+    ]);
+    expect(warnings).toHaveBeenCalledWith(expect.stringMatching(/played take\(\[\d,\d\]\) instead/));
+  });
+
+  it("plays a strategy's move that takes a second, and answers another match's bot meanwhile", async () => {
+    await startServerWithWorkers(2000);
+    const warnings = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const [slowSocket, quickSocket] = [await connectClient(), await connectClient()];
+    const finished: string[] = [];
+
+    await Promise.all([
+      teamTakesAndBotAnswers(slowSocket, MATCH_ID, { sleepMs: 1000 }).then(() => finished.push("slow")),
+      teamTakesAndBotAnswers(quickSocket, OTHER_MATCH_ID, {}).then(() => finished.push("quick")),
+    ]);
+
+    expect(finished).toStrictEqual(["quick", "slow"]);
+    expect(await failureNotes()).toStrictEqual([]);
+    expect(warnings).toHaveBeenCalledWith(expect.stringMatching(/took \d+ ms to name a move, over its 100 ms/));
   });
 
   it("gives a reconnecting player the state their last one left", async () => {

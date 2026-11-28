@@ -71,8 +71,8 @@ COPY --from=build /usr/src/app/apps/online-backend/dist ./apps/online-backend/di
 # For a container started without docker-compose.yml's ./scripts mount.
 COPY scripts/import_teams.sh ./scripts/
 
-# Loads the modules the server requires at startup, so a dependency prod-deps
-# left out fails the build, not the deployment.
+# Loads the modules the server and its bot workers require at startup, so a
+# dependency prod-deps left out fails the build, not the deployment.
 RUN node apps/online-backend/dist/server.js sanity-check
 
 # Unprivileged: everything above is root-owned and only read from here on. The

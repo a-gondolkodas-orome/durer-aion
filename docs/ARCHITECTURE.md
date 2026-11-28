@@ -151,12 +151,25 @@ clears the mark, so a fixed strategy, deployed, frees the match on the team's
 next reload. `BOT_FAILURE=stall` stalls on every failure: for a test drive,
 where a failure should be impossible to miss.
 
-A strategy is synchronous, and runs on the server's only thread, so no timer
-can stop one: one that takes longer than `STRATEGY_BUDGET_MS` (`botwrapper.ts`)
-is only reported, with its move still played.
+**On the server a strategy runs in a worker thread, under a deadline.** A
+strategy is synchronous, so on the server's own thread a slow one would hold
+up every match's moves, syncs and clock polls, and one that never returns
+would freeze them all. So the server keeps a small pool of warm workers
+(`bot_pool.ts`, the worker `bot_worker.ts`) and posts each call to one: the
+match's state, which is plain JSON, and its setup data, the relay's judge
+included. One that takes longer than `STRATEGY_BUDGET_MS` (`botwrapper.ts`) is
+reported, with its move still played; one that misses the deadline,
+`STRATEGY_DEADLINE_MS`, twenty times the budget, has its worker terminated and
+replaced, and fails as a throwing strategy does — as does one whose worker
+crashes. Two workers, so a slow call ties up one while the other serves every
+other match; a match has at most one call out, as its bot's turn is one job on
+its queue. The 400 ms pause stays on the server's thread, outside the deadline.
+The browser — the dry run, the practice sites — and the suites run a
+strategy in-process.
 
-`hostedGames` (`games.ts`) lists each game beside its
-bot, and `server.ts` builds both the game list and the bots from it.
+`hostedStrategies` (`strategies.ts`) holds each game's strategy by the game's
+name, which `hostedGames` (`games.ts`) and the worker both look it up in;
+`server.ts` builds the game list and the bots from `hostedGames`.
 
 ## The two kinds of match
 
