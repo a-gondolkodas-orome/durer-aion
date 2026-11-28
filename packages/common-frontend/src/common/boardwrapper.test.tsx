@@ -50,7 +50,7 @@ function boardElement(ctx: Partial<Ctx>, game: Partial<GameStateMixin> & Record<
     liveResults: [],
     ...game,
   };
-  const moves = { getTime: vi.fn(), chooseNewGameType: vi.fn(), chooseRole: vi.fn(), newStartingPosition: vi.fn() };
+  const moves = { getTime: vi.fn(), chooseNewGameType: vi.fn(), chooseRole: vi.fn(), newStartingPosition: vi.fn(), giveUp: vi.fn() };
   const props = {
     G,
     ctx: { numPlayers: 2, playOrder: ['0', '1'], playOrderPos: 0, activePlayers: null, turn: 1, ...ctx },
@@ -502,5 +502,74 @@ describe('the game\'s own words on the move', () => {
     renderBoard({ phase: 'play', currentPlayer: JUDGE_PLAYER }, {}, StepBoard);
 
     expect(screen.queryByText(/step/)).not.toBeInTheDocument();
+  });
+});
+
+describe('giving up a game (#595)', () => {
+  const teamToPlay = { phase: 'play', currentPlayer: GUESSER_PLAYER };
+  const dialog = () => screen.getByRole('dialog');
+
+  test('is offered on the team\'s turn, and done only once the dialog confirms it', () => {
+    const moves = renderBoard(teamToPlay, { numberOfTries: 3, numberOfLoss: 1 });
+
+    fireEvent.click(button('strategy.giveUp.button'));
+    expect(moves.giveUp).not.toHaveBeenCalled();
+    expect(dialog()).toHaveTextContent('strategy.giveUp.titleLive');
+    // What it costs: a loss, and fewer points for the next run.
+    expect(dialog()).toHaveTextContent('strategy.giveUp.countsAsLoss');
+    expect(dialog()).toHaveTextContent('strategy.giveUp.pointsDrop');
+    fireEvent.click(within(dialog()).getByRole('button', { name: 'strategy.giveUp.button' }));
+    expect(moves.giveUp).toHaveBeenCalledOnce();
+  });
+
+  test('can be called off, back to the game', async () => {
+    const moves = renderBoard(teamToPlay);
+
+    fireEvent.click(button('strategy.giveUp.button'));
+    fireEvent.click(button('strategy.giveUp.cancel'));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(moves.giveUp).not.toHaveBeenCalled();
+  });
+
+  test('says a practice game costs nothing', () => {
+    renderBoard(teamToPlay, { difficulty: 'test' });
+
+    fireEvent.click(button('strategy.giveUp.button'));
+
+    expect(dialog()).toHaveTextContent('strategy.giveUp.titlePractice');
+    expect(dialog()).not.toHaveTextContent('strategy.giveUp.countsAsLoss');
+  });
+
+  test('names no drop in points where a loss costs none', () => {
+    renderBoard(teamToPlay, { numberOfLoss: 5 });
+
+    fireEvent.click(button('strategy.giveUp.button'));
+
+    expect(dialog()).toHaveTextContent('strategy.giveUp.countsAsLoss');
+    expect(dialog()).not.toHaveTextContent('strategy.giveUp.pointsDrop');
+  });
+
+  test.each([
+    ['on the bot\'s turn', { phase: 'play', currentPlayer: JUDGE_PLAYER }, {}],
+    ['before a role is chosen', { phase: 'chooseRole', currentPlayer: GUESSER_PLAYER }, {}],
+    ['between games', betweenGames, { winner: JUDGE_PLAYER }],
+    ['once the time is up', teamToPlay, { millisecondsRemaining: -6000 }],
+  ])('is not offered %s', (_, ctx, game) => {
+    renderBoard(ctx, game);
+
+    expect(screen.queryByRole('button', { name: 'strategy.giveUp.button' })).not.toBeInTheDocument();
+  });
+
+  // The bot's move, or the clock, can end the game while the team reads.
+  test('closes once there is no game of the team\'s to give up', async () => {
+    const { element } = boardElement(teamToPlay);
+    const { rerender } = render(element);
+    fireEvent.click(button('strategy.giveUp.button'));
+    expect(dialog()).toBeInTheDocument();
+
+    rerender(boardElement({ phase: 'play', currentPlayer: JUDGE_PLAYER }).element);
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });

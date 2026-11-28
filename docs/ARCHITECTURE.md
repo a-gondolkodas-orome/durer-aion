@@ -177,7 +177,8 @@ validated each time it is read (`validatingCompetitionSource`). An ESLint rule k
   to `startNewGame` for the bot's answer alone;
 - `play` — the game's own moves, until one sets `G.winner`. Then it is back to
   `startNewGame`, unless the game's move ended the whole match itself
-  (`20ocde` does on a second win in a row).
+  (`20ocde` does on a second win in a row). On its own turn the team may
+  concede the game instead (`giveUp`), which scores it as the bot's win.
 
 A `live` sub-game's result is pushed to `G.liveResults`. In the `play` phase, a
 move past the end plus `LATE_MOVE_GRACE_MS` ends the match. What a game folder

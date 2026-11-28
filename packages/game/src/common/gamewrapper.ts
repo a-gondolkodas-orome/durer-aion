@@ -1,7 +1,7 @@
 import { Ctx, FnContext, Game, PhaseConfig, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves } from './timestamp';
-import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish } from './types';
+import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish, recordWinner } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -34,6 +34,16 @@ function newStartingPosition({ G, playerID, events }: MoveContext) {
     return INVALID_MOVE;
   };
   events.setPhase(PHASE.startNewGame);
+};
+
+/// The team concedes the game it is playing (#595), on its own turn: scored as
+/// the bot's win, so a live one is a loss like any other, and the phase's
+/// `endIf` takes the match to the next game. The bot never concedes.
+function giveUp({ G, playerID }: MoveContext) {
+  if (playerID !== GUESSER_PLAYER) {
+    return INVALID_MOVE;
+  };
+  recordWinner(G, JUDGE_PLAYER);
 };
 
 /// The only source of a game's opening position: the bot sends it, typed on
@@ -172,7 +182,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       [PHASE.play]: {
-        moves: { ...timestampMoves(game.moves ?? {}), getTime: clockPoll },
+        moves: { ...timestampMoves({ ...game.moves, giveUp }), getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
         next: PHASE.startNewGame,
         turn: {
