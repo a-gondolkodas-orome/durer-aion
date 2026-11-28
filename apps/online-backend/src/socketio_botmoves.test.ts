@@ -3,7 +3,7 @@ import type { Game, StorageAPI } from "boardgame.io";
 import { Server } from "boardgame.io/server";
 import { createMatch } from "boardgame.io/internal";
 import { io as connect, type Socket } from "socket.io-client";
-import { SocketIOButBotMoves } from "./socketio_botmoves";
+import { botFailureMode, SocketIOButBotMoves } from "./socketio_botmoves";
 import type { GuardLimits } from "./server/socket_guard";
 
 /** The transport, with the match queues it keeps open to inspection. */
@@ -352,5 +352,20 @@ describe("the socket transport", () => {
 
     expect(rejections).toEqual([]);
     expect(hookFailures()).toEqual([]);
+  });
+});
+
+describe("botFailureMode", () => {
+  // A competition that forgot the setting keeps its teams playing.
+  it.each([undefined, "", "recover"])("reads %j as recover", value => {
+    expect(botFailureMode(value)).toBe("recover");
+  });
+
+  it("reads stall", () => {
+    expect(botFailureMode("stall")).toBe("stall");
+  });
+
+  it("stops the server at start for anything else", () => {
+    expect(() => botFailureMode("forfeit")).toThrow(/BOT_FAILURE is "forfeit"/);
   });
 });

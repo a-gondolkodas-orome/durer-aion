@@ -19,6 +19,18 @@ export type MatchBot = Bot & {
   play(state: State, playerID: string, setupData?: unknown): ReturnType<Bot['play']>;
 };
 
+/// How long one call of a strategy may take before the server warns, in
+/// milliseconds. The call runs on the server's only thread, so this is also
+/// the most one bot move may hold up every other match; the live bots take a
+/// few milliseconds at worst (#116).
+export const STRATEGY_BUDGET_MS = 100;
+
+/// What `play` reports beside the move: how long the strategy took, for the
+/// server to hold against the budget, the 400 ms pause left out.
+export interface BotPlayMetadata {
+  strategyMs: number;
+}
+
 /// Wraps a strategy into a boardgame.io Bot class. The return type is spelled
 /// out because a declaration file cannot name the class itself: it inherits
 /// Bot's private members.
@@ -33,8 +45,10 @@ export function botWrapper<T_SpecificGameState, T_Move>(
 
     async play(state: State<T_SpecificGameState>, playerID: string, setupData?: unknown): ReturnType<Bot['play']> {
       await this.wait();
+      const started = Date.now();
       const [move, moveName] = botstrategy(state, playerID, setupData);
-      return { action: { type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } } };
+      const metadata: BotPlayMetadata = { strategyMs: Date.now() - started };
+      return { action: { type: 'MAKE_MOVE', payload: { type: moveName, args: move, playerID } }, metadata };
     }
   }
   return _Bot;

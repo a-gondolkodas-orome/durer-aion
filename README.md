@@ -425,6 +425,10 @@ vite does not pick up `.env` edits, and the docker stack reads `.env.docker` at
 | `apps/online-backend/.env` | the same settings for `npm run dev:server`, plus `DATABASE_URL` — which is all `teams:import:local` reads |
 | `apps/offline-frontend/.env` | the S3 bucket the dry run's play data goes to |
 
+The backend also reads `BOT_FAILURE`, which no sample sets: unset, the server
+plays a random legal move for a bot whose strategy fails, and `stall` makes it
+wait instead, for a test drive (docs/ARCHITECTURE.md says why).
+
 Because setup never overwrites, a file you already have goes stale when its
 sample gains a setting — so setup, and each `dev:*` script that runs it first,
 names any setting the sample has that yours lacks.

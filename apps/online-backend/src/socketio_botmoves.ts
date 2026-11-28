@@ -7,10 +7,10 @@ import type { Game, Server, State, StorageAPI } from "boardgame.io";
 import { getFilterPlayerView, Sync as SyncStorage } from "boardgame.io/internal";
 import { Master } from "boardgame.io/master";
 import { GenericPubSub, SocketIO } from "boardgame.io/server";
-import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType } from "game";
+import { isMakeMovePayloadReadOnly, currentPlayer, PHASE, PlayerIDType, STRATEGY_BUDGET_MS } from "game";
 import { getBotCredentials } from "./server/common";
 import { SocketGuard, socketClientKey, type GuardLimits } from "./server/socket_guard";
-import type { MatchBot } from "game";
+import type { BotPlayMetadata, MatchBot } from "game";
 import type { CorsOptionsDelegate } from "cors";
 
 // boardgame.io does not export the types its own transport is written against.
@@ -95,14 +95,17 @@ export class SocketIOButBotMoves extends SocketIO {
   bots: Record<string, MatchBot>;
   // The suite's way to reach a limit in a few packets.
   private readonly guardLimits: GuardLimits;
+  private readonly botFailure: BotFailureMode;
   constructor(
     socketOpts: SocketOpts,
     bots: Record<string, MatchBot>,
     guardLimits: GuardLimits = {},
+    botFailure: BotFailureMode = "recover",
   ) {
     super({ ...socketOpts });
     this.bots = bots;
     this.guardLimits = guardLimits;
+    this.botFailure = botFailure;
   }
   init(
     app: Server.App & { _io: IOTypes.Server; },
@@ -244,6 +247,23 @@ export class SocketIOButBotMoves extends SocketIO {
       auth
     );
 
+    /** Sends one of the bot's moves and reads back what it left; the state
+     *  ID alone says whether the game took it, which holds because every
+     *  write of a match runs on its queue, and this whole turn is one job on
+     *  it. A write from outside the queue that landed in the bot's pause
+     *  would look exactly like its move (#655). */
+    const send = async (from: State, payload: BotMove): Promise<{ state: State, taken: boolean } | undefined> => {
+      await master.onUpdate(
+        { type: "MAKE_MOVE", payload: { type: payload.type, args: payload.args ?? [], playerID: BOT_ID, credentials: getBotCredentials() } },
+        from._stateID,
+        matchID,
+        BOT_ID
+      );
+      const { state: after } = await fetch(db, matchID, { state: true } as const);
+      return after === undefined ? undefined : { state: after, taken: after._stateID !== from._stateID };
+    };
+    const name = JSON.stringify(matchID);
+
     // The bot's whole turn, each move stored and pushed on its own, as long as
     // the turn is the bot's: a turn of several moves, and a bot that plays two
     // turns running, the opening position and then the first move.
@@ -252,32 +272,86 @@ export class SocketIOButBotMoves extends SocketIO {
       // A strategy that keeps naming moves that keep the turn would loop for
       // ever, and the match's queue with it.
       if (moves === MAX_BOT_MOVES) {
-        console.error(`The bot of match ${JSON.stringify(matchID)} still had the turn after ${moves} moves.`);
+        console.error(`The bot of match ${name} still had the turn after ${moves} moves.`);
         return;
       }
-      const { action } = await bot.play(current, BOT_ID, metadata?.setupData);
-      await master.onUpdate(
-        { ...action, payload: { ...action.payload, credentials: getBotCredentials() } },
-        current._stateID,
-        matchID,
-        BOT_ID
-      );
-      const { state: after } = await fetch(db, matchID, { state: true } as const);
-      if (after === undefined) return;
-      // Whether the move was taken is read off the state ID alone, which
-      // holds because every write of a match runs on its queue, and this
-      // whole turn is one job on it. A write from outside the queue that
-      // landed in the bot's pause would look exactly like its move (#655).
-      if (after._stateID === current._stateID) {
-        // Nothing is played in its place: docs/ARCHITECTURE.md says why.
-        console.error(`The bot of match ${JSON.stringify(matchID)} named `
-          + `${action.payload.type}(${JSON.stringify(action.payload.args ?? [])}), which the game refused; `
-          + `the match waits on the bot.`);
-        return;
+      // Only the strategy's own failure is the bot's: a storage error below
+      // still rejects the job, as any other does.
+      const answer = await bot.play(current, BOT_ID, metadata?.setupData)
+        .then(played => ({ played }), (error: unknown) => ({ error }));
+      let failure: string;
+      if ("error" in answer) {
+        failure = `threw ${answer.error instanceof Error ? answer.error.message : String(answer.error)}`;
+      } else {
+        const { action, metadata: timing } = answer.played;
+        const { strategyMs } = (timing ?? {}) as Partial<BotPlayMetadata>;
+        if (strategyMs !== undefined && strategyMs > STRATEGY_BUDGET_MS) {
+          console.warn(`The bot of match ${name} took ${strategyMs} ms to name a move, over its ${STRATEGY_BUDGET_MS} ms.`);
+        }
+        const { type, args } = action.payload;
+        const result = await send(current, { type, args });
+        if (result === undefined) return;
+        if (result.taken) {
+          current = result.state;
+          continue;
+        }
+        failure = `named ${describeMove({ type, args })}, which the game refused`;
       }
-      current = after;
+
+      // docs/ARCHITECTURE.md says what the two modes are for.
+      const instead = this.botFailure === "recover" && current.ctx.phase === PHASE.play
+        ? randomLegalMove(game, current)
+        : undefined;
+      if (instead !== undefined) {
+        const noted = await send(current, noteMove(failure, false));
+        if (noted === undefined) return;
+        current = noted.state;
+        const result = await send(current, instead);
+        if (result === undefined) return;
+        if (result.taken) {
+          console.warn(`The bot of match ${name} ${failure}; it played ${describeMove(instead)} instead.`);
+          current = result.state;
+          continue;
+        }
+        failure += `, and the game refused ${describeMove(instead)} too`;
+      }
+      console.error(`The bot of match ${name} ${failure}; the match waits on the bot.`);
+      await send(current, noteMove(failure, true));
+      return;
     }
   }
+}
+
+/** What the server does when the bot's strategy fails: plays a random legal
+ *  move in its place, or waits for an organiser. `BOT_FAILURE` in the
+ *  environment; docs/ARCHITECTURE.md says what each is for. */
+export type BotFailureMode = "recover" | "stall";
+
+/** Unset or empty is `recover`, so a competition that forgot the setting
+ *  keeps its teams playing. Anything else stops the server at start. */
+export function botFailureMode(value: string | undefined): BotFailureMode {
+  if (value === undefined || value === "" || value === "recover") return "recover";
+  if (value === "stall") return "stall";
+  throw new Error(`BOT_FAILURE is ${JSON.stringify(value)}; it must be "recover" or "stall", or unset.`);
+}
+
+/** A move as the bot sends it, before the server signs it. */
+interface BotMove {
+  type: string;
+  args?: unknown[];
+}
+
+const describeMove = ({ type, args }: BotMove) => `${type}(${JSON.stringify(args ?? [])})`;
+
+const noteMove = (reason: string, stuck: boolean): BotMove => ({ type: "noteBotFailure", args: [reason, stuck] });
+
+/** One of the moves the game lists for the bot, at random; none if it lists
+ *  none. `possibleMoves` is exact for the state, also halfway through a turn
+ *  (types.ts), and is the only thing the server knows to be legal. */
+function randomLegalMove(game: Game, state: State): BotMove | undefined {
+  const moves = (game.ai?.enumerate(state.G, state.ctx, BOT_ID) ?? [])
+    .flatMap(entry => "move" in entry ? [{ type: entry.move, args: entry.args }] : []);
+  return moves.length === 0 ? undefined : moves[Math.floor(Math.random() * moves.length)];
 }
 
 /** How many moves one bot job may play. Generous: a turn of the games here is
