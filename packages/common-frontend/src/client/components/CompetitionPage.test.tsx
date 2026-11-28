@@ -50,7 +50,7 @@ const competition: AdminCompetitionDto = {
       ],
     },
   ],
-  strategyGameIds: ['minta-ketkupac'],
+  strategyGameIds: ['minta-ketkupac'], started: false,
 };
 
 let repo: MockClientRepository;

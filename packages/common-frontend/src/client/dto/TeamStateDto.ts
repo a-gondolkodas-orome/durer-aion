@@ -87,6 +87,15 @@ export interface AdminCompetitionDto extends CompetitionSummaryDto {
   }[];
   /// Every strategy game a competition can name: what the edit form offers.
   strategyGameIds: string[];
+  /// A team of it has started a match, which locks its relay's problems.
+  started: boolean;
+}
+
+/// The body of `PUT /team/admin/competitions/:id`: the competition whole, and
+/// the new problems its relay brings, which nothing holds yet.
+export interface CompetitionChangeDto {
+  competition: CompetitionConfig;
+  problems: Problem[];
 }
 
 /// What `PUT /team/admin/competitions/:id` answers, with `?dryRun=1` too:

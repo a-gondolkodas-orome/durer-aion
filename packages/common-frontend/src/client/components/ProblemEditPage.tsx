@@ -4,19 +4,15 @@ import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import useSWR from 'swr';
 import type { Language, Problem } from 'schemas';
-import { LANGUAGES, localizeProblem } from 'schemas';
 import type { AdminProblemDto, ProblemUseDto, ProblemWriteResultDto } from '../dto/TeamStateDto';
 import { useProblem, useSaveProblem } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { BORDER, DANGER, MUTED } from './adminStyles';
 import { SAVED_PARAM, competitionPath, competitionTitle, slug } from './CompetitionTable';
 import { Card, ReviewMessages, Steps, WARNING, useLeaveWarning } from './EditPageParts';
-import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
-import {
-  type ContentForm, FIELD_NAMES, LANGUAGE_NAMES, type ProblemForm, hasContent, problemChanges, problemForm,
-  problemFromForm,
-} from './problem-form';
+import { ProblemContentCards, brokenImageWarnings } from './ProblemContentCards';
+import { type ContentForm, type ProblemForm, problemChanges, problemForm, problemFromForm } from './problem-form';
 
 // A problem's edit page: each language's LaTeX beside what a team sees, then
 // the server's review, then Save. Opened from a competition's page, it goes
@@ -61,10 +57,7 @@ function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competi
   const back = competitionId === undefined ? COMPETITIONS_TAB : competitionPath(competitionId);
   const opener = data.uses.find(use => use.competitionId === competitionId) ?? data.uses[0];
   const broken = (url: string) => url !== '' && loads[url] === false;
-  const brokenImages = LANGUAGES.flatMap((language) => {
-    const url = form.content[language].imageUrl.trim();
-    return broken(url) ? [`A kép nem töltődik be a böngészőben (${LANGUAGE_NAMES[language]}): ${url}`] : [];
-  });
+  const brokenImages = brokenImageWarnings(form.content, broken);
 
   const send = async (problem: Problem, dryRun: boolean) => {
     setBusy(true);
@@ -158,12 +151,6 @@ function ProblemStep(props: {
       ...current, content: { ...current.content, [language]: { ...current.content[language], ...change } },
     }));
   };
-  // A language without content shows another one's, as for a team.
-  const draft: Problem = {
-    id: data.problem.id, answer: 0,
-    content: Object.fromEntries(LANGUAGES.filter(each => hasContent(form.content[each]))
-      .map(each => [each, { ...form.content[each], imageUrl: form.content[each].imageUrl.trim() || undefined }])),
-  };
 
   return (
     <Stack component="form" sx={{ gap: '20px' }} noValidate
@@ -180,34 +167,9 @@ function ProblemStep(props: {
             ? 'Nem változhat: már indult csapat egy versenyben, amely használja.' : 'Egész szám.')}
           onChange={(event) => { const answer = event.target.value; props.setForm(current => ({ ...current, answer })); }}/>
       </Card>
-      {LANGUAGES.map((language) => {
-        const content = form.content[language];
-        const broken = props.broken(content.imageUrl.trim());
-        const name = LANGUAGE_NAMES[language];
-        return (
-          <Card key={language} title={name[0].toUpperCase() + name.slice(1)}>
-            <Box sx={{ display: 'grid', gap: '24px', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' } }}>
-              <Stack sx={{ gap: '16px' }}>
-                <TextField multiline minRows={6} label={`${FIELD_NAMES.problemText}, ${name}`} value={content.problemText}
-                  disabled={inCode} slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
-                  helperText={hasContent(content) ? ' ' : 'Üresen ezen a nyelven a másik nyelv szövege látszik.'}
-                  onChange={(event) => { updateContent(language, { problemText: event.target.value }); }}/>
-                <TextField label={`${FIELD_NAMES.imageUrl}, ${name} (nem kötelező)`} value={content.imageUrl} disabled={inCode}
-                  placeholder="https://durerinfo.hu/…" slotProps={{ inputLabel: { shrink: true } }}
-                  error={broken} helperText={broken ? 'A kép nem töltődik be a böngészőben.' : ' '}
-                  onChange={(event) => { updateContent(language, { imageUrl: event.target.value }); }}/>
-              </Stack>
-              <Stack aria-label={`Így látja a csapat, ${name}`} role="region" sx={{ border: `1px solid ${BORDER}`,
-                borderRadius: '10px', padding: '22px', gap: '12px', minWidth: 0 }}>
-                <Typography sx={{ fontSize: '13px', color: MUTED }}>Így látja a csapat</Typography>
-                {Object.keys(draft.content).length === 0 ? <Typography sx={{ fontSize: '14px' }}>Nincs szövege.</Typography>
-                  : <Preview problem={draft} language={language} opener={props.opener} onPictureLoad={props.onPictureLoad}/>}
-              </Stack>
-            </Box>
-          </Card>
-        );
-      })}
-
+      <ProblemContentCards content={form.content} onChange={updateContent} disabled={inCode}
+        serial={props.opener?.position ?? 1} points={props.opener?.points ?? 0} broken={props.broken}
+        onPictureLoad={props.onPictureLoad}/>
       <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
         <Button variant="outlined" href={props.back}>Mégse</Button>
         {!inCode && <Stack sx={{ flexDirection: 'row', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -219,17 +181,6 @@ function ProblemStep(props: {
         Semmi nem kerül az adatbázisba a mentésig. A félkész változtatás csak ezen az oldalon marad meg.
       </Typography>}
     </Stack>
-  );
-}
-
-function Preview(props: {
-  problem: Problem, language: Language, opener?: ProblemUseDto, onPictureLoad: (url: string, loaded: boolean) => void,
-}) {
-  const { problemText, imageUrl } = localizeProblem(props.problem, props.language);
-  return (
-    <ExerciseTask task={problemText} serial={props.opener?.position ?? 1}
-      availablePoints={props.opener?.points ?? 0} pictureUrl={imageUrl ?? null} language={props.language}
-      onPictureLoad={(loaded) => { if (imageUrl !== undefined) props.onPictureLoad(imageUrl, loaded); }}/>
   );
 }
 

@@ -18,7 +18,7 @@ import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
-import { writeCompetition } from './competition_edit';
+import { hasStarted, writeCompetition } from './competition_edit';
 import { adminProblemView, writeProblem } from './problem_edit';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
@@ -308,7 +308,7 @@ export function configureTeamsRouter(
     const problemIds = competition.relay?.problems.map(({ problemId }) => problemId) ?? [];
     const summary = competitionSummary(competition, await teams.competitionWindows(), sources.competitions);
     ctx.body = adminCompetitionView(summary, competition, await problems.getProblems(problemIds), sources.problems,
-      problemUses(await competitions.listCompetitions()));
+      problemUses(await competitions.listCompetitions()), await hasStarted(competitionId));
   });
 
   /**

@@ -4,21 +4,14 @@
 //   npm run new-id -- hatszog-terulet online-c
 //
 // The format, and why the slug never changes once something refers to the id,
-// is `ENTITY_ID_PATTERN` in packages/schemas/src/competition.ts.
+// is `ENTITY_ID_PATTERN` in packages/schemas/src/competition.ts; the generator
+// is `newEntityId` beside it, which the admin page uses too. Node reads the
+// TypeScript source as it is, without a build.
 
-import { randomInt } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { newEntityId } from '../packages/schemas/src/competition.ts';
 
-const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
-const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-
-export function newId(slug) {
-  if (!SLUG.test(slug)) {
-    throw new Error(`"${slug}" is not a slug: lowercase ASCII letters and digits, single dashes between words`);
-  }
-  const random = Array.from({ length: 10 }, () => ALPHABET[randomInt(ALPHABET.length)]).join('');
-  return `${random}--${slug}`;
-}
+export const newId = slug => newEntityId(slug);
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const slugs = process.argv.slice(2);

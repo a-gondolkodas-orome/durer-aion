@@ -33,6 +33,33 @@ export function isEntityId(value: unknown): value is string {
   return typeof value === 'string' && ENTITY_ID_PATTERN.test(value);
 }
 
+/// The slug of an id: lowercase ASCII letters and digits, single dashes between words.
+export const ENTITY_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+const ID_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+/// The random part of a fresh id, uniform over the alphabet: a byte at or
+/// past the last whole multiple of its length is drawn again.
+export function randomIdPart(): string {
+  const limit = 256 - (256 % ID_ALPHABET.length);
+  let part = '';
+  while (part.length < 10) {
+    for (const byte of crypto.getRandomValues(new Uint8Array(16))) {
+      if (byte < limit && part.length < 10) part += ID_ALPHABET[byte % ID_ALPHABET.length];
+    }
+  }
+  return part;
+}
+
+/// A fresh competition or problem id: what `npm run new-id` prints, and what
+/// the admin page gives a problem it creates.
+export function newEntityId(slug: string, random = randomIdPart()): string {
+  if (!ENTITY_SLUG_PATTERN.test(slug)) {
+    throw new Error(`"${slug}" is not a slug: lowercase ASCII letters and digits, single dashes between words`);
+  }
+  return `${random}--${slug}`;
+}
+
 export type CompetitionId = string;
 export type ProblemId = string;
 

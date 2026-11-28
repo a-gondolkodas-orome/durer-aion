@@ -393,6 +393,9 @@ paths:
                     description: Every strategy game a competition can name, for the edit form to offer
                     items:
                       type: string
+                  started:
+                    type: boolean
+                    description: Whether a team of the competition has started a match, which locks its relay's problems
         "401":
           description: Not an organiser
         "404":
@@ -400,14 +403,17 @@ paths:
     put:
       summary: Replace a competition, or, with dryRun, say what that would do
       description: >
-        The body is the competition whole, its id unchanged. One held in the
-        database is written only if it keeps the validator's rules and, once a
-        team of it has started a match, the locks: no language taken away, no
-        match added or taken away, and the relay's problems, their order and
-        points as they are. Its window replaces any set apart from it. Of one
-        held in code only the start window may change: it is stored apart, and
-        the code's own window given back takes that away. The answer is the
-        report either way; the messages are Hungarian.
+        The body is the competition whole, its id unchanged, and the new
+        problems its relay brings, which nothing holds yet: written with it in
+        one transaction, or not at all. A problem already held changes on its
+        own route, never here. One held in the database is written only if it
+        keeps the validator's rules and, once a team of it has started a match,
+        the locks: no language taken away, no match added or taken away, and
+        the relay's problems, their order and points as they are. Its window
+        replaces any set apart from it. Of one held in code only the start
+        window may change: it is stored apart, and the code's own window given
+        back takes that away. The answer is the report either way; the
+        messages are Hungarian.
       security:
       - basicAdminAuth: []
       tags:
@@ -435,6 +441,14 @@ paths:
                 competition:
                   type: object
                   description: The competition's config, as `CompetitionConfig` types it
+                problems:
+                  type: array
+                  description: >
+                    New problems, as `Problem` types them, each used by the relay
+                    and its id taken by nothing yet: one added in the relay's
+                    editor, or a copy of a shared one
+                  items:
+                    type: object
       responses:
         "200":
           description: The report, written or not

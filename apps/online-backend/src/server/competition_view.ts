@@ -68,6 +68,8 @@ export interface AdminCompetitionView extends CompetitionSummary {
   relayProblems: AdminRelayProblem[];
   /** Every strategy game a competition can name: what the edit form offers. */
   strategyGameIds: string[];
+  /** A team of it has started a match, which locks its relay (`lockErrors`). */
+  started: boolean;
 }
 
 export function adminCompetitionView(
@@ -76,10 +78,12 @@ export function adminCompetitionView(
   problems: ReadonlyMap<ProblemId, Problem>,
   problemsInCode: ReadonlyMap<ProblemId, unknown>,
   uses: ReadonlyMap<ProblemId, ProblemUse[]>,
+  started: boolean,
 ): AdminCompetitionView {
   return {
     ...summary,
     competition,
+    started,
     strategyGameIds: Object.keys(strategyGames),
     relayProblems: (competition.relay?.problems ?? []).map(({ problemId, points }) => {
       // The source validates a competition as it reads it, and the validator
