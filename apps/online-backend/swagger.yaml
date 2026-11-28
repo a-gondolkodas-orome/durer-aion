@@ -244,6 +244,67 @@ paths:
                       type: string
                       enum: [code, database]
                       description: Where the competition is held. One in code is never written to the database.
+    post:
+      summary: Create a competition in the database, or, with dryRun, say what that would do
+      description: >
+        The body is as the PUT below takes it, the competition's id a fresh
+        one: no competition or problem holds it, in code or in the database.
+        It is written, with the new problems its relay brings, only if it
+        keeps the validator's rules and no id is taken; no team can have
+        started it, so no lock applies. The answer is the report either way,
+        `started` always false; the messages are Hungarian.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: dryRun
+        in: query
+        required: false
+        description: "1: write nothing, answer what the write would do"
+        schema:
+          type: string
+          enum: ["1"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                competition:
+                  type: object
+                  description: The competition's config, as `CompetitionConfig` types it
+                problems:
+                  type: array
+                  description: New problems, as `Problem` types them, each used by the relay and its id taken by nothing yet
+                  items:
+                    type: object
+      responses:
+        "200":
+          description: The report, written or not, as the PUT below answers it
+        "401":
+          description: Not an organiser
+        "415":
+          description: The body is not JSON
+  /team/admin/strategy-games:
+    get:
+      summary: Every strategy game a competition can name, for the new competition's form
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      responses:
+        "200":
+          description: The games' ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "401":
+          description: Not an organiser
   /team/admin/competitions/import:
     post:
       summary: Write the competitions and problems of a bundle to the database, all of them or none

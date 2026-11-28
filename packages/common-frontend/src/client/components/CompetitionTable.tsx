@@ -1,10 +1,11 @@
-import { IconButton } from '@mui/material';
+import { Button, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Edit from '@mui/icons-material/Edit';
 import Visibility from '@mui/icons-material/Visibility';
 import { Box, Stack } from '@mui/system';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 import { competitionName, editionSchoolYear } from 'schemas';
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
@@ -61,6 +62,10 @@ export function competitionPath(competitionId: string): string {
   return `/admin/verseny/${encodeURIComponent(competitionId)}`;
 }
 
+/// Where a new competition is made (`NewCompetitionPage`): what `adminPath`
+/// reads back.
+export const NEW_COMPETITION_PATH = '/admin/verseny/new';
+
 /// The query parameter the edit page leaves for the competition's page, to
 /// say the change it was opened by is saved.
 export const SAVED_PARAM = 'mentve';
@@ -99,13 +104,19 @@ export function competitionTitle({ id, metadata }: Pick<CompetitionSummaryDto, '
 
 /// Every registered competition, newest edition first, with what the import's
 /// Competition column takes for it, to copy, and its start window, with a
-/// link to change it on the competition's edit page.
+/// link to change it on the competition's edit page; above it, the button
+/// making a new one. Practice sets and the like, `other`, are shown on asking:
+/// there is one admin password, so this tidies the list, and hides nothing
+/// from anyone.
 export function CompetitionTable(props: {
   competitions: CompetitionSummaryDto[],
   /// How many teams each competition has, by its id.
   teamCounts: ReadonlyMap<string, number>,
 }) {
   const { enqueueSnackbar } = useSnackbar();
+  const [showOther, setShowOther] = useState(false);
+  const otherCount = props.competitions.filter(({ metadata }) => metadata.kind === 'other').length;
+  const shown = showOther ? props.competitions : props.competitions.filter(({ metadata }) => metadata.kind !== 'other');
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -126,82 +137,90 @@ export function CompetitionTable(props: {
   );
 
   return (
-    <Stack sx={{ height: '600px' }} data-testid="competitionTable">
-      <DataGrid
-        rows={props.competitions.map(competition => ({
-          ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
-        }))}
-        columns={[
-          {
-            field: 'open',
-            headerName: '',
-            width: 56,
-            sortable: false,
-            renderCell: ({ row }: { row: CompetitionRow }) => <CompetitionPageLink id={row.id} title={row.importAs}/>,
-          },
-          {
-            field: 'importAs',
-            headerName: 'Competition',
-            description: 'Ezt kell a csapat sorában a Competition oszlopba írni. Az azonosító is jó.',
-            width: 230,
-            renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.importAs),
-          },
-          {
-            field: 'id',
-            headerName: 'Azonosító',
-            width: 270,
-            renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.id),
-          },
-          {
-            field: 'edition',
-            headerName: 'Kiadás',
-            width: 110,
-            type: 'number',
-            valueFormatter: (value: number | null) => value === null ? '' : `${value}. (${editionSchoolYear(value)})`,
-          },
-          { field: 'round', headerName: 'Forduló', width: 100 },
-          { field: 'category', headerName: 'Kategória', width: 90 },
-          { field: 'label', headerName: 'Címke', width: 160 },
-          { field: 'teams', headerName: 'Csapatok', width: 90, type: 'number' },
-          {
-            field: 'storedIn',
-            headerName: 'Tárolás',
-            description: 'A kódban tárolt verseny csak telepítéssel változik; az adatbázisbeli az Import/export fülön '
-              + 'került be.',
-            width: 100,
-          },
-          {
-            field: 'startWindow',
-            headerName: 'Indítási ablak',
-            description: 'Mikor kezdhet játékot a verseny egy csapata, ha nincs saját ablaka. '
-              + 'A verseny szerkesztőoldalán módosítható, a kódban tárolt versenyé is.',
-            width: 480,
-            sortable: false,
-            renderCell: ({ row }: { row: CompetitionRow }) => (
-              // The button first: a window with both ends is wider than the
-              // column, and would push a button after it out of sight.
-              <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '4px', minWidth: 0 }}>
-                <IconButton size="small" aria-label={`Indítási ablak módosítása: ${row.importAs}`} title="Módosítás"
-                  href={competitionEditPath(row.id)}>
-                  <Edit fontSize="inherit"/>
-                </IconButton>
-                <Box component="span" title={windowText(row.startWindow)}
-                  sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}
-                </Box>
-              </Stack>
-            ),
-          },
-        ]}
-        initialState={{
-          sorting: { sortModel: [{ field: 'edition', sort: 'desc' }] },
-          pagination: { paginationModel: { pageSize: 10 } },
-          // Only a practice set needs a label, and none is imported into yet.
-          columns: { columnVisibilityModel: { label: false } },
-        }}
-        pageSizeOptions={[10, 25, 50]}
-        disableRowSelectionOnClick
-      />
+    <Stack sx={{ gap: '10px' }}>
+      <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+        <Button variant="contained" href={NEW_COMPETITION_PATH}>+ Új verseny</Button>
+        <FormControlLabel label={`Egyéb versenyek mutatása (${otherCount})`} control={
+          <Checkbox checked={showOther} onChange={(event) => { setShowOther(event.target.checked); }}/>
+        }/>
+      </Stack>
+      <Stack sx={{ height: '600px' }} data-testid="competitionTable">
+        <DataGrid
+          rows={shown.map(competition => ({
+            ...competitionRow(competition), teams: props.teamCounts.get(competition.id) ?? 0,
+          }))}
+          columns={[
+            {
+              field: 'open',
+              headerName: '',
+              width: 56,
+              sortable: false,
+              renderCell: ({ row }: { row: CompetitionRow }) => <CompetitionPageLink id={row.id} title={row.importAs}/>,
+            },
+            {
+              field: 'importAs',
+              headerName: 'Competition',
+              description: 'Ezt kell a csapat sorában a Competition oszlopba írni. Az azonosító is jó.',
+              width: 230,
+              renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.importAs),
+            },
+            {
+              field: 'id',
+              headerName: 'Azonosító',
+              width: 270,
+              renderCell: ({ row }: { row: CompetitionRow }) => withCopy(row.id),
+            },
+            {
+              field: 'edition',
+              headerName: 'Kiadás',
+              width: 110,
+              type: 'number',
+              valueFormatter: (value: number | null) => value === null ? '' : `${value}. (${editionSchoolYear(value)})`,
+            },
+            { field: 'round', headerName: 'Forduló', width: 100 },
+            { field: 'category', headerName: 'Kategória', width: 90 },
+            { field: 'label', headerName: 'Címke', width: 160 },
+            { field: 'teams', headerName: 'Csapatok', width: 90, type: 'number' },
+            {
+              field: 'storedIn',
+              headerName: 'Tárolás',
+              description: 'A kódban tárolt verseny csak telepítéssel változik; az adatbázisbeli itt készült, '
+                + 'vagy az Import/export fülön került be.',
+              width: 100,
+            },
+            {
+              field: 'startWindow',
+              headerName: 'Indítási ablak',
+              description: 'Mikor kezdhet játékot a verseny egy csapata, ha nincs saját ablaka. '
+                + 'A verseny szerkesztőoldalán módosítható, a kódban tárolt versenyé is.',
+              width: 480,
+              sortable: false,
+              renderCell: ({ row }: { row: CompetitionRow }) => (
+                // The button first: a window with both ends is wider than the
+                // column, and would push a button after it out of sight.
+                <Stack sx={{ flexDirection: 'row', alignItems: 'center', gap: '4px', minWidth: 0 }}>
+                  <IconButton size="small" aria-label={`Indítási ablak módosítása: ${row.importAs}`} title="Módosítás"
+                    href={competitionEditPath(row.id)}>
+                    <Edit fontSize="inherit"/>
+                  </IconButton>
+                  <Box component="span" title={windowText(row.startWindow)}
+                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {windowText(row.startWindow)}{row.windowSet ? ' (itt megadva)' : ''}
+                  </Box>
+                </Stack>
+              ),
+            },
+          ]}
+          initialState={{
+            sorting: { sortModel: [{ field: 'edition', sort: 'desc' }] },
+            pagination: { paginationModel: { pageSize: 10 } },
+            // Only a practice set needs a label, and none is imported into yet.
+            columns: { columnVisibilityModel: { label: false } },
+          }}
+          pageSizeOptions={[10, 25, 50]}
+          disableRowSelectionOnClick
+        />
+      </Stack>
     </Stack>
   );
 }

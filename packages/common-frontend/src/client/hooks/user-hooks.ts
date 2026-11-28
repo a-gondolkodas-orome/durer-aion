@@ -220,6 +220,17 @@ export const useSaveCompetition = () => {
     await repo.saveCompetition(change, options);
 };
 
+export const useCreateCompetition = () => {
+  const repo = useAdminRepo();
+  return async (change: CompetitionChangeDto, options: { dryRun: boolean }) =>
+    await repo.createCompetition(change, options);
+};
+
+export const useStrategyGameIds = () => {
+  const repo = useAdminRepo();
+  return async () => await repo.getStrategyGameIds();
+};
+
 export const useSearchProblems = () => {
   const repo = useAdminRepo();
   return async (query: { q: string, competition?: string }) => await repo.searchProblems(query);

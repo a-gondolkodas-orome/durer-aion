@@ -98,6 +98,12 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
   saveCompetition(_change: CompetitionChangeDto, _options: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
     throw Error("NOT call this");
   }
+  createCompetition(_change: CompetitionChangeDto, _options: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
+    throw Error("NOT call this");
+  }
+  getStrategyGameIds(): Promise<string[]> {
+    return Promise.resolve([]);
+  }
   searchProblems(_query: { q: string, competition?: string }): Promise<ProblemSearchDto> {
     return Promise.resolve({ problems: [], truncated: false });
   }

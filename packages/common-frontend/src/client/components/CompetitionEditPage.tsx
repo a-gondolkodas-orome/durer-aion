@@ -7,15 +7,17 @@ import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import useSWR from 'swr';
 import type { CompetitionConfig, Language, Problem, StartWindow } from 'schemas';
-import { LANGUAGES, ROUNDS, editionSchoolYear, validateStartWindow } from 'schemas';
+import { ENTITY_SLUG_PATTERN, LANGUAGES, ROUNDS, editionSchoolYear, randomIdPart, validateStartWindow } from 'schemas';
 import type { AdminCompetitionDto, CompetitionWriteResultDto } from '../dto/TeamStateDto';
-import { useCompetition, useSaveCompetition } from '../hooks/user-hooks';
+import { useCompetition, useCreateCompetition, useSaveCompetition, useStrategyGameIds } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { BORDER, DANGER, MUTED } from './adminStyles';
 import { Card, ReviewMessages, Steps, WARNING, useLeaveWarning } from './EditPageParts';
 import { ROUND_NAMES, SAVED_PARAM, competitionPath, competitionTitle, slug } from './CompetitionTable';
-import { type FieldErrors, type SettingsForm, competitionFromForm, settingsForm } from './competition-form';
+import {
+  type FieldErrors, type SettingsForm, competitionFromForm, newSettingsForm, settingsForm, suggestedSlug,
+} from './competition-form';
 import { Loading } from './Loading';
 import { brokenImageWarnings } from './ProblemContentCards';
 import { RelayEditor, type RelayEntriesUpdate } from './RelayEditor';
@@ -27,7 +29,9 @@ import { type EntryErrors, type RelayEntryForm, entryProblemId, relayForm, relay
 // relay brings included, and the draft lives in this page alone. One held in
 // code changes only with a deploy, its start window aside: the same form
 // shows it, every field but the window's read-only, so a window is set in one
-// place for both.
+// place for both. A new competition, /admin/verseny/new, is made on the same
+// page from an empty draft (`NewCompetitionPage`), its id's slug editable
+// until the save.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'magyar', en: 'angol' };
 
@@ -45,25 +49,57 @@ export function CompetitionEditPage(props: { competitionId: string }) {
   );
 }
 
-function Breadcrumb(props: { data: AdminCompetitionDto, dirty: boolean }) {
+const COMPETITIONS_PATH = '/admin?tab=versenyek';
+
+/// A new competition's draft. Its `id` is empty: the id is the form's to
+/// settle until the save, and an empty one names no competition, so a problem
+/// editor opened from the relay returns to none (`adminPath` in Main.tsx).
+const NEW_DRAFT: CompetitionConfig =
+  { id: '', languages: ['hu'], metadata: { kind: 'competition', edition: 0, round: 'online', category: '' } };
+
+/// The page of a competition not yet saved: the edit page with an empty draft.
+export function NewCompetitionPage() {
+  const errorMessage = useErrorMessage();
+  const getStrategyGameIds = useStrategyGameIds();
+  const { data: strategyGameIds, error } = useSWR('team/admin/strategy-games', getStrategyGameIds,
+    { revalidateOnFocus: false });
+  return (
+    <Stack sx={{ padding: '10px', gap: '20px' }} data-testid="newCompetitionPage">
+      {error !== undefined && <Typography role="alert" color="error">{errorMessage(error)}</Typography>}
+      {strategyGameIds === undefined && error === undefined && <Loading/>}
+      {strategyGameIds !== undefined && <CompetitionEditor creating data={{
+        id: '', metadata: NEW_DRAFT.metadata, storedIn: 'database', startWindow: null, configStartWindow: null,
+        competition: NEW_DRAFT, relayProblems: [], strategyGameIds, started: false,
+      }}/>}
+    </Stack>
+  );
+}
+
+function Breadcrumb(props: { data: AdminCompetitionDto, dirty: boolean, creating: boolean }) {
   return (
     <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
       <Box component="nav" aria-label="Útvonal" sx={{ fontSize: '14px', color: MUTED }}>
-        <Link href="/admin?tab=versenyek">Versenyek</Link>
-        {' › '}<Link href={competitionPath(props.data.id)}>{competitionTitle(props.data)}</Link> › Szerkesztés
+        <Link href={COMPETITIONS_PATH}>Versenyek</Link>
+        {props.creating ? ' › Új verseny' : <>
+          {' › '}<Link href={competitionPath(props.data.id)}>{competitionTitle(props.data)}</Link> › Szerkesztés
+        </>}
       </Box>
       {props.dirty && <Box sx={{ marginLeft: 'auto', fontSize: '13px', color: WARNING }}>● Mentetlen változások</Box>}
     </Stack>
   );
 }
 
-function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
+const SLUG_RULE = 'Kisbetűk és számjegyek, a szavak között egy-egy kötőjel.';
+
+function CompetitionEditor({ data, creating = false }: { data: AdminCompetitionDto, creating?: boolean }) {
   const errorMessage = useErrorMessage();
   const saveCompetition = useSaveCompetition();
+  const createCompetition = useCreateCompetition();
   const { enqueueSnackbar } = useSnackbar();
   // The window in force: for one held in code, the one set apart from its
   // config where there is one.
-  const [initial] = useState(() => settingsForm({ ...data.competition, startWindow: data.startWindow ?? undefined }));
+  const [initial] = useState(() => creating ? newSettingsForm()
+    : settingsForm({ ...data.competition, startWindow: data.startWindow ?? undefined }));
   const [form, setForm] = useState(initial);
   const [initialRelay] = useState(() => relayForm(data.competition.relay));
   const [relay, setRelay] = useState(initialRelay);
@@ -72,10 +108,17 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   const [review, setReview] = useState<Review | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  // A new competition's id: a random part drawn once, and a slug that follows
+  // the settings (`suggestedSlug`) until the organiser types one.
+  const [random] = useState(randomIdPart);
+  const [typedSlug, setTypedSlug] = useState<string | null>(null);
+  const [slugError, setSlugError] = useState<string | undefined>(undefined);
+  const idSlug = typedSlug ?? suggestedSlug(form);
+  const id = creating ? `${random}--${idSlug}` : data.id;
   // Whether each image URL of a new problem loaded in its preview.
   const [loads, setLoads] = useState<Record<string, boolean>>({});
   const broken = (url: string) => url !== '' && loads[url] === false;
-  const dirty = !saved && JSON.stringify([form, relay]) !== JSON.stringify([initial, initialRelay]);
+  const dirty = !saved && (JSON.stringify([form, relay]) !== JSON.stringify([initial, initialRelay]) || typedSlug !== null);
   const leaving = useLeaveWarning(dirty);
 
   const update = (change: Partial<SettingsForm>) => { setForm(current => ({ ...current, ...change })); };
@@ -83,7 +126,7 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   const send = async (change: Omit<Review, 'result'>, dryRun: boolean) => {
     setBusy(true);
     try {
-      return await saveCompetition(change, { dryRun });
+      return await (creating ? createCompetition : saveCompetition)(change, { dryRun });
     } catch (e: unknown) {
       enqueueSnackbar(errorMessage(e), { variant: 'error' });
       return undefined;
@@ -95,10 +138,12 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   const toReview = async () => {
     // A relay turned off takes the problems it would have brought with it.
     const relayRead = form.hasRelay ? relayFromForm(relay) : { problems: [], created: [] };
-    const read = competitionFromForm(form, data.competition, 'errors' in relayRead ? [] : relayRead.problems);
+    const read = competitionFromForm(form, { ...data.competition, id }, 'errors' in relayRead ? [] : relayRead.problems);
+    const badSlug = creating && !ENTITY_SLUG_PATTERN.test(idSlug) ? SLUG_RULE : undefined;
     setFieldErrors('fieldErrors' in read ? read.fieldErrors : {});
     setRelayErrors('errors' in relayRead ? relayRead.errors : {});
-    if ('fieldErrors' in read || 'errors' in relayRead) return;
+    setSlugError(badSlug);
+    if ('fieldErrors' in read || 'errors' in relayRead || badSlug !== undefined) return;
     const change = { competition: read.competition, problems: relayRead.created };
     const result = await send(change, true);
     if (result !== undefined) setReview({ ...change, result });
@@ -117,15 +162,18 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
     leaving.current = true;
     // The competition's page says it was saved: a snackbar here would go with
     // the page it is shown on.
-    window.location.assign(`${competitionPath(data.id)}?${SAVED_PARAM}=1`);
+    window.location.assign(`${competitionPath(review.competition.id)}?${SAVED_PARAM}=1`);
   };
 
   return <>
-    <Breadcrumb data={data} dirty={dirty}/>
-    <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
+    <Breadcrumb data={data} dirty={dirty} creating={creating}/>
+    <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>
+      {creating ? 'Új verseny' : competitionTitle(data)}
+    </Typography>
     <Steps names={['Beállítások', 'Ellenőrzés és mentés']} step={review === null ? 1 : 2}/>
     {review === null
       ? <SettingsStep form={form} update={update} fieldErrors={fieldErrors} data={data} busy={busy} dirty={dirty}
+        idField={creating ? { slug: idSlug, id, error: slugError, onChange: setTypedSlug } : undefined}
         relay={relay} setRelay={setRelay} relayErrors={relayErrors} broken={broken}
         onPictureLoad={(url, loaded) => { setLoads(current => ({ ...current, [url]: loaded })); }}
         onNext={() => { void toReview(); }}/>
@@ -142,10 +190,15 @@ const fieldRow = { display: 'grid', gap: '16px', gridTemplateColumns: { xs: '1fr
 function SettingsStep(props: {
   form: SettingsForm, update: (change: Partial<SettingsForm>) => void, fieldErrors: FieldErrors,
   data: AdminCompetitionDto, busy: boolean, dirty: boolean, onNext: () => void,
+  /** A new competition's: the slug of its id, which stays editable until the save. */
+  idField?: { slug: string, id: string, error: string | undefined, onChange: (slug: string) => void },
   relay: RelayEntryForm[], setRelay: RelayEntriesUpdate, relayErrors: Record<string, EntryErrors>,
   broken: (url: string) => boolean, onPictureLoad: (url: string, loaded: boolean) => void,
 }) {
-  const { form, update, fieldErrors } = props;
+  const { form, update, fieldErrors, idField } = props;
+  // A new competition has nothing to differ from: its empty draft goes on to
+  // the review too, which says what it lacks.
+  const canGoOn = props.dirty || idField !== undefined;
   const example = windowTimeNow();
   // The stored id, should it name a game no longer registered: the validator
   // says so in the review, and the select still shows what is stored.
@@ -167,7 +220,7 @@ function SettingsStep(props: {
 
   return (
     <Stack component="form" sx={{ gap: '20px' }} noValidate
-      onSubmit={(event) => { event.preventDefault(); if (props.dirty) props.onNext(); }}>
+      onSubmit={(event) => { event.preventDefault(); if (canGoOn) props.onNext(); }}>
       {inCode && <Typography role="note" sx={{ fontSize: '14px', backgroundColor: '#fff', border: `1px solid ${BORDER}`,
         borderRadius: '8px', padding: '16px 24px' }}>
         A kódban tárolt verseny csak telepítéssel változik, az indítási ablaka kivételével: itt csak az módosítható.
@@ -213,8 +266,14 @@ function SettingsStep(props: {
               ))}
             </FormGroup>
           </Box>
-          <TextField label="Azonosító" value={props.data.id} disabled helperText="Mentés után nem változik."
-            sx={{ flex: '1 1 320px' }} slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}/>
+          {idField === undefined
+            ? <TextField label="Azonosító" value={props.data.id} disabled helperText="Mentés után nem változik."
+              sx={{ flex: '1 1 320px' }} slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}/>
+            : <TextField label="Név az azonosítóban" value={idField.slug} sx={{ flex: '1 1 320px' }}
+              error={idField.error !== undefined}
+              helperText={idField.error ?? `Azonosító: ${idField.id} (mentés után nem változik)`}
+              slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
+              onChange={(event) => { idField.onChange(event.target.value); }}/>}
         </Stack>
       </Card>
 
@@ -284,10 +343,12 @@ function SettingsStep(props: {
       </Card>
 
       <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-        <Button variant="outlined" href={competitionPath(props.data.id)}>Mégse</Button>
+        <Button variant="outlined" href={idField === undefined ? competitionPath(props.data.id) : COMPETITIONS_PATH}>
+          Mégse
+        </Button>
         <Stack sx={{ flexDirection: 'row', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-          {!props.dirty && <Typography sx={{ fontSize: '13px', color: MUTED }}>Még nincs mit menteni.</Typography>}
-          <Button variant="contained" type="submit" disabled={props.busy || !props.dirty}>Tovább: ellenőrzés</Button>
+          {!canGoOn && <Typography sx={{ fontSize: '13px', color: MUTED }}>Még nincs mit menteni.</Typography>}
+          <Button variant="contained" type="submit" disabled={props.busy || !canGoOn}>Tovább: ellenőrzés</Button>
         </Stack>
       </Stack>
       <Typography sx={{ fontSize: '12px', color: MUTED }}>

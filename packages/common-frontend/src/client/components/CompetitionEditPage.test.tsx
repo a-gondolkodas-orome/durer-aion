@@ -9,7 +9,7 @@ import { AdminRepoProvider, ClientRepoProvider } from '../client-repo-context';
 import { MockClientRepository } from '../mock-client-repository';
 import type { AdminCompetitionDto, CompetitionWriteResultDto } from '../dto/TeamStateDto';
 import { Layout } from './Layout';
-import { CompetitionEditPage } from './CompetitionEditPage';
+import { CompetitionEditPage, NewCompetitionPage } from './CompetitionEditPage';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -48,12 +48,12 @@ afterEach(() => {
 
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
 
-const renderPage = () => render(
+const renderPage = (page = <CompetitionEditPage competitionId={ID}/>) => render(
   <ThemeProvider theme={outerTheme}><ClientRepoProvider value={repo}>
     <AdminRepoProvider value={repo}>
       <SWRConfig value={{ provider: () => new Map() }}>
         <Layout>
-          <CompetitionEditPage competitionId={ID}/>
+          {page}
         </Layout>
       </SWRConfig>
     </AdminRepoProvider>
@@ -363,5 +363,71 @@ describe('composing the relay', () => {
     }
     // A problem's own editor is still where its text is fixed.
     expect(screen.getByRole('link', { name: 'Szerkesztés: 1. feladat' })).toBeInTheDocument();
+  });
+});
+
+describe('a new competition', () => {
+  beforeEach(() => {
+    vi.spyOn(repo, 'getStrategyGameIds').mockResolvedValue(['minta-ketkupac', 'minta-masik']);
+    vi.spyOn(repo, 'createCompetition').mockImplementation((_, { dryRun }) =>
+      Promise.resolve(dryRun ? clean : { ...clean, written: true }));
+  });
+  const renderNew = () => renderPage(<NewCompetitionPage/>);
+  const created = () => vi.mocked(repo.createCompetition).mock.lastCall?.[0].competition;
+
+  test('starts from an empty draft, offers the id\'s slug from the settings, and creates it, then opens its page', async () => {
+    renderNew();
+    await screen.findByRole('heading', { name: 'Új verseny' });
+    expect(screen.getByRole('navigation', { name: 'Útvonal' })).toHaveTextContent('Versenyek › Új verseny');
+    expect(screen.getByRole('link', { name: 'Mégse' })).toHaveAttribute('href', '/admin?tab=versenyek');
+    type('Kiadás', '22');
+    type('Kategória', 'C');
+    expect(field('Név az azonosítóban')).toHaveValue('22-online-c');
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: 'Játék azonosítója' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'minta-masik' }));
+    next();
+
+    await screen.findByRole('region', { name: 'Amit a csapat a szabályok oldalon lát' });
+    expect(repo.saveCompetition).not.toHaveBeenCalled();
+    const competition = created();
+    expect(competition?.id).toMatch(/^[0-9a-z]{10}--22-online-c$/);
+    expect(competition).toEqual({
+      id: competition?.id, languages: ['hu'],
+      relay: { durationMinutes: 60, problems: [] }, strategy: { durationMinutes: 30, gameId: 'minta-masik' },
+      metadata: { kind: 'competition', edition: 22, round: 'online', category: 'C' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+    await waitFor(() => { expect(assign).toHaveBeenCalledWith(`/admin/verseny/${competition?.id}?mentve=1`); });
+    expect(repo.createCompetition).toHaveBeenLastCalledWith({ competition, problems: [] }, { dryRun: false });
+  });
+
+  test('keeps a typed slug whatever the settings say, and refuses one that is no slug before asking the server', async () => {
+    renderNew();
+    await screen.findByRole('heading', { name: 'Új verseny' });
+    type('Név az azonosítóban', 'Próba verseny');
+    type('Kiadás', '22');
+    expect(field('Név az azonosítóban')).toHaveValue('Próba verseny');
+    expect(screen.getByText('● Mentetlen változások')).toBeInTheDocument();
+    next();
+    expect(await screen.findByText('Kisbetűk és számjegyek, a szavak között egy-egy kötőjel.')).toBeInTheDocument();
+    expect(repo.createCompetition).not.toHaveBeenCalled();
+
+    type('Név az azonosítóban', 'proba-verseny');
+    next();
+    await screen.findByRole('region', { name: 'Amit a csapat a szabályok oldalon lát' });
+    expect(created()?.id).toMatch(/^[0-9a-z]{10}--proba-verseny$/);
+  });
+
+  test('goes on to the review untouched, for the server to say what the draft lacks', async () => {
+    vi.spyOn(repo, 'createCompetition').mockResolvedValue({ ...clean, errors: ['verseny …: nincs stratégiás játék'] });
+    renderNew();
+    await screen.findByRole('heading', { name: 'Új verseny' });
+    fireEvent.click(screen.getByRole('button', { name: 'Egyéb' }));
+    type('Címke, magyar', 'Őszi gyakorló');
+    expect(field('Név az azonosítóban')).toHaveValue('oszi-gyakorlo');
+    next();
+    expect(await screen.findByRole('region', { name: '1 hiba, ezek miatt még nem menthető' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mentés' })).toBeDisabled();
   });
 });
