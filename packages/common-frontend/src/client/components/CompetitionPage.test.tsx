@@ -143,3 +143,10 @@ test('links the competition to its edit page, one held in code too', async () =>
   renderPage();
   expect(await screen.findByRole('link', { name: 'Szerkesztés' })).toHaveAttribute('href', `/admin/verseny/${ID}/edit`);
 });
+
+test('says the change the edit page left it for is saved, once', async () => {
+  window.history.replaceState({}, '', `/admin/verseny/${ID}?mentve=1`);
+  renderPage();
+  expect(await screen.findByText('Mentve')).toBeInTheDocument();
+  expect(window.location.search).toBe('');
+});

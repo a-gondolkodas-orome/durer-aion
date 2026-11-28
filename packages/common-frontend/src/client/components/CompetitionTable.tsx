@@ -60,7 +60,11 @@ export function competitionPath(competitionId: string): string {
   return `/admin/verseny/${encodeURIComponent(competitionId)}`;
 }
 
-/// Where a database competition's edit page is (CompetitionEditPage.tsx).
+/// The query parameter the edit page leaves for the competition's page, to
+/// say the change it was opened by is saved.
+export const SAVED_PARAM = 'mentve';
+
+/// Where a competition's edit page is (CompetitionEditPage.tsx).
 export function competitionEditPath(competitionId: string): string {
   return `${competitionPath(competitionId)}/edit`;
 }

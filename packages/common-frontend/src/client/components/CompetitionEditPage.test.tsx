@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 // `toBeInTheDocument` and friends.
 import '@testing-library/jest-dom';
 import { SWRConfig } from 'swr';
@@ -95,8 +95,9 @@ test('fills the form from the competition, and sends the changes on to a dry run
   let promptedOnSave: boolean | undefined;
   assign.mockImplementation(() => { promptedOnSave = leavePrevented(); });
   fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
-  expect(await screen.findByText('Mentve')).toBeInTheDocument();
-  expect(assign).toHaveBeenCalledWith(`/admin/verseny/${ID}`);
+  // Gone once the saved state renders, which comes after the page is left.
+  await waitFor(() => { expect(screen.queryByText('● Mentetlen változások')).not.toBeInTheDocument(); });
+  expect(assign).toHaveBeenCalledWith(`/admin/verseny/${ID}?mentve=1`);
   // Asked as the page is left, before React renders the saved state.
   expect(promptedOnSave).toBe(false);
   expect(repo.saveCompetition).toHaveBeenLastCalledWith(changed, { dryRun: false });

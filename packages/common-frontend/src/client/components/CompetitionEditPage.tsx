@@ -13,7 +13,7 @@ import { useCompetition, useSaveCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { BORDER, DANGER, DANGER_BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, competitionPath, competitionTitle } from './CompetitionTable';
+import { ROUND_NAMES, SAVED_PARAM, competitionPath, competitionTitle } from './CompetitionTable';
 import { type FieldErrors, type SettingsForm, competitionFromForm, settingsForm } from './competition-form';
 import { Loading } from './Loading';
 
@@ -115,9 +115,10 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
       return;
     }
     setSaved(true);
-    enqueueSnackbar('Mentve', { variant: 'success' });
     leaving.current = true;
-    window.location.assign(competitionPath(data.id));
+    // The competition's page says it was saved: a snackbar here would go with
+    // the page it is shown on.
+    window.location.assign(`${competitionPath(data.id)}?${SAVED_PARAM}=1`);
   };
 
   return <>
