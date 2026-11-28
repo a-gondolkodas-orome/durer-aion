@@ -208,7 +208,7 @@ function StrategyDescription(props: { competition?: PublicCompetition | null }) 
           <Hint>{t('chooser.strategy.practiceHint')}</Hint>
         </li>
         <li><Trans i18nKey='chooser.strategy.time' components={BOLD} values={{ minutes }} /></li>
-        <li>{t('chooser.strategy.noAbandon')}</li>
+        <li>{t('chooser.strategy.giveUp')}</li>
       </ul>
     </Description>
   );

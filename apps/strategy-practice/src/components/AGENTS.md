@@ -373,6 +373,9 @@ Two conventions to keep in mind:
 - Mobile-friendly and playable from the keyboard alone: Tab reaches the board,
   the arrow keys move between its piles, cells or pieces, and Enter (or Space)
   makes the move (#709) — teams find it much faster than the mouse
+- Worth considering, not required: the bot's last move is easy to see (#714) —
+  its cells tinted in a placing game; in a game that takes things away, what it
+  took shown until the player moves, if the board can show it without clutter
 - Player can undo within a multi-move turn where that applies
 - Neither `board` nor `ctx` is ever modified in place
 - Watching the bot play does not give the winning strategy away outright

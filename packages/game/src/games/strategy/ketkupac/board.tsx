@@ -3,6 +3,7 @@ import type { BoardProps } from 'boardgame.io/react';
 import { useEffect, useRef } from 'react';
 import { useBoardKeys } from '../../../common/board-keys';
 import { PHASE } from '../../../common/gamewrapper';
+import { botMovedLast } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalSelection, isLegalTake, maxTake } from './game';
 import type { MyGameState } from './game';
@@ -16,6 +17,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   // once the game is over: a game timed out mid-turn keeps its pile chosen.
   const selected = playing ? G.selectedPile : null;
   const keys = useBoardKeys({ active });
+  const botTake = botMovedLast(G, ctx) ? G.lastJudgeTake : null;
   // A pile chosen, the keyboard goes on to how many to take from it.
   const takes = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -26,7 +28,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   return (
     <Stack spacing={2} {...keys} sx={{ width: '100%', maxWidth: 440, mx: 'auto' }}>
       {G.piles.map((size, pile) => {
-        const justTaken = G.lastJudgeTake?.pile === pile ? G.lastJudgeTake.count : 0;
+        const justTaken = botTake?.pile === pile ? botTake.count : 0;
         return (
           <Button
             key={pile}
@@ -46,6 +48,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
             <Box component="span" aria-hidden sx={{ letterSpacing: 2 }}>
               {'●'.repeat(size)}
               <Box component="span" sx={{ opacity: 0.3 }}>{'○'.repeat(justTaken)}</Box>
+              {justTaken > 0 && <Box component="span" sx={{ ml: 1, opacity: 0.7, letterSpacing: 0 }}>{`−${justTaken}`}</Box>}
             </Box>
           </Button>
         );

@@ -243,6 +243,21 @@ describe("the admin routes", () => {
     expect(calls).toStrictEqual([{ method: "get", url: "/team/admin/competitions/aqvco71pta--csomag-teljes" }]);
   });
 
+  test("a problem's editor reads it by its id, and saves it, or dry-runs the save, as a PUT of { problem }", async () => {
+    const calls = fakeAxios(() => Promise.resolve({ status: 200, data: { written: false } }));
+    const problem = { id: "10iqp4vy6b--csomag-kockak", answer: 27, content: { hu: { problemText: "Hány?" } } };
+
+    await new RealClientRepository().getProblem(problem.id);
+    await new RealClientRepository().saveProblem(problem, { dryRun: true });
+    await new RealClientRepository().saveProblem(problem, { dryRun: false });
+
+    expect(calls).toStrictEqual([
+      { method: "get", url: "/team/admin/problems/10iqp4vy6b--csomag-kockak" },
+      { method: "put", url: "/team/admin/problems/10iqp4vy6b--csomag-kockak?dryRun=1", body: { problem } },
+      { method: "put", url: "/team/admin/problems/10iqp4vy6b--csomag-kockak", body: { problem } },
+    ]);
+  });
+
   test("a team's own start window is a PUT of the window as JSON", async () => {
     const calls = fakeAxios(ok);
     const window = { opensAt: "2026-11-21T15:00+01:00", closesAt: null };

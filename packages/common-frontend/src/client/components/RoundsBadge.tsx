@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Popover, Stack } from '@mui/material';
+import { Box, Button, ButtonBase, Popover, Stack } from '@mui/material';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import KeyboardArrowDownRounded from '@mui/icons-material/KeyboardArrowDownRounded';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -51,8 +51,9 @@ function hint(t: TFunction, view: RoundsView): string {
 }
 
 /// Both rounds, the page's own first, and the hint: the badge's popover, and
-/// the phone's account menu.
-export function RoundsList(props: { view: RoundsView }) {
+/// the phone's account menu. `onEndRound` ends the page's round early, where
+/// the round offers that (#111).
+export function RoundsList(props: { view: RoundsView, onEndRound?: () => void }) {
   const { t } = useTranslation();
   const { current, other } = props.view;
   const row = (round: Round, isCurrent: boolean) => {
@@ -74,6 +75,10 @@ export function RoundsList(props: { view: RoundsView }) {
       <Box sx={{ borderBottom: `1px solid ${LINE}` }}>{row(current, true)}</Box>
       {row(other, false)}
       <Box sx={{ fontSize: 13, color: MUTED, lineHeight: 1.45, marginTop: '2px' }}>{hint(t, props.view)}</Box>
+      {props.onEndRound && <Button variant="outlined" color="error" onClick={props.onEndRound}
+        sx={{ marginTop: '12px', minHeight: '44px', borderRadius: '10px', textTransform: 'none', fontWeight: 600, backgroundColor: '#fff' }}>
+        {t('rounds.endStrategy')}
+      </Button>}
     </Stack>
   );
 }
@@ -82,12 +87,13 @@ export function RoundsList(props: { view: RoundsView }) {
 /// (#744). The page is about the current round, so the badge names only the
 /// other. `compact` is the phone's: its short name alone, and the list opens
 /// the header's full width under it.
-export function RoundsBadge(props: { view: RoundsView, compact?: boolean }) {
+export function RoundsBadge(props: { view: RoundsView, compact?: boolean, onEndRound?: () => void }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const popoverId = useId();
   const { other } = props.view;
+  const { onEndRound } = props;
   const otherName = other.type === 'relay' ? t('rounds.short.relay') : t('rounds.short.strategy');
   const otherStatus = other.status.state === 'FINISHED'
     ? t('general.points', { count: other.status.score })
@@ -137,7 +143,10 @@ export function RoundsBadge(props: { view: RoundsView, compact?: boolean }) {
         },
       }}
     >
-      <RoundsList view={props.view}/>
+      <RoundsList view={props.view} onEndRound={onEndRound && (() => {
+        setAnchor(null);
+        onEndRound();
+      })}/>
     </Popover>
   </>;
 }

@@ -19,6 +19,7 @@ import { AnyBgioGame, PlayerIDType } from 'game';
 import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
 import { writeCompetition } from './competition_edit';
+import { adminProblemView, writeProblem } from './problem_edit';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
 import { adminCompetitionView, competitionSummary, problemUses } from './competition_view';
@@ -324,6 +325,33 @@ export function configureTeamsRouter(
     const { competitionId } = ctx.params;
     ctx.body = await writeCompetition(teams, competitionId, ctx.request.body, sources, { dryRun: ctx.query.dryRun === "1" })
       ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
+  });
+
+  /**
+   * One problem as its editor opens it (`AdminProblemView`): as stored, every
+   * use a relay makes of it, and whether its answer is locked.
+   *
+   * @param {string} problemId - The id of the problem.
+   */
+  router.get("/team/admin/problems/:problemId", adminAuth, async (ctx) => {
+    const { problemId } = ctx.params;
+    ctx.body = await adminProblemView(problemId, sources)
+      ?? refuse(ctx, 404, "PROBLEM_NOT_FOUND", `No problem with id ${problemId}.`);
+  });
+
+  /**
+   * Replace a problem held in the database: the body is `{ problem }`, the
+   * problem whole, its id the same. Written only if it keeps the rules, is
+   * still in a language of every competition using it, and, once a team of
+   * one of those has started a match, keeps its answer. The answer is the
+   * report either way; `?dryRun=1` writes nothing.
+   *
+   * @param {string} problemId - The id of the problem.
+   */
+  router.put("/team/admin/problems/:problemId", adminAuth, requireJson, koaBody(), async (ctx) => {
+    const { problemId } = ctx.params;
+    ctx.body = await writeProblem(teams, problemId, ctx.request.body, sources, { dryRun: ctx.query.dryRun === "1" })
+      ?? refuse(ctx, 404, "PROBLEM_NOT_FOUND", `No problem with id ${problemId}.`);
   });
 
   /**

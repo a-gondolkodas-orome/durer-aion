@@ -1,8 +1,8 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance } from 'axios';
 import { I18nError, apiRefusal } from "common-frontend/core";
-import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, AdminCompetitionDto, CompetitionWriteResultDto } from "common-frontend";
-import type { CompetitionConfig } from "schemas";
+import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, AdminCompetitionDto, CompetitionWriteResultDto, AdminProblemDto, ProblemWriteResultDto } from "common-frontend";
+import type { CompetitionConfig, Problem } from "schemas";
 import type { Tracker } from "./tracking";
 
 // Always the page's own origin: the session is a cookie, and a cookie does not
@@ -169,6 +169,16 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async saveCompetition(competition: CompetitionConfig, { dryRun }: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
     const url = urlcat('/team/admin/competitions/:competitionId', { competitionId: competition.id, ...(dryRun && { dryRun: 1 }) });
     return await request(api => api.put<CompetitionWriteResultDto>(url, { competition }));
+  }
+
+  async getProblem(problemId: string): Promise<AdminProblemDto> {
+    const url = urlcat('/team/admin/problems/:problemId', { problemId });
+    return await request(api => api.get<AdminProblemDto>(url));
+  }
+
+  async saveProblem(problem: Problem, { dryRun }: { dryRun: boolean }): Promise<ProblemWriteResultDto> {
+    const url = urlcat('/team/admin/problems/:problemId', { problemId: problem.id, ...(dryRun && { dryRun: 1 }) });
+    return await request(api => api.put<ProblemWriteResultDto>(url, { problem }));
   }
 
 

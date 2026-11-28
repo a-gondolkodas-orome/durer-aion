@@ -20,7 +20,7 @@
     "strategy": {
       "intro": "A two-player strategy game against the computer. You can read its rules once you start. You get points if you manage to beat the computer twice in a row in live games.",
       "live": "<b>Points:</b> you get {{max}} points if you beat the computer twice in a row in live games with no loss. Live losses lower it to {{next}}, then {{rest}}.",
-      "noAbandon": "A game, once started, has to be played to the end.",
+      "giveUp": "You may give up a game you have started; in a live game that counts as a loss.",
       "practice": "<b>Practice game:</b> does not count towards your score.",
       "practiceHint": "Try out how the game goes, and check that you understand the rules. The computer may not play its best here. You can play practice games at any time, between live games too.",
       "time": "<b>You have {{minutes}} minutes:</b> the clock starts when you click “Start”. Practice games count towards the time too."
@@ -48,6 +48,7 @@
   },
   "error": {
     "competitionNotFound": "No such competition.",
+    "problemNotFound": "No such problem.",
     "competitionNotStarted": "The competition hasn't started yet.",
     "competitionOver": "It is too late to start the competition.",
     "fileTooLarge": "The file is too large.",
@@ -88,7 +89,8 @@
       "connectionLost": "Connection to the server lost. You can't make a move or submit an answer until it's back.",
       "timeNotMatch": "Your computer's clock is not synchronised with the server's clock, the displayed remaining time is not perfect, reloading the page may solve the problem",
       "timeNotReal": "The clock is for informational purposes only. You will see a different time on other devices and browsers, but we will still only consider answers received on time."
-    }
+    },
+    "confirmNeeded": "Confirmation needed"
   },
   "header": {
     "logout": "logout",
@@ -200,7 +202,8 @@
       "strategyLeft": "When you are done here, start the strategy game from the home page.",
       "last": "This is your last round. Your final score is the sum of both rounds.",
       "total": "Your final score is the sum of both rounds."
-    }
+    },
+    "endStrategy": "End the strategy game…"
   },
   "strategy": {
     "endTable": {
@@ -220,7 +223,7 @@
       "label": "Practice or live?",
       "liveLabel": "Live game:",
       "liveText": "this counts. Beat the computer twice in a row; each live loss lowers the points you can earn.",
-      "noAbandon": "A game, once started, has to be played to the end.",
+      "giveUp": "You may give up a game you have started; in a live game that counts as a loss.",
       "practiceLabel": "Practice game:",
       "practiceText": "does not count towards your score. The computer may not play its best here.",
       "practiceTextVaries": "does not count towards your score. The computer may not play its best here, and the starting position may differ."
@@ -267,7 +270,8 @@
       "practiceNoteStart": "This does not count towards your score, and live games may start from a different position.",
       "practiceWon": "You won the practice game.",
       "timeUp": "Time is up.",
-      "unfinished": "This game was left unfinished."
+      "unfinished": "This game was left unfinished.",
+      "abandoned": "You ended the strategy game."
     },
     "role": {
       "first": "First",
@@ -304,6 +308,31 @@
       "starting": "The game is starting…",
       "yourTurn": "Your turn!"
     },
-    "viewBoard": "View the board"
+    "viewBoard": "View the board",
+    "giveUp": {
+      "button": "Give up",
+      "titleLive": "Give up this live game?",
+      "titlePractice": "Give up the practice game?",
+      "thisGame": "This game",
+      "countsAsLoss": "counts as a loss",
+      "twoWins": "Two wins in a row",
+      "pointsDrop": "{{to}} instead of {{from}}",
+      "after": "You can start a new game straight away. The clock keeps running meanwhile.",
+      "cancel": "Cancel, keep playing"
+    },
+    "endRound": {
+      "title": "End the strategy game?",
+      "titleRelayLeft": "End it and move on to the relay?",
+      "keepPlaying": "If you play on",
+      "twoWins": "two wins in a row: {{points}}",
+      "endNow": "If you end it now",
+      "relayLeft": "Then you can start the relay from the home page.",
+      "lastRound": "You have finished the relay already, so this ends your competition.",
+      "noReturn": "This cannot be undone: there is no going back to the strategy game.",
+      "word": "give up",
+      "typeWord": "To confirm, type: {{words}}",
+      "confirm": "End it, with 0 points",
+      "cancel": "Keep playing"
+    }
   }
 }

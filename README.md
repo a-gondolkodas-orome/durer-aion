@@ -155,7 +155,10 @@ touches the `Dockerfile`, nginx or the routes.
 The admin pages are at `http://localhost/admin`, user `admin`, password from
 `.env.docker`; `/admin/<teamId>` opens one team directly, and
 `/admin/verseny/<competitionId>` one competition, with its relay's problems and
-answers, linked from the **Versenyek** tab.
+answers, linked from the **Versenyek** tab. Each problem there opens its editor,
+whose fix reaches every relay using the problem, for the matches started after
+it. Once a team of any of those competitions has started, the answer no longer
+changes, and a problem held in code only with a deploy.
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container and redirects the export it
@@ -675,6 +678,17 @@ the clock, the test/live choice, choosing who starts, tries and score.
   `columns`, and focus comes back to the board once the bot has moved, since
   its turn disables every button. A turn of two steps moves focus on to the
   second itself, as `ketkupac/` does.
+
+  Consider also making the bot's last move easy to see (#714): teams ask what
+  it just did. How depends on the game, so this is a judgement, not a rule.
+  The move records what the bot did in `G` (`lastMachineMove`,
+  `lastJudgeTake`), and the opening position clears it. A game that places
+  marks can tint the bot's cells, as `20ocde/` does; that stays true for the
+  rest of the game. A game that takes things away has nothing left to tint:
+  the reference boards draw what the bot took, faded, beside what is left, with
+  its `−N`, and only while `botMovedLast` (`types.ts`) holds, since after the
+  team's own move the picture no longer adds up. Where no picture is clear,
+  saying it in the control's `aria-label` still helps.
 - **`main.tsx`** exports the rules text shown above the board: one element
   for every language, or `{ hu, en }` for a game in both, of which the board
   shows the page's.

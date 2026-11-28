@@ -59,7 +59,21 @@
     katexCss.href = new URL("css/katex.css", latexJs).href;
     document.head.append(katexCss);
     import(/* @vite-ignore */ latexJs)
-      .then(({ LaTeXJSComponent }) => customElements.define("latex-js", LaTeXJSComponent))
+      .then(({ LaTeXJSComponent }) => customElements.define("latex-js", class extends LaTeXJSComponent {
+        // A task latex.js cannot parse would be left blank, since it empties the shadow root
+        // before parsing: show its LaTeX source instead, as when latex.js never loads.
+        async onContentReady() {
+          try {
+            await super.onContentReady();
+          } catch (error) {
+            console.warn("latex.js could not render a task; it shows its LaTeX source", error);
+            const source = document.createElement("div");
+            source.style.whiteSpace = "pre-wrap";
+            source.textContent = this.textContent;
+            this.shadowRoot.replaceChildren(source);
+          }
+        }
+      }))
       .catch((error) => console.error("latex.js could not be loaded; tasks fall back to their LaTeX source", error))
   </script>
 </head>

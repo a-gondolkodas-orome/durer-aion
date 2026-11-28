@@ -1,5 +1,5 @@
-import type { CompetitionConfig } from "schemas";
-import type { AdminCompetitionDto, BundleImportResultDto, CompetitionSummaryDto, CompetitionWriteResultDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { CompetitionConfig, Problem } from "schemas";
+import type { AdminCompetitionDto, AdminProblemDto, ProblemWriteResultDto, BundleImportResultDto, CompetitionSummaryDto, CompetitionWriteResultDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -48,6 +48,11 @@ export interface AdminClientRepository {
   /** Replaces a competition with `competition`, or, with `dryRun`, only says
    *  what that would do. Of one held in code only the start window changes. */
   saveCompetition(competition: CompetitionConfig, options: { dryRun: boolean }): Promise<CompetitionWriteResultDto>
+  /** One problem as stored, answer included, with its uses and its lock. */
+  getProblem(problemId: string): Promise<AdminProblemDto>
+  /** Replaces a problem held in the database with `problem`, or, with
+   *  `dryRun`, only says what that would do. */
+  saveProblem(problem: Problem, options: { dryRun: boolean }): Promise<ProblemWriteResultDto>
   importTeams(file: File): Promise<TeamImportResultDto>
   /** Writes a bundle's competitions and problems to the database, all or none.
    *  The bundle is sent as it was read from its file. */

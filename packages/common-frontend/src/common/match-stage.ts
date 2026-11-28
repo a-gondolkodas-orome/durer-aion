@@ -6,9 +6,11 @@ import type { GameStateMixin } from "game";
 /// line and one row of buttons for each. `boardWrapper` picks the text; this
 /// decides which.
 export type MatchStage =
-  // Two live wins in a row end the match; anything else ending it is the
-  // clock, which may cut a game short.
+  // Two live wins in a row end the match, and so does the team, ending it
+  // itself (#111); anything else ending it is the clock, which may cut a game
+  // short.
   | { kind: 'ended', by: 'liveWon' }
+  | { kind: 'ended', by: 'abandoned' }
   | { kind: 'ended', by: 'time', unfinished: boolean }
   // The bot failed to move and the server played nothing in its place, so
   // the match waits on it until an organiser steps in or a fixed bot moves.
@@ -33,6 +35,7 @@ export type MatchStage =
 export function matchStage(G: GameStateMixin, ctx: Pick<Ctx, 'phase' | 'currentPlayer'>, finished: boolean): MatchStage {
   if (finished) {
     if (G.winningStreak >= 2) return { kind: 'ended', by: 'liveWon' };
+    if (G.abandoned) return { kind: 'ended', by: 'abandoned' };
     return { kind: 'ended', by: 'time', unfinished: ctx.phase === PHASE.play || ctx.phase === PHASE.chooseRole };
   }
   if (G.botStuck === true) return { kind: 'stuck' };

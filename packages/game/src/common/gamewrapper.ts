@@ -1,7 +1,7 @@
 import { Ctx, FnContext, Game, MoveFn, MoveMap, PhaseConfig, PlayerID } from 'boardgame.io';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { timestampMoves, type MoveLogMetadata } from './timestamp';
-import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish } from './types';
+import { currentPlayer, GameStateMixin, GameType, GUESSER_PLAYER, isDifficulty, isOwnGameState, JUDGE_PLAYER, PlayerIDType, recordFinish, recordWinner } from './types';
 
 /// What boardgame.io hands a move. The wrapper's own moves read and write only
 /// the mixin, so they name that as their state: a move whose context is the
@@ -34,6 +34,16 @@ function newStartingPosition({ G, playerID, events }: MoveContext) {
     return INVALID_MOVE;
   };
   events.setPhase(PHASE.startNewGame);
+};
+
+/// The team concedes the game it is playing (#595), on its own turn: scored as
+/// the bot's win, so a live one is a loss like any other, and the phase's
+/// `endIf` takes the match to the next game. The bot never concedes.
+function giveUp({ G, playerID }: MoveContext) {
+  if (playerID !== GUESSER_PLAYER) {
+    return INVALID_MOVE;
+  };
+  recordWinner(G, JUDGE_PLAYER);
 };
 
 /// The only source of a game's opening position: the bot sends it, typed on
@@ -160,6 +170,23 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                  { durationMinutes = STRATEGY_DEFAULT_DURATION_MINUTES }: StrategyOptions = {},
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
+  /// The team ends its strategy round for good (#111), on its own turn in any
+  /// phase. It keeps the points it has, which are 0: a second win in a row
+  /// would have ended the match already. A game being played is lost with it.
+  /// The play phase's `onEnd` reports the end; outside it, nothing would.
+  function abandonMatch({ G, ctx, playerID, events }: MoveContext) {
+    if (playerID !== GUESSER_PLAYER) {
+      return INVALID_MOVE;
+    };
+    G.abandoned = true;
+    if (ctx.phase === PHASE.play) {
+      recordWinner(G, JUDGE_PLAYER);
+    } else {
+      sendStrategyFunction({ component: "strategy", phase: "end", G: G as T_SpecificGameState & GameStateMixin, ctx });
+    }
+    events.endGame();
+  };
+
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin, Record<string, unknown>, StrategySetupData | undefined> = {
     setup: (_context, setupData) => {
       const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
@@ -190,7 +217,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     maxPlayers: 2,
     phases: {
       [PHASE.startNewGame]: {
-        moves: { ...timestampMoves(clearingBotStuck({ chooseNewGameType, setStartingPosition })), getTime: clockPoll, noteBotFailure: botFailureNote },
+        moves: { ...timestampMoves(clearingBotStuck({ chooseNewGameType, setStartingPosition, abandonMatch })), getTime: clockPoll, noteBotFailure: botFailureNote },
         next: PHASE.chooseRole,
         // The team picks the difficulty, the bot answers with the position,
         // and the phase ends with that one round of turns. Coming back for
@@ -206,7 +233,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       [PHASE.chooseRole]: {
-        moves: { ...timestampMoves({ chooseRole, newStartingPosition }), getTime: clockPoll },
+        moves: { ...timestampMoves({ chooseRole, newStartingPosition, abandonMatch }), getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: PHASE.play,
         turn: {
@@ -214,7 +241,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       [PHASE.play]: {
-        moves: { ...timestampMoves(clearingBotStuck(game.moves ?? {})), getTime: clockPoll, noteBotFailure: botFailureNote },
+        moves: { ...timestampMoves(clearingBotStuck({ ...game.moves, giveUp, abandonMatch })), getTime: clockPoll, noteBotFailure: botFailureNote },
         endIf: ({ G }) => { return G.winner !== null },
         next: PHASE.startNewGame,
         turn: {
