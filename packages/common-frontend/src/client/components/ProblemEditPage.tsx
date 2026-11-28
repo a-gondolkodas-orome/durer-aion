@@ -85,7 +85,7 @@ function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competi
   };
 
   const toReview = async () => {
-    const read = problemFromForm(form, data.problem.id);
+    const read = problemFromForm(form, data.problem);
     if ('answerError' in read) {
       setAnswerError(read.answerError);
       return;
@@ -204,10 +204,6 @@ function ProblemStep(props: {
                   placeholder="https://durerinfo.hu/…" slotProps={{ inputLabel: { shrink: true } }}
                   error={broken} helperText={broken ? 'A kép nem töltődik be a böngészőben.' : ' '}
                   onChange={(event) => { updateContent(language, { imageUrl: event.target.value }); }}/>
-                {(['help1', 'help2'] as const).map(field => (
-                  <TextField key={field} multiline label={`${FIELD_NAMES[field]}, ${name} (nem kötelező)`} value={content[field]}
-                    disabled={inCode} onChange={(event) => { updateContent(language, { [field]: event.target.value }); }}/>
-                ))}
               </Stack>
               <Stack aria-label={`Így látja a csapat, ${name}`} role="region" sx={{ border: `1px solid ${BORDER}`,
                 borderRadius: '10px', padding: '22px', gap: '12px', minWidth: 0 }}>

@@ -87,7 +87,7 @@ test('fills the form from the problem, lists what it reaches, and saves a fix af
   expect(screen.getByRole('link', { name: '21 online C' })).toHaveAttribute('href', `/admin/verseny/${COMPETITION}`);
 
   type('Szöveg (LaTeX), magyar', 'Hány kis kockából áll a nagy kocka?');
-  type('Első segítség, angol (nem kötelező)', ' Count a layer. ');
+  type('Kép címe, angol (nem kötelező)', ' https://durerinfo.hu/cube.png ');
   expect(screen.getByText('● Mentetlen változások')).toBeInTheDocument();
   next();
 
@@ -95,13 +95,13 @@ test('fills the form from the problem, lists what it reaches, and saves a fix af
     ...problem,
     content: {
       hu: { problemText: 'Hány kis kockából áll a nagy kocka?', imageUrl: 'https://durerinfo.hu/kocka.png' },
-      en: { problemText: 'How many small cubes?', help1: 'Count a layer.' },
+      en: { problemText: 'How many small cubes?', imageUrl: 'https://durerinfo.hu/cube.png' },
     },
   };
   const changes = await screen.findByRole('region', { name: 'Változások' });
   expect(repo.saveProblem).toHaveBeenLastCalledWith(fixed, { dryRun: true });
   expect(within(changes).getByText('Szöveg (LaTeX) (magyar)')).toBeInTheDocument();
-  expect(within(changes).getByText('Első segítség (angol)')).toBeInTheDocument();
+  expect(within(changes).getByText('Kép címe (angol)')).toBeInTheDocument();
   expect(within(changes).queryByText('Válasz')).not.toBeInTheDocument();
 
   let promptedOnSave: boolean | undefined;
@@ -112,7 +112,7 @@ test('fills the form from the problem, lists what it reaches, and saves a fix af
   expect(repo.saveProblem).toHaveBeenLastCalledWith(fixed, { dryRun: false });
 });
 
-test('leaves out a language whose every field is emptied, and an emptied optional field', async () => {
+test('leaves out a language whose every field is emptied, and an emptied image', async () => {
   await renderPage();
   type('Szöveg (LaTeX), angol', '');
   type('Kép címe, magyar (nem kötelező)', '  ');
@@ -147,7 +147,7 @@ test('warns of an image that does not load in the preview, on the form and in th
   fireEvent.error(image);
   expect(screen.getByText('A kép nem töltődik be a böngészőben.')).toBeInTheDocument();
 
-  type('Első segítség, magyar (nem kötelező)', 'Rétegenként.');
+  type('Szöveg (LaTeX), angol', 'How many cubes?');
   next();
   const warnings = await screen.findByRole('region', { name: '1 figyelmeztetés' });
   expect(within(warnings).getByText('A kép nem töltődik be a böngészőben (magyar): https://durerinfo.hu/kocka.png'))
