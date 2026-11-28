@@ -14,11 +14,13 @@ import type { AdminCompetitionDto } from '../dto/TeamStateDto';
 import { BORDER, DANGER, MUTED } from './adminStyles';
 import { problemEditPath, slug } from './CompetitionTable';
 import { ProblemContentCards } from './ProblemContentCards';
+import { ProblemPicker } from './ProblemPicker';
 import type { ContentForm } from './problem-form';
-import { type EntryErrors, type RelayEntryForm, copyEntry, entryProblemId, move, newEntry } from './relay-form';
+import { type EntryErrors, type RelayEntryForm, copyEntry, entryProblemId, move, newEntry, pickedEntries } from './relay-form';
 
 // The relay's problems on the competition's edit page: in play order, each
-// one's points, moved up or down, removed, copied, or added as new. A held
+// one's points, moved up or down, removed, copied, added as new, or picked
+// from those the database holds (ProblemPicker.tsx). A held
 // problem's text is changed in its own editor, which reaches every relay
 // using it; a problem this relay brings is written out here, and saved with
 // the competition.
@@ -32,6 +34,7 @@ export function RelayEditor(props: {
 }) {
   const { entries, setEntries, data } = props;
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
+  const [picking, setPicking] = useState(false);
   const held = new Map(data.relayProblems.map(each => [each.problem.id, each]));
   const language: Language = data.competition.languages[0] ?? 'hu';
   const toggle = (key: string, opened: boolean) => {
@@ -45,8 +48,9 @@ export function RelayEditor(props: {
   const replace = (key: string, change: (entry: RelayEntryForm) => RelayEntryForm) => {
     setEntries(current => current.map(each => each.key === key ? change(each) : each));
   };
+  const nextPoints = entries.at(-1)?.points ?? '1';
   const add = () => {
-    const entry = newEntry(entries.at(-1)?.points ?? '1');
+    const entry = newEntry(nextPoints);
     setEntries(current => [...current, entry]);
     toggle(entry.key, true);
   };
@@ -62,7 +66,7 @@ export function RelayEditor(props: {
           const name = `${index + 1}. feladat`;
           const errors = props.errors[entry.key] ?? {};
           const created = entry.created;
-          const heldProblem = entry.problemId === undefined ? undefined : held.get(entry.problemId);
+          const heldProblem = entry.problemId === undefined ? undefined : held.get(entry.problemId) ?? entry.picked;
           const opened = created !== undefined && (open.has(entry.key) || errors.slug !== undefined
             || errors.answer !== undefined);
           const text = created === undefined ? heldProblem && localizeProblem(heldProblem.problem, language).problemText
@@ -79,6 +83,7 @@ export function RelayEditor(props: {
                     </Box>
                     {created !== undefined && <Chip size="small" color="primary" variant="outlined"
                       label={created.copyOf === undefined ? 'új' : `másolat: ${slug(created.copyOf.id)}`}/>}
+                    {entry.picked !== undefined && <Chip size="small" color="primary" variant="outlined" label="hozzáadva"/>}
                     {heldProblem !== undefined && heldProblem.uses.length > 1 && <Chip size="small" variant="outlined"
                       label={`${heldProblem.uses.length} helyen használt`}
                       title="A javítása minden versenyre kihat, amely használja. A Másolat csak ebben a váltóban cseréli le."/>}
@@ -131,7 +136,16 @@ export function RelayEditor(props: {
           );
         })}
       </Stack>
-      {!props.locked && <Box><Button variant="outlined" onClick={add}>+ Új feladat</Button></Box>}
+      {!props.locked && <Stack sx={{ flexDirection: 'row', gap: '12px', flexWrap: 'wrap' }}>
+        <Button variant="outlined" onClick={add}>+ Új feladat</Button>
+        <Button variant="outlined" onClick={() => { setPicking(true); }}>+ Meglévő feladat</Button>
+      </Stack>}
+      <ProblemPicker open={picking} onClose={() => { setPicking(false); }} language={language} competitionId={data.id}
+        inRelay={new Set(entries.map(entryProblemId))} serial={entries.length + 1} points={Number(nextPoints) || 0}
+        onAdd={(picked) => {
+          setEntries(current => [...current, ...pickedEntries(picked, nextPoints)]);
+          setPicking(false);
+        }}/>
     </Stack>
   );
 }

@@ -1,7 +1,7 @@
 import urlcat from "urlcat";
 import axios, { AxiosInstance } from 'axios';
 import { I18nError, apiRefusal } from "common-frontend/core";
-import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, AdminCompetitionDto, CompetitionChangeDto, CompetitionWriteResultDto, AdminProblemDto, ProblemWriteResultDto } from "common-frontend";
+import type { AdminClientRepository, ClientRepository, MatchStatus, TeamModelDto, MatchStateDto, TeamImportResultDto, CompetitionSummaryDto, BundleImportResultDto, AdminCompetitionDto, CompetitionChangeDto, CompetitionWriteResultDto, AdminProblemDto, ProblemSearchDto, ProblemWriteResultDto } from "common-frontend";
 import type { Problem } from "schemas";
 import type { Tracker } from "./tracking";
 
@@ -169,6 +169,11 @@ export class RealClientRepository implements ClientRepository, AdminClientReposi
   async saveCompetition(change: CompetitionChangeDto, { dryRun }: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
     const url = urlcat('/team/admin/competitions/:competitionId', { competitionId: change.competition.id, ...(dryRun && { dryRun: 1 }) });
     return await request(api => api.put<CompetitionWriteResultDto>(url, change));
+  }
+
+  async searchProblems({ q, competition }: { q: string, competition?: string }): Promise<ProblemSearchDto> {
+    const url = urlcat('/team/admin/problems', { q, ...(competition !== undefined && { competition }) });
+    return await request(api => api.get<ProblemSearchDto>(url));
   }
 
   async getProblem(problemId: string): Promise<AdminProblemDto> {

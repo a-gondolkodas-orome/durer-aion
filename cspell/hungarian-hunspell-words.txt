@@ -315,6 +315,7 @@ hozzáadsz
 hozzáadta
 hozzáadtam
 hozzáadunk
+hozzáadva
 hozzáragasztása
 hozzárendelünk
 húrnégyszöget
@@ -353,6 +354,7 @@ képezhetők
 kérésben
 kérésére
 keresésénél
+keresést
 keresztezhetik
 kereszteződésben
 kereszteződésébe
@@ -473,6 +475,7 @@ kitöröljük
 kitörölve
 kitüntetett
 kiválasztani
+Kiválasztás
 kiválasztása
 kiválasztja
 kiválasztjuk

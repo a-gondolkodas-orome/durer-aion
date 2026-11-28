@@ -20,6 +20,7 @@ import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
 import { hasStarted, writeCompetition } from './competition_edit';
 import { adminProblemView, writeProblem } from './problem_edit';
+import { searchProblems } from './problem_search';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
 import { adminCompetitionView, competitionSummary, problemUses } from './competition_view';
@@ -325,6 +326,18 @@ export function configureTeamsRouter(
     const { competitionId } = ctx.params;
     ctx.body = await writeCompetition(teams, competitionId, ctx.request.body, sources, { dryRun: ctx.query.dryRun === "1" })
       ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
+  });
+
+  /**
+   * The database's problems for the relay editor's picker
+   * (`ProblemSearchView`): those whose id holds `q`, and, given `competition`,
+   * which that competition's relay uses, in its order.
+   */
+  router.get("/team/admin/problems", adminAuth, async (ctx) => {
+    const text = (value: unknown) => typeof value === 'string' && value !== '' ? value : undefined;
+    const competition = text(ctx.query.competition);
+    ctx.body = await searchProblems({ q: text(ctx.query.q), competition }, sources)
+      ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competition}.`);
   });
 
   /**

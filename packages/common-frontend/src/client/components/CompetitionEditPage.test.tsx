@@ -293,6 +293,52 @@ describe('composing the relay', () => {
     expect(change?.competition.relay?.problems).toEqual([{ problemId: id, points: 3 }, { problemId: KOCKAK, points: 4 }]);
   });
 
+  test('adds problems another relay uses, by id, and marks those already in this one', async () => {
+    const HAROMSZOG = '7q1wniz55w--csomag-haromszog';
+    const haromszog = { id: HAROMSZOG, answer: 9, content: { hu: { problemText: 'Hány háromszög van?' } } };
+    const OTHER = 'zzzzzzzzzz--masik';
+    const otherUse = { competitionId: OTHER, metadata: { ...metadata, category: 'D' }, position: 1, points: 2 };
+    vi.spyOn(repo, 'getCompetitions').mockResolvedValue([
+      { id: OTHER, metadata: otherUse.metadata, startWindow: null, configStartWindow: null, storedIn: 'database' },
+    ]);
+    const search = vi.spyOn(repo, 'searchProblems').mockImplementation(({ competition: id }) => Promise.resolve({
+      truncated: false,
+      problems: id === OTHER
+        ? [{ problem: haromszog, storedIn: 'database', uses: [otherUse] },
+          { problem: paros, storedIn: 'database', uses: [use(1, 3), { ...otherUse, position: 2 }] }]
+        : [],
+    }));
+    renderPage();
+    await screen.findByRole('heading', { name: '21 online C' });
+    click('+ Meglévő feladat');
+    const dialog = await screen.findByRole('dialog', { name: 'Meglévő feladat hozzáadása' });
+    fireEvent.mouseDown(within(dialog).getByRole('combobox', { name: 'Verseny' }));
+    fireEvent.click(await screen.findByRole('option', { name: '21 online D' }));
+    await waitFor(() => { expect(search).toHaveBeenLastCalledWith({ q: '', competition: OTHER }); });
+
+    const results = await within(dialog).findByRole('list', { name: 'Találatok' });
+    expect(within(results).getByRole('checkbox', { name: 'Kiválasztás: csomag-paros' })).toBeDisabled();
+    expect(within(results).getByText('már a váltóban')).toBeInTheDocument();
+    fireEvent.click(within(results).getByRole('button', { name: 'Előnézet: csomag-haromszog' }));
+    expect(within(results).getByRole('region', { name: 'Így látja a csapat: csomag-haromszog' })).toBeInTheDocument();
+    fireEvent.click(within(results).getByRole('checkbox', { name: 'Kiválasztás: csomag-haromszog' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Hozzáadás (1)' }));
+    await waitFor(() => { expect(screen.queryByRole('dialog')).not.toBeInTheDocument(); });
+
+    const added = within(relayList()).getByRole('listitem', { name: '3. feladat' });
+    expect(within(added).getByText('hozzáadva')).toBeInTheDocument();
+    expect(within(added).getByText('Hány háromszög van?')).toBeInTheDocument();
+    expect(field('Pont, 3. feladat')).toHaveValue('4');
+    next();
+    const review = await screen.findByRole('region', { name: 'A váltó feladatai a mentés után' });
+    expect(within(review).getByText('· meglévő feladat, hozzáadva')).toBeInTheDocument();
+    expect(lastChange()).toEqual({
+      competition: { ...relayConfig, relay: { durationMinutes: 30,
+        problems: [...relayConfig.relay?.problems ?? [], { problemId: HAROMSZOG, points: 4 }] } },
+      problems: [],
+    });
+  });
+
   test('stays on the form, naming the entry, while a new problem has no slug or answer, or points are no number', async () => {
     renderPage();
     await screen.findByRole('heading', { name: '21 online C' });
@@ -312,7 +358,7 @@ describe('composing the relay', () => {
     await screen.findByRole('heading', { name: '21 online C' });
     expect(screen.getByText(/a váltó feladatai, sorrendjük és pontjuk nem változhat/)).toBeInTheDocument();
     expect(field('Pont, 1. feladat')).toBeDisabled();
-    for (const name of ['+ Új feladat', 'Lejjebb: 1. feladat', 'Másolat: 1. feladat', 'Eltávolítás: 1. feladat']) {
+    for (const name of ['+ Új feladat', '+ Meglévő feladat', 'Lejjebb: 1. feladat', 'Másolat: 1. feladat', 'Eltávolítás: 1. feladat']) {
       expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
     }
     // A problem's own editor is still where its text is fixed.

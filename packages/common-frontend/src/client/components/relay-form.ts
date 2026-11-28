@@ -1,11 +1,13 @@
 import type { Problem, ProblemId, RelayConfig } from 'schemas';
+import type { AdminProblemSearchResultDto } from '../dto/TeamStateDto';
 import { ENTITY_SLUG_PATTERN, randomIdPart } from 'schemas';
 import { type ProblemForm, problemForm, problemFromForm } from './problem-form';
 
 // The relay's problems as the edit page composes them: in play order, each
 // one's points as typed, and the problems the relay brings that nothing holds
 // yet — one added as new, or a copy of a shared one, which replaces it in this
-// relay only. Those are written with the competition, on its Save. As
+// relay only. Those are written with the competition, on its Save. A problem
+// picked from those already held joins by its id (ProblemPicker.tsx). As
 // elsewhere, the server validates; the form refuses only what it cannot turn
 // into a relay.
 
@@ -25,6 +27,9 @@ export interface RelayEntryForm {
   points: string;
   /** The problem a held entry refers to; undefined for a created one. */
   problemId?: ProblemId;
+  /** A held problem picked on this page, which the competition's own
+   *  `relayProblems` do not carry. */
+  picked?: AdminProblemSearchResultDto;
   created?: CreatedProblemForm;
 }
 
@@ -47,6 +52,11 @@ export function newEntry(points: string, random = randomIdPart()): RelayEntryFor
     key: `új:${random}`, points,
     created: { random, slug: '', problem: { ...problemForm({ id: '', answer: 0, content: {} }), answer: '' } },
   };
+}
+
+/** Problems picked from those already held, each at `points`. */
+export function pickedEntries(picked: readonly AdminProblemSearchResultDto[], points: string): RelayEntryForm[] {
+  return picked.map(each => ({ key: `választott:${each.problem.id}`, points, problemId: each.problem.id, picked: each }));
 }
 
 /** A copy of `problem` in place of `entry`: the same content under a new id

@@ -1,4 +1,4 @@
-import { copyEntry, move, newEntry, relayForm, relayFromForm } from './relay-form';
+import { copyEntry, move, newEntry, pickedEntries, relayForm, relayFromForm } from './relay-form';
 
 const relay = { durationMinutes: 30, problems: [{ problemId: 'aaaaaaaaaa--egy', points: 3 }, { problemId: 'bbbbbbbbbb--ketto', points: 4 }] };
 
@@ -44,4 +44,12 @@ test('names what of each entry it cannot read', () => {
       answer: 'Egész számot írj ide.',
     },
   } });
+});
+
+test('adds picked problems by their id, at the end, nothing to create', () => {
+  const picked = { problem: { id: 'cccccccccc--harom', answer: 3, content: { hu: { problemText: 'Mennyi?' } } },
+    storedIn: 'database' as const, uses: [] };
+  expect(relayFromForm([...relayForm(relay), ...pickedEntries([picked], '5')])).toEqual({
+    problems: [...relay.problems, { problemId: 'cccccccccc--harom', points: 5 }], created: [],
+  });
 });
