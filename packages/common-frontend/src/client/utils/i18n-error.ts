@@ -45,6 +45,7 @@ const API_ERROR_KEYS: Record<ApiErrorCode, string> = {
   MATCH_NOT_FOUND: t("error.matchNotFound"),
   GAME_NOT_FOUND: t("error.gameNotFound"),
   COMPETITION_NOT_FOUND: t("error.competitionNotFound"),
+  PROBLEM_NOT_FOUND: t("error.problemNotFound"),
   STALE_MATCH_ID: t("error.staleMatchId"),
   MATCH_FINISHED: t("error.matchFinished"),
   JSON_REQUIRED: t("error.unexpected"),

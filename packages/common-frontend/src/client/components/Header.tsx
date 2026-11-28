@@ -9,6 +9,7 @@ import { LanguageDropdown } from './Langswitcher';
 import type { Heading } from './competition-heading';
 import { RoundsBadge, RoundsList } from './RoundsBadge';
 import type { RoundsView } from './rounds-view';
+import { useEndRoundAction } from './end-round';
 
 /// How wide a page gets. The strategy page is wider, as the game's rules sit
 /// beside its board.
@@ -53,6 +54,10 @@ export function Header(props: {
       });
   };
   const teamLabel = props.teamLabel ?? props.teamName;
+  // Only the strategy round may be ended early (#111), and only while its
+  // board offers it.
+  const endRound = useEndRoundAction();
+  const onEndRound = props.rounds?.current.type === 'strategy' ? endRound ?? undefined : undefined;
   const leaveLabel = props.leaveLabel ?? t('header.logout');
   const LeaveIcon = props.leaveLabel ? ArrowBackRounded : Logout;
   const { title, subtitle } = props.heading ?? { title: t('header.titlePlain'), subtitle: t('header.subtitle') };
@@ -142,10 +147,10 @@ export function Header(props: {
         <Stack direction="row" sx={{ justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
           {props.rounds && <>
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-              <RoundsBadge view={props.rounds}/>
+              <RoundsBadge view={props.rounds} onEndRound={onEndRound}/>
             </Box>
             {!props.languageSwitcher && <Box sx={{ display: { xs: 'flex', md: 'none' }, minWidth: 0 }}>
-              <RoundsBadge view={props.rounds} compact/>
+              <RoundsBadge view={props.rounds} compact onEndRound={onEndRound}/>
             </Box>}
             {props.languageSwitcher && <Box aria-hidden sx={{
               display: { xs: 'none', md: 'block' }, width: '1px', height: '24px',
@@ -190,7 +195,10 @@ export function Header(props: {
             {props.rounds && <Box sx={{
               border: '1px solid #eef0f2', borderRadius: '12px', padding: '6px 14px 10px', marginBottom: '20px',
             }}>
-              <RoundsList view={props.rounds}/>
+              <RoundsList view={props.rounds} onEndRound={onEndRound && (() => {
+                setMobileMenuOpen(false);
+                onEndRound();
+              })}/>
             </Box>}
             <Button onClick={() => {
               setMobileMenuOpen(false);

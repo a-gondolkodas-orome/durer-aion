@@ -1,7 +1,7 @@
 import {
   CompetitionConfig, competitionName, editionSchoolYear, namesCompetition, inLanguage, isEntityId, localizeLabel, localizeProblem, Problem, RelayConfig, StrategyConfig,
 } from './competition';
-import { CompetitionReferences, validateCompetition, validateProblem } from './competition-validation';
+import { CompetitionReferences, problemImageWarnings, validateCompetition, validateProblem } from './competition-validation';
 
 const bilingual: Problem = {
   id: 'k3x9q2m7ab--hatszog-terulet',
@@ -88,6 +88,35 @@ describe('validateProblem', () => {
   it('refuses an answer that is not an integer', () => {
     expect(validateProblem({ ...hungarianOnly, answer: 1.5 })).toEqual([
       `feladat ${hungarianOnly.id}: a válasz (1.5) nem egész szám`,
+    ]);
+  });
+
+  const withImage = (imageUrl: string): Problem =>
+    ({ ...hungarianOnly, content: { hu: { problemText: 'Mennyi?', imageUrl } } });
+
+  it('refuses an image that is not at an absolute https: URL', () => {
+    for (const imageUrl of ['http://durerinfo.hu/a.png', '/kepek/a.png', 'https://a b/c.png']) {
+      expect(validateProblem(withImage(imageUrl))).toEqual([
+        `feladat ${hungarianOnly.id}: a kép címe nem teljes https:// kezdetű cím (hu): „${imageUrl}”`,
+      ]);
+    }
+    expect(validateProblem(withImage('https://durerinfo.hu/wp-content/a.png?v=2'))).toEqual([]);
+  });
+});
+
+describe('problemImageWarnings', () => {
+  const withImage = (imageUrl: string): Problem =>
+    ({ ...hungarianOnly, content: { hu: { problemText: 'Mennyi?', imageUrl }, en: { problemText: 'How much?' } } });
+
+  it('passes an image on a host the banks use, in any case', () => {
+    expect(problemImageWarnings(withImage('https://durerinfo.hu/a.png'))).toEqual([]);
+    expect(problemImageWarnings(withImage('https://DurerImages.s3.eu-north-1.amazonaws.com/a.png'))).toEqual([]);
+    expect(problemImageWarnings(hungarianOnly)).toEqual([]);
+  });
+
+  it('warns of an image on any other host', () => {
+    expect(problemImageWarnings(withImage('https://i.imgur.com/a.png'))).toEqual([
+      `feladat ${hungarianOnly.id}: a kép nem a szokásos tárhelyen van (hu): i.imgur.com`,
     ]);
   });
 });

@@ -260,6 +260,39 @@ describe("gameWrapper high-level logic", () => {
     expect(client.getState()?.G.liveResults).toStrictEqual(["lost", "unfinished"]);
   });
 
+  test("a live game the team gives up is lost, and the next one can start", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    startGame(client, "live");
+    client.moves.win();
+    startGame(client, "live");
+
+    client.moves.giveUp();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+    expect(client.getState()?.G.winner).toStrictEqual(JUDGE_PLAYER);
+    expect(client.getState()?.G.winningStreak).toStrictEqual(0);
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(1);
+    expect(client.getState()?.G.liveResults).toStrictEqual(["won", "lost"]);
+  });
+
+  test("a practice game the team gives up ends without a loss", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    startGame(client, "live");
+    client.moves.win();
+    startGame(client, "test");
+
+    client.moves.giveUp();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("startNewGame");
+    expect(client.getState()?.G.winner).toStrictEqual(JUDGE_PLAYER);
+    expect(client.getState()?.G.winningStreak).toStrictEqual(1);
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
+    expect(client.getState()?.G.liveResults).toStrictEqual(["won"]);
+  });
+
   test("win in test", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
@@ -540,6 +573,33 @@ describe("gameWrapper move guards", () => {
     expect(rejected).toHaveBeenCalledOnce();
   });
 
+  test("the bot cannot give up", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole(JUDGE_PLAYER); // the bot moves first
+
+    client.moves.giveUp();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("play");
+    expect(client.getState()?.G.winner).toBeNull();
+    expect(rejected).toHaveBeenCalledOnce();
+  });
+
+  test("there is no game to give up before one is played", () => {
+    const client = Client({ game: wrappedGame, numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+
+    client.moves.giveUp();
+
+    expect(client.getState()?.ctx.phase).toStrictEqual("chooseRole");
+    expect(client.getState()?.G.numberOfLoss).toStrictEqual(0);
+    expect(rejected).toHaveBeenCalledOnce();
+  });
+
   test("the team cannot choose a difficulty that does not exist", () => {
     const client = Client({ game: wrappedGame, numPlayers: 2 });
     client.start();
@@ -737,4 +797,76 @@ test("a match's end is its start plus its duration, however the clock ticks", ()
   onTestFinished(() => { vi.restoreAllMocks(); });
   const G = gameWrapper(createGameWithMove(vi.fn(), vi.fn())).setup?.({} as never, { durationMinutes: 25 });
   expect(Date.parse(G?.end ?? "") - Date.parse(G?.start ?? "")).toBe(25 * 60_000);
+});
+
+describe("gameWrapper abandoning the match (#111)", () => {
+  const setup = () => ({ data: "asd" });
+
+  const startGame = (client: ReturnType<typeof Client>, difficulty: "live" | "test") => {
+    client.moves.chooseNewGameType(difficulty);
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole(GUESSER_PLAYER);
+  };
+
+  test("between games it ends the match with no points, and reports the end", () => {
+    const reports: { phase: string; points: number }[] = [];
+    const client = Client({
+      game: gameWrapper(createGameWithWinAndLose(setup), (report) => {
+        reports.push({ phase: report.phase, points: report.G.points });
+      }),
+      numPlayers: 2,
+    });
+    client.start();
+    startGame(client, "live");
+    client.moves.win();
+
+    client.moves.abandonMatch();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+    expect(client.getState()?.G.abandoned).toBe(true);
+    expect(client.getState()?.G.points).toStrictEqual(0);
+    expect(client.getState()?.G.liveResults).toStrictEqual(["won"]);
+    expect(reports[reports.length - 1]).toStrictEqual({ phase: "end", points: 0 });
+    expect(reports.filter(report => report.phase === "end")).toHaveLength(2);
+  });
+
+  test("during a live game it loses that game too, and reports the end once", () => {
+    const reports: string[] = [];
+    const client = Client({
+      game: gameWrapper(createGameWithWinAndLose(setup), (report) => reports.push(report.phase)),
+      numPlayers: 2,
+    });
+    client.start();
+    startGame(client, "live");
+
+    client.moves.abandonMatch();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+    expect(client.getState()?.G.liveResults).toStrictEqual(["lost"]);
+    expect(reports.filter(phase => phase === "end")).toHaveLength(1);
+  });
+
+  test("before the first game it ends the match too", () => {
+    const client = Client({ game: gameWrapper(createGameWithWinAndLose(setup)), numPlayers: 2 });
+    client.start();
+
+    client.moves.abandonMatch();
+
+    expect(client.getState()?.ctx.gameover).toBe(true);
+    expect(client.getState()?.G.liveResults).toStrictEqual([]);
+  });
+
+  test("the bot cannot end the match", () => {
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = Client({ game: gameWrapper(createGameWithWinAndLose(setup)), numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live"); // hands the turn to the judge
+
+    client.moves.abandonMatch();
+
+    expect(client.getState()?.ctx.gameover).toBeUndefined();
+    expect(client.getState()?.G.abandoned).toBeUndefined();
+    expect(rejected).toHaveBeenCalledOnce();
+    rejected.mockRestore();
+  });
 });

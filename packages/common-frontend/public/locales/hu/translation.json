@@ -20,7 +20,7 @@
     "strategy": {
       "intro": "Kétszereplős stratégiás játék a gép ellen. A szabályokat a kezdés után olvashatjátok. Akkor kaptok pontot, ha sikerül éles játszmában kétszer egymás után legyőznötök a gépet.",
       "live": "<b>Pontozás:</b> {{max}} pontot kaptok, ha kétszer egymás után legyőzitek éles játszmában a gépet vereség nélkül. Az éles vereségek ezt {{next}}, majd {{rest}} pontra csökkentik.",
-      "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
+      "giveUp": "Egy elkezdett játszmát fel is adhattok; élesben ez vereségnek számít.",
       "practice": "<b>Próbajáték:</b> nem számít a pontozásba.",
       "practiceHint": "Kipróbálhatjátok a játék menetét, és hogy jól értitek-e a szabályokat. A gép itt nem feltétlenül játszik a legjobban. Bármikor játszhattok próbajátékot, éles játszmák között is.",
       "time": "<b>{{minutes}} percetek van:</b> az óra akkor indul, amikor a „Kezdjük” gombra kattintotok. A próbajátékok is beleszámítanak az időbe."
@@ -48,6 +48,7 @@
   },
   "error": {
     "competitionNotFound": "Nincs ilyen verseny.",
+    "problemNotFound": "Nincs ilyen feladat.",
     "competitionNotStarted": "A verseny még nem kezdődött el.",
     "competitionOver": "A versenybe már nem lehet belekezdeni.",
     "fileTooLarge": "A fájl túl nagy.",
@@ -86,7 +87,8 @@
       "connectionLost": "Megszakadt a kapcsolat a szerverrel. Amíg helyre nem áll, nem tudtok lépni vagy választ beküldeni.",
       "timeNotMatch": "A számítógép órája nincs szinkronban a szerver órájával, a jelzett hátralevő idő nem tökéletes, az oldal újra töltése megoldhatja a problémát",
       "timeNotReal": "Az óra csak tájékoztató jellegű. Más eszközökön és böngészőkben más időt fogtok látni, de így is csak az időben beérkezett válaszokat fogjuk figyelembe venni."
-    }
+    },
+    "confirmNeeded": "Megerősítés szükséges"
   },
   "header": {
     "logout": "kilépés",
@@ -196,7 +198,8 @@
       "strategyLeft": "Ha itt végeztetek, a stratégiás játékot a kezdőlapról indíthatjátok.",
       "last": "Ez az utolsó fordulótok. A végeredmény a két forduló pontjainak összege.",
       "total": "A végeredmény a két forduló pontjainak összege."
-    }
+    },
+    "endStrategy": "Stratégiás játék befejezése…"
   },
   "strategy": {
     "endTable": {
@@ -216,7 +219,7 @@
       "label": "Próba vagy éles?",
       "liveLabel": "Éles játszma:",
       "liveText": "ez számít. Győzzétek le a gépet kétszer egymás után; minden éles vereség csökkenti az elérhető pontot.",
-      "noAbandon": "Egy elkezdett játszmát végig kell játszani.",
+      "giveUp": "Egy elkezdett játszmát fel is adhattok; élesben ez vereségnek számít.",
       "practiceLabel": "Próbajáték:",
       "practiceText": "nem számít a pontozásba. A gép itt nem feltétlenül játszik a legjobban.",
       "practiceTextVaries": "nem számít a pontozásba. A gép itt nem feltétlenül játszik a legjobban, és a kezdőállás is más lehet."
@@ -263,7 +266,8 @@
       "practiceNoteStart": "Ez nem számít a pontozásba, és az éles játszmák kezdőállása más lehet.",
       "practiceWon": "Nyertetek a próbajátékban.",
       "timeUp": "Lejárt az idő.",
-      "unfinished": "Ez a játszma befejezetlen maradt."
+      "unfinished": "Ez a játszma befejezetlen maradt.",
+      "abandoned": "Befejeztétek a stratégiás játékot."
     },
     "role": {
       "first": "Kezdő",
@@ -300,6 +304,31 @@
       "starting": "Indul a játszma…",
       "yourTurn": "Ti jöttök!"
     },
-    "viewBoard": "Tábla megtekintése"
+    "viewBoard": "Tábla megtekintése",
+    "giveUp": {
+      "button": "Feladjuk",
+      "titleLive": "Feladjátok ezt az éles játszmát?",
+      "titlePractice": "Feladjátok a próbajátékot?",
+      "thisGame": "Ez a játszma",
+      "countsAsLoss": "vereségnek számít",
+      "twoWins": "Két győzelemért",
+      "pointsDrop": "{{from}} helyett {{to}}",
+      "after": "Utána rögtön új játszmát kezdhettek. Az óra közben megy tovább.",
+      "cancel": "Mégse, játszunk tovább"
+    },
+    "endRound": {
+      "title": "Befejezitek a stratégiás játékot?",
+      "titleRelayLeft": "Befejezitek, és mentek a váltóhoz?",
+      "keepPlaying": "Ha játszotok tovább",
+      "twoWins": "két egymás utáni győzelem: {{points}}",
+      "endNow": "Ha most befejezitek",
+      "relayLeft": "Utána a kezdőlapról indíthatjátok a váltót.",
+      "lastRound": "A váltót már befejeztétek, így ezzel a versenyetek véget ér.",
+      "noReturn": "Nem vonható vissza: a stratégiás játékhoz nem lehet visszatérni.",
+      "word": "feladjuk",
+      "typeWord": "A megerősítéshez írjátok be: {{words}}",
+      "confirm": "Befejezzük, 0 ponttal",
+      "cancel": "Játszunk még"
+    }
   }
 }

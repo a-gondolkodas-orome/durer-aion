@@ -74,8 +74,25 @@ function validateLabel(label: LocalizedLabel, where: string, what = 'a felirat')
   return errors;
 }
 
+// An absolute `https:` URL, its host the first group: the page is served over
+// https, which blocks a plain `http:` image.
+const HTTPS_URL = /^https:\/\/([^\s/?#@]+)(?:[/?#]\S*)?$/i;
+
+/// Where the banks keep their images.
+export const IMAGE_HOSTS: readonly string[] = ['durerinfo.hu', 'durerimages.s3.eu-north-1.amazonaws.com'];
+
+/// An image on a host other than `IMAGE_HOSTS`, as a message per language:
+/// allowed, but nobody of the competition looks after it.
+export function problemImageWarnings(problem: Problem): string[] {
+  return Object.entries(problem.content).flatMap(([language, content]) => {
+    const host = content?.imageUrl === undefined ? undefined : HTTPS_URL.exec(content.imageUrl)?.[1]?.toLowerCase();
+    return host === undefined || IMAGE_HOSTS.includes(host) ? []
+      : [`feladat ${problem.id}: a kép nem a szokásos tárhelyen van (${language}): ${host}`];
+  });
+}
+
 /// Every way the problem breaks the rules `Problem` states, as messages; none
-/// means it is valid.
+/// means it is valid. An image is given by an absolute `https:` URL.
 export function validateProblem(problem: Problem): string[] {
   const errors: string[] = [];
   const where = `feladat ${problem.id}`;
@@ -96,6 +113,10 @@ export function validateProblem(problem: Problem): string[] {
       errors.push(`${where}: ismeretlen nyelvű szövege van: „${language}”`);
     } else if (problem.content[language]?.problemText.trim() === '') {
       errors.push(`${where}: a szövege üres (${language})`);
+    }
+    const imageUrl = problem.content[language as Language]?.imageUrl;
+    if (imageUrl !== undefined && !HTTPS_URL.test(imageUrl)) {
+      errors.push(`${where}: a kép címe nem teljes https:// kezdetű cím (${language}): „${imageUrl}”`);
     }
   }
 

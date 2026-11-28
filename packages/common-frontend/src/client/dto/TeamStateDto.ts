@@ -100,6 +100,26 @@ export interface CompetitionWriteResultDto {
   started: boolean;
 }
 
+/// One problem as `GET /team/admin/problems/:id` serves it, for its editor:
+/// as stored, every use a relay makes of it, and whether a team of a
+/// competition using it has started, which locks its answer.
+export interface AdminProblemDto {
+  problem: Problem;
+  storedIn: 'code' | 'database';
+  uses: ProblemUseDto[];
+  answerLocked: boolean;
+}
+
+/// What `PUT /team/admin/problems/:id` answers, with `?dryRun=1` too, as
+/// `CompetitionWriteResultDto` does; `uses` is what the change reaches.
+export interface ProblemWriteResultDto {
+  written: boolean;
+  errors: string[];
+  warnings: string[];
+  answerLocked: boolean;
+  uses: ProblemUseDto[];
+}
+
 /// What `POST /team/admin/competitions/import` answers: every competition and
 /// problem of the bundle written, or none, with `errors` saying why, one
 /// Hungarian line each.

@@ -7,9 +7,13 @@ import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
-import { useEffect, useMemo, useRef, useState } from "react";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
+import { ConfirmDialog } from "../client/components/ConfirmDialog";
+import { useOfferEndRound } from "../client/components/end-round";
+import type { ConfirmDialogInterface } from "../client/components/ConfirmDialog";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { LIVE_COLOUR, LiveGameCell, LiveGameRun } from "../client/components/ResultTables";
 import { useBackToHome, useTeamState } from "../client/hooks/user-hooks";
@@ -18,7 +22,7 @@ import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, PHASE, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
 import type { Difficulty, GamePresentation, GameStateMixin } from "game";
-import type { LiveGameResult } from "schemas";
+import type { LiveGameResult, MatchStatus } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
 import type { AnimationEvent, MouseEvent, ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
@@ -114,6 +118,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // reload.
     const [rulesRead, setRulesRead] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
+    const [giveUpOpen, setGiveUpOpen] = useState(false);
+    const [endRoundOpen, setEndRoundOpen] = useState(false);
     const rulesColumns = rulesBeside ? `minmax(${GAME_COLUMN_WIDTH}px, 1fr) minmax(${RULES_COLUMN_WIDTH}px, ${RULES_COLUMN_MAX_WIDTH}px)`
       : wide && rulesOpen ? `minmax(0, 1fr) ${RULES_COLUMN_WIDTH}px`
       : null;
@@ -186,6 +192,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     let subWide: string | null = null;
     // A small action of its own after the line under the status.
     let subAction: ReactNode = null;
+    // Giving up the game being played (#595), at the board's right edge.
+    let giveUp: ReactNode = null;
     let intro: ReactNode = null;
     // A game's own role labels name the roles on the buttons and on the chip
     // alike. Without them the wrapper has a phrase for each: on the buttons
@@ -201,6 +209,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         if (stage.by === 'liveWon') {
           status = t('strategy.result.liveWon');
           tone = 'won';
+        } else if (stage.by === 'abandoned') {
+          status = t('strategy.result.abandoned');
         } else {
           status = t('strategy.result.timeUp');
           sub = stage.unfinished ? t('strategy.result.unfinished') : '';
@@ -277,10 +287,29 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
           ? presentation.getPlayerStepDescription?.({ G, ctx }) ?? null
           : null;
         sub = step === null ? '' : inLanguage<string>(step, language) ?? '';
+        if (stage.teamToMove) {
+          giveUp = (
+            <Button size="small" variant="outlined" color="error" onClick={() => setGiveUpOpen(true)}
+              startIcon={<FlagOutlinedIcon fontSize="small" />}
+              sx={{ flexShrink: 0, textTransform: 'none', fontWeight: 600, borderRadius: '8px', backgroundColor: '#fff' }}>
+              {t('strategy.giveUp.button')}
+            </Button>
+          );
+        }
         break;
       }
     }
     const role = chosenRole(stage, G, [firstRole, secondRole]);
+    // Only while there is a game of the team's to give up: the dialog closes
+    // by itself if the bot's move or the clock ends it first.
+    const giveUpDialog: ConfirmDialogInterface | null = giveUpOpen && giveUp !== null
+      ? giveUpConfirmation(t, G, moves) : null;
+    // Ending the whole round (#111) is asked for from the header's rounds
+    // menu, on the team's turn while the match runs.
+    const offerEndRound = useCallback(() => setEndRoundOpen(true), []);
+    useOfferEndRound(teamToMove ? offerEndRound : null);
+    const endRoundDialog: ConfirmDialogInterface | null = endRoundOpen && teamToMove
+      ? endRoundConfirmation(t, G, moves, team?.competition?.relay === undefined ? 'none' : team.relayMatch.state) : null;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
 
@@ -358,7 +387,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
                 shrink it, as a grid item, to its content. */}
             <Box sx={{ minWidth: 0 }}>
               <GameArea mode={difficulty} liveNumber={G.numberOfTries} role={role}
-                status={status} tone={tone} sub={sub} subWide={subWide} subAction={subAction} actions={actions} intro={intro}
+                status={status} tone={tone} sub={sub} subWide={subWide} subAction={subAction} actions={actions} intro={intro} giveUp={giveUp}
                 info={<InfoButton startVaries={startVaries} />} infoBeside={infoBeside}>
                 <BoardArea state={boardState(stage)}>{board(props)}</BoardArea>
               </GameArea>
@@ -376,6 +405,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
             </Stack>}
           </Box>
         </Stack>
+        <ConfirmDialog confirmDialog={giveUpDialog} setConfirmDialog={(dialog) => setGiveUpOpen(dialog !== null)} />
+        <ConfirmDialog confirmDialog={endRoundDialog} setConfirmDialog={(dialog) => setEndRoundOpen(dialog !== null)} />
         {/* No onClose: neither a click beside it nor Esc stands for having
             read the rules. Once the time is up there is nothing left to read
             them for, and the end dialog must not sit under it. Where it flies
@@ -505,8 +536,8 @@ function SeriesCell(props: { kind: LiveGameResult | 'next', n: number, scored?: 
 /// board does not move from one state to the next.
 function GameArea(props: {
   mode: Difficulty | null, liveNumber: number, role: string | null, status: string, tone: Tone, sub: string,
-  subWide: string | null, subAction: ReactNode, actions: ReactNode, intro: ReactNode, info: ReactNode, infoBeside: boolean,
-  children: ReactNode,
+  subWide: string | null, subAction: ReactNode, actions: ReactNode, intro: ReactNode, giveUp: ReactNode, info: ReactNode,
+  infoBeside: boolean, children: ReactNode,
 }) {
   const { t } = useTranslation();
   const { mode, tone } = props;
@@ -552,17 +583,19 @@ function GameArea(props: {
           {/* During play the row is free: the role the team chose sits on the
               board's left edge, as its caption, for a team that looks at the
               board and wonders which side is theirs. Muted: a reminder, not
-              something to look at. */}
-          {props.role !== null && <Box sx={{
+              something to look at. Giving up the game is on the right edge,
+              away from the board's own controls. */}
+          {(props.role !== null || props.giveUp !== null) && <Box sx={{
             position: 'absolute', inset: 0, marginX: 'auto', maxWidth: BOARD_MAX_WIDTH,
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start', paddingBottom: '6px',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', paddingBottom: '6px',
           }}>
-            <Box component="span" sx={{
-              padding: '0 9px', borderRadius: '999px', whiteSpace: 'nowrap',
+            {props.role !== null ? <Box component="span" sx={{
+              padding: '0 9px', borderRadius: '999px', whiteSpace: 'nowrap', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
               border: `1px solid ${LINE}`, color: MUTED, fontSize: '13px', fontWeight: 500,
             }}>
               {t('strategy.role.you')} <span>{props.role}</span>
-            </Box>
+            </Box> : <span/>}
+            {props.giveUp}
           </Box>}
           {props.infoBeside && <Box sx={{ position: 'absolute', left: INFO_BESIDE_LEFT }}>{props.info}</Box>}
         </Stack>
@@ -586,6 +619,58 @@ function ModeLine(props: { mode: Difficulty | null, liveNumber: number }) {
       {live ? t('strategy.mode.live', { n: props.liveNumber }) : t('strategy.mode.practice')}
     </Stack>
   );
+}
+
+/// What giving up the game being played costs: in a live game, a loss, and
+/// fewer points for the next two wins in a row.
+function giveUpConfirmation(t: TFunction, G: GameStateMixin, moves: StrategyWrapperMoves): ConfirmDialogInterface {
+  const live = G.difficulty === 'live';
+  const now = strategyPoints(G.numberOfLoss);
+  const after = strategyPoints(G.numberOfLoss + 1);
+  return {
+    title: live ? t('strategy.giveUp.titleLive') : t('strategy.giveUp.titlePractice'),
+    facts: live ? [
+      { label: t('strategy.giveUp.thisGame'), value: t('strategy.giveUp.countsAsLoss') },
+      // At the scale's floor a loss costs no points, and saying so would read oddly.
+      { label: t('strategy.giveUp.twoWins'), value: now === after ? pointsText(t, now)
+        : t('strategy.giveUp.pointsDrop', { from: pointsText(t, now), to: pointsText(t, after) }) },
+    ] : undefined,
+    description: live ? t('strategy.giveUp.after') : `${t('strategy.result.practiceNote')} ${t('strategy.giveUp.after')}`,
+    confirmLabel: t('strategy.giveUp.button'),
+    danger: true,
+    confirm: async () => moves.giveUp(),
+    labels: {
+      heading: t('general.confirmNeeded'),
+      cancel: t('strategy.giveUp.cancel'),
+      typeWord: words => words,
+    },
+  };
+}
+
+/// What ending the strategy round now costs: the points the current run could
+/// still earn, as the match has none yet. `relay` is the relay's state, or
+/// `none` in a competition without one: the round after this, if any.
+function endRoundConfirmation(t: TFunction, G: GameStateMixin, moves: StrategyWrapperMoves, relay: MatchStatus['state'] | 'none'): ConfirmDialogInterface {
+  const next = relay === 'NOT STARTED' ? t('strategy.endRound.relayLeft')
+    : relay === 'FINISHED' ? t('strategy.endRound.lastRound')
+    : null;
+  return {
+    title: relay === 'NOT STARTED' ? t('strategy.endRound.titleRelayLeft') : t('strategy.endRound.title'),
+    facts: [
+      { label: t('strategy.endRound.keepPlaying'), value: t('strategy.endRound.twoWins', { points: pointsText(t, strategyPoints(G.numberOfLoss)) }) },
+      { label: t('strategy.endRound.endNow'), value: pointsText(t, 0) },
+    ],
+    description: next === null ? t('strategy.endRound.noReturn') : `${next} ${t('strategy.endRound.noReturn')}`,
+    confirmLabel: t('strategy.endRound.confirm'),
+    danger: true,
+    requiredWords: [t('strategy.endRound.word')],
+    confirm: async () => moves.abandonMatch(),
+    labels: {
+      heading: t('general.confirmNeeded'),
+      cancel: t('strategy.endRound.cancel'),
+      typeWord: words => t('strategy.endRound.typeWord', { words }),
+    },
+  };
 }
 
 /// The bot pauses on purpose before each move (400 ms, botwrapper.ts in the
@@ -662,7 +747,7 @@ function InfoButton(props: { startVaries: boolean }) {
     <Stack sx={{ gap: '6px', fontSize: '14px', lineHeight: 1.45, padding: '4px' }}>
       <span><b>{t('strategy.info.liveLabel')}</b> {t('strategy.info.liveText')}</span>
       <span><b>{t('strategy.info.practiceLabel')}</b> {props.startVaries ? t('strategy.info.practiceTextVaries') : t('strategy.info.practiceText')}</span>
-      <span>{t('strategy.info.noAbandon')}</span>
+      <span>{t('strategy.info.giveUp')}</span>
     </Stack>
   );
   return (

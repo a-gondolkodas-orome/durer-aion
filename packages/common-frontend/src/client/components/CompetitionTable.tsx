@@ -8,6 +8,7 @@ import { useSnackbar } from 'notistack';
 import { competitionName, editionSchoolYear } from 'schemas';
 import type { CompetitionMetadata, StartWindow } from 'schemas';
 import { CompetitionSummaryDto } from '../dto/TeamStateDto';
+import { FROM_COMPETITION_PARAM } from './admin-params';
 import { windowText } from '../utils/window-time';
 
 export const ROUND_NAMES: Record<Extract<CompetitionMetadata, { kind: 'competition' }>['round'], string> = {
@@ -67,6 +68,18 @@ export const SAVED_PARAM = 'mentve';
 /// Where a competition's edit page is (CompetitionEditPage.tsx).
 export function competitionEditPath(competitionId: string): string {
   return `${competitionPath(competitionId)}/edit`;
+}
+
+/// The part of an id people recognise a problem by: its slug.
+export function slug(id: string): string {
+  return id.split('--').slice(1).join('--') || id;
+}
+
+/// Where a problem's editor is (ProblemEditPage.tsx), opened from a competition's page or not.
+export function problemEditPath(problemId: string, competitionId?: string): string {
+  const path = `/admin/feladat/${encodeURIComponent(problemId)}`;
+  return competitionId === undefined ? path
+    : `${path}?${new URLSearchParams({ [FROM_COMPETITION_PARAM]: competitionId }).toString()}`;
 }
 
 /// An eye icon opening the competition's own page.

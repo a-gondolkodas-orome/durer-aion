@@ -11,6 +11,8 @@ export interface ExerciseTaskProps {
   pictureUrl: string | null;
   /** The heading's language where it is not the page's, as on the admin page. */
   language?: string;
+  /** Whether the picture loaded, for the problem editor to warn of one that does not. */
+  onPictureLoad?: (loaded: boolean) => void;
 }
 
 // Both sizes stretch small figures, at the cost of some blur: in the panel to
@@ -33,7 +35,8 @@ export const ExerciseTask: React.FunctionComponent<ExerciseTaskProps> = (props: 
     {props.pictureUrl && <>
       <ButtonBase onClick={() => setEnlarged(true)} disableRipple
         sx={{ display: 'block', width: '100%', marginTop: '30px', '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main' } }}>
-        <img src={props.pictureUrl} style={fittedImage} alt={t('relay.taskImage')}/>
+        <img src={props.pictureUrl} style={fittedImage} alt={t('relay.taskImage')}
+          onLoad={() => props.onPictureLoad?.(true)} onError={() => props.onPictureLoad?.(false)}/>
       </ButtonBase>
       <Typography variant="caption" sx={{ textAlign: 'center', mt: 1 }}>{t('relay.zoomImage')}</Typography>
       {/* A click anywhere, Esc, or the close button shrinks it back. It covers the

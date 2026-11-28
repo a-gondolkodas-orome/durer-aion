@@ -45,3 +45,22 @@ test('on a phone, shows only the short name and says the rest to a screen reader
   const badge = screen.getByRole('button', { name: 'Fordulók: Váltó, még hátra' });
   expect(badge).toHaveTextContent(/^Váltó$/);
 });
+
+// #111: the strategy round may be ended from here, while its board offers it.
+test('offers to end the round only when asked to, and closes as it does', () => {
+  const view: RoundsView = { current: { type: 'strategy', status: inProgress }, other: { type: 'relay', status: { state: 'NOT STARTED' } } };
+  const onEndRound = vi.fn();
+  render(<RoundsBadge view={view} onEndRound={onEndRound}/>);
+
+  fireEvent.click(within(open()).getByRole('button', { name: 'Stratégiás játék befejezése…' }));
+
+  expect(onEndRound).toHaveBeenCalledOnce();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+
+test('offers no end of the round by default', () => {
+  const view: RoundsView = { current: { type: 'strategy', status: inProgress }, other: { type: 'relay', status: { state: 'NOT STARTED' } } };
+  render(<RoundsBadge view={view}/>);
+
+  expect(within(open()).queryByRole('button')).not.toBeInTheDocument();
+});
