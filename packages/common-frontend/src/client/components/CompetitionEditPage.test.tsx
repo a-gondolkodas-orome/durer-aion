@@ -251,8 +251,8 @@ describe('composing the relay', () => {
     renderPage();
     await screen.findByRole('heading', { name: '21 online C' });
     click('+ Új feladat');
-    // Starts from the points of the one before it.
-    expect(field('Pont, 3. feladat')).toHaveValue('4');
+    // At 3, whatever the one before it is worth.
+    expect(field('Pont, 3. feladat')).toHaveValue('3');
     type('Név az azonosítóban', 'uj-feladat');
     type('Válasz', '42');
     type('Szöveg (LaTeX), magyar', 'Mennyi $6 \\cdot 7$?');
@@ -264,7 +264,7 @@ describe('composing the relay', () => {
     const id = change?.problems[0]?.id ?? '';
     expect(id).toMatch(/^[0-9a-z]{10}--uj-feladat$/);
     expect(change?.problems).toEqual([{ id, answer: 42, content: { hu: { problemText: 'Mennyi $6 \\cdot 7$?' } } }]);
-    expect(change?.competition.relay?.problems.at(-1)).toEqual({ problemId: id, points: 4 });
+    expect(change?.competition.relay?.problems.at(-1)).toEqual({ problemId: id, points: 3 });
 
     fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
     await waitFor(() => { expect(assign).toHaveBeenCalled(); });

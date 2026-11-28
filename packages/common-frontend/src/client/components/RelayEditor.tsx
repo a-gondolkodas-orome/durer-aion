@@ -25,8 +25,8 @@ import { type EntryErrors, type RelayEntryForm, copyEntry, entryProblemId, move,
 // using it; a problem this relay brings is written out here, and saved with
 // the competition.
 
-/** What a problem picked from those already held starts at. */
-const PICKED_POINTS = '3';
+/** What a problem added to the relay starts at, new or picked. */
+const DEFAULT_POINTS = '3';
 
 export type RelayEntriesUpdate = (change: (entries: RelayEntryForm[]) => RelayEntryForm[]) => void;
 
@@ -51,9 +51,8 @@ export function RelayEditor(props: {
   const replace = (key: string, change: (entry: RelayEntryForm) => RelayEntryForm) => {
     setEntries(current => current.map(each => each.key === key ? change(each) : each));
   };
-  const nextPoints = entries.at(-1)?.points ?? '1';
   const add = () => {
-    const entry = newEntry(nextPoints);
+    const entry = newEntry(DEFAULT_POINTS);
     setEntries(current => [...current, entry]);
     toggle(entry.key, true);
   };
@@ -144,9 +143,9 @@ export function RelayEditor(props: {
         <Button variant="outlined" onClick={() => { setPicking(true); }}>+ Meglévő feladat</Button>
       </Stack>}
       <ProblemPicker open={picking} onClose={() => { setPicking(false); }} language={language} competitionId={data.id}
-        inRelay={new Set(entries.map(entryProblemId))} serial={entries.length + 1} points={Number(PICKED_POINTS)}
+        inRelay={new Set(entries.map(entryProblemId))} serial={entries.length + 1} points={Number(DEFAULT_POINTS)}
         onAdd={(picked) => {
-          setEntries(current => [...current, ...pickedEntries(picked, PICKED_POINTS)]);
+          setEntries(current => [...current, ...pickedEntries(picked, DEFAULT_POINTS)]);
           setPicking(false);
         }}/>
     </Stack>
