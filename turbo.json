@@ -12,6 +12,10 @@
   ],
   "globalEnv": [
     "BOT_CREDENTIALS",
+    // turbo hands a task only the variables listed here, so without it the
+    // dev stack's server, which turbo runs, would never see a test drive's
+    // `stall` (socketio_botmoves.ts).
+    "BOT_FAILURE",
     "ADMIN_CREDENTIALS",
     "DATABASE_URL",
     "DEV_SERVER_HOST",
