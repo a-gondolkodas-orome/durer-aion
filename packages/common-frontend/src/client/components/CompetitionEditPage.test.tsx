@@ -142,6 +142,20 @@ test('fills a window field with the current time', async () => {
   expect((field('Indítás ettől') as HTMLInputElement).value).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d[+-]\d\d:\d\d$/);
 });
 
+// A regression: the review read an unparseable window time out as a date,
+// which threw, and the page fell to the error boundary.
+test('reviews a window the server will refuse, a close with no start, without breaking', async () => {
+  vi.spyOn(repo, 'saveCompetition').mockResolvedValue({ ...clean, errors: ['verseny: a kezdete hibás'] });
+  renderPage();
+  await screen.findByRole('heading', { name: '21 online C' });
+  fireEvent.click(screen.getByRole('button', { name: 'Indítás eddig: most' }));
+  next();
+
+  const rules = await screen.findByRole('region', { name: 'Amit a csapat a szabályok oldalon lát' });
+  expect(within(rules).getByText(/^hibás:/)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Mentés' })).toBeDisabled();
+});
+
 test('stays on the form, naming the field, while a number field holds no number', async () => {
   renderPage();
   await screen.findByRole('heading', { name: '21 online C' });

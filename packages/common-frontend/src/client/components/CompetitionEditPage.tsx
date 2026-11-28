@@ -6,8 +6,8 @@ import { Stack } from '@mui/system';
 import { useSnackbar } from 'notistack';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
-import type { CompetitionConfig, Language } from 'schemas';
-import { LANGUAGES, ROUNDS, editionSchoolYear } from 'schemas';
+import type { CompetitionConfig, Language, StartWindow } from 'schemas';
+import { LANGUAGES, ROUNDS, editionSchoolYear, validateStartWindow } from 'schemas';
 import type { AdminCompetitionDto, CompetitionWriteResultDto } from '../dto/TeamStateDto';
 import { useCompetition, useSaveCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
@@ -329,6 +329,14 @@ function SettingsStep(props: {
   );
 }
 
+/// The window as the rules page reads it out, or, where it breaks the rules,
+/// as typed: a time that does not parse cannot be read out, and the review's
+/// errors say what is wrong with it.
+function startText(window: StartWindow | undefined): string {
+  if (window === undefined || validateStartWindow(window).length === 0) return windowText(window ?? null);
+  return `hibás: ${window.opensAt || '(nincs kezdete)'}${window.closesAt === undefined ? '' : ` – ${window.closesAt}`}`;
+}
+
 /// What the rules page and the end of the round tell a team, line by line.
 export function rulesLines(competition: CompetitionConfig): [string, string][] {
   const { relay, strategy } = competition;
@@ -337,7 +345,7 @@ export function rulesLines(competition: CompetitionConfig): [string, string][] {
   const finish = competition.finishMessage;
   return [
     ['Nyelv', languages.length > 1 ? `${languages.join(' és ')}, a csapat választ` : languages.join('')],
-    ['Indítás', windowText(competition.startWindow ?? null)],
+    ['Indítás', startText(competition.startWindow)],
     ['Váltó', relay === undefined ? 'nincs'
       : `${points.length} feladat, ${relay.durationMinutes} perc, összesen ${points.reduce((sum, each) => sum + each, 0)} pont`
         + (points.length > 0 ? ` (${points.join(', ')})` : '')],
