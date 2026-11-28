@@ -4,6 +4,7 @@ import { useTeamState, LoadTeamState } from "../hooks/user-hooks";
 import { Header, PAGE_MAX_WIDTH, STRATEGY_PAGE_MAX_WIDTH } from "./Header";
 import { Layout } from "./Layout";
 import { Login } from "./Login";
+import { FROM_COMPETITION_PARAM } from "./admin-params";
 import { LoginLayout } from "./LoginLayout";
 import { Relay } from "./teamstates/Relay";
 import { Strategy } from "./teamstates/Strategy";
@@ -27,17 +28,20 @@ import { competitionLanguage, loginLanguage, readChosenLanguage, rememberChosenL
 const Admin = React.lazy(() => import("./Admin").then(module => ({ default: module.Admin })));
 
 /// What an admin path opens: `/admin/verseny/<id>` a competition's page,
-/// `/admin/verseny/<id>/edit` its edit page, `/admin/verseny/<id>/feladat/<problemId>`
-/// the editor of one of its problems, `/admin/<teamId>` a team's, anything
-/// else the tabs.
-export function adminPath(pathname: string):
+/// `/admin/verseny/<id>/edit` its edit page, `/admin/feladat/<problemId>` a
+/// problem's editor, with `?verseny=<id>` the competition it was opened from,
+/// `/admin/<teamId>` a team's, anything else the tabs.
+export function adminPath(pathname: string, search = ''):
   { teamId?: string, competitionId?: string, edit?: true, problemId?: string } {
-  const [, , first, second, third, fourth] = pathname.split('/');
+  const [, , first, second, third] = pathname.split('/');
+  if (first === 'feladat') {
+    if (!second) return {};
+    const from = new URLSearchParams(search).get(FROM_COMPETITION_PARAM);
+    return { problemId: decodeURIComponent(second), ...(from && { competitionId: from }) };
+  }
   if (first === 'verseny') {
     if (!second) return {};
-    const competitionId = decodeURIComponent(second);
-    if (third === 'feladat' && fourth) return { competitionId, problemId: decodeURIComponent(fourth) };
-    return { competitionId, ...(third === 'edit' && { edit: true }) };
+    return { competitionId: decodeURIComponent(second), ...(third === 'edit' && { edit: true }) };
   }
   return first ? { teamId: first } : {};
 }
@@ -112,7 +116,7 @@ export function Main(props: { gitCommitHash: string }) {
               or a live, playable board for one still holding a team's session
               from testing. */}
           {admin ? <React.Suspense fallback={<Loading/>}>
-            <Admin {...adminPath(window.location.pathname)}/>
+            <Admin {...adminPath(window.location.pathname, window.location.search)}/>
           </React.Suspense> : <>
             {/* `undefined`, not yet known, renders nothing: see the store */}
             {teamState === null && <LoginLayout><Login /></LoginLayout>}

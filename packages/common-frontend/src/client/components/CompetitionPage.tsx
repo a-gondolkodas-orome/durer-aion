@@ -5,8 +5,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import Code from '@mui/icons-material/Code';
 import Storage from '@mui/icons-material/Storage';
 import { Stack } from '@mui/system';
-import { useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { editionSchoolYear, localizeProblem } from 'schemas';
 import type { CompetitionConfig, Language, Problem } from 'schemas';
@@ -15,7 +14,8 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle, problemEditPath, slug } from './CompetitionTable';
+import { useSavedNotice } from './EditPageParts';
+import { ROUND_NAMES, competitionEditPath, competitionPath, competitionTitle, problemEditPath, slug } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
@@ -45,15 +45,7 @@ function describeUse(use: ProblemUseDto): string {
 }
 
 export function CompetitionPage(props: { competitionId: string }) {
-  const { enqueueSnackbar } = useSnackbar();
-  // Once, and the parameter dropped, so a reload does not say it again.
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has(SAVED_PARAM)) return;
-    enqueueSnackbar('Mentve', { variant: 'success' });
-    url.searchParams.delete(SAVED_PARAM);
-    window.history.replaceState(window.history.state, '', url);
-  }, [enqueueSnackbar]);
+  useSavedNotice();
   const errorMessage = useErrorMessage();
   const getCompetition = useCompetition();
   const { data, error } = useSWR(['team/admin/competitions', props.competitionId],
@@ -220,7 +212,7 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
 function ProblemEditLink(props: { competitionId: string, problemId: string, storedIn: AdminCompetitionDto['storedIn'] }) {
   const inCode = props.storedIn === 'code';
   return (
-    <IconButton size="small" href={problemEditPath(props.competitionId, props.problemId)}
+    <IconButton size="small" href={problemEditPath(props.problemId, props.competitionId)}
       aria-label={`${inCode ? 'Megnyitás' : 'Szerkesztés'}: ${slug(props.problemId)}`}
       title={inCode ? 'Megnyitás (kódban tárolt, nem szerkeszthető)' : 'Szerkesztés'}>
       {inCode ? <Visibility fontSize="inherit"/> : <Edit fontSize="inherit"/>}

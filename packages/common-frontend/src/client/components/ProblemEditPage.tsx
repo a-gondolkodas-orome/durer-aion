@@ -18,13 +18,15 @@ import {
   problemFromForm,
 } from './problem-form';
 
-// A problem's edit page, opened from a competition's page and going back to
-// it: each language's LaTeX beside what a team sees, then the server's
-// review, then Save. A problem held in code is shown read-only.
+// A problem's edit page: each language's LaTeX beside what a team sees, then
+// the server's review, then Save. Opened from a competition's page, it goes
+// back there and previews the problem at its place in that relay; otherwise
+// at its first use. A problem held in code is shown read-only.
 
 const STEPS = ['Feladat', 'Ellenőrzés és mentés'];
+const COMPETITIONS_TAB = '/admin?tab=versenyek';
 
-export function ProblemEditPage(props: { competitionId: string, problemId: string }) {
+export function ProblemEditPage(props: { competitionId?: string, problemId: string }) {
   const errorMessage = useErrorMessage();
   const getProblem = useProblem();
   const { data, error } = useSWR(['team/admin/problems', props.problemId],
@@ -42,7 +44,7 @@ function describeUse(use: ProblemUseDto): string {
   return `${competitionTitle({ id: use.competitionId, metadata: use.metadata })} · ${use.position}. feladat · ${use.points} pont`;
 }
 
-function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competitionId: string }) {
+function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competitionId?: string }) {
   const errorMessage = useErrorMessage();
   const saveProblem = useSaveProblem();
   const { enqueueSnackbar } = useSnackbar();
@@ -56,8 +58,8 @@ function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competi
   const [loads, setLoads] = useState<Record<string, boolean>>({});
   const dirty = !saved && JSON.stringify(form) !== JSON.stringify(initial);
   const leaving = useLeaveWarning(dirty);
-  const back = competitionPath(competitionId);
-  const opener = data.uses.find(use => use.competitionId === competitionId);
+  const back = competitionId === undefined ? COMPETITIONS_TAB : competitionPath(competitionId);
+  const opener = data.uses.find(use => use.competitionId === competitionId) ?? data.uses[0];
   const broken = (url: string) => url !== '' && loads[url] === false;
   const brokenImages = LANGUAGES.flatMap((language) => {
     const url = form.content[language].imageUrl.trim();
@@ -98,16 +100,16 @@ function ProblemEditor({ data, competitionId }: { data: AdminProblemDto, competi
     }
     setSaved(true);
     leaving.current = true;
-    window.location.assign(`${back}?${SAVED_PARAM}=1`);
+    window.location.assign(`${back}${back.includes('?') ? '&' : '?'}${SAVED_PARAM}=1`);
   };
 
-  const title = opener === undefined ? competitionId
-    : competitionTitle({ id: opener.competitionId, metadata: opener.metadata });
+  const from = data.uses.find(use => use.competitionId === competitionId);
+  const title = from === undefined ? competitionId : competitionTitle({ id: from.competitionId, metadata: from.metadata });
   return <>
     <Stack sx={{ flexDirection: 'row', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
       <Box component="nav" aria-label="Útvonal" sx={{ fontSize: '14px', color: MUTED }}>
-        <Link href="/admin?tab=versenyek">Versenyek</Link>
-        {' › '}<Link href={back}>{title}</Link> › {slug(data.problem.id)}
+        <Link href={COMPETITIONS_TAB}>Versenyek</Link>
+        {competitionId !== undefined && <>{' › '}<Link href={back}>{title}</Link></>} › {slug(data.problem.id)}
       </Box>
       {dirty && <Box sx={{ marginLeft: 'auto', fontSize: '13px', color: WARNING }}>● Mentetlen változások</Box>}
     </Stack>

@@ -51,13 +51,13 @@ afterEach(() => {
 
 const outerTheme = { palette: { primary: { main: '#11009E', contrastText: '#fff' } } };
 
-const renderPage = async () => {
+const renderPage = async (competitionId: string | null = COMPETITION) => {
   render(
     <ThemeProvider theme={outerTheme}><ClientRepoProvider value={repo}>
       <AdminRepoProvider value={repo}>
         <SWRConfig value={{ provider: () => new Map() }}>
           <Layout>
-            <ProblemEditPage competitionId={COMPETITION} problemId={ID}/>
+            <ProblemEditPage competitionId={competitionId ?? undefined} problemId={ID}/>
           </Layout>
         </SWRConfig>
       </AdminRepoProvider>
@@ -180,4 +180,14 @@ test('shows a problem held in code read-only, with nothing to save', async () =>
   expect(screen.getByRole('note')).toHaveTextContent('csak telepítéssel változik');
   for (const name of ['Válasz', 'Szöveg (LaTeX), magyar', 'Kép címe, angol (nem kötelező)']) expect(field(name)).toBeDisabled();
   expect(screen.queryByRole('button', { name: 'Tovább: ellenőrzés' })).not.toBeInTheDocument();
+});
+
+test('opened from no competition, goes back to the competitions tab', async () => {
+  await renderPage(null);
+  expect(screen.queryByRole('link', { name: '21 online C' })).not.toBeInTheDocument();
+  type('Válasz', '28');
+  next();
+  await screen.findByRole('region', { name: 'Változások' });
+  fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+  await waitFor(() => { expect(assign).toHaveBeenCalledWith('/admin?tab=versenyek&mentve=1'); });
 });

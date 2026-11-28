@@ -11,6 +11,7 @@ import { CompetitionPageLink, CompetitionTable, competitionTitle } from './Compe
 import { CompetitionPage } from './CompetitionPage';
 import { CompetitionEditPage } from './CompetitionEditPage';
 import { ProblemEditPage } from './ProblemEditPage';
+import { useSavedNotice } from './EditPageParts';
 import Form from './form';
 import { ErrorMessage, Field } from 'formik';
 import { useTheme } from '@mui/material/styles';
@@ -86,8 +87,8 @@ const panelProps = (panel: AdminTab, open: AdminTab) => ({
 });
 
 export function Admin(props: { teamId?: string, competitionId?: string, edit?: true, problemId?: string }) {
-  if (props.competitionId === undefined) return <AdminTabs teamId={props.teamId}/>;
   if (props.problemId !== undefined) return <ProblemEditPage competitionId={props.competitionId} problemId={props.problemId}/>;
+  if (props.competitionId === undefined) return <AdminTabs teamId={props.teamId}/>;
   return props.edit ? <CompetitionEditPage competitionId={props.competitionId}/>
     : <CompetitionPage competitionId={props.competitionId}/>;
 }
@@ -98,6 +99,7 @@ function AdminTabs(props: { teamId?: string }) {
   const getAll = useAll();
   const addMinutes = useAddMinutes();
   const { enqueueSnackbar } = useSnackbar();
+  useSavedNotice();
   const { data, mutate } = useSWR("users/all", getAll)
   const getCompetitions = useCompetitions();
   const { data: competitions, mutate: refetchCompetitions } = useSWR('team/admin/competitions', getCompetitions);

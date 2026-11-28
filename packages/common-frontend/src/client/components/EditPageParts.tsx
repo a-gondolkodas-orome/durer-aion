@@ -1,6 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { Stack } from '@mui/system';
+import { useSnackbar } from 'notistack';
 import { type ReactNode, useEffect, useRef } from 'react';
+import { SAVED_PARAM } from './CompetitionTable';
 import { BORDER, DANGER, DANGER_BORDER, MUTED } from './adminStyles';
 
 // What the admin page's edit pages share.
@@ -19,6 +21,19 @@ export function useLeaveWarning(dirty: boolean) {
     return () => { window.removeEventListener('beforeunload', warn); };
   }, [dirty]);
   return leaving;
+}
+
+/** Says "Mentve" where an edit page's save left the page for, once: the
+ *  parameter is dropped, so a reload does not say it again. */
+export function useSavedNotice() {
+  const { enqueueSnackbar } = useSnackbar();
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(SAVED_PARAM)) return;
+    enqueueSnackbar('Mentve', { variant: 'success' });
+    url.searchParams.delete(SAVED_PARAM);
+    window.history.replaceState(window.history.state, '', url);
+  }, [enqueueSnackbar]);
 }
 
 export function Steps({ names, step }: { names: readonly string[], step: number }) {
