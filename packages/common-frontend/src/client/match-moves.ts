@@ -23,11 +23,14 @@ export interface StrategyWrapperMoves extends MatchTimeMoves {
   chooseRole: (firstPlayer: PlayerIDType) => void;
   newStartingPosition: () => void;
   giveUp: () => void;
+  abandonMatch: () => void;
 }
 
 // One key per move, so the compiler holds each list to its interface.
 const RELAY_MOVES = { submitAnswer: true, startGame: true, getTime: true } satisfies Record<keyof RelayMoves, true>;
-const STRATEGY_WRAPPER_MOVES = { chooseNewGameType: true, chooseRole: true, newStartingPosition: true, giveUp: true, getTime: true } satisfies Record<keyof StrategyWrapperMoves, true>;
+const STRATEGY_WRAPPER_MOVES = {
+  chooseNewGameType: true, chooseRole: true, newStartingPosition: true, giveUp: true, abandonMatch: true, getTime: true,
+} satisfies Record<keyof StrategyWrapperMoves, true>;
 
 // boardgame.io types `moves` as a record of `any` functions, so a renamed move
 // would surface as a call to `undefined` mid-round. Checked here, it fails as

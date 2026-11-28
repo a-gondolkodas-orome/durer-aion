@@ -8,10 +8,11 @@ import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Countdown, ENDED_CLOCK, OfflineClockNote, useMsRemaining } from "../client/components/Countdown";
 import { EndDialog } from "../client/components/EndCard";
 import { ConfirmDialog } from "../client/components/ConfirmDialog";
+import { useOfferEndRound } from "../client/components/end-round";
 import type { ConfirmDialogInterface } from "../client/components/ConfirmDialog";
 import { StrategyEndTable } from "../client/components/StrategyEndTable";
 import { LIVE_COLOUR, LiveGameCell, LiveGameRun } from "../client/components/ResultTables";
@@ -21,7 +22,7 @@ import { asStrategyWrapperMoves } from "../client/match-moves";
 import type { StrategyWrapperMoves } from "../client/match-moves";
 import { GUESSER_PLAYER, JUDGE_PLAYER, STRATEGY_POINTS_BY_LOSSES, strategyPoints } from "game";
 import type { Difficulty, GamePresentation, GameStateMixin } from "game";
-import type { LiveGameResult } from "schemas";
+import type { LiveGameResult, MatchStatus } from "schemas";
 import type { BoardProps } from "boardgame.io/react";
 import type { AnimationEvent, MouseEvent, ReactNode } from "react";
 import { useTheme } from "@mui/material/styles";
@@ -118,6 +119,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     const [rulesRead, setRulesRead] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
     const [giveUpOpen, setGiveUpOpen] = useState(false);
+    const [endRoundOpen, setEndRoundOpen] = useState(false);
     const rulesColumns = rulesBeside ? `minmax(${GAME_COLUMN_WIDTH}px, 1fr) minmax(${RULES_COLUMN_WIDTH}px, ${RULES_COLUMN_MAX_WIDTH}px)`
       : wide && rulesOpen ? `minmax(0, 1fr) ${RULES_COLUMN_WIDTH}px`
       : null;
@@ -205,6 +207,8 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
         if (stage.by === 'liveWon') {
           status = t('strategy.result.liveWon');
           tone = 'won';
+        } else if (stage.by === 'abandoned') {
+          status = t('strategy.result.abandoned');
         } else {
           status = t('strategy.result.timeUp');
           sub = stage.unfinished ? t('strategy.result.unfinished') : '';
@@ -293,6 +297,12 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
     // by itself if the bot's move or the clock ends it first.
     const giveUpDialog: ConfirmDialogInterface | null = giveUpOpen && giveUp !== null
       ? giveUpConfirmation(t, G, moves) : null;
+    // Ending the whole round (#111) is asked for from the header's rounds
+    // menu, on the team's turn while the match runs.
+    const offerEndRound = useCallback(() => setEndRoundOpen(true), []);
+    useOfferEndRound(teamToMove ? offerEndRound : null);
+    const endRoundDialog: ConfirmDialogInterface | null = endRoundOpen && teamToMove
+      ? endRoundConfirmation(t, G, moves, team?.competition?.relay === undefined ? 'none' : team.relayMatch.state) : null;
     // On a phone the two buttons fill the row, so the ⓘ stays in the corner.
     infoBeside = infoBeside && wide;
 
@@ -389,6 +399,7 @@ export function boardWrapper<G>(board: StrategyBoard<G>, description: StrategyDe
           </Box>
         </Stack>
         <ConfirmDialog confirmDialog={giveUpDialog} setConfirmDialog={(dialog) => setGiveUpOpen(dialog !== null)} />
+        <ConfirmDialog confirmDialog={endRoundDialog} setConfirmDialog={(dialog) => setEndRoundOpen(dialog !== null)} />
         {/* No onClose: neither a click beside it nor Esc stands for having
             read the rules. Once the time is up there is nothing left to read
             them for, and the end dialog must not sit under it. Where it flies
@@ -625,6 +636,32 @@ function giveUpConfirmation(t: TFunction, G: GameStateMixin, moves: StrategyWrap
       heading: t('general.confirmNeeded'),
       cancel: t('strategy.giveUp.cancel'),
       typeWord: words => words,
+    },
+  };
+}
+
+/// What ending the strategy round now costs: the points the current run could
+/// still earn, as the match has none yet. `relay` is the relay's state, or
+/// `none` in a competition without one: the round after this, if any.
+function endRoundConfirmation(t: TFunction, G: GameStateMixin, moves: StrategyWrapperMoves, relay: MatchStatus['state'] | 'none'): ConfirmDialogInterface {
+  const next = relay === 'NOT STARTED' ? t('strategy.endRound.relayLeft')
+    : relay === 'FINISHED' ? t('strategy.endRound.lastRound')
+    : null;
+  return {
+    title: relay === 'NOT STARTED' ? t('strategy.endRound.titleRelayLeft') : t('strategy.endRound.title'),
+    facts: [
+      { label: t('strategy.endRound.keepPlaying'), value: t('strategy.endRound.twoWins', { points: pointsText(t, strategyPoints(G.numberOfLoss)) }) },
+      { label: t('strategy.endRound.endNow'), value: pointsText(t, 0) },
+    ],
+    description: next === null ? t('strategy.endRound.noReturn') : `${next} ${t('strategy.endRound.noReturn')}`,
+    confirmLabel: t('strategy.endRound.confirm'),
+    danger: true,
+    requiredWords: [t('strategy.endRound.word')],
+    confirm: async () => moves.abandonMatch(),
+    labels: {
+      heading: t('general.confirmNeeded'),
+      cancel: t('strategy.endRound.cancel'),
+      typeWord: words => t('strategy.endRound.typeWord', { words }),
     },
   };
 }

@@ -198,7 +198,8 @@
       "strategyLeft": "Ha itt végeztetek, a stratégiás játékot a kezdőlapról indíthatjátok.",
       "last": "Ez az utolsó fordulótok. A végeredmény a két forduló pontjainak összege.",
       "total": "A végeredmény a két forduló pontjainak összege."
-    }
+    },
+    "endStrategy": "Stratégiás játék befejezése…"
   },
   "strategy": {
     "endTable": {
@@ -265,7 +266,8 @@
       "practiceNoteStart": "Ez nem számít a pontozásba, és az éles játszmák kezdőállása más lehet.",
       "practiceWon": "Nyertetek a próbajátékban.",
       "timeUp": "Lejárt az idő.",
-      "unfinished": "Ez a játszma befejezetlen maradt."
+      "unfinished": "Ez a játszma befejezetlen maradt.",
+      "abandoned": "Befejeztétek a stratégiás játékot."
     },
     "role": {
       "first": "Kezdő",
@@ -311,6 +313,20 @@
       "pointsDrop": "{{from}} helyett {{to}}",
       "after": "Utána rögtön új játszmát kezdhettek. Az óra közben megy tovább.",
       "cancel": "Mégse, játszunk tovább"
+    },
+    "endRound": {
+      "title": "Befejezitek a stratégiás játékot?",
+      "titleRelayLeft": "Befejezitek, és mentek a váltóhoz?",
+      "keepPlaying": "Ha játszotok tovább",
+      "twoWins": "két egymás utáni győzelem: {{points}}",
+      "endNow": "Ha most befejezitek",
+      "relayLeft": "Utána a kezdőlapról indíthatjátok a váltót.",
+      "lastRound": "A váltót már befejeztétek, így ezzel a versenyetek véget ér.",
+      "noReturn": "Nem vonható vissza: a stratégiás játékhoz nem lehet visszatérni.",
+      "word": "feladjuk",
+      "typeWord": "A megerősítéshez írjátok be: {{words}}",
+      "confirm": "Befejezzük, 0 ponttal",
+      "cancel": "Játszunk még"
     }
   }
 }

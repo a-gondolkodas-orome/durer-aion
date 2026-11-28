@@ -202,7 +202,8 @@
       "strategyLeft": "When you are done here, start the strategy game from the home page.",
       "last": "This is your last round. Your final score is the sum of both rounds.",
       "total": "Your final score is the sum of both rounds."
-    }
+    },
+    "endStrategy": "End the strategy game…"
   },
   "strategy": {
     "endTable": {
@@ -269,7 +270,8 @@
       "practiceNoteStart": "This does not count towards your score, and live games may start from a different position.",
       "practiceWon": "You won the practice game.",
       "timeUp": "Time is up.",
-      "unfinished": "This game was left unfinished."
+      "unfinished": "This game was left unfinished.",
+      "abandoned": "You ended the strategy game."
     },
     "role": {
       "first": "First",
@@ -315,6 +317,20 @@
       "pointsDrop": "{{to}} instead of {{from}}",
       "after": "You can start a new game straight away. The clock keeps running meanwhile.",
       "cancel": "Cancel, keep playing"
+    },
+    "endRound": {
+      "title": "End the strategy game?",
+      "titleRelayLeft": "End it and move on to the relay?",
+      "keepPlaying": "If you play on",
+      "twoWins": "two wins in a row: {{points}}",
+      "endNow": "If you end it now",
+      "relayLeft": "Then you can start the relay from the home page.",
+      "lastRound": "You have finished the relay already, so this ends your competition.",
+      "noReturn": "This cannot be undone: there is no going back to the strategy game.",
+      "word": "give up",
+      "typeWord": "To confirm, type: {{words}}",
+      "confirm": "End it, with 0 points",
+      "cancel": "Keep playing"
     }
   }
 }

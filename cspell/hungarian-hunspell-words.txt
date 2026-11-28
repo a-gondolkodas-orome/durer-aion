@@ -41,8 +41,10 @@ bedobnunk
 beérkezett
 Befejezem
 befejezi
+befejezitek
 befejezni
 Befejezve
+Befejezzük
 befestett
 befestve
 befogásához
@@ -208,7 +210,7 @@ etetéssel
 evezésre
 exportálása
 Feladjátok
-Feladjuk
+feladjuk
 feladnunk
 feladva
 felbontani

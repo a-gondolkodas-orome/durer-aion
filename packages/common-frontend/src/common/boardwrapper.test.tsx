@@ -9,6 +9,7 @@ import { ClientRepoProvider } from '../client/client-repo-context';
 import { MockClientRepository } from '../client/mock-client-repository';
 import { MockTeamState } from '../client/hooks/mock-user-hooks';
 import { boardWrapper } from './boardwrapper';
+import { EndRoundProvider, useEndRoundAction } from '../client/components/end-round';
 import type { StrategyBoardProps, StrategyDescription } from './boardwrapper';
 
 const i18n = vi.hoisted(() => ({ language: 'hu' }));
@@ -50,7 +51,7 @@ function boardElement(ctx: Partial<Ctx>, game: Partial<GameStateMixin> & Record<
     liveResults: [],
     ...game,
   };
-  const moves = { getTime: vi.fn(), chooseNewGameType: vi.fn(), chooseRole: vi.fn(), newStartingPosition: vi.fn(), giveUp: vi.fn() };
+  const moves = { getTime: vi.fn(), chooseNewGameType: vi.fn(), chooseRole: vi.fn(), newStartingPosition: vi.fn(), giveUp: vi.fn(), abandonMatch: vi.fn() };
   const props = {
     G,
     ctx: { numPlayers: 2, playOrder: ['0', '1'], playOrderPos: 0, activePlayers: null, turn: 1, ...ctx },
@@ -571,5 +572,58 @@ describe('giving up a game (#595)', () => {
     rerender(boardElement({ phase: 'play', currentPlayer: JUDGE_PLAYER }).element);
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+});
+
+describe('ending the strategy round (#111)', () => {
+  // Stands for the header's rounds menu, which shows the board's offer.
+  function EndRoundButton() {
+    const action = useEndRoundAction();
+    return action && <button onClick={action}>end the round</button>;
+  }
+  function renderWithMenu(ctx: Partial<Ctx>, game: Partial<GameStateMixin> = {}) {
+    const { moves, element } = boardElement(ctx, game);
+    render(<EndRoundProvider>{element}<EndRoundButton/></EndRoundProvider>);
+    return moves;
+  }
+
+  test('is offered on the team\'s turn, and done only once the word is typed', () => {
+    const moves = renderWithMenu(betweenGames, { winner: JUDGE_PLAYER, numberOfLoss: 1 });
+
+    fireEvent.click(button('end the round'));
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('strategy.endRound.title');
+    expect(dialog).toHaveTextContent('strategy.endRound.twoWins');
+    const confirm = within(dialog).getByRole('button', { name: 'strategy.endRound.confirm' });
+    expect(confirm).toBeDisabled();
+    fireEvent.change(within(dialog).getByRole('textbox'), { target: { value: 'strategy.endRound.word' } });
+    fireEvent.click(confirm);
+
+    expect(moves.abandonMatch).toHaveBeenCalledOnce();
+  });
+
+  test('says the relay is next where it is still to play', () => {
+    MockTeamState.mockHomeIn(['hu']);
+    renderWithMenu(betweenGames, { winner: JUDGE_PLAYER });
+
+    fireEvent.click(button('end the round'));
+
+    expect(screen.getByRole('dialog')).toHaveTextContent('strategy.endRound.titleRelayLeft');
+    expect(screen.getByRole('dialog')).toHaveTextContent('strategy.endRound.relayLeft');
+  });
+
+  test.each([
+    ['on the bot\'s turn', { phase: 'play', currentPlayer: JUDGE_PLAYER }, {}],
+    ['once the match is over', betweenGames, { millisecondsRemaining: -6000 }],
+  ])('is not offered %s', (_, ctx, game) => {
+    renderWithMenu(ctx, game);
+
+    expect(screen.queryByRole('button', { name: 'end the round' })).not.toBeInTheDocument();
+  });
+
+  test('says the team ended it once it has', () => {
+    renderBoard({ ...betweenGames, gameover: true }, { winner: JUDGE_PLAYER, abandoned: true });
+    // The board under the result dialog.
+    expect(screen.getByRole('status', { hidden: true })).toHaveTextContent('strategy.result.abandoned');
   });
 });
