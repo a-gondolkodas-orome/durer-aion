@@ -12,6 +12,7 @@ import { Chooser } from "./Chooser";
 import { Loading } from "./Loading";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { SiteFooter } from "./SiteFooter";
+import { EndRoundProvider } from "./end-round";
 import i18next from "i18next";
 import { useClientRepo, useOptionalAdminRepo } from "../client-repo-context";
 import { useTranslation } from "react-i18next";
@@ -73,6 +74,7 @@ export function Main(props: { gitCommitHash: string }) {
 
   return (
     <Layout>
+      <EndRoundProvider>
       {/* The admin pages are no team's: asking `team/me` there only costs a
           request, and its error if the basic-auth prompt outlasts the timeout */}
       {!admin && <LoadTeamState />}
@@ -131,6 +133,7 @@ export function Main(props: { gitCommitHash: string }) {
       {/* The note only on the login page: an admin page loads no tracker, and
           a team mid-round has the clock to read, not this */}
       <SiteFooter gitCommitHash={props.gitCommitHash} trackingNote={!admin && teamState === null}/>
+      </EndRoundProvider>
     </Layout>
   );
 }

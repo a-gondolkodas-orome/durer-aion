@@ -128,6 +128,23 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
                                                  sendStrategyFunction: (_report: StrategyReport<T_SpecificGameState>) => void = () => undefined,
                                                  { durationMinutes = STRATEGY_DEFAULT_DURATION_MINUTES }: StrategyOptions = {},
                                                 ): Game<T_SpecificGameState & GameStateMixin> {
+  /// The team ends its strategy round for good (#111), on its own turn in any
+  /// phase. It keeps the points it has, which are 0: a second win in a row
+  /// would have ended the match already. A game being played is lost with it.
+  /// The play phase's `onEnd` reports the end; outside it, nothing would.
+  function abandonMatch({ G, ctx, playerID, events }: MoveContext) {
+    if (playerID !== GUESSER_PLAYER) {
+      return INVALID_MOVE;
+    };
+    G.abandoned = true;
+    if (ctx.phase === PHASE.play) {
+      recordWinner(G, JUDGE_PLAYER);
+    } else {
+      sendStrategyFunction({ component: "strategy", phase: "end", G: G as T_SpecificGameState & GameStateMixin, ctx });
+    }
+    events.endGame();
+  };
+
   const myGameWrapper: Game<T_SpecificGameState & GameStateMixin, Record<string, unknown>, StrategySetupData | undefined> = {
     setup: (_context, setupData) => {
       const durationMs = (setupData?.durationMinutes ?? durationMinutes) * 60 * 1000;
@@ -158,7 +175,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
     maxPlayers: 2,
     phases: {
       [PHASE.startNewGame]: {
-        moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition }), getTime: clockPoll },
+        moves: { ...timestampMoves({ chooseNewGameType, setStartingPosition, abandonMatch }), getTime: clockPoll },
         next: PHASE.chooseRole,
         // The team picks the difficulty, the bot answers with the position,
         // and the phase ends with that one round of turns. Coming back for
@@ -174,7 +191,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         start: true,
       },
       [PHASE.chooseRole]: {
-        moves: { ...timestampMoves({ chooseRole, newStartingPosition }), getTime: clockPoll },
+        moves: { ...timestampMoves({ chooseRole, newStartingPosition, abandonMatch }), getTime: clockPoll },
         endIf: ({ G }) => { return G.firstPlayer !== null },
         next: PHASE.play,
         turn: {
@@ -182,7 +199,7 @@ export function gameWrapper<T_SpecificGameState>(game: GameType<T_SpecificGameSt
         },
       },
       [PHASE.play]: {
-        moves: { ...timestampMoves({ ...game.moves, giveUp }), getTime: clockPoll },
+        moves: { ...timestampMoves({ ...game.moves, giveUp, abandonMatch }), getTime: clockPoll },
         endIf: ({ G }) => { return G.winner !== null },
         next: PHASE.startNewGame,
         turn: {

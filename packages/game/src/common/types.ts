@@ -42,6 +42,9 @@ export interface GameStateMixin extends GameStateTimer {
   // Every live game in order; gameWrapper's play phase appends to it and says
   // when a game cut off by the time is included. The games never touch it.
   liveResults: LiveGameResult[];
+  // The team ended the match itself (#111). Absent otherwise, and in a match
+  // played before the field existed.
+  abandoned?: true;
 }
 
 // `satisfies` makes this list exhaustive and exact: a key added to the mixin
@@ -59,6 +62,7 @@ const GAME_STATE_MIXIN_KEYS: ReadonlySet<string> = new Set(Object.keys({
   points: true,
   liveResults: true,
   finishedAt: true,
+  abandoned: true,
 } satisfies Record<keyof GameStateMixin, true>));
 
 /// A starting position arrives as a move argument and is merged into `G`, so

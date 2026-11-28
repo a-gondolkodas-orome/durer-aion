@@ -180,6 +180,10 @@ validated each time it is read (`validatingCompetitionSource`). An ESLint rule k
   (`20ocde` does on a second win in a row). On its own turn the team may
   concede the game instead (`giveUp`), which scores it as the bot's win.
 
+On its own turn in any phase, the team may also end the whole match
+(`abandonMatch`): it keeps the points it has, which are 0, and a game it is
+playing counts as lost. The header's rounds menu offers it (`end-round.tsx`).
+
 A `live` sub-game's result is pushed to `G.liveResults`. In the `play` phase, a
 move past the end plus `LATE_MOVE_GRACE_MS` ends the match. What a game folder
 provides is [`README.md`](../README.md) § *Creating a new game*.
