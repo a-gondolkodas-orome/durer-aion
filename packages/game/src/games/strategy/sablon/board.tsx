@@ -2,6 +2,7 @@ import { Box, Button, Stack } from '@mui/material';
 import type { BoardProps } from 'boardgame.io/react';
 import { useBoardKeys } from '../../../common/board-keys';
 import { PHASE } from '../../../common/gamewrapper';
+import { botMovedLast } from '../../../common/types';
 import type { GameStateMixin } from '../../../common/types';
 import { isLegalTake, TAKES } from './game';
 import type { MyGameState } from './game';
@@ -13,7 +14,8 @@ type MyGameProps = BoardProps<MyGameState & GameStateMixin>;
 // wrapper shows beside it says what they mean.
 export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
   const active = isActive && ctx.phase === PHASE.play && !ctx.gameover && G.winner === null;
-  const justTaken = active ? G.lastJudgeTake ?? 0 : 0;
+  // What the bot just took stays beside the pile, faded, with its take.
+  const justTaken = botMovedLast(G, ctx) ? G.lastJudgeTake ?? 0 : 0;
   // Every board is played from the keyboard too: the arrows choose, Enter moves.
   const keys = useBoardKeys({ active });
 
@@ -23,6 +25,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
       <Box aria-hidden sx={{ letterSpacing: 2, textAlign: 'center', wordBreak: 'break-all' }}>
         {'●'.repeat(G.pile)}
         <Box component="span" sx={{ opacity: 0.3 }}>{'○'.repeat(justTaken)}</Box>
+        {justTaken > 0 && <Box component="span" sx={{ ml: 1, color: 'text.secondary', letterSpacing: 0 }}>{`−${justTaken}`}</Box>}
       </Box>
       <Stack direction="row" spacing={1} {...keys}>
         {TAKES.map(count => (

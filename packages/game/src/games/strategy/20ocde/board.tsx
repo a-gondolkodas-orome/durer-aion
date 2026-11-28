@@ -33,7 +33,7 @@ export function MyBoard({ G, ctx, moves, isActive }: MyGameProps) {
             key={index}
             variant='outlined'
             disabled={!active || cell !== null}
-            aria-label={`${Math.floor(index / BOARD_SIZE) + 1}. sor, ${index % BOARD_SIZE + 1}. oszlop: ${cell === 'O' ? 'kör' : cell === 'X' ? (xsThisTurn.includes(index) ? 'az imént letett X' : 'X') : 'üres'}`}
+            aria-label={`${Math.floor(index / BOARD_SIZE) + 1}. sor, ${index % BOARD_SIZE + 1}. oszlop: ${cell === 'O' ? 'kör' : cell === 'X' ? (xsThisTurn.includes(index) ? 'az imént letett X' : 'X') : 'üres'}${machineMove.includes(index) ? ', a gép legutóbbi lépése' : ''}`}
             onClick={() => chooseCell(index)}
             sx={{
               minWidth: 0, p: 0, aspectRatio: '1', fontSize: 'clamp(16px, 9cqi, 40px)', lineHeight: 1,
