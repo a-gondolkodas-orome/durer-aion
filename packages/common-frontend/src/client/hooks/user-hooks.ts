@@ -220,6 +220,11 @@ export const useSaveCompetition = () => {
     await repo.saveCompetition(change, options);
 };
 
+export const useSearchProblems = () => {
+  const repo = useAdminRepo();
+  return async (query: { q: string, competition?: string }) => await repo.searchProblems(query);
+};
+
 export const useProblem = () => {
   const repo = useAdminRepo();
   return async (problemId: string) => await repo.getProblem(problemId);

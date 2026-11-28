@@ -361,12 +361,14 @@ function ReviewStep(props: {
             const created = props.review.problems.some(each => each.id === problemId);
             const copyOf = props.relay.find(each => each.created !== undefined && entryProblemId(each) === problemId)
               ?.created?.copyOf;
+            const picked = props.relay.some(each => each.picked !== undefined && each.problemId === problemId);
             return (
               <li key={problemId}>
                 <span title={problemId}>{slug(problemId)}</span> · {points} pont
                 {created && <Box component="span" sx={{ color: MUTED }}>
                   {copyOf === undefined ? ' · új feladat' : ` · másolat, ennek a helyén: ${slug(copyOf.id)}`}
                 </Box>}
+                {picked && <Box component="span" sx={{ color: MUTED }}> · meglévő feladat, hozzáadva</Box>}
               </li>
             );
           })}

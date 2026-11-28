@@ -476,6 +476,60 @@ paths:
           description: No competition with this id
         "415":
           description: The body is not JSON
+  /team/admin/problems:
+    get:
+      summary: Search the database's problems, for the relay editor's picker
+      description: >
+        Database problems only, as stored, answers included. With
+        `competition`, the ones its relay uses, in its order; by slug
+        otherwise. At most 50, `truncated` saying whether more match.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Part of the id or slug, case ignored
+        schema:
+          type: string
+      - name: competition
+        in: query
+        required: false
+        description: Only the problems this competition's relay uses
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The matching problems
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  problems:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        problem:
+                          type: object
+                          description: The problem, as `Problem` types it
+                        storedIn:
+                          type: string
+                          enum: [database]
+                        uses:
+                          type: array
+                          description: Every use a relay makes of the problem, as on `GET /team/admin/problems/{problemId}`
+                          items:
+                            type: object
+                  truncated:
+                    type: boolean
+        "401":
+          description: Not an organiser
+        "404":
+          description: No competition with the id `competition` gives
   /team/admin/problems/{problemId}:
     get:
       summary: One problem, for its editor, answer included

@@ -1,5 +1,5 @@
 import type { Problem } from "schemas";
-import type { AdminCompetitionDto, CompetitionChangeDto, AdminProblemDto, ProblemWriteResultDto, BundleImportResultDto, CompetitionSummaryDto, CompetitionWriteResultDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { AdminCompetitionDto, CompetitionChangeDto, AdminProblemDto, ProblemSearchDto, ProblemWriteResultDto, BundleImportResultDto, CompetitionSummaryDto, CompetitionWriteResultDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 import type { RelayEndReport } from 'game';
 
 // The session is the repository's to keep, not the caller's: online it is an
@@ -49,6 +49,9 @@ export interface AdminClientRepository {
    *  `problems` its relay brings, or, with `dryRun`, only says what that would
    *  do. Of one held in code only the start window changes. */
   saveCompetition(change: CompetitionChangeDto, options: { dryRun: boolean }): Promise<CompetitionWriteResultDto>
+  /** The database's problems whose id holds `q`, and, given `competition`,
+   *  which its relay uses: what the relay editor's picker offers. */
+  searchProblems(query: { q: string, competition?: string }): Promise<ProblemSearchDto>
   /** One problem as stored, answer included, with its uses and its lock. */
   getProblem(problemId: string): Promise<AdminProblemDto>
   /** Replaces a problem held in the database with `problem`, or, with

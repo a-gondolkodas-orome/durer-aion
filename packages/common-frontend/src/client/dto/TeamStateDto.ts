@@ -119,6 +119,20 @@ export interface AdminProblemDto {
   answerLocked: boolean;
 }
 
+/// What `GET /team/admin/problems` answers, for the relay editor's picker:
+/// the database's problems that match, at most 50, `truncated` saying
+/// whether more do.
+export interface ProblemSearchDto {
+  problems: AdminProblemSearchResultDto[];
+  truncated: boolean;
+}
+
+export interface AdminProblemSearchResultDto {
+  problem: Problem;
+  storedIn: 'code' | 'database';
+  uses: ProblemUseDto[];
+}
+
 /// What `PUT /team/admin/problems/:id` answers, with `?dryRun=1` too, as
 /// `CompetitionWriteResultDto` does; `uses` is what the change reaches.
 export interface ProblemWriteResultDto {

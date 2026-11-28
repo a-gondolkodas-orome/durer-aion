@@ -14,10 +14,12 @@ import type { ContentSources } from "./database_sources";
 import { importBundle, openContentSources } from "./database_sources";
 import { ProblemModel } from "./model";
 import type { AdminProblemView, ProblemWriteReport } from "./problem_edit";
+import type { ProblemSearchView } from "./problem_search";
 import { configureTeamsRouter } from "./router";
 import { startTestDatabase } from "./test_database";
 
-// GET and PUT /team/admin/problems/:id over HTTP against PGlite (#818).
+// GET and PUT /team/admin/problems/:id (#818), and the picker's search,
+// GET /team/admin/problems (#820), over HTTP against PGlite.
 
 const sample = JSON.parse(readFileSync(
   join(__dirname, "..", "..", "..", "..", "packages", "problem-bank", "fixtures", "sample-bundle.json"), "utf8",
@@ -166,4 +168,56 @@ it("asks for the organisers' login", async () => {
     method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ problem: shared }),
   });
   expect(response.status).toBe(401);
+});
+
+async function search(query: Record<string, string>): Promise<ProblemSearchView> {
+  const response = await fetch(`http://127.0.0.1:${port}/team/admin/problems?${new URLSearchParams(query)}`, { headers: admin });
+  expect(response.status).toBe(200);
+  return await response.json() as ProblemSearchView;
+}
+
+const ids = (view: ProblemSearchView) => view.problems.map(({ problem }) => problem.id);
+
+it("searches the database's problems by id or slug, case ignored, by slug", async () => {
+  expect(await search({})).toEqual({ truncated: false, problems: [
+    "7q1wniz55w--csomag-haromszog", SHARED, OWN,
+  ].map(id => ({ problem: { ...sample.problems[id], id }, storedIn: "database", uses: expect.any(Array) as unknown })) });
+  expect(ids(await search({ q: " CSOMAG-KOCKAK " }))).toEqual([SHARED]);
+  expect(ids(await search({ q: OWN.split("--")[0] }))).toEqual([OWN]);
+  // Held in code, so not the picker's to offer.
+  expect(ids(await search({ q: "korongok" }))).toEqual([]);
+  expect((await search({ q: "kockak" })).problems[0].uses.map(({ competitionId }) => competitionId))
+    .toEqual([RELAY_ONLY, FULL]);
+});
+
+it("filters by a competition's relay, in its order, and refuses a competition no one holds", async () => {
+  expect(ids(await search({ competition: FULL }))).toEqual([OWN, SHARED]);
+  expect(ids(await search({ competition: FULL, q: "paros" }))).toEqual([OWN]);
+  // Its in-code problem left out.
+  expect(ids(await search({ competition: RELAY_ONLY }))).toEqual([SHARED, "7q1wniz55w--csomag-haromszog"]);
+  const response = await fetch(`http://127.0.0.1:${port}/team/admin/problems?competition=zzzzzzzzzz--nincs`, { headers: admin });
+  expect(response.status).toBe(404);
+  expect((await fetch(`http://127.0.0.1:${port}/team/admin/problems`)).status).toBe(401);
+});
+
+it("builds one relay from another's problems, and a fix to a shared one reaches both", async () => {
+  const picked = (await search({ competition: FULL, q: "paros" })).problems.map(({ problem }) => problem.id);
+  const before = sample.competitions[RELAY_ONLY];
+  if (before.relay === undefined) throw new Error("The relay-only competition has a relay");
+  const relay = { ...before.relay, problems: [...before.relay.problems, ...picked.map(problemId => ({ problemId, points: 5 }))] };
+  const response = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${RELAY_ONLY}`, {
+    method: "PUT", headers: admin,
+    body: JSON.stringify({ competition: { ...before, id: RELAY_ONLY, relay }, problems: [] }),
+  });
+  expect(await response.json()).toMatchObject({ written: true, errors: [] });
+
+  const own: Problem = { ...sample.problems[OWN], id: OWN };
+  const fixed = withText(own, "Hány páros szám van 1 és 100 között?");
+  expect(await report(fixed, { id: OWN })).toMatchObject({ written: true });
+  expect((await view(OWN)).uses.map(({ competitionId }) => competitionId)).toEqual([RELAY_ONLY, FULL]);
+  for (const competitionId of [RELAY_ONLY, FULL]) {
+    const competition = await sources.competitionSource.getCompetition(competitionId);
+    expect(competition?.relay?.problems.map(({ problemId }) => problemId)).toContain(OWN);
+  }
+  expect((await sources.problemSource.getProblems([OWN])).get(OWN)).toEqual(fixed);
 });

@@ -163,7 +163,9 @@ competition's edit page composes its relay: problems added, removed, reordered
 and re-pointed, until a team of it starts. A new problem, or a **Másolat** of a
 shared one, which replaces it in that relay only, is written with the
 competition on its save, under an id from the same generator as
-`npm run new-id`.
+`npm run new-id`. **+ Meglévő feladat** picks problems the database already
+holds, by id or slug or by a competition using them: they join by id, so a fix
+to one reaches every relay that picked it.
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container and redirects the export it
