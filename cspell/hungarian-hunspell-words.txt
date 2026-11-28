@@ -846,6 +846,7 @@ szélességét
 szerese
 szeresét
 szervezője
+szervezőknek
 szervezőt
 szétdarabolni
 szétosztja

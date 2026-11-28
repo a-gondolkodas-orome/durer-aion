@@ -45,6 +45,9 @@ export interface GameStateMixin extends GameStateTimer {
   // The team ended the match itself (#111). Absent otherwise, and in a match
   // played before the field existed.
   abandoned?: true;
+  // Set while the bot failed to move and nothing was played in its place, so
+  // the match waits on it; absent otherwise. gameWrapper's `noteBotFailure`.
+  botStuck?: boolean;
 }
 
 // `satisfies` makes this list exhaustive and exact: a key added to the mixin
@@ -63,6 +66,7 @@ const GAME_STATE_MIXIN_KEYS: ReadonlySet<string> = new Set(Object.keys({
   liveResults: true,
   finishedAt: true,
   abandoned: true,
+  botStuck: true,
 } satisfies Record<keyof GameStateMixin, true>));
 
 /// A starting position arrives as a move argument and is merged into `G`, so
@@ -142,6 +146,9 @@ export interface GamePresentation<G> {
 /// GameWrapper's mixin.
 /// setup() is defined here, as it returns G instead of G & WrapperState
 interface GameMixin<G> extends GamePresentation<G> {
+  /// Every move the player may make in this state, each one the game accepts
+  /// as it stands — halfway through a turn of several moves too. The server
+  /// plays one of them at random when the bot's own move fails.
   possibleMoves: (G: G, ctx: Ctx, playerID: PlayerIDType) => PossibleMove[];
   setup: SetupFunction<G>,
 }

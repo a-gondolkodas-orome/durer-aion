@@ -12,6 +12,9 @@ export type MatchStage =
   | { kind: 'ended', by: 'liveWon' }
   | { kind: 'ended', by: 'abandoned' }
   | { kind: 'ended', by: 'time', unfinished: boolean }
+  // The bot failed to move and the server played nothing in its place, so
+  // the match waits on it until an organiser steps in or a fixed bot moves.
+  | { kind: 'stuck' }
   // Until then the team may act on its own turn, in any phase. The judge is
   // the bot, so its turn is a wait rather than a move to offer; it takes one
   // outside `play` too, to set the opening position of each new game.
@@ -35,6 +38,7 @@ export function matchStage(G: GameStateMixin, ctx: Pick<Ctx, 'phase' | 'currentP
     if (G.abandoned) return { kind: 'ended', by: 'abandoned' };
     return { kind: 'ended', by: 'time', unfinished: ctx.phase === PHASE.play || ctx.phase === PHASE.chooseRole };
   }
+  if (G.botStuck === true) return { kind: 'stuck' };
   const teamToMove = ctx.currentPlayer !== JUDGE_PLAYER;
   if (ctx.phase === PHASE.startNewGame) {
     // `difficulty` and `winner` outlive the game they describe until the next
@@ -57,7 +61,7 @@ export type BoardState = 'empty' | 'locked' | 'live' | 'waiting';
 
 export function boardState(stage: MatchStage): BoardState {
   switch (stage.kind) {
-    case 'ended': case 'result': case 'chooseRole': return 'locked';
+    case 'ended': case 'stuck': case 'result': case 'chooseRole': return 'locked';
     case 'intro': case 'nextGame': return 'empty';
     case 'play': return stage.teamToMove ? 'live' : 'waiting';
   }

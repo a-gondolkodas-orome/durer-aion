@@ -1,5 +1,5 @@
 import type { MockInstance } from "vitest";
-import { gameWrapper, isMakeMovePayloadReadOnly, LATE_MOVE_GRACE_MS } from "./gamewrapper";
+import { BOT_FAILURE_REASON_MAX_LENGTH, gameWrapper, isMakeMovePayloadReadOnly, LATE_MOVE_GRACE_MS } from "./gamewrapper";
 import { Client } from "boardgame.io/client";
 import {
   createGameWithWinAndLose,
@@ -650,6 +650,116 @@ describe("gameWrapper move log", () => {
     const [poll] = client.getState()?.log ?? [];
     expect(poll?.action.payload.type).toStrictEqual("getTime");
     expect(poll?.metadata).toBeUndefined();
+  });
+});
+
+describe("gameWrapper bot failure note", () => {
+  const timeOfNote = new Date("2026-11-14T09:30:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(timeOfNote);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /// A live match in play with the bot to move, its one move a turn.
+  function botToMove() {
+    const oneMovePerTurn: GameType<{ data: string }> = {
+      setup: () => ({ data: "setup" }),
+      possibleMoves: () => [{ move: "step" }],
+      moves: { step: ({ G }) => { G.data = "stepped"; } },
+      turn: { minMoves: 1, maxMoves: 1 },
+    };
+    const client = Client({ game: gameWrapper(oneMovePerTurn), numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    client.moves.chooseRole(JUDGE_PLAYER);
+    return client;
+  }
+
+  const lastLogEntry = (client: ReturnType<typeof botToMove>) => client.getState()?.log.slice(-1)[0];
+
+  test("puts the reason in the match log, with the time, and leaves the turn the bot's", () => {
+    const client = botToMove();
+
+    client.moves.noteBotFailure("threw: boom", false);
+
+    expect(lastLogEntry(client)?.action.payload.type).toStrictEqual("noteBotFailure");
+    expect(lastLogEntry(client)?.metadata).toStrictEqual({ time: timeOfNote.toISOString(), botFailure: "threw: boom" });
+    expect(client.getState()?.G.botStuck).toBeUndefined();
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(JUDGE_PLAYER);
+  });
+
+  // The server notes the failure and then plays a move in its place, which a
+  // turn limited to one move must still take.
+  test("does not spend a limited turn's move", () => {
+    const client = botToMove();
+
+    client.moves.noteBotFailure("refused: step([])", false);
+    client.moves.step();
+
+    expect(client.getState()?.G.data).toStrictEqual("stepped");
+    expect(client.getState()?.ctx.currentPlayer).toStrictEqual(GUESSER_PLAYER);
+  });
+
+  test("marks the bot stuck until it plays a move", () => {
+    const client = botToMove();
+
+    client.moves.noteBotFailure("no legal move", true);
+    expect(client.getState()?.G.botStuck).toStrictEqual(true);
+
+    client.moves.step();
+    expect(client.getState()?.G.botStuck).toBeUndefined();
+  });
+
+  test("marks the bot stuck on a new game's opening until it sends one", () => {
+    const client = Client({ game: gameWrapper(createGameWithWinAndLose(() => ({ data: "setup" }))), numPlayers: 2 });
+    client.start();
+    client.moves.chooseNewGameType("live");
+
+    client.moves.noteBotFailure("threw: boom", true);
+    expect(client.getState()?.G.botStuck).toStrictEqual(true);
+
+    client.moves.setStartingPosition({ data: "startingPosition" });
+    expect(client.getState()?.G.botStuck).toBeUndefined();
+  });
+
+  test("keeps only the start of a long reason", () => {
+    const client = botToMove();
+
+    client.moves.noteBotFailure("x".repeat(BOT_FAILURE_REASON_MAX_LENGTH + 1), false);
+
+    expect(lastLogEntry(client)?.metadata).toStrictEqual({ time: timeOfNote.toISOString(), botFailure: "x".repeat(BOT_FAILURE_REASON_MAX_LENGTH) });
+  });
+
+  test.each([
+    ["a reason that is no string", [42, false]],
+    ["no word on whether the bot is stuck", ["threw: boom"]],
+  ])("is refused with %s", (_case, args) => {
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = botToMove();
+
+    client.moves.noteBotFailure(...args);
+
+    expect(rejected).toHaveBeenCalledOnce();
+    expect(client.getState()?.log.some(entry => entry.action.payload?.type === "noteBotFailure")).toStrictEqual(false);
+    rejected.mockRestore();
+  });
+
+  test("is refused from the team", () => {
+    const rejected = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const client = botToMove();
+    client.moves.step();
+
+    client.moves.noteBotFailure("made up", true);
+
+    expect(rejected).toHaveBeenCalledOnce();
+    expect(client.getState()?.G.botStuck).toBeUndefined();
+    rejected.mockRestore();
   });
 });
 
