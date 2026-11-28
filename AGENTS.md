@@ -107,6 +107,9 @@ wrong:
 **A board is played from the keyboard too** (#709): the arrows choose, Enter
 moves. Every move is a `<button>`, and the reference boards show the shared
 `useBoardKeys` hook that does the rest; README § *Creating a new game* says how.
+Consider also showing the bot's last move (#714) — a recommendation, not a
+rule, since a game that takes things away has no obvious way to; the same
+section says what the reference boards do.
 
 **The rules and the bot are typechecked twice**, because the server reads the
 game package's source under its own `lib` and without the DOM. A `document` in

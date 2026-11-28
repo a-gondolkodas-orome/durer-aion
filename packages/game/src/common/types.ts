@@ -159,6 +159,16 @@ export function currentPlayer(ctx: Ctx): PlayerIDType {
   return ctx.currentPlayer as PlayerIDType;
 }
 
+/// Whether the position on the board is the bot's doing: its turn is the one
+/// that just ended, or its move won. A board that marks the bot's last move by
+/// what it took away shows the mark only then (#714): once the team has moved
+/// too, it no longer matches the position. A game the time ended mid-turn
+/// counts as the turn's player's to move. A draw is never the bot's.
+export function botMovedLast(G: Pick<GameStateMixin, 'winner'>, ctx: Pick<Ctx, 'currentPlayer'>): boolean {
+  if (G.winner !== null) return G.winner === JUDGE_PLAYER;
+  return ctx.currentPlayer !== JUDGE_PLAYER;
+}
+
 /// Records who won the game in `play`, and in a live game the team's streak
 /// and losses. True when the win is the team's second in a row, which earns the
 /// match's points; the game's move then ends the match.

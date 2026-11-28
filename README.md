@@ -671,6 +671,17 @@ the clock, the test/live choice, choosing who starts, tries and score.
   `columns`, and focus comes back to the board once the bot has moved, since
   its turn disables every button. A turn of two steps moves focus on to the
   second itself, as `ketkupac/` does.
+
+  Consider also making the bot's last move easy to see (#714): teams ask what
+  it just did. How depends on the game, so this is a judgement, not a rule.
+  The move records what the bot did in `G` (`lastMachineMove`,
+  `lastJudgeTake`), and the opening position clears it. A game that places
+  marks can tint the bot's cells, as `20ocde/` does; that stays true for the
+  rest of the game. A game that takes things away has nothing left to tint:
+  the reference boards draw what the bot took, faded, beside what is left, with
+  its `−N`, and only while `botMovedLast` (`types.ts`) holds, since after the
+  team's own move the picture no longer adds up. Where no picture is clear,
+  saying it in the control's `aria-label` still helps.
 - **`main.tsx`** exports the rules text shown above the board: one element
   for every language, or `{ hu, en }` for a game in both, of which the board
   shows the page's.
