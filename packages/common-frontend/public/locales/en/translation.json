@@ -48,6 +48,7 @@
   },
   "error": {
     "competitionNotFound": "No such competition.",
+    "problemNotFound": "No such problem.",
     "competitionNotStarted": "The competition hasn't started yet.",
     "competitionOver": "It is too late to start the competition.",
     "fileTooLarge": "The file is too large.",

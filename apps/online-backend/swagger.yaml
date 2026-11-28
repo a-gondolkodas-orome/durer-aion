@@ -462,6 +462,137 @@ paths:
           description: No competition with this id
         "415":
           description: The body is not JSON
+  /team/admin/problems/{problemId}:
+    get:
+      summary: One problem, for its editor, answer included
+      description: >
+        As stored, unvalidated, so a stored problem the rules have since come
+        to refuse can be opened and mended.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: problemId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The problem, where it is held, its uses and its lock
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  problem:
+                    type: object
+                    description: The problem, as `Problem` types it
+                  storedIn:
+                    type: string
+                    enum: [code, database]
+                  uses:
+                    type: array
+                    description: Every use a relay makes of the problem, in-code and database competitions alike
+                    items:
+                      type: object
+                      properties:
+                        competitionId:
+                          type: string
+                        metadata:
+                          type: object
+                        position:
+                          type: integer
+                          description: 1-based, in play order
+                        points:
+                          type: integer
+                  answerLocked:
+                    type: boolean
+                    description: Whether a team of a competition using the problem has started a match, which locks the answer
+        "401":
+          description: Not an organiser
+        "404":
+          description: No problem with this id
+    put:
+      summary: Replace a problem held in the database, or, with dryRun, say what that would do
+      description: >
+        The body is the problem whole, its id unchanged. Written only if it
+        keeps the validator's rules, still has content in a language of every
+        competition using it, and, once a team of one of those has started a
+        match, keeps its answer. A started match keeps the problems it was
+        created with, so the change reaches the matches started after it. One
+        held in code changes only with a deploy. The answer is the report
+        either way; the messages are Hungarian.
+      security:
+      - basicAdminAuth: []
+      tags:
+      - admin
+      parameters:
+      - name: problemId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: dryRun
+        in: query
+        required: false
+        description: "1: write nothing, answer what the write would do"
+        schema:
+          type: string
+          enum: ["1"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                problem:
+                  type: object
+                  description: The problem, as `Problem` types it
+      responses:
+        "200":
+          description: The report, written or not
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  written:
+                    type: boolean
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                  answerLocked:
+                    type: boolean
+                    description: Whether a team of a competition using the problem has started a match, which locks the answer
+                  uses:
+                    type: array
+                    description: Every use a relay makes of the problem, in-code and database competitions alike
+                    items:
+                      type: object
+                      properties:
+                        competitionId:
+                          type: string
+                        metadata:
+                          type: object
+                        position:
+                          type: integer
+                          description: 1-based, in play order
+                        points:
+                          type: integer
+        "401":
+          description: Not an organiser
+        "404":
+          description: No problem with this id
+        "415":
+          description: The body is not JSON
   /team/admin/import:
     put:
       summary: Import teams from a TSV file
@@ -727,6 +858,7 @@ components:
             - MATCH_NOT_FOUND
             - GAME_NOT_FOUND
             - COMPETITION_NOT_FOUND
+            - PROBLEM_NOT_FOUND
             - STALE_MATCH_ID
             - MATCH_FINISHED
             - JSON_REQUIRED

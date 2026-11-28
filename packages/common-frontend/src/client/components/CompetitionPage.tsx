@@ -1,9 +1,11 @@
-import { Box, Button, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import { Box, Button, Chip, IconButton, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
+import Edit from '@mui/icons-material/Edit';
+import Visibility from '@mui/icons-material/Visibility';
 import Code from '@mui/icons-material/Code';
 import Storage from '@mui/icons-material/Storage';
 import { Stack } from '@mui/system';
-import { useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { editionSchoolYear, localizeProblem } from 'schemas';
 import type { CompetitionConfig, Language, Problem } from 'schemas';
@@ -12,7 +14,8 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle } from './CompetitionTable';
+import { useSavedNotice } from './EditPageParts';
+import { ROUND_NAMES, competitionEditPath, competitionPath, competitionTitle, problemEditPath, slug } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
@@ -37,25 +40,12 @@ function StoredElsewhere({ storedIn }: { storedIn: AdminCompetitionDto['storedIn
     titleAccess={storedIn === 'code' ? 'Kódban tárolt feladat' : 'Adatbázisban tárolt feladat'}/>;
 }
 
-/// The part of an id people recognise a problem by: its slug.
-function slug(id: string): string {
-  return id.split('--').slice(1).join('--') || id;
-}
-
 function describeUse(use: ProblemUseDto): string {
   return `${competitionTitle({ id: use.competitionId, metadata: use.metadata })} · ${use.position}. · ${use.points} pont`;
 }
 
 export function CompetitionPage(props: { competitionId: string }) {
-  const { enqueueSnackbar } = useSnackbar();
-  // Once, and the parameter dropped, so a reload does not say it again.
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has(SAVED_PARAM)) return;
-    enqueueSnackbar('Mentve', { variant: 'success' });
-    url.searchParams.delete(SAVED_PARAM);
-    window.history.replaceState(window.history.state, '', url);
-  }, [enqueueSnackbar]);
+  useSavedNotice();
   const errorMessage = useErrorMessage();
   const getCompetition = useCompetition();
   const { data, error } = useSWR(['team/admin/competitions', props.competitionId],
@@ -99,9 +89,9 @@ function CompetitionDetails({ data }: { data: AdminCompetitionDto }) {
           aria-label="Nyelv" sx={{ borderBottom: 1, borderColor: 'divider' }}>
           {competition.languages.map(each => <Tab key={each} value={each} label={LANGUAGE_NAMES[each]}/>)}
         </Tabs>}
-        {data.relayProblems.map(({ problem, points }, index) => (
+        {data.relayProblems.map(({ problem, points, storedIn }, index) => (
           <ProblemPreview key={`${index}-${problem.id}`} problem={problem} points={points} serial={index + 1}
-            language={language}/>
+            language={language} competitionId={data.id} storedIn={storedIn}/>
         ))}
       </Stack>
     </>}
@@ -171,6 +161,7 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
             <TableCell>Válasz</TableCell>
             <TableCell>Nyelvek</TableCell>
             <TableCell>Használja</TableCell>
+            <TableCell><Box component="span" sx={visuallyHidden}>Szerkesztés</Box></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -208,6 +199,7 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
                   </Box>
                 ))}
               </TableCell>
+              <TableCell><ProblemEditLink competitionId={data.id} problemId={problem.id} storedIn={storedIn}/></TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -216,11 +208,29 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
   );
 }
 
-function ProblemPreview(props: { problem: Problem, points: number, serial: number, language: Language }) {
+/// The link to a problem's editor, which shows one held in code read-only.
+function ProblemEditLink(props: { competitionId: string, problemId: string, storedIn: AdminCompetitionDto['storedIn'] }) {
+  const inCode = props.storedIn === 'code';
+  return (
+    <IconButton size="small" href={problemEditPath(props.problemId, props.competitionId)}
+      aria-label={`${inCode ? 'Megnyitás' : 'Szerkesztés'}: ${slug(props.problemId)}`}
+      title={inCode ? 'Megnyitás (kódban tárolt, nem szerkeszthető)' : 'Szerkesztés'}>
+      {inCode ? <Visibility fontSize="inherit"/> : <Edit fontSize="inherit"/>}
+    </IconButton>
+  );
+}
+
+function ProblemPreview(props: {
+  problem: Problem, points: number, serial: number, language: Language, competitionId: string,
+  storedIn: AdminCompetitionDto['storedIn'],
+}) {
   const { problemText, imageUrl } = localizeProblem(props.problem, props.language);
   return (
-    <Stack id={`feladat-${props.serial}`} sx={{ backgroundColor: '#fff', border: `1px solid ${BORDER}`, borderRadius: '10px',
-      padding: '22px', gap: '12px' }}>
+    <Stack id={`feladat-${props.serial}`} sx={{ position: 'relative', backgroundColor: '#fff', border: `1px solid ${BORDER}`,
+      borderRadius: '10px', padding: '22px', gap: '12px' }}>
+      <Box sx={{ position: 'absolute', top: '12px', right: '12px' }}>
+        <ProblemEditLink competitionId={props.competitionId} problemId={props.problem.id} storedIn={props.storedIn}/>
+      </Box>
       <ExerciseTask task={problemText} serial={props.serial} availablePoints={props.points} pictureUrl={imageUrl ?? null}
         language={props.language}/>
       <Typography sx={{ fontSize: '14px' }}>Válasz: <strong>{props.problem.answer}</strong></Typography>

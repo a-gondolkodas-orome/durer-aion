@@ -185,7 +185,7 @@ export default defineConfig(
   {
     files: ['**/*.tsx'],
     ignores: [
-      'packages/common-frontend/src/client/components/{Admin,CompetitionEditPage,CompetitionExport,CompetitionImport,CompetitionPage,CompetitionTable,ConfirmDialog,ImportExport,TeamDetailDialog}.tsx',
+      'packages/common-frontend/src/client/components/{Admin,CompetitionEditPage,CompetitionExport,CompetitionImport,CompetitionPage,CompetitionTable,ConfirmDialog,EditPageParts,ImportExport,ProblemEditPage,TeamDetailDialog}.tsx',
       'packages/game/src/games/**',
       '**/*.test.tsx',
     ],

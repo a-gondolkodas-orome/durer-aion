@@ -52,10 +52,13 @@ export function lockErrors(before: CompetitionConfig, after: CompetitionConfig):
   return errors;
 }
 
-/** Whether a team of the competition has started either match. */
-async function hasStarted(competitionId: string, transaction?: Transaction): Promise<boolean> {
+/** Whether a team of any of the competitions has started either match. */
+export async function hasStarted(competitionIds: string | string[], transaction?: Transaction): Promise<boolean> {
   const count = await TeamModel.count({
-    where: { competitionId, [Op.or]: [{ relayMatchID: { [Op.ne]: null } }, { strategyMatchID: { [Op.ne]: null } }] },
+    where: {
+      competitionId: competitionIds,
+      [Op.or]: [{ relayMatchID: { [Op.ne]: null } }, { strategyMatchID: { [Op.ne]: null } }],
+    },
     transaction,
   });
   return count > 0;

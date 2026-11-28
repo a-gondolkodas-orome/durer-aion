@@ -1,6 +1,6 @@
 import type { AdminClientRepository, ClientRepository } from "./api-repository-interface";
-import type { CompetitionConfig } from "schemas";
-import type { AdminCompetitionDto, BundleImportResultDto, CompetitionSummaryDto, CompetitionWriteResultDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
+import type { CompetitionConfig, Problem } from "schemas";
+import type { AdminCompetitionDto, AdminProblemDto, ProblemWriteResultDto, BundleImportResultDto, CompetitionSummaryDto, CompetitionWriteResultDto, MatchStateDto, TeamImportResultDto, TeamModelDto } from "./dto/TeamStateDto";
 
 // Tests only: the package entry does not export this, so it stays out of the
 // build the apps bundle.
@@ -96,6 +96,12 @@ export class MockClientRepository implements ClientRepository, AdminClientReposi
     throw Error("NOT call this");
   }
   saveCompetition(_competition: CompetitionConfig, _options: { dryRun: boolean }): Promise<CompetitionWriteResultDto> {
+    throw Error("NOT call this");
+  }
+  getProblem(_problemId: string): Promise<AdminProblemDto> {
+    throw Error("NOT call this");
+  }
+  saveProblem(_problem: Problem, _options: { dryRun: boolean }): Promise<ProblemWriteResultDto> {
     throw Error("NOT call this");
   }
   importTeams(_file: File): Promise<TeamImportResultDto> {
