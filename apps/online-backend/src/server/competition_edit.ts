@@ -1,15 +1,19 @@
 import { strategyGames } from 'game/strategy';
-import type { CompetitionConfig, Language } from 'schemas';
-import { competitionShapeErrors, isRecord, validateCompetition, validateStartWindow } from 'schemas';
+import type { CompetitionConfig, Language, Problem } from 'schemas';
+import {
+  competitionShapeErrors, isRecord, problemImageWarnings, problemShapeErrors, validateCompetition, validateProblem,
+  validateStartWindow,
+} from 'schemas';
 import { Op, type Transaction } from 'sequelize';
 import type { TeamsRepository } from './db';
 import type { ContentSources } from './database_sources';
 import { InvalidStoredProblemError } from './database_sources';
-import { CompetitionModel, CompetitionWindowModel, TeamModel } from './model';
+import { CompetitionModel, CompetitionWindowModel, ProblemModel, TeamModel } from './model';
 
 // Changing a competition on its admin page: the body is the competition
-// whole. One held in the database is replaced by it once it keeps the rules
-// and the locks; of one held in code only the start window changes.
+// whole, with the new problems its relay brings. One held in the database is
+// replaced by it once it keeps the rules and the locks, and the new problems
+// are written with it; of one held in code only the start window changes.
 
 /** What an edit did, or, in a dry run, would do: written or not, and why not,
  *  one Hungarian line each. `started` says whether a team of the competition
@@ -73,9 +77,14 @@ function canonical(value: unknown): string {
 }
 
 /** Replaces the competition `competitionId` with the one `value` holds, as
- *  `{ competition }`, or, if it breaks the rules or a lock, does not; with
- *  `dryRun`, says what it would do and writes nothing. Undefined for an id
- *  no one holds.
+ *  `{ competition, problems? }`, or, if it breaks the rules or a lock, does
+ *  not; with `dryRun`, says what it would do and writes nothing. Undefined for
+ *  an id no one holds.
+ *
+ *  `problems` are new ones, which the relay uses and nothing holds yet: a
+ *  problem added in the relay's editor, or a copy of a shared one. They are
+ *  written in the same transaction, or not at all. A problem already held is
+ *  changed in its own editor (`writeProblem`), never here.
  *
  *  One held in the database is replaced whole, and its window is the one the
  *  body gives: a window set for it apart, by an earlier admin page, is
@@ -90,7 +99,7 @@ export async function writeCompetition(
   teams: TeamsRepository,
   competitionId: string,
   value: unknown,
-  { problemSource, competitions }: Pick<ContentSources, 'problemSource' | 'competitions'>,
+  { problemSource, competitions, problems: problemsInCode }: Pick<ContentSources, 'problemSource' | 'competitions' | 'problems'>,
   { dryRun }: { dryRun: boolean },
 ): Promise<CompetitionWriteReport | undefined> {
   const inCode = competitions.get(competitionId);
@@ -103,10 +112,12 @@ export async function writeCompetition(
   const shape = readCompetitionBody(competitionId, value);
   if ('errors' in shape) return report(shape.errors, [], await hasStarted(competitionId));
   const after = shape.competition;
+  const newProblems = shape.problems;
 
   if (inCode !== undefined) {
     const where = `verseny ${competitionId}`;
     const errors = [
+      ...newProblems.length === 0 ? [] : [`${where}: a kódban tárolt verseny váltójához nem adható új feladat`],
       ...canonical({ ...inCode, startWindow: undefined }) === canonical({ ...after, startWindow: undefined }) ? []
         : [`${where}: a kódban tárolt versenynek csak az indítási ablaka változhat, a többi csak telepítéssel`],
       ...after.startWindow === undefined
@@ -120,41 +131,80 @@ export async function writeCompetition(
     return report([], [], started, true);
   }
 
-  let errors: string[];
+  const newIds = new Set(newProblems.map(({ id }) => id));
+  const used = new Set(after.relay?.problems.map(({ problemId }) => problemId) ?? []);
+  let errors: string[] = [
+    ...newProblems.flatMap(validateProblem),
+    ...newProblems.filter(({ id }) => !used.has(id)).map(({ id }) => `feladat ${id}: új feladat, de a váltó nem használja`),
+    ...newProblems.filter(({ id }) => problemsInCode.has(id) || competitions.has(id)).map(({ id }) =>
+      `feladat ${id}: ez az azonosító a kódban már egy ${problemsInCode.has(id) ? 'feladaté' : 'versenyé'}`),
+  ];
   try {
-    const problems = await problemSource.getProblems(after.relay?.problems.map(({ problemId }) => problemId) ?? []);
-    errors = validateCompetition(after, { problems, strategyGames: new Map(Object.entries(strategyGames)) });
+    const problems = new Map([
+      ...await problemSource.getProblems([...used].filter(id => !newIds.has(id))),
+      ...newProblems.map(problem => [problem.id, problem] as const),
+    ]);
+    errors = [...errors,
+      ...validateCompetition(after, { problems, strategyGames: new Map(Object.entries(strategyGames)) })];
   } catch (error) {
     if (!(error instanceof InvalidStoredProblemError)) throw error;
-    errors = [`feladat ${error.problemId}: a váltó ezt a tárolt feladatot használja, de a tárolt feladat hibás`,
-      ...error.errors];
+    errors = [...errors,
+      `feladat ${error.problemId}: a váltó ezt a tárolt feladatot használja, de a tárolt feladat hibás`, ...error.errors];
   }
 
   return await teams.sequelize.transaction(async (transaction) => {
     const started = await hasStarted(competitionId, transaction);
-    const allErrors = [...errors, ...(started ? lockErrors(before, after) : [])];
-    const warnings = started ? ['Már indult csapat ebben a versenyben: a futó meccsek a régi beállításokkal mennek '
-      + 'tovább, a változás az ezután indulókra érvényes.'] : [];
+    // Ids are one namespace, as in a bundle (`importBundle`).
+    const byId = { attributes: ['id'], where: { id: [...newIds] }, order: [['id', 'ASC']] as [string, string][], transaction };
+    const taken = newIds.size === 0 ? [] : [
+      ...(await ProblemModel.findAll(byId)).map(({ id }) => `feladat ${id}: ez az azonosító az adatbázisban már egy feladaté`),
+      ...(await CompetitionModel.findAll(byId)).map(({ id }) => `feladat ${id}: ez az azonosító az adatbázisban már egy versenyé`),
+    ];
+    const allErrors = [
+      ...errors,
+      ...taken,
+      ...(started ? lockErrors(before, after) : []),
+    ];
+    const warnings = [
+      ...started ? ['Már indult csapat ebben a versenyben: a futó meccsek a régi beállításokkal mennek '
+        + 'tovább, a változás az ezután indulókra érvényes.'] : [],
+      ...newProblems.flatMap(problemImageWarnings),
+    ];
     if (allErrors.length > 0 || dryRun) return report(allErrors, warnings, started);
     const { id, ...body } = after;
+    await ProblemModel.bulkCreate(newProblems.map(({ id, ...problem }) => ({ id, body: problem, createdBy: null })),
+      { transaction });
     await CompetitionModel.update({ body }, { where: { id }, transaction });
     await CompetitionWindowModel.destroy({ where: { competitionId: id }, transaction });
     return report([], warnings, started, true);
   });
 }
 
-/** The competition `{ competition }` holds, checked for its shape and for
- *  keeping the id it is stored under. */
+/** The competition `{ competition, problems? }` holds, checked for its shape
+ *  and for keeping the id it is stored under, and the new problems, checked
+ *  for theirs. */
 function readCompetitionBody(competitionId: string, value: unknown):
-  { competition: CompetitionConfig } | { errors: string[] } {
-  if (!isRecord(value) || !isRecord(value.competition)) {
-    return { errors: ['A kérés nem egy { competition } objektum.'] };
+  { competition: CompetitionConfig, problems: Problem[] } | { errors: string[] } {
+  if (!isRecord(value) || !isRecord(value.competition)
+    || !(value.problems === undefined || (Array.isArray(value.problems) && value.problems.every(isRecord)))) {
+    return { errors: ['A kérés nem egy { competition, problems } objektum.'] };
   }
   const { id, ...body } = value.competition;
   if (id !== competitionId) {
     return { errors: [`verseny ${competitionId}: az azonosító nem változhat (a kérésben: ${String(id)})`] };
   }
-  const errors = competitionShapeErrors(competitionId, body);
+  const problems = value.problems ?? [];
+  const errors = [
+    ...competitionShapeErrors(competitionId, body),
+    ...problems.flatMap(({ id: problemId, ...problem }) => typeof problemId === 'string'
+      ? problemShapeErrors(problemId, problem) : [`feladat ${String(problemId)}: az azonosítója nem szöveg`]),
+  ];
+  const ids = problems.map(({ id: problemId }) => problemId);
+  errors.push(...[...new Set(ids.filter((each, index) => ids.indexOf(each) !== index))]
+    .map(each => `feladat ${String(each)}: kétszer is szerepel az új feladatok között`));
   if (errors.length > 0) return { errors };
-  return { competition: { ...(body as Omit<CompetitionConfig, 'id'>), id: competitionId } };
+  return {
+    competition: { ...(body as Omit<CompetitionConfig, 'id'>), id: competitionId },
+    problems: problems as unknown as Problem[],
+  };
 }

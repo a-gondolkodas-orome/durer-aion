@@ -158,7 +158,12 @@ The admin pages are at `http://localhost/admin`, user `admin`, password from
 answers, linked from the **Versenyek** tab. Each problem there opens its editor,
 whose fix reaches every relay using the problem, for the matches started after
 it. Once a team of any of those competitions has started, the answer no longer
-changes, and a problem held in code only with a deploy.
+changes, and a problem held in code only with a deploy. A database
+competition's edit page composes its relay: problems added, removed, reordered
+and re-pointed, until a team of it starts. A new problem, or a **Másolat** of a
+shared one, which replaces it in that relay only, is written with the
+competition on its save, under an id from the same generator as
+`npm run new-id`.
 
 Team import has two paths: `npm run teams:import`, which runs
 `scripts/import_teams.sh` inside the container and redirects the export it

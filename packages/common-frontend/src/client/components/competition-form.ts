@@ -1,9 +1,9 @@
-import type { CompetitionConfig, Language, LocalizedLabel, Round } from 'schemas';
+import type { CompetitionConfig, Language, LocalizedLabel, RelayConfig, Round } from 'schemas';
 import { LANGUAGES } from 'schemas';
 
 // The settings form of a database competition's edit page: everything of
-// `CompetitionConfig` but the relay's problems, as the fields hold it — text,
-// as typed. The validator on the server decides what is valid; the form
+// `CompetitionConfig` but the relay's problems (relay-form.ts), as the fields
+// hold it — text, as typed. The validator on the server decides what is valid; the form
 // only refuses what it cannot turn into a competition at all, a number that
 // is not one.
 
@@ -61,12 +61,13 @@ export type FieldErrors = Partial<Record<'edition' | 'relayMinutes' | 'strategyM
 
 const NOT_A_NUMBER = 'Egész számot írj ide.';
 
-/// The competition the form describes, `original` changed by it: the relay
-/// keeps its problems, which this form does not edit, and the id stays. A
-/// relay turned on where there was none starts with no problems, which the
-/// validator refuses until the relay's own editor adds some.
-export function competitionFromForm(form: SettingsForm, original: CompetitionConfig):
-  { competition: CompetitionConfig } | { fieldErrors: FieldErrors } {
+/// The competition the form describes, `original` changed by it, with
+/// `relayProblems` for its relay's, which the relay's editor composes; the id
+/// stays.
+export function competitionFromForm(
+  form: SettingsForm, original: CompetitionConfig,
+  relayProblems: RelayConfig['problems'] = original.relay?.problems ?? [],
+): { competition: CompetitionConfig } | { fieldErrors: FieldErrors } {
   const fieldErrors: FieldErrors = {};
   // A field in use, `optional` or not, that holds no whole number is an error,
   // and reads as 0 here, which the return below never lets out.
@@ -93,7 +94,7 @@ export function competitionFromForm(form: SettingsForm, original: CompetitionCon
     languages: LANGUAGES.filter(language => form.languages.includes(language)),
     ...(opensAt !== '' || closesAt !== '' ? { startWindow: { opensAt, ...(closesAt !== '' && { closesAt }) } } : {}),
     ...(form.hasRelay && {
-      relay: { durationMinutes: relayMinutes, problems: original.relay?.problems ?? [] },
+      relay: { durationMinutes: relayMinutes, problems: relayProblems },
     }),
     ...(form.hasStrategy && { strategy: { durationMinutes: strategyMinutes, gameId: form.gameId.trim() } }),
     ...(advancingPoints !== undefined && { advancingPoints }),

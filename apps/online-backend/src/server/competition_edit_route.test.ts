@@ -7,19 +7,20 @@ import Router from "@koa/router";
 import type { Server } from "boardgame.io";
 import type { Bundle } from "problem-bank";
 import { registry } from "problem-bank/all";
-import type { CompetitionConfig } from "schemas";
+import type { CompetitionConfig, Problem } from "schemas";
 import { hostedGames } from "../games";
 import { ADMIN_USER, requireAdmin } from "./admin_session";
 import type { CompetitionWriteReport } from "./competition_edit";
 import type { ContentSources } from "./database_sources";
 import { importBundle, openContentSources } from "./database_sources";
-import { CompetitionModel } from "./model";
+import { CompetitionModel, ProblemModel } from "./model";
 import { configureTeamsRouter } from "./router";
 import { startTestDatabase } from "./test_database";
 
-// PUT /team/admin/competitions/:id over HTTP against PGlite (#817): a database
-// competition's settings are replaced whole, validated, and locked where a
-// started team needs them to stay.
+// PUT /team/admin/competitions/:id over HTTP against PGlite (#817, #819): a
+// database competition's settings are replaced whole, with the new problems
+// its relay brings, validated, and locked where a started team needs them to
+// stay.
 
 const sample = JSON.parse(readFileSync(
   join(__dirname, "..", "..", "..", "..", "packages", "problem-bank", "fixtures", "sample-bundle.json"), "utf8",
@@ -65,13 +66,14 @@ beforeEach(async () => {
 
 const admin = { authorization: `Basic ${btoa(`${ADMIN_USER}:${PASSWORD}`)}`, "content-type": "application/json" };
 
-async function put(competition: unknown, { id = FULL, dryRun = false } = {}) {
+async function put(competition: unknown,
+  { id = FULL, dryRun = false, problems }: { id?: string, dryRun?: boolean, problems?: unknown } = {}) {
   return await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${id}${dryRun ? "?dryRun=1" : ""}`, {
-    method: "PUT", headers: admin, body: JSON.stringify({ competition }),
+    method: "PUT", headers: admin, body: JSON.stringify({ competition, problems }),
   });
 }
 
-async function report(competition: unknown, options?: { dryRun?: boolean }): Promise<CompetitionWriteReport> {
+async function report(competition: unknown, options?: { dryRun?: boolean, problems?: unknown }): Promise<CompetitionWriteReport> {
   const response = await put(competition, options);
   expect(response.status).toBe(200);
   return await response.json() as CompetitionWriteReport;
@@ -169,4 +171,83 @@ it("asks for the organisers' login", async () => {
     method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ competition: stored }),
   });
   expect(response.status).toBe(401);
+});
+
+describe("composing the relay", () => {
+  const PAROS = "roow9oo75t--csomag-paros";
+  const KOCKAK = "10iqp4vy6b--csomag-kockak";
+  const HAROMSZOG = "7q1wniz55w--csomag-haromszog";
+  const RELAY_ONLY = "903xajr9et--csomag-valto";
+  const fresh: Problem = { id: "n3wpr0b1em--uj-feladat", answer: 7, content: { hu: { problemText: "Mennyi $3 + 4$?" } } };
+  const withRelay = (problems: { problemId: string, points: number }[]): CompetitionConfig =>
+    ({ ...stored, relay: { ...relay, problems } });
+  const servedRelay = async (id: string) => {
+    const served = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${id}`, { headers: admin });
+    return (await served.json() as { competition: CompetitionConfig }).competition.relay?.problems;
+  };
+
+  it("reorders, re-points and drops the relay's problems, and serves them so", async () => {
+    const reordered = [{ problemId: KOCKAK, points: 5 }, { problemId: HAROMSZOG, points: 2 }];
+    expect(await report(withRelay(reordered))).toMatchObject({ written: true, errors: [] });
+    expect(await servedRelay(FULL)).toEqual(reordered);
+    // Dropped from the relay only: the problem stays, for whatever else uses it.
+    expect(await ProblemModel.findByPk(PAROS)).not.toBeNull();
+  });
+
+  it("writes a new problem with the relay that uses it, and nothing of it on a dry run", async () => {
+    const competition = withRelay([...relay.problems, { problemId: fresh.id, points: 6 }]);
+    expect(await report(competition, { dryRun: true, problems: [fresh] }))
+      .toEqual({ written: false, errors: [], warnings: [], started: false });
+    expect(await ProblemModel.findByPk(fresh.id)).toBeNull();
+
+    expect(await report(competition, { problems: [fresh] })).toMatchObject({ written: true, errors: [] });
+    expect((await ProblemModel.findByPk(fresh.id))?.body).toEqual({ ...fresh, id: undefined });
+    expect(await servedRelay(FULL)).toEqual(competition.relay?.problems);
+  });
+
+  it("leaves the other competitions using a shared problem as they are when one relay takes a copy", async () => {
+    const shared = sample.problems[KOCKAK];
+    const copy: Problem = { ...shared, id: "c0pyc0pyc0--csomag-kockak", answer: shared.answer + 1 };
+    const otherBefore = await servedRelay(RELAY_ONLY);
+    expect(otherBefore).toContainEqual(expect.objectContaining({ problemId: KOCKAK }));
+    const competition = withRelay(relay.problems.map(each => each.problemId === KOCKAK ? { ...each, problemId: copy.id } : each));
+    expect(await report(competition, { problems: [copy] })).toMatchObject({ written: true, errors: [] });
+    expect(await servedRelay(RELAY_ONLY)).toEqual(otherBefore);
+    expect((await ProblemModel.findByPk(KOCKAK))?.body).toEqual(shared);
+  });
+
+  it("refuses a new problem that breaks the rules, is not in the relay, or has an id already taken", async () => {
+    const invalid = { ...fresh, content: { hu: { problemText: " ", imageUrl: "http://pelda.hu/a.png" } } };
+    const unused: Problem = { ...fresh, id: "n0tus3d000--nem-hasznalt" };
+    const taken: Problem = { ...fresh, id: HAROMSZOG };
+    const competition = withRelay([...relay.problems, { problemId: fresh.id, points: 6 }, { problemId: HAROMSZOG, points: 1 }]);
+    const answer = await report(competition, { problems: [invalid, unused, taken] });
+    expect(answer.written).toBe(false);
+    expect(answer.errors).toEqual([
+      `feladat ${fresh.id}: a szövege üres (hu)`,
+      `feladat ${fresh.id}: a kép címe nem teljes https:// kezdetű cím (hu): „http://pelda.hu/a.png”`,
+      `feladat ${unused.id}: új feladat, de a váltó nem használja`,
+      `feladat ${HAROMSZOG}: ez az azonosító az adatbázisban már egy feladaté`,
+    ]);
+    expect(await ProblemModel.findByPk(fresh.id)).toBeNull();
+    expect(await storedBody()).toEqual(sample.competitions[FULL]);
+  });
+
+  it("refuses new problems once a team has started, with the relay's lock", async () => {
+    await startRelay();
+    const answer = await report(withRelay([...relay.problems, { problemId: fresh.id, points: 6 }]), { problems: [fresh] });
+    expect(answer).toMatchObject({ written: false, started: true });
+    expect(answer.errors).toEqual(
+      ["A váltó feladatai, sorrendjük és pontjuk nem változhat: már indult csapat ebben a versenyben."]);
+    expect(await ProblemModel.findByPk(fresh.id)).toBeNull();
+    const served = await fetch(`http://127.0.0.1:${port}/team/admin/competitions/${FULL}`, { headers: admin });
+    expect((await served.json() as { started: boolean }).started).toBe(true);
+  });
+
+  it("refuses new problems that are not a list of objects, or name one id twice", async () => {
+    expect((await report(stored, { problems: { [fresh.id]: fresh } })).errors)
+      .toEqual(["A kérés nem egy { competition, problems } objektum."]);
+    expect((await report(withRelay([{ problemId: fresh.id, points: 1 }]), { problems: [fresh, fresh] })).errors)
+      .toEqual([`feladat ${fresh.id}: kétszer is szerepel az új feladatok között`]);
+  });
 });

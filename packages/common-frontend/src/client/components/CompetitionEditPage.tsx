@@ -6,7 +6,7 @@ import { Stack } from '@mui/system';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import useSWR from 'swr';
-import type { CompetitionConfig, Language, StartWindow } from 'schemas';
+import type { CompetitionConfig, Language, Problem, StartWindow } from 'schemas';
 import { LANGUAGES, ROUNDS, editionSchoolYear, validateStartWindow } from 'schemas';
 import type { AdminCompetitionDto, CompetitionWriteResultDto } from '../dto/TeamStateDto';
 import { useCompetition, useSaveCompetition } from '../hooks/user-hooks';
@@ -14,16 +14,20 @@ import { useErrorMessage } from '../utils/error-message';
 import { windowText, windowTimeNow } from '../utils/window-time';
 import { BORDER, DANGER, MUTED } from './adminStyles';
 import { Card, ReviewMessages, Steps, WARNING, useLeaveWarning } from './EditPageParts';
-import { ROUND_NAMES, SAVED_PARAM, competitionPath, competitionTitle } from './CompetitionTable';
+import { ROUND_NAMES, SAVED_PARAM, competitionPath, competitionTitle, slug } from './CompetitionTable';
 import { type FieldErrors, type SettingsForm, competitionFromForm, settingsForm } from './competition-form';
 import { Loading } from './Loading';
+import { brokenImageWarnings } from './ProblemContentCards';
+import { RelayEditor, type RelayEntriesUpdate } from './RelayEditor';
+import { type EntryErrors, type RelayEntryForm, entryProblemId, relayForm, relayFromForm } from './relay-form';
 
-// A competition's edit page, /admin/verseny/:id/edit: its settings,
-// then a review of what the server says of them, then Save. Nothing is
-// written before Save, and the draft lives in this page alone. The relay's
-// problems are not edited here (#818–#819). One held in code changes only
-// with a deploy, its start window aside: the same form shows it, every field
-// but the window's read-only, so a window is set in one place for both.
+// A competition's edit page, /admin/verseny/:id/edit: its settings and its
+// relay's problems (RelayEditor.tsx), then a review of what the server says
+// of them, then Save. Nothing is written before Save, the new problems the
+// relay brings included, and the draft lives in this page alone. One held in
+// code changes only with a deploy, its start window aside: the same form
+// shows it, every field but the window's read-only, so a window is set in one
+// place for both.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'magyar', en: 'angol' };
 
@@ -61,19 +65,25 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   // config where there is one.
   const [initial] = useState(() => settingsForm({ ...data.competition, startWindow: data.startWindow ?? undefined }));
   const [form, setForm] = useState(initial);
+  const [initialRelay] = useState(() => relayForm(data.competition.relay));
+  const [relay, setRelay] = useState(initialRelay);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [review, setReview] = useState<{ competition: CompetitionConfig, result: CompetitionWriteResultDto } | null>(null);
+  const [relayErrors, setRelayErrors] = useState<Record<string, EntryErrors>>({});
+  const [review, setReview] = useState<Review | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
-  const dirty = !saved && JSON.stringify(form) !== JSON.stringify(initial);
+  // Whether each image URL of a new problem loaded in its preview.
+  const [loads, setLoads] = useState<Record<string, boolean>>({});
+  const broken = (url: string) => url !== '' && loads[url] === false;
+  const dirty = !saved && JSON.stringify([form, relay]) !== JSON.stringify([initial, initialRelay]);
   const leaving = useLeaveWarning(dirty);
 
   const update = (change: Partial<SettingsForm>) => { setForm(current => ({ ...current, ...change })); };
 
-  const send = async (competition: CompetitionConfig, dryRun: boolean) => {
+  const send = async (change: Omit<Review, 'result'>, dryRun: boolean) => {
     setBusy(true);
     try {
-      return await saveCompetition(competition, { dryRun });
+      return await saveCompetition(change, { dryRun });
     } catch (e: unknown) {
       enqueueSnackbar(errorMessage(e), { variant: 'error' });
       return undefined;
@@ -83,19 +93,20 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
   };
 
   const toReview = async () => {
-    const read = competitionFromForm(form, data.competition);
-    if ('fieldErrors' in read) {
-      setFieldErrors(read.fieldErrors);
-      return;
-    }
-    setFieldErrors({});
-    const result = await send(read.competition, true);
-    if (result !== undefined) setReview({ competition: read.competition, result });
+    // A relay turned off takes the problems it would have brought with it.
+    const relayRead = form.hasRelay ? relayFromForm(relay) : { problems: [], created: [] };
+    const read = competitionFromForm(form, data.competition, 'errors' in relayRead ? [] : relayRead.problems);
+    setFieldErrors('fieldErrors' in read ? read.fieldErrors : {});
+    setRelayErrors('errors' in relayRead ? relayRead.errors : {});
+    if ('fieldErrors' in read || 'errors' in relayRead) return;
+    const change = { competition: read.competition, problems: relayRead.created };
+    const result = await send(change, true);
+    if (result !== undefined) setReview({ ...change, result });
   };
 
   const save = async () => {
     if (review === null) return;
-    const result = await send(review.competition, false);
+    const result = await send({ competition: review.competition, problems: review.problems }, false);
     if (result === undefined) return;
     if (!result.written) {
       // What changed since the dry run, a team starting say, is the report's to say.
@@ -115,8 +126,12 @@ function CompetitionEditor({ data }: { data: AdminCompetitionDto }) {
     <Steps names={['Beállítások', 'Ellenőrzés és mentés']} step={review === null ? 1 : 2}/>
     {review === null
       ? <SettingsStep form={form} update={update} fieldErrors={fieldErrors} data={data} busy={busy} dirty={dirty}
+        relay={relay} setRelay={setRelay} relayErrors={relayErrors} broken={broken}
+        onPictureLoad={(url, loaded) => { setLoads(current => ({ ...current, [url]: loaded })); }}
         onNext={() => { void toReview(); }}/>
-      : <ReviewStep competition={review.competition} result={review.result} busy={busy}
+      : <ReviewStep review={review} relay={relay} data={data} busy={busy}
+        brokenImages={relay.flatMap((entry, index) => entry.created === undefined ? []
+          : brokenImageWarnings(entry.created.problem.content, broken, `A váltó ${index + 1}. feladata: `))}
         onBack={() => { setReview(null); }} onSave={() => { void save(); }}/>}
   </>;
 }
@@ -127,6 +142,8 @@ const fieldRow = { display: 'grid', gap: '16px', gridTemplateColumns: { xs: '1fr
 function SettingsStep(props: {
   form: SettingsForm, update: (change: Partial<SettingsForm>) => void, fieldErrors: FieldErrors,
   data: AdminCompetitionDto, busy: boolean, dirty: boolean, onNext: () => void,
+  relay: RelayEntryForm[], setRelay: RelayEntriesUpdate, relayErrors: Record<string, EntryErrors>,
+  broken: (url: string) => boolean, onPictureLoad: (url: string, loaded: boolean) => void,
 }) {
   const { form, update, fieldErrors } = props;
   const example = windowTimeNow();
@@ -206,13 +223,14 @@ function SettingsStep(props: {
           <Checkbox checked={form.hasRelay} disabled={inCode} onChange={(event) => { update({ hasRelay: event.target.checked }); }}/>
         }/>
       }>
-        {form.hasRelay && <Box sx={fieldRow}>
-          <TextField label="Időtartam (perc)" value={form.relayMinutes} disabled={inCode} error={fieldErrors.relayMinutes !== undefined}
-            helperText={fieldErrors.relayMinutes} onChange={(event) => { update({ relayMinutes: event.target.value }); }}/>
-          <Typography sx={{ gridColumn: { md: 'span 3' }, fontSize: '14px', alignSelf: 'center' }}>
-            {props.data.competition.relay?.problems.length ?? 0} feladat. Egy feladat a verseny oldalán szerkeszthető, a sorrendjük és a pontjuk itt még nem.
-          </Typography>
-        </Box>}
+        {form.hasRelay && <>
+          <Box sx={fieldRow}>
+            <TextField label="Időtartam (perc)" value={form.relayMinutes} disabled={inCode} error={fieldErrors.relayMinutes !== undefined}
+              helperText={fieldErrors.relayMinutes} onChange={(event) => { update({ relayMinutes: event.target.value }); }}/>
+          </Box>
+          <RelayEditor entries={props.relay} setEntries={props.setRelay} errors={props.relayErrors} data={props.data}
+            locked={inCode || props.data.started} broken={props.broken} onPictureLoad={props.onPictureLoad}/>
+        </>}
       </Card>
 
       <Card title="Stratégiás játék" action={
@@ -307,17 +325,27 @@ export function rulesLines(competition: CompetitionConfig): [string, string][] {
   ];
 }
 
+interface Review {
+  competition: CompetitionConfig;
+  /** The new problems the relay brings. */
+  problems: Problem[];
+  result: CompetitionWriteResultDto;
+}
+
 function ReviewStep(props: {
-  competition: CompetitionConfig, result: CompetitionWriteResultDto, busy: boolean,
+  review: Review, relay: RelayEntryForm[], data: AdminCompetitionDto, busy: boolean, brokenImages: string[],
   onBack: () => void, onSave: () => void,
 }) {
-  const { errors, warnings } = props.result;
+  const { competition, result: { errors, warnings } } = props.review;
+  const before = props.data.competition.relay?.problems ?? [];
+  const after = competition.relay?.problems ?? [];
+  const relayChanged = JSON.stringify(before) !== JSON.stringify(after);
   return (
     <Stack sx={{ gap: '18px' }}>
-      <ReviewMessages errors={errors} warnings={warnings}/>
+      <ReviewMessages errors={errors} warnings={[...warnings, ...props.brokenImages]}/>
       <Card title="Amit a csapat a szabályok oldalon lát">
         <Box component="dl" sx={{ margin: 0 }}>
-          {rulesLines(props.competition).map(([name, value]) => (
+          {rulesLines(competition).map(([name, value]) => (
             <Stack key={name} sx={{ flexDirection: 'row', gap: '10px', padding: '6px 0', fontSize: '14px',
               borderBottom: `1px solid ${BORDER}`, '&:last-child': { borderBottom: 0 } }}>
               <Box component="dt" sx={{ color: MUTED, fontSize: '13px', minWidth: '170px' }}>{name}</Box>
@@ -326,6 +354,30 @@ function ReviewStep(props: {
           ))}
         </Box>
       </Card>
+      {relayChanged && <Card title="A váltó feladatai a mentés után">
+        <Box component="ol" sx={{ margin: 0, paddingLeft: '24px', fontSize: '14px', display: 'flex', flexDirection: 'column',
+          gap: '4px' }}>
+          {after.map(({ problemId, points }) => {
+            const created = props.review.problems.some(each => each.id === problemId);
+            const copyOf = props.relay.find(each => each.created !== undefined && entryProblemId(each) === problemId)
+              ?.created?.copyOf;
+            return (
+              <li key={problemId}>
+                <span title={problemId}>{slug(problemId)}</span> · {points} pont
+                {created && <Box component="span" sx={{ color: MUTED }}>
+                  {copyOf === undefined ? ' · új feladat' : ` · másolat, ennek a helyén: ${slug(copyOf.id)}`}
+                </Box>}
+              </li>
+            );
+          })}
+        </Box>
+        {before.some(({ problemId }) => !after.some(each => each.problemId === problemId)) &&
+          <Typography sx={{ fontSize: '13px', color: MUTED }}>
+            Kikerül a váltóból: {before.filter(({ problemId }) => !after.some(each => each.problemId === problemId))
+              .map(({ problemId }) => slug(problemId)).join(', ')}. A feladat megmarad, a többi verseny, amely használja,
+            nem változik.
+          </Typography>}
+      </Card>}
       <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
         flexWrap: 'wrap' }}>
         <Button variant="outlined" onClick={props.onBack}>Vissza: beállítások</Button>

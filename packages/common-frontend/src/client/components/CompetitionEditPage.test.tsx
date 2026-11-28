@@ -25,7 +25,7 @@ const config: CompetitionConfig = {
 };
 const competition: AdminCompetitionDto = {
   id: ID, metadata, storedIn: 'database', startWindow: null, configStartWindow: null,
-  competition: config, relayProblems: [], strategyGameIds: ['minta-ketkupac', 'minta-masik'],
+  competition: config, relayProblems: [], strategyGameIds: ['minta-ketkupac', 'minta-masik'], started: false,
 };
 const clean: CompetitionWriteResultDto = { written: false, errors: [], warnings: [], started: false };
 
@@ -87,7 +87,7 @@ test('fills the form from the competition, and sends the changes on to a dry run
     ...config, languages: ['hu', 'en'], advancingPoints: 12, metadata: { ...metadata, category: 'D' },
   };
   const rules = await screen.findByRole('region', { name: 'Amit a csapat a szabályok oldalon lát' });
-  expect(repo.saveCompetition).toHaveBeenLastCalledWith(changed, { dryRun: true });
+  expect(repo.saveCompetition).toHaveBeenLastCalledWith({ competition: changed, problems: [] }, { dryRun: true });
   expect(within(rules).getByText('magyar és angol, a csapat választ')).toBeInTheDocument();
   expect(within(rules).getByText('1 feladat, 30 perc, összesen 3 pont (3)')).toBeInTheDocument();
   expect(within(rules).getByText('12 ponttól')).toBeInTheDocument();
@@ -100,7 +100,7 @@ test('fills the form from the competition, and sends the changes on to a dry run
   expect(assign).toHaveBeenCalledWith(`/admin/verseny/${ID}?mentve=1`);
   // Asked as the page is left, before React renders the saved state.
   expect(promptedOnSave).toBe(false);
-  expect(repo.saveCompetition).toHaveBeenLastCalledWith(changed, { dryRun: false });
+  expect(repo.saveCompetition).toHaveBeenLastCalledWith({ competition: changed, problems: [] }, { dryRun: false });
 });
 
 test('shows the server\'s errors and warnings, and saves nothing while there is an error', async () => {
@@ -195,5 +195,127 @@ test('of a competition held in code, offers its start window alone, starting fro
 
   await screen.findByRole('region', { name: 'Amit a csapat a szabályok oldalon lát' });
   expect(repo.saveCompetition).toHaveBeenLastCalledWith(
-    { ...config, startWindow: { opensAt: '2099-03-01T14:00+01:00' } }, { dryRun: true });
+    { competition: { ...config, startWindow: { opensAt: '2099-03-01T14:00+01:00' } }, problems: [] }, { dryRun: true });
+});
+
+describe('composing the relay', () => {
+  const PAROS = 'roow9oo75t--csomag-paros';
+  const KOCKAK = '10iqp4vy6b--csomag-kockak';
+  const paros = { id: PAROS, answer: 12, content: { hu: { problemText: 'Hány páros szám van?', help1: 'Számolj!' } } };
+  const kockak = { id: KOCKAK, answer: 5, content: { hu: { problemText: 'Hány kocka van?' } } };
+  const use = (position: number, points: number) => ({ competitionId: ID, metadata, position, points });
+  const relayConfig: CompetitionConfig = {
+    ...config,
+    relay: { durationMinutes: 30, problems: [{ problemId: PAROS, points: 3 }, { problemId: KOCKAK, points: 4 }] },
+  };
+  const composed: AdminCompetitionDto = {
+    ...competition, competition: relayConfig,
+    relayProblems: [
+      { problem: paros, points: 3, storedIn: 'database',
+        uses: [use(1, 3), { competitionId: 'zzzzzzzzzz--masik', metadata, position: 2, points: 3 }] },
+      { problem: kockak, points: 4, storedIn: 'database', uses: [use(2, 4)] },
+    ],
+  };
+  const relayList = () => screen.getByRole('list', { name: 'A váltó feladatai' });
+  const click = (name: string) => { fireEvent.click(screen.getByRole('button', { name })); };
+  const lastChange = () => vi.mocked(repo.saveCompetition).mock.lastCall?.[0];
+
+  beforeEach(() => { vi.spyOn(repo, 'getCompetition').mockResolvedValue(composed); });
+
+  test('reorders, re-points and removes the relay\'s problems', async () => {
+    renderPage();
+    await screen.findByRole('heading', { name: '21 online C' });
+    expect(within(relayList()).getAllByRole('listitem').map(item => item.textContent))
+      .toEqual([expect.stringContaining('csomag-paros'), expect.stringContaining('csomag-kockak')]);
+    expect(screen.getByRole('button', { name: 'Feljebb: 1. feladat' })).toBeDisabled();
+
+    click('Lejjebb: 1. feladat');
+    type('Pont, 1. feladat', '6');
+    next();
+    await screen.findByRole('region', { name: 'A váltó feladatai a mentés után' });
+    expect(lastChange()).toEqual({
+      competition: { ...relayConfig, relay: { durationMinutes: 30,
+        problems: [{ problemId: KOCKAK, points: 6 }, { problemId: PAROS, points: 3 }] } },
+      problems: [],
+    });
+
+    click('Vissza: beállítások');
+    click('Eltávolítás: 2. feladat');
+    next();
+    const review = await screen.findByRole('region', { name: 'A váltó feladatai a mentés után' });
+    expect(within(review).getByText(/Kikerül a váltóból: csomag-paros/)).toBeInTheDocument();
+    expect(lastChange()?.competition.relay?.problems).toEqual([{ problemId: KOCKAK, points: 6 }]);
+  });
+
+  test('adds a new problem, written with the competition on its save', async () => {
+    renderPage();
+    await screen.findByRole('heading', { name: '21 online C' });
+    click('+ Új feladat');
+    // Starts from the points of the one before it.
+    expect(field('Pont, 3. feladat')).toHaveValue('4');
+    type('Név az azonosítóban', 'uj-feladat');
+    type('Válasz', '42');
+    type('Szöveg (LaTeX), magyar', 'Mennyi $6 \\cdot 7$?');
+    next();
+
+    const review = await screen.findByRole('region', { name: 'A váltó feladatai a mentés után' });
+    expect(within(review).getByText('· új feladat')).toBeInTheDocument();
+    const change = lastChange();
+    const id = change?.problems[0]?.id ?? '';
+    expect(id).toMatch(/^[0-9a-z]{10}--uj-feladat$/);
+    expect(change?.problems).toEqual([{ id, answer: 42, content: { hu: { problemText: 'Mennyi $6 \\cdot 7$?' } } }]);
+    expect(change?.competition.relay?.problems.at(-1)).toEqual({ problemId: id, points: 4 });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mentés' }));
+    await waitFor(() => { expect(assign).toHaveBeenCalled(); });
+    expect(repo.saveCompetition).toHaveBeenLastCalledWith(change, { dryRun: false });
+  });
+
+  test('replaces a shared problem with a copy in this relay only', async () => {
+    renderPage();
+    await screen.findByRole('heading', { name: '21 online C' });
+    expect(within(relayList()).getByText('2 helyen használt')).toBeInTheDocument();
+    click('Másolat: 1. feladat');
+    expect(within(relayList()).getByText('másolat: csomag-paros')).toBeInTheDocument();
+    expect(field('Név az azonosítóban')).toHaveValue('csomag-paros');
+    expect(field('Válasz')).toHaveValue('12');
+    type('Szöveg (LaTeX), magyar', 'Hány páratlan szám van?');
+    next();
+
+    await screen.findByRole('region', { name: 'A váltó feladatai a mentés után' });
+    const change = lastChange();
+    const id = change?.problems[0]?.id ?? '';
+    expect(id).toMatch(/^[0-9a-z]{10}--csomag-paros$/);
+    expect(id).not.toBe(PAROS);
+    // The hints go with the copy, as the problem editor keeps them.
+    expect(change?.problems).toEqual(
+      [{ id, answer: 12, content: { hu: { problemText: 'Hány páratlan szám van?', help1: 'Számolj!' } } }]);
+    expect(change?.competition.relay?.problems).toEqual([{ problemId: id, points: 3 }, { problemId: KOCKAK, points: 4 }]);
+  });
+
+  test('stays on the form, naming the entry, while a new problem has no slug or answer, or points are no number', async () => {
+    renderPage();
+    await screen.findByRole('heading', { name: '21 online C' });
+    click('+ Új feladat');
+    type('Pont, 1. feladat', 'sok');
+    type('Név az azonosítóban', 'Új feladat');
+    next();
+    expect(await screen.findByText('Kisbetűk és számok, a szavak között egy-egy kötőjel, ékezet nélkül.')).toBeInTheDocument();
+    expect(field('Pont, 1. feladat')).toHaveAccessibleDescription('Egész számot írj ide.');
+    expect(field('Válasz')).toHaveAccessibleDescription('Egész számot írj ide.');
+    expect(repo.saveCompetition).not.toHaveBeenCalled();
+  });
+
+  test('leaves the relay as it is once a team has started', async () => {
+    vi.spyOn(repo, 'getCompetition').mockResolvedValue({ ...composed, started: true });
+    renderPage();
+    await screen.findByRole('heading', { name: '21 online C' });
+    expect(screen.getByText(/a váltó feladatai, sorrendjük és pontjuk nem változhat/)).toBeInTheDocument();
+    expect(field('Pont, 1. feladat')).toBeDisabled();
+    for (const name of ['+ Új feladat', 'Lejjebb: 1. feladat', 'Másolat: 1. feladat', 'Eltávolítás: 1. feladat']) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+    }
+    // A problem's own editor is still where its text is fixed.
+    expect(screen.getByRole('link', { name: 'Szerkesztés: 1. feladat' })).toBeInTheDocument();
+  });
 });
