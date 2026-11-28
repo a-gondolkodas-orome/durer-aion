@@ -87,7 +87,7 @@ test('explains the strategy game in short lines, the details in sight', () => {
   expect(screen.getByText('chooser.strategy.practiceHint')).toBeInTheDocument();
   // No ⓘ: the card's buttons are the fold toggle and the start.
   expect(screen.getAllByRole('button')).toHaveLength(2);
-  expect(screen.getByText('chooser.strategy.noAbandon')).toBeInTheDocument();
+  expect(screen.getByText('chooser.strategy.giveUp')).toBeInTheDocument();
 });
 
 test('explains the relay the same way', () => {

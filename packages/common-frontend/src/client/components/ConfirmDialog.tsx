@@ -21,7 +21,24 @@ export interface ConfirmDialogInterface {
   /// When set, the confirm button stays disabled until one of these words is
   /// typed, for actions that are too easy to trigger by a stray click.
   requiredWords?: string[];
+  /// The dialog's own words, for a page in the team's language. Without them,
+  /// the admin's Hungarian.
+  labels?: ConfirmDialogLabels;
 }
+
+export interface ConfirmDialogLabels {
+  /// Above the title.
+  heading: string;
+  cancel: string;
+  /// The typed-word field's label, `words` the accepted ones joined.
+  typeWord: (words: string) => string;
+}
+
+const ADMIN_LABELS: ConfirmDialogLabels = {
+  heading: 'Megerősítés szükséges',
+  cancel: 'Mégse',
+  typeWord: words => `Írd be: ${words}`,
+};
 
 const TITLE_ID = 'confirm-dialog-title';
 const DESCRIPTION_ID = 'confirm-dialog-description';
@@ -58,6 +75,7 @@ function ConfirmContent(props: { confirmDialog: ConfirmDialogInterface, setConfi
   const { confirmDialog, setConfirmDialog } = props;
   const [typed, setTyped] = useState('');
   const { requiredWords, facts, description } = confirmDialog;
+  const labels = confirmDialog.labels ?? ADMIN_LABELS;
   const danger = confirmDialog.danger ?? false;
   const allowed = requiredWords === undefined || requiredWords.some(w => fold(w) === fold(typed));
   const Icon = danger ? WarningAmber : InfoOutlined;
@@ -85,7 +103,7 @@ function ConfirmContent(props: { confirmDialog: ConfirmDialogInterface, setConfi
         <Icon sx={{ fontSize: 22 }}/>
       </Box>
       <Stack sx={{ gap: '2px', minWidth: 0 }}>
-        <Box sx={{ fontSize: 12, fontWeight: 500, color: MUTED }}>Megerősítés szükséges</Box>
+        <Box sx={{ fontSize: 12, fontWeight: 500, color: MUTED }}>{labels.heading}</Box>
         <Box component="h2" id={TITLE_ID} sx={{ margin: 0, fontSize: 20, fontWeight: 600, lineHeight: 1.25, color: danger ? DANGER : 'text.primary' }}>
           {confirmDialog.title}
         </Box>
@@ -114,7 +132,7 @@ function ConfirmContent(props: { confirmDialog: ConfirmDialogInterface, setConfi
         size="small"
         autoComplete="off"
         autoFocus
-        label={`Írd be: ${requiredWords.join(' / ')}`}
+        label={labels.typeWord(requiredWords.join(' / '))}
         value={typed}
         onChange={e => setTyped(e.target.value)}
       />}
@@ -131,7 +149,7 @@ function ConfirmContent(props: { confirmDialog: ConfirmDialogInterface, setConfi
     }}>
       <Button variant="outlined" color="inherit" sx={{ textTransform: 'none', height: 40, color: MUTED, borderColor: BORDER }}
         onClick={() => setConfirmDialog(null)}>
-        Mégse
+        {labels.cancel}
       </Button>
       <Button
         variant="contained"
