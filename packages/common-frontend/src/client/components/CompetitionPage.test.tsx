@@ -144,12 +144,14 @@ test('links the competition to its edit page, one held in code too', async () =>
   expect(await screen.findByRole('link', { name: 'Szerkesztés' })).toHaveAttribute('href', `/admin/verseny/${ID}/edit`);
 });
 
-test('links each relay problem to its editor, under this competition, one held in code to read', async () => {
+test('links each problem to its editor from its row and its preview, one held in code to read', async () => {
   renderPage();
-  expect(await screen.findByRole('link', { name: 'Szerkesztés: csomag-paros' }))
-    .toHaveAttribute('href', `/admin/verseny/${ID}/feladat/roow9oo75t--csomag-paros`);
-  expect(screen.getByRole('link', { name: `Megnyitás: ${SHARED.split('--')[1]}` }))
-    .toHaveAttribute('href', `/admin/verseny/${ID}/feladat/${SHARED}`);
+  const edits = await screen.findAllByRole('link', { name: 'Szerkesztés: csomag-paros' });
+  expect(edits).toHaveLength(2);
+  for (const link of edits) expect(link).toHaveAttribute('href', `/admin/verseny/${ID}/feladat/roow9oo75t--csomag-paros`);
+  for (const link of screen.getAllByRole('link', { name: `Megnyitás: ${SHARED.split('--')[1]}` })) {
+    expect(link).toHaveAttribute('href', `/admin/verseny/${ID}/feladat/${SHARED}`);
+  }
 });
 
 test('says the change the edit page left it for is saved, once', async () => {

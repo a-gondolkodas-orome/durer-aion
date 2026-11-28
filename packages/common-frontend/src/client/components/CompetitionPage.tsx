@@ -97,9 +97,9 @@ function CompetitionDetails({ data }: { data: AdminCompetitionDto }) {
           aria-label="Nyelv" sx={{ borderBottom: 1, borderColor: 'divider' }}>
           {competition.languages.map(each => <Tab key={each} value={each} label={LANGUAGE_NAMES[each]}/>)}
         </Tabs>}
-        {data.relayProblems.map(({ problem, points }, index) => (
+        {data.relayProblems.map(({ problem, points, storedIn }, index) => (
           <ProblemPreview key={`${index}-${problem.id}`} problem={problem} points={points} serial={index + 1}
-            language={language}/>
+            language={language} competitionId={data.id} storedIn={storedIn}/>
         ))}
       </Stack>
     </>}
@@ -207,14 +207,7 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
                   </Box>
                 ))}
               </TableCell>
-              <TableCell>
-                {/* An in-code problem's editor shows it read-only */}
-                <IconButton size="small" href={problemEditPath(data.id, problem.id)}
-                  aria-label={`${storedIn === 'code' ? 'Megnyitás' : 'Szerkesztés'}: ${slug(problem.id)}`}
-                  title={storedIn === 'code' ? 'Megnyitás (kódban tárolt, nem szerkeszthető)' : 'Szerkesztés'}>
-                  {storedIn === 'code' ? <Visibility fontSize="inherit"/> : <Edit fontSize="inherit"/>}
-                </IconButton>
-              </TableCell>
+              <TableCell><ProblemEditLink competitionId={data.id} problemId={problem.id} storedIn={storedIn}/></TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -223,11 +216,29 @@ function RelayTable({ data }: { data: AdminCompetitionDto }) {
   );
 }
 
-function ProblemPreview(props: { problem: Problem, points: number, serial: number, language: Language }) {
+/// The link to a problem's editor, which shows one held in code read-only.
+function ProblemEditLink(props: { competitionId: string, problemId: string, storedIn: AdminCompetitionDto['storedIn'] }) {
+  const inCode = props.storedIn === 'code';
+  return (
+    <IconButton size="small" href={problemEditPath(props.competitionId, props.problemId)}
+      aria-label={`${inCode ? 'Megnyitás' : 'Szerkesztés'}: ${slug(props.problemId)}`}
+      title={inCode ? 'Megnyitás (kódban tárolt, nem szerkeszthető)' : 'Szerkesztés'}>
+      {inCode ? <Visibility fontSize="inherit"/> : <Edit fontSize="inherit"/>}
+    </IconButton>
+  );
+}
+
+function ProblemPreview(props: {
+  problem: Problem, points: number, serial: number, language: Language, competitionId: string,
+  storedIn: AdminCompetitionDto['storedIn'],
+}) {
   const { problemText, imageUrl } = localizeProblem(props.problem, props.language);
   return (
-    <Stack id={`feladat-${props.serial}`} sx={{ backgroundColor: '#fff', border: `1px solid ${BORDER}`, borderRadius: '10px',
-      padding: '22px', gap: '12px' }}>
+    <Stack id={`feladat-${props.serial}`} sx={{ position: 'relative', backgroundColor: '#fff', border: `1px solid ${BORDER}`,
+      borderRadius: '10px', padding: '22px', gap: '12px' }}>
+      <Box sx={{ position: 'absolute', top: '12px', right: '12px' }}>
+        <ProblemEditLink competitionId={props.competitionId} problemId={props.problem.id} storedIn={props.storedIn}/>
+      </Box>
       <ExerciseTask task={problemText} serial={props.serial} availablePoints={props.points} pictureUrl={imageUrl ?? null}
         language={props.language}/>
       <Typography sx={{ fontSize: '14px' }}>Válasz: <strong>{props.problem.answer}</strong></Typography>
