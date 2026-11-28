@@ -1,8 +1,9 @@
-import { Box, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
+import { Box, Button, Chip, Link, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, Typography } from '@mui/material';
 import Code from '@mui/icons-material/Code';
 import Storage from '@mui/icons-material/Storage';
 import { Stack } from '@mui/system';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 import useSWR from 'swr';
 import { editionSchoolYear, localizeProblem } from 'schemas';
 import type { CompetitionConfig, Language, Problem } from 'schemas';
@@ -11,13 +12,14 @@ import { useCompetition } from '../hooks/user-hooks';
 import { useErrorMessage } from '../utils/error-message';
 import { windowText } from '../utils/window-time';
 import { BORDER, MUTED } from './adminStyles';
-import { ROUND_NAMES, competitionPath, competitionTitle } from './CompetitionTable';
+import { ROUND_NAMES, SAVED_PARAM, competitionEditPath, competitionPath, competitionTitle } from './CompetitionTable';
 import { ExerciseTask } from './ExerciseTask';
 import { Loading } from './Loading';
 
 // A competition's own admin page, /admin/verseny/:id: its settings, its
 // relay's problems with their answers, and each problem as a team sees it.
-// Read-only, for in-code and database competitions alike.
+// Read-only, for in-code and database competitions alike, linking to the
+// edit page.
 
 const LANGUAGE_NAMES: Record<Language, string> = { hu: 'Magyar', en: 'Angol' };
 
@@ -45,6 +47,15 @@ function describeUse(use: ProblemUseDto): string {
 }
 
 export function CompetitionPage(props: { competitionId: string }) {
+  const { enqueueSnackbar } = useSnackbar();
+  // Once, and the parameter dropped, so a reload does not say it again.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(SAVED_PARAM)) return;
+    enqueueSnackbar('Mentve', { variant: 'success' });
+    url.searchParams.delete(SAVED_PARAM);
+    window.history.replaceState(window.history.state, '', url);
+  }, [enqueueSnackbar]);
   const errorMessage = useErrorMessage();
   const getCompetition = useCompetition();
   const { data, error } = useSWR(['team/admin/competitions', props.competitionId],
@@ -66,7 +77,10 @@ function CompetitionDetails({ data }: { data: AdminCompetitionDto }) {
   const { competition } = data;
   const [language, setLanguage] = useState<Language>(competition.languages[0] ?? 'hu');
   return <>
-    <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
+    <Stack sx={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      <Typography component="h1" sx={{ fontSize: '24px', fontWeight: 600 }}>{competitionTitle(data)}</Typography>
+      <Button variant="contained" href={competitionEditPath(data.id)}>Szerkesztés</Button>
+    </Stack>
     <Settings data={data}/>
     {competition.relay !== undefined && <>
       <Stack>

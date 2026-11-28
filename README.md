@@ -185,10 +185,11 @@ that has not opened yet, one that has closed, and one that is open, in that
 order; the rest have none, so `000` to `003` can start at any time.
 
 A competition's own window, which every team without one of its own follows, is
-the `startWindow` of its config in `packages/problem-bank/banks/`, or the one set
-on the **Versenyek** tab: its table of competitions shows each one's window,
-and its edit button sets one in place of the config's, or returns it to the
-config's. Neither the team's window nor the competition's means any time. The
+the `startWindow` of its config, set on the competition's edit page, which the
+**Versenyek** tab's window column links to. A competition in
+`packages/problem-bank/banks/` keeps its config in code, so the page stores the
+window it sets apart, in place of the config's; giving it the config's window
+back takes that away. Neither the team's window nor the competition's means any time. The
 server decides a start by its own clock, and the team's page reads the window by
 the server's clock too, not the browser's.
 

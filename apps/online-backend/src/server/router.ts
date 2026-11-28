@@ -18,6 +18,7 @@ import type { requireAdmin } from './admin_session';
 import { AnyBgioGame, PlayerIDType } from 'game';
 import { apiErrorBody, refuse } from './api_error';
 import { TeamModel, appendOtherNote } from './model';
+import { writeCompetition } from './competition_edit';
 import { exportBundle, importBundle } from './database_sources';
 import type { ContentSources } from './database_sources';
 import { adminCompetitionView, competitionSummary, problemUses } from './competition_view';
@@ -310,24 +311,19 @@ export function configureTeamsRouter(
   });
 
   /**
-   * Set a competition's start window in place of the one its config gives: a
-   * body of `{ opensAt, closesAt }`, ISO 8601 with an offset, `closesAt`
-   * optional. `{ opensAt: null }` returns it to its config's. A team with a
-   * window of its own keeps that one.
+   * Replace a competition: the body is `{ competition }`, the competition
+   * whole, its id the same. One held in the database is written only if it
+   * keeps the rules and, once a team of it has started a match, the locks
+   * (`lockErrors`); of one held in code only the start window may change.
+   * The answer is the report either way, as the bundle import's is.
+   * `?dryRun=1` writes nothing and answers what would happen.
    *
    * @param {string} competitionId - The id of the competition.
    */
-  router.put("/team/admin/competitions/:competitionId/start-window", adminAuth, requireJson, koaBody(), async (ctx) => {
+  router.put("/team/admin/competitions/:competitionId", adminAuth, requireJson, koaBody(), async (ctx) => {
     const { competitionId } = ctx.params;
-    if (await competitions.getCompetition(competitionId) === undefined) {
-      refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
-    }
-    const window = readStartWindowBody(ctx.request.body);
-    if (window !== null && 'refused' in window) {
-      refuse(ctx, 400, "INVALID_START_WINDOW", window.refused);
-    }
-    await teams.setCompetitionWindow(competitionId, window);
-    ctx.status = 204;
+    ctx.body = await writeCompetition(teams, competitionId, ctx.request.body, sources, { dryRun: ctx.query.dryRun === "1" })
+      ?? refuse(ctx, 404, "COMPETITION_NOT_FOUND", `No competition with id ${competitionId}.`);
   });
 
   /**

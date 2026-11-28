@@ -85,6 +85,19 @@ export interface AdminCompetitionDto extends CompetitionSummaryDto {
     /// Every use of the problem, this competition's included.
     uses: ProblemUseDto[];
   }[];
+  /// Every strategy game a competition can name: what the edit form offers.
+  strategyGameIds: string[];
+}
+
+/// What `PUT /team/admin/competitions/:id` answers, with `?dryRun=1` too:
+/// whether the competition was written, and if not, why, one Hungarian line
+/// each. `started` says whether a team of it has started a match, which locks
+/// its languages, which matches it has, and its relay's problems.
+export interface CompetitionWriteResultDto {
+  written: boolean;
+  errors: string[];
+  warnings: string[];
+  started: boolean;
 }
 
 /// What `POST /team/admin/competitions/import` answers: every competition and

@@ -80,7 +80,6 @@ beszínezve
 beszúrni
 betartásával
 Betöltés
-betöltése
 beválthatjuk
 beváltotok
 bevezetett
@@ -343,6 +342,7 @@ kaphatták
 kaphattok
 kaphatunk
 képezhetők
+kérésben
 kérésére
 keresésénél
 keresztezhetik
@@ -684,6 +684,7 @@ megvalósítani
 megváltoztathatatlanul
 megvásárlásuktól
 megvizsgálni
+mentésig
 mérésen
 mérésre
 mérést
@@ -836,6 +837,7 @@ szedhetünk
 szélességét
 szerese
 szeresét
+szerkeszthetők
 szervezője
 szervezőt
 szétdarabolni
